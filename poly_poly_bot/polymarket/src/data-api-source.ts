@@ -4,6 +4,7 @@ import { TradeSource } from "./trade-source";
 import { fetchAllTraderActivities } from "./trade-monitor";
 import { isSeenTrade, isMaxRetries } from "./trade-store";
 import { enqueueTrade } from "./trade-queue";
+import { isMarketEnded } from "./market-cache";
 import { CONFIG } from "./config";
 import { logger } from "./logger";
 import { errorMessage } from "./types";
@@ -23,8 +24,27 @@ export class DataApiSource implements TradeSource {
     while (this.running) {
       try {
         const trades = await fetchAllTraderActivities();
-        const newTrades = trades.filter(t => !isSeenTrade(t.id) && !isMaxRetries(t.id));
+        const now = Date.now();
+        const maxAgeMs = CONFIG.maxTradeAgeHours * 60 * 60 * 1000;
+        const newTrades = trades.filter(t => {
+          if (isSeenTrade(t.id) || isMaxRetries(t.id)) return false;
+          // Trade age gate: skip trades older than MAX_TRADE_AGE_HOURS.
+          // Defense-in-depth against cursor resets after bot restart causing
+          // old trades to be re-fetched from the Data API.
+          const tradeTime = new Date(t.timestamp).getTime();
+          if (isNaN(tradeTime) || now - tradeTime > maxAgeMs) return false;
+          return true;
+        });
         for (const trade of newTrades) {
+          // Skip trades on markets that have already resolved/ended
+          if (trade.conditionId) {
+            try {
+              if (await isMarketEnded(trade.conditionId)) {
+                logger.debug(`Skipping trade on ended market: "${trade.market}"`);
+                continue;
+              }
+            } catch { /* non-critical — proceed with enqueue */ }
+          }
           enqueueTrade(trade, new Date(trade.timestamp).getTime(), "data-api");
         }
         consecutiveFailures = 0;

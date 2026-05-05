@@ -134,15 +134,29 @@ async def _monitor_drain_loop() -> None:
          (otherwise those trades would be silent in monitor mode)
       3. drops the trades afterward
     """
+    from datetime import datetime, timezone
     from src.copy_trading.trade_store import is_seen_trade, mark_trade_as_seen
     from src.copy_trading.strategy_config import get_wallet_tier
+    max_age_s = CONFIG.max_trade_age_hours * 3600
     run_patterns = TIER_1C.enabled
     while not _shutting_down:
         drained = drain_trades()
         if drained:
             logger.debug(f"[monitor-drain] draining {len(drained)} trades")
+            now = datetime.now(timezone.utc).timestamp()
             for qt in drained:
                 if is_seen_trade(qt.trade.id):
+                    continue
+                # Trade age gate: skip trades older than MAX_TRADE_AGE_HOURS
+                try:
+                    dt = datetime.fromisoformat(
+                        qt.trade.timestamp.replace("Z", "+00:00")
+                    )
+                    if (now - dt.timestamp()) > max_age_s:
+                        mark_trade_as_seen(qt.trade.id)
+                        continue
+                except (ValueError, TypeError):
+                    mark_trade_as_seen(qt.trade.id)
                     continue
                 if run_patterns:
                     try:

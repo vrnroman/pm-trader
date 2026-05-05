@@ -1,5 +1,6 @@
 """Tests for the monitor-mode watchlist alerter noise gates."""
 
+from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -8,6 +9,7 @@ from src.copy_trading import watchlist_alerter
 from src.copy_trading.strategy_config import WATCHLIST_ALERT
 from src.copy_trading.watchlist_alerter import (
     maybe_alert_watchlist_trade,
+    _is_stale_trade,
     _reset_watchlist_alerter,
 )
 from src.models import DetectedTrade
@@ -27,11 +29,15 @@ def _make_trade(
     size: float = 1500.0,
     price: float = 0.34,
     trader: str = "0x" + "a" * 40,
+    timestamp: str | None = None,
 ) -> DetectedTrade:
+    if timestamp is None:
+        # Default to "now" so tests don't fail due to stale-trade gate
+        timestamp = datetime.now(timezone.utc).isoformat()
     return DetectedTrade(
         id=f"trade-{trader[-4:]}-{side}-{size}-{price}",
         trader_address=trader,
-        timestamp="2026-04-14T12:00:00Z",
+        timestamp=timestamp,
         market=market,
         condition_id=condition_id,
         side=side,
@@ -166,3 +172,76 @@ async def test_dedup_scoped_per_condition_id():
     assert a is True
     assert b is True
     assert send.await_count == 2
+
+
+# --- Trade age / stale trade gate ---
+
+
+class TestStaleTradeGate:
+    def test_fresh_trade_is_not_stale(self):
+        trade = _make_trade()  # default timestamp = now
+        assert _is_stale_trade(trade, datetime.now(timezone.utc).timestamp()) is False
+
+    def test_old_trade_is_stale(self):
+        old_ts = (datetime.now(timezone.utc) - timedelta(hours=3)).isoformat()
+        trade = _make_trade(timestamp=old_ts)
+        assert _is_stale_trade(trade, datetime.now(timezone.utc).timestamp()) is True
+
+    def test_unparseable_timestamp_is_stale(self):
+        trade = _make_trade(timestamp="not-a-date")
+        assert _is_stale_trade(trade, datetime.now(timezone.utc).timestamp()) is True
+
+    @pytest.mark.asyncio
+    async def test_stale_trade_suppresses_alert(self):
+        old_ts = (datetime.now(timezone.utc) - timedelta(hours=48)).isoformat()
+        trade = _make_trade(size=10000, price=0.30, timestamp=old_ts)
+        with patch(
+            "src.copy_trading.telegram_notifier._send_message",
+            new=AsyncMock(),
+        ) as send:
+            sent = await maybe_alert_watchlist_trade(trade, "1b")
+        assert sent is False
+        send.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_fresh_trade_still_fires(self):
+        fresh_ts = datetime.now(timezone.utc).isoformat()
+        trade = _make_trade(size=2000, price=0.30, timestamp=fresh_ts)
+        with patch(
+            "src.copy_trading.telegram_notifier._send_message",
+            new=AsyncMock(),
+        ) as send:
+            sent = await maybe_alert_watchlist_trade(trade, "1b")
+        assert sent is True
+        send.assert_awaited_once()
+
+
+class TestMarketEndedGate:
+    @pytest.mark.asyncio
+    async def test_ended_market_suppresses_alert(self):
+        trade = _make_trade(size=2000, price=0.30, condition_id="0xresolved")
+        # Patch at the source module — the alerter does a lazy import
+        with patch(
+            "src.copy_trading.telegram_notifier._send_message",
+            new=AsyncMock(),
+        ) as send, patch(
+            "src.copy_trading.market_cache.is_market_ended",
+            return_value=True,
+        ):
+            sent = await maybe_alert_watchlist_trade(trade, "1b")
+        assert sent is False
+        send.assert_not_awaited()
+
+    @pytest.mark.asyncio
+    async def test_active_market_still_fires(self):
+        trade = _make_trade(size=2000, price=0.30, condition_id="0xactive")
+        with patch(
+            "src.copy_trading.telegram_notifier._send_message",
+            new=AsyncMock(),
+        ) as send, patch(
+            "src.copy_trading.market_cache.is_market_ended",
+            return_value=False,
+        ):
+            sent = await maybe_alert_watchlist_trade(trade, "1b")
+        assert sent is True
+        send.assert_awaited_once()

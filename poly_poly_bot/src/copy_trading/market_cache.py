@@ -1,9 +1,14 @@
-"""Market metadata cache — in-memory with JSON persistence and CLOB API lookup."""
+"""Market metadata cache — in-memory with JSON persistence and CLOB API lookup.
+
+Also provides a market-resolution cache (condition_id → end_date_iso) used to
+suppress notifications for markets whose end date is in the past.
+"""
 
 from __future__ import annotations
 
 import asyncio
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -156,3 +161,83 @@ async def warm_cache(token_ids: list[str]) -> None:
     if added > 0:
         _save_cache()
         logger.info(f"Market cache warmed: {added} new entries")
+
+
+# ---------------------------------------------------------------------------
+# Market end-date / resolution cache
+# ---------------------------------------------------------------------------
+# Maps condition_id (lower) → end_date ISO string (or "" if unknown).
+# Persisted separately from the metadata cache; entries are immutable.
+
+_END_DATE_CACHE_PATH = Path(CONFIG.data_dir) / "market-end-dates.json"
+_end_dates: dict[str, str] = {}
+_end_dates_loaded = False
+_MAX_END_DATE_ENTRIES = 20000
+
+
+def _load_end_dates() -> None:
+    global _end_dates_loaded
+    if _end_dates_loaded:
+        return
+    _end_dates_loaded = True
+    try:
+        if _END_DATE_CACHE_PATH.exists():
+            _end_dates.update(json.loads(_END_DATE_CACHE_PATH.read_text()))
+    except Exception:
+        pass
+
+
+def _save_end_dates() -> None:
+    try:
+        _END_DATE_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        # Trim to cap
+        if len(_end_dates) > _MAX_END_DATE_ENTRIES:
+            keys = list(_end_dates.keys())
+            for k in keys[: len(keys) - _MAX_END_DATE_ENTRIES]:
+                del _end_dates[k]
+        _END_DATE_CACHE_PATH.write_text(json.dumps(_end_dates))
+    except Exception:
+        pass
+
+
+def _fetch_end_date_from_api(condition_id: str) -> Optional[str]:
+    """Query CLOB API for market end date. Returns ISO string or None on failure."""
+    try:
+        with httpx.Client(timeout=5.0) as client:
+            resp = client.get(
+                f"{CONFIG.clob_api_url}/markets/{condition_id}",
+            )
+            if resp.status_code != 200:
+                return None
+            data = resp.json()
+            return data.get("end_date_iso") or data.get("end_date") or None
+    except Exception:
+        return None
+
+
+def is_market_ended(condition_id: str) -> bool:
+    """Return True if the market's end date is in the past.
+
+    Uses a persistent cache keyed by condition_id to avoid repeated API calls.
+    Returns False (conservative) when the end date cannot be determined.
+    """
+    if not condition_id:
+        return False
+
+    _load_end_dates()
+    key = condition_id.lower()
+
+    if key not in _end_dates:
+        end_date = _fetch_end_date_from_api(condition_id)
+        _end_dates[key] = end_date or ""
+        _save_end_dates()
+
+    raw = _end_dates.get(key, "")
+    if not raw:
+        return False
+
+    try:
+        end_dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        return datetime.now(timezone.utc) > end_dt
+    except (ValueError, TypeError):
+        return False

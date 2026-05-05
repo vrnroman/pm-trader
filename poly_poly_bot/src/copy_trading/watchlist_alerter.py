@@ -26,8 +26,10 @@ from __future__ import annotations
 
 import time
 from collections import OrderedDict
+from datetime import datetime, timezone
 from typing import Optional
 
+from src.config import CONFIG
 from src.copy_trading.strategy_config import WATCHLIST_ALERT, StrategyTier
 from src.logger import logger
 from src.models import DetectedTrade
@@ -65,6 +67,22 @@ def _should_suppress_duplicate(trade: DetectedTrade, now: float) -> bool:
     return False
 
 
+def _is_stale_trade(trade: DetectedTrade, now: float) -> bool:
+    """Return True if the trade is older than MAX_TRADE_AGE_HOURS.
+
+    This catches phantom notifications from old trades that pass through after
+    a bot restart resets the in-memory cursor and older entries have been evicted
+    from the seen-trades dedup set.
+    """
+    try:
+        dt = datetime.fromisoformat(trade.timestamp.replace("Z", "+00:00"))
+        trade_epoch = dt.timestamp()
+    except (ValueError, TypeError):
+        return True  # unparseable timestamp → treat as stale
+    age_hours = (now - trade_epoch) / 3600
+    return age_hours > CONFIG.max_trade_age_hours
+
+
 def _is_near_cert_buy(trade: DetectedTrade) -> bool:
     """BUY into an outcome already priced as a near-lock — no insider edge."""
     return (
@@ -97,14 +115,27 @@ async def maybe_alert_watchlist_trade(
     on every drained trade — this is the monitor-mode equivalent of the
     executor's copy path.
     """
+    now = time.time()
+
+    if _is_stale_trade(trade, now):
+        return False
+
+    # Skip trades on markets that have already resolved/ended
+    cid_check = getattr(trade, "condition_id", "") or ""
+    if cid_check:
+        try:
+            from src.copy_trading.market_cache import is_market_ended
+            if is_market_ended(cid_check):
+                return False
+        except Exception:
+            pass
+
     if _is_near_cert_buy(trade):
         return False
 
     cash = _cash_value(trade)
     if cash < WATCHLIST_ALERT.min_cash_usd:
         return False
-
-    now = time.time()
     if _should_suppress_duplicate(trade, now):
         return False
 
