@@ -917,6 +917,7 @@ def _register_bot_menu():
             "commands": [
                 {"command": "predict", "description": "Run weather prediction (e.g. /predict 11 Apr)"},
                 {"command": "tennis", "description": "Show current tennis divergences"},
+                {"command": "tennis_pnl", "description": "Tennis paper-book PnL with breakdown by event"},
                 {"command": "status", "description": "Balance, positions, daily limits"},
                 {"command": "pnl", "description": "Unified P&L across all strategies"},
                 {"command": "history", "description": "Last 10 copy trades"},
