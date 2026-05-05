@@ -25,7 +25,7 @@ from src.models import TradeRecord
 # Constants
 # ---------------------------------------------------------------------------
 
-_MAX_SEEN_TRADES = 10_000
+_MAX_SEEN_TRADES = 50_000
 _MAX_RETRIES = 3
 _MAX_RETRY_MAP = 1_000
 _MAX_TRADER_COUNTS = 20_000
@@ -58,7 +58,12 @@ def _atomic_write_json(path: str, data: object) -> None:
 # ---------------------------------------------------------------------------
 
 _SEEN_FILE = os.path.join(CONFIG.data_dir, "seen-trades.json")
-_seen_trades: set[str] = set()
+# OrderedDict so eviction is true LRU. A plain set's `list(...)` order is hash
+# order, which means eviction was effectively random — old IDs (including for
+# wallets where the cursor is stuck on a single old trade) could be evicted
+# while newer ones survived, causing the same old trade to be re-emitted on
+# every fetch and re-alerted by downstream consumers.
+_seen_trades: "OrderedDict[str, None]" = OrderedDict()
 
 
 def _load_seen_trades() -> None:
@@ -67,21 +72,17 @@ def _load_seen_trades() -> None:
         with open(_SEEN_FILE, "r") as f:
             raw = json.load(f)
         if isinstance(raw, list):
-            _seen_trades = set(raw[-_MAX_SEEN_TRADES:])
+            _seen_trades = OrderedDict((tid, None) for tid in raw[-_MAX_SEEN_TRADES:])
         else:
-            _seen_trades = set()
+            _seen_trades = OrderedDict()
     except (FileNotFoundError, json.JSONDecodeError):
-        _seen_trades = set()
+        _seen_trades = OrderedDict()
 
 
 def _save_seen_trades() -> None:
-    # Evict oldest entries by converting to list and trimming
-    items = list(_seen_trades)
-    if len(items) > _MAX_SEEN_TRADES:
-        items = items[-_MAX_SEEN_TRADES:]
-        _seen_trades.clear()
-        _seen_trades.update(items)
-    _atomic_write_json(_SEEN_FILE, items)
+    while len(_seen_trades) > _MAX_SEEN_TRADES:
+        _seen_trades.popitem(last=False)
+    _atomic_write_json(_SEEN_FILE, list(_seen_trades.keys()))
 
 
 _load_seen_trades()
@@ -94,13 +95,12 @@ def is_seen_trade(trade_id: str) -> bool:
 
 def mark_trade_as_seen(trade_id: str) -> None:
     """Mark a trade as processed."""
-    _seen_trades.add(trade_id)
-    # Evict if over limit
-    if len(_seen_trades) > _MAX_SEEN_TRADES:
-        excess = len(_seen_trades) - _MAX_SEEN_TRADES
-        items = list(_seen_trades)
-        for i in range(excess):
-            _seen_trades.discard(items[i])
+    if trade_id in _seen_trades:
+        _seen_trades.move_to_end(trade_id)
+    else:
+        _seen_trades[trade_id] = None
+    while len(_seen_trades) > _MAX_SEEN_TRADES:
+        _seen_trades.popitem(last=False)
     _save_seen_trades()
 
 

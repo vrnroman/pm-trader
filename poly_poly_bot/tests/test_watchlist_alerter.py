@@ -29,7 +29,7 @@ def _make_trade(
     trader: str = "0x" + "a" * 40,
 ) -> DetectedTrade:
     return DetectedTrade(
-        id=f"trade-{trader[-4:]}-{side}-{size}-{price}",
+        id=f"trade-{trader[-4:]}-{condition_id}-{side}-{size}-{price}",
         trader_address=trader,
         timestamp="2026-04-14T12:00:00Z",
         market=market,
@@ -166,3 +166,57 @@ async def test_dedup_scoped_per_condition_id():
     assert a is True
     assert b is True
     assert send.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_same_trade_id_never_refires_after_cooldown(tmp_path, monkeypatch):
+    # Regression: a wallet's Data API cursor can stick on a single old trade
+    # so that trade is re-detected forever. The (wallet, market, side)
+    # cooldown alone would let it fire every cooldown_s; the trade-id gate
+    # must suppress every subsequent occurrence regardless of how much time
+    # has passed.
+    monkeypatch.setattr(
+        watchlist_alerter, "_ALERTED_FILE", str(tmp_path / "alerted.json")
+    )
+    _reset_watchlist_alerter()
+    trade = _make_trade(size=2000, price=0.30)  # $600
+    with patch(
+        "src.copy_trading.telegram_notifier._send_message",
+        new=AsyncMock(),
+    ) as send:
+        first = await maybe_alert_watchlist_trade(trade, "1a")
+        # Pretend the (wallet, market, side) cooldown elapsed — without the
+        # trade-id gate this would re-fire.
+        watchlist_alerter._dedup_cache.clear()
+        second = await maybe_alert_watchlist_trade(trade, "1a")
+    assert first is True
+    assert second is False
+    assert send.await_count == 1
+
+
+@pytest.mark.asyncio
+async def test_alerted_trade_ids_persist_across_restart(tmp_path, monkeypatch):
+    # The persistence is what makes the gate survive a container restart;
+    # without it the bot would re-alert every old trade on every redeploy.
+    alerted_path = tmp_path / "alerted.json"
+    monkeypatch.setattr(watchlist_alerter, "_ALERTED_FILE", str(alerted_path))
+    _reset_watchlist_alerter()
+    trade = _make_trade(size=2000, price=0.30)
+    with patch(
+        "src.copy_trading.telegram_notifier._send_message",
+        new=AsyncMock(),
+    ):
+        await maybe_alert_watchlist_trade(trade, "1a")
+
+    # Simulate a restart: drop in-memory state, reload from disk.
+    watchlist_alerter._alerted_trade_ids.clear()
+    watchlist_alerter._load_alerted_trade_ids()
+    assert watchlist_alerter._is_already_alerted(trade.id) is True
+
+    with patch(
+        "src.copy_trading.telegram_notifier._send_message",
+        new=AsyncMock(),
+    ) as send:
+        again = await maybe_alert_watchlist_trade(trade, "1a")
+    assert again is False
+    send.assert_not_awaited()

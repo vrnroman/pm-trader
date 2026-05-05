@@ -6,7 +6,7 @@ notifications live — never starts. The pattern detector still runs for
 Strategy 1c, but 1a/1b wallets get silently dropped in `_monitor_drain_loop`.
 
 This module closes that gap: a thin Telegram-only alerter that fires one
-notification per *material* tracked-wallet trade, with three noise gates:
+notification per *material* tracked-wallet trade, with four noise gates:
 
   1. Near-cert BUY gate — skip BUYs priced ≥ `near_cert_buy_price` (no insider
      edge in paying near-$1 for a $1 share).
@@ -17,17 +17,30 @@ notification per *material* tracked-wallet trade, with three noise gates:
      subsequent fills on the same market+side from the same wallet are
      suppressed for `dedup_cooldown_s`. This is what turns a 100-fill scale-in
      into a single notification.
+  4. Persistent per-trade-id gate — once we have alerted on a specific trade
+     identifier we never alert on it again. The upstream `seen-trades` cache
+     is LRU-bounded, so for wallets whose Data API cursor is stuck on a single
+     old trade (e.g. a Feb/Mar fill on a wallet that has gone dormant) the
+     same trade was being re-emitted, evicted, and re-alerted hourly. This
+     gate is independent of the (wallet, market, side) cooldown so a genuine
+     fresh fill on the same market still fires after the cooldown.
 
-All three gates are tunable via the `WATCHLIST_ALERT_*` env vars (see
-`strategy_config.WatchlistAlertConfig`). The cache is in-memory and LRU-bounded.
+All four gates are tunable via the `WATCHLIST_ALERT_*` env vars (see
+`strategy_config.WatchlistAlertConfig`). The dedup cache is in-memory; the
+per-trade-id gate is persisted to `data/watchlist-alerted.json` so it survives
+process restarts.
 """
 
 from __future__ import annotations
 
+import json
+import os
+import tempfile
 import time
 from collections import OrderedDict
 from typing import Optional
 
+from src.config import CONFIG
 from src.copy_trading.strategy_config import WATCHLIST_ALERT, StrategyTier
 from src.logger import logger
 from src.models import DetectedTrade
@@ -36,6 +49,71 @@ from src.models import DetectedTrade
 # (wallet_lower, condition_id_lower, side) -> last-alert epoch seconds.
 # OrderedDict for LRU eviction when we cross max_dedup_entries.
 _dedup_cache: "OrderedDict[tuple[str, str, str], float]" = OrderedDict()
+
+
+# Persistent set of trade IDs we have already fired an alert for. Capped LRU
+# to keep the file bounded; sized far larger than any realistic backlog so a
+# stuck-cursor old trade can never roll out of the gate.
+_ALERTED_FILE = os.path.join(CONFIG.data_dir, "watchlist-alerted.json")
+_MAX_ALERTED = 50_000
+_alerted_trade_ids: "OrderedDict[str, None]" = OrderedDict()
+
+
+def _load_alerted_trade_ids() -> None:
+    global _alerted_trade_ids
+    try:
+        with open(_ALERTED_FILE, "r") as f:
+            raw = json.load(f)
+        if isinstance(raw, list):
+            _alerted_trade_ids = OrderedDict(
+                (tid, None) for tid in raw[-_MAX_ALERTED:]
+            )
+        else:
+            _alerted_trade_ids = OrderedDict()
+    except (FileNotFoundError, json.JSONDecodeError):
+        _alerted_trade_ids = OrderedDict()
+
+
+def _save_alerted_trade_ids() -> None:
+    while len(_alerted_trade_ids) > _MAX_ALERTED:
+        _alerted_trade_ids.popitem(last=False)
+    dir_path = os.path.dirname(_ALERTED_FILE)
+    os.makedirs(dir_path, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(dir=dir_path, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            json.dump(list(_alerted_trade_ids.keys()), f)
+        os.replace(tmp_path, _ALERTED_FILE)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
+_load_alerted_trade_ids()
+
+
+def _is_already_alerted(trade_id: str) -> bool:
+    return bool(trade_id) and trade_id in _alerted_trade_ids
+
+
+def _mark_alerted(trade_id: str) -> None:
+    if not trade_id:
+        return
+    if trade_id in _alerted_trade_ids:
+        _alerted_trade_ids.move_to_end(trade_id)
+    else:
+        _alerted_trade_ids[trade_id] = None
+    while len(_alerted_trade_ids) > _MAX_ALERTED:
+        _alerted_trade_ids.popitem(last=False)
+    try:
+        _save_alerted_trade_ids()
+    except Exception as exc:
+        # Persistence failure shouldn't take the alert path down — we'll
+        # still have the in-memory record for this process lifetime.
+        logger.warn(f"[watchlist] failed to persist alerted set: {exc}")
 
 
 def _dedup_key(trade: DetectedTrade) -> tuple[str, str, str]:
@@ -97,6 +175,9 @@ async def maybe_alert_watchlist_trade(
     on every drained trade — this is the monitor-mode equivalent of the
     executor's copy path.
     """
+    if _is_already_alerted(trade.id):
+        return False
+
     if _is_near_cert_buy(trade):
         return False
 
@@ -156,6 +237,8 @@ async def maybe_alert_watchlist_trade(
         logger.warn(f"[watchlist] send failed: {exc}")
         return False
 
+    _mark_alerted(trade.id)
+
     logger.info(
         f"[watchlist] alert fired tier={tier} ${cash:,.0f} {trade.side} "
         f"'{trade.market[:40]}' wallet={wallet[:12]}"
@@ -164,5 +247,6 @@ async def maybe_alert_watchlist_trade(
 
 
 def _reset_watchlist_alerter() -> None:
-    """Clear the dedup cache. Test-only."""
+    """Clear the in-memory caches. Test-only."""
     _dedup_cache.clear()
+    _alerted_trade_ids.clear()
