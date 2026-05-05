@@ -58,7 +58,7 @@ tar czf "$ARCHIVE" \
     --exclude='.pytest_cache' \
     --exclude='.ruff_cache' \
     --exclude='*.egg-info' \
-    --exclude='node_modules' \
+    --exclude='tests' \
     -C "$(dirname "$0")" .
 
 echo "  Archive: $(du -h "$ARCHIVE" | cut -f1)"

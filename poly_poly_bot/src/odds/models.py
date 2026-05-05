@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 class MatchOdds(BaseModel):
     """Sharp sportsbook odds for a tennis match."""
 
-    source: str = Field(description="Odds provider name (e.g. 'pinnacle', 'oddspapi')")
+    source: str = Field(description="Odds provider name (e.g. 'smarkets')")
     sport: str = Field(default="tennis", description="Sport type")
     tournament: str = Field(description="Tournament name (e.g. 'ATP Monte-Carlo')")
     tour: str = Field(description="Tour: ATP or WTA")

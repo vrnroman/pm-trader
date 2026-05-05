@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.odds.models import MatchOdds, OddsComparison
-from src.strategies.tennis_arb import (
+from src.tennis.tennis_arb import (
     TennisArbStrategy,
     _extract_player_from_question,
     _match_player_to_odds,
@@ -113,8 +113,6 @@ class TestMatchPlayerToOdds:
 class TestKellySizing:
     def setup_method(self):
         self.strategy = TennisArbStrategy(
-            odds_provider="oddspapi",
-            oddspapi_api_key="test",
             max_bet_size=100.0,
             kelly_fraction=0.25,
             preview_mode=True,
@@ -150,8 +148,6 @@ class TestSignalSaving:
     def test_saves_to_jsonl(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             strategy = TennisArbStrategy(
-                odds_provider="oddspapi",
-                oddspapi_api_key="test",
                 preview_mode=True,
                 data_dir=tmpdir,
             )
@@ -181,8 +177,6 @@ class TestSignalSaving:
     def test_appends_to_existing(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             strategy = TennisArbStrategy(
-                odds_provider="oddspapi",
-                oddspapi_api_key="test",
                 preview_mode=True,
                 data_dir=tmpdir,
             )
@@ -197,8 +191,6 @@ class TestSignalSaving:
 
     def test_no_data_dir_skips(self):
         strategy = TennisArbStrategy(
-            odds_provider="oddspapi",
-            oddspapi_api_key="test",
             preview_mode=True,
             data_dir="",
         )
@@ -211,7 +203,7 @@ class TestSignalSaving:
 
 class TestScanIntegration:
     @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
-    @patch("src.strategies.tennis_arb.OddsPapiProvider.fetch_tennis_odds")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
     def test_scan_finds_divergence(self, mock_odds, mock_pm):
         mock_odds.return_value = [
             MatchOdds.from_decimal_odds(
@@ -227,9 +219,12 @@ class TestScanIntegration:
 
         mock_pm.return_value = [
             {
-                "event_title": "ATP Monte-Carlo: Sinner vs Rublev",
-                "question": "Will Jannik Sinner win the ATP Monte-Carlo Masters?",
+                "event_title": "Sinner vs Rublev (ATP Monte-Carlo)",
+                "event_slug": "sinner-vs-rublev-monte-carlo",
+                "event_end_date": "",
+                "question": "Will Jannik Sinner beat Andrey Rublev?",
                 "player": "Jannik Sinner",
+                "group_item_title": "Jannik Sinner",
                 "yes_price": 0.58,
                 "volume": 200000,
                 "liquidity": 50000,
@@ -241,8 +236,6 @@ class TestScanIntegration:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             strategy = TennisArbStrategy(
-                odds_provider="oddspapi",
-                oddspapi_api_key="test",
                 min_divergence=0.10,
                 max_bet_size=100,
                 kelly_fraction=0.25,
@@ -263,7 +256,7 @@ class TestScanIntegration:
         assert sig["preview"] is True
 
     @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
-    @patch("src.strategies.tennis_arb.OddsPapiProvider.fetch_tennis_odds")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
     def test_scan_no_signals_below_threshold(self, mock_odds, mock_pm):
         mock_odds.return_value = [
             MatchOdds.from_decimal_odds(
@@ -279,9 +272,12 @@ class TestScanIntegration:
 
         mock_pm.return_value = [
             {
-                "event_title": "Test match",
-                "question": "Will A win the test?",
+                "event_title": "A vs B",
+                "event_slug": "a-vs-b",
+                "event_end_date": "",
+                "question": "Will A beat B in the test?",
                 "player": "A",
+                "group_item_title": "A",
                 "yes_price": 0.48,  # Close to sharp 0.50, divergence ~0.02
                 "volume": 100000,
                 "liquidity": 20000,
@@ -292,8 +288,6 @@ class TestScanIntegration:
         ]
 
         strategy = TennisArbStrategy(
-            odds_provider="oddspapi",
-            oddspapi_api_key="test",
             min_divergence=0.10,
             preview_mode=True,
         )
@@ -302,14 +296,12 @@ class TestScanIntegration:
         assert len(signals) == 0
 
     @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
-    @patch("src.strategies.tennis_arb.OddsPapiProvider.fetch_tennis_odds")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
     def test_scan_empty_odds(self, mock_odds, mock_pm):
         mock_odds.return_value = []
         mock_pm.return_value = []
 
         strategy = TennisArbStrategy(
-            odds_provider="oddspapi",
-            oddspapi_api_key="test",
             preview_mode=True,
         )
 

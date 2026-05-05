@@ -10,13 +10,20 @@ from src.logger import logger
 _client: Optional[ClobClient] = None
 
 
-def create_clob_client() -> ClobClient:
-    """Create and cache a singleton authenticated CLOB client."""
+def create_clob_client() -> ClobClient | None:
+    """Create and cache a singleton authenticated CLOB client.
+
+    Returns None if private key is not configured (preview mode without wallet).
+    """
     global _client
     if _client is not None:
         return _client
 
     private_key = get_private_key()
+    if not private_key:
+        logger.info("No private key configured — CLOB client disabled (preview/monitor only)")
+        return None
+
     logger.info("Deriving API credentials from wallet...")
 
     # Initial client for key derivation

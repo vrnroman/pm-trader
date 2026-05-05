@@ -143,9 +143,7 @@ class Config:
     schedule_hour_sgt: int = _opt_int("SCHEDULE_HOUR_SGT", 15)
     schedule_minute_sgt: int = _opt_int("SCHEDULE_MINUTE_SGT", 0)
 
-    # --- Strategy 3: Tennis Arb ---
-    tennis_odds_provider: str = _optional("TENNIS_ODDS_PROVIDER", "oddspapi")
-    oddspapi_api_key: str = _optional("ODDSPAPI_API_KEY", "")
+    # --- Strategy 3: Tennis Arb (Smarkets-only) ---
     tennis_min_divergence: float = _opt_float("TENNIS_MIN_DIVERGENCE", 0.10)
     tennis_max_bet_size: float = _opt_float("TENNIS_MAX_BET_SIZE", 100.0)
     tennis_kelly_fraction: float = _opt_float("TENNIS_KELLY_FRACTION", 0.25)

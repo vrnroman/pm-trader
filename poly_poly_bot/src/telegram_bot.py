@@ -120,15 +120,36 @@ def send_tennis_signals(signals: list[dict]):
     ]
 
     for s in signals:
-        lines.append(
-            f"[TENNIS] {_esc(s.get('tournament', ''))}: "
-            f"{_esc(s['player_a'])} vs {_esc(s['player_b'])} — "
-            f"Sharp: {s['sharp_prob']:.0%} / PM: {s['polymarket_price']:.0%} — "
-            f"Edge: <b>{s['divergence']:.0%}</b> — "
-            f"{s['side']} @ ${s['bet_size']:.0f}"
-        )
+        outcome = s.get("outcome_label") or s.get("target_player") or ""
+        event_title = s.get("event_title") or s.get("tournament", "")
+        question = s.get("polymarket_question", "")
+        url = s.get("polymarket_url", "")
+        match_time = s.get("match_time", "") or ""
+        match_time_short = match_time.replace("T", " ")[:16] if match_time else ""
 
-    send_message("\n".join(lines))
+        block = [
+            f"[TENNIS] <b>{_esc(s['player_a'])} vs {_esc(s['player_b'])}</b>"
+            + (f"  ({_esc(match_time_short)} UTC)" if match_time_short else ""),
+            f"  Tournament: {_esc(s.get('tournament', ''))}",
+            f"  PM event: <b>{_esc(event_title)}</b>",
+        ]
+        if question:
+            block.append(f"  Resolves: {_esc(question)}")
+        block.append(
+            f"  Bet: <b>{s['side']} {_esc(outcome)}</b> @ "
+            f"${s['bet_size']:.0f} (price {s['polymarket_price']:.1%})"
+        )
+        block.append(
+            f"  Sharp: {s['sharp_prob']:.1%}  |  PM: {s['polymarket_price']:.1%}  |  "
+            f"Edge: <b>{s['divergence']:+.1%}</b>"
+        )
+        if url:
+            block.append(f'  <a href="{_esc(url)}">Polymarket link</a>')
+
+        lines.append("\n".join(block))
+        lines.append("")
+
+    send_message("\n".join(lines).rstrip())
 
 
 def _load_s3_trades() -> list[dict]:

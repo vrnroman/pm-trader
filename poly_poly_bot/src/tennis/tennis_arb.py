@@ -1,13 +1,13 @@
-"""Strategy #3: Tennis Odds Arbitrage — Pinnacle vs Polymarket.
+"""Strategy #3: Tennis Odds Arbitrage — Smarkets vs Polymarket.
 
-Compares sharp sportsbook odds (Pinnacle) against Polymarket tennis match
-prices and generates trade signals on divergences above a configurable
-threshold.
+Compares Smarkets exchange odds (live tick-resolution mid prices) against
+Polymarket tennis match prices and generates trade signals on divergences
+above a configurable threshold.
 
 Core loop:
-  1. Fetch sharp odds from configured provider (OddsPapi / scraper)
+  1. Fetch sharp odds from Smarkets
   2. Fetch Polymarket tennis match markets via Gamma API
-  3. Match sportsbook events to Polymarket markets by player names
+  3. Match Smarkets events to Polymarket markets by player names
   4. Calculate divergence = sharp_implied_prob - polymarket_price
   5. If divergence > threshold, generate signal (BUY YES on underpriced side)
   6. Size using fractional Kelly criterion, capped at max bet
@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import json
 import logging
-import math
 import os
 import re
 import time
@@ -26,10 +25,7 @@ from difflib import SequenceMatcher
 
 import requests
 
-from src.odds.base import OddsProvider
 from src.odds.models import MatchOdds, OddsComparison
-from src.odds.oddspapi import OddsPapiProvider
-from src.odds.scraper import OddsScraperProvider
 from src.odds.smarkets import SmarketsProvider
 
 logger = logging.getLogger("strategy.tennis_arb")
@@ -45,8 +41,6 @@ class TennisArbStrategy:
 
     def __init__(
         self,
-        odds_provider: str = "oddspapi",
-        oddspapi_api_key: str = "",
         min_divergence: float = 0.10,
         max_bet_size: float = 100.0,
         kelly_fraction: float = 0.25,
@@ -73,20 +67,13 @@ class TennisArbStrategy:
         # Same-event guard: event endDate must be within ±N days of match_time
         self.max_event_date_delta_days = max_event_date_delta_days
 
-        # Initialize odds provider
-        self._provider: OddsProvider
-        if odds_provider == "oddspapi":
-            self._provider = OddsPapiProvider(api_key=oddspapi_api_key)
-        elif odds_provider == "scraper":
-            self._provider = OddsScraperProvider()
-        elif odds_provider == "smarkets":
-            # Real-time tennis prices via Smarkets' public REST API. No
-            # account / API key / payment required — see src/odds/smarkets.py
-            # for the rationale and architecture notes.
-            self._provider = SmarketsProvider()
-        else:
-            logger.warning(f"Unknown odds provider '{odds_provider}', using OddsPapi")
-            self._provider = OddsPapiProvider(api_key=oddspapi_api_key)
+        # Real-time tennis prices via Smarkets' public REST API. No account /
+        # API key / payment required — see src/odds/smarkets.py for the
+        # rationale and architecture notes. Older OddsPapi / The Odds API
+        # providers were removed because they served closing-line snapshots
+        # that froze the moment a match went in-play, defeating the live-arb
+        # thesis.
+        self._provider = SmarketsProvider()
 
     def scan(self) -> list[dict]:
         """Run a single scan: fetch odds, find markets, detect divergences.
@@ -112,6 +99,13 @@ class TennisArbStrategy:
         # Step 3: Match and compare
         comparisons = self._match_and_compare(sharp_odds, poly_markets)
         logger.info(f"Matched {len(comparisons)} market-odds pairs")
+
+        for comp, pm in comparisons:
+            logger.info(
+                f"  >> {comp.match_odds.player_a} vs {comp.match_odds.player_b} | "
+                f"Sharp: {comp.sharp_prob:.1%} / PM: {comp.polymarket_price:.1%} | "
+                f"Edge: {comp.divergence:+.1%} | {pm.get('question', '')}"
+            )
 
         # Step 4: Filter by divergence threshold + re-bet gate
         bet_state = self._load_bet_state()

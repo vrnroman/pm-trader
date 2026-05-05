@@ -1,4 +1,4 @@
-.PHONY: setup test lint run-preview run-live deploy backtest
+.PHONY: setup test lint run-preview run-live deploy
 
 setup:
 	pip install -r requirements.txt
@@ -17,6 +17,3 @@ run-live:
 
 deploy:
 	bash deploy.sh
-
-backtest:
-	python -m backtest.weather_backtest
