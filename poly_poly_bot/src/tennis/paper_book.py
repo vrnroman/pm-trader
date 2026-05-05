@@ -269,6 +269,36 @@ class TennisPaperBook:
         return closed
 
     # ------------------------------------------------------------------
+    # External-trigger close (take-profit)
+    # ------------------------------------------------------------------
+    def take_profit(self, token_id: str, exit_price: float) -> dict | None:
+        """Close the open YES position on ``token_id`` at ``exit_price``.
+
+        Used by the strategy's take-profit gate: when the current PM price
+        of a held token has run far enough above its entry price, we lock
+        in the profit instead of riding the position to resolution.
+
+        Returns the closed position dict, or ``None`` if no open position
+        matches this token. Token IDs are unique per position so at most
+        one match exists.
+        """
+        if not token_id:
+            return None
+        with self._lock:
+            for pos in list(self._state["open_positions"].values()):
+                if pos.get("token_id") != token_id:
+                    continue
+                closed = self._close(pos, exit_price=exit_price, reason="TAKE_PROFIT")
+                self._save()
+                logger.info(
+                    f"[paper-book] TAKE_PROFIT {closed['outcome_player']} "
+                    f"@ {closed['exit_price']:.3f} (entry {closed['entry_price']:.3f}) "
+                    f"→ realized ${closed['realized_pnl_usd']:+.2f}"
+                )
+                return closed
+            return None
+
+    # ------------------------------------------------------------------
     # External-trigger close (resolution)
     # ------------------------------------------------------------------
     def resolve(

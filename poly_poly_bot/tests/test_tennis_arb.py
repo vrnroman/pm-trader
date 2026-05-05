@@ -386,6 +386,96 @@ class TestPaperBookIntegration:
             assert closed[0]["exit_price"] == 1.0
             assert closed[0]["realized_pnl_usd"] > 0
 
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_take_profit_closes_position_when_price_triples(
+        self, mock_odds, mock_pm,
+    ):
+        # Open at 0.20 on the first scan, then on the second scan the PM
+        # price is 0.60 (exactly 3×) — the take-profit gate should close
+        # the position and emit a TAKE_PROFIT signal alongside any new
+        # divergence signals.
+        mock_odds.return_value = [
+            MatchOdds.from_decimal_odds(
+                source="smarkets", tournament="Atp Rome", tour="ATP",
+                player_a="Hugo Dellien", player_b="Jesper de Jong",
+                odds_a=2.5, odds_b=1.6,
+            )
+        ]
+        # First scan: PM price 0.20, sharp implies ~0.40 → big edge → OPEN.
+        first_pm = [{
+            "event_title": "Hugo Dellien vs Jesper de Jong",
+            "event_slug": "rome-2026-dellien", "event_end_date": "",
+            "question": "Will Hugo Dellien beat Jesper de Jong?",
+            "player": "Hugo Dellien", "group_item_title": "Hugo Dellien",
+            "yes_price": 0.20, "volume": 200000, "liquidity": 50000,
+            "market_id": "mkt_1", "condition_id": "0xMATCH1",
+            "token_id_yes": "TOKA",
+        }]
+        mock_pm.return_value = first_pm
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.05, preview_mode=True, data_dir=tmpdir,
+                take_profit_ratio=3.0,
+            )
+            signals = strategy.scan()
+            assert any(s.get("paper_action") == "OPEN" for s in signals)
+            assert strategy.paper_book.open_position_count() == 1
+
+            # Second scan: same market but PM has rallied to 0.60 (exactly
+            # 3× entry). Sharp is unchanged at ~0.40, so no fresh BUY signal
+            # should appear (PM is now above sharp). The TP gate fires.
+            second_pm = [dict(first_pm[0], yes_price=0.60)]
+            mock_pm.return_value = second_pm
+            signals = strategy.scan()
+
+            tp = [s for s in signals if s.get("paper_action") == "TAKE_PROFIT"]
+            assert len(tp) == 1
+            assert tp[0]["entry_price"] == pytest.approx(0.20, abs=1e-4)
+            assert tp[0]["exit_price"] == pytest.approx(0.60, abs=1e-4)
+            assert tp[0]["ratio"] == pytest.approx(3.0, abs=1e-4)
+            # Realized PnL = shares × (exit − entry); shares depends on the
+            # Kelly-sized bet, so we just assert the quadrupling left us in
+            # the green by the right multiplier.
+            assert tp[0]["paper_realized_pnl_usd"] > 0
+            assert strategy.paper_book.open_position_count() == 0
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_take_profit_holds_below_threshold(self, mock_odds, mock_pm):
+        mock_odds.return_value = [
+            MatchOdds.from_decimal_odds(
+                source="smarkets", tournament="Atp Rome", tour="ATP",
+                player_a="Hugo Dellien", player_b="Jesper de Jong",
+                odds_a=2.5, odds_b=1.6,
+            )
+        ]
+        first_pm = [{
+            "event_title": "Hugo Dellien vs Jesper de Jong",
+            "event_slug": "rome-2026-dellien", "event_end_date": "",
+            "question": "Will Hugo Dellien beat Jesper de Jong?",
+            "player": "Hugo Dellien", "group_item_title": "Hugo Dellien",
+            "yes_price": 0.20, "volume": 200000, "liquidity": 50000,
+            "market_id": "mkt_1", "condition_id": "0xMATCH1",
+            "token_id_yes": "TOKA",
+        }]
+        mock_pm.return_value = first_pm
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.05, preview_mode=True, data_dir=tmpdir,
+                take_profit_ratio=3.0,
+            )
+            strategy.scan()
+            assert strategy.paper_book.open_position_count() == 1
+
+            # Price moves to 0.55 — only 2.75× entry, below the 3× gate.
+            mock_pm.return_value = [dict(first_pm[0], yes_price=0.55)]
+            signals = strategy.scan()
+            assert not any(s.get("paper_action") == "TAKE_PROFIT" for s in signals)
+            assert strategy.paper_book.open_position_count() == 1
+
     def test_fetch_market_resolution_reads_outcome_prices(self):
         # Smoke-test the Gamma response parser against the documented
         # shape: outcomePrices = ["1", "0"], clobTokenIds = ["TA", "TB"].

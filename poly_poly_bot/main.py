@@ -189,6 +189,7 @@ def _init_tennis_strategy():
         min_liquidity=CONFIG.tennis_min_polymarket_liquidity,
         preview_mode=CONFIG.preview_mode,
         data_dir=CONFIG.data_dir,
+        take_profit_ratio=CONFIG.tennis_take_profit_ratio,
     )
     return _tennis_strategy
 
@@ -385,6 +386,7 @@ async def main():
     if CONFIG.strategy3_enabled:
         logger.info(f"  Tennis scan interval: {CONFIG.tennis_scan_interval}s")
         logger.info(f"  Tennis min divergence: {CONFIG.tennis_min_divergence:.0%}")
+        logger.info(f"  Tennis take-profit ratio: ×{CONFIG.tennis_take_profit_ratio:g}")
         logger.info(f"  Tennis tournaments: {', '.join(tennis_tournaments)}")
     logger.info("=" * 60)
 

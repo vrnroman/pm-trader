@@ -237,6 +237,34 @@ def test_corrupt_state_file_resets_and_does_not_crash(tmp_path):
     assert book.open_position_count() == 1
 
 
+# ── Take-profit ──────────────────────────────────────────────────────
+
+
+def test_take_profit_closes_at_exit_price(book):
+    book.process_signal(_signal(token_id="TOKA", price=0.20, size=10.0))
+    closed = book.take_profit("TOKA", exit_price=0.60)
+    assert closed is not None
+    # shares = 10 / 0.20 = 50; realized = 50 * (0.60 - 0.20) = 20.0
+    assert closed["realized_pnl_usd"] == pytest.approx(20.0, abs=1e-4)
+    assert closed["exit_reason"] == "TAKE_PROFIT"
+    assert book.open_position_count() == 0
+
+
+def test_take_profit_unknown_token_returns_none(book):
+    book.process_signal(_signal(token_id="TOKA", price=0.20, size=10.0))
+    assert book.take_profit("OTHER", exit_price=0.60) is None
+    assert book.open_position_count() == 1
+
+
+def test_take_profit_persists_to_disk(tmp_path):
+    book = TennisPaperBook(data_dir=str(tmp_path))
+    book.process_signal(_signal(token_id="TOKA", price=0.20, size=10.0))
+    book.take_profit("TOKA", exit_price=0.60)
+    book2 = TennisPaperBook(data_dir=str(tmp_path))
+    assert book2.open_position_count() == 0
+    assert book2.realized_pnl() == pytest.approx(20.0, abs=1e-4)
+
+
 # ── Defensive guards ─────────────────────────────────────────────────
 
 

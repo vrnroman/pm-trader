@@ -42,7 +42,7 @@ class TennisArbStrategy:
 
     def __init__(
         self,
-        min_divergence: float = 0.10,
+        min_divergence: float = 0.08,
         max_bet_size: float = 100.0,
         kelly_fraction: float = 0.25,
         tournaments: list[str] | None = None,
@@ -52,6 +52,7 @@ class TennisArbStrategy:
         data_dir: str = "",
         min_edge_step: float = 0.05,
         max_event_date_delta_days: float = 3.0,
+        take_profit_ratio: float = 3.0,
     ):
         self.min_divergence = min_divergence
         self.max_bet_size = max_bet_size
@@ -67,6 +68,11 @@ class TennisArbStrategy:
         self.min_edge_step = min_edge_step
         # Same-event guard: event endDate must be within ±N days of match_time
         self.max_event_date_delta_days = max_event_date_delta_days
+        # Take-profit gate: close any open paper position whose current PM
+        # YES price is at least this multiple of its entry price. With the
+        # default 3.0, a position bought at 0.20 fixes profit when the
+        # market rallies to 0.60.
+        self.take_profit_ratio = take_profit_ratio
 
         # Real-time tennis prices via Smarkets' public REST API. No account /
         # API key / payment required — see src/odds/smarkets.py for the
@@ -116,6 +122,12 @@ class TennisArbStrategy:
             logger.info("No Polymarket tennis markets found")
             return []
         logger.info(f"Found {len(poly_markets)} Polymarket tennis markets")
+
+        # Step 2b: Take-profit gate — close open positions whose current PM
+        # price is ≥ take_profit_ratio × entry_price. Done before the
+        # divergence work so a fix-profit close that happens to live on the
+        # same market as a fresh signal can be reflected immediately.
+        tp_events = self._check_take_profit(poly_markets)
 
         # Step 3: Match and compare
         comparisons = self._match_and_compare(sharp_odds, poly_markets)
@@ -251,7 +263,9 @@ class TennisArbStrategy:
         # Save signals to history
         self._save_signals(signals)
 
-        return signals
+        # Take-profit events surface alongside divergence signals so the
+        # Telegram alert path renders them in the same scan output.
+        return tp_events + signals
 
     def _fetch_polymarket_tennis_markets(self) -> list[dict]:
         """Fetch active tennis match markets from Polymarket Gamma API."""
@@ -369,6 +383,103 @@ class TennisArbStrategy:
                 break
 
         return all_markets
+
+    # ------------------------------------------------------------------
+    # Take-profit gate
+    # ------------------------------------------------------------------
+    def _check_take_profit(self, poly_markets: list[dict]) -> list[dict]:
+        """Close paper positions whose current price has crossed the TP ratio.
+
+        For each open position we look up the current YES price for its
+        token in the freshly-fetched Gamma response. If
+        ``current_price >= take_profit_ratio × entry_price`` we close the
+        position via ``paper_book.take_profit`` and emit a synthetic
+        signal so the Telegram alert path can surface the fix.
+
+        Positions whose token isn't in this scan's ``poly_markets`` (e.g.
+        the underlying market dropped below the volume / liquidity filter)
+        are skipped — they'll be re-checked on the next scan, and
+        resolution will close them eventually.
+        """
+        if self.paper_book is None or self.take_profit_ratio <= 0:
+            return []
+
+        open_positions = self.paper_book.open_positions()
+        if not open_positions:
+            return []
+
+        # token_id → (current_yes_price, pm_dict)
+        price_by_token: dict[str, tuple[float, dict]] = {
+            pm["token_id_yes"]: (pm["yes_price"], pm)
+            for pm in poly_markets
+            if pm.get("token_id_yes")
+        }
+
+        events: list[dict] = []
+        for pos in open_positions:
+            token_id = pos.get("token_id") or ""
+            entry_price = float(pos.get("entry_price") or 0.0)
+            if not token_id or entry_price <= 0:
+                continue
+            quote = price_by_token.get(token_id)
+            if quote is None:
+                continue
+            current_price, pm = quote
+            # Compare via the ratio so floating-point noise like
+            # 3.0 * 0.20 == 0.6000000000000001 doesn't push a clean 3×
+            # move just below the threshold.
+            ratio_now = current_price / entry_price
+            if ratio_now + 1e-9 < self.take_profit_ratio:
+                continue
+
+            closed = self.paper_book.take_profit(token_id, exit_price=current_price)
+            if closed is None:
+                continue
+
+            event_slug = pos.get("event_slug") or pm.get("event_slug") or ""
+            polymarket_url = (
+                pos.get("polymarket_url")
+                or (f"https://polymarket.com/event/{event_slug}" if event_slug else "")
+            )
+            match = pos.get("match") or ""
+            player_a, _, player_b = match.partition(" vs ")
+            event = {
+                "strategy": "tennis_arb",
+                "paper_action": "TAKE_PROFIT",
+                "paper_realized_pnl_usd": closed["realized_pnl_usd"],
+                "paper_position_id": closed["id"],
+                "tournament": pos.get("tournament", ""),
+                "player_a": player_a,
+                "player_b": player_b,
+                "outcome_label": closed.get("outcome_player", ""),
+                "target_player": closed.get("outcome_player", ""),
+                "event_title": pos.get("event_title", ""),
+                "event_slug": event_slug,
+                "polymarket_url": polymarket_url,
+                "polymarket_question": pm.get("question", ""),
+                "match_time": pos.get("match_time"),
+                "entry_price": round(entry_price, 4),
+                "exit_price": round(current_price, 4),
+                "ratio": round(ratio_now, 3),
+                "shares": closed.get("shares"),
+                "size_usd": closed.get("size_usd"),
+                "timestamp": datetime.now(SGT).isoformat(),
+                "preview": self.preview_mode,
+            }
+            events.append(event)
+            logger.info(
+                f"Tennis arb: TAKE_PROFIT {closed['outcome_player']} entry "
+                f"{entry_price:.3f} → exit {current_price:.3f} "
+                f"(×{event['ratio']}) realized "
+                f"${closed['realized_pnl_usd']:+.2f}"
+            )
+
+        # Persist TP events to the trade history file too — keeps the
+        # JSONL the only source of truth for what the strategy did.
+        if events:
+            self._save_signals(events)
+
+        return events
 
     # ------------------------------------------------------------------
     # Paper-book settlement (auto-resolve)

@@ -128,6 +128,30 @@ def send_tennis_signals(signals: list[dict]):
         match_time = s.get("match_time", "") or ""
         match_time_short = match_time.replace("T", " ")[:16] if match_time else ""
 
+        # Take-profit events skip the divergence-signal layout — there's no
+        # new bet, just a fix-profit close on an existing position.
+        if s.get("paper_action") == "TAKE_PROFIT":
+            realized = s.get("paper_realized_pnl_usd")
+            realized_str = (
+                f" — realized <b>${realized:+.2f}</b>" if realized is not None else ""
+            )
+            entry = float(s.get("entry_price") or 0.0)
+            exitp = float(s.get("exit_price") or 0.0)
+            ratio = s.get("ratio") or (exitp / entry if entry > 0 else 0.0)
+            block = [
+                f"[TENNIS] 🎯 <b>Take-profit: {_esc(outcome)}</b>"
+                + (f"  ({_esc(match_time_short)} UTC)" if match_time_short else ""),
+                f"  Tournament: {_esc(s.get('tournament', ''))}",
+                f"  PM event: <b>{_esc(event_title)}</b>",
+                f"  Closed YES @ {exitp:.1%} (entry {entry:.1%}, ×{ratio:.2f})"
+                f"{realized_str}",
+            ]
+            if url:
+                block.append(f'  <a href="{_esc(url)}">Polymarket link</a>')
+            lines.append("\n".join(block))
+            lines.append("")
+            continue
+
         block = [
             f"[TENNIS] <b>{_esc(s['player_a'])} vs {_esc(s['player_b'])}</b>"
             + (f"  ({_esc(match_time_short)} UTC)" if match_time_short else ""),
