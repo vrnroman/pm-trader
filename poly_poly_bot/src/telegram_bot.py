@@ -154,7 +154,7 @@ def send_tennis_signals(signals: list[dict]):
         if paper_action == "OPEN":
             block.append(
                 f"  📒 Paper book: OPEN — long {_esc(outcome)} YES "
-                f"@ {s['polymarket_price']:.3f} ${s['bet_size']:.2f}"
+                f"@ {s['polymarket_price']:.1%} ${s['bet_size']:.2f}"
             )
         elif paper_action == "FLIP":
             realized = s.get("paper_realized_pnl_usd")
@@ -163,7 +163,7 @@ def send_tennis_signals(signals: list[dict]):
             )
             block.append(
                 f"  📒 Paper book: FLIP — closed previous YES{realized_str}, "
-                f"now long {_esc(outcome)} YES @ {s['polymarket_price']:.3f} "
+                f"now long {_esc(outcome)} YES @ {s['polymarket_price']:.1%} "
                 f"${s['bet_size']:.2f}"
             )
         elif paper_action == "HOLD":
@@ -807,11 +807,11 @@ def _handle_tennis_pnl():
             if shown >= 6:
                 break
             cur = current_prices.get(pos.get("token_id"))
-            cur_str = f" → {cur:.3f}" if cur is not None else ""
+            cur_str = f" → {cur:.1%}" if cur is not None else ""
             lines.append(
                 f"     OPEN  {_esc(pos.get('outcome_player',''))} YES "
-                f"@ {pos.get('entry_price', 0):.3f}{cur_str}"
-                f"  ({pos.get('shares', 0):.2f}sh)"
+                f"@ {pos.get('entry_price', 0):.1%}{cur_str}"
+                f"  ({pos.get('shares', 0):.2f}sh, ${pos.get('size_usd', 0):.2f})"
             )
             shown += 1
         for pos in reversed(g["closed_positions"]):
@@ -819,7 +819,7 @@ def _handle_tennis_pnl():
                 break
             lines.append(
                 f"     CLOSED  {_esc(pos.get('outcome_player',''))} "
-                f"@ {pos.get('entry_price', 0):.3f}→{pos.get('exit_price', 0):.3f} "
+                f"@ {pos.get('entry_price', 0):.1%}→{pos.get('exit_price', 0):.1%} "
                 f"({pos.get('exit_reason','?')}) "
                 f"<b>${pos.get('realized_pnl_usd', 0):+.2f}</b>"
             )
