@@ -307,3 +307,111 @@ class TestScanIntegration:
 
         signals = strategy.scan()
         assert signals == []
+
+
+# ── Paper-book + auto-resolve integration ─────────────────────────────
+
+
+class TestPaperBookIntegration:
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_signal_opens_paper_position(self, mock_odds, mock_pm):
+        mock_odds.return_value = [
+            MatchOdds.from_decimal_odds(
+                source="smarkets", tournament="Atp Rome", tour="ATP",
+                player_a="Hugo Dellien", player_b="Jesper de Jong",
+                odds_a=1.55, odds_b=2.55,
+            )
+        ]
+        mock_pm.return_value = [{
+            "event_title": "Hugo Dellien vs Jesper de Jong",
+            "event_slug": "rome-2026-dellien", "event_end_date": "",
+            "question": "Will Hugo Dellien beat Jesper de Jong?",
+            "player": "Hugo Dellien", "group_item_title": "Hugo Dellien",
+            "yes_price": 0.50, "volume": 200000, "liquidity": 50000,
+            "market_id": "mkt_1", "condition_id": "0xMATCH1",
+            "token_id_yes": "TOKA",
+        }]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.05, preview_mode=True, data_dir=tmpdir,
+            )
+            signals = strategy.scan()
+            assert len(signals) == 1
+            assert signals[0]["paper_action"] == "OPEN"
+            assert strategy.paper_book.open_position_count() == 1
+
+    @patch.object(TennisArbStrategy, "_fetch_market_resolution")
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_open_position_auto_resolves_when_market_settles(
+        self, mock_odds, mock_pm, mock_resolve,
+    ):
+        # Open a position on the first scan, then on the second scan have
+        # the resolution helper report TOKA as the winner. The book should
+        # close the position at exit_price 1.0.
+        mock_odds.return_value = [
+            MatchOdds.from_decimal_odds(
+                source="smarkets", tournament="Atp Rome", tour="ATP",
+                player_a="Hugo Dellien", player_b="Jesper de Jong",
+                odds_a=1.55, odds_b=2.55,
+            )
+        ]
+        mock_pm.return_value = [{
+            "event_title": "Hugo Dellien vs Jesper de Jong",
+            "event_slug": "rome-2026-dellien", "event_end_date": "",
+            "question": "Will Hugo Dellien beat Jesper de Jong?",
+            "player": "Hugo Dellien", "group_item_title": "Hugo Dellien",
+            "yes_price": 0.50, "volume": 200000, "liquidity": 50000,
+            "market_id": "mkt_1", "condition_id": "0xMATCH1",
+            "token_id_yes": "TOKA",
+        }]
+        # First scan: market still open → no resolution.
+        mock_resolve.return_value = None
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.05, preview_mode=True, data_dir=tmpdir,
+            )
+            strategy._resolve_min_interval_s = 0.0  # disable throttle
+            strategy.scan()
+            assert strategy.paper_book.open_position_count() == 1
+
+            # Second scan: market resolved with TOKA winning.
+            mock_resolve.return_value = "TOKA"
+            strategy.scan()
+            assert strategy.paper_book.open_position_count() == 0
+            closed = strategy.paper_book.closed_positions()
+            assert len(closed) == 1
+            assert closed[0]["exit_reason"] == "RESOLVED"
+            assert closed[0]["exit_price"] == 1.0
+            assert closed[0]["realized_pnl_usd"] > 0
+
+    def test_fetch_market_resolution_reads_outcome_prices(self):
+        # Smoke-test the Gamma response parser against the documented
+        # shape: outcomePrices = ["1", "0"], clobTokenIds = ["TA", "TB"].
+        from unittest.mock import patch as up
+        strategy = TennisArbStrategy(preview_mode=True)
+        fake_resp = MagicMock()
+        fake_resp.json.return_value = [{
+            "closed": True,
+            "outcomePrices": '["1", "0"]',
+            "clobTokenIds": '["TA", "TB"]',
+        }]
+        fake_resp.raise_for_status = lambda: None
+        with up("src.tennis.tennis_arb.requests.get", return_value=fake_resp):
+            assert strategy._fetch_market_resolution("0xC") == "TA"
+
+        fake_resp.json.return_value = [{
+            "closed": True,
+            "outcomePrices": '["0", "1"]',
+            "clobTokenIds": '["TA", "TB"]',
+        }]
+        with up("src.tennis.tennis_arb.requests.get", return_value=fake_resp):
+            assert strategy._fetch_market_resolution("0xC") == "TB"
+
+        # Open market → None, leaves paper position untouched.
+        fake_resp.json.return_value = [{
+            "closed": False, "outcomePrices": '["0.4","0.6"]',
+        }]
+        with up("src.tennis.tennis_arb.requests.get", return_value=fake_resp):
+            assert strategy._fetch_market_resolution("0xC") is None

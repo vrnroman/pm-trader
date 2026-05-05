@@ -27,6 +27,7 @@ import requests
 
 from src.odds.models import MatchOdds, OddsComparison
 from src.odds.smarkets import SmarketsProvider
+from src.tennis.paper_book import TennisPaperBook
 
 logger = logging.getLogger("strategy.tennis_arb")
 
@@ -75,12 +76,32 @@ class TennisArbStrategy:
         # thesis.
         self._provider = SmarketsProvider()
 
+        # Paper-trading book: keeps a notional position per market, lets a
+        # contradicting signal close+flip into the new direction, and
+        # auto-closes positions when the underlying Polymarket market
+        # resolves. Disabled if data_dir is not configured (in tests).
+        self.paper_book: TennisPaperBook | None = (
+            TennisPaperBook(data_dir=data_dir) if data_dir else None
+        )
+
+        # Auto-resolve throttle: tennis markets settle hours after the
+        # match ends, so polling Gamma every few minutes is plenty —
+        # cheaper than once per scan when scan_interval is 60s.
+        self._resolve_min_interval_s: float = 300.0
+        self._last_resolve_at: float = 0.0
+
     def scan(self) -> list[dict]:
         """Run a single scan: fetch odds, find markets, detect divergences.
 
         Returns list of signal dicts ready for execution or logging.
         """
         logger.info(f"Tennis arb scan starting (provider={self._provider.name})")
+
+        # Step 0: Settle any open paper positions whose underlying Polymarket
+        # market has resolved since the last scan. We do this before the
+        # divergence work so realized PnL is up to date by the time we may
+        # decide to flip into a new position on the same event.
+        self._resolve_settled_paper_positions()
 
         # Step 1: Fetch sharp odds
         sharp_odds = self._provider.fetch_tennis_odds(tours=self.tournaments)
@@ -176,6 +197,20 @@ class TennisArbStrategy:
                 "timestamp": datetime.now(SGT).isoformat(),
                 "preview": self.preview_mode,
             }
+
+            # Paper-book: open / flip-close / hold based on existing position.
+            # FLIP closes the existing YES at the implied current PM price for
+            # our side (1 - new_signal_price) and opens the new YES position;
+            # the realized PnL on the close is attached to the signal so the
+            # Telegram alert can surface it.
+            if self.paper_book is not None:
+                action = self.paper_book.process_signal(signal)
+                signal["paper_action"] = action["action"]
+                if action.get("realized_pnl_usd") is not None:
+                    signal["paper_realized_pnl_usd"] = action["realized_pnl_usd"]
+                if action.get("position_id"):
+                    signal["paper_position_id"] = action["position_id"]
+
             signals.append(signal)
 
             # Record in state for future gate checks
@@ -334,6 +369,107 @@ class TennisArbStrategy:
                 break
 
         return all_markets
+
+    # ------------------------------------------------------------------
+    # Paper-book settlement (auto-resolve)
+    # ------------------------------------------------------------------
+    def _resolve_settled_paper_positions(self) -> None:
+        """Close paper positions whose underlying PM market has resolved.
+
+        For each open-position condition_id, query Gamma for the market's
+        current status. If `closed=true` and `outcomePrices` is binary
+        (1.0/0.0), we know which side won and can close the position at the
+        canonical exit price. Throttled to once per
+        `_resolve_min_interval_s` to avoid hammering Gamma — match
+        resolution is settled hours after the match ends so polling more
+        often than every few minutes is wasted work.
+        """
+        if self.paper_book is None:
+            return
+        condition_ids = self.paper_book.open_position_condition_ids()
+        if not condition_ids:
+            return
+
+        now = time.time()
+        if now - getattr(self, "_last_resolve_at", 0.0) < self._resolve_min_interval_s:
+            return
+        self._last_resolve_at = now
+
+        for cid in condition_ids:
+            try:
+                status = self._fetch_market_resolution(cid)
+            except Exception as exc:
+                logger.debug(f"Tennis arb: resolution fetch failed for {cid[:10]}…: {exc}")
+                continue
+            if status is None:
+                continue
+            self.paper_book.resolve(cid, winning_token_id=status)
+
+    def _fetch_market_resolution(self, condition_id: str) -> str | None:
+        """Look up a single market's resolution state from Gamma.
+
+        Returns:
+          - winning token_id (str) if the market is closed and resolved binary
+          - "" (empty string) if voided / non-binary resolution — caller
+            treats this as winning_token_id=None and closes positions at
+            entry price (zero-PnL settlement)
+          - None if the market is still open or unknown — leave positions open
+
+        Gamma does not document a stable schema for resolution metadata, so
+        we accept either `closed=True` with `outcomePrices=[1,0]/[0,1]` or
+        an explicit `umaResolutionStatus` / `acceptingOrders=false`.
+        """
+        resp = requests.get(
+            f"{GAMMA_API_URL}/markets",
+            params={"condition_ids": condition_id},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        if isinstance(data, dict):
+            # Some Gamma deployments wrap as {"data": [...]}
+            data = data.get("data") or data.get("markets") or []
+        if not isinstance(data, list) or not data:
+            return None
+        market = data[0]
+        if not market.get("closed"):
+            return None
+
+        prices = market.get("outcomePrices")
+        if isinstance(prices, str):
+            try:
+                prices = json.loads(prices)
+            except (json.JSONDecodeError, TypeError):
+                prices = None
+        token_ids = market.get("clobTokenIds")
+        if isinstance(token_ids, str):
+            try:
+                token_ids = json.loads(token_ids)
+            except (json.JSONDecodeError, TypeError):
+                token_ids = None
+
+        if not (
+            isinstance(prices, list)
+            and isinstance(token_ids, list)
+            and len(prices) == 2
+            and len(token_ids) == 2
+        ):
+            return ""  # closed but non-binary / malformed → void-style close
+
+        try:
+            p0 = float(prices[0])
+            p1 = float(prices[1])
+        except (ValueError, TypeError):
+            return ""
+
+        # Tennis markets always resolve to one of {[1,0], [0,1]} once a
+        # winner is announced; anything else (e.g. [0.5, 0.5]) is treated
+        # as a void.
+        if p0 >= 0.99 and p1 <= 0.01:
+            return str(token_ids[0])
+        if p1 >= 0.99 and p0 <= 0.01:
+            return str(token_ids[1])
+        return ""
 
     def _match_and_compare(
         self, sharp_odds: list[MatchOdds], poly_markets: list[dict]

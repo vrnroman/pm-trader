@@ -8,6 +8,7 @@ Commands:
   /history           — Show last 10 copy trades (Strategy #1)
   /takeprofit        — Close all positions with unrealized PnL > 30%
   /tennis            — Show current tennis divergences (Strategy #3)
+  /tennis_pnl        — Tennis paper-book PnL with breakdown by event
   /help              — Show available commands
 """
 
@@ -145,6 +146,28 @@ def send_tennis_signals(signals: list[dict]):
         )
         if url:
             block.append(f'  <a href="{_esc(url)}">Polymarket link</a>')
+
+        # Paper-book note: shows what the book did with this signal
+        # (OPEN a fresh position, FLIP-close the previous one and re-enter
+        # on the other side, or HOLD because we're already long it).
+        paper_action = s.get("paper_action")
+        if paper_action == "OPEN":
+            block.append(
+                f"  📒 Paper book: OPEN — long {_esc(outcome)} YES "
+                f"@ {s['polymarket_price']:.3f} ${s['bet_size']:.2f}"
+            )
+        elif paper_action == "FLIP":
+            realized = s.get("paper_realized_pnl_usd")
+            realized_str = (
+                f" — realized <b>${realized:+.2f}</b>" if realized is not None else ""
+            )
+            block.append(
+                f"  📒 Paper book: FLIP — closed previous YES{realized_str}, "
+                f"now long {_esc(outcome)} YES @ {s['polymarket_price']:.3f} "
+                f"${s['bet_size']:.2f}"
+            )
+        elif paper_action == "HOLD":
+            block.append("  📒 Paper book: HOLD (already long this side)")
 
         lines.append("\n".join(block))
         lines.append("")
@@ -305,6 +328,9 @@ def _handle_command(text: str):
 
     if text.startswith("/predict"):
         _handle_predict(text)
+    elif text.startswith("/tennis_pnl"):
+        # /tennis_pnl must come BEFORE /tennis because startswith matches.
+        _handle_tennis_pnl()
     elif text.startswith("/tennis"):
         _handle_tennis()
     elif text.startswith("/history"):
@@ -713,6 +739,95 @@ def _handle_tennis():
         send_message("Tennis scan handler not configured.")
 
 
+def _handle_tennis_pnl():
+    """Handle /tennis_pnl — paper-book PnL with breakdown by event."""
+    if not CONFIG.strategy3_enabled:
+        send_message("Strategy #3 (Tennis Arb) is disabled.")
+        return
+
+    try:
+        from src.tennis.paper_book import TennisPaperBook
+    except Exception as exc:
+        send_message(f"Paper book not available: <code>{_esc(str(exc))}</code>")
+        return
+
+    book = TennisPaperBook(data_dir=CONFIG.data_dir)
+    realized = book.realized_pnl()
+    open_count = book.open_position_count()
+
+    # Mark-to-market for open positions: best-effort live YES midpoint per
+    # token from the CLOB. A failure here just means we report unrealized
+    # as 0 for that position (rather than crash the command).
+    current_prices: dict[str, float] = {}
+    for pos in book.open_positions():
+        tid = pos.get("token_id") or ""
+        if not tid:
+            continue
+        mid = _fetch_midpoint(tid)
+        if mid is not None:
+            current_prices[tid] = mid
+
+    unrealized = book.unrealized_pnl(current_prices)
+    breakdown = book.breakdown_by_event(current_prices)
+
+    lines = [
+        "🎾 <b>Tennis Paper Book — PnL</b>",
+        "",
+        f"Realized:    <b>${realized:+.2f}</b>",
+        f"Unrealized:  <b>${unrealized:+.2f}</b>",
+        f"Net:         <b>${realized + unrealized:+.2f}</b>",
+        f"Open:        {open_count}",
+        f"Closed:      {len(book.closed_positions())}",
+    ]
+
+    if not breakdown:
+        lines.append("")
+        lines.append("<i>No paper positions yet.</i>")
+        send_message("\n".join(lines))
+        return
+
+    lines.append("")
+    lines.append("<b>Breakdown by event</b>")
+    for g in breakdown:
+        ev = _esc(g["event_title"])
+        rp = g["realized_pnl_usd"]
+        up = g["unrealized_pnl_usd"]
+        tp = g["total_pnl_usd"]
+        n_open = len(g["open_positions"])
+        n_closed = len(g["closed_positions"])
+        lines.append(
+            f"\n• <b>{ev}</b>"
+            f"\n   Total: <b>${tp:+.2f}</b>  (R ${rp:+.2f} / U ${up:+.2f})"
+            f"\n   Open: {n_open}  |  Closed: {n_closed}"
+        )
+        # Per-position detail (open first, then closed, capped to keep
+        # message under Telegram's 4096-char limit)
+        shown = 0
+        for pos in g["open_positions"]:
+            if shown >= 6:
+                break
+            cur = current_prices.get(pos.get("token_id"))
+            cur_str = f" → {cur:.3f}" if cur is not None else ""
+            lines.append(
+                f"     OPEN  {_esc(pos.get('outcome_player',''))} YES "
+                f"@ {pos.get('entry_price', 0):.3f}{cur_str}"
+                f"  ({pos.get('shares', 0):.2f}sh)"
+            )
+            shown += 1
+        for pos in reversed(g["closed_positions"]):
+            if shown >= 6:
+                break
+            lines.append(
+                f"     CLOSED  {_esc(pos.get('outcome_player',''))} "
+                f"@ {pos.get('entry_price', 0):.3f}→{pos.get('exit_price', 0):.3f} "
+                f"({pos.get('exit_reason','?')}) "
+                f"<b>${pos.get('realized_pnl_usd', 0):+.2f}</b>"
+            )
+            shown += 1
+
+    send_message("\n".join(lines))
+
+
 def _handle_help():
     """Handle /help command."""
     send_message(
@@ -726,7 +841,8 @@ def _handle_help():
         "<code>/predict</code> \u2014 Run prediction for default date\n"
         "<code>/takeprofit</code> \u2014 Close positions with &gt;30% profit\n\n"
         "<b>Strategy #3 \u2014 Tennis Arb</b>\n"
-        "<code>/tennis</code> \u2014 Show current tennis divergences\n\n"
+        "<code>/tennis</code> \u2014 Show current tennis divergences\n"
+        "<code>/tennis_pnl</code> \u2014 Paper-book PnL with breakdown by event\n\n"
         "<code>/help</code> \u2014 Show this message\n\n"
         f"Strategy #1: {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"
         f"Strategy #2: {'ON' if CONFIG.strategy2_enabled else 'OFF'}\n"
