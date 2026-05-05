@@ -811,7 +811,7 @@ def _handle_tennis_pnl():
             lines.append(
                 f"     OPEN  {_esc(pos.get('outcome_player',''))} YES "
                 f"@ {pos.get('entry_price', 0):.1%}{cur_str}"
-                f"  ({pos.get('shares', 0):.2f}sh, ${pos.get('size_usd', 0):.2f})"
+                f"  ({pos.get('shares', 0):.2f} contracts, ${pos.get('size_usd', 0):.2f})"
             )
             shown += 1
         for pos in reversed(g["closed_positions"]):
