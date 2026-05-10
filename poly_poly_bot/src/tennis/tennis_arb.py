@@ -547,7 +547,7 @@ class TennisArbStrategy:
     # ------------------------------------------------------------------
     # Paper-book settlement (auto-resolve)
     # ------------------------------------------------------------------
-    def _resolve_settled_paper_positions(self) -> None:
+    def _resolve_settled_paper_positions(self, force: bool = False) -> None:
         """Close paper positions whose underlying PM market has resolved.
 
         For each open-position condition_id, query Gamma for the market's
@@ -556,7 +556,9 @@ class TennisArbStrategy:
         canonical exit price. Throttled to once per
         `_resolve_min_interval_s` to avoid hammering Gamma — match
         resolution is settled hours after the match ends so polling more
-        often than every few minutes is wasted work.
+        often than every few minutes is wasted work. ``force=True`` skips
+        the throttle (used by the on-demand /tennis_pnl path so the report
+        reflects the freshest settlement state).
         """
         if self.paper_book is None:
             return
@@ -565,7 +567,7 @@ class TennisArbStrategy:
             return
 
         now = time.time()
-        if now - getattr(self, "_last_resolve_at", 0.0) < self._resolve_min_interval_s:
+        if not force and now - getattr(self, "_last_resolve_at", 0.0) < self._resolve_min_interval_s:
             return
         self._last_resolve_at = now
 
@@ -578,6 +580,14 @@ class TennisArbStrategy:
             if status is None:
                 continue
             self.paper_book.resolve(cid, winning_token_id=status)
+
+    def force_resolve_open_positions(self) -> None:
+        """Public wrapper that runs the resolve loop bypassing the throttle.
+
+        Wired to /tennis_pnl: each report opportunistically settles any
+        markets that closed since the last scheduled resolve tick.
+        """
+        self._resolve_settled_paper_positions(force=True)
 
     def _fetch_market_resolution(self, condition_id: str) -> str | None:
         """Look up a single market's resolution state from Gamma.
@@ -606,7 +616,11 @@ class TennisArbStrategy:
         if not isinstance(data, list) or not data:
             return None
         market = data[0]
-        if not market.get("closed"):
+        # Gamma flips ``closed=true`` once UMA resolution lands, but tennis
+        # markets often go ``archived=true`` first (sometimes hours before
+        # ``closed`` updates). Treat either as a settled signal so we don't
+        # leave a paper position OPEN for days after the match ended.
+        if not (market.get("closed") or market.get("archived")):
             return None
 
         prices = market.get("outcomePrices")

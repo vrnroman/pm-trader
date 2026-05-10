@@ -209,6 +209,14 @@ def run_strategy3() -> list[dict]:
     return _tennis_strategy.scan()
 
 
+def force_resolve_tennis() -> None:
+    """Force-run paper-book resolution; called by /tennis_pnl on demand."""
+    global _tennis_strategy
+    if _tennis_strategy is None:
+        _init_tennis_strategy()
+    _tennis_strategy.force_resolve_open_positions()
+
+
 def refresh_tennis_clob_client() -> None:
     """Rebuild the singleton CLOB client and re-bind it to the tennis strategy.
 
@@ -435,6 +443,9 @@ async def main():
 
     # Register tennis scan callback for telegram
     telegram_bot.on_tennis_scan_request = run_strategy3
+    # /tennis_pnl runs the paper-book resolve loop on demand so the report
+    # picks up matches that settled between scheduled resolve ticks.
+    telegram_bot.on_tennis_resolve_request = force_resolve_tennis
     # Register CLOB-client refresher so /setkey can rotate the in-memory
     # private key and have the change apply immediately to live trading.
     telegram_bot.on_refresh_clob_client = refresh_tennis_clob_client

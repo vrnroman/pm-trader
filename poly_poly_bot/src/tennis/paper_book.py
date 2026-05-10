@@ -52,7 +52,7 @@ import tempfile
 import threading
 import uuid
 from collections import OrderedDict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from src.logger import logger
 
@@ -299,6 +299,49 @@ class TennisPaperBook:
                 )
                 return closed
             return None
+
+    # ------------------------------------------------------------------
+    # Stale-position void (safety net for unresolved markets)
+    # ------------------------------------------------------------------
+    def void_stale_open_positions(self, max_age_days: float) -> list[dict]:
+        """Force-close open positions older than ``max_age_days`` at entry.
+
+        Safety net for the resolution loop: tennis matches resolve within
+        hours, so a position still open multiple days later means the
+        underlying PM market is almost certainly settled but Gamma's
+        ``closed`` field never flipped (or it flipped only after archive,
+        which the resolver doesn't see). Voiding at entry yields zero
+        realized PnL — conservative, but it removes the row from OPEN so
+        PnL reports stop misrepresenting it as still active.
+        """
+        if max_age_days <= 0:
+            return []
+        cutoff = datetime.now(timezone.utc) - timedelta(days=max_age_days)
+        with self._lock:
+            voided: list[dict] = []
+            for pos in list(self._state["open_positions"].values()):
+                opened_at_str = pos.get("opened_at") or ""
+                if not opened_at_str:
+                    continue
+                try:
+                    opened_at = datetime.fromisoformat(opened_at_str)
+                except ValueError:
+                    continue
+                if opened_at.tzinfo is None:
+                    opened_at = opened_at.replace(tzinfo=timezone.utc)
+                if opened_at >= cutoff:
+                    continue
+                entry = float(pos.get("entry_price") or 0.0)
+                voided.append(self._close(pos, exit_price=entry, reason="STALE_VOID"))
+            if voided:
+                self._save()
+                for c in voided:
+                    logger.info(
+                        f"[paper-book] STALE_VOID {c['outcome_player']} "
+                        f"opened {c['opened_at']} → closed at entry "
+                        f"{c['exit_price']:.3f}"
+                    )
+            return voided
 
     # ------------------------------------------------------------------
     # External-trigger close (resolution)

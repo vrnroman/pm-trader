@@ -272,3 +272,69 @@ def test_zero_price_signal_is_skipped_not_crashed(book):
     res = book.process_signal(_signal(price=0.0, size=10.0))
     assert res["action"] == "HOLD"
     assert book.open_position_count() == 0
+
+
+# ── Stale-position void (safety net for unresolved markets) ──────────
+
+
+def test_void_stale_open_positions_closes_old_at_entry(book):
+    """A position opened 5 days ago must be voided at entry (zero PnL).
+
+    Simulates the bug we're guarding against: PM never reports the market
+    as ``closed`` (or our resolver doesn't recognise the form), so the
+    position lingers. Voiding at entry is conservative — the upside is
+    that /tennis_pnl stops misrepresenting it as still active.
+    """
+    from datetime import datetime, timedelta, timezone
+    book.process_signal(_signal(token_id="TOKA", price=0.40, size=10.0))
+    pos = book.open_positions()[0]
+    # Backdate to 5 days ago.
+    old = datetime.now(timezone.utc) - timedelta(days=5)
+    book._state["open_positions"][pos["id"]]["opened_at"] = old.isoformat()
+
+    voided = book.void_stale_open_positions(max_age_days=3)
+
+    assert len(voided) == 1
+    assert book.open_position_count() == 0
+    closed = book.closed_positions()
+    assert len(closed) == 1
+    assert closed[0]["exit_reason"] == "STALE_VOID"
+    # Voided at entry → realized PnL is zero.
+    assert closed[0]["realized_pnl_usd"] == pytest.approx(0.0, abs=1e-4)
+    assert closed[0]["exit_price"] == pytest.approx(0.40, abs=1e-6)
+
+
+def test_void_stale_open_positions_keeps_recent(book):
+    """A freshly-opened position must NOT be voided."""
+    book.process_signal(_signal(token_id="TOKA", price=0.40, size=10.0))
+    voided = book.void_stale_open_positions(max_age_days=3)
+    assert voided == []
+    assert book.open_position_count() == 1
+
+
+def test_void_stale_open_positions_persists(tmp_path):
+    """The void must survive a process restart (otherwise we'd void it
+    again on the next /tennis_pnl, which is harmless but wasteful)."""
+    from datetime import datetime, timedelta, timezone
+    book = TennisPaperBook(data_dir=str(tmp_path))
+    book.process_signal(_signal(token_id="TOKA", price=0.40, size=10.0))
+    pos = book.open_positions()[0]
+    old = datetime.now(timezone.utc) - timedelta(days=5)
+    book._state["open_positions"][pos["id"]]["opened_at"] = old.isoformat()
+    book._save()
+    book.void_stale_open_positions(max_age_days=3)
+
+    book2 = TennisPaperBook(data_dir=str(tmp_path))
+    assert book2.open_position_count() == 0
+    assert len(book2.closed_positions()) == 1
+    assert book2.closed_positions()[0]["exit_reason"] == "STALE_VOID"
+
+
+def test_void_stale_open_positions_zero_max_age_is_noop(book):
+    """``max_age_days <= 0`` is a no-op — guards against a config mistake
+    accidentally voiding everything that exists."""
+    book.process_signal(_signal(token_id="TOKA", price=0.40, size=10.0))
+    assert book.void_stale_open_positions(max_age_days=0) == []
+    assert book.open_position_count() == 1
+    assert book.void_stale_open_positions(max_age_days=-5) == []
+    assert book.open_position_count() == 1

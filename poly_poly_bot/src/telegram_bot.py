@@ -49,6 +49,7 @@ _stop_event = threading.Event()
 on_predict_request = None   # Callable[[datetime], list[dict]]
 on_sell_positions = None    # Callable[[list[dict]], list[dict]]
 on_tennis_scan_request = None  # Callable[[], list[dict]]
+on_tennis_resolve_request = None  # Callable[[], None] — force-resolve paper positions before /tennis_pnl
 on_refresh_clob_client = None  # Callable[[], None] — rebuild CLOB client after /setkey
 
 
@@ -806,8 +807,24 @@ def _handle_tennis():
         send_message("Tennis scan handler not configured.")
 
 
+RECENT_CLOSED_DAYS = 3
+STALE_OPEN_DAYS = 3
+
+
 def _handle_tennis_pnl():
-    """Handle /tennis_pnl — paper-book PnL with breakdown by event."""
+    """Handle /tennis_pnl — paper-book PnL with breakdown by event.
+
+    Behaviour:
+      - Force-resolves any open paper positions whose PM market settled
+        since the last scheduled resolve tick (and voids ones stuck open
+        for more than ``STALE_OPEN_DAYS`` as a safety net).
+      - Top of the message shows a single Total PnL number (no R/U split).
+      - Per-event breakdown only includes events with currently OPEN
+        positions or closed positions settled within the last
+        ``RECENT_CLOSED_DAYS`` days; older settled events are not shown.
+      - In LIVE mode (preview=False for Strategy #3), only positions tagged
+        ``live=True`` are included — preview deals are filtered out.
+    """
     if not CONFIG.strategy3_enabled:
         send_message("Strategy #3 (Tennis Arb) is disabled.")
         return
@@ -818,15 +835,51 @@ def _handle_tennis_pnl():
         send_message(f"Paper book not available: <code>{_esc(str(exc))}</code>")
         return
 
-    book = TennisPaperBook(data_dir=CONFIG.data_dir)
-    realized = book.realized_pnl()
-    open_count = book.open_position_count()
+    # Opportunistic settlement before reporting. The strategy's scheduled
+    # resolve tick runs every ~5 min; calling it on demand here means a
+    # report fired right after a match ends shows the resolution rather
+    # than a stale OPEN row.
+    if on_tennis_resolve_request:
+        try:
+            on_tennis_resolve_request()
+        except Exception:
+            logger.exception("Tennis resolve before /tennis_pnl failed")
 
-    # Mark-to-market for open positions: best-effort live YES midpoint per
-    # token from the CLOB. A failure here just means we report unrealized
-    # as 0 for that position (rather than crash the command).
+    book = TennisPaperBook(data_dir=CONFIG.data_dir)
+    # Belt-and-braces: anything still open many days later is treated as
+    # voided. Covers the case where Gamma never reports the settlement in
+    # a form our resolver recognizes.
+    book.void_stale_open_positions(max_age_days=STALE_OPEN_DAYS)
+
+    from src import runtime_state
+    live_only = not runtime_state.is_preview(3)
+
+    def _live_match(p: dict) -> bool:
+        return (not live_only) or bool(p.get("live"))
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=RECENT_CLOSED_DAYS)
+
+    def _is_recent(p: dict) -> bool:
+        ca = p.get("closed_at") or ""
+        if not ca:
+            return False
+        try:
+            d = datetime.fromisoformat(ca)
+        except ValueError:
+            return False
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=timezone.utc)
+        return d >= cutoff
+
+    open_positions = [p for p in book.open_positions() if _live_match(p)]
+    closed_positions = [
+        p for p in book.closed_positions() if _live_match(p) and _is_recent(p)
+    ]
+
+    # Mark-to-market: best-effort YES midpoint per open token. Missing
+    # quotes contribute zero unrealized rather than crashing the command.
     current_prices: dict[str, float] = {}
-    for pos in book.open_positions():
+    for pos in open_positions:
         tid = pos.get("token_id") or ""
         if not tid:
             continue
@@ -834,22 +887,72 @@ def _handle_tennis_pnl():
         if mid is not None:
             current_prices[tid] = mid
 
-    unrealized = book.unrealized_pnl(current_prices)
-    breakdown = book.breakdown_by_event(current_prices)
+    realized = round(
+        sum(float(p.get("realized_pnl_usd") or 0.0) for p in closed_positions), 4
+    )
+    unrealized = 0.0
+    for pos in open_positions:
+        cur = current_prices.get(pos.get("token_id"))
+        if cur is None:
+            continue
+        shares = float(pos.get("shares") or 0.0)
+        entry = float(pos.get("entry_price") or 0.0)
+        unrealized += shares * (float(cur) - entry)
+    unrealized = round(unrealized, 4)
+    total = round(realized + unrealized, 4)
+
+    mode_label = "LIVE" if live_only else "PREVIEW"
 
     lines = [
         "🎾 <b>Tennis Paper Book — PnL</b>",
+        f"<i>Mode: {mode_label}</i>",
         "",
-        f"Realized:    <b>${realized:+.2f}</b>",
-        f"Unrealized:  <b>${unrealized:+.2f}</b>",
-        f"Net:         <b>${realized + unrealized:+.2f}</b>",
-        f"Open:        {open_count}",
-        f"Closed:      {len(book.closed_positions())}",
+        f"Total PnL: <b>${total:+.2f}</b>",
+        f"Open: {len(open_positions)}  |  "
+        f"Closed (last {RECENT_CLOSED_DAYS}d): {len(closed_positions)}",
     ]
+
+    groups: dict[str, dict] = {}
+
+    def _bucket(ev: str) -> dict:
+        if ev not in groups:
+            groups[ev] = {
+                "event_title": ev,
+                "realized_pnl_usd": 0.0,
+                "unrealized_pnl_usd": 0.0,
+                "open_positions": [],
+                "closed_positions": [],
+            }
+        return groups[ev]
+
+    for p in closed_positions:
+        g = _bucket(p.get("event_title") or "(unknown event)")
+        g["realized_pnl_usd"] += float(p.get("realized_pnl_usd") or 0.0)
+        g["closed_positions"].append(p)
+
+    for p in open_positions:
+        g = _bucket(p.get("event_title") or "(unknown event)")
+        cur = current_prices.get(p.get("token_id"))
+        if cur is not None:
+            shares = float(p.get("shares") or 0.0)
+            entry = float(p.get("entry_price") or 0.0)
+            g["unrealized_pnl_usd"] += shares * (float(cur) - entry)
+        g["open_positions"].append(p)
+
+    for g in groups.values():
+        g["realized_pnl_usd"] = round(g["realized_pnl_usd"], 4)
+        g["unrealized_pnl_usd"] = round(g["unrealized_pnl_usd"], 4)
+        g["total_pnl_usd"] = round(
+            g["realized_pnl_usd"] + g["unrealized_pnl_usd"], 4
+        )
+
+    breakdown = sorted(
+        groups.values(), key=lambda g: g["total_pnl_usd"], reverse=True
+    )
 
     if not breakdown:
         lines.append("")
-        lines.append("<i>No paper positions yet.</i>")
+        lines.append("<i>No paper positions to show.</i>")
         _send_chunked("\n".join(lines))
         return
 

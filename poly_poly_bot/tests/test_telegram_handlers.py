@@ -320,3 +320,201 @@ def test_e2e_live_3_requires_confirm_via_full_path(configured_chat, captured_mes
     from src import runtime_state, telegram_bot
     telegram_bot._process_update(_update("/live 3"))
     assert runtime_state.is_preview(3) is True  # unchanged: no CONFIRM
+
+
+# ==================================================================
+# /tennis_pnl — report shape, mode filter, recent-window filter,
+# stale-void safety net
+# ==================================================================
+
+
+@pytest.fixture
+def tennis_pnl_env(monkeypatch, tmp_path):
+    """Stand up a paper book on disk and wire telegram_bot to read from it.
+
+    Returns (book, captured) — the live ``TennisPaperBook`` so tests can
+    backdate timestamps directly, and a list of strings the handler tried
+    to send (so each test can grep the rendered output).
+    """
+    from src import telegram_bot
+    from src.tennis.paper_book import TennisPaperBook
+
+    monkeypatch.setattr(telegram_bot.CONFIG, "strategy3_enabled", True)
+    monkeypatch.setattr(telegram_bot.CONFIG, "data_dir", str(tmp_path))
+
+    captured: list[str] = []
+    monkeypatch.setattr(telegram_bot, "send_message", lambda text, **_kw: captured.append(text))
+    # Skip live midpoint fetches — tests don't have network and we want
+    # determinism. ``None`` means the handler treats unrealized as zero,
+    # which is fine for shape/filter assertions.
+    monkeypatch.setattr(telegram_bot, "_fetch_midpoint", lambda _tid: None)
+    # Default: no resolve callback wired (tests can override).
+    monkeypatch.setattr(telegram_bot, "on_tennis_resolve_request", None)
+
+    book = TennisPaperBook(data_dir=str(tmp_path))
+    return book, captured
+
+
+def _open_signal(**kw):
+    """Build a minimal signal dict the paper book accepts."""
+    base = {
+        "strategy": "tennis_arb",
+        "condition_id": "0xMATCH1",
+        "token_id": "TOKA",
+        "market_id": "M1",
+        "polymarket_price": 0.40,
+        "bet_size": 10.0,
+        "player_a": "Alpha",
+        "player_b": "Bravo",
+        "target_player": "Alpha",
+        "outcome_label": "Alpha",
+        "sharp_prob": 0.65,
+        "divergence": 0.15,
+        "event_title": "Atp Test Cup",
+        "event_slug": "test-cup-2026",
+        "polymarket_url": "https://polymarket.com/event/test-cup-2026",
+        "tournament": "Atp Test",
+        "match_time": "2026-05-06T14:00:00+00:00",
+        "side": "A",
+        "live": False,
+    }
+    base.update(kw)
+    return base
+
+
+def test_tennis_pnl_shows_single_total_no_realized_unrealized_breakdown(tennis_pnl_env):
+    """The top of the message must show a single Total PnL number.
+
+    The previous report listed Realized / Unrealized / Net separately;
+    the user now wants just one headline figure.
+    """
+    book, captured = tennis_pnl_env
+    book.process_signal(_open_signal())  # one open position
+    from src import telegram_bot
+    telegram_bot._handle_command("/tennis_pnl")
+    out = "\n".join(captured)
+    assert "Total PnL:" in out
+    # No standalone "Realized:" / "Unrealized:" / "Net:" labels at the
+    # top-of-message summary. (R/U breakdown still appears per-event,
+    # which is fine — those labels are different lines.)
+    assert "Realized:" not in out
+    assert "Unrealized:" not in out
+    assert "\nNet:" not in out
+
+
+def test_tennis_pnl_calls_resolve_callback_first(tennis_pnl_env, monkeypatch):
+    """Before reading the book, the handler must trigger a force-resolve
+    so any markets that settled since the last scheduled tick are picked
+    up. Otherwise the report shows stale OPEN rows for finished matches.
+    """
+    book, captured = tennis_pnl_env
+    book.process_signal(_open_signal())
+    resolve_cb = MagicMock()
+    from src import telegram_bot
+    monkeypatch.setattr(telegram_bot, "on_tennis_resolve_request", resolve_cb)
+    telegram_bot._handle_command("/tennis_pnl")
+    resolve_cb.assert_called_once()
+
+
+def test_tennis_pnl_voids_stale_open_positions(tennis_pnl_env):
+    """A position open for >3 days with no resolution must be voided so
+    /tennis_pnl stops reporting it as OPEN."""
+    from datetime import datetime, timedelta, timezone
+    book, captured = tennis_pnl_env
+    book.process_signal(_open_signal())
+    pid = book.open_positions()[0]["id"]
+    old = datetime.now(timezone.utc) - timedelta(days=10)
+    book._state["open_positions"][pid]["opened_at"] = old.isoformat()
+    book._save()
+
+    from src import telegram_bot
+    telegram_bot._handle_command("/tennis_pnl")
+
+    # Re-read state from disk (the handler instantiates its own book).
+    from src.tennis.paper_book import TennisPaperBook
+    book2 = TennisPaperBook(data_dir=telegram_bot.CONFIG.data_dir)
+    assert book2.open_position_count() == 0
+    assert any(p["exit_reason"] == "STALE_VOID" for p in book2.closed_positions())
+
+
+def test_tennis_pnl_hides_old_closed_events(tennis_pnl_env):
+    """Closed positions older than the recent-window must NOT appear in
+    the breakdown. Active OPEN positions are always shown, but a long
+    history of resolved events shouldn't clutter the report."""
+    from datetime import datetime, timedelta, timezone
+    book, captured = tennis_pnl_env
+    # An old closed position from a different event.
+    book.process_signal(_open_signal(
+        condition_id="0xOLD", token_id="OLD_A",
+        event_title="Old Tournament 2025",
+    ))
+    book.resolve("0xOLD", winning_token_id="OLD_A")
+    closed = book.closed_positions()[0]
+    old_time = datetime.now(timezone.utc) - timedelta(days=30)
+    closed["closed_at"] = old_time.isoformat()
+    book._state["closed_positions"][0] = closed
+    book._save()
+
+    from src import telegram_bot
+    telegram_bot._handle_command("/tennis_pnl")
+    out = "\n".join(captured)
+    assert "Old Tournament 2025" not in out
+
+
+def test_tennis_pnl_shows_recently_closed_events(tennis_pnl_env):
+    """A position closed within the recent window must appear."""
+    book, captured = tennis_pnl_env
+    book.process_signal(_open_signal(
+        condition_id="0xNEW", token_id="NEW_A",
+        event_title="Recent Tournament",
+    ))
+    book.resolve("0xNEW", winning_token_id="NEW_A")  # closed_at = now
+
+    from src import telegram_bot
+    telegram_bot._handle_command("/tennis_pnl")
+    out = "\n".join(captured)
+    assert "Recent Tournament" in out
+
+
+def test_tennis_pnl_live_mode_excludes_preview_positions(tennis_pnl_env):
+    """When Strategy #3 is in LIVE mode, ``live=False`` (preview) deals
+    must not appear. The point: in live trading the user only cares about
+    real placed orders' PnL, not the paper-only signals."""
+    from src import runtime_state, telegram_bot
+    runtime_state.set_preview(3, False)  # live mode
+
+    book, captured = tennis_pnl_env
+    book.process_signal(_open_signal(
+        condition_id="0xPREV", token_id="PREV_A",
+        event_title="Preview Only Event",
+        live=False,
+    ))
+    book.process_signal(_open_signal(
+        condition_id="0xLIVE", token_id="LIVE_A",
+        event_title="Real Live Event",
+        live=True,
+    ))
+
+    telegram_bot._handle_command("/tennis_pnl")
+    out = "\n".join(captured)
+    assert "Real Live Event" in out
+    assert "Preview Only Event" not in out
+    assert "Mode: LIVE" in out
+
+
+def test_tennis_pnl_preview_mode_includes_all_positions(tennis_pnl_env):
+    """In PREVIEW mode, paper signals are the whole point — show them."""
+    from src import runtime_state, telegram_bot
+    runtime_state.set_preview(3, True)
+
+    book, captured = tennis_pnl_env
+    book.process_signal(_open_signal(
+        condition_id="0xPREV", token_id="PREV_A",
+        event_title="Preview Only Event",
+        live=False,
+    ))
+
+    telegram_bot._handle_command("/tennis_pnl")
+    out = "\n".join(captured)
+    assert "Preview Only Event" in out
+    assert "Mode: PREVIEW" in out
