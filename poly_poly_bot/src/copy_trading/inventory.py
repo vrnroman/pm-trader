@@ -237,15 +237,31 @@ async def sync_inventory_from_api(proxy_wallet: str) -> int:
     remote_token_ids: set[str] = set()
 
     for entry in data:
-        token_id = entry.get("asset", {}).get("id", "") or entry.get("tokenId", "")
+        # Polymarket data-api response: ``asset`` may be either a string
+        # (token id directly) or a {"id": "..."} dict; ``market`` may be
+        # either a string question/conditionId or a dict. Normalize both.
+        asset_field = entry.get("asset")
+        if isinstance(asset_field, dict):
+            token_id = asset_field.get("id", "")
+        elif isinstance(asset_field, str):
+            token_id = asset_field
+        else:
+            token_id = ""
+        token_id = token_id or entry.get("tokenId", "") or entry.get("token_id", "")
         if not token_id:
             continue
 
         remote_token_ids.add(token_id)
         shares = float(entry.get("size", 0) or entry.get("shares", 0))
         avg_price = float(entry.get("avgPrice", 0) or entry.get("avg_price", 0))
-        market = entry.get("market", {}).get("question", "") or entry.get("market", "")
-        condition_id = entry.get("market", {}).get("conditionId", "") or entry.get("conditionId", "")
+
+        market_field = entry.get("market")
+        if isinstance(market_field, dict):
+            market = market_field.get("question", "")
+            condition_id = market_field.get("conditionId", "") or entry.get("conditionId", "")
+        else:
+            market = market_field or ""
+            condition_id = entry.get("conditionId", "") or entry.get("condition_id", "")
 
         if shares <= 0:
             continue

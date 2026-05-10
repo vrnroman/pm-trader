@@ -470,7 +470,8 @@ async def main():
         except KeyboardInterrupt:
             pass
         except Exception as e:
-            logger.exception("Strategy #1 crashed")
+            import traceback
+            logger.error(f"Strategy #1 crashed: {e}\n{traceback.format_exc()}")
             telegram_bot.send_message(f"Strategy #1 crashed: <code>{e}</code>")
     else:
         logger.info("Strategy #1 disabled, skipping copy-trader bot")
