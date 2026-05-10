@@ -1216,6 +1216,34 @@ def _handle_help():
 
 # --- Polling ---
 
+def _process_update(update: dict) -> None:
+    """Filter, parse, and dispatch a single Telegram getUpdates entry.
+
+    Extracted from ``_poll_loop`` so the chat-id filter, command-prefix
+    filter, and exception wrapper are unit-testable without standing up
+    a polling thread. The wrapper is the kill-switch's safety net: if a
+    handler raises, we log it and surface the error to the user instead
+    of letting the exception kill the polling thread (and with it, all
+    future Telegram control of the bot).
+    """
+    msg = update.get("message", {})
+    chat_id = str(msg.get("chat", {}).get("id", ""))
+    text = msg.get("text", "")
+
+    if chat_id != CONFIG.telegram_chat_id:
+        return
+
+    if not text.startswith("/"):
+        return
+
+    logger.info(f"Telegram command: {text}")
+    try:
+        _handle_command(text)
+    except Exception as e:
+        logger.exception(f"Command handler error: {e}")
+        send_message(f"Error: <code>{_esc(str(e))}</code>")
+
+
 def _poll_loop():
     """Poll Telegram for new messages."""
     last_update_id = 0
@@ -1250,20 +1278,7 @@ def _poll_loop():
             data = resp.json()
             for update in data.get("result", []):
                 last_update_id = update["update_id"] + 1
-                msg = update.get("message", {})
-                chat_id = str(msg.get("chat", {}).get("id", ""))
-                text = msg.get("text", "")
-
-                if chat_id != CONFIG.telegram_chat_id:
-                    continue
-
-                if text.startswith("/"):
-                    logger.info(f"Telegram command: {text}")
-                    try:
-                        _handle_command(text)
-                    except Exception as e:
-                        logger.exception(f"Command handler error: {e}")
-                        send_message(f"Error: <code>{_esc(str(e))}</code>")
+                _process_update(update)
 
         except requests.exceptions.Timeout:
             continue

@@ -197,3 +197,126 @@ def test_tennis_pnl_dispatched_before_tennis(captured_messages, mock_callbacks, 
     telegram_bot._handle_command("/tennis_pnl")
     pnl_called.assert_called_once()
     tennis_called.assert_not_called()
+
+
+# ==================================================================
+# Full update-path tests (synthesized Telegram getUpdates payloads)
+#
+# These cover the layers between the Telegram-API and _handle_command:
+#   - msg.chat.id extraction + chat-id filter (auth)
+#   - msg.text extraction + "/" prefix filter
+#   - the try/except wrapper around _handle_command (kill-switch
+#     resilience: a handler crash must NOT kill the polling thread)
+# A regression in any of these silently breaks the user's only
+# real-time control over the bot, so they get their own tests.
+# ==================================================================
+
+CHAT_ID = "12345"
+WRONG_CHAT_ID = 99999  # tg sends ints; bot stringifies before compare
+
+
+@pytest.fixture
+def configured_chat(monkeypatch):
+    from src import telegram_bot
+    monkeypatch.setattr(telegram_bot.CONFIG, "telegram_chat_id", CHAT_ID)
+
+
+def _update(text: str, chat_id=CHAT_ID, update_id: int = 1) -> dict:
+    return {
+        "update_id": update_id,
+        "message": {"chat": {"id": chat_id}, "text": text},
+    }
+
+
+def test_update_from_wrong_chat_id_is_ignored(configured_chat, captured_messages, mock_callbacks):
+    """A regression in the chat-id filter is the difference between a
+    private bot and a public one. Pin it."""
+    from src import runtime_state, telegram_bot
+    runtime_state.set_preview(3, False)
+    telegram_bot._process_update(_update("/preview 3", chat_id=WRONG_CHAT_ID))
+    # State unchanged, no message sent.
+    assert runtime_state.is_preview(3) is False
+    assert captured_messages == []
+
+
+def test_update_from_correct_chat_id_dispatches(configured_chat, captured_messages, mock_callbacks):
+    from src import runtime_state, telegram_bot
+    runtime_state.set_preview(3, False)
+    telegram_bot._process_update(_update("/preview 3"))
+    assert runtime_state.is_preview(3) is True
+
+
+def test_update_with_non_command_text_ignored(configured_chat, captured_messages, mock_callbacks, monkeypatch):
+    from src import telegram_bot
+    spy = MagicMock()
+    monkeypatch.setattr(telegram_bot, "_handle_command", spy)
+    telegram_bot._process_update(_update("hello there, not a command"))
+    spy.assert_not_called()
+
+
+def test_update_with_no_message_object_ignored(configured_chat, captured_messages, mock_callbacks):
+    from src import telegram_bot
+    # Some update types (edited_message, callback_query) won't have ``message``.
+    telegram_bot._process_update({"update_id": 5})
+    assert captured_messages == []
+
+
+def test_handler_exception_does_not_kill_polling(configured_chat, captured_messages, monkeypatch):
+    """If a command handler raises, the wrapper must catch it and surface
+    an error to the user — not let the exception bubble up and tear down
+    the polling thread (which would silently break the kill switch)."""
+    from src import telegram_bot
+
+    def boom(_text):
+        raise RuntimeError("handler exploded")
+
+    monkeypatch.setattr(telegram_bot, "_handle_command", boom)
+    # No exception escapes:
+    telegram_bot._process_update(_update("/anything"))
+    assert any("Error" in m and "handler exploded" in m for m in captured_messages)
+
+
+def test_update_with_string_chat_id_also_works(configured_chat, captured_messages, mock_callbacks):
+    """Telegram sometimes sends chat.id as int, sometimes as str (bot
+    libraries vary). The bot stringifies before compare — pin both."""
+    from src import runtime_state, telegram_bot
+    runtime_state.set_preview(3, False)
+    telegram_bot._process_update(_update("/preview 3", chat_id=int(CHAT_ID)))
+    assert runtime_state.is_preview(3) is True
+
+
+# ------------------------------------------------------------------
+# End-to-end: real Telegram payload → state mutation
+# These are the exact scenarios the user originally specified.
+# ------------------------------------------------------------------
+
+def test_e2e_setkey_clear(configured_chat, captured_messages, mock_callbacks):
+    """{"text":"/setkey clear CONFIRM"} must wipe the in-memory key."""
+    from src import config, telegram_bot
+    config._private_key = "ab" * 32
+    telegram_bot._process_update(_update("/setkey clear CONFIRM"))
+    assert config.get_private_key() == ""
+    mock_callbacks.on_refresh_clob_client.assert_called_once()
+
+
+def test_e2e_setkey_clear_without_confirm_no_op(configured_chat, captured_messages, mock_callbacks):
+    """The CONFIRM token must be required even when the payload comes
+    through the full update path."""
+    from src import config, telegram_bot
+    config._private_key = "ab" * 32
+    telegram_bot._process_update(_update("/setkey clear"))
+    assert config.get_private_key() == "ab" * 32  # unchanged
+    mock_callbacks.on_refresh_clob_client.assert_not_called()
+
+
+def test_e2e_preview_3_flips_runtime_state(configured_chat, captured_messages, mock_callbacks):
+    from src import runtime_state, telegram_bot
+    runtime_state.set_preview(3, False)
+    telegram_bot._process_update(_update("/preview 3"))
+    assert runtime_state.is_preview(3) is True
+
+
+def test_e2e_live_3_requires_confirm_via_full_path(configured_chat, captured_messages, mock_callbacks):
+    from src import runtime_state, telegram_bot
+    telegram_bot._process_update(_update("/live 3"))
+    assert runtime_state.is_preview(3) is True  # unchanged: no CONFIRM
