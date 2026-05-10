@@ -417,6 +417,8 @@ def _handle_command(text: str):
         _handle_preview(text)
     elif text.startswith("/check"):
         _handle_check()
+    elif text.startswith("/test-live"):
+        _handle_test_live()
     elif text.startswith("/setkey"):
         _handle_setkey(text)
     elif text.startswith("/shutdown"):
@@ -1257,6 +1259,78 @@ def _handle_check():
     _send_chunked("\n".join(lines))
 
 
+def _handle_test_live():
+    """Handle /test-live — fire a small live BUY on a soon-to-resolve geopolitics market.
+
+    Smoke-tests the live trading path end-to-end: market discovery, CLOB
+    auth, order construction, and order submission. Picks a binary
+    geopolitics market with a side priced ≥90% and resolution within 48h
+    so the round-trip P&L is bounded. The bet always posts in live mode
+    regardless of the Strategy #3 preview flag — this is a deliberate
+    test command, not a strategy signal.
+    """
+    from src.copy_trading.clob_client import create_clob_client
+    from src.test_live import (
+        DEFAULT_BET_SIZE_USD,
+        MIN_FAVOURITE_PRICE,
+        RESOLUTION_WINDOW_HOURS,
+        find_test_market,
+        place_test_bet,
+    )
+
+    send_message(
+        f"🧪 <b>/test-live</b>: searching geopolitics markets resolving "
+        f"in ≤{RESOLUTION_WINDOW_HOURS}h with a side ≥{MIN_FAVOURITE_PRICE:.0%}..."
+    )
+
+    candidate = find_test_market()
+    if candidate is None:
+        send_message(
+            "🧪 <b>/test-live</b>: no eligible market found.\n"
+            "Try again in a few minutes — geopolitics markets resolve all the time."
+        )
+        return
+
+    clob_client = create_clob_client()
+    if clob_client is None:
+        send_message(
+            "🧪 <b>/test-live</b>: ❌ CLOB client not available — set PRIVATE_KEY first."
+        )
+        return
+
+    lines = [
+        "🧪 <b>/test-live</b> — picked market:",
+        f"  Event: <b>{_esc(candidate.event_title)}</b>",
+        f"  Question: {_esc(candidate.question)}",
+        f"  Resolves: <code>{_esc(candidate.end_iso)}</code>",
+        f"  Side: <b>{candidate.favourite_side}</b> @ {candidate.favourite_price:.1%} "
+        f"(ask {candidate.best_ask:.4f})",
+    ]
+    if candidate.polymarket_url:
+        lines.append(f'  <a href="{_esc(candidate.polymarket_url)}">Polymarket link</a>')
+    lines.append(f"  Posting <b>${DEFAULT_BET_SIZE_USD:.2f}</b> BUY now...")
+    send_message("\n".join(lines))
+
+    result = place_test_bet(clob_client=clob_client, candidate=candidate)
+    status = result.get("status", "")
+
+    if status == "placed":
+        send_message(
+            "🧪 <b>/test-live</b>: 🟢 <b>LIVE order placed</b>\n"
+            f"  Order ID: <code>{_esc(str(result.get('order_id', '')))}</code>\n"
+            f"  Shares: {result.get('shares', 0)}\n"
+            f"  Limit price: {(result.get('order_price') or 0):.4f}\n"
+            f"  Side: BUY {candidate.favourite_side}\n"
+            f"  Token: <code>{_esc(candidate.favourite_token_id[:20])}...</code>"
+        )
+    elif status.startswith("skipped:"):
+        send_message(f"🧪 <b>/test-live</b>: 🟡 skipped — <code>{_esc(status)}</code>")
+    elif status.startswith("failed:"):
+        send_message(f"🧪 <b>/test-live</b>: ❌ failed — <code>{_esc(status)}</code>")
+    else:
+        send_message(f"🧪 <b>/test-live</b>: unknown status — <code>{_esc(status)}</code>")
+
+
 def _handle_help():
     """Handle /help command."""
     send_message(
@@ -1276,7 +1350,8 @@ def _handle_help():
         "<code>/mode</code> \u2014 Show preview/live mode per strategy\n"
         "<code>/live 3 CONFIRM</code> \u2014 Switch Strategy #3 to live trading\n"
         "<code>/preview 3</code> \u2014 Switch Strategy #3 back to preview\n"
-        "<code>/check</code> \u2014 Verify trading setup (read-only)\n\n"
+        "<code>/check</code> \u2014 Verify trading setup (read-only)\n"
+        "<code>/test-live</code> \u2014 Fire $5 live BUY on a 90%+ geopolitics market (smoke test)\n\n"
         "<b>Safety levers</b>\n"
         "<code>/setkey clear CONFIRM</code> \u2014 Wipe in-memory private key\n"
         "<code>/setkey 0xHEX CONFIRM</code> \u2014 Replace key in memory\n"
@@ -1375,6 +1450,7 @@ def _register_bot_menu():
                 {"command": "live", "description": "Switch a strategy to live (e.g. /live 3 CONFIRM)"},
                 {"command": "preview", "description": "Switch a strategy back to preview (e.g. /preview 3)"},
                 {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
+                {"command": "test-live", "description": "Fire $5 live BUY on a 90%+ geopolitics market (smoke test)"},
                 {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
                 {"command": "shutdown", "description": "Graceful shutdown (Docker restarts container)"},
                 {"command": "status", "description": "Balance, positions, daily limits"},
