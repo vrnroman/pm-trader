@@ -57,6 +57,7 @@ class TennisArbStrategy:
         take_profit_ratio: float = 3.0,
         min_bet_size: float = 5.0,
         clob_client=None,
+        revalidation_min_divergence: float = 0.06,
     ):
         self.min_divergence = min_divergence
         self.max_bet_size = max_bet_size
@@ -81,6 +82,11 @@ class TennisArbStrategy:
         self.min_edge_step = min_edge_step
         # Same-event guard: event endDate must be within ±N days of match_time
         self.max_event_date_delta_days = max_event_date_delta_days
+        # After Gamma's edge clears min_divergence, we refetch the live CLOB
+        # ask and recompute the edge against it. The signal only fires if
+        # the live edge is still ≥ this floor — otherwise Gamma was lagging.
+        # Set <= 0 to disable revalidation entirely.
+        self.revalidation_min_divergence = revalidation_min_divergence
         # Take-profit gate: close any open paper position whose current PM
         # YES price is at least this multiple of its entry price. With the
         # default 3.0, a position bought at 0.20 fixes profit when the
@@ -161,22 +167,71 @@ class TennisArbStrategy:
             if comp.divergence < self.min_divergence:
                 continue
 
+            # Live revalidation: Gamma's outcomePrices is the last-trade
+            # price and lags the live ask by several cents on low-volume
+            # tennis markets. Refetch the CLOB book once the cheap filter
+            # passes so the bet-or-skip decision uses the real fill cost.
+            #
+            #   Gamma edge ≥ min_divergence (8%)  →  cheap candidate
+            #   live edge  ≥ revalidation_min_divergence (6%)  →  fire
+            #   live edge below floor              →  drop, Gamma was stale
+            #
+            # The default 8% / 6% gap absorbs ~2¢ of normal Gamma drift.
+            pm_price = comp.polymarket_price
+            edge = comp.divergence
+            gamma_price = comp.polymarket_price
+            live_ask: float | None = None
+            if (
+                self.clob_client is not None
+                and comp.polymarket_token_id
+                and self.revalidation_min_divergence > 0
+            ):
+                from src.tennis.order_placer import _fetch_book
+                try:
+                    best_ask, _, _ = _fetch_book(self.clob_client, comp.polymarket_token_id)
+                except Exception as exc:
+                    logger.warning(
+                        f"Tennis arb: live revalidation failed for "
+                        f"{pm.get('question','')}: {exc} — skipping signal"
+                    )
+                    continue
+                if best_ask <= 0:
+                    logger.info(
+                        f"Tennis arb: empty live book for {pm.get('question','')} — "
+                        f"skipping signal"
+                    )
+                    continue
+                live_ask = best_ask
+                live_edge = comp.sharp_prob - best_ask
+                if live_edge < self.revalidation_min_divergence:
+                    logger.info(
+                        f"Tennis arb: signal dropped — Gamma edge "
+                        f"{comp.divergence:.1%} but live edge {live_edge:.1%} "
+                        f"< {self.revalidation_min_divergence:.1%} "
+                        f"({pm.get('question','')})"
+                    )
+                    continue
+                pm_price = best_ask
+                edge = live_edge
+
             # Re-bet gate: if we already emitted a signal for this market,
             # only emit again when edge has grown by at least min_edge_step.
+            # Compares against the post-revalidation `edge` so the gate
+            # tracks real fill-cost edge, not stale Gamma edge.
             state_key = f"{comp.polymarket_condition_id}:{comp.polymarket_token_id}"
             prev = bet_state.get(state_key)
             if prev is not None:
                 prev_edge = float(prev.get("last_divergence", 0.0))
-                if comp.divergence < prev_edge + self.min_edge_step:
+                if edge < prev_edge + self.min_edge_step:
                     skipped_dedupe += 1
                     logger.debug(
                         f"Tennis arb: skip re-bet {pm.get('question','')} — "
-                        f"edge {comp.divergence:.1%} vs prev {prev_edge:.1%} "
+                        f"edge {edge:.1%} vs prev {prev_edge:.1%} "
                         f"(step {self.min_edge_step:.0%})"
                     )
                     continue
 
-            bet_size = self._calculate_bet_size(comp.sharp_prob, comp.polymarket_price)
+            bet_size = self._calculate_bet_size(comp.sharp_prob, pm_price)
 
             event_slug = pm.get("event_slug", "")
             polymarket_url = (
@@ -200,8 +255,11 @@ class TennisArbStrategy:
                 "sharp_prob": round(comp.sharp_prob, 4),
                 "sharp_odds_a": comp.match_odds.odds_a,
                 "sharp_odds_b": comp.match_odds.odds_b,
-                "polymarket_price": round(comp.polymarket_price, 4),
-                "divergence": round(comp.divergence, 4),
+                "polymarket_price": round(pm_price, 4),
+                "polymarket_gamma_price": round(gamma_price, 4),
+                "live_ask": round(live_ask, 4) if live_ask is not None else None,
+                "divergence": round(edge, 4),
+                "gamma_divergence": round(comp.divergence, 4),
                 "side": comp.side,
                 "bet_size": round(bet_size, 2),
                 "kelly_size": round(bet_size, 2),
@@ -265,7 +323,7 @@ class TennisArbStrategy:
                         clob_client=self.clob_client,
                         token_id=comp.polymarket_token_id,
                         bet_size_usd=bet_size,
-                        ref_price=comp.polymarket_price,
+                        ref_price=pm_price,
                     )
                     if live and live.get("order_id"):
                         signal["live"] = True
@@ -293,10 +351,12 @@ class TennisArbStrategy:
 
             signals.append(signal)
 
-            # Record in state for future gate checks
+            # Record in state for future gate checks. Stores the revalidated
+            # edge/price so the re-bet gate compares apples-to-apples on the
+            # next scan.
             bet_state[state_key] = {
-                "last_divergence": round(comp.divergence, 4),
-                "last_price": round(comp.polymarket_price, 4),
+                "last_divergence": round(edge, 4),
+                "last_price": round(pm_price, 4),
                 "last_bet_size": round(bet_size, 2),
                 "last_ts": signal["timestamp"],
                 "times_emitted": int(prev.get("times_emitted", 0)) + 1 if prev else 1,

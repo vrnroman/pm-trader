@@ -195,6 +195,20 @@ def send_tennis_signals(signals: list[dict]):
             f"  Sharp: {s['sharp_prob']:.1%}  |  PM: {s['polymarket_price']:.1%}  |  "
             f"Edge: <b>{s['divergence']:+.1%}</b>"
         )
+        # Show Gamma → live-ask drift when revalidation ran. If the two
+        # prices differ, the user can see how stale Gamma was without
+        # having to dig through logs.
+        gamma_price = s.get("polymarket_gamma_price")
+        gamma_div = s.get("gamma_divergence")
+        if (
+            gamma_price is not None
+            and gamma_div is not None
+            and abs(float(gamma_price) - float(s["polymarket_price"])) > 1e-6
+        ):
+            block.append(
+                f"  <i>(Gamma quoted {gamma_price:.1%}, edge "
+                f"{gamma_div:+.1%} — revalidated at live ask)</i>"
+            )
         if url:
             block.append(f'  <a href="{_esc(url)}">Polymarket link</a>')
 

@@ -198,6 +198,7 @@ def _init_tennis_strategy():
         take_profit_ratio=CONFIG.tennis_take_profit_ratio,
         min_bet_size=CONFIG.min_order_size_usd,
         clob_client=clob_client,
+        revalidation_min_divergence=CONFIG.tennis_revalidation_min_divergence,
     )
     return _tennis_strategy
 

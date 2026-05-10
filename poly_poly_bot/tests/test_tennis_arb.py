@@ -585,3 +585,180 @@ class TestPaperBookIntegration:
         fake_404.json.return_value = {}
         with up("src.tennis.tennis_arb.requests.get", return_value=fake_404):
             assert strategy._fetch_market_resolution("0xC") is None
+
+
+# ── Live-ask revalidation gate ──────────────────────────────────────────
+
+
+def _stub_book(ask_price: float, bid_price: float = 0.0, tick: float = 0.01):
+    """Build a CLOB get_order_book mock response."""
+    return {
+        "asks": [{"price": str(ask_price + 0.01), "size": "100"}, {"price": str(ask_price), "size": "200"}],
+        "bids": [{"price": str(max(bid_price - 0.01, 0.001)), "size": "100"}, {"price": str(bid_price or 0.40), "size": "100"}],
+        "tick_size": str(tick),
+    }
+
+
+def _odds_sinner_v_rublev(prob_a: float = 0.71):
+    """Sharp gives Sinner prob_a (default 71%)."""
+    odds_a = 1.0 / prob_a
+    odds_b = 1.0 / (1.0 - prob_a)
+    return [
+        MatchOdds.from_decimal_odds(
+            source="pinnacle",
+            tournament="ATP Monte-Carlo",
+            tour="ATP",
+            player_a="Jannik Sinner",
+            player_b="Andrey Rublev",
+            odds_a=odds_a,
+            odds_b=odds_b,
+        )
+    ]
+
+
+def _pm_sinner(yes_price: float = 0.58):
+    """Gamma quotes Sinner YES at yes_price."""
+    return [{
+        "event_title": "Sinner vs Rublev (ATP Monte-Carlo)",
+        "event_slug": "sinner-vs-rublev",
+        "event_end_date": "",
+        "question": "Will Jannik Sinner beat Andrey Rublev?",
+        "player": "Jannik Sinner",
+        "group_item_title": "Jannik Sinner",
+        "yes_price": yes_price,
+        "volume": 200000,
+        "liquidity": 50000,
+        "market_id": "mkt_123",
+        "condition_id": "cond_123",
+        "token_id_yes": "tok_123",
+    }]
+
+
+class TestRevalidationGate:
+    """Gamma's price clears 8% but live ask may have moved closer to sharp.
+
+    Floor is 6% of revalidated edge. Below that, drop the signal.
+    """
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_no_clob_client_skips_revalidation(self, mock_odds, mock_pm):
+        """When clob_client is None (preview/no-key) we fall through to Gamma."""
+        mock_odds.return_value = _odds_sinner_v_rublev(0.71)
+        mock_pm.return_value = _pm_sinner(0.58)  # Gamma edge ~13%
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.06,
+            )
+            signals = strategy.scan()
+        assert len(signals) == 1
+        assert signals[0]["polymarket_price"] == 0.58
+        assert signals[0]["live_ask"] is None
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_live_ask_above_floor_keeps_signal_with_revalidated_price(self, mock_odds, mock_pm):
+        """Gamma 0.58 → ask 0.62 (sharp 0.71 → live edge 9%, > 6% floor)."""
+        mock_odds.return_value = _odds_sinner_v_rublev(0.71)
+        mock_pm.return_value = _pm_sinner(0.58)
+        client = MagicMock()
+        client.get_order_book.return_value = _stub_book(ask_price=0.62)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=client,
+                revalidation_min_divergence=0.06,
+            )
+            signals = strategy.scan()
+        assert len(signals) == 1
+        sig = signals[0]
+        assert sig["polymarket_price"] == 0.62
+        assert sig["polymarket_gamma_price"] == 0.58
+        assert sig["live_ask"] == 0.62
+        # Edge re-computed against live ask (0.71 - 0.62 ≈ 0.09)
+        assert sig["divergence"] == pytest.approx(0.09, abs=1e-4)
+        assert sig["gamma_divergence"] == pytest.approx(0.13, abs=1e-4)
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_live_ask_below_floor_drops_signal(self, mock_odds, mock_pm):
+        """Gamma 0.58 → ask 0.66. Live edge 5% < 6% floor → drop."""
+        mock_odds.return_value = _odds_sinner_v_rublev(0.71)
+        mock_pm.return_value = _pm_sinner(0.58)
+        client = MagicMock()
+        client.get_order_book.return_value = _stub_book(ask_price=0.66)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=client,
+                revalidation_min_divergence=0.06,
+            )
+            signals = strategy.scan()
+        assert signals == []
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_book_fetch_failure_drops_signal(self, mock_odds, mock_pm):
+        """If the live book request raises, we'd rather miss the bet than fire on stale data."""
+        mock_odds.return_value = _odds_sinner_v_rublev(0.71)
+        mock_pm.return_value = _pm_sinner(0.58)
+        client = MagicMock()
+        client.get_order_book.side_effect = RuntimeError("connection reset")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=client,
+                revalidation_min_divergence=0.06,
+            )
+            signals = strategy.scan()
+        assert signals == []
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_empty_book_drops_signal(self, mock_odds, mock_pm):
+        """No asks on the book → can't actually buy → drop the signal."""
+        mock_odds.return_value = _odds_sinner_v_rublev(0.71)
+        mock_pm.return_value = _pm_sinner(0.58)
+        client = MagicMock()
+        client.get_order_book.return_value = {"asks": [], "bids": [], "tick_size": "0.01"}
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=client,
+                revalidation_min_divergence=0.06,
+            )
+            signals = strategy.scan()
+        assert signals == []
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_revalidation_disabled_when_floor_zero(self, mock_odds, mock_pm):
+        """revalidation_min_divergence <= 0 turns the gate off entirely."""
+        mock_odds.return_value = _odds_sinner_v_rublev(0.71)
+        mock_pm.return_value = _pm_sinner(0.58)
+        client = MagicMock()
+        client.get_order_book.return_value = _stub_book(ask_price=0.99)  # would trip the floor
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=client,
+                revalidation_min_divergence=0.0,
+            )
+            signals = strategy.scan()
+        assert len(signals) == 1
+        # Falls through to Gamma price
+        assert signals[0]["polymarket_price"] == 0.58

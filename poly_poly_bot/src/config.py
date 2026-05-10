@@ -169,6 +169,13 @@ class Config:
 
     # --- Strategy 3: Tennis Arb (Smarkets-only) ---
     tennis_min_divergence: float = _opt_float("TENNIS_MIN_DIVERGENCE", 0.08)
+    # After Gamma's edge clears tennis_min_divergence, we refetch the live
+    # CLOB ask (which is what we'd actually pay) and recompute the edge.
+    # If the live edge is still ≥ this floor, we fire — otherwise the
+    # signal is dropped because Gamma's last-trade price was stale.
+    tennis_revalidation_min_divergence: float = _opt_float(
+        "TENNIS_REVALIDATION_MIN_DIVERGENCE", 0.06
+    )
     tennis_max_bet_size: float = _opt_float("TENNIS_MAX_BET_SIZE", 100.0)
     tennis_kelly_fraction: float = _opt_float("TENNIS_KELLY_FRACTION", 0.25)
     tennis_scan_interval: int = _opt_int("TENNIS_SCAN_INTERVAL", 300)
