@@ -140,6 +140,34 @@ class TestKellySizing:
         size = self.strategy._calculate_bet_size(sharp_prob=0.72, market_price=1.0)
         assert size == 0.0
 
+    def test_kelly_below_min_is_floored(self):
+        """A small-but-positive Kelly recommendation must be rounded up to
+        ``min_bet_size`` so the resulting order is still above Polymarket's
+        minimum (~$5). Otherwise we'd emit unfillable signals every scan
+        for low-edge / extreme-price markets."""
+        strategy = TennisArbStrategy(
+            max_bet_size=100.0,
+            kelly_fraction=0.25,
+            min_bet_size=5.0,
+            preview_mode=True,
+        )
+        # The exact case the user reported: sharp 28% vs PM 19% → Kelly
+        # produces ~$2.78, below the $5 floor.
+        size = strategy._calculate_bet_size(sharp_prob=0.28, market_price=0.19)
+        assert size == pytest.approx(5.0, abs=1e-6)
+
+    def test_kelly_zero_is_not_floored(self):
+        """No-edge / negative-edge cases must still return 0 — the floor
+        only kicks in when Kelly is positive but tiny."""
+        strategy = TennisArbStrategy(
+            max_bet_size=100.0,
+            kelly_fraction=0.25,
+            min_bet_size=5.0,
+            preview_mode=True,
+        )
+        assert strategy._calculate_bet_size(sharp_prob=0.50, market_price=0.55) == 0.0
+        assert strategy._calculate_bet_size(sharp_prob=0.72, market_price=0.0) == 0.0
+
 
 # ── Signal saving tests ─────────────────────────────────────────────────
 

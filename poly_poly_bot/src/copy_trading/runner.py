@@ -225,7 +225,11 @@ async def _periodic_loop() -> None:
 
             if now - last_heartbeat >= heartbeat_interval_s:
                 avg_latency = get_avg_reaction_latency()
-                latency_str = f" | avg reaction: {avg_latency}ms" if avg_latency > 0 else ""
+                latency_str = (
+                    f" | avg reaction: {avg_latency:.0f}ms"
+                    if avg_latency and avg_latency > 0
+                    else ""
+                )
                 tiered_str = f" | {get_tiered_risk_status()}" if TIERED_MODE else ""
                 logger.info(f"Heartbeat: {get_risk_status()} | {get_inventory_summary()}{latency_str}{tiered_str}")
                 last_heartbeat = now

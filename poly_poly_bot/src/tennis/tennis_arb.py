@@ -55,10 +55,15 @@ class TennisArbStrategy:
         min_edge_step: float = 0.05,
         max_event_date_delta_days: float = 3.0,
         take_profit_ratio: float = 3.0,
+        min_bet_size: float = 5.0,
         clob_client=None,
     ):
         self.min_divergence = min_divergence
         self.max_bet_size = max_bet_size
+        # Polymarket rejects orders below ~$5; if Kelly recommends a tinier
+        # bet, we bump it up to this floor. Without the floor we'd emit an
+        # unfillable signal every scan.
+        self.min_bet_size = max(0.0, float(min_bet_size))
         self.kelly_fraction = kelly_fraction
         self.tournaments = tournaments or ["ATP", "WTA"]
         self.min_volume = min_volume
@@ -725,6 +730,11 @@ class TennisArbStrategy:
 
         Kelly fraction = (bp - q) / b
         where b = (1/price) - 1 (net odds), p = sharp_prob, q = 1 - p
+
+        The result is clamped to [min_bet_size, max_bet_size]. If Kelly
+        says zero or negative we return 0 (no edge → no bet); but a
+        positive Kelly recommendation below the platform minimum is
+        rounded up so the order remains fillable.
         """
         if market_price <= 0 or market_price >= 1:
             return 0.0
@@ -738,9 +748,11 @@ class TennisArbStrategy:
         if kelly <= 0:
             return 0.0
 
-        # Apply fractional Kelly and cap
         size = kelly * self.kelly_fraction * self.max_bet_size
-        return min(size, self.max_bet_size)
+        size = min(size, self.max_bet_size)
+        if size < self.min_bet_size:
+            size = self.min_bet_size
+        return size
 
     def _bet_state_path(self) -> str:
         return os.path.join(self.data_dir or "", "tennis_bet_state.json")
