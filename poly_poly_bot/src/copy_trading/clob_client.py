@@ -35,20 +35,23 @@ def create_clob_client() -> ClobClient | None:
         funder=CONFIG.proxy_wallet,
     )
 
-    creds = l1_client.create_or_derive_api_creds()
-    api_key = creds.get("apiKey") or creds.get("key", "")
-    api_secret = creds["secret"]
-    api_passphrase = creds["passphrase"]
+    raw_creds = l1_client.create_or_derive_api_creds()
+    # py-clob-client returns ApiCreds directly in current versions; older
+    # versions returned a dict. Normalize to ApiCreds.
+    if isinstance(raw_creds, ApiCreds):
+        creds = raw_creds
+    else:
+        creds = ApiCreds(
+            api_key=raw_creds.get("apiKey") or raw_creds.get("key", ""),
+            api_secret=raw_creds["secret"],
+            api_passphrase=raw_creds["passphrase"],
+        )
 
     _client = ClobClient(
         CONFIG.clob_api_url,
         chain_id=CONFIG.chain_id,
         key=f"0x{private_key}",
-        creds=ApiCreds(
-            api_key=api_key,
-            api_secret=api_secret,
-            api_passphrase=api_passphrase,
-        ),
+        creds=creds,
         signature_type=CONFIG.signature_type,
         funder=CONFIG.proxy_wallet,
     )
