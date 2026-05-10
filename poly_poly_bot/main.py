@@ -177,8 +177,14 @@ def _init_tennis_strategy():
     """Initialize the Tennis Arb strategy instance."""
     global _tennis_strategy
     from src.tennis.tennis_arb import TennisArbStrategy
+    from src.copy_trading.clob_client import create_clob_client
 
     tennis_tournaments = [t.strip() for t in CONFIG.tennis_tournaments.split(",")]
+
+    # Share the same singleton CLOB client used by Strategy #1 so we don't
+    # derive API creds twice. Returns None when no PRIVATE_KEY is set, in
+    # which case live tennis BUY/SELL just gets skipped at scan time.
+    clob_client = create_clob_client()
 
     _tennis_strategy = TennisArbStrategy(
         min_divergence=CONFIG.tennis_min_divergence,
@@ -190,6 +196,7 @@ def _init_tennis_strategy():
         preview_mode=CONFIG.preview_mode,
         data_dir=CONFIG.data_dir,
         take_profit_ratio=CONFIG.tennis_take_profit_ratio,
+        clob_client=clob_client,
     )
     return _tennis_strategy
 

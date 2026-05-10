@@ -390,6 +390,12 @@ def _handle_command(text: str):
         _handle_pnl()
     elif text.startswith("/takeprofit"):
         _handle_takeprofit()
+    elif text.startswith("/mode"):
+        _handle_mode()
+    elif text.startswith("/live"):
+        _handle_live(text)
+    elif text.startswith("/preview"):
+        _handle_preview(text)
     elif text.startswith("/help") or text.startswith("/start"):
         _handle_help()
     else:
@@ -428,14 +434,19 @@ def _handle_predict(text: str):
 
 def _handle_status():
     """Handle /status command — show status for all three strategies."""
+    from src import runtime_state
+
     now = datetime.now(SGT)
     cities_list = [c.strip() for c in CONFIG.cities_to_bet.split(",")]
     tennis_tournaments = [t.strip() for t in CONFIG.tennis_tournaments.split(",")]
+    modes = runtime_state.all_modes()
 
     lines = [
         f"<b>Bot Status</b>",
         f"Time: {now.strftime('%Y-%m-%d %H:%M SGT')}",
-        f"Mode: {'PREVIEW' if CONFIG.preview_mode else 'LIVE'}",
+        f"Mode: #1 {'PREVIEW' if modes.get(1, True) else 'LIVE'} | "
+        f"#2 {'PREVIEW' if modes.get(2, True) else 'LIVE'} | "
+        f"#3 {'PREVIEW' if modes.get(3, True) else 'LIVE'}",
         "",
     ]
 
@@ -875,6 +886,68 @@ def _handle_tennis_pnl():
     _send_chunked("\n".join(lines))
 
 
+def _handle_mode():
+    """Handle /mode — show preview/live mode per strategy."""
+    from src import runtime_state
+
+    modes = runtime_state.all_modes()
+    s3_mode = modes.get(3, True)
+    from src.config import get_private_key
+    wallet_ok = bool(get_private_key())
+
+    lines = [
+        "<b>Strategy Modes</b>",
+        f"  #1 Copy:    {'PREVIEW' if modes.get(1, True) else 'LIVE'}",
+        f"  #2 Weather: {'PREVIEW' if modes.get(2, True) else 'LIVE'}",
+        f"  #3 Tennis:  <b>{'PREVIEW' if s3_mode else 'LIVE'}</b>",
+        "",
+        f"Wallet (PRIVATE_KEY): {'configured' if wallet_ok else '<b>NOT configured</b>'}",
+        "",
+        "<i>Toggle Strategy #3:</i>",
+        "<code>/live 3 CONFIRM</code> — switch to live (real orders)",
+        "<code>/preview 3</code> — switch back to preview",
+    ]
+    send_message("\n".join(lines))
+
+
+def _handle_live(text: str):
+    """Handle /live N CONFIRM — switch a strategy to live."""
+    from src import runtime_state
+
+    parts = text.split()
+    if len(parts) < 3 or parts[1] != "3" or parts[2] != "CONFIRM":
+        send_message(
+            "Usage: <code>/live 3 CONFIRM</code>\n"
+            "Only Strategy #3 (Tennis) supports live toggle.\n"
+            "<code>CONFIRM</code> token required to prevent fat-finger."
+        )
+        return
+
+    runtime_state.set_preview(3, False)
+    from src.config import get_private_key
+    wallet_ok = bool(get_private_key())
+    warn = "" if wallet_ok else "\n<b>Warning:</b> PRIVATE_KEY is empty — orders won't actually post until wallet is configured."
+    send_message(f"Strategy #3 switched to <b>LIVE</b>. Real orders will be placed on next scan.{warn}")
+    logger.warning("Strategy #3 switched to LIVE via Telegram /live command")
+
+
+def _handle_preview(text: str):
+    """Handle /preview N — switch a strategy back to preview."""
+    from src import runtime_state
+
+    parts = text.split()
+    if len(parts) < 2 or parts[1] != "3":
+        send_message(
+            "Usage: <code>/preview 3</code>\n"
+            "Only Strategy #3 (Tennis) supports preview/live toggle."
+        )
+        return
+
+    runtime_state.set_preview(3, True)
+    send_message("Strategy #3 switched to <b>PREVIEW</b>. No real orders will be placed.")
+    logger.info("Strategy #3 switched to PREVIEW via Telegram /preview command")
+
+
 def _handle_help():
     """Handle /help command."""
     send_message(
@@ -890,6 +963,10 @@ def _handle_help():
         "<b>Strategy #3 \u2014 Tennis Arb</b>\n"
         "<code>/tennis</code> \u2014 Show current tennis divergences\n"
         "<code>/tennis_pnl</code> \u2014 Paper-book PnL with breakdown by event\n\n"
+        "<b>Mode controls</b>\n"
+        "<code>/mode</code> \u2014 Show preview/live mode per strategy\n"
+        "<code>/live 3 CONFIRM</code> \u2014 Switch Strategy #3 to live trading\n"
+        "<code>/preview 3</code> \u2014 Switch Strategy #3 back to preview\n\n"
         "<code>/help</code> \u2014 Show this message\n\n"
         f"Strategy #1: {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"
         f"Strategy #2: {'ON' if CONFIG.strategy2_enabled else 'OFF'}\n"
@@ -965,6 +1042,9 @@ def _register_bot_menu():
                 {"command": "predict", "description": "Run weather prediction (e.g. /predict 11 Apr)"},
                 {"command": "tennis", "description": "Show current tennis divergences"},
                 {"command": "tennis_pnl", "description": "Tennis paper-book PnL with breakdown by event"},
+                {"command": "mode", "description": "Show preview/live mode per strategy"},
+                {"command": "live", "description": "Switch a strategy to live (e.g. /live 3 CONFIRM)"},
+                {"command": "preview", "description": "Switch a strategy back to preview (e.g. /preview 3)"},
                 {"command": "status", "description": "Balance, positions, daily limits"},
                 {"command": "pnl", "description": "Unified P&L across all strategies"},
                 {"command": "history", "description": "Last 10 copy trades"},

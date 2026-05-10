@@ -25,6 +25,8 @@ from difflib import SequenceMatcher
 
 import requests
 
+from src import runtime_state
+from src.config import CONFIG
 from src.odds.models import MatchOdds, OddsComparison
 from src.odds.smarkets import SmarketsProvider
 from src.tennis.paper_book import TennisPaperBook
@@ -53,6 +55,7 @@ class TennisArbStrategy:
         min_edge_step: float = 0.05,
         max_event_date_delta_days: float = 3.0,
         take_profit_ratio: float = 3.0,
+        clob_client=None,
     ):
         self.min_divergence = min_divergence
         self.max_bet_size = max_bet_size
@@ -60,8 +63,13 @@ class TennisArbStrategy:
         self.tournaments = tournaments or ["ATP", "WTA"]
         self.min_volume = min_volume
         self.min_liquidity = min_liquidity
+        # Initial preview default. Live state of record is runtime_state, which
+        # is checked dynamically per scan so Telegram-driven flips take effect
+        # without a restart. Constructor flag is just a fallback for tests /
+        # first-run when no runtime_state file exists yet.
         self.preview_mode = preview_mode
         self.data_dir = data_dir
+        self.clob_client = clob_client
         # Re-bet gate: only emit a new signal if edge grew by this much vs last
         # recorded bet on the same market (prevents spamming the same bet every
         # scan when edge stays roughly constant).
@@ -207,8 +215,32 @@ class TennisArbStrategy:
                     else None
                 ),
                 "timestamp": datetime.now(SGT).isoformat(),
-                "preview": self.preview_mode,
+                "preview": runtime_state.is_preview(3),
             }
+
+            # Live execution: place a real BUY YES order on the CLOB before
+            # the paper book records the position so the recorded position
+            # carries the actual order_id. If the live BUY fails the signal
+            # still gets emitted/paper-booked so we don't lose the trail; it
+            # just stays a paper-only position.
+            if (
+                not runtime_state.is_preview(3)
+                and self.clob_client is not None
+                and bet_size >= CONFIG.min_order_size_usd
+                and comp.polymarket_token_id
+            ):
+                from src.tennis.order_placer import place_buy_yes
+                live = place_buy_yes(
+                    clob_client=self.clob_client,
+                    token_id=comp.polymarket_token_id,
+                    bet_size_usd=bet_size,
+                    ref_price=comp.polymarket_price,
+                )
+                if live and live.get("order_id"):
+                    signal["live"] = True
+                    signal["live_order_id"] = live["order_id"]
+                    signal["live_order_price"] = live["order_price"]
+                    signal["live_shares"] = live["shares"]
 
             # Paper-book: open / flip-close / hold based on existing position.
             # FLIP closes the existing YES at the implied current PM price for
@@ -432,6 +464,27 @@ class TennisArbStrategy:
             if ratio_now + 1e-9 < self.take_profit_ratio:
                 continue
 
+            # Live SELL first if this position was opened live and we're
+            # currently in live mode. Failure to submit the SELL doesn't
+            # block the paper close — it just gets logged.
+            live_sell_id = ""
+            live_sell_price = None
+            if (
+                pos.get("live")
+                and not runtime_state.is_preview(3)
+                and self.clob_client is not None
+            ):
+                from src.tennis.order_placer import place_sell_yes
+                live = place_sell_yes(
+                    clob_client=self.clob_client,
+                    token_id=token_id,
+                    shares=float(pos.get("shares") or 0.0),
+                    ref_price=current_price,
+                )
+                if live and live.get("order_id"):
+                    live_sell_id = live["order_id"]
+                    live_sell_price = live["order_price"]
+
             closed = self.paper_book.take_profit(token_id, exit_price=current_price)
             if closed is None:
                 continue
@@ -464,7 +517,10 @@ class TennisArbStrategy:
                 "shares": closed.get("shares"),
                 "size_usd": closed.get("size_usd"),
                 "timestamp": datetime.now(SGT).isoformat(),
-                "preview": self.preview_mode,
+                "preview": runtime_state.is_preview(3),
+                "live": bool(closed.get("live")),
+                "live_sell_order_id": live_sell_id,
+                "live_sell_order_price": live_sell_price,
             }
             events.append(event)
             logger.info(

@@ -247,6 +247,8 @@ class TennisPaperBook:
             "shares": shares,
             "sharp_prob_at_entry": float(signal.get("sharp_prob") or 0.0),
             "divergence_at_entry": float(signal.get("divergence") or 0.0),
+            "live": bool(signal.get("live", False)),
+            "entry_order_id": signal.get("live_order_id") or "",
         }
         self._state["open_positions"][position_id] = position
         return position
