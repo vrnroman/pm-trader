@@ -177,8 +177,29 @@ class BotLogger:
     def warn(self, msg: str) -> None:
         self._logger.warning(msg)
 
+    # Stdlib logging.Logger spelling. Alias kept so call sites that reach
+    # for the standard name don't blow up with AttributeError (the exact
+    # bug class that took the bot down on 2026-05-10).
+    def warning(self, msg: str) -> None:
+        self._logger.warning(msg)
+
     def error(self, msg: str) -> None:
         self._logger.error(msg)
+
+    def critical(self, msg: str) -> None:
+        self._logger.critical(msg)
+
+    def exception(self, msg: str) -> None:
+        """Log an error with the current exception's traceback appended.
+
+        Mirrors ``logging.Logger.exception`` so call sites inside ``except``
+        blocks (``logger.exception("X failed")``) get the traceback for
+        free, the same way a stdlib logger would.
+        """
+        self._logger.exception(msg)
+
+    def log(self, level: int, msg: str) -> None:
+        self._logger.log(level, msg)
 
     def trade(self, msg: str) -> None:
         self._logger.log(TRADE, msg)
