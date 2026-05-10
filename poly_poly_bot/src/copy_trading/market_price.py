@@ -7,7 +7,7 @@ import time
 from typing import Optional
 
 from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import BUY, SELL
+from py_clob_client.order_builder.constants import BUY, SELL
 
 from src.logger import logger
 from src.models import MarketSnapshot
