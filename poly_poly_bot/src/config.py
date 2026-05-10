@@ -142,6 +142,11 @@ class Config:
     copy_size: float = _opt_float("COPY_SIZE", 10.0)
     max_order_size_usd: float = _opt_float("MAX_ORDER_SIZE_USD", 100.0)
     min_order_size_usd: float = _opt_float("MIN_ORDER_SIZE_USD", 1.0)
+    # Maximum slippage we accept on a live limit order, in basis points.
+    # The order is posted at best_ask × (1 + slippage_bps/10000) for a BUY
+    # (or best_bid × (1 - ...) for a SELL) and uses FAK so the unmatched
+    # portion cancels rather than resting in the book. 50 bps = 0.5%.
+    live_order_slippage_bps: int = _opt_int("LIVE_ORDER_SLIPPAGE_BPS", 50)
     max_position_per_market_usd: float = _opt_float("MAX_POSITION_PER_MARKET_USD", 500.0)
     max_daily_volume_usd: float = _opt_float("MAX_DAILY_VOLUME_USD", 1000.0)
     fetch_interval: float = _opt_int("FETCH_INTERVAL", 1) * 1.0  # seconds
