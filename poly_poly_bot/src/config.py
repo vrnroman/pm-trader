@@ -85,6 +85,25 @@ def get_private_key() -> str:
     return _private_key
 
 
+def set_private_key(raw: str) -> str:
+    """Replace the in-memory private key at runtime.
+
+    Used by the Telegram /setkey command as a safety lever: rotating to a
+    different key (or clearing it with the empty string) immediately
+    prevents the bot from signing further orders without redeploying.
+
+    Returns the validated 64-hex key (or empty string when cleared).
+    Raises ``ValueError`` on a bad hex.
+    """
+    global _private_key
+    raw = (raw or "").strip()
+    if not raw:
+        _private_key = ""
+        return ""
+    _private_key = validate_private_key(raw)
+    return _private_key
+
+
 # Determine which strategies are enabled
 _s1a_enabled = _opt_bool("STRATEGY_1A_ENABLED", bool(os.environ.get("STRATEGY_1A_WALLETS", "").strip()))
 _s1b_enabled = _opt_bool("STRATEGY_1B_ENABLED", bool(os.environ.get("STRATEGY_1B_WALLETS", "").strip()))

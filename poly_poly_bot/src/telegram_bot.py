@@ -49,6 +49,7 @@ _stop_event = threading.Event()
 on_predict_request = None   # Callable[[datetime], list[dict]]
 on_sell_positions = None    # Callable[[list[dict]], list[dict]]
 on_tennis_scan_request = None  # Callable[[], list[dict]]
+on_refresh_clob_client = None  # Callable[[], None] — rebuild CLOB client after /setkey
 
 
 def is_configured() -> bool:
@@ -398,6 +399,10 @@ def _handle_command(text: str):
         _handle_preview(text)
     elif text.startswith("/check"):
         _handle_check()
+    elif text.startswith("/setkey"):
+        _handle_setkey(text)
+    elif text.startswith("/shutdown"):
+        _handle_shutdown(text)
     elif text.startswith("/help") or text.startswith("/start"):
         _handle_help()
     else:
@@ -950,6 +955,106 @@ def _handle_preview(text: str):
     logger.info("Strategy #3 switched to PREVIEW via Telegram /preview command")
 
 
+def _handle_setkey(text: str):
+    """Handle /setkey <hex|clear> CONFIRM — rotate or wipe the in-memory key.
+
+    Safety lever to immediately disable signed orders if /preview 3 is
+    insufficient. Change is in-memory only; on container restart the .env
+    value reloads.
+    """
+    from src.config import set_private_key
+
+    parts = text.split()
+    # /setkey <hex|clear> CONFIRM  (3 tokens)
+    if len(parts) != 3 or parts[2] != "CONFIRM":
+        send_message(
+            "Usage:\n"
+            "<code>/setkey clear CONFIRM</code> — wipe in-memory key (no orders signable)\n"
+            "<code>/setkey 0xABCD... CONFIRM</code> — replace key in memory\n"
+            "Change is in-memory only; container restart reloads .env."
+        )
+        return
+
+    arg = parts[1]
+    if arg.lower() == "clear":
+        set_private_key("")
+        if on_refresh_clob_client:
+            try:
+                on_refresh_clob_client()
+            except Exception as e:
+                logger.exception("Refresh CLOB client failed")
+                send_message(f"Key cleared but refresh failed: <code>{_esc(str(e))}</code>")
+                return
+        send_message(
+            "🛑 Private key <b>cleared</b> in memory. "
+            "CLOB client invalidated; tennis live trading cannot sign orders. "
+            "Restart will reload the .env key."
+        )
+        logger.warning("PRIVATE_KEY cleared in memory via /setkey")
+        return
+
+    try:
+        new_key = set_private_key(arg)
+    except ValueError as e:
+        send_message(f"Invalid key: <code>{_esc(str(e))}</code>")
+        return
+
+    if on_refresh_clob_client:
+        try:
+            on_refresh_clob_client()
+        except Exception as e:
+            logger.exception("Refresh CLOB client failed")
+            send_message(f"Key updated but CLOB rebuild failed: <code>{_esc(str(e))}</code>")
+            return
+
+    # Derive EOA so user can sanity-check that the new key matches what
+    # they intended. We do NOT echo the key itself.
+    try:
+        from web3 import Web3
+        eoa = Web3().eth.account.from_key(f"0x{new_key}").address
+    except Exception:
+        eoa = "<unknown>"
+    send_message(
+        f"🔑 Private key <b>updated</b> in memory. New EOA: <code>{eoa}</code>. "
+        "Restart will reload the .env key."
+    )
+    logger.warning(f"PRIVATE_KEY rotated in memory via /setkey (EOA={eoa})")
+
+
+def _handle_shutdown(text: str):
+    """Handle /shutdown CONFIRM — graceful process exit.
+
+    Docker is configured with --restart unless-stopped, so the container
+    will come back up automatically — but on restart it reloads from .env
+    where PREVIEW_MODE=true is the default. To physically stop the
+    container, SSH the VM and ``docker stop poly-poly-bot``.
+    """
+    parts = text.split()
+    if len(parts) != 2 or parts[1] != "CONFIRM":
+        send_message(
+            "Usage: <code>/shutdown CONFIRM</code>\n"
+            "Exits the bot process. Docker will restart it within seconds; "
+            "the restart will read PREVIEW_MODE from .env (currently true). "
+            "For permanent stop, SSH the VM and run "
+            "<code>docker stop poly-poly-bot</code>."
+        )
+        return
+
+    send_message("👋 Shutting down. Container will restart per Docker policy.")
+    logger.warning("Bot shutdown requested via /shutdown")
+    # Kick off the asyncio shutdown path used by SIGTERM. _shutdown_event is
+    # the same flag the SIGTERM handler sets, so the rest of the cleanup
+    # path runs as designed.
+    import os
+    import threading
+    def _delayed_exit():
+        # small delay so the Telegram send_message above gets flushed
+        import time
+        time.sleep(1)
+        os._exit(0)
+    threading.Thread(target=_delayed_exit, daemon=True).start()
+
+
 def _handle_check():
     """Handle /check — read-only verification of trading setup.
 
@@ -1097,6 +1202,10 @@ def _handle_help():
         "<code>/live 3 CONFIRM</code> \u2014 Switch Strategy #3 to live trading\n"
         "<code>/preview 3</code> \u2014 Switch Strategy #3 back to preview\n"
         "<code>/check</code> \u2014 Verify trading setup (read-only)\n\n"
+        "<b>Safety levers</b>\n"
+        "<code>/setkey clear CONFIRM</code> \u2014 Wipe in-memory private key\n"
+        "<code>/setkey 0xHEX CONFIRM</code> \u2014 Replace key in memory\n"
+        "<code>/shutdown CONFIRM</code> \u2014 Graceful exit (container will restart)\n\n"
         "<code>/help</code> \u2014 Show this message\n\n"
         f"Strategy #1: {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"
         f"Strategy #2: {'ON' if CONFIG.strategy2_enabled else 'OFF'}\n"
@@ -1176,6 +1285,8 @@ def _register_bot_menu():
                 {"command": "live", "description": "Switch a strategy to live (e.g. /live 3 CONFIRM)"},
                 {"command": "preview", "description": "Switch a strategy back to preview (e.g. /preview 3)"},
                 {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
+                {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
+                {"command": "shutdown", "description": "Graceful shutdown (Docker restarts container)"},
                 {"command": "status", "description": "Balance, positions, daily limits"},
                 {"command": "pnl", "description": "Unified P&L across all strategies"},
                 {"command": "history", "description": "Last 10 copy trades"},

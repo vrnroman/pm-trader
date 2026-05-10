@@ -192,6 +192,43 @@ def append_trade_history(record: TradeRecord) -> None:
         logger.error(f"[trade-store] Failed to append trade history: {e}")
 
 
+# Alias kept for callers that import the older name. Same function.
+record_trade_history = append_trade_history
+
+
+def get_duplicate_count(market_key: str, side: str) -> int:
+    """Count how many trades we've already recorded for ``market_key`` on ``side``.
+
+    Used by the executor to enforce ``max_copies_per_market_side``: if we've
+    already copied this market+side N times, the next attempt is skipped.
+    Reads the trade-history JSONL on demand; cheap enough for the modest
+    history sizes the bot accumulates between restarts.
+    """
+    if not market_key or not os.path.exists(_HISTORY_FILE):
+        return 0
+    count = 0
+    try:
+        with open(_HISTORY_FILE) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except Exception:
+                    continue
+                if rec.get("side") != side:
+                    continue
+                # Match either ``market`` (display string used as the key
+                # by the executor) or ``condition_id`` for resilience.
+                if rec.get("market") == market_key or rec.get("condition_id") == market_key:
+                    count += 1
+    except Exception as e:
+        logger.warn(f"[trade-store] get_duplicate_count read failed: {e}")
+        return 0
+    return count
+
+
 # ---------------------------------------------------------------------------
 # Reaction latency tracking (rolling window, max 50 samples)
 # ---------------------------------------------------------------------------

@@ -10,6 +10,16 @@ from src.logger import logger
 _client: Optional[ClobClient] = None
 
 
+def reset_clob_client() -> None:
+    """Drop the singleton so the next ``create_clob_client()`` rebuilds it.
+
+    Used by /setkey when the in-memory private key changes; the cached
+    client was authenticated with the old key and must be discarded.
+    """
+    global _client
+    _client = None
+
+
 def create_clob_client() -> ClobClient | None:
     """Create and cache a singleton authenticated CLOB client.
 

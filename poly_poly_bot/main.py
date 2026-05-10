@@ -209,6 +209,23 @@ def run_strategy3() -> list[dict]:
     return _tennis_strategy.scan()
 
 
+def refresh_tennis_clob_client() -> None:
+    """Rebuild the singleton CLOB client and re-bind it to the tennis strategy.
+
+    Called by the Telegram /setkey command. After the in-memory private key
+    has changed, the CLOB client cached on TennisArbStrategy points at an
+    auth context built from the old key; updating the reference here lets
+    the change take effect on the next scan without a process restart.
+    """
+    global _tennis_strategy
+    from src.copy_trading.clob_client import create_clob_client, reset_clob_client
+
+    reset_clob_client()
+    new_client = create_clob_client()  # may be None if key was cleared
+    if _tennis_strategy is not None:
+        _tennis_strategy.clob_client = new_client
+
+
 def _parse_match_windows() -> list[tuple[datetime, datetime, int]]:
     """Parse TENNIS_MATCH_WINDOWS env var into list of (start_utc, end_utc, interval_s).
 
@@ -418,6 +435,9 @@ async def main():
 
     # Register tennis scan callback for telegram
     telegram_bot.on_tennis_scan_request = run_strategy3
+    # Register CLOB-client refresher so /setkey can rotate the in-memory
+    # private key and have the change apply immediately to live trading.
+    telegram_bot.on_refresh_clob_client = refresh_tennis_clob_client
 
     # Signal handlers
     signal.signal(signal.SIGINT, _signal_handler)
