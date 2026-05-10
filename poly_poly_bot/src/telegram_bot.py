@@ -429,6 +429,10 @@ def _handle_command(text: str):
         _handle_tasks_list()
     elif text.startswith("/cancel"):
         _handle_cancel()
+    elif text.startswith("/deploy_status") or text.startswith("/deploystatus"):
+        _handle_deploy_status()
+    elif text.startswith("/rollback"):
+        _handle_rollback()
     elif text.startswith("/help") or text.startswith("/start"):
         _handle_help()
     else:
@@ -1415,6 +1419,51 @@ def _handle_cancel():
     send_message(f"Cancelled task <code>{_esc(cur)}</code>." if ok else "Task not found.")
 
 
+def _handle_deploy_status():
+    """Handle /deploy_status — show last deploy verdict + container health."""
+    if not CONFIG.runner_url:
+        send_message("Remote-fix runner not configured.")
+        return
+    try:
+        from src import remote_fix
+        d = remote_fix.last_deploy()
+    except Exception as e:
+        send_message(f"Runner error: <code>{_esc(str(e))}</code>")
+        return
+    if not d:
+        send_message("No deploys recorded yet.")
+        return
+    # status: watching | done | rolled-back   verdict: healthy | unhealthy | rolled-back | None
+    icons = {"healthy": "✅", "unhealthy": "❌", "rolled-back": "↩️"}
+    verdict = d.get("verdict")
+    icon = icons.get(verdict, "⏳")
+    sha = _esc(str(d.get("sha", "?")))
+    status = _esc(str(d.get("status", "?")))
+    detail = _esc(str(d.get("detail", "")))[:400]
+    import time as _t
+    age_s = max(0, int(_t.time() - int(d.get("started_at", 0))))
+    send_message(
+        f"{icon} <b>Deploy {sha}</b>  ({status}, {age_s}s ago)\n"
+        f"verdict: <code>{_esc(str(verdict))}</code>\n"
+        f"<i>{detail}</i>"
+    )
+
+
+def _handle_rollback():
+    """Handle /rollback — restore the previous container image."""
+    if not CONFIG.runner_url:
+        send_message("Remote-fix runner not configured.")
+        return
+    send_message("↩️ rolling back…")
+    try:
+        from src import remote_fix
+        out = remote_fix.rollback()
+    except Exception as e:
+        send_message(f"Rollback failed: <code>{_esc(str(e))}</code>")
+        return
+    send_message(f"↩️ <b>Rollback complete</b>\n<code>{_esc(out[-400:])}</code>")
+
+
 def _route_as_task_reply(text: str):
     """Forward a plain-text Telegram message to the active remote-fix task."""
     if not CONFIG.runner_url or not CONFIG.runner_shared_secret:
@@ -1462,6 +1511,8 @@ def _handle_help():
         "<code>/fix &lt;text&gt;</code> \u2014 Open a remote-fix task\n"
         "<code>/tasks</code> \u2014 Show current/recent fix tasks\n"
         "<code>/cancel</code> \u2014 Cancel the active fix task\n"
+        "<code>/deploy_status</code> \u2014 Last deploy verdict + container health\n"
+        "<code>/rollback</code> \u2014 Restore the previous container image\n"
         "<i>Plain text replies are routed to the active task as answers.</i>\n\n"
         "<code>/help</code> \u2014 Show this message\n\n"
         f"Strategy #1: {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"
@@ -1576,6 +1627,8 @@ def _register_bot_menu():
                 {"command": "fix", "description": "Open a remote-fix task on claude-agent (e.g. /fix tennis_pnl rounding is off)"},
                 {"command": "tasks", "description": "Show current/recent remote-fix tasks"},
                 {"command": "cancel", "description": "Cancel the active remote-fix task"},
+                {"command": "deploy_status", "description": "Last deploy verdict + container health"},
+                {"command": "rollback", "description": "Restore the previous container image"},
                 {"command": "help", "description": "Show all commands"},
             ],
         }, timeout=10)

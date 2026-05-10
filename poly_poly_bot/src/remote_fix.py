@@ -98,3 +98,23 @@ def current_task_id() -> Optional[str]:
     if not h:
         return None
     return h.get("current")
+
+
+def last_deploy() -> Optional[dict]:
+    """Most-recent deploy state (or None if there's no record yet)."""
+    if not _enabled():
+        return None
+    r = requests.get(f"{CONFIG.runner_url}/deploys/last", headers=_headers(), timeout=5)
+    r.raise_for_status()
+    data = r.json()
+    if data.get("empty"):
+        return None
+    return data
+
+
+def rollback() -> str:
+    """Trigger the rollback script. Returns the runner's stdout summary."""
+    r = requests.post(f"{CONFIG.runner_url}/rollback", headers=_headers(), timeout=200)
+    if r.status_code >= 400:
+        raise RuntimeError(r.json().get("detail", r.text)[:500])
+    return r.json().get("output", "")
