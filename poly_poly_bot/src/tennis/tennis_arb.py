@@ -228,17 +228,37 @@ class TennisArbStrategy:
             # carries the actual order_id. If the live BUY fails the signal
             # still gets emitted/paper-booked so we don't lose the trail; it
             # just stays a paper-only position.
-            if (
-                not runtime_state.is_preview(3)
-                and self.clob_client is not None
-                and bet_size >= CONFIG.min_order_size_usd
-                and comp.polymarket_token_id
-            ):
+            #
+            # signal["live_status"] is always populated so the Telegram alert
+            # and downstream tooling can show why a live order did or didn't
+            # post — the previous silent skip path made it look like live mode
+            # was broken when it was just gated.
+            in_preview = runtime_state.is_preview(3)
+            if in_preview:
+                signal["live_status"] = "preview"
+            elif self.clob_client is None:
+                signal["live_status"] = "skipped:no_clob_client"
+                logger.warning(
+                    f"Tennis arb: live BUY skipped — clob_client is None "
+                    f"(token={comp.polymarket_token_id[:12] if comp.polymarket_token_id else ''})"
+                )
+            elif bet_size < CONFIG.min_order_size_usd:
+                signal["live_status"] = (
+                    f"skipped:bet_below_min(${bet_size:.2f}<${CONFIG.min_order_size_usd:.2f})"
+                )
+                logger.info(
+                    f"Tennis arb: live BUY skipped — bet ${bet_size:.2f} < "
+                    f"min ${CONFIG.min_order_size_usd:.2f}"
+                )
+            elif not comp.polymarket_token_id:
+                signal["live_status"] = "skipped:no_token_id"
+                logger.warning("Tennis arb: live BUY skipped — empty token_id")
+            else:
                 from src.copy_trading.daily_spend_guard import can_spend, record_spend
                 ok, reason = can_spend(bet_size)
                 if not ok:
                     logger.info(f"Tennis arb: live BUY skipped — {reason}")
-                    live = None
+                    signal["live_status"] = f"skipped:daily_cap({reason})"
                 else:
                     from src.tennis.order_placer import place_buy_yes
                     live = place_buy_yes(
@@ -252,7 +272,10 @@ class TennisArbStrategy:
                         signal["live_order_id"] = live["order_id"]
                         signal["live_order_price"] = live["order_price"]
                         signal["live_shares"] = live["shares"]
+                        signal["live_status"] = "placed"
                         record_spend(bet_size, source="tennis")
+                    else:
+                        signal["live_status"] = "failed:clob_post_returned_no_order_id"
 
             # Paper-book: open / flip-close / hold based on existing position.
             # FLIP closes the existing YES at the implied current PM price for

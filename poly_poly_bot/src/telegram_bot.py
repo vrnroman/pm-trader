@@ -198,6 +198,23 @@ def send_tennis_signals(signals: list[dict]):
         if url:
             block.append(f'  <a href="{_esc(url)}">Polymarket link</a>')
 
+        # Live-order status (set by tennis_arb.py for every signal). Surfaces
+        # whether the real CLOB order was placed, skipped, or failed so the
+        # alert isn't ambiguous about what actually hit the exchange.
+        live_status = s.get("live_status")
+        if live_status == "placed":
+            block.append(
+                f"  🟢 LIVE: BUY YES {s.get('live_shares', 0)}@"
+                f"{(s.get('live_order_price') or 0):.4f} "
+                f"order=<code>{_esc(str(s.get('live_order_id', ''))[:16])}</code>"
+            )
+        elif live_status == "preview":
+            block.append("  🟡 LIVE: skipped — preview mode")
+        elif isinstance(live_status, str) and live_status.startswith("skipped:"):
+            block.append(f"  🟡 LIVE: {_esc(live_status)}")
+        elif isinstance(live_status, str) and live_status.startswith("failed:"):
+            block.append(f"  ❌ LIVE: {_esc(live_status)}")
+
         # Paper-book note: shows what the book did with this signal
         # (OPEN a fresh position, FLIP-close the previous one and re-enter
         # on the other side, or HOLD because we're already long it).
