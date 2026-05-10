@@ -807,23 +807,41 @@ def _handle_tennis():
         send_message("Tennis scan handler not configured.")
 
 
-RECENT_CLOSED_DAYS = 3
 STALE_OPEN_DAYS = 3
 
 
-def _handle_tennis_pnl():
-    """Handle /tennis_pnl — paper-book PnL with breakdown by event.
+def _strip_tournament_prefix(s: str) -> str:
+    """Drop the leading tournament tag from event/outcome strings.
 
-    Behaviour:
-      - Force-resolves any open paper positions whose PM market settled
-        since the last scheduled resolve tick (and voids ones stuck open
-        for more than ``STALE_OPEN_DAYS`` as a safety net).
-      - Top of the message shows a single Total PnL number (no R/U split).
-      - Per-event breakdown only includes events with currently OPEN
-        positions or closed positions settled within the last
-        ``RECENT_CLOSED_DAYS`` days; older settled events are not shown.
-      - In LIVE mode (preview=False for Strategy #3), only positions tagged
-        ``live=True`` are included — preview deals are filtered out.
+    PM titles are formatted like ``"Internazionali BNL d'Italia: Aryna
+    Sabalenka vs Sorana Cirstea"``; for the PnL report we only want the
+    tail ("Aryna Sabalenka vs Sorana Cirstea") so the message stays
+    skimmable.
+    """
+    if not s:
+        return ""
+    return s.split(": ", 1)[-1] if ": " in s else s
+
+
+def _handle_tennis_pnl():
+    """Handle /tennis_pnl — concise PnL summary + open positions list.
+
+    Format:
+
+        🎾 Tennis Paper Book — PnL
+        Mode: LIVE/PREVIEW
+
+        Realized overall: $X.XX
+        Realized today: $X.XX
+        Realized yesterday: $X.XX
+        Unrealized: $X.XX
+
+        Open positions
+        • Sabalenka vs Cirstea — $13.07 on Sabalenka @ 88.5% → 92.0%
+
+    Day boundaries are SGT (matches the codebase's other scheduled-job
+    convention). In LIVE mode (preview=False) only ``live=True`` paper
+    rows are counted; in PREVIEW everything counts.
     """
     if not CONFIG.strategy3_enabled:
         send_message("Strategy #3 (Tennis Arb) is disabled.")
@@ -847,8 +865,7 @@ def _handle_tennis_pnl():
 
     book = TennisPaperBook(data_dir=CONFIG.data_dir)
     # Belt-and-braces: anything still open many days later is treated as
-    # voided. Covers the case where Gamma never reports the settlement in
-    # a form our resolver recognizes.
+    # voided.
     book.void_stale_open_positions(max_age_days=STALE_OPEN_DAYS)
 
     from src import runtime_state
@@ -857,27 +874,10 @@ def _handle_tennis_pnl():
     def _live_match(p: dict) -> bool:
         return (not live_only) or bool(p.get("live"))
 
-    cutoff = datetime.now(timezone.utc) - timedelta(days=RECENT_CLOSED_DAYS)
-
-    def _is_recent(p: dict) -> bool:
-        ca = p.get("closed_at") or ""
-        if not ca:
-            return False
-        try:
-            d = datetime.fromisoformat(ca)
-        except ValueError:
-            return False
-        if d.tzinfo is None:
-            d = d.replace(tzinfo=timezone.utc)
-        return d >= cutoff
-
     open_positions = [p for p in book.open_positions() if _live_match(p)]
-    closed_positions = [
-        p for p in book.closed_positions() if _live_match(p) and _is_recent(p)
-    ]
+    closed_positions = [p for p in book.closed_positions() if _live_match(p)]
 
-    # Mark-to-market: best-effort YES midpoint per open token. Missing
-    # quotes contribute zero unrealized rather than crashing the command.
+    # Mark-to-market: best-effort YES midpoint per open token.
     current_prices: dict[str, float] = {}
     for pos in open_positions:
         tid = pos.get("token_id") or ""
@@ -887,9 +887,32 @@ def _handle_tennis_pnl():
         if mid is not None:
             current_prices[tid] = mid
 
-    realized = round(
-        sum(float(p.get("realized_pnl_usd") or 0.0) for p in closed_positions), 4
-    )
+    # Day buckets in SGT — matches the user's wall-clock day.
+    now_sgt = datetime.now(SGT)
+    today_start = now_sgt.replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday_start = today_start - timedelta(days=1)
+
+    realized_overall = 0.0
+    realized_today = 0.0
+    realized_yesterday = 0.0
+    for p in closed_positions:
+        pnl = float(p.get("realized_pnl_usd") or 0.0)
+        realized_overall += pnl
+        ca = p.get("closed_at") or ""
+        if not ca:
+            continue
+        try:
+            d = datetime.fromisoformat(ca)
+        except ValueError:
+            continue
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=timezone.utc)
+        d_sgt = d.astimezone(SGT)
+        if d_sgt >= today_start:
+            realized_today += pnl
+        elif d_sgt >= yesterday_start:
+            realized_yesterday += pnl
+
     unrealized = 0.0
     for pos in open_positions:
         cur = current_prices.get(pos.get("token_id"))
@@ -898,8 +921,6 @@ def _handle_tennis_pnl():
         shares = float(pos.get("shares") or 0.0)
         entry = float(pos.get("entry_price") or 0.0)
         unrealized += shares * (float(cur) - entry)
-    unrealized = round(unrealized, 4)
-    total = round(realized + unrealized, 4)
 
     mode_label = "LIVE" if live_only else "PREVIEW"
 
@@ -907,91 +928,25 @@ def _handle_tennis_pnl():
         "🎾 <b>Tennis Paper Book — PnL</b>",
         f"<i>Mode: {mode_label}</i>",
         "",
-        f"Total PnL: <b>${total:+.2f}</b>",
-        f"Open: {len(open_positions)}  |  "
-        f"Closed (last {RECENT_CLOSED_DAYS}d): {len(closed_positions)}",
+        f"Realized overall: <b>${realized_overall:+.2f}</b>",
+        f"Realized today: <b>${realized_today:+.2f}</b>",
+        f"Realized yesterday: <b>${realized_yesterday:+.2f}</b>",
+        f"Unrealized: <b>${unrealized:+.2f}</b>",
     ]
 
-    groups: dict[str, dict] = {}
-
-    def _bucket(ev: str) -> dict:
-        if ev not in groups:
-            groups[ev] = {
-                "event_title": ev,
-                "realized_pnl_usd": 0.0,
-                "unrealized_pnl_usd": 0.0,
-                "open_positions": [],
-                "closed_positions": [],
-            }
-        return groups[ev]
-
-    for p in closed_positions:
-        g = _bucket(p.get("event_title") or "(unknown event)")
-        g["realized_pnl_usd"] += float(p.get("realized_pnl_usd") or 0.0)
-        g["closed_positions"].append(p)
-
-    for p in open_positions:
-        g = _bucket(p.get("event_title") or "(unknown event)")
-        cur = current_prices.get(p.get("token_id"))
-        if cur is not None:
-            shares = float(p.get("shares") or 0.0)
-            entry = float(p.get("entry_price") or 0.0)
-            g["unrealized_pnl_usd"] += shares * (float(cur) - entry)
-        g["open_positions"].append(p)
-
-    for g in groups.values():
-        g["realized_pnl_usd"] = round(g["realized_pnl_usd"], 4)
-        g["unrealized_pnl_usd"] = round(g["unrealized_pnl_usd"], 4)
-        g["total_pnl_usd"] = round(
-            g["realized_pnl_usd"] + g["unrealized_pnl_usd"], 4
-        )
-
-    breakdown = sorted(
-        groups.values(), key=lambda g: g["total_pnl_usd"], reverse=True
-    )
-
-    if not breakdown:
+    if open_positions:
         lines.append("")
-        lines.append("<i>No paper positions to show.</i>")
-        _send_chunked("\n".join(lines))
-        return
-
-    lines.append("")
-    lines.append("<b>Breakdown by event</b>")
-    for g in breakdown:
-        ev = _esc(g["event_title"])
-        rp = g["realized_pnl_usd"]
-        up = g["unrealized_pnl_usd"]
-        tp = g["total_pnl_usd"]
-        n_open = len(g["open_positions"])
-        n_closed = len(g["closed_positions"])
-        lines.append(
-            f"\n• <b>{ev}</b>"
-            f"\n   Total: <b>${tp:+.2f}</b>  (R ${rp:+.2f} / U ${up:+.2f})"
-            f"\n   Open: {n_open}  |  Closed: {n_closed}"
-        )
-        shown = 0
-        for pos in g["open_positions"]:
-            if shown >= 6:
-                break
+        lines.append(f"<b>Open positions ({len(open_positions)})</b>")
+        for pos in open_positions:
+            match = _esc(_strip_tournament_prefix(pos.get("event_title") or "?"))
+            bet_on = _esc(_strip_tournament_prefix(pos.get("outcome_player") or "?"))
+            size = float(pos.get("size_usd") or 0.0)
+            entry = float(pos.get("entry_price") or 0.0)
             cur = current_prices.get(pos.get("token_id"))
-            cur_str = f" → {cur:.1%}" if cur is not None else ""
+            cur_str = f" → {cur:.1%}" if cur is not None else " → ?"
             lines.append(
-                f"     OPEN  {_esc(pos.get('outcome_player',''))} YES "
-                f"@ {pos.get('entry_price', 0):.1%}{cur_str}"
-                f"  ({pos.get('shares', 0):.2f} contracts, ${pos.get('size_usd', 0):.2f})"
+                f"• {match} — ${size:.2f} on {bet_on} @ {entry:.1%}{cur_str}"
             )
-            shown += 1
-        for pos in reversed(g["closed_positions"]):
-            if shown >= 6:
-                break
-            lines.append(
-                f"     CLOSED  {_esc(pos.get('outcome_player',''))} "
-                f"@ {pos.get('entry_price', 0):.1%}→{pos.get('exit_price', 0):.1%} "
-                f"({pos.get('exit_reason','?')}) "
-                f"<b>${pos.get('realized_pnl_usd', 0):+.2f}</b>"
-            )
-            shown += 1
 
     _send_chunked("\n".join(lines))
 

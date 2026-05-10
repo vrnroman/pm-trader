@@ -382,24 +382,22 @@ def _open_signal(**kw):
     return base
 
 
-def test_tennis_pnl_shows_single_total_no_realized_unrealized_breakdown(tennis_pnl_env):
-    """The top of the message must show a single Total PnL number.
-
-    The previous report listed Realized / Unrealized / Net separately;
-    the user now wants just one headline figure.
-    """
+def test_tennis_pnl_shows_summary_lines(tennis_pnl_env):
+    """The header must show four summary numbers: Realized overall / today
+    / yesterday + Unrealized. The user explicitly asked for these four —
+    no per-event R/U breakdown anywhere in the message."""
     book, captured = tennis_pnl_env
     book.process_signal(_open_signal())  # one open position
     from src import telegram_bot
     telegram_bot._handle_command("/tennis_pnl")
     out = "\n".join(captured)
-    assert "Total PnL:" in out
-    # No standalone "Realized:" / "Unrealized:" / "Net:" labels at the
-    # top-of-message summary. (R/U breakdown still appears per-event,
-    # which is fine — those labels are different lines.)
-    assert "Realized:" not in out
-    assert "Unrealized:" not in out
-    assert "\nNet:" not in out
+    assert "Realized overall:" in out
+    assert "Realized today:" in out
+    assert "Realized yesterday:" in out
+    assert "Unrealized:" in out
+    # No "Total PnL" line, no per-event R/U split.
+    assert "Total PnL:" not in out
+    assert "(R $" not in out
 
 
 def test_tennis_pnl_calls_resolve_callback_first(tennis_pnl_env, monkeypatch):
@@ -437,43 +435,44 @@ def test_tennis_pnl_voids_stale_open_positions(tennis_pnl_env):
     assert any(p["exit_reason"] == "STALE_VOID" for p in book2.closed_positions())
 
 
-def test_tennis_pnl_hides_old_closed_events(tennis_pnl_env):
-    """Closed positions older than the recent-window must NOT appear in
-    the breakdown. Active OPEN positions are always shown, but a long
-    history of resolved events shouldn't clutter the report."""
-    from datetime import datetime, timedelta, timezone
+def test_tennis_pnl_does_not_list_closed_events_by_name(tennis_pnl_env):
+    """Closed positions are summed into the Realized lines — they are
+    NOT listed individually in the report. The Open positions section
+    only shows currently-active bets."""
     book, captured = tennis_pnl_env
-    # An old closed position from a different event.
     book.process_signal(_open_signal(
-        condition_id="0xOLD", token_id="OLD_A",
-        event_title="Old Tournament 2025",
+        condition_id="0xJUST", token_id="JUST_A",
+        event_title="Just Closed Event",
     ))
-    book.resolve("0xOLD", winning_token_id="OLD_A")
-    closed = book.closed_positions()[0]
-    old_time = datetime.now(timezone.utc) - timedelta(days=30)
-    closed["closed_at"] = old_time.isoformat()
-    book._state["closed_positions"][0] = closed
-    book._save()
+    book.resolve("0xJUST", winning_token_id="JUST_A")  # winner → +PnL
 
     from src import telegram_bot
     telegram_bot._handle_command("/tennis_pnl")
     out = "\n".join(captured)
-    assert "Old Tournament 2025" not in out
+    # The event title is gone — only the realized PnL contribution survives.
+    assert "Just Closed Event" not in out
 
 
-def test_tennis_pnl_shows_recently_closed_events(tennis_pnl_env):
-    """A position closed within the recent window must appear."""
+def test_tennis_pnl_realized_today_includes_just_resolved_position(tennis_pnl_env):
+    """A position that resolved today (in SGT) must be reflected in the
+    Realized today total — that's what the line is for."""
     book, captured = tennis_pnl_env
     book.process_signal(_open_signal(
-        condition_id="0xNEW", token_id="NEW_A",
-        event_title="Recent Tournament",
+        condition_id="0xWIN", token_id="JUST_A", price=0.40, size=10.0,
+        event_title="Today Event",
     ))
-    book.resolve("0xNEW", winning_token_id="NEW_A")  # closed_at = now
+    book.resolve("0xWIN", winning_token_id="JUST_A")  # +$15 (10/0.40 * (1 - 0.40))
 
     from src import telegram_bot
     telegram_bot._handle_command("/tennis_pnl")
     out = "\n".join(captured)
-    assert "Recent Tournament" in out
+    # The position is gone from open → must show in Realized today.
+    # Don't pin the exact number (timezone edge cases around midnight
+    # would make this flaky); just assert it's non-zero and positive.
+    import re
+    m = re.search(r"Realized today: <b>\$([+\-\d.]+)</b>", out)
+    assert m is not None, f"missing Realized today line in: {out!r}"
+    assert float(m.group(1)) > 0, f"expected positive realized-today, got {m.group(1)}"
 
 
 def test_tennis_pnl_live_mode_excludes_preview_positions(tennis_pnl_env):
