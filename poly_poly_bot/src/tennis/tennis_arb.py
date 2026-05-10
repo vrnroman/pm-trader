@@ -275,7 +275,8 @@ class TennisArbStrategy:
                         signal["live_status"] = "placed"
                         record_spend(bet_size, source="tennis")
                     else:
-                        signal["live_status"] = "failed:clob_post_returned_no_order_id"
+                        err = (live or {}).get("error") or "no_order_id_in_response"
+                        signal["live_status"] = f"failed:{err}"
 
             # Paper-book: open / flip-close / hold based on existing position.
             # FLIP closes the existing YES at the implied current PM price for

@@ -9,9 +9,8 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import OrderArgs, OrderType
-from py_clob_client.order_builder.constants import BUY, SELL
+from py_clob_client_v2 import ClobClient, OrderArgs, OrderType
+from py_clob_client_v2.order_builder.constants import BUY, SELL
 
 from src.utils import ceil_cents, error_message, round_cents
 
@@ -73,8 +72,9 @@ def place_buy_yes(
         )
         resp = clob_client.post_order(order, OrderType.GTC)
     except Exception as exc:
-        logger.error(f"[tennis-live] BUY failed: {error_message(exc)}")
-        return None
+        msg = error_message(exc)
+        logger.error(f"[tennis-live] BUY failed: {msg}")
+        return {"error": msg, "shares": shares, "order_price": order_price}
 
     order_id = _extract_order_id(resp)
     if not order_id:
@@ -112,8 +112,9 @@ def place_sell_yes(
         )
         resp = clob_client.post_order(order, OrderType.GTC)
     except Exception as exc:
-        logger.error(f"[tennis-live] SELL failed: {error_message(exc)}")
-        return None
+        msg = error_message(exc)
+        logger.error(f"[tennis-live] SELL failed: {msg}")
+        return {"error": msg, "shares": sell_shares, "order_price": order_price}
 
     order_id = _extract_order_id(resp)
     if not order_id:

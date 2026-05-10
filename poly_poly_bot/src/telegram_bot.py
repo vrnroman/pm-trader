@@ -1247,7 +1247,7 @@ def _handle_check():
     # 7. Authenticated CLOB read — confirms creds work end-to-end
     if clob_client is not None and proxy:
         try:
-            from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
+            from py_clob_client_v2 import BalanceAllowanceParams, AssetType
             params = BalanceAllowanceParams(asset_type=AssetType.COLLATERAL)
             ba = clob_client.get_balance_allowance(params)
             lines.append(f"✅ CLOB /balance-allowance OK: {ba}")

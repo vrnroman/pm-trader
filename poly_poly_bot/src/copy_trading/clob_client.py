@@ -1,9 +1,15 @@
-"""Singleton CLOB client factory."""
+"""Singleton CLOB client factory.
+
+Uses ``py-clob-client-v2`` because Polymarket's CLOB V2 migration on
+2026-04-28 bumped the EIP-712 exchange domain version from "1" to "2";
+every order signed by the V1 SDK is now rejected with
+``order_version_mismatch`` and the V1 package is no longer maintained
+against production.
+"""
 
 from __future__ import annotations
 from typing import Optional
-from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import ApiCreds
+from py_clob_client_v2 import ClobClient, ApiCreds
 from src.config import CONFIG, get_private_key
 from src.logger import logger
 
@@ -45,17 +51,7 @@ def create_clob_client() -> ClobClient | None:
         funder=CONFIG.proxy_wallet,
     )
 
-    raw_creds = l1_client.create_or_derive_api_creds()
-    # py-clob-client returns ApiCreds directly in current versions; older
-    # versions returned a dict. Normalize to ApiCreds.
-    if isinstance(raw_creds, ApiCreds):
-        creds = raw_creds
-    else:
-        creds = ApiCreds(
-            api_key=raw_creds.get("apiKey") or raw_creds.get("key", ""),
-            api_secret=raw_creds["secret"],
-            api_passphrase=raw_creds["passphrase"],
-        )
+    creds = l1_client.create_or_derive_api_key()
 
     _client = ClobClient(
         CONFIG.clob_api_url,

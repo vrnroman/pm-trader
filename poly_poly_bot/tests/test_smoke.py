@@ -10,9 +10,9 @@ before deploy. The lazy-import helpers (``_trade_store``, ``_trade_queue``,
 ``_inventory``, etc.) are also exercised so the inner ``from ... import
 foo`` lines actually resolve.
 
-Skipped automatically when ``py_clob_client`` isn't installed (e.g. in a
-local venv that doesn't ship the trading deps); still runs in the Docker
-build where the prod deps are present.
+Skipped automatically when ``py_clob_client_v2`` isn't installed (e.g. in
+a local venv that doesn't ship the trading deps); still runs in the
+Docker build where the prod deps are present.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ import importlib
 
 import pytest
 
-py_clob_client = pytest.importorskip("py_clob_client")  # noqa: F401
+py_clob_client_v2 = pytest.importorskip("py_clob_client_v2")  # noqa: F401
 
 
 def test_main_imports():

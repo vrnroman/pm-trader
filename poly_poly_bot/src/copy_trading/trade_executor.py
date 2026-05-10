@@ -14,7 +14,7 @@ from __future__ import annotations
 import time
 from typing import Optional
 
-from py_clob_client.client import ClobClient
+from py_clob_client_v2 import ClobClient
 
 from src.config import CONFIG
 from src.logger import logger
@@ -210,7 +210,7 @@ async def _execute_copy_order(
         if shares <= 0:
             return None
 
-        from py_clob_client.order_builder.constants import BUY, SELL
+        from py_clob_client_v2.order_builder.constants import BUY, SELL
         side = BUY if trade.side == "BUY" else SELL
 
         order_args = {

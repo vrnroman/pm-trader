@@ -241,10 +241,8 @@ def place_test_bet(
         ref_price=ref_price,
     )
     if not live or not live.get("order_id"):
-        return {
-            "status": "failed:clob_post_returned_no_order_id",
-            "ref_price": ref_price,
-        }
+        err = (live or {}).get("error") or "no_order_id_in_response"
+        return {"status": f"failed:{err}", "ref_price": ref_price}
 
     record_spend(bet_size_usd, source="test-live")
     return {

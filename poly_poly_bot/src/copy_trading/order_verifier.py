@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from typing import Optional
 
-from py_clob_client.client import ClobClient
+from py_clob_client_v2 import ClobClient
 
 from src.constants import FILL_CHECK_DELAY_S, FILL_CHECK_RETRIES
 from src.logger import logger
