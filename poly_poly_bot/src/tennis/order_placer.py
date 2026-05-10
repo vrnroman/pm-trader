@@ -10,7 +10,8 @@ import logging
 from typing import Optional
 
 from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import BUY, SELL, OrderArgs, OrderType
+from py_clob_client.clob_types import OrderArgs, OrderType
+from py_clob_client.order_builder.constants import BUY, SELL
 
 from src.utils import ceil_cents, error_message, round_cents
 

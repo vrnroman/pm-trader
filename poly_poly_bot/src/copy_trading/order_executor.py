@@ -5,7 +5,8 @@ from __future__ import annotations
 from typing import Optional
 
 from py_clob_client.client import ClobClient
-from py_clob_client.clob_types import BUY, SELL, OrderArgs, OrderType
+from py_clob_client.clob_types import OrderArgs, OrderType
+from py_clob_client.order_builder.constants import BUY, SELL
 
 from src.logger import logger
 from src.models import DetectedTrade, MarketSnapshot, OrderResult
