@@ -504,32 +504,84 @@ class TestPaperBookIntegration:
             assert not any(s.get("paper_action") == "TAKE_PROFIT" for s in signals)
             assert strategy.paper_book.open_position_count() == 1
 
-    def test_fetch_market_resolution_reads_outcome_prices(self):
-        # Smoke-test the Gamma response parser against the documented
-        # shape: outcomePrices = ["1", "0"], clobTokenIds = ["TA", "TB"].
+    def test_fetch_market_resolution_reads_clob_tokens(self):
+        """The resolver must read winner state from the CLOB
+        ``/markets/{condition_id}`` shape: dict with ``tokens=[{token_id,
+        winner, price}, ...]`` and a ``closed`` flag.
+
+        We use CLOB instead of Gamma because Gamma's
+        ``/markets?condition_ids=`` filter silently returns ``[]`` for
+        closed markets — that's the bug that left tennis paper positions
+        showing OPEN forever.
+        """
         from unittest.mock import patch as up
         strategy = TennisArbStrategy(preview_mode=True)
         fake_resp = MagicMock()
-        fake_resp.json.return_value = [{
-            "closed": True,
-            "outcomePrices": '["1", "0"]',
-            "clobTokenIds": '["TA", "TB"]',
-        }]
+        fake_resp.status_code = 200
         fake_resp.raise_for_status = lambda: None
+
+        # Closed, winner=A → return TA.
+        fake_resp.json.return_value = {
+            "closed": True,
+            "tokens": [
+                {"token_id": "TA", "outcome": "A", "winner": True, "price": 1},
+                {"token_id": "TB", "outcome": "B", "winner": False, "price": 0},
+            ],
+        }
         with up("src.tennis.tennis_arb.requests.get", return_value=fake_resp):
             assert strategy._fetch_market_resolution("0xC") == "TA"
 
-        fake_resp.json.return_value = [{
+        # Closed, winner=B → return TB.
+        fake_resp.json.return_value = {
             "closed": True,
-            "outcomePrices": '["0", "1"]',
-            "clobTokenIds": '["TA", "TB"]',
-        }]
+            "tokens": [
+                {"token_id": "TA", "outcome": "A", "winner": False, "price": 0},
+                {"token_id": "TB", "outcome": "B", "winner": True, "price": 1},
+            ],
+        }
+        with up("src.tennis.tennis_arb.requests.get", return_value=fake_resp):
+            assert strategy._fetch_market_resolution("0xC") == "TB"
+
+        # Closed, winner flag missing but prices are 1/0 → fall back to price.
+        fake_resp.json.return_value = {
+            "closed": True,
+            "tokens": [
+                {"token_id": "TA", "price": 0},
+                {"token_id": "TB", "price": 1},
+            ],
+        }
         with up("src.tennis.tennis_arb.requests.get", return_value=fake_resp):
             assert strategy._fetch_market_resolution("0xC") == "TB"
 
         # Open market → None, leaves paper position untouched.
-        fake_resp.json.return_value = [{
-            "closed": False, "outcomePrices": '["0.4","0.6"]',
-        }]
+        fake_resp.json.return_value = {
+            "closed": False,
+            "archived": False,
+            "tokens": [
+                {"token_id": "TA", "winner": False, "price": 0.4},
+                {"token_id": "TB", "winner": False, "price": 0.6},
+            ],
+        }
         with up("src.tennis.tennis_arb.requests.get", return_value=fake_resp):
+            assert strategy._fetch_market_resolution("0xC") is None
+
+        # Archived (some tennis markets archive before closed flips) →
+        # treated as settled.
+        fake_resp.json.return_value = {
+            "closed": False,
+            "archived": True,
+            "tokens": [
+                {"token_id": "TA", "winner": True, "price": 1},
+                {"token_id": "TB", "winner": False, "price": 0},
+            ],
+        }
+        with up("src.tennis.tennis_arb.requests.get", return_value=fake_resp):
+            assert strategy._fetch_market_resolution("0xC") == "TA"
+
+        # 404 (market unknown to CLOB) → leave open.
+        fake_404 = MagicMock()
+        fake_404.status_code = 404
+        fake_404.raise_for_status = lambda: None
+        fake_404.json.return_value = {}
+        with up("src.tennis.tennis_arb.requests.get", return_value=fake_404):
             assert strategy._fetch_market_resolution("0xC") is None

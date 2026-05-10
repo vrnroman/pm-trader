@@ -595,7 +595,7 @@ class TennisArbStrategy:
         self._resolve_settled_paper_positions(force=True)
 
     def _fetch_market_resolution(self, condition_id: str) -> str | None:
-        """Look up a single market's resolution state from Gamma.
+        """Look up a single market's resolution state from the CLOB.
 
         Returns:
           - winning token_id (str) if the market is closed and resolved binary
@@ -604,64 +604,52 @@ class TennisArbStrategy:
             entry price (zero-PnL settlement)
           - None if the market is still open or unknown — leave positions open
 
-        Gamma does not document a stable schema for resolution metadata, so
-        we accept either `closed=True` with `outcomePrices=[1,0]/[0,1]` or
-        an explicit `umaResolutionStatus` / `acceptingOrders=false`.
+        Why CLOB and not Gamma: Gamma's ``/markets?condition_ids=`` filter
+        silently returns ``[]`` for closed/archived markets (the canonical
+        param appears to be ``conditionId``, not ``condition_ids``), so the
+        resolver never saw any settlement. The CLOB exposes
+        ``/markets/{condition_id}`` directly with a ``tokens[]`` array
+        whose ``winner`` flag tells us which side resolved 1.0.
         """
+        if not condition_id:
+            return None
         resp = requests.get(
-            f"{GAMMA_API_URL}/markets",
-            params={"condition_ids": condition_id},
+            f"{CLOB_API_URL}/markets/{condition_id}",
             timeout=15,
         )
-        resp.raise_for_status()
-        data = resp.json()
-        if isinstance(data, dict):
-            # Some Gamma deployments wrap as {"data": [...]}
-            data = data.get("data") or data.get("markets") or []
-        if not isinstance(data, list) or not data:
+        if resp.status_code == 404:
             return None
-        market = data[0]
-        # Gamma flips ``closed=true`` once UMA resolution lands, but tennis
-        # markets often go ``archived=true`` first (sometimes hours before
-        # ``closed`` updates). Treat either as a settled signal so we don't
-        # leave a paper position OPEN for days after the match ended.
+        resp.raise_for_status()
+        market = resp.json()
+        if not isinstance(market, dict):
+            return None
+        # CLOB also flips ``closed=true`` (sometimes ``archived=true``) once
+        # UMA resolution lands. Anything else means "still trading" — leave
+        # the position open.
         if not (market.get("closed") or market.get("archived")):
             return None
 
-        prices = market.get("outcomePrices")
-        if isinstance(prices, str):
-            try:
-                prices = json.loads(prices)
-            except (json.JSONDecodeError, TypeError):
-                prices = None
-        token_ids = market.get("clobTokenIds")
-        if isinstance(token_ids, str):
-            try:
-                token_ids = json.loads(token_ids)
-            except (json.JSONDecodeError, TypeError):
-                token_ids = None
+        tokens = market.get("tokens")
+        if not isinstance(tokens, list) or len(tokens) != 2:
+            return ""  # closed but non-binary → void-style close
 
-        if not (
-            isinstance(prices, list)
-            and isinstance(token_ids, list)
-            and len(prices) == 2
-            and len(token_ids) == 2
-        ):
-            return ""  # closed but non-binary / malformed → void-style close
+        # ``winner: True`` is the canonical signal. Fall back to ``price``
+        # (1.0 vs 0.0) if winner flags aren't populated yet on a freshly
+        # closed market.
+        for tok in tokens:
+            if tok.get("winner") is True:
+                tid = tok.get("token_id")
+                if tid:
+                    return str(tid)
 
         try:
-            p0 = float(prices[0])
-            p1 = float(prices[1])
-        except (ValueError, TypeError):
+            prices = [float(t.get("price") or 0.0) for t in tokens]
+        except (TypeError, ValueError):
             return ""
-
-        # Tennis markets always resolve to one of {[1,0], [0,1]} once a
-        # winner is announced; anything else (e.g. [0.5, 0.5]) is treated
-        # as a void.
-        if p0 >= 0.99 and p1 <= 0.01:
-            return str(token_ids[0])
-        if p1 >= 0.99 and p0 <= 0.01:
-            return str(token_ids[1])
+        if prices[0] >= 0.99 and prices[1] <= 0.01:
+            return str(tokens[0].get("token_id") or "")
+        if prices[1] >= 0.99 and prices[0] <= 0.01:
+            return str(tokens[1].get("token_id") or "")
         return ""
 
     def _match_and_compare(
