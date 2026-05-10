@@ -209,10 +209,16 @@ def place_test_bet(
     candidate: TestMarketCandidate,
     bet_size_usd: float = DEFAULT_BET_SIZE_USD,
 ) -> dict:
-    """Place a single BUY on `candidate.favourite_token_id` for `bet_size_usd`.
+    """Place a market BUY on `candidate.favourite_token_id` for `bet_size_usd`.
 
-    Returns a status dict suitable for posting to Telegram:
-        {"status": "placed"|"failed"|"skipped:<reason>", ...}
+    Uses CLOB V2's market-order path (FOK = fill-or-kill) so the test is
+    unambiguous: either the order fills immediately and the user sees the
+    position on Polymarket's UI, or the CLOB rejects it outright. The old
+    GTC limit path silently rested below the ask on tick-0.001 markets
+    because the legacy ``place_buy_yes`` clamped the price to 0.99 — that
+    bug is bypassed entirely by going through ``create_and_post_market_order``.
+
+    Returns ``{"status": "placed"|"failed:<reason>"|"skipped:<reason>", ...}``.
     """
     if clob_client is None:
         return {"status": "skipped:no_clob_client"}
@@ -229,26 +235,37 @@ def place_test_bet(
     if not ok:
         return {"status": f"skipped:daily_cap({reason})"}
 
-    # Use the favourite-side ask as the reference price; place_buy_yes will
-    # add the standard 1.02× crossing buffer and clamp to [0.01, 0.99].
-    ref_price = min(max(candidate.best_ask, 0.01), MAX_BUY_PRICE)
+    from py_clob_client_v2 import MarketOrderArgs, OrderType
+    from py_clob_client_v2.order_builder.constants import BUY
+    from src.utils import error_message
 
-    from src.tennis.order_placer import place_buy_yes
-    live = place_buy_yes(
-        clob_client=clob_client,
-        token_id=candidate.favourite_token_id,
-        bet_size_usd=bet_size_usd,
-        ref_price=ref_price,
-    )
-    if not live or not live.get("order_id"):
-        err = (live or {}).get("error") or "no_order_id_in_response"
-        return {"status": f"failed:{err}", "ref_price": ref_price}
+    try:
+        resp = clob_client.create_and_post_market_order(
+            MarketOrderArgs(
+                token_id=candidate.favourite_token_id,
+                amount=bet_size_usd,
+                side=BUY,
+            ),
+            order_type=OrderType.FOK,
+        )
+    except Exception as exc:
+        return {"status": f"failed:{error_message(exc)}"}
+
+    order_id = ""
+    if isinstance(resp, dict):
+        order_id = resp.get("orderID") or resp.get("order_id") or resp.get("id") or ""
+    elif isinstance(resp, str):
+        order_id = resp
+
+    if not order_id:
+        return {"status": "failed:no_order_id_in_response", "raw": str(resp)[:200]}
 
     record_spend(bet_size_usd, source="test-live")
     return {
         "status": "placed",
-        "order_id": live["order_id"],
-        "shares": live["shares"],
-        "order_price": live["order_price"],
-        "ref_price": ref_price,
+        "order_id": order_id,
+        "amount_usd": bet_size_usd,
+        "side": candidate.favourite_side,
+        "order_type": "FOK",
+        "raw": resp if isinstance(resp, dict) else None,
     }

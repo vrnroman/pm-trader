@@ -423,6 +423,12 @@ def _handle_command(text: str):
         _handle_setkey(text)
     elif text.startswith("/shutdown"):
         _handle_shutdown(text)
+    elif text.startswith("/fix"):
+        _handle_fix(text)
+    elif text.startswith("/tasks"):
+        _handle_tasks_list()
+    elif text.startswith("/cancel"):
+        _handle_cancel()
     elif text.startswith("/help") or text.startswith("/start"):
         _handle_help()
     else:
@@ -1315,20 +1321,116 @@ def _handle_test_live():
     status = result.get("status", "")
 
     if status == "placed":
-        send_message(
-            "🧪 <b>/test-live</b>: 🟢 <b>LIVE order placed</b>\n"
-            f"  Order ID: <code>{_esc(str(result.get('order_id', '')))}</code>\n"
-            f"  Shares: {result.get('shares', 0)}\n"
-            f"  Limit price: {(result.get('order_price') or 0):.4f}\n"
-            f"  Side: BUY {candidate.favourite_side}\n"
-            f"  Token: <code>{_esc(candidate.favourite_token_id[:20])}...</code>"
-        )
+        raw = result.get("raw") or {}
+        making = raw.get("making_amount") or raw.get("makingAmount") or ""
+        taking = raw.get("taking_amount") or raw.get("takingAmount") or ""
+        status_field = raw.get("status") or ""
+        lines = [
+            "🧪 <b>/test-live</b>: 🟢 <b>LIVE order placed (FOK)</b>",
+            f"  Order ID: <code>{_esc(str(result.get('order_id', '')))}</code>",
+            f"  Spent: <b>${result.get('amount_usd', 0):.2f}</b> (BUY {candidate.favourite_side})",
+        ]
+        if status_field:
+            lines.append(f"  CLOB status: <code>{_esc(str(status_field))}</code>")
+        if making:
+            lines.append(f"  making/taking: {_esc(str(making))}/{_esc(str(taking))}")
+        lines.append(f"  Token: <code>{_esc(candidate.favourite_token_id[:20])}...</code>")
+        send_message("\n".join(lines))
     elif status.startswith("skipped:"):
         send_message(f"🧪 <b>/test-live</b>: 🟡 skipped — <code>{_esc(status)}</code>")
     elif status.startswith("failed:"):
         send_message(f"🧪 <b>/test-live</b>: ❌ failed — <code>{_esc(status)}</code>")
     else:
         send_message(f"🧪 <b>/test-live</b>: unknown status — <code>{_esc(status)}</code>")
+
+
+# --- Remote-fix (claude-runner on claude-agent VM) ---
+
+def _handle_fix(text: str):
+    """Handle /fix <free-text> — open a remote-fix task."""
+    if not CONFIG.runner_url or not CONFIG.runner_shared_secret:
+        send_message("Remote-fix runner not configured. Set RUNNER_URL and RUNNER_SHARED_SECRET.")
+        return
+    parts = text.split(maxsplit=1)
+    if len(parts) < 2 or not parts[1].strip():
+        send_message("Usage: <code>/fix &lt;describe what to change&gt;</code>")
+        return
+    prompt = parts[1].strip()
+    try:
+        from src import remote_fix
+        info = remote_fix.create_task(prompt=prompt, chat_id=CONFIG.telegram_chat_id)
+    except RuntimeError as e:
+        send_message(f"Cannot start: <code>{_esc(str(e))}</code>\nUse <code>/cancel</code> to stop the active task first.")
+        return
+    except Exception as e:
+        send_message(f"Runner error: <code>{_esc(str(e))}</code>")
+        return
+    send_message(
+        f"🛠 task <code>{_esc(info['id'])}</code> queued on claude-agent\n"
+        f"Reply with plain text to answer questions, or <code>/cancel</code> to abort."
+    )
+
+
+def _handle_tasks_list():
+    """Handle /tasks — show current and recent tasks."""
+    if not CONFIG.runner_url:
+        send_message("Remote-fix runner not configured.")
+        return
+    try:
+        from src import remote_fix
+        tasks = remote_fix.list_tasks()
+    except Exception as e:
+        send_message(f"Runner error: <code>{_esc(str(e))}</code>")
+        return
+    if not tasks:
+        send_message("No remote-fix tasks.")
+        return
+    lines = ["<b>Remote-fix tasks</b>"]
+    for t in tasks[-10:]:
+        q = (t.get("last_question") or "").strip()
+        q_str = f"\n   <i>last Q: {_esc(q[:140])}</i>" if q else ""
+        lines.append(
+            f"\n• <code>{_esc(t['id'])}</code> [{_esc(t['status'])}]"
+            f"  <i>{_esc((t.get('prompt') or '')[:80])}</i>"
+            f"{q_str}"
+        )
+    send_message("\n".join(lines))
+
+
+def _handle_cancel():
+    """Handle /cancel — cancel the active remote-fix task."""
+    if not CONFIG.runner_url:
+        send_message("Remote-fix runner not configured.")
+        return
+    try:
+        from src import remote_fix
+        cur = remote_fix.current_task_id()
+        if not cur:
+            send_message("No active remote-fix task.")
+            return
+        ok = remote_fix.cancel(cur)
+    except Exception as e:
+        send_message(f"Runner error: <code>{_esc(str(e))}</code>")
+        return
+    send_message(f"Cancelled task <code>{_esc(cur)}</code>." if ok else "Task not found.")
+
+
+def _route_as_task_reply(text: str):
+    """Forward a plain-text Telegram message to the active remote-fix task."""
+    if not CONFIG.runner_url or not CONFIG.runner_shared_secret:
+        return
+    try:
+        from src import remote_fix
+        cur = remote_fix.current_task_id()
+        if not cur:
+            return  # Nothing to do — bot ignores chatter when no task is open.
+        ok = remote_fix.reply(cur, text)
+    except Exception as e:
+        logger.warning(f"reply routing failed: {e}")
+        return
+    if ok:
+        # Send a small acknowledgement so the user knows the reply landed.
+        send_message(f"↪️ relayed to task <code>{_esc(cur)}</code>")
 
 
 def _handle_help():
@@ -1356,6 +1458,11 @@ def _handle_help():
         "<code>/setkey clear CONFIRM</code> \u2014 Wipe in-memory private key\n"
         "<code>/setkey 0xHEX CONFIRM</code> \u2014 Replace key in memory\n"
         "<code>/shutdown CONFIRM</code> \u2014 Graceful exit (container will restart)\n\n"
+        "<b>Remote-fix (claude-agent)</b>\n"
+        "<code>/fix &lt;text&gt;</code> \u2014 Open a remote-fix task\n"
+        "<code>/tasks</code> \u2014 Show current/recent fix tasks\n"
+        "<code>/cancel</code> \u2014 Cancel the active fix task\n"
+        "<i>Plain text replies are routed to the active task as answers.</i>\n\n"
         "<code>/help</code> \u2014 Show this message\n\n"
         f"Strategy #1: {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"
         f"Strategy #2: {'ON' if CONFIG.strategy2_enabled else 'OFF'}\n"
@@ -1383,14 +1490,23 @@ def _process_update(update: dict) -> None:
     if chat_id != CONFIG.telegram_chat_id:
         return
 
-    if not text.startswith("/"):
+    if not text:
         return
 
-    logger.info(f"Telegram command: {text}")
+    if text.startswith("/"):
+        logger.info(f"Telegram command: {text}")
+        try:
+            _handle_command(text)
+        except Exception as e:
+            logger.exception(f"Command handler error: {e}")
+            send_message(f"Error: <code>{_esc(str(e))}</code>")
+        return
+
+    # Plain text: if there's an active remote-fix task, route as a reply to it.
     try:
-        _handle_command(text)
+        _route_as_task_reply(text)
     except Exception as e:
-        logger.exception(f"Command handler error: {e}")
+        logger.exception(f"Task reply routing error: {e}")
         send_message(f"Error: <code>{_esc(str(e))}</code>")
 
 
@@ -1457,6 +1573,9 @@ def _register_bot_menu():
                 {"command": "pnl", "description": "Unified P&L across all strategies"},
                 {"command": "history", "description": "Last 10 copy trades"},
                 {"command": "takeprofit", "description": "Close positions with >30% profit"},
+                {"command": "fix", "description": "Open a remote-fix task on claude-agent (e.g. /fix tennis_pnl rounding is off)"},
+                {"command": "tasks", "description": "Show current/recent remote-fix tasks"},
+                {"command": "cancel", "description": "Cancel the active remote-fix task"},
                 {"command": "help", "description": "Show all commands"},
             ],
         }, timeout=10)
