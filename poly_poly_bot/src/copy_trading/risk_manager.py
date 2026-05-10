@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Optional
 
 from src.config import CONFIG
+from src.copy_trading.daily_spend_guard import can_spend
 from src.logger import logger
 from src.models import CopyDecision, DetectedTrade
 from src.utils import round_cents, today_utc
@@ -218,6 +219,12 @@ def _evaluate_trade_with_state(
             copy_size=0,
             reason=f"Final copy size ${copy_size:.2f} < min ${CONFIG.min_order_size_usd:.2f}",
         )
+
+    # Global daily-spend cap (BUY only; SELLs are exits, not new exposure)
+    if trade.side == "BUY":
+        ok, reason = can_spend(copy_size)
+        if not ok:
+            return CopyDecision(should_copy=False, copy_size=0, reason=reason)
 
     return CopyDecision(should_copy=True, copy_size=round_cents(copy_size))
 

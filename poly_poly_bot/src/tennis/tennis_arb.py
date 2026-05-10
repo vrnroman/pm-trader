@@ -229,18 +229,25 @@ class TennisArbStrategy:
                 and bet_size >= CONFIG.min_order_size_usd
                 and comp.polymarket_token_id
             ):
-                from src.tennis.order_placer import place_buy_yes
-                live = place_buy_yes(
-                    clob_client=self.clob_client,
-                    token_id=comp.polymarket_token_id,
-                    bet_size_usd=bet_size,
-                    ref_price=comp.polymarket_price,
-                )
-                if live and live.get("order_id"):
-                    signal["live"] = True
-                    signal["live_order_id"] = live["order_id"]
-                    signal["live_order_price"] = live["order_price"]
-                    signal["live_shares"] = live["shares"]
+                from src.copy_trading.daily_spend_guard import can_spend, record_spend
+                ok, reason = can_spend(bet_size)
+                if not ok:
+                    logger.info(f"Tennis arb: live BUY skipped — {reason}")
+                    live = None
+                else:
+                    from src.tennis.order_placer import place_buy_yes
+                    live = place_buy_yes(
+                        clob_client=self.clob_client,
+                        token_id=comp.polymarket_token_id,
+                        bet_size_usd=bet_size,
+                        ref_price=comp.polymarket_price,
+                    )
+                    if live and live.get("order_id"):
+                        signal["live"] = True
+                        signal["live_order_id"] = live["order_id"]
+                        signal["live_order_price"] = live["order_price"]
+                        signal["live_shares"] = live["shares"]
+                        record_spend(bet_size, source="tennis")
 
             # Paper-book: open / flip-close / hold based on existing position.
             # FLIP closes the existing YES at the implied current PM price for

@@ -542,6 +542,11 @@ async def place_trade_orders(
             else:
                 record_placement_fn(trade, copy_size)
 
+            # Global daily-spend cap accounting (BUY only)
+            if trade.side == "BUY":
+                from src.copy_trading.daily_spend_guard import record_spend
+                record_spend(copy_size, source=f"copy:{tier or 'legacy'}")
+
             # 2. Enqueue for verification
             pending = PendingOrder(
                 trade=trade,

@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from src.config import CONFIG
+from src.copy_trading.daily_spend_guard import can_spend
 from src.copy_trading.strategy_config import (
     StrategyTier,
     TierConfig,
@@ -194,6 +195,12 @@ def _evaluate_tiered_trade_with_state(
         )
 
     size = round_cents(size)
+
+    # Global daily-spend cap (BUY only; SELLs are exits, not new exposure)
+    if trade.side == "BUY":
+        ok, reason = can_spend(size)
+        if not ok:
+            return skip(reason)
 
     # 6. Alert-only mode (1c tier)
     if cfg.alert_only:
