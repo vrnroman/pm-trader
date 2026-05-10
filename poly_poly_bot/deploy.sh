@@ -43,6 +43,31 @@ else
     echo "[1/5] VM exists, reusing."
 fi
 
+# ─── Step 1.5: Pre-deploy gates (lint + smoke) ───────────────────
+# These catch the class of latent bug that took down the bot on
+# 2026-05-10: undefined names and lazy imports of names that don't
+# exist. Fail fast here before we ship a broken image to prod.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+RUFF=""
+if [ -x "$SCRIPT_DIR/.venv/bin/ruff" ]; then
+    RUFF="$SCRIPT_DIR/.venv/bin/ruff"
+elif command -v ruff >/dev/null 2>&1; then
+    RUFF="ruff"
+fi
+
+if [ -n "$RUFF" ]; then
+    echo "[1.5/5] Lint: ruff F821 (undefined names)..."
+    if ! "$RUFF" check --select F821 "$SCRIPT_DIR/src" "$SCRIPT_DIR/main.py"; then
+        echo "❌ Lint failed; refusing to deploy."
+        exit 1
+    fi
+else
+    echo "[1.5/5] ruff not found locally; lint will still run in Docker build (install local: pip install ruff)"
+fi
+
+# The full smoke + lint gate runs inside the Docker build on the VM
+# (Dockerfile RUN steps). No way to skip it from here.
+
 # ─── Step 2: Archive code ────────────────────────────────────────
 echo "[2/5] Archiving code..."
 ARCHIVE="/tmp/poly-poly-bot-deploy.tar.gz"
