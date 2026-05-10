@@ -396,6 +396,8 @@ def _handle_command(text: str):
         _handle_live(text)
     elif text.startswith("/preview"):
         _handle_preview(text)
+    elif text.startswith("/check"):
+        _handle_check()
     elif text.startswith("/help") or text.startswith("/start"):
         _handle_help()
     else:
@@ -948,6 +950,133 @@ def _handle_preview(text: str):
     logger.info("Strategy #3 switched to PREVIEW via Telegram /preview command")
 
 
+def _handle_check():
+    """Handle /check — read-only verification of trading setup.
+
+    Runs through PRIVATE_KEY, PROXY_WALLET, CLOB auth, USDC balance, and
+    on-chain approvals on both Polymarket exchanges. Posts nothing on chain
+    and submits no orders.
+    """
+    from src.config import CONFIG, get_private_key
+
+    lines: list[str] = ["🔧 <b>Setup Check</b>", ""]
+    ok_all = True
+
+    # 1. Private key + derived EOA
+    pk = get_private_key()
+    eoa = ""
+    if not pk:
+        lines.append("❌ <b>PRIVATE_KEY</b>: not configured")
+        send_message("\n".join(lines))
+        return
+    try:
+        from web3 import Web3
+        eoa = Web3().eth.account.from_key(f"0x{pk}").address
+        lines.append(f"✅ PRIVATE_KEY → EOA <code>{eoa}</code>")
+    except Exception as e:
+        lines.append(f"❌ PRIVATE_KEY invalid: <code>{_esc(str(e))}</code>")
+        send_message("\n".join(lines))
+        return
+
+    # 2. PROXY_WALLET
+    proxy = CONFIG.proxy_wallet
+    if not proxy:
+        lines.append("❌ <b>PROXY_WALLET</b>: not set in .env")
+        ok_all = False
+    else:
+        lines.append(f"✅ PROXY_WALLET <code>{proxy}</code>")
+
+    # 3. SIGNATURE_TYPE
+    sig_type = CONFIG.signature_type
+    sig_label = {0: "EOA (no proxy)", 1: "POLY_PROXY (email login)", 2: "POLY_GNOSIS_SAFE (browser wallet)"}.get(sig_type, f"unknown({sig_type})")
+    lines.append(f"   SIGNATURE_TYPE: {sig_type} — {sig_label}")
+
+    # 4. USDC balance on proxy
+    if proxy:
+        try:
+            from src.constants import ERC20_BALANCE_ABI, USDC_ADDRESS
+            from web3 import Web3
+            w3 = Web3(Web3.HTTPProvider(CONFIG.rpc_url))
+            usdc = w3.eth.contract(
+                address=Web3.to_checksum_address(USDC_ADDRESS),
+                abi=ERC20_BALANCE_ABI,
+            )
+            raw = usdc.functions.balanceOf(Web3.to_checksum_address(proxy)).call()
+            usdc_bal = raw / 1_000_000
+            mark = "✅" if usdc_bal > 0 else "⚠️"
+            lines.append(f"{mark} USDC balance: <b>${usdc_bal:.2f}</b>")
+            if usdc_bal == 0:
+                lines.append("   <i>Proxy is empty — fund it before going live.</i>")
+                ok_all = False
+        except Exception as e:
+            lines.append(f"❌ USDC balance lookup failed: <code>{_esc(str(e))}</code>")
+            ok_all = False
+
+    # 5. CLOB authentication (read-only — derives API creds from L1 sig)
+    clob_client = None
+    try:
+        from src.copy_trading.clob_client import create_clob_client
+        clob_client = create_clob_client()
+        if clob_client is None:
+            lines.append("❌ CLOB client: not created (private key issue?)")
+            ok_all = False
+        else:
+            lines.append("✅ CLOB client authenticated")
+    except Exception as e:
+        lines.append(f"❌ CLOB auth failed: <code>{_esc(str(e))}</code>")
+        ok_all = False
+
+    # 6. On-chain approvals (read-only)
+    if proxy:
+        try:
+            from src.constants import (
+                CTF_CONTRACT,
+                CTF_EXCHANGE,
+                ERC1155_APPROVAL_ABI,
+                ERC20_APPROVE_ABI,
+                NEG_RISK_CTF_EXCHANGE,
+                USDC_ADDRESS,
+            )
+            from web3 import Web3
+            w3 = Web3(Web3.HTTPProvider(CONFIG.rpc_url))
+            usdc = w3.eth.contract(
+                address=Web3.to_checksum_address(USDC_ADDRESS),
+                abi=ERC20_APPROVE_ABI,
+            )
+            ctf = w3.eth.contract(
+                address=Web3.to_checksum_address(CTF_CONTRACT),
+                abi=ERC1155_APPROVAL_ABI,
+            )
+            threshold = 10**6 * 10**6  # 1M USDC
+            owner = Web3.to_checksum_address(proxy)
+            for name, exchange in [("CTF", CTF_EXCHANGE), ("NegRisk", NEG_RISK_CTF_EXCHANGE)]:
+                addr = Web3.to_checksum_address(exchange)
+                allowance = usdc.functions.allowance(owner, addr).call()
+                approved = ctf.functions.isApprovedForAll(owner, addr).call()
+                u_ok = "✅" if allowance >= threshold else "❌"
+                c_ok = "✅" if approved else "❌"
+                lines.append(f"   {name}: USDC {u_ok}  CTF {c_ok}")
+                if allowance < threshold or not approved:
+                    ok_all = False
+        except Exception as e:
+            lines.append(f"❌ Approval check failed: <code>{_esc(str(e))}</code>")
+            ok_all = False
+
+    # 7. Authenticated CLOB read — confirms creds work end-to-end
+    if clob_client is not None and proxy:
+        try:
+            from py_clob_client.clob_types import BalanceAllowanceParams, AssetType
+            params = BalanceAllowanceParams(asset_type=AssetType.COLLATERAL)
+            ba = clob_client.get_balance_allowance(params)
+            lines.append(f"✅ CLOB /balance-allowance OK: {ba}")
+        except Exception as e:
+            lines.append(f"⚠️ CLOB authed read failed: <code>{_esc(str(e))}</code>")
+
+    lines.append("")
+    lines.append("<b>READY</b> ✅" if ok_all else "<b>NOT READY</b> ❌ — fix items above before /live 3 CONFIRM")
+    _send_chunked("\n".join(lines))
+
+
 def _handle_help():
     """Handle /help command."""
     send_message(
@@ -966,7 +1095,8 @@ def _handle_help():
         "<b>Mode controls</b>\n"
         "<code>/mode</code> \u2014 Show preview/live mode per strategy\n"
         "<code>/live 3 CONFIRM</code> \u2014 Switch Strategy #3 to live trading\n"
-        "<code>/preview 3</code> \u2014 Switch Strategy #3 back to preview\n\n"
+        "<code>/preview 3</code> \u2014 Switch Strategy #3 back to preview\n"
+        "<code>/check</code> \u2014 Verify trading setup (read-only)\n\n"
         "<code>/help</code> \u2014 Show this message\n\n"
         f"Strategy #1: {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"
         f"Strategy #2: {'ON' if CONFIG.strategy2_enabled else 'OFF'}\n"
@@ -1045,6 +1175,7 @@ def _register_bot_menu():
                 {"command": "mode", "description": "Show preview/live mode per strategy"},
                 {"command": "live", "description": "Switch a strategy to live (e.g. /live 3 CONFIRM)"},
                 {"command": "preview", "description": "Switch a strategy back to preview (e.g. /preview 3)"},
+                {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
                 {"command": "status", "description": "Balance, positions, daily limits"},
                 {"command": "pnl", "description": "Unified P&L across all strategies"},
                 {"command": "history", "description": "Last 10 copy trades"},
