@@ -74,6 +74,31 @@ def send_message(text: str, parse_mode: str = "HTML"):
         logger.warning(f"Telegram send error: {e}")
 
 
+def _send_chunked(text: str, parse_mode: str = "HTML", chunk_size: int = 3800):
+    """Send a potentially long message as multiple Telegram messages.
+
+    Splits on newline boundaries. We rely on the convention that HTML tags
+    used here (<b>, <code>, <i>) open and close on the same line, so a split
+    between lines won't tear a tag.
+    """
+    if len(text) <= chunk_size:
+        send_message(text, parse_mode=parse_mode)
+        return
+
+    buf: list[str] = []
+    cur = 0
+    for line in text.split("\n"):
+        ln = len(line) + 1  # +1 for the newline we re-insert
+        if buf and cur + ln > chunk_size:
+            send_message("\n".join(buf), parse_mode=parse_mode)
+            buf = []
+            cur = 0
+        buf.append(line)
+        cur += ln
+    if buf:
+        send_message("\n".join(buf), parse_mode=parse_mode)
+
+
 def send_strategy2_signals(signals: list[dict], target_date: str):
     """Send Strategy #2 prediction results to Telegram."""
     if not signals:
@@ -807,7 +832,7 @@ def _handle_tennis_pnl():
     if not breakdown:
         lines.append("")
         lines.append("<i>No paper positions yet.</i>")
-        send_message("\n".join(lines))
+        _send_chunked("\n".join(lines))
         return
 
     lines.append("")
@@ -824,8 +849,6 @@ def _handle_tennis_pnl():
             f"\n   Total: <b>${tp:+.2f}</b>  (R ${rp:+.2f} / U ${up:+.2f})"
             f"\n   Open: {n_open}  |  Closed: {n_closed}"
         )
-        # Per-position detail (open first, then closed, capped to keep
-        # message under Telegram's 4096-char limit)
         shown = 0
         for pos in g["open_positions"]:
             if shown >= 6:
@@ -849,7 +872,7 @@ def _handle_tennis_pnl():
             )
             shown += 1
 
-    send_message("\n".join(lines))
+    _send_chunked("\n".join(lines))
 
 
 def _handle_help():
