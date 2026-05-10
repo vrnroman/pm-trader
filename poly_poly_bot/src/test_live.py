@@ -29,9 +29,11 @@ GAMMA_EVENTS_URL = "https://gamma-api.polymarket.com/events"
 DEFAULT_BET_SIZE_USD = 5.0
 
 # Resolution window — the market's endDate must fall within this many
-# hours from "now" to be eligible. Two days is wide enough to pick up
-# both same-day markets and "ends tomorrow" markets across timezones.
-RESOLUTION_WINDOW_HOURS = 48
+# hours from "now" to be eligible. The geopolitics universe is sparse
+# in the 0–48h horizon (most "happens by ..." markets resolve on
+# weekly/monthly grid lines), so a one-week window is what reliably
+# finds something to bet on while still keeping the round-trip short.
+RESOLUTION_WINDOW_HOURS = 168
 
 # Minimum favourite-side price for the market to be considered a safe
 # test target. Above 90% the resolution is overwhelmingly likely to pay

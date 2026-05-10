@@ -1280,7 +1280,7 @@ def _handle_test_live():
 
     send_message(
         f"🧪 <b>/test-live</b>: searching geopolitics markets resolving "
-        f"in ≤{RESOLUTION_WINDOW_HOURS}h with a side ≥{MIN_FAVOURITE_PRICE:.0%}..."
+        f"in ≤{RESOLUTION_WINDOW_HOURS // 24}d with a side ≥{MIN_FAVOURITE_PRICE:.0%}..."
     )
 
     candidate = find_test_market()
