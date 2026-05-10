@@ -840,7 +840,7 @@ async def recover_pending_orders(clob_client: ClobClient) -> None:
     record_buy, record_sell, _, _ = _inventory()
     _, remove_pending_order, _ = _trade_queue()
 
-    pending = load_pending_orders_from_disk()
+    pending = load_pending()
     if not pending:
         logger.info("[recovery] No pending orders to recover")
         return
