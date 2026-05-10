@@ -431,7 +431,10 @@ def _handle_command(text: str):
         _handle_preview(text)
     elif text.startswith("/check"):
         _handle_check()
-    elif text.startswith("/test-live"):
+    elif text.startswith("/testlive") or text.startswith("/test-live"):
+        # Telegram menu registration only accepts [a-z0-9_]; the canonical
+        # command is now /testlive. /test-live is kept as an alias so older
+        # muscle memory keeps working.
         _handle_test_live()
     elif text.startswith("/setkey"):
         _handle_setkey(text)
@@ -1516,7 +1519,7 @@ def _handle_help():
         "<code>/live 3 CONFIRM</code> \u2014 Switch Strategy #3 to live trading\n"
         "<code>/preview 3</code> \u2014 Switch Strategy #3 back to preview\n"
         "<code>/check</code> \u2014 Verify trading setup (read-only)\n"
-        "<code>/test-live</code> \u2014 Fire $5 live BUY on a 90%+ geopolitics market (smoke test)\n\n"
+        "<code>/testlive</code> \u2014 Fire $5 live BUY on a 90%+ geopolitics market (smoke test)\n\n"
         "<b>Safety levers</b>\n"
         "<code>/setkey clear CONFIRM</code> \u2014 Wipe in-memory private key\n"
         "<code>/setkey 0xHEX CONFIRM</code> \u2014 Replace key in memory\n"
@@ -1619,10 +1622,15 @@ def _poll_loop():
 
 
 def _register_bot_menu():
-    """Register all bot commands in the Telegram UI menu."""
+    """Register all bot commands in the Telegram UI menu.
+
+    Telegram rejects the entire batch (HTTP 200 with ok=false) if any single
+    command name violates ^[a-z0-9_]{1,32}$. We surface that rejection in
+    logs and on Telegram so a typo doesn't silently wipe the popup menu.
+    """
     try:
         url = f"{TELEGRAM_API.format(token=CONFIG.telegram_bot_token)}/setMyCommands"
-        requests.post(url, json={
+        resp = requests.post(url, json={
             "commands": [
                 {"command": "predict", "description": "Run weather prediction (e.g. /predict 11 Apr)"},
                 {"command": "tennis", "description": "Show current tennis divergences"},
@@ -1631,7 +1639,7 @@ def _register_bot_menu():
                 {"command": "live", "description": "Switch a strategy to live (e.g. /live 3 CONFIRM)"},
                 {"command": "preview", "description": "Switch a strategy back to preview (e.g. /preview 3)"},
                 {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
-                {"command": "test-live", "description": "Fire $5 live BUY on a 90%+ geopolitics market (smoke test)"},
+                {"command": "testlive", "description": "Fire $5 live BUY on a 90%+ geopolitics market (smoke test)"},
                 {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
                 {"command": "shutdown", "description": "Graceful shutdown (Docker restarts container)"},
                 {"command": "status", "description": "Balance, positions, daily limits"},
@@ -1646,8 +1654,22 @@ def _register_bot_menu():
                 {"command": "help", "description": "Show all commands"},
             ],
         }, timeout=10)
-    except Exception:
-        pass  # non-critical -- menu just won't update
+        body = {}
+        try:
+            body = resp.json()
+        except Exception:
+            pass
+        if resp.ok and body.get("ok"):
+            logger.info("Telegram menu: registered %d commands", len(body))
+        else:
+            err = body.get("description") or f"HTTP {resp.status_code}"
+            logger.error(f"Telegram setMyCommands rejected: {err}")
+            try:
+                send_message(f"⚠️ Telegram menu update failed: <code>{_esc(err)}</code>")
+            except Exception:
+                pass
+    except Exception as e:
+        logger.warning(f"Telegram setMyCommands error: {e}")
 
 
 def start_polling():
