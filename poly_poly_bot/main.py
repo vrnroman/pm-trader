@@ -460,6 +460,7 @@ async def main():
         logger.info("Strategy #3 disabled, skipping tennis arb scanner")
 
     # Start Strategy #1 (Copy Trading) natively via asyncio
+    s1_crashed = False
     if CONFIG.strategy1_enabled:
         logger.info("Starting Strategy #1 (Copy Trading) via asyncio...")
         from src.copy_trading.runner import run_copy_trading
@@ -472,10 +473,15 @@ async def main():
         except Exception as e:
             import traceback
             logger.error(f"Strategy #1 crashed: {e}\n{traceback.format_exc()}")
-            telegram_bot.send_message(f"Strategy #1 crashed: <code>{e}</code>")
+            telegram_bot.send_message(f"Strategy #1 crashed: <code>{e}</code>\n<i>Bot continues — Strategies #2/#3 still running.</i>")
+            s1_crashed = True
     else:
         logger.info("Strategy #1 disabled, skipping copy-trader bot")
-        # Main loop — keep alive while strategies #2/#3 run in threads
+
+    # Keep alive whenever Strategy #1 isn't the main task — either it's
+    # disabled, or it crashed. Strategies #2 and #3 run in daemon threads
+    # and need the main thread to stay up so the container doesn't exit.
+    if not CONFIG.strategy1_enabled or s1_crashed:
         try:
             while not _shutdown_event.is_set():
                 await asyncio.sleep(1)
