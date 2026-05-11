@@ -133,6 +133,10 @@ class SmarketsProvider(OddsProvider):
         # Track last rate-limit window seen so we can self-throttle pre-emptively
         self._last_remaining: int | None = None
         self._last_reset_at: float = 0.0
+        # Cumulative HTTP request counter — read by scan-timing instrumentation
+        # to measure how many Smarkets calls each scan actually makes (caches
+        # mean the number varies from scan to scan).
+        self.call_count: int = 0
 
     # ------------------------------------------------------------------
     # OddsProvider interface
@@ -543,6 +547,7 @@ class SmarketsProvider(OddsProvider):
         """
         self._maybe_sleep_for_rate_limit()
         url = self._base + path
+        self.call_count += 1
         try:
             resp = self._session.get(url, params=params, timeout=_DEFAULT_REQUEST_TIMEOUT)
         except requests.RequestException as exc:
@@ -555,7 +560,8 @@ class SmarketsProvider(OddsProvider):
             wait = self._compute_rate_limit_wait(resp) or 5.0
             logger.warning(f"Smarkets 429 — sleeping {wait:.1f}s")
             time.sleep(min(wait, 60.0))
-            # Retry once after backoff
+            # Retry once after backoff (counts as a separate call against the budget)
+            self.call_count += 1
             resp = self._session.get(url, params=params, timeout=_DEFAULT_REQUEST_TIMEOUT)
             self._update_rate_limit(resp)
 

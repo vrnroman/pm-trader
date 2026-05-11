@@ -120,23 +120,53 @@ class TennisArbStrategy:
 
         Returns list of signal dicts ready for execution or logging.
         """
+        scan_started_at = time.monotonic()
+        metrics: dict = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "preview": runtime_state.is_preview(3),
+        }
+        self._gamma_calls_in_scan = 0
+        self._scan_clob_calls = 0
+        self._scan_clob_s = 0.0
+        smarkets_calls_baseline = getattr(self._provider, "call_count", 0)
+        try:
+            return self._scan_body(metrics, scan_started_at)
+        finally:
+            metrics["total_s"] = round(time.monotonic() - scan_started_at, 3)
+            metrics["smarkets_calls"] = (
+                getattr(self._provider, "call_count", 0) - smarkets_calls_baseline
+            )
+            metrics["gamma_calls"] = self._gamma_calls_in_scan
+            metrics["clob_revalidation_calls"] = self._scan_clob_calls
+            metrics["clob_revalidation_s"] = round(self._scan_clob_s, 3)
+            self._save_metrics(metrics)
+
+    def _scan_body(self, metrics: dict, scan_started_at: float) -> list[dict]:
         logger.info(f"Tennis arb scan starting (provider={self._provider.name})")
 
         # Step 0: Settle any open paper positions whose underlying Polymarket
         # market has resolved since the last scan. We do this before the
         # divergence work so realized PnL is up to date by the time we may
         # decide to flip into a new position on the same event.
+        t_phase = time.monotonic()
         self._resolve_settled_paper_positions()
+        metrics["resolve_s"] = round(time.monotonic() - t_phase, 3)
 
         # Step 1: Fetch sharp odds
+        t_phase = time.monotonic()
         sharp_odds = self._provider.fetch_tennis_odds(tours=self.tournaments)
+        metrics["smarkets_s"] = round(time.monotonic() - t_phase, 3)
+        metrics["sharp_odds_count"] = len(sharp_odds)
         if not sharp_odds:
             logger.info("No sharp odds available")
             return []
         logger.info(f"Fetched {len(sharp_odds)} matches from {self._provider.name}")
 
         # Step 2: Fetch Polymarket tennis markets
+        t_phase = time.monotonic()
         poly_markets = self._fetch_polymarket_tennis_markets()
+        metrics["gamma_s"] = round(time.monotonic() - t_phase, 3)
+        metrics["pm_markets_count"] = len(poly_markets)
         if not poly_markets:
             logger.info("No Polymarket tennis markets found")
             return []
@@ -146,10 +176,16 @@ class TennisArbStrategy:
         # price is ≥ take_profit_ratio × entry_price. Done before the
         # divergence work so a fix-profit close that happens to live on the
         # same market as a fresh signal can be reflected immediately.
+        t_phase = time.monotonic()
         tp_events = self._check_take_profit(poly_markets)
+        metrics["take_profit_s"] = round(time.monotonic() - t_phase, 3)
+        metrics["take_profit_events"] = len(tp_events)
 
         # Step 3: Match and compare
+        t_phase = time.monotonic()
         comparisons = self._match_and_compare(sharp_odds, poly_markets)
+        metrics["match_compare_s"] = round(time.monotonic() - t_phase, 3)
+        metrics["comparisons_count"] = len(comparisons)
         logger.info(f"Matched {len(comparisons)} market-odds pairs")
 
         for comp, pm in comparisons:
@@ -187,14 +223,18 @@ class TennisArbStrategy:
                 and self.revalidation_min_divergence > 0
             ):
                 from src.tennis.order_placer import _fetch_book
+                t_clob = time.monotonic()
+                self._scan_clob_calls += 1
                 try:
                     best_ask, _, _ = _fetch_book(self.clob_client, comp.polymarket_token_id)
                 except Exception as exc:
+                    self._scan_clob_s += time.monotonic() - t_clob
                     logger.warning(
                         f"Tennis arb: live revalidation failed for "
                         f"{pm.get('question','')}: {exc} — skipping signal"
                     )
                     continue
+                self._scan_clob_s += time.monotonic() - t_clob
                 if best_ask <= 0:
                     logger.info(
                         f"Tennis arb: empty live book for {pm.get('question','')} — "
@@ -370,6 +410,9 @@ class TennisArbStrategy:
                 f"not grow by {self.min_edge_step:.0%}"
             )
 
+        metrics["signals_count"] = len(signals)
+        metrics["dropped_dedupe"] = skipped_dedupe
+
         if signals:
             self._save_bet_state(bet_state)
 
@@ -402,6 +445,7 @@ class TennisArbStrategy:
 
         while True:
             try:
+                self._gamma_calls_in_scan = getattr(self, "_gamma_calls_in_scan", 0) + 1
                 resp = requests.get(
                     f"{GAMMA_API_URL}/events",
                     params={
@@ -866,6 +910,24 @@ class TennisArbStrategy:
                     f.write(json.dumps(s) + "\n")
         except OSError as e:
             logger.error(f"Failed to save tennis signals: {e}")
+
+    def _save_metrics(self, metrics: dict) -> None:
+        """Append one scan's timing + call-count metrics to a JSONL file.
+
+        One line per scan, dedicated file so `jq`/`awk` analysis stays simple
+        and the regular trade-history JSONL isn't polluted with operational
+        telemetry. Best-effort: a write failure is logged but never raised
+        so it can't break a scan.
+        """
+        if not self.data_dir:
+            return
+        try:
+            os.makedirs(self.data_dir, exist_ok=True)
+            path = os.path.join(self.data_dir, "tennis_scan_metrics.jsonl")
+            with open(path, "a") as f:
+                f.write(json.dumps(metrics) + "\n")
+        except OSError as e:
+            logger.warning(f"Failed to save tennis scan metrics: {e}")
 
 
 # -- Helpers --
