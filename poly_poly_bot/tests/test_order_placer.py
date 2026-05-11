@@ -60,17 +60,25 @@ def test_tick_size_str_picks_canonical_string():
 
 
 def test_buy_crosses_ask_with_slippage_on_tick_0_001_market():
-    """The Xi-Iran-meets failure: ask 0.994, tick 0.001. Limit must be > 0.994."""
+    """The Xi-Iran-meets failure: ask 0.994, tick 0.001. Limit must be > 0.994.
+
+    At price=0.999, gcd(999, 1e5)=1 so shares must be integer multiples of 10
+    (smallest cents-clean order is 10 shares = $9.99). Use a $20 budget so a
+    valid order fits — this is independent of the price-computation we're testing.
+    """
     client = _mock_client(_book(asks=[(0.995, 100), (0.994, 200)], bids=[(0.005, 100)], tick=0.001))
 
     with patch("src.tennis.order_placer.CONFIG") as cfg:
         cfg.live_order_slippage_bps = 50  # 0.5%
-        result = place_buy_yes(clob_client=client, token_id="T", bet_size_usd=5.0, ref_price=0.99)
+        result = place_buy_yes(clob_client=client, token_id="T", bet_size_usd=20.0, ref_price=0.99)
 
     assert result is not None
     assert result.get("error") is None
     # ask=0.994, slip=max(0.994*0.005, 0.001)=0.00497, limit=0.99897 → tick 0.999
     assert result["order_price"] == pytest.approx(0.999, abs=1e-9)
+    # shares quantized so price*shares is cents-clean (Polymarket maker_amount limit)
+    maker_usd = result["order_price"] * result["shares"]
+    assert maker_usd * 100 == pytest.approx(round(maker_usd * 100), abs=1e-6)
     # Must be FAK so unmatched portion cancels — never rests
     args, kwargs = client.post_order.call_args
     assert OrderType.FAK in args or kwargs.get("order_type") == OrderType.FAK
@@ -86,6 +94,47 @@ def test_buy_crosses_ask_on_tick_0_01_market():
 
     # ask=0.55, slip=max(0.55*0.005, 0.01)=0.01, limit=0.56
     assert result["order_price"] == pytest.approx(0.56, abs=1e-9)
+    # price*shares must round to cents (Polymarket maker_amount precision)
+    maker_usd = result["order_price"] * result["shares"]
+    assert maker_usd * 100 == pytest.approx(round(maker_usd * 100), abs=1e-6)
+
+
+def test_buy_quantizes_to_cents_clean_maker_on_tiafoe_failure():
+    """Regression: Tiafoe vs Pellegrino, ask=0.62, bet=$9, tick=0.01.
+
+    Old code: shares = ceil_cents(9 / 0.63) = 14.29 → maker = 0.63 * 14.29
+    = 9.0027 USDC → Polymarket rejected with "maker amount supports max 2
+    decimals". Fix: quantize shares to 14 → maker = $8.82 cleanly.
+    """
+    client = _mock_client(_book(asks=[(0.63, 200), (0.62, 100)], bids=[(0.37, 100)], tick=0.01))
+
+    with patch("src.tennis.order_placer.CONFIG") as cfg:
+        cfg.live_order_slippage_bps = 50
+        result = place_buy_yes(clob_client=client, token_id="T", bet_size_usd=9.0, ref_price=0.62)
+
+    assert result.get("error") is None
+    # ask=0.62, slip=max(0.62*0.005, 0.01)=0.01 → limit 0.63
+    assert result["order_price"] == pytest.approx(0.63, abs=1e-9)
+    # 9/0.63 = 14.2857 → with gcd(63, 10000)=1, step=10000 → shares must be integer.
+    # Largest integer fitting $9 budget: 14 (= $8.82).
+    assert result["shares"] == pytest.approx(14.0, abs=1e-9)
+    maker_usd = result["order_price"] * result["shares"]
+    assert maker_usd == pytest.approx(8.82, abs=1e-9)
+
+
+def test_buy_skips_when_budget_too_small_for_clob_step():
+    """At price 0.999 (coprime to 100), cents-clean orders need 10-share
+    multiples = $9.99 minimum. A $5 budget can't produce a valid order; the
+    bot must skip rather than send a malformed request to the CLOB.
+    """
+    client = _mock_client(_book(asks=[(0.998, 100)], bids=[(0.001, 100)], tick=0.001))
+
+    with patch("src.tennis.order_placer.CONFIG") as cfg:
+        cfg.live_order_slippage_bps = 50
+        result = place_buy_yes(clob_client=client, token_id="T", bet_size_usd=5.0, ref_price=0.99)
+
+    assert result["error"] == "notional_below_clob_step"
+    client.post_order.assert_not_called()
 
 
 def test_buy_uses_one_tick_when_slippage_bps_below_tick():
@@ -106,7 +155,7 @@ def test_buy_caps_at_one_tick_below_one():
 
     with patch("src.tennis.order_placer.CONFIG") as cfg:
         cfg.live_order_slippage_bps = 50
-        result = place_buy_yes(clob_client=client, token_id="T", bet_size_usd=5.0, ref_price=0.99)
+        result = place_buy_yes(clob_client=client, token_id="T", bet_size_usd=20.0, ref_price=0.99)
 
     # ask=0.999 + slip=0.005 = 1.004, capped at 1 - tick = 0.999
     assert result["order_price"] == pytest.approx(0.999, abs=1e-9)

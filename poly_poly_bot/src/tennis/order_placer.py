@@ -23,7 +23,7 @@ from py_clob_client_v2 import (
 from py_clob_client_v2.order_builder.constants import BUY, SELL
 
 from src.config import CONFIG
-from src.utils import ceil_cents, error_message, round_cents
+from src.utils import error_message, quantize_buy_shares, quantize_sell_shares
 
 logger = logging.getLogger("strategy.tennis_arb")
 
@@ -128,15 +128,22 @@ def place_buy_yes(
     if order_price < tick:
         order_price = tick
 
-    shares = ceil_cents(bet_size_usd / order_price) if order_price > 0 else 0.0
+    shares = quantize_buy_shares(bet_size_usd, order_price, tick)
     if shares <= 0:
-        logger.warning(f"[tennis-live] BUY non-positive shares: {shares}")
-        return None
+        logger.warning(
+            f"[tennis-live] BUY skipped: bet_size=${bet_size_usd:.2f} too small "
+            f"for cents-clean order at price={order_price} tick={tick} "
+            f"(maker must round to cents; smallest valid notional > budget). "
+            f"token={token_id[:12]}..."
+        )
+        return {"error": "notional_below_clob_step", "order_price": order_price}
 
+    actual_notional = order_price * shares
     logger.info(
         f"[tennis-live] BUY YES {shares}@{order_price} "
-        f"(size=${bet_size_usd:.2f}, ref={ref_price:.4f}, ask={best_ask:.4f}, "
-        f"slip={slippage_bps}bps, tick={tick}, token={token_id[:12]}...)"
+        f"(req=${bet_size_usd:.2f}, fill=${actual_notional:.2f}, ref={ref_price:.4f}, "
+        f"ask={best_ask:.4f}, slip={slippage_bps}bps, tick={tick}, "
+        f"token={token_id[:12]}...)"
     )
 
     try:
@@ -185,13 +192,19 @@ def place_sell_yes(
     slip = max(best_bid * slippage_bps / 10_000.0, tick)
     order_price = _round_to_tick(max(best_bid - slip, tick), tick)
 
-    sell_shares = round_cents(shares)
+    sell_shares = quantize_sell_shares(shares, order_price, tick)
     if sell_shares <= 0:
-        return None
+        logger.warning(
+            f"[tennis-live] SELL skipped: position={shares} too small for "
+            f"cents-clean order at price={order_price} tick={tick}. "
+            f"token={token_id[:12]}..."
+        )
+        return {"error": "position_below_clob_step", "order_price": order_price}
 
     logger.info(
         f"[tennis-live] SELL YES {sell_shares}@{order_price} "
-        f"(ref={ref_price:.4f}, bid={best_bid:.4f}, slip={slippage_bps}bps, "
+        f"(have={shares}, proceeds=${order_price * sell_shares:.2f}, "
+        f"ref={ref_price:.4f}, bid={best_bid:.4f}, slip={slippage_bps}bps, "
         f"tick={tick}, token={token_id[:12]}...)"
     )
 
