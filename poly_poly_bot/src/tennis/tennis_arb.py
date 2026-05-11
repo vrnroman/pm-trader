@@ -199,9 +199,21 @@ class TennisArbStrategy:
         bet_state = self._load_bet_state()
         signals = []
         skipped_dedupe = 0
+        # Per-signal "noticed divergence → order submitted" stopwatches. Stored
+        # on metrics so we can answer "how fresh is the price our order hit?"
+        # without grepping logs.
+        signal_latencies: list[dict] = []
         for comp, pm in comparisons:
             if comp.divergence < self.min_divergence:
                 continue
+
+            # Stopwatch starts here: this is the moment we "noticed" the
+            # divergence is large enough to act on. Everything below (live
+            # revalidation, re-bet gate, sizing, order placement) is counted
+            # against detect→order latency.
+            t_detect = time.monotonic()
+            revalidate_s = 0.0
+            order_place_s = 0.0
 
             # Live revalidation: Gamma's outcomePrices is the last-trade
             # price and lags the live ask by several cents on low-volume
@@ -228,14 +240,28 @@ class TennisArbStrategy:
                 try:
                     best_ask, _, _ = _fetch_book(self.clob_client, comp.polymarket_token_id)
                 except Exception as exc:
-                    self._scan_clob_s += time.monotonic() - t_clob
+                    revalidate_s = time.monotonic() - t_clob
+                    self._scan_clob_s += revalidate_s
+                    signal_latencies.append({
+                        "outcome": "revalidate_failed",
+                        "revalidate_ms": round(revalidate_s * 1000),
+                        "order_place_ms": 0,
+                        "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                    })
                     logger.warning(
                         f"Tennis arb: live revalidation failed for "
                         f"{pm.get('question','')}: {exc} — skipping signal"
                     )
                     continue
-                self._scan_clob_s += time.monotonic() - t_clob
+                revalidate_s = time.monotonic() - t_clob
+                self._scan_clob_s += revalidate_s
                 if best_ask <= 0:
+                    signal_latencies.append({
+                        "outcome": "empty_book",
+                        "revalidate_ms": round(revalidate_s * 1000),
+                        "order_place_ms": 0,
+                        "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                    })
                     logger.info(
                         f"Tennis arb: empty live book for {pm.get('question','')} — "
                         f"skipping signal"
@@ -244,6 +270,12 @@ class TennisArbStrategy:
                 live_ask = best_ask
                 live_edge = comp.sharp_prob - best_ask
                 if live_edge < self.revalidation_min_divergence:
+                    signal_latencies.append({
+                        "outcome": "live_edge_too_low",
+                        "revalidate_ms": round(revalidate_s * 1000),
+                        "order_place_ms": 0,
+                        "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                    })
                     logger.info(
                         f"Tennis arb: signal dropped — Gamma edge "
                         f"{comp.divergence:.1%} but live edge {live_edge:.1%} "
@@ -264,6 +296,12 @@ class TennisArbStrategy:
                 prev_edge = float(prev.get("last_divergence", 0.0))
                 if edge < prev_edge + self.min_edge_step:
                     skipped_dedupe += 1
+                    signal_latencies.append({
+                        "outcome": "dedupe_skipped",
+                        "revalidate_ms": round(revalidate_s * 1000),
+                        "order_place_ms": 0,
+                        "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                    })
                     logger.debug(
                         f"Tennis arb: skip re-bet {pm.get('question','')} — "
                         f"edge {edge:.1%} vs prev {prev_edge:.1%} "
@@ -359,12 +397,14 @@ class TennisArbStrategy:
                     signal["live_status"] = f"skipped:daily_cap({reason})"
                 else:
                     from src.tennis.order_placer import place_buy_yes
+                    t_order = time.monotonic()
                     live = place_buy_yes(
                         clob_client=self.clob_client,
                         token_id=comp.polymarket_token_id,
                         bet_size_usd=bet_size,
                         ref_price=pm_price,
                     )
+                    order_place_s = time.monotonic() - t_order
                     if live and live.get("order_id"):
                         signal["live"] = True
                         signal["live_order_id"] = live["order_id"]
@@ -389,6 +429,21 @@ class TennisArbStrategy:
                 if action.get("position_id"):
                     signal["paper_position_id"] = action["position_id"]
 
+            # Per-signal latency: from "noticed divergence" to "order placed
+            # (or terminal skip reason)". Includes revalidation HTTP, dedupe
+            # checks, sizing, daily-spend guard, and the place_buy_yes call.
+            # Stored on the signal so it shows up in tennis_trades.jsonl and
+            # on the scan-metrics record for aggregate analysis.
+            detect_to_order_s = time.monotonic() - t_detect
+            latency = {
+                "outcome": signal.get("live_status", "unknown"),
+                "revalidate_ms": round(revalidate_s * 1000),
+                "order_place_ms": round(order_place_s * 1000),
+                "detect_to_order_ms": round(detect_to_order_s * 1000),
+            }
+            signal["latency_ms"] = latency
+            signal_latencies.append(latency)
+
             signals.append(signal)
 
             # Record in state for future gate checks. Stores the revalidated
@@ -412,6 +467,7 @@ class TennisArbStrategy:
 
         metrics["signals_count"] = len(signals)
         metrics["dropped_dedupe"] = skipped_dedupe
+        metrics["signal_latencies"] = signal_latencies
 
         if signals:
             self._save_bet_state(bet_state)
