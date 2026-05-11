@@ -45,8 +45,8 @@ class TennisArbStrategy:
     def __init__(
         self,
         min_divergence: float = 0.08,
-        max_bet_size: float = 100.0,
-        kelly_fraction: float = 0.25,
+        max_bet_size: float = 165.0,
+        kelly_fraction: float = 0.3,
         tournaments: list[str] | None = None,
         min_volume: float = 50_000.0,
         min_liquidity: float = 10_000.0,

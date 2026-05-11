@@ -176,8 +176,8 @@ class Config:
     tennis_revalidation_min_divergence: float = _opt_float(
         "TENNIS_REVALIDATION_MIN_DIVERGENCE", 0.06
     )
-    tennis_max_bet_size: float = _opt_float("TENNIS_MAX_BET_SIZE", 100.0)
-    tennis_kelly_fraction: float = _opt_float("TENNIS_KELLY_FRACTION", 0.25)
+    tennis_max_bet_size: float = _opt_float("TENNIS_MAX_BET_SIZE", 165.0)
+    tennis_kelly_fraction: float = _opt_float("TENNIS_KELLY_FRACTION", 0.3)
     tennis_scan_interval: int = _opt_int("TENNIS_SCAN_INTERVAL", 300)
     tennis_tournaments: str = _optional("TENNIS_TOURNAMENTS", "ATP,WTA")
     tennis_min_polymarket_volume: float = _opt_float("TENNIS_MIN_POLYMARKET_VOLUME", 50000)
