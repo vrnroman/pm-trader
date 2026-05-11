@@ -42,6 +42,35 @@ def _esc(text: str) -> str:
 
 TELEGRAM_API = "https://api.telegram.org/bot{token}"
 
+# Commands registered in the Telegram popup menu (setMyCommands).
+# Names must match ^[a-z0-9_]{1,32}$ — Telegram rejects the entire batch
+# otherwise. Every name listed here MUST also be dispatched in
+# ``_handle_command``; the parity is enforced by
+# ``tests/test_telegram_handlers.py::test_bot_menu_matches_dispatcher``.
+BOT_MENU_COMMANDS: list[dict] = [
+    {"command": "start", "description": "Show all commands"},
+    {"command": "help", "description": "Show all commands"},
+    {"command": "status", "description": "Balance, positions, daily limits"},
+    {"command": "pnl", "description": "Unified P&L across all strategies"},
+    {"command": "history", "description": "Last 10 copy trades"},
+    {"command": "predict", "description": "Run weather prediction (e.g. /predict 11 Apr)"},
+    {"command": "takeprofit", "description": "Close positions with >30% profit"},
+    {"command": "tennis", "description": "Show current tennis divergences"},
+    {"command": "tennis_pnl", "description": "Tennis paper-book PnL with breakdown by event"},
+    {"command": "mode", "description": "Show preview/live mode per strategy"},
+    {"command": "live", "description": "Switch a strategy to live (e.g. /live 3 CONFIRM)"},
+    {"command": "preview", "description": "Switch a strategy back to preview (e.g. /preview 3)"},
+    {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
+    {"command": "testlive", "description": "Fire $5 live BUY on a 90%+ geopolitics market (smoke test)"},
+    {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
+    {"command": "shutdown", "description": "Graceful shutdown (Docker restarts container)"},
+    {"command": "fix", "description": "Open a remote-fix task on claude-agent (e.g. /fix tennis_pnl rounding is off)"},
+    {"command": "tasks", "description": "Show current/recent remote-fix tasks"},
+    {"command": "cancel", "description": "Cancel the active remote-fix task"},
+    {"command": "deploy_status", "description": "Last deploy verdict + container health"},
+    {"command": "rollback", "description": "Restore the previous container image"},
+]
+
 _poll_thread: threading.Thread | None = None
 _stop_event = threading.Event()
 
@@ -1630,37 +1659,14 @@ def _register_bot_menu():
     """
     try:
         url = f"{TELEGRAM_API.format(token=CONFIG.telegram_bot_token)}/setMyCommands"
-        resp = requests.post(url, json={
-            "commands": [
-                {"command": "predict", "description": "Run weather prediction (e.g. /predict 11 Apr)"},
-                {"command": "tennis", "description": "Show current tennis divergences"},
-                {"command": "tennis_pnl", "description": "Tennis paper-book PnL with breakdown by event"},
-                {"command": "mode", "description": "Show preview/live mode per strategy"},
-                {"command": "live", "description": "Switch a strategy to live (e.g. /live 3 CONFIRM)"},
-                {"command": "preview", "description": "Switch a strategy back to preview (e.g. /preview 3)"},
-                {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
-                {"command": "testlive", "description": "Fire $5 live BUY on a 90%+ geopolitics market (smoke test)"},
-                {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
-                {"command": "shutdown", "description": "Graceful shutdown (Docker restarts container)"},
-                {"command": "status", "description": "Balance, positions, daily limits"},
-                {"command": "pnl", "description": "Unified P&L across all strategies"},
-                {"command": "history", "description": "Last 10 copy trades"},
-                {"command": "takeprofit", "description": "Close positions with >30% profit"},
-                {"command": "fix", "description": "Open a remote-fix task on claude-agent (e.g. /fix tennis_pnl rounding is off)"},
-                {"command": "tasks", "description": "Show current/recent remote-fix tasks"},
-                {"command": "cancel", "description": "Cancel the active remote-fix task"},
-                {"command": "deploy_status", "description": "Last deploy verdict + container health"},
-                {"command": "rollback", "description": "Restore the previous container image"},
-                {"command": "help", "description": "Show all commands"},
-            ],
-        }, timeout=10)
+        resp = requests.post(url, json={"commands": BOT_MENU_COMMANDS}, timeout=10)
         body = {}
         try:
             body = resp.json()
         except Exception:
             pass
         if resp.ok and body.get("ok"):
-            logger.info("Telegram menu: registered %d commands", len(body))
+            logger.info("Telegram menu: registered %d commands", len(BOT_MENU_COMMANDS))
         else:
             err = body.get("description") or f"HTTP {resp.status_code}"
             logger.error(f"Telegram setMyCommands rejected: {err}")

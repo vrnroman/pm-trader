@@ -517,3 +517,55 @@ def test_tennis_pnl_preview_mode_includes_all_positions(tennis_pnl_env):
     out = "\n".join(captured)
     assert "Preview Only Event" in out
     assert "Mode: PREVIEW" in out
+
+
+# ------------------------------------------------------------------
+# Bot menu (setMyCommands) parity with the dispatcher
+# ------------------------------------------------------------------
+
+def test_bot_menu_command_names_are_valid():
+    """Telegram rejects the entire setMyCommands batch if any name fails
+    ^[a-z0-9_]{1,32}$. A typo here silently leaves the menu in its prior
+    state — which is exactly how /test-live broke things in 86f9d4d.
+    """
+    import re
+    from src import telegram_bot
+
+    pattern = re.compile(r"^[a-z0-9_]{1,32}$")
+    for entry in telegram_bot.BOT_MENU_COMMANDS:
+        assert pattern.match(entry["command"]), (
+            f"invalid Telegram command name: {entry['command']!r}"
+        )
+        assert 1 <= len(entry["description"]) <= 256
+
+
+def test_bot_menu_matches_dispatcher():
+    """Every command in the popup menu must be handled by ``_handle_command``,
+    and every dispatched command (besides aliases) must appear in the menu.
+    Catches drift when someone adds a handler but forgets to register it
+    (or vice versa)."""
+    import inspect
+    import re
+    from src import telegram_bot
+
+    source = inspect.getsource(telegram_bot._handle_command)
+    dispatched = set(re.findall(r'text\.startswith\("/([a-z0-9_-]+)"\)', source))
+
+    # Aliases that intentionally don't get their own menu entry — they
+    # share a description with the canonical command.
+    aliases = {"test-live", "deploystatus"}
+    dispatched -= aliases
+
+    menu = {entry["command"] for entry in telegram_bot.BOT_MENU_COMMANDS}
+    # /start is registered in the menu but dispatched via the /help branch.
+    menu_dispatched_via_help = {"start"}
+
+    missing_from_menu = dispatched - menu
+    missing_from_dispatch = menu - dispatched - menu_dispatched_via_help
+
+    assert not missing_from_menu, (
+        f"commands handled but not in menu: {sorted(missing_from_menu)}"
+    )
+    assert not missing_from_dispatch, (
+        f"commands in menu but not handled: {sorted(missing_from_dispatch)}"
+    )
