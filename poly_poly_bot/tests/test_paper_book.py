@@ -78,15 +78,59 @@ def test_open_creates_position_with_correct_shares(book):
     assert pos["status"] == "OPEN"
 
 
-def test_same_side_signal_holds(book):
+def test_same_side_signal_dcas_with_vwap(book):
+    """Same-token re-signal pyramids into the position with VWAP entry.
+
+    The strategy's re-bet gate ensures we only reach this branch when the
+    divergence widened, PM didn't drop, and sharp moved up — so DCA-ing is
+    the deliberate behavior (no longer HOLD). entry_price after the add
+    must be the share-weighted VWAP so the take-profit gate blends.
+    """
     book.process_signal(_signal(token_id="TOKA", price=0.40, size=10.0))
-    res = book.process_signal(_signal(token_id="TOKA", price=0.45, size=10.0))
-    # Same token = same direction → HOLD. We don't stack into the position
-    # (would muddle PnL accounting).
-    assert res["action"] == "HOLD"
+    res = book.process_signal(_signal(token_id="TOKA", price=0.45, size=8.0))
+    assert res["action"] == "ADD"
     assert len(book.open_positions()) == 1
-    # Original entry preserved
-    assert book.open_positions()[0]["entry_price"] == 0.4
+    pos = book.open_positions()[0]
+    # shares_1 = 10/0.40 = 25; shares_2 = 8/0.45 ≈ 17.7778;
+    # total_shares ≈ 42.7778; total_size = 18; VWAP = 18/42.7778 ≈ 0.4208
+    assert pos["shares"] == pytest.approx(25.0 + 8.0 / 0.45, rel=1e-4)
+    assert pos["size_usd"] == pytest.approx(18.0, abs=1e-4)
+    assert pos["entry_price"] == pytest.approx(
+        18.0 / (25.0 + 8.0 / 0.45), rel=1e-4
+    )
+    assert pos["entries"] == 2
+
+
+def test_add_zero_price_signal_is_skipped(book):
+    """A degenerate second signal (price=0) must not blow up the position."""
+    book.process_signal(_signal(token_id="TOKA", price=0.40, size=10.0))
+    res = book.process_signal(_signal(token_id="TOKA", price=0.0, size=10.0))
+    assert res["action"] == "HOLD"
+    pos = book.open_positions()[0]
+    assert pos["entry_price"] == pytest.approx(0.40, abs=1e-6)
+    assert pos["entries"] == 1
+
+
+def test_take_profit_uses_vwap_after_dca(book):
+    """After DCA, TP must trigger off the blended VWAP, not the first entry.
+
+    Without VWAP-based TP, a position that DCA'd at a higher price would
+    fire TP too early on a small move.
+    """
+    book.process_signal(_signal(token_id="TOKA", price=0.20, size=10.0))
+    book.process_signal(_signal(token_id="TOKA", price=0.30, size=10.0))
+    pos = book.open_positions()[0]
+    # shares_1 = 50, shares_2 ≈ 33.333; total_shares ≈ 83.333;
+    # total_size = 20; VWAP ≈ 0.240
+    vwap = 20.0 / (50.0 + 10.0 / 0.30)
+    assert pos["entry_price"] == pytest.approx(vwap, rel=1e-4)
+    # Selling at VWAP × 3 ≈ 0.720 should realize a strict 2× gain on $20.
+    closed = book.take_profit("TOKA", exit_price=round(vwap * 3.0, 6))
+    assert closed is not None
+    assert closed["exit_reason"] == "TAKE_PROFIT"
+    # realized = total_shares × (exit − VWAP) = total_size × 2 (because
+    # exit = 3×VWAP).
+    assert closed["realized_pnl_usd"] == pytest.approx(40.0, rel=1e-3)
 
 
 def test_flip_closes_old_and_opens_new(book):

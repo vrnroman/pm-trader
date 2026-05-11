@@ -14,10 +14,13 @@ Position lifecycle
 - OPEN: a signal arrives for a market we have no open position on. We buy
   ``shares = bet_size_usd / entry_price`` of YES on the favored player's
   Polymarket token.
-- HOLD: a signal arrives for a market where we already hold YES on the
-  *same* token. The existing rebet-gate in ``tennis_arb.py`` already
-  filters out duplicate signals unless the edge has grown materially; if
-  one still gets through we treat it as "already long" and don't stack.
+- ADD: a signal arrives for a market where we already hold YES on the
+  *same* token. The strategy's re-bet gate has already verified the
+  divergence widened, PM didn't drop, and sharp moved up — so this is a
+  pyramid-up bet. We DCA into the existing position: total_size and
+  total_shares both grow, and ``entry_price`` is recomputed as the VWAP
+  (``total_size_usd / total_shares``). The cap on adds is enforced
+  upstream (``max_bets_per_event``).
 - FLIP: a signal arrives for a market where we hold YES on the *opposite*
   player's token. We close the existing position at the implied current
   PM price for our side (``1 - new_signal_price``, since YES_A + YES_B ≈ 1
@@ -113,7 +116,7 @@ class TennisPaperBook:
         """Return the (single) open position for this condition_id, or None.
 
         Paper book holds at most one open position per market. Same-direction
-        signals are skipped (HOLD); opposite-direction signals trigger a FLIP.
+        signals DCA into it (ADD); opposite-direction signals trigger a FLIP.
         """
         if not condition_id:
             return None
@@ -130,7 +133,7 @@ class TennisPaperBook:
 
         Returns an action summary::
 
-            {"action": "OPEN" | "FLIP" | "HOLD",
+            {"action": "OPEN" | "ADD" | "FLIP" | "HOLD",
              "position_id": str,
              "closed_position_id": str | None,
              "realized_pnl_usd": float | None}
@@ -172,12 +175,31 @@ class TennisPaperBook:
                 }
 
             if existing["token_id"] == new_token:
-                # Same direction; the rebet gate already filtered upstream.
-                # Keep the original entry to keep PnL accounting unambiguous
-                # (no DCA into the position).
+                # Same direction → DCA. tennis_arb's re-bet gate has already
+                # verified that the divergence widened, PM didn't drop, and
+                # sharp moved further from PM, and is enforcing a per-event
+                # bet cap. Stack shares onto the existing position and
+                # recompute entry_price as the VWAP so the take-profit gate
+                # (which compares current_price to entry_price) reflects the
+                # blended cost of all legs.
+                if entry_price <= 0 or size_usd <= 0:
+                    return {
+                        "action": "HOLD",
+                        "position_id": existing["id"],
+                        "closed_position_id": None,
+                        "realized_pnl_usd": None,
+                    }
+                pos = self._add(existing, signal)
+                self._save()
+                logger.info(
+                    f"[paper-book] ADD {pos['outcome_player']} YES "
+                    f"+${size_usd:.2f} @ {entry_price:.3f} → "
+                    f"VWAP {pos['entry_price']:.3f} "
+                    f"({pos['shares']:.3f} shares, {pos['entries']} legs)"
+                )
                 return {
-                    "action": "HOLD",
-                    "position_id": existing["id"],
+                    "action": "ADD",
+                    "position_id": pos["id"],
                     "closed_position_id": None,
                     "realized_pnl_usd": None,
                 }
@@ -245,12 +267,37 @@ class TennisPaperBook:
             "entry_price": round(entry_price, 6),
             "size_usd": round(size_usd, 4),
             "shares": shares,
+            "entries": 1,
             "sharp_prob_at_entry": float(signal.get("sharp_prob") or 0.0),
             "divergence_at_entry": float(signal.get("divergence") or 0.0),
             "live": bool(signal.get("live", False)),
             "entry_order_id": signal.get("live_order_id") or "",
         }
         self._state["open_positions"][position_id] = position
+        return position
+
+    def _add(self, position: dict, signal: dict) -> dict:
+        """DCA into an existing same-side position.
+
+        Recomputes entry_price as the share-weighted VWAP across all legs so
+        the take-profit gate (current/entry ratio) blends correctly. The
+        position's ``entries`` counter is incremented for diagnostics.
+        """
+        add_price = float(signal.get("polymarket_price") or 0.0)
+        add_size = float(signal.get("bet_size") or 0.0)
+        if add_price <= 0 or add_size <= 0:
+            raise ValueError(
+                f"can't DCA paper position with non-positive add "
+                f"(price={add_price}, size={add_size})"
+            )
+        add_shares = add_size / add_price
+        total_shares = float(position.get("shares") or 0.0) + add_shares
+        total_size = float(position.get("size_usd") or 0.0) + add_size
+        vwap = total_size / total_shares if total_shares > 0 else add_price
+        position["shares"] = round(total_shares, 6)
+        position["size_usd"] = round(total_size, 4)
+        position["entry_price"] = round(vwap, 6)
+        position["entries"] = int(position.get("entries", 1)) + 1
         return position
 
     def _close(self, position: dict, exit_price: float, reason: str) -> dict:

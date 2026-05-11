@@ -156,6 +156,21 @@ class TestKellySizing:
         size = strategy._calculate_bet_size(sharp_prob=0.28, market_price=0.19)
         assert size == pytest.approx(5.0, abs=1e-6)
 
+    def test_kelly_fraction_override_scales_size_down(self):
+        """The second-bet path passes a smaller kelly_fraction so the add
+        is strictly smaller than the first bet at the same edge."""
+        strategy = TennisArbStrategy(
+            max_bet_size=100.0,
+            kelly_fraction=0.30,
+            preview_mode=True,
+        )
+        full = strategy._calculate_bet_size(0.70, 0.40)
+        small = strategy._calculate_bet_size(0.70, 0.40, kelly_fraction=0.20)
+        assert small < full
+        # The ratio matches the kelly fraction ratio (clamped by min_bet_size).
+        if small > strategy.min_bet_size:
+            assert small == pytest.approx(full * (0.20 / 0.30), rel=1e-4)
+
     def test_kelly_zero_is_not_floored(self):
         """No-edge / negative-edge cases must still return 0 — the floor
         only kicks in when Kelly is positive but tiny."""
@@ -762,3 +777,195 @@ class TestRevalidationGate:
         assert len(signals) == 1
         # Falls through to Gamma price
         assert signals[0]["polymarket_price"] == 0.58
+
+
+# ── Re-bet gate: pyramid-up on widening divergence ───────────────────────
+
+
+def _dellien_odds(prob_a: float):
+    """Smarkets fixture where Dellien (player A) has sharp_prob = prob_a."""
+    odds_a = 1.0 / prob_a
+    odds_b = 1.0 / (1.0 - prob_a)
+    return [
+        MatchOdds.from_decimal_odds(
+            source="smarkets", tournament="Atp Rome", tour="ATP",
+            player_a="Hugo Dellien", player_b="Jesper de Jong",
+            odds_a=odds_a, odds_b=odds_b,
+        )
+    ]
+
+
+def _dellien_pm(yes_price: float):
+    return [{
+        "event_title": "Hugo Dellien vs Jesper de Jong",
+        "event_slug": "rome-2026-dellien", "event_end_date": "",
+        "question": "Will Hugo Dellien beat Jesper de Jong?",
+        "player": "Hugo Dellien", "group_item_title": "Hugo Dellien",
+        "yes_price": yes_price, "volume": 200000, "liquidity": 50000,
+        "market_id": "mkt_1", "condition_id": "0xMATCH1",
+        "token_id_yes": "TOKA",
+    }]
+
+
+class TestRebetPyramid:
+    """The re-bet gate allows a second bet only when sharp is the mover.
+
+    Same-side rebet requires (in order):
+        edge grew ≥ min_edge_step  AND
+        pm_price ≥ first_pm_price  AND
+        sharp_prob > first_sharp_prob
+    capped at max_bets_per_event=2 per condition_id (FLIPs count).
+    """
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_second_bet_fires_when_sharp_widens_with_pm_held(
+        self, mock_odds, mock_pm,
+    ):
+        # Scan 1: sharp 0.60, PM 0.40 → edge 0.20 → first bet.
+        # Scan 2: sharp 0.70, PM 0.40 → edge 0.30, PM unchanged, sharp +0.10.
+        #         All three gates clear → second bet fires.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+                min_edge_step=0.05,
+            )
+            mock_odds.return_value = _dellien_odds(0.60)
+            mock_pm.return_value = _dellien_pm(0.40)
+            first = strategy.scan()
+            assert len(first) == 1
+            assert first[0]["paper_action"] == "OPEN"
+            first_bet = first[0]["bet_size"]
+
+            mock_odds.return_value = _dellien_odds(0.70)
+            mock_pm.return_value = _dellien_pm(0.40)
+            second = strategy.scan()
+            assert len(second) == 1
+            assert second[0]["paper_action"] == "ADD"
+            # Second bet was sized with the smaller second_bet_kelly_fraction
+            # — comparing dollar sizes alone is ambiguous because a sharper
+            # edge grows the Kelly recommendation, which can offset the
+            # fraction cut. Verify against the formula directly.
+            expected_full = strategy._calculate_bet_size(0.70, 0.40)
+            expected_small = strategy._calculate_bet_size(
+                0.70, 0.40, kelly_fraction=strategy.second_bet_kelly_fraction,
+            )
+            assert second[0]["bet_size"] == pytest.approx(expected_small, abs=1e-2)
+            assert expected_small < expected_full
+            assert first_bet == pytest.approx(
+                strategy._calculate_bet_size(0.60, 0.40), abs=1e-2
+            )
+            # Paper book now holds a single DCA'd position.
+            assert strategy.paper_book.open_position_count() == 1
+            pos = strategy.paper_book.open_positions()[0]
+            assert pos["entries"] == 2
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_second_bet_blocked_when_pm_dropped(self, mock_odds, mock_pm):
+        # Scan 1: sharp 0.60, PM 0.40. Scan 2: sharp 0.75, PM 0.35.
+        # Edge grew (0.20 → 0.40), but PM fell — the falling-knife case the
+        # new gate explicitly filters out.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+                min_edge_step=0.05,
+            )
+            mock_odds.return_value = _dellien_odds(0.60)
+            mock_pm.return_value = _dellien_pm(0.40)
+            strategy.scan()
+
+            mock_odds.return_value = _dellien_odds(0.75)
+            mock_pm.return_value = _dellien_pm(0.35)
+            second = strategy.scan()
+            assert second == []
+            assert strategy.paper_book.open_positions()[0]["entries"] == 1
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_third_bet_blocked_by_cap(self, mock_odds, mock_pm):
+        # Cap = 2. Even if every gate clears on scan 3, no signal fires.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+                min_edge_step=0.05,
+                max_bets_per_event=2,
+            )
+            mock_odds.return_value = _dellien_odds(0.60)
+            mock_pm.return_value = _dellien_pm(0.40)
+            strategy.scan()
+            mock_odds.return_value = _dellien_odds(0.70)
+            mock_pm.return_value = _dellien_pm(0.40)
+            strategy.scan()
+            mock_odds.return_value = _dellien_odds(0.85)
+            mock_pm.return_value = _dellien_pm(0.40)
+            third = strategy.scan()
+            assert third == []
+            # Position is still DCA'd with 2 legs.
+            assert strategy.paper_book.open_positions()[0]["entries"] == 2
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_min_edge_step_still_required_on_second_bet(
+        self, mock_odds, mock_pm,
+    ):
+        # Sharp moves up but only marginally — edge grew by <5%. The
+        # existing min_edge_step gate must still apply.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+                min_edge_step=0.05,
+            )
+            mock_odds.return_value = _dellien_odds(0.60)
+            mock_pm.return_value = _dellien_pm(0.40)
+            strategy.scan()
+            # Edge went 0.20 → 0.22 (delta 0.02 < 0.05 step).
+            mock_odds.return_value = _dellien_odds(0.62)
+            mock_pm.return_value = _dellien_pm(0.40)
+            second = strategy.scan()
+            assert second == []
+
+    def test_legacy_state_keys_are_migrated_to_condition_id(self):
+        """Old ``condition_id:token_id`` keys must migrate cleanly so the
+        deploy doesn't accidentally reset bet counters on in-flight markets.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                preview_mode=True, data_dir=tmpdir,
+            )
+            legacy = {
+                "0xCOND:TOKA": {
+                    "last_divergence": 0.12,
+                    "last_price": 0.38,
+                    "last_bet_size": 12.5,
+                    "last_ts": "2026-05-11T01:00:00+08:00",
+                    "times_emitted": 1,
+                    "question": "Will A beat B?",
+                    "event_title": "A vs B",
+                },
+            }
+            with open(strategy._bet_state_path(), "w") as f:
+                json.dump(legacy, f)
+            migrated = strategy._load_bet_state()
+            assert "0xCOND" in migrated
+            entry = migrated["0xCOND"]
+            assert entry["times_emitted"] == 1
+            assert entry["first_token_id"] == "TOKA"
+            # last_price falls through to first_pm_price for the anchor.
+            assert entry["first_pm_price"] == 0.38

@@ -58,6 +58,8 @@ class TennisArbStrategy:
         min_bet_size: float = 5.0,
         clob_client=None,
         revalidation_min_divergence: float = 0.06,
+        second_bet_kelly_fraction: float = 0.2,
+        max_bets_per_event: int = 2,
     ):
         self.min_divergence = min_divergence
         self.max_bet_size = max_bet_size
@@ -90,8 +92,17 @@ class TennisArbStrategy:
         # Take-profit gate: close any open paper position whose current PM
         # YES price is at least this multiple of its entry price. With the
         # default 3.0, a position bought at 0.20 fixes profit when the
-        # market rallies to 0.60.
+        # market rallies to 0.60. After a DCA add, entry_price is the
+        # share-weighted VWAP so the gate blends across legs.
         self.take_profit_ratio = take_profit_ratio
+        # Pyramid-up sizing: when the re-bet gate clears for a 2nd bet on the
+        # same event, size at this Kelly fraction instead of the full
+        # ``kelly_fraction``. We're already long once at this point; the
+        # smaller add caps tail exposure if PM never converges.
+        self.second_bet_kelly_fraction = second_bet_kelly_fraction
+        # Hard cap on bets per Polymarket event (condition_id). FLIPs to the
+        # opposite side count against this cap.
+        self.max_bets_per_event = max(1, int(max_bets_per_event))
 
         # Real-time tennis prices via Smarkets' public REST API. No account /
         # API key / payment required — see src/odds/smarkets.py for the
@@ -286,30 +297,102 @@ class TennisArbStrategy:
                 pm_price = best_ask
                 edge = live_edge
 
-            # Re-bet gate: if we already emitted a signal for this market,
-            # only emit again when edge has grown by at least min_edge_step.
-            # Compares against the post-revalidation `edge` so the gate
-            # tracks real fill-cost edge, not stale Gamma edge.
-            state_key = f"{comp.polymarket_condition_id}:{comp.polymarket_token_id}"
+            # Re-bet gate. State is keyed by condition_id (the Polymarket
+            # event), so a FLIP to the opposite token counts against the
+            # per-event bet cap.
+            #
+            # First bet: no gate beyond min_divergence + live revalidation.
+            #
+            # Re-bet on the *same* side (token_id matches first_token_id):
+            #   1. bets_count must be < max_bets_per_event
+            #   2. live edge must have grown by ≥ min_edge_step vs first bet
+            #   3. PM price didn't drop vs first bet (else we're catching a
+            #      falling knife — PM moved toward sharp, not away)
+            #   4. Sharp probability moved further from PM since first bet
+            #      (the move is sharp leading, not PM converging)
+            #
+            # FLIP (token_id differs from first_token_id): still counts
+            # toward the cap, but the first-bet anchors don't apply (the
+            # thesis is on a different side, comparing prices is meaningless).
+            state_key = comp.polymarket_condition_id
             prev = bet_state.get(state_key)
+            is_second_bet = False
             if prev is not None:
-                prev_edge = float(prev.get("last_divergence", 0.0))
-                if edge < prev_edge + self.min_edge_step:
+                bets_count = int(prev.get("times_emitted") or 0)
+                if bets_count >= self.max_bets_per_event:
                     skipped_dedupe += 1
                     signal_latencies.append({
-                        "outcome": "dedupe_skipped",
+                        "outcome": "cap_reached",
                         "revalidate_ms": round(revalidate_s * 1000),
                         "order_place_ms": 0,
                         "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
                     })
                     logger.debug(
                         f"Tennis arb: skip re-bet {pm.get('question','')} — "
-                        f"edge {edge:.1%} vs prev {prev_edge:.1%} "
+                        f"bets_count {bets_count} ≥ cap {self.max_bets_per_event}"
+                    )
+                    continue
+
+                first_edge = float(prev.get("first_divergence", prev.get("last_divergence", 0.0)))
+                first_pm = float(prev.get("first_pm_price", prev.get("last_pm_price", 0.0)))
+                first_sharp = float(prev.get("first_sharp_prob", prev.get("last_sharp_prob", 0.0)))
+                first_token = prev.get("first_token_id") or prev.get("last_token_id") or ""
+                same_side = (
+                    first_token
+                    and comp.polymarket_token_id
+                    and first_token == comp.polymarket_token_id
+                )
+
+                if edge < first_edge + self.min_edge_step:
+                    skipped_dedupe += 1
+                    signal_latencies.append({
+                        "outcome": "edge_step",
+                        "revalidate_ms": round(revalidate_s * 1000),
+                        "order_place_ms": 0,
+                        "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                    })
+                    logger.debug(
+                        f"Tennis arb: skip re-bet {pm.get('question','')} — "
+                        f"edge {edge:.1%} vs first {first_edge:.1%} "
                         f"(step {self.min_edge_step:.0%})"
                     )
                     continue
 
-            bet_size = self._calculate_bet_size(comp.sharp_prob, pm_price)
+                if same_side:
+                    if pm_price < first_pm:
+                        skipped_dedupe += 1
+                        signal_latencies.append({
+                            "outcome": "pm_dropped",
+                            "revalidate_ms": round(revalidate_s * 1000),
+                            "order_place_ms": 0,
+                            "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                        })
+                        logger.debug(
+                            f"Tennis arb: skip re-bet {pm.get('question','')} — "
+                            f"PM dropped {first_pm:.3f}→{pm_price:.3f}"
+                        )
+                        continue
+                    if comp.sharp_prob <= first_sharp:
+                        skipped_dedupe += 1
+                        signal_latencies.append({
+                            "outcome": "sharp_flat",
+                            "revalidate_ms": round(revalidate_s * 1000),
+                            "order_place_ms": 0,
+                            "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                        })
+                        logger.debug(
+                            f"Tennis arb: skip re-bet {pm.get('question','')} — "
+                            f"sharp didn't move up {first_sharp:.3f}→{comp.sharp_prob:.3f}"
+                        )
+                        continue
+                is_second_bet = True
+
+            kelly_for_this_bet = (
+                self.second_bet_kelly_fraction if is_second_bet else None
+            )
+            bet_size = self._calculate_bet_size(
+                comp.sharp_prob, pm_price, kelly_fraction=kelly_for_this_bet,
+            )
 
             event_slug = pm.get("event_slug", "")
             polymarket_url = (
@@ -446,12 +529,32 @@ class TennisArbStrategy:
 
             signals.append(signal)
 
-            # Record in state for future gate checks. Stores the revalidated
-            # edge/price so the re-bet gate compares apples-to-apples on the
-            # next scan.
+            # Record in state for future gate checks. Stores both the
+            # first-bet anchors (used by the same-side rebet gate to confirm
+            # PM didn't drop and sharp moved up vs original entry) and a
+            # snapshot of the latest bet for debugging.
+            if prev is None:
+                first_div = round(edge, 4)
+                first_pm = round(pm_price, 4)
+                first_sharp = round(comp.sharp_prob, 4)
+                first_token = comp.polymarket_token_id
+                first_ts = signal["timestamp"]
+            else:
+                first_div = float(prev.get("first_divergence", prev.get("last_divergence", round(edge, 4))))
+                first_pm = float(prev.get("first_pm_price", prev.get("last_pm_price", round(pm_price, 4))))
+                first_sharp = float(prev.get("first_sharp_prob", prev.get("last_sharp_prob", round(comp.sharp_prob, 4))))
+                first_token = prev.get("first_token_id") or prev.get("last_token_id") or comp.polymarket_token_id
+                first_ts = prev.get("first_ts") or prev.get("last_ts") or signal["timestamp"]
             bet_state[state_key] = {
+                "first_divergence": first_div,
+                "first_pm_price": first_pm,
+                "first_sharp_prob": first_sharp,
+                "first_token_id": first_token,
+                "first_ts": first_ts,
                 "last_divergence": round(edge, 4),
-                "last_price": round(pm_price, 4),
+                "last_pm_price": round(pm_price, 4),
+                "last_sharp_prob": round(comp.sharp_prob, 4),
+                "last_token_id": comp.polymarket_token_id,
                 "last_bet_size": round(bet_size, 2),
                 "last_ts": signal["timestamp"],
                 "times_emitted": int(prev.get("times_emitted", 0)) + 1 if prev else 1,
@@ -897,11 +1000,20 @@ class TennisArbStrategy:
 
         return comparisons
 
-    def _calculate_bet_size(self, sharp_prob: float, market_price: float) -> float:
+    def _calculate_bet_size(
+        self,
+        sharp_prob: float,
+        market_price: float,
+        kelly_fraction: float | None = None,
+    ) -> float:
         """Calculate bet size using fractional Kelly criterion.
 
         Kelly fraction = (bp - q) / b
         where b = (1/price) - 1 (net odds), p = sharp_prob, q = 1 - p
+
+        ``kelly_fraction`` defaults to ``self.kelly_fraction`` (used for the
+        first bet). The pyramid-up path passes ``self.second_bet_kelly_fraction``
+        so re-bets are sized more conservatively.
 
         The result is clamped to [min_bet_size, max_bet_size]. If Kelly
         says zero or negative we return 0 (no edge → no bet); but a
@@ -920,7 +1032,8 @@ class TennisArbStrategy:
         if kelly <= 0:
             return 0.0
 
-        size = kelly * self.kelly_fraction * self.max_bet_size
+        frac = self.kelly_fraction if kelly_fraction is None else kelly_fraction
+        size = kelly * frac * self.max_bet_size
         size = min(size, self.max_bet_size)
         if size < self.min_bet_size:
             size = self.min_bet_size
@@ -930,17 +1043,61 @@ class TennisArbStrategy:
         return os.path.join(self.data_dir or "", "tennis_bet_state.json")
 
     def _load_bet_state(self) -> dict:
-        """Load persisted per-market last-edge state (for re-bet gate)."""
+        """Load persisted per-market last-edge state (for re-bet gate).
+
+        Migrates legacy ``condition_id:token_id`` keys to plain
+        ``condition_id`` keys on read so the new gate (which keys by event)
+        keeps continuity for in-flight positions after a deploy. The
+        last-bet snapshot fields are reused as the first-bet anchors so the
+        new gates have a baseline immediately.
+        """
         path = self._bet_state_path()
         if not path or not os.path.exists(path):
             return {}
         try:
             with open(path) as f:
                 data = json.load(f)
-                return data if isinstance(data, dict) else {}
         except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"Could not read tennis bet state: {e}")
             return {}
+        if not isinstance(data, dict):
+            return {}
+
+        migrated: dict = {}
+        for key, val in data.items():
+            if not isinstance(val, dict):
+                continue
+            new_key = key.split(":", 1)[0] if ":" in key else key
+            # Use last_price as a fallback for old records that didn't track
+            # last_pm_price explicitly.
+            last_pm = val.get("last_pm_price", val.get("last_price", 0.0))
+            last_sharp = val.get("last_sharp_prob", 0.0)
+            last_token = val.get("last_token_id") or (
+                key.split(":", 1)[1] if ":" in key else ""
+            )
+            entry = {
+                "first_divergence": val.get("first_divergence", val.get("last_divergence", 0.0)),
+                "first_pm_price": val.get("first_pm_price", last_pm),
+                "first_sharp_prob": val.get("first_sharp_prob", last_sharp),
+                "first_token_id": val.get("first_token_id") or last_token,
+                "first_ts": val.get("first_ts") or val.get("last_ts", ""),
+                "last_divergence": val.get("last_divergence", 0.0),
+                "last_pm_price": last_pm,
+                "last_sharp_prob": last_sharp,
+                "last_token_id": last_token,
+                "last_bet_size": val.get("last_bet_size", 0.0),
+                "last_ts": val.get("last_ts", ""),
+                "times_emitted": int(val.get("times_emitted") or 0),
+                "question": val.get("question", ""),
+                "event_title": val.get("event_title", ""),
+            }
+            # If two legacy keys collide on the same condition_id (one per
+            # side), keep the one with the higher times_emitted so the cap
+            # stays correct.
+            existing = migrated.get(new_key)
+            if existing is None or entry["times_emitted"] > existing["times_emitted"]:
+                migrated[new_key] = entry
+        return migrated
 
     def _save_bet_state(self, state: dict) -> None:
         if not self.data_dir:
