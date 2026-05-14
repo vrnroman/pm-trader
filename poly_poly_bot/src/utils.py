@@ -36,47 +36,61 @@ def _tick_decimals(tick: float) -> int:
 
 
 def _clob_share_step(price: float, tick: float) -> tuple[int, int]:
-    """Return (price_int_at_tick, share_step_e4) — the smallest m=shares*10000
-    increment such that price*shares lands on cents. Returns (0, 0) if invalid.
+    """Return (p_int, m_step) for the 2-decimal share grid m = shares * 100.
 
-    Polymarket CLOB enforces: maker_amount (USDC for BUY, shares for SELL)
-    has <=2 decimal cents, taker_amount has <=4 decimals. With shares
-    expressed as m/10000, maker_cents = P*m / (10^d * 100) where P = price
-    in tick units. Integer maker_cents <=> m divisible by step.
+    py-clob-client-v2's RoundConfig sets ``size = 2`` for every tick, so the
+    library round_down's our shares to 2dp before signing. If we hand it a
+    4dp share count the 0.0001-place gets silently dropped and the resulting
+    maker_amount = round_down(size, 2) * price is no longer cents-clean,
+    which Polymarket's CLOB rejects on BUY orders with
+    ``invalid amounts, the market buy orders maker amount supports a max
+    accuracy of 2 decimals``. So we quantize directly on the 2dp grid.
+
+    On that grid: maker_cents = m * P / scale where P = price * 10^d and
+    scale = 10^d. ``m * P`` must be a multiple of ``scale`` for the maker
+    amount to land on whole cents, so the step in m-units is
+    scale // gcd(P, scale).
     """
     d = _tick_decimals(tick)
     scale = 10 ** d
     p_int = int(round(price * scale))
     if p_int <= 0 or p_int >= scale:
         return 0, 0
-    modulus = scale * 100
-    return p_int, modulus // math.gcd(p_int, modulus)
+    return p_int, scale // math.gcd(p_int, scale)
 
 
 def quantize_buy_shares(notional_usd: float, price: float, tick: float) -> float:
-    """Largest share count for a BUY such that:
-      - shares has <=4 decimals
-      - price*shares is cents-clean (<=2 decimals) — Polymarket maker_amount limit
-      - price*shares <= notional_usd (never overspend)
+    """Largest BUY shares such that:
+      - shares has <=2 decimals (matches py-clob-client-v2 RoundConfig.size)
+      - price*shares is cents-clean (Polymarket BUY maker_amount rule)
+      - price*shares <= notional_usd (never overspend, modulo half-cent dust)
     Returns 0.0 if no valid positive size fits the budget at this price/tick.
+
+    Float dust on the budget (Kelly often returns 10.79999…6 when the bet was
+    meant to be $10.80) is absorbed by rounding half-up to the nearest cent
+    before quantization. Max overspend from the cushion is 0.5¢.
     """
     if price <= 0 or tick <= 0 or notional_usd <= 0:
         return 0.0
     p_int, step = _clob_share_step(price, tick)
     if step <= 0:
         return 0.0
-    notional_cents = math.floor(notional_usd * 100 + 1e-9)
+    scale = 10 ** _tick_decimals(tick)
+    notional_cents = int(math.floor(notional_usd * 100 + 0.5))
     if notional_cents <= 0:
         return 0.0
-    modulus = (10 ** _tick_decimals(tick)) * 100
-    m_max = (notional_cents * modulus) // p_int
+    m_max = (notional_cents * scale) // p_int
     m = (m_max // step) * step
-    return m / 10000.0 if m > 0 else 0.0
+    return m / 100.0 if m > 0 else 0.0
 
 
 def quantize_sell_shares(available_shares: float, price: float, tick: float) -> float:
-    """Largest share count for a SELL such that shares <= available_shares,
-    shares has <=4 decimals, and price*shares is cents-clean (taker_amount limit).
+    """Largest SELL shares such that:
+      - shares <= available_shares
+      - shares has <=2 decimals (matches py-clob-client-v2 RoundConfig.size)
+      - price*shares is cents-clean (defensive — taker_amount allows 4dp
+        for SELL today, but keeping it cents-clean preserves the symmetry
+        with BUY and shields us if Polymarket tightens taker precision).
     Returns 0.0 if no valid positive size fits.
     """
     if price <= 0 or tick <= 0 or available_shares <= 0:
@@ -84,11 +98,11 @@ def quantize_sell_shares(available_shares: float, price: float, tick: float) -> 
     _, step = _clob_share_step(price, tick)
     if step <= 0:
         return 0.0
-    m_max = math.floor(available_shares * 10000 + 1e-9)
+    m_max = math.floor(available_shares * 100 + 1e-9)
     if m_max <= 0:
         return 0.0
     m = (m_max // step) * step
-    return m / 10000.0 if m > 0 else 0.0
+    return m / 100.0 if m > 0 else 0.0
 
 
 def today_utc() -> str:

@@ -498,6 +498,17 @@ class TennisArbStrategy:
                         signal["live_order_id"] = live["order_id"]
                         signal["live_order_price"] = live["order_price"]
                         signal["live_shares"] = live["shares"]
+                        # Realised fill (post-FAK matching). Used by the paper-book
+                        # to record the actual position size and entry VWAP instead
+                        # of the requested bet — without this, partial FAK fills
+                        # leave the book over-sized and a later SELL hits "not
+                        # enough balance / allowance" (2026-05-12 Garin incident).
+                        # Falls back to the requested size+limit if get_order /
+                        # get_trades didn't return usable data.
+                        filled = live.get("filled_shares") or live["shares"]
+                        avg_px = live.get("filled_avg_price") or live["order_price"]
+                        signal["live_filled_shares"] = filled
+                        signal["live_filled_avg_price"] = avg_px
                         signal["live_status"] = "placed"
                         record_spend(bet_size, source="tennis")
                     else:

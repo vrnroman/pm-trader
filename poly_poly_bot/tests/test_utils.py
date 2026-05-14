@@ -114,10 +114,14 @@ class TestQuantizeBuyShares:
         assert 0.63 * shares == pytest.approx(8.82, abs=1e-9)
 
     def test_even_price_allows_fractional_shares(self):
-        """price=0.50, tick=0.01: gcd(50,10000)=50 → step=200 → shares step 0.02."""
+        """price=0.50, tick=0.01: gcd(50,100)=50 → step=2 → shares step 0.02.
+
+        Shares grid is 2dp (matches py-clob-client-v2 RoundConfig.size=2);
+        the cents-clean modulus on top of that gives 0.02-share increments at
+        this price.
+        """
         shares = quantize_buy_shares(9.05, 0.50, 0.01)
-        # 9.05/0.50 = 18.1; nearest 0.02 multiple <= 18.1 is 18.10 (m=181000,
-        # which is multiple of 200). maker = 9.05.
+        # 9.05/0.50 = 18.10, already on the 0.02 grid → 18.10 shares, maker $9.05.
         assert shares == pytest.approx(18.10, abs=1e-9)
         assert _is_cents_clean(0.50 * shares)
 
@@ -176,6 +180,58 @@ class TestQuantizeBuyShares:
                 f"maker not cents: tick={tick} price={price} bet={bet} "
                 f"shares={shares} maker={price * shares}"
             )
+
+    def test_shares_always_2dp_so_client_round_down_does_not_break_cents(self):
+        """Regression: py-clob-client-v2 round_down's size to 2dp on every
+        tick before signing. If quantize hands back 4dp shares (e.g. 22.4375)
+        the client truncates to 22.43 and the resulting maker_amount = 22.43
+        * 0.48 = 10.7664 stops being cents-clean → Polymarket rejects with
+        'maker amount supports max 2 decimals'.
+
+        Hard-cap: every output share count must be <=2 decimal places.
+        """
+        for tick in (0.1, 0.01, 0.001, 0.0001):
+            n_ticks = int(round(1 / tick))
+            step = 1 if n_ticks <= 100 else max(1, n_ticks // 100)
+            for k in range(1, n_ticks, step):
+                price = round(k * tick, 4)
+                for bet in (5.0, 9.0, 10.8, 12.23, 50.0):
+                    shares = quantize_buy_shares(bet, price, tick)
+                    if shares == 0.0:
+                        continue
+                    assert abs(shares * 100 - round(shares * 100)) < 1e-6, (
+                        f"shares not 2dp: tick={tick} price={price} bet={bet} "
+                        f"shares={shares}"
+                    )
+
+    def test_keegan_smith_post_fix_regression(self):
+        """2026-05-13 06:45 UTC live failure on Bengaluru 2: Keegan Smith.
+
+        bet_size=10.80 (rounded), live ask=0.47, slip 50bps → limit 0.48,
+        tick=0.01. Pre-fix produced shares=22.4375 (4dp); client truncated
+        to 22.43, maker 22.43 * 0.48 = 10.7664 → CLOB rejected.
+
+        Post-fix on the 2dp grid: shares step at price=0.48 is
+        100/gcd(48,100)=25 → 0.25-share increments. Largest fit ≤ $10.80
+        budget is 22.50 shares ($10.80 maker, cents-clean).
+        """
+        shares = quantize_buy_shares(10.80, 0.48, 0.01)
+        assert shares == pytest.approx(22.50, abs=1e-9)
+        assert 0.48 * shares == pytest.approx(10.80, abs=1e-9)
+
+    def test_kelly_float_dust_does_not_drop_a_grid_step(self):
+        """Kelly often returns 10.7999…6 when the intended bet was $10.80.
+
+        Without the half-cent rounding cushion, `floor(10.7999*100)` was 1079
+        (a full cent short), which on the 0.25-share grid at price 0.48
+        dropped from the optimal 22.50 down to 22.25 — losing 12¢ of edge.
+
+        With the +0.5¢ round-half-up: float dust on the cent boundary maps
+        to the intended cent value (1080), preserving the full grid step.
+        """
+        dust = 10.80 - 1e-6  # ≈ 10.7999999...
+        shares = quantize_buy_shares(dust, 0.48, 0.01)
+        assert shares == pytest.approx(22.50, abs=1e-9)
 
 
 class TestQuantizeSellShares:

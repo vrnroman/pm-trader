@@ -241,7 +241,19 @@ class TennisPaperBook:
                 f"can't open paper position with non-positive entry "
                 f"(price={entry_price}, size={size_usd})"
             )
-        shares = round(size_usd / entry_price, 6)
+        # If this is a successfully-placed live order, prefer the realised
+        # fill from CLOB over the requested bet. FAK orders can partially
+        # fill (book thins out) or fill more shares than asked (matched at
+        # below-limit price), and recording the request rather than the fill
+        # is what made `place_sell_yes` later trip on "not enough balance".
+        filled_shares = float(signal.get("live_filled_shares") or 0.0)
+        filled_avg_price = float(signal.get("live_filled_avg_price") or 0.0)
+        if filled_shares > 0 and filled_avg_price > 0:
+            entry_price = filled_avg_price
+            shares = round(filled_shares, 6)
+            size_usd = round(filled_shares * filled_avg_price, 4)
+        else:
+            shares = round(size_usd / entry_price, 6)
         position_id = uuid.uuid4().hex[:12]
         position = {
             "id": position_id,
@@ -290,7 +302,17 @@ class TennisPaperBook:
                 f"can't DCA paper position with non-positive add "
                 f"(price={add_price}, size={add_size})"
             )
-        add_shares = add_size / add_price
+        # Mirror _open: when the live leg actually got placed, use the realised
+        # fill to grow the VWAP / share total. Without this, a DCA leg recorded
+        # in shares-at-quoted-price drifts further from the on-chain balance.
+        filled_shares = float(signal.get("live_filled_shares") or 0.0)
+        filled_avg_price = float(signal.get("live_filled_avg_price") or 0.0)
+        if filled_shares > 0 and filled_avg_price > 0:
+            add_shares = filled_shares
+            add_size = filled_shares * filled_avg_price
+            add_price = filled_avg_price
+        else:
+            add_shares = add_size / add_price
         total_shares = float(position.get("shares") or 0.0) + add_shares
         total_size = float(position.get("size_usd") or 0.0) + add_size
         vwap = total_size / total_shares if total_shares > 0 else add_price

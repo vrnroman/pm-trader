@@ -12,6 +12,7 @@ that class of bug impossible.
 from __future__ import annotations
 
 import logging
+import time
 from typing import Optional
 
 from py_clob_client_v2 import (
@@ -20,12 +21,24 @@ from py_clob_client_v2 import (
     OrderType,
     PartialCreateOrderOptions,
 )
+from py_clob_client_v2.clob_types import TradeParams
+from py_clob_client_v2.exceptions import PolyApiException
 from py_clob_client_v2.order_builder.constants import BUY, SELL
 
 from src.config import CONFIG
 from src.utils import error_message, quantize_buy_shares, quantize_sell_shares
 
 logger = logging.getLogger("strategy.tennis_arb")
+
+# Polymarket's CLOB returns HTTP 425 ("Too Early") on freshly-listed markets
+# whose order book hasn't fully spun up. The condition clears within a few
+# seconds — single retries with short backoff have flipped both observed
+# instances (2026-05-12 Garin/Midon at 13:16 and 13:18 hit the same market
+# 2 min apart and both failed; a single 1–5s retry should catch the recovery
+# window). Cap at 3 attempts so a genuinely dead market doesn't stall the
+# strategy loop for too long.
+_RETRY_TRANSIENT_STATUSES = {425}
+_RETRY_BACKOFFS_S = (1.0, 3.0)  # 1st retry after 1s, 2nd after 3s; total <=4s
 
 
 def _extract_order_id(resp) -> str:
@@ -39,6 +52,119 @@ def _extract_order_id(resp) -> str:
     if isinstance(resp, str):
         return resp
     return ""
+
+
+def _post_order_with_retry(clob_client: ClobClient, order, order_type: OrderType):
+    """Post an order, retrying on transient CLOB status codes (425).
+
+    Re-posts the same signed order on retry — the FAK order body is
+    salt-keyed so the server treats each attempt as a fresh request, but the
+    underlying limit price was decided once at the call site and isn't
+    refreshed between attempts (acceptable: 425 means the book isn't ready
+    yet, not that the price stale-ed; total retry budget is <5s so the
+    price drift risk is small).
+    """
+    last_exc: BaseException | None = None
+    for attempt in range(len(_RETRY_BACKOFFS_S) + 1):
+        try:
+            return clob_client.post_order(order, order_type)
+        except PolyApiException as exc:
+            status = getattr(exc, "status_code", None)
+            if status not in _RETRY_TRANSIENT_STATUSES:
+                raise
+            last_exc = exc
+            if attempt >= len(_RETRY_BACKOFFS_S):
+                break
+            backoff = _RETRY_BACKOFFS_S[attempt]
+            logger.warning(
+                f"[tennis-live] CLOB {status} transient (attempt "
+                f"{attempt + 1}/{len(_RETRY_BACKOFFS_S) + 1}); waiting "
+                f"{backoff:.1f}s before retry"
+            )
+            time.sleep(backoff)
+    # Exhausted retries — re-raise the last 425 so the caller logs it.
+    assert last_exc is not None
+    raise last_exc
+
+
+def _fetch_fill(
+    clob_client: ClobClient, order_id: str, fallback_price: float
+) -> tuple[float, float]:
+    """Return (filled_shares, avg_fill_price) for a just-placed FAK order.
+
+    The bot used to record paper-book positions sized off the *requested*
+    bet, not the actual fill. FAK orders can fill below the requested size
+    (book thins out before maker_amount is fully consumed), and BUY FAK can
+    even fill *more* shares than requested when the matching price is below
+    the limit (the matcher consumes the maker_amount in USDC and gives more
+    shares back at the cheaper price). Both cases cause paper-book drift
+    that later trips up SELL with "not enough balance" — see the 2026-05-12
+    Garin 50.555/55.555 incident.
+
+    Strategy: pull the placed order via get_order for ``size_matched`` (the
+    canonical filled share count). Then fetch get_trades filtered on the
+    token to derive the size-weighted avg fill price; the order's ``price``
+    field is the limit, not the realised VWAP. On any API failure or empty
+    response, return ``(0.0, fallback_price)`` so the caller can fall back to
+    the planned request size rather than crashing the order path.
+    """
+    if not order_id:
+        return 0.0, fallback_price
+    try:
+        order = clob_client.get_order(order_id)
+    except Exception as exc:
+        logger.warning(
+            f"[tennis-live] get_order({order_id[:10]}…) failed: "
+            f"{error_message(exc)} — falling back to limit price"
+        )
+        return 0.0, fallback_price
+
+    if not isinstance(order, dict):
+        return 0.0, fallback_price
+
+    try:
+        size_matched = float(order.get("size_matched") or 0)
+    except (TypeError, ValueError):
+        size_matched = 0.0
+    if size_matched <= 0:
+        return 0.0, fallback_price
+
+    token_id = order.get("asset_id") or ""
+    # VWAP via get_trades. Filter to our taker_order_id since the listing is
+    # account-wide. Best-effort: if get_trades fails (auth, rate limit) we
+    # fall back to the order's limit price, which over-reports cost on BUYs
+    # that filled below limit and under-reports on SELLs that filled above —
+    # both directions are conservative for the paper-book entry.
+    try:
+        params = TradeParams(asset_id=token_id) if token_id else TradeParams()
+        trades = clob_client.get_trades(params=params, only_first_page=True) or []
+    except Exception as exc:
+        logger.debug(
+            f"[tennis-live] get_trades for {order_id[:10]}… failed: "
+            f"{error_message(exc)} — using limit price as fill price"
+        )
+        return size_matched, float(order.get("price") or fallback_price)
+
+    matched_trades = [t for t in trades if t.get("taker_order_id") == order_id]
+    if not matched_trades:
+        return size_matched, float(order.get("price") or fallback_price)
+
+    total_size = 0.0
+    total_usdc = 0.0
+    for t in matched_trades:
+        try:
+            s = float(t.get("size") or 0)
+            p = float(t.get("price") or 0)
+        except (TypeError, ValueError):
+            continue
+        if s <= 0 or p <= 0:
+            continue
+        total_size += s
+        total_usdc += s * p
+    if total_size <= 0:
+        return size_matched, float(order.get("price") or fallback_price)
+
+    return total_size, total_usdc / total_size
 
 
 def _fetch_book(clob_client: ClobClient, token_id: str) -> tuple[float, float, float]:
@@ -151,7 +277,7 @@ def place_buy_yes(
             OrderArgs(price=order_price, size=shares, side=BUY, token_id=token_id),
             options=PartialCreateOrderOptions(tick_size=_tick_size_str(tick)),
         )
-        resp = clob_client.post_order(order, OrderType.FAK)
+        resp = _post_order_with_retry(clob_client, order, OrderType.FAK)
     except Exception as exc:
         msg = error_message(exc)
         logger.error(f"[tennis-live] BUY failed: {msg}")
@@ -160,7 +286,24 @@ def place_buy_yes(
     order_id = _extract_order_id(resp)
     if not order_id:
         logger.warning(f"[tennis-live] BUY posted but no order_id in resp: {resp}")
-    return {"order_id": order_id, "shares": shares, "order_price": order_price}
+        return {"order_id": "", "shares": shares, "order_price": order_price}
+
+    filled_shares, avg_fill_price = _fetch_fill(
+        clob_client, order_id, fallback_price=order_price
+    )
+    # If fill reconcile came up empty, fall back to the request — better to
+    # record planned shares than nothing. The paper-book will still flip to
+    # the real fill on the next reconcile pass (none today, but reserved).
+    if filled_shares <= 0:
+        filled_shares = shares
+        avg_fill_price = order_price
+    return {
+        "order_id": order_id,
+        "shares": shares,
+        "order_price": order_price,
+        "filled_shares": filled_shares,
+        "filled_avg_price": avg_fill_price,
+    }
 
 
 def place_sell_yes(
@@ -213,7 +356,7 @@ def place_sell_yes(
             OrderArgs(price=order_price, size=sell_shares, side=SELL, token_id=token_id),
             options=PartialCreateOrderOptions(tick_size=_tick_size_str(tick)),
         )
-        resp = clob_client.post_order(order, OrderType.FAK)
+        resp = _post_order_with_retry(clob_client, order, OrderType.FAK)
     except Exception as exc:
         msg = error_message(exc)
         logger.error(f"[tennis-live] SELL failed: {msg}")
@@ -222,4 +365,18 @@ def place_sell_yes(
     order_id = _extract_order_id(resp)
     if not order_id:
         logger.warning(f"[tennis-live] SELL posted but no order_id in resp: {resp}")
-    return {"order_id": order_id, "shares": sell_shares, "order_price": order_price}
+        return {"order_id": "", "shares": sell_shares, "order_price": order_price}
+
+    filled_shares, avg_fill_price = _fetch_fill(
+        clob_client, order_id, fallback_price=order_price
+    )
+    if filled_shares <= 0:
+        filled_shares = sell_shares
+        avg_fill_price = order_price
+    return {
+        "order_id": order_id,
+        "shares": sell_shares,
+        "order_price": order_price,
+        "filled_shares": filled_shares,
+        "filled_avg_price": avg_fill_price,
+    }
