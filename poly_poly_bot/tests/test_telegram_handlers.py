@@ -552,8 +552,8 @@ def test_bot_menu_matches_dispatcher():
     dispatched = set(re.findall(r'text\.startswith\("/([a-z0-9_-]+)"\)', source))
 
     # Aliases that intentionally don't get their own menu entry — they
-    # share a description with the canonical command.
-    aliases = {"test-live"}
+    # share a description with the canonical command. (Empty for now.)
+    aliases: set[str] = set()
     dispatched -= aliases
 
     menu = {entry["command"] for entry in telegram_bot.BOT_MENU_COMMANDS}
