@@ -1274,3 +1274,164 @@ class TestGammaFetchExtractsBidAsk:
         assert m["yes_ask"] == pytest.approx(0.60, abs=1e-9)
         assert m["yes_bid"] == pytest.approx(0.60, abs=1e-9)
         assert m["token_id_no"] == "TN"
+
+
+# ── Derivative-shape filter at fetch ────────────────────────────────────
+
+
+class TestDerivativeMarketFilter:
+    """Polymarket lists many derivative markets per tennis match — Set 1
+    Games O/U, Match O/U, Total Sets, Set 1 Winner, Completed Match.
+    Smarkets only quotes the straight match-winner price, so derivatives
+    can never produce a legitimate signal and would only burn CLOB calls
+    if they leaked into the comparison stage.
+    """
+
+    def _make_market(self, question: str) -> dict:
+        return {
+            "id": "mkt",
+            "conditionId": "cond",
+            "question": question,
+            "outcomePrices": '["0.50", "0.50"]',
+            "bestAsk": 0.51,
+            "bestBid": 0.50,
+            "clobTokenIds": '["TY", "TN"]',
+            "volume": "200000",
+            "liquidity": "50000",
+            "groupItemTitle": "",
+        }
+
+    def _fetch_with_markets(self, markets: list[dict]) -> list[dict]:
+        from unittest.mock import patch as up
+        gamma_event = {"title": "evt", "slug": "evt", "endDate": "", "markets": markets}
+        resp = MagicMock()
+        resp.raise_for_status.return_value = None
+        resp.json.side_effect = [[gamma_event], []]
+        strategy = TennisArbStrategy(preview_mode=True)
+        with up("src.tennis.tennis_arb.requests.get", return_value=resp):
+            return strategy._fetch_polymarket_tennis_markets()
+
+    def test_set_1_games_ou_rejected(self):
+        out = self._fetch_with_markets([
+            self._make_market("Lajovic vs. Altmaier: Set 1 Games O/U 9.5"),
+        ])
+        assert out == []
+
+    def test_match_games_ou_rejected(self):
+        out = self._fetch_with_markets([
+            self._make_market("Lajovic vs. Altmaier: Match O/U 22.5"),
+        ])
+        assert out == []
+
+    def test_total_sets_ou_rejected(self):
+        out = self._fetch_with_markets([
+            self._make_market("Dusan Lajovic vs. Daniel Altmaier: Total Sets O/U 2.5"),
+        ])
+        assert out == []
+
+    def test_set_1_winner_rejected(self):
+        out = self._fetch_with_markets([
+            self._make_market("Set 1 Winner: Lajovic vs Altmaier"),
+        ])
+        assert out == []
+
+    def test_completed_match_rejected(self):
+        out = self._fetch_with_markets([
+            self._make_market("Valencia: Completed Match: Lajovic vs Altmaier"),
+        ])
+        assert out == []
+
+    def test_head_to_head_winner_kept(self):
+        out = self._fetch_with_markets([
+            self._make_market("Valencia: Dusan Lajovic vs Daniel Altmaier"),
+        ])
+        assert len(out) == 1
+        assert out[0]["question"] == "Valencia: Dusan Lajovic vs Daniel Altmaier"
+
+    def test_outright_kept_for_downstream_filter(self):
+        """Outright markets pass the shape filter; _validate_same_event
+        will reject them later because only one player surname appears.
+        """
+        out = self._fetch_with_markets([
+            self._make_market("Will Jannik Sinner win the 2026 French Open?"),
+        ])
+        assert len(out) == 1
+
+    def test_mixed_event_keeps_only_winner(self):
+        out = self._fetch_with_markets([
+            self._make_market("Valencia: Dusan Lajovic vs Daniel Altmaier"),
+            self._make_market("Lajovic vs. Altmaier: Set 1 Games O/U 9.5"),
+            self._make_market("Lajovic vs. Altmaier: Match O/U 22.5"),
+            self._make_market("Set 1 Winner: Lajovic vs Altmaier"),
+            self._make_market("Dusan Lajovic vs. Daniel Altmaier: Total Sets O/U 2.5"),
+        ])
+        assert len(out) == 1
+        assert "vs" in out[0]["question"].lower()
+        assert "o/u" not in out[0]["question"].lower()
+
+
+# ── Revalidation drop log enrichment ────────────────────────────────────
+
+
+class TestRevalidationDropTelemetry:
+    """signal_latencies must carry raw gamma_ask / live_ask / drift_pp on
+    every revalidation drop so future analysis doesn't have to grep logs.
+    """
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_drop_records_prices_and_drift(self, mock_odds, mock_pm):
+        mock_odds.return_value = _odds_sinner_v_rublev(0.71)
+        mock_pm.return_value = _pm_sinner(0.58)  # gamma ask=0.58 via fallback
+        client = MagicMock()
+        # CLOB ask moves to 0.66 → live edge 0.05 < 0.06 floor → drop.
+        client.get_order_book.return_value = _stub_book(ask_price=0.66)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=client,
+                revalidation_min_divergence=0.06,
+            )
+            strategy.scan()
+            metrics_path = os.path.join(tmpdir, "tennis_scan_metrics.jsonl")
+            with open(metrics_path) as f:
+                line = f.readline()
+        rec = json.loads(line)
+        lats = rec.get("signal_latencies", [])
+        # The single comparison that crossed Gamma's 8% threshold should
+        # have dropped at revalidation with the new diagnostic fields.
+        drops = [l for l in lats if l["outcome"] == "live_edge_too_low"]
+        assert len(drops) == 1
+        d = drops[0]
+        assert d["side"] in ("YES", "NO")
+        assert d["gamma_ask"] == pytest.approx(0.58, abs=1e-4)
+        assert d["live_ask"] == pytest.approx(0.66, abs=1e-4)
+        assert d["drift_pp"] == pytest.approx(8.0, abs=1e-2)
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_placed_signal_latency_records_drift(self, mock_odds, mock_pm):
+        """Successful signals also carry drift in the latency entry so we
+        can compare normal drift (small) vs failed-drop drift (large).
+        """
+        mock_odds.return_value = _odds_sinner_v_rublev(0.71)
+        mock_pm.return_value = _pm_sinner(0.58)
+        client = MagicMock()
+        client.get_order_book.return_value = _stub_book(ask_price=0.60)  # tiny drift
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=client,
+                revalidation_min_divergence=0.06,
+            )
+            signals = strategy.scan()
+        assert len(signals) == 1
+        latency = signals[0]["latency_ms"]
+        assert latency["side"] in ("YES", "NO")
+        assert latency["gamma_ask"] == pytest.approx(0.58, abs=1e-4)
+        assert latency["live_ask"] == pytest.approx(0.60, abs=1e-4)
+        assert latency["drift_pp"] == pytest.approx(2.0, abs=1e-2)

@@ -282,17 +282,28 @@ class TennisArbStrategy:
                     continue
                 live_ask = best_ask
                 live_edge = comp.sharp_prob - best_ask
+                # Drift = how much the live ask moved AWAY from Gamma's
+                # cached ask. Positive = CLOB more expensive than Gamma
+                # claimed (the common failure mode that produces the
+                # phantom-edge funnel).
+                drift_pp = round((best_ask - comp.polymarket_price) * 100, 2)
                 if live_edge < self.revalidation_min_divergence:
                     signal_latencies.append({
                         "outcome": "live_edge_too_low",
                         "revalidate_ms": round(revalidate_s * 1000),
                         "order_place_ms": 0,
                         "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                        "side": comp.outcome_side,
+                        "gamma_ask": round(comp.polymarket_price, 4),
+                        "live_ask": round(best_ask, 4),
+                        "drift_pp": drift_pp,
                     })
                     logger.info(
-                        f"Tennis arb: signal dropped — Gamma edge "
-                        f"{comp.divergence:.1%} but live edge {live_edge:.1%} "
-                        f"< {self.revalidation_min_divergence:.1%} "
+                        f"Tennis arb: signal dropped — {comp.outcome_side} "
+                        f"Gamma ask={comp.polymarket_price:.3f} (edge {comp.divergence:+.1%}) → "
+                        f"CLOB ask={best_ask:.3f} (edge {live_edge:+.1%}) "
+                        f"drift={drift_pp:+.1f}pp < floor "
+                        f"{self.revalidation_min_divergence:.1%} "
                         f"({pm.get('question','')})"
                     )
                     continue
@@ -539,6 +550,13 @@ class TennisArbStrategy:
                 "revalidate_ms": round(revalidate_s * 1000),
                 "order_place_ms": round(order_place_s * 1000),
                 "detect_to_order_ms": round(detect_to_order_s * 1000),
+                "side": comp.outcome_side,
+                "gamma_ask": round(comp.polymarket_price, 4),
+                "live_ask": round(live_ask, 4) if live_ask is not None else None,
+                "drift_pp": (
+                    round((live_ask - comp.polymarket_price) * 100, 2)
+                    if live_ask is not None else None
+                ),
             }
             signal["latency_ms"] = latency
             signal_latencies.append(latency)
@@ -677,6 +695,17 @@ class TennisArbStrategy:
                         if volume < self.min_volume:
                             continue
                         if liquidity < self.min_liquidity:
+                            continue
+
+                        # Reject derivative markets (Set 1 Winner, Set/Match
+                        # Games O/U, Total Sets O/U, Completed Match, …).
+                        # Smarkets only quotes the match-winner price, so
+                        # derivatives have no sharp counterpart and can
+                        # only ever produce phantom signals. The volume
+                        # gate happens to filter them all today, but
+                        # making this explicit prevents a future
+                        # min_volume tweak from letting them leak in.
+                        if _is_derivative_market(market.get("question", "")):
                             continue
 
                         # Parse prices. outcomePrices is the mid (avg of
@@ -1229,6 +1258,34 @@ class TennisArbStrategy:
 
 
 # -- Helpers --
+
+
+# Substrings (lowercased) that mark a Polymarket tennis market as a
+# *derivative* of the match — Set 1 Games O/U, Match O/U, Total Sets O/U,
+# Set 1 Winner, Completed Match, etc. Smarkets only quotes the
+# straight-up match-winner price, so any of these can never produce a
+# legitimate sharp-vs-PM divergence and would only generate noise if
+# they reached the comparison stage.
+_DERIVATIVE_QUESTION_KEYWORDS: tuple[str, ...] = (
+    "o/u",
+    "total sets",
+    "set 1 winner",
+    "set winner",
+    "completed match",
+)
+
+
+def _is_derivative_market(question: str) -> bool:
+    """True if the market question is a derivative we can't price.
+
+    Pattern-match only — we don't need to know which kind it is, just
+    that no sharp quote exists for any of them. The check runs at fetch
+    time so the comparison loop and CLOB revalidation never see them.
+    """
+    if not question:
+        return False
+    q = question.lower()
+    return any(kw in q for kw in _DERIVATIVE_QUESTION_KEYWORDS)
 
 
 def _surname(name: str) -> str:
