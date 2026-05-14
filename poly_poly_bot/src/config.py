@@ -184,10 +184,6 @@ class Config:
     tennis_min_polymarket_liquidity: float = _opt_float("TENNIS_MIN_POLYMARKET_LIQUIDITY", 10000)
     tennis_take_profit_ratio: float = _opt_float("TENNIS_TAKE_PROFIT_RATIO", 3.0)
 
-    # --- Remote-fix runner (claude-agent VM) ---
-    runner_url: str = _optional("RUNNER_URL", "")
-    runner_shared_secret: str = _optional("RUNNER_SHARED_SECRET", "")
-
     # --- APIs ---
     clob_api_url: str = _optional("CLOB_API_URL", "https://clob.polymarket.com")
     data_api_url: str = _optional("DATA_API_URL", "https://data-api.polymarket.com")

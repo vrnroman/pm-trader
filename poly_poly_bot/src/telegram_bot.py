@@ -64,11 +64,6 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "testlive", "description": "Fire $5 live BUY on a 90%+ geopolitics market (smoke test)"},
     {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
     {"command": "shutdown", "description": "Graceful shutdown (Docker restarts container)"},
-    {"command": "fix", "description": "Open a remote-fix task on claude-agent (e.g. /fix tennis_pnl rounding is off)"},
-    {"command": "tasks", "description": "Show current/recent remote-fix tasks"},
-    {"command": "cancel", "description": "Cancel the active remote-fix task"},
-    {"command": "deploy_status", "description": "Last deploy verdict + container health"},
-    {"command": "rollback", "description": "Restore the previous container image"},
 ]
 
 _poll_thread: threading.Thread | None = None
@@ -469,16 +464,6 @@ def _handle_command(text: str):
         _handle_setkey(text)
     elif text.startswith("/shutdown"):
         _handle_shutdown(text)
-    elif text.startswith("/fix"):
-        _handle_fix(text)
-    elif text.startswith("/tasks"):
-        _handle_tasks_list()
-    elif text.startswith("/cancel"):
-        _handle_cancel()
-    elif text.startswith("/deploy_status") or text.startswith("/deploystatus"):
-        _handle_deploy_status()
-    elif text.startswith("/rollback"):
-        _handle_rollback()
     elif text.startswith("/help") or text.startswith("/start"):
         _handle_help()
     else:
@@ -1394,140 +1379,6 @@ def _handle_test_live():
         send_message(f"🧪 <b>/test-live</b>: unknown status — <code>{_esc(status)}</code>")
 
 
-# --- Remote-fix (claude-runner on claude-agent VM) ---
-
-def _handle_fix(text: str):
-    """Handle /fix <free-text> — open a remote-fix task."""
-    if not CONFIG.runner_url or not CONFIG.runner_shared_secret:
-        send_message("Remote-fix runner not configured. Set RUNNER_URL and RUNNER_SHARED_SECRET.")
-        return
-    parts = text.split(maxsplit=1)
-    if len(parts) < 2 or not parts[1].strip():
-        send_message("Usage: <code>/fix &lt;describe what to change&gt;</code>")
-        return
-    prompt = parts[1].strip()
-    try:
-        from src import remote_fix
-        info = remote_fix.create_task(prompt=prompt, chat_id=CONFIG.telegram_chat_id)
-    except RuntimeError as e:
-        send_message(f"Cannot start: <code>{_esc(str(e))}</code>\nUse <code>/cancel</code> to stop the active task first.")
-        return
-    except Exception as e:
-        send_message(f"Runner error: <code>{_esc(str(e))}</code>")
-        return
-    send_message(
-        f"🛠 task <code>{_esc(info['id'])}</code> queued on claude-agent\n"
-        f"Reply with plain text to answer questions, or <code>/cancel</code> to abort."
-    )
-
-
-def _handle_tasks_list():
-    """Handle /tasks — show current and recent tasks."""
-    if not CONFIG.runner_url:
-        send_message("Remote-fix runner not configured.")
-        return
-    try:
-        from src import remote_fix
-        tasks = remote_fix.list_tasks()
-    except Exception as e:
-        send_message(f"Runner error: <code>{_esc(str(e))}</code>")
-        return
-    if not tasks:
-        send_message("No remote-fix tasks.")
-        return
-    lines = ["<b>Remote-fix tasks</b>"]
-    for t in tasks[-10:]:
-        q = (t.get("last_question") or "").strip()
-        q_str = f"\n   <i>last Q: {_esc(q[:140])}</i>" if q else ""
-        lines.append(
-            f"\n• <code>{_esc(t['id'])}</code> [{_esc(t['status'])}]"
-            f"  <i>{_esc((t.get('prompt') or '')[:80])}</i>"
-            f"{q_str}"
-        )
-    send_message("\n".join(lines))
-
-
-def _handle_cancel():
-    """Handle /cancel — cancel the active remote-fix task."""
-    if not CONFIG.runner_url:
-        send_message("Remote-fix runner not configured.")
-        return
-    try:
-        from src import remote_fix
-        cur = remote_fix.current_task_id()
-        if not cur:
-            send_message("No active remote-fix task.")
-            return
-        ok = remote_fix.cancel(cur)
-    except Exception as e:
-        send_message(f"Runner error: <code>{_esc(str(e))}</code>")
-        return
-    send_message(f"Cancelled task <code>{_esc(cur)}</code>." if ok else "Task not found.")
-
-
-def _handle_deploy_status():
-    """Handle /deploy_status — show last deploy verdict + container health."""
-    if not CONFIG.runner_url:
-        send_message("Remote-fix runner not configured.")
-        return
-    try:
-        from src import remote_fix
-        d = remote_fix.last_deploy()
-    except Exception as e:
-        send_message(f"Runner error: <code>{_esc(str(e))}</code>")
-        return
-    if not d:
-        send_message("No deploys recorded yet.")
-        return
-    # status: watching | done | rolled-back   verdict: healthy | unhealthy | rolled-back | None
-    icons = {"healthy": "✅", "unhealthy": "❌", "rolled-back": "↩️"}
-    verdict = d.get("verdict")
-    icon = icons.get(verdict, "⏳")
-    sha = _esc(str(d.get("sha", "?")))
-    status = _esc(str(d.get("status", "?")))
-    detail = _esc(str(d.get("detail", "")))[:400]
-    import time as _t
-    age_s = max(0, int(_t.time() - int(d.get("started_at", 0))))
-    send_message(
-        f"{icon} <b>Deploy {sha}</b>  ({status}, {age_s}s ago)\n"
-        f"verdict: <code>{_esc(str(verdict))}</code>\n"
-        f"<i>{detail}</i>"
-    )
-
-
-def _handle_rollback():
-    """Handle /rollback — restore the previous container image."""
-    if not CONFIG.runner_url:
-        send_message("Remote-fix runner not configured.")
-        return
-    send_message("↩️ rolling back…")
-    try:
-        from src import remote_fix
-        out = remote_fix.rollback()
-    except Exception as e:
-        send_message(f"Rollback failed: <code>{_esc(str(e))}</code>")
-        return
-    send_message(f"↩️ <b>Rollback complete</b>\n<code>{_esc(out[-400:])}</code>")
-
-
-def _route_as_task_reply(text: str):
-    """Forward a plain-text Telegram message to the active remote-fix task."""
-    if not CONFIG.runner_url or not CONFIG.runner_shared_secret:
-        return
-    try:
-        from src import remote_fix
-        cur = remote_fix.current_task_id()
-        if not cur:
-            return  # Nothing to do — bot ignores chatter when no task is open.
-        ok = remote_fix.reply(cur, text)
-    except Exception as e:
-        logger.warning(f"reply routing failed: {e}")
-        return
-    if ok:
-        # Send a small acknowledgement so the user knows the reply landed.
-        send_message(f"↪️ relayed to task <code>{_esc(cur)}</code>")
-
-
 def _handle_help():
     """Handle /help command."""
     send_message(
@@ -1553,13 +1404,6 @@ def _handle_help():
         "<code>/setkey clear CONFIRM</code> \u2014 Wipe in-memory private key\n"
         "<code>/setkey 0xHEX CONFIRM</code> \u2014 Replace key in memory\n"
         "<code>/shutdown CONFIRM</code> \u2014 Graceful exit (container will restart)\n\n"
-        "<b>Remote-fix (claude-agent)</b>\n"
-        "<code>/fix &lt;text&gt;</code> \u2014 Open a remote-fix task\n"
-        "<code>/tasks</code> \u2014 Show current/recent fix tasks\n"
-        "<code>/cancel</code> \u2014 Cancel the active fix task\n"
-        "<code>/deploy_status</code> \u2014 Last deploy verdict + container health\n"
-        "<code>/rollback</code> \u2014 Restore the previous container image\n"
-        "<i>Plain text replies are routed to the active task as answers.</i>\n\n"
         "<code>/help</code> \u2014 Show this message\n\n"
         f"Strategy #1: {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"
         f"Strategy #2: {'ON' if CONFIG.strategy2_enabled else 'OFF'}\n"
@@ -1598,13 +1442,6 @@ def _process_update(update: dict) -> None:
             logger.exception(f"Command handler error: {e}")
             send_message(f"Error: <code>{_esc(str(e))}</code>")
         return
-
-    # Plain text: if there's an active remote-fix task, route as a reply to it.
-    try:
-        _route_as_task_reply(text)
-    except Exception as e:
-        logger.exception(f"Task reply routing error: {e}")
-        send_message(f"Error: <code>{_esc(str(e))}</code>")
 
 
 def _poll_loop():

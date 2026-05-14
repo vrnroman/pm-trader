@@ -553,7 +553,7 @@ def test_bot_menu_matches_dispatcher():
 
     # Aliases that intentionally don't get their own menu entry — they
     # share a description with the canonical command.
-    aliases = {"test-live", "deploystatus"}
+    aliases = {"test-live"}
     dispatched -= aliases
 
     menu = {entry["command"] for entry in telegram_bot.BOT_MENU_COMMANDS}
