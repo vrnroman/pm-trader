@@ -1407,10 +1407,32 @@ def _register_bot_menu():
     Telegram rejects the entire batch (HTTP 200 with ok=false) if any single
     command name violates ^[a-z0-9_]{1,32}$. We surface that rejection in
     logs and on Telegram so a typo doesn't silently wipe the popup menu.
+
+    Telegram resolves the popup menu per chat by picking the most-specific
+    scope that has commands set: chat_member > chat_administrators > chat >
+    all_chat_administrators > all_private_chats / all_group_chats > default.
+    A stale list on any narrower scope hides our default-scope list — so
+    before we register the default, we clear every broader-than-default
+    scope we ever might have set. (Per-chat scopes can only be set by
+    explicit chat_id and aren't touched here.)
     """
+    base = TELEGRAM_API.format(token=CONFIG.telegram_bot_token)
+
+    # Wipe scoped command lists that would shadow the default scope.
+    for scope in (
+        {"type": "all_private_chats"},
+        {"type": "all_group_chats"},
+        {"type": "all_chat_administrators"},
+    ):
+        try:
+            r = requests.post(f"{base}/deleteMyCommands", json={"scope": scope}, timeout=10)
+            if not (r.ok and r.json().get("ok")):
+                logger.warning(f"deleteMyCommands {scope['type']} failed: {r.text[:200]}")
+        except Exception as e:
+            logger.warning(f"deleteMyCommands {scope['type']} error: {e}")
+
     try:
-        url = f"{TELEGRAM_API.format(token=CONFIG.telegram_bot_token)}/setMyCommands"
-        resp = requests.post(url, json={"commands": BOT_MENU_COMMANDS}, timeout=10)
+        resp = requests.post(f"{base}/setMyCommands", json={"commands": BOT_MENU_COMMANDS}, timeout=10)
         body = {}
         try:
             body = resp.json()
