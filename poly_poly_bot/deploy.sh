@@ -112,6 +112,11 @@ gcloud compute ssh "$INSTANCE" \
         # Preserve data across deployments
         mkdir -p data cache results logs
 
+        # Force preview mode on every deploy: drop the persisted
+        # preview/live toggle so the bot boots with PREVIEW_MODE from
+        # .env. Telegram /live 3 CONFIRM re-creates the file as needed.
+        rm -f data/runtime_state.json
+
         # Stop existing container
         docker stop poly-poly-bot 2>/dev/null || true
         docker rm poly-poly-bot 2>/dev/null || true
