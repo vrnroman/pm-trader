@@ -8,8 +8,10 @@ Core loop:
   1. Fetch sharp odds from Smarkets
   2. Fetch Polymarket tennis match markets via Gamma API
   3. Match Smarkets events to Polymarket markets by player names
-  4. Calculate divergence = sharp_implied_prob - polymarket_price
-  5. If divergence > threshold, generate signal (BUY YES on underpriced side)
+  4. For each match, compute two divergences off Gamma's live book:
+       YES: sharp_prob(question_player) − bestAsk
+       NO:  sharp_prob(other_player)    − (1 − bestBid)
+  5. If either divergence > threshold, emit a signal (BUY YES or BUY NO)
   6. Size using fractional Kelly criterion, capped at max bet
 """
 
@@ -226,16 +228,16 @@ class TennisArbStrategy:
             revalidate_s = 0.0
             order_place_s = 0.0
 
-            # Live revalidation: Gamma's outcomePrices is the last-trade
-            # price and lags the live ask by several cents on low-volume
-            # tennis markets. Refetch the CLOB book once the cheap filter
-            # passes so the bet-or-skip decision uses the real fill cost.
+            # Live revalidation: Gamma's bestAsk/bestBid are cached and can
+            # lag the live CLOB book by a few seconds on fast-moving thin
+            # markets. Refetch the CLOB book once the cheap filter passes
+            # so the bet-or-skip decision uses the real fill cost.
             #
             #   Gamma edge ≥ min_divergence (8%)  →  cheap candidate
             #   live edge  ≥ revalidation_min_divergence (6%)  →  fire
             #   live edge below floor              →  drop, Gamma was stale
             #
-            # The default 8% / 6% gap absorbs ~2¢ of normal Gamma drift.
+            # The 8% / 6% gap absorbs short-lived Gamma cache drift.
             pm_price = comp.polymarket_price
             edge = comp.divergence
             gamma_price = comp.polymarket_price
@@ -398,9 +400,12 @@ class TennisArbStrategy:
             polymarket_url = (
                 f"https://polymarket.com/event/{event_slug}" if event_slug else ""
             )
+            # comp.polymarket_player is set per-side (YES → question player,
+            # NO → the other player), so it's authoritative. group_item_title
+            # only ever names the YES-side player and would mislabel NO bets.
             outcome_label = (
-                pm.get("group_item_title")
-                or comp.polymarket_player
+                comp.polymarket_player
+                or pm.get("group_item_title")
                 or ""
             )
 
@@ -663,7 +668,13 @@ class TennisArbStrategy:
                         if liquidity < self.min_liquidity:
                             continue
 
-                        # Parse prices
+                        # Parse prices. outcomePrices is the mid (avg of
+                        # bestBid/bestAsk) — we keep it for take-profit and
+                        # display, but the divergence filter uses bestAsk
+                        # because it's the actual cost to buy. bestBid is
+                        # used to derive the NO side's ask (no_ask ≈ 1 − bid)
+                        # so we can also evaluate buying NO when the OTHER
+                        # player is the one sharp says is underpriced.
                         prices = market.get("outcomePrices")
                         if isinstance(prices, str):
                             try:
@@ -674,6 +685,15 @@ class TennisArbStrategy:
                         yes_price = float(prices[0]) if prices and len(prices) > 0 else None
                         if yes_price is None or yes_price <= 0.01 or yes_price >= 0.99:
                             continue
+
+                        try:
+                            yes_ask = float(market.get("bestAsk")) if market.get("bestAsk") is not None else yes_price
+                        except (ValueError, TypeError):
+                            yes_ask = yes_price
+                        try:
+                            yes_bid = float(market.get("bestBid")) if market.get("bestBid") is not None else yes_price
+                        except (ValueError, TypeError):
+                            yes_bid = yes_price
 
                         # Parse token IDs
                         token_ids = market.get("clobTokenIds")
@@ -695,12 +715,17 @@ class TennisArbStrategy:
                             "player": player,
                             "group_item_title": market.get("groupItemTitle", ""),
                             "yes_price": yes_price,
+                            "yes_ask": yes_ask,
+                            "yes_bid": yes_bid,
                             "volume": volume,
                             "liquidity": liquidity,
                             "market_id": market.get("id", ""),
                             "condition_id": market.get("conditionId", ""),
                             "token_id_yes": (
                                 token_ids[0] if token_ids and len(token_ids) > 0 else ""
+                            ),
+                            "token_id_no": (
+                                token_ids[1] if token_ids and len(token_ids) > 1 else ""
                             ),
                         })
 
@@ -949,6 +974,15 @@ class TennisArbStrategy:
         markets that only name one player), and its event end date must be
         near the sharp match time (rules out same-player future tournaments).
 
+        For each matched (sharp_odds, pm) pair we evaluate BOTH outcomes:
+          - YES side: buy the question's YES token at bestAsk.
+            divergence = sharp_prob(question_player) − yes_ask
+          - NO side:  buy the NO token at (1 − yes_bid).
+            divergence = sharp_prob(other_player) − no_ask
+        Sharp probabilities are no-vig normalized so sharp_a + sharp_b ≈ 1,
+        and yes_bid ≤ yes_ask, which guarantees both sides can't pass the
+        min_divergence threshold simultaneously — no internal contradiction.
+
         Returns a list of (OddsComparison, pm_dict) so the caller keeps
         access to event metadata for Telegram / state tracking.
         """
@@ -961,7 +995,7 @@ class TennisArbStrategy:
                     continue
 
                 # Try to match PM player to either side of the sharp odds
-                side, sharp_prob = _match_player_to_odds(
+                side, _ = _match_player_to_odds(
                     pm_player, odds.player_a, odds.player_b,
                     odds.implied_prob_a, odds.implied_prob_b
                 )
@@ -981,22 +1015,62 @@ class TennisArbStrategy:
                     )
                     continue
 
-                divergence = sharp_prob - pm["yes_price"]
+                # The question's YES token resolves to the player named in
+                # the question (pm_player). NO resolves to the other player.
+                if side == "A":
+                    yes_player, yes_sharp = odds.player_a, odds.implied_prob_a
+                    no_player, no_sharp = odds.player_b, odds.implied_prob_b
+                else:
+                    yes_player, yes_sharp = odds.player_b, odds.implied_prob_b
+                    no_player, no_sharp = odds.player_a, odds.implied_prob_a
 
-                comp = OddsComparison(
-                    match_odds=odds,
-                    polymarket_condition_id=pm["condition_id"],
-                    polymarket_token_id=pm["token_id_yes"],
-                    polymarket_market_id=pm["market_id"],
-                    polymarket_question=pm["question"],
-                    polymarket_player=pm_player,
-                    polymarket_price=pm["yes_price"],
-                    sharp_prob=sharp_prob,
-                    divergence=divergence,
-                    polymarket_volume=pm["volume"],
-                    polymarket_liquidity=pm["liquidity"],
-                )
-                comparisons.append((comp, pm))
+                # Filter prices: bestAsk for YES, derived (1 − bestBid) for
+                # NO. Fall back to outcomePrices mid for either if the new
+                # fields aren't populated (older test fixtures / data paths).
+                yes_ask = float(pm.get("yes_ask", pm.get("yes_price", 0.0)))
+                yes_bid = float(pm.get("yes_bid", pm.get("yes_price", 0.0)))
+                no_ask = max(0.0, 1.0 - yes_bid) if yes_bid > 0 else 0.0
+
+                # YES side
+                comparisons.append((
+                    OddsComparison(
+                        match_odds=odds,
+                        polymarket_condition_id=pm["condition_id"],
+                        polymarket_token_id=pm["token_id_yes"],
+                        polymarket_market_id=pm["market_id"],
+                        polymarket_question=pm["question"],
+                        polymarket_player=yes_player,
+                        polymarket_price=yes_ask,
+                        sharp_prob=yes_sharp,
+                        divergence=yes_sharp - yes_ask,
+                        polymarket_volume=pm["volume"],
+                        polymarket_liquidity=pm["liquidity"],
+                        outcome_side="YES",
+                    ),
+                    pm,
+                ))
+
+                # NO side. Needs a NO token id and a valid derived ask;
+                # markets without both fields skip the NO check.
+                token_id_no = pm.get("token_id_no", "")
+                if token_id_no and 0.0 < no_ask < 1.0:
+                    comparisons.append((
+                        OddsComparison(
+                            match_odds=odds,
+                            polymarket_condition_id=pm["condition_id"],
+                            polymarket_token_id=token_id_no,
+                            polymarket_market_id=pm["market_id"],
+                            polymarket_question=pm["question"],
+                            polymarket_player=no_player,
+                            polymarket_price=no_ask,
+                            sharp_prob=no_sharp,
+                            divergence=no_sharp - no_ask,
+                            polymarket_volume=pm["volume"],
+                            polymarket_liquidity=pm["liquidity"],
+                            outcome_side="NO",
+                        ),
+                        pm,
+                    ))
 
         return comparisons
 

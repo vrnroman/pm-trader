@@ -70,15 +70,18 @@ class OddsComparison(BaseModel):
 
     match_odds: MatchOdds
     polymarket_condition_id: str = Field(description="Polymarket market condition ID")
-    polymarket_token_id: str = Field(description="CLOB token ID for YES outcome")
+    polymarket_token_id: str = Field(description="CLOB token ID being bought (YES or NO outcome)")
     polymarket_market_id: str = Field(description="Polymarket market slug or ID")
     polymarket_question: str = Field(description="Market question text")
-    polymarket_player: str = Field(description="Which player this market is for")
-    polymarket_price: float = Field(description="Current YES price on Polymarket (0-1)")
+    polymarket_player: str = Field(description="The player whose win we'd be betting on")
+    polymarket_price: float = Field(description="Ask price for the side we'd buy (0-1)")
     sharp_prob: float = Field(description="Sharp implied probability for this player")
     divergence: float = Field(description="sharp_prob - polymarket_price")
     polymarket_volume: float = Field(default=0.0, description="Market volume in USD")
     polymarket_liquidity: float = Field(default=0.0, description="Market liquidity in USD")
+    # "YES" → buying the question's YES token. "NO" → buying the NO token (i.e.
+    # betting the other player wins). Determines order side and signal label.
+    outcome_side: str = Field(default="YES", description="Which outcome we'd buy: YES or NO")
 
     @property
     def has_edge(self) -> bool:
@@ -86,5 +89,7 @@ class OddsComparison(BaseModel):
 
     @property
     def side(self) -> str:
-        """BUY YES if sharp thinks it's underpriced."""
-        return "BUY YES" if self.divergence > 0 else "SKIP"
+        """BUY YES / BUY NO if sharp thinks it's underpriced."""
+        if self.divergence <= 0:
+            return "SKIP"
+        return "BUY NO" if self.outcome_side == "NO" else "BUY YES"

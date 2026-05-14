@@ -969,3 +969,308 @@ class TestRebetPyramid:
             assert entry["first_token_id"] == "TOKA"
             # last_price falls through to first_pm_price for the anchor.
             assert entry["first_pm_price"] == 0.38
+
+
+# ── bestAsk filter + NO-side evaluation ─────────────────────────────────
+
+
+def _pm_sinner_rublev(yes_ask: float, yes_bid: float | None = None,
+                      yes_price: float | None = None):
+    """Sinner-vs-Rublev head-to-head with explicit bid/ask.
+
+    yes_price defaults to the mid of (yes_bid, yes_ask) so take-profit and
+    other mid-consumers stay reasonable.
+    """
+    if yes_bid is None:
+        yes_bid = max(0.01, yes_ask - 0.01)
+    if yes_price is None:
+        yes_price = round((yes_ask + yes_bid) / 2, 4)
+    return [{
+        "event_title": "Sinner vs Rublev (ATP Monte-Carlo)",
+        "event_slug": "sinner-vs-rublev",
+        "event_end_date": "",
+        "question": "Will Jannik Sinner beat Andrey Rublev?",
+        "player": "Jannik Sinner",
+        "group_item_title": "Jannik Sinner",
+        "yes_price": yes_price,
+        "yes_ask": yes_ask,
+        "yes_bid": yes_bid,
+        "volume": 200000,
+        "liquidity": 50000,
+        "market_id": "mkt_sr",
+        "condition_id": "cond_sr",
+        "token_id_yes": "TOK_YES",
+        "token_id_no": "TOK_NO",
+    }]
+
+
+def _sinner_rublev_odds(sharp_sinner: float):
+    """Smarkets fixture with sharp_sinner probability for Sinner.
+
+    Sharp probabilities are no-vig normalized in from_decimal_odds so
+    implied_prob_a + implied_prob_b == 1.
+    """
+    odds_a = 1.0 / sharp_sinner
+    odds_b = 1.0 / (1.0 - sharp_sinner)
+    return [
+        MatchOdds.from_decimal_odds(
+            source="smarkets",
+            tournament="ATP Monte-Carlo",
+            tour="ATP",
+            player_a="Jannik Sinner",
+            player_b="Andrey Rublev",
+            odds_a=odds_a,
+            odds_b=odds_b,
+        )
+    ]
+
+
+class TestBothSidesEvaluated:
+    """The bot must consider buying NO when the OTHER player is undervalued.
+
+    Worked example from the design conversation:
+      Sinner-Rublev head-to-head, YES=0.70, NO=0.31 (yes_bid=0.69).
+        sharp_Sinner=0.80  → YES div = +0.10 → BUY YES.
+        sharp_Sinner=0.60  → YES div = -0.10 (skip),
+                             but sharp_Rublev=0.40 vs NO ask 0.31 → NO div = +0.09 → BUY NO.
+    """
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_sharp_favors_yes_player_buys_yes(self, mock_odds, mock_pm):
+        mock_odds.return_value = _sinner_rublev_odds(sharp_sinner=0.80)
+        mock_pm.return_value = _pm_sinner_rublev(yes_ask=0.70, yes_bid=0.69)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+            )
+            signals = strategy.scan()
+        assert len(signals) == 1
+        sig = signals[0]
+        assert sig["side"] == "BUY YES"
+        assert sig["token_id"] == "TOK_YES"
+        assert sig["target_player"] == "Jannik Sinner"
+        assert sig["outcome_label"] == "Jannik Sinner"
+        assert sig["polymarket_price"] == pytest.approx(0.70, abs=1e-4)
+        assert sig["divergence"] == pytest.approx(0.10, abs=1e-4)
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_sharp_favors_no_player_buys_no(self, mock_odds, mock_pm):
+        """Previously this scenario produced zero signals — half the universe."""
+        mock_odds.return_value = _sinner_rublev_odds(sharp_sinner=0.60)
+        mock_pm.return_value = _pm_sinner_rublev(yes_ask=0.70, yes_bid=0.69)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+            )
+            signals = strategy.scan()
+        assert len(signals) == 1
+        sig = signals[0]
+        assert sig["side"] == "BUY NO"
+        assert sig["token_id"] == "TOK_NO"
+        # The NO bet is on the OTHER player winning.
+        assert sig["target_player"] == "Andrey Rublev"
+        assert sig["outcome_label"] == "Andrey Rublev"
+        # NO ask = 1 - yes_bid = 1 - 0.69 = 0.31
+        assert sig["polymarket_price"] == pytest.approx(0.31, abs=1e-4)
+        # sharp_Rublev = 1 - 0.60 = 0.40 → div = 0.40 - 0.31 = 0.09
+        assert sig["divergence"] == pytest.approx(0.09, abs=1e-4)
+        assert sig["sharp_prob"] == pytest.approx(0.40, abs=1e-4)
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_sharp_at_market_neither_side_fires(self, mock_odds, mock_pm):
+        """When sharp matches PM closely, neither YES nor NO crosses min_divergence."""
+        mock_odds.return_value = _sinner_rublev_odds(sharp_sinner=0.70)
+        mock_pm.return_value = _pm_sinner_rublev(yes_ask=0.70, yes_bid=0.69)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+            )
+            signals = strategy.scan()
+        assert signals == []
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_no_side_skipped_when_token_id_missing(self, mock_odds, mock_pm):
+        """If clobTokenIds[1] wasn't populated, drop the NO leg silently."""
+        pm = _pm_sinner_rublev(yes_ask=0.70, yes_bid=0.69)
+        pm[0]["token_id_no"] = ""
+        mock_odds.return_value = _sinner_rublev_odds(sharp_sinner=0.60)
+        mock_pm.return_value = pm
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+            )
+            signals = strategy.scan()
+        # YES doesn't qualify, NO would have but token id is missing.
+        assert signals == []
+
+
+class TestBestAskReplacesMidInFilter:
+    """The cheap filter now uses bestAsk, not the outcomePrices mid.
+
+    On thin tennis books the mid sits halfway between a wide bid/ask, so
+    using the mid as filter price routinely generates phantom signals that
+    die at CLOB revalidation. Switching to bestAsk closes that gap.
+    """
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_phantom_signal_from_wide_spread_is_filtered(self, mock_odds, mock_pm):
+        """mid=0.50 looks like 30% edge vs sharp=0.80; bestAsk=0.78 only 2%."""
+        mock_odds.return_value = _sinner_rublev_odds(sharp_sinner=0.80)
+        # Wide spread: bid 0.22, ask 0.78, mid 0.50. The cheap filter must
+        # see only the 2pp ask-side edge and reject — the 30pp mid-vs-sharp
+        # gap is illusory.
+        mock_pm.return_value = _pm_sinner_rublev(
+            yes_ask=0.78, yes_bid=0.22, yes_price=0.50,
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+            )
+            signals = strategy.scan()
+        assert signals == []
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_signal_fires_against_bestask_not_mid(self, mock_odds, mock_pm):
+        """When the real bestAsk still leaves edge, a YES signal must fire at the ask."""
+        mock_odds.return_value = _sinner_rublev_odds(sharp_sinner=0.80)
+        mock_pm.return_value = _pm_sinner_rublev(
+            yes_ask=0.65, yes_bid=0.60, yes_price=0.625,
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+            )
+            signals = strategy.scan()
+        assert len(signals) == 1
+        # polymarket_price reflects the actual buy cost (the ask), not the mid.
+        assert signals[0]["polymarket_price"] == pytest.approx(0.65, abs=1e-4)
+        assert signals[0]["divergence"] == pytest.approx(0.15, abs=1e-4)
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_legacy_pm_dict_without_ask_bid_falls_back_to_yes_price(
+        self, mock_odds, mock_pm,
+    ):
+        """A pm dict missing yes_ask/yes_bid should behave like the old path.
+
+        Keeps every pre-existing test fixture working without refactoring;
+        also covers the migration window before the next production fetch.
+        """
+        mock_odds.return_value = _sinner_rublev_odds(sharp_sinner=0.80)
+        legacy_pm = _pm_sinner_rublev(yes_ask=0.58, yes_bid=0.58, yes_price=0.58)
+        del legacy_pm[0]["yes_ask"]
+        del legacy_pm[0]["yes_bid"]
+        mock_pm.return_value = legacy_pm
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=None,
+                revalidation_min_divergence=0.0,
+            )
+            signals = strategy.scan()
+        assert len(signals) == 1
+        assert signals[0]["polymarket_price"] == pytest.approx(0.58, abs=1e-4)
+
+
+class TestGammaFetchExtractsBidAsk:
+    """The Gamma fetch must read bestAsk / bestBid / clobTokenIds[1] from the response."""
+
+    def test_fetch_populates_new_fields_from_gamma_payload(self):
+        from unittest.mock import patch as up
+        gamma_event = {
+            "title": "Sinner vs Rublev",
+            "slug": "sinner-vs-rublev",
+            "endDate": "",
+            "markets": [{
+                "id": "mkt_x",
+                "conditionId": "cond_x",
+                "question": "Will Jannik Sinner beat Andrey Rublev?",
+                "outcomePrices": '["0.70", "0.30"]',
+                "bestAsk": 0.71,
+                "bestBid": 0.69,
+                "clobTokenIds": '["TOK_YES_X", "TOK_NO_X"]',
+                "volume": "200000",
+                "liquidity": "50000",
+                "groupItemTitle": "Jannik Sinner",
+            }],
+        }
+        resp = MagicMock()
+        resp.raise_for_status.return_value = None
+        resp.json.side_effect = [[gamma_event], []]
+
+        strategy = TennisArbStrategy(preview_mode=True)
+        with up("src.tennis.tennis_arb.requests.get", return_value=resp):
+            markets = strategy._fetch_polymarket_tennis_markets()
+
+        assert len(markets) == 1
+        m = markets[0]
+        assert m["yes_ask"] == pytest.approx(0.71, abs=1e-9)
+        assert m["yes_bid"] == pytest.approx(0.69, abs=1e-9)
+        assert m["yes_price"] == pytest.approx(0.70, abs=1e-9)
+        assert m["token_id_yes"] == "TOK_YES_X"
+        assert m["token_id_no"] == "TOK_NO_X"
+
+    def test_fetch_falls_back_when_bid_ask_absent(self):
+        """Older market payloads without bestAsk/bestBid fall back to mid."""
+        from unittest.mock import patch as up
+        gamma_event = {
+            "title": "Sinner vs Rublev",
+            "slug": "sinner-vs-rublev",
+            "endDate": "",
+            "markets": [{
+                "id": "mkt_y",
+                "conditionId": "cond_y",
+                "question": "Will Jannik Sinner beat Andrey Rublev?",
+                "outcomePrices": '["0.60", "0.40"]',
+                # bestAsk / bestBid intentionally omitted
+                "clobTokenIds": '["TY", "TN"]',
+                "volume": "200000",
+                "liquidity": "50000",
+                "groupItemTitle": "",
+            }],
+        }
+        resp = MagicMock()
+        resp.raise_for_status.return_value = None
+        resp.json.side_effect = [[gamma_event], []]
+
+        strategy = TennisArbStrategy(preview_mode=True)
+        with up("src.tennis.tennis_arb.requests.get", return_value=resp):
+            markets = strategy._fetch_polymarket_tennis_markets()
+
+        assert len(markets) == 1
+        m = markets[0]
+        assert m["yes_ask"] == pytest.approx(0.60, abs=1e-9)
+        assert m["yes_bid"] == pytest.approx(0.60, abs=1e-9)
+        assert m["token_id_no"] == "TN"
