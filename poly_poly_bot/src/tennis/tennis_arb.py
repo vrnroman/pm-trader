@@ -772,7 +772,6 @@ class TennisArbStrategy:
                 offset += 100
                 if offset > 2000:
                     break
-                time.sleep(0.15)
 
             except requests.RequestException as e:
                 logger.error(f"Polymarket tennis fetch failed: {e}")
