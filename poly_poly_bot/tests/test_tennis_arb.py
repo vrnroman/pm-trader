@@ -265,7 +265,7 @@ class TestScanIntegration:
                 "event_title": "Sinner vs Rublev (ATP Monte-Carlo)",
                 "event_slug": "sinner-vs-rublev-monte-carlo",
                 "event_end_date": "",
-                "question": "Will Jannik Sinner beat Andrey Rublev?",
+                "question": "Test Tournament: Jannik Sinner vs Andrey Rublev",
                 "player": "Jannik Sinner",
                 "group_item_title": "Jannik Sinner",
                 "yes_price": 0.58,
@@ -637,7 +637,7 @@ def _pm_sinner(yes_price: float = 0.58):
         "event_title": "Sinner vs Rublev (ATP Monte-Carlo)",
         "event_slug": "sinner-vs-rublev",
         "event_end_date": "",
-        "question": "Will Jannik Sinner beat Andrey Rublev?",
+        "question": "Test Tournament: Jannik Sinner vs Andrey Rublev",
         "player": "Jannik Sinner",
         "group_item_title": "Jannik Sinner",
         "yes_price": yes_price,
@@ -989,7 +989,7 @@ def _pm_sinner_rublev(yes_ask: float, yes_bid: float | None = None,
         "event_title": "Sinner vs Rublev (ATP Monte-Carlo)",
         "event_slug": "sinner-vs-rublev",
         "event_end_date": "",
-        "question": "Will Jannik Sinner beat Andrey Rublev?",
+        "question": "Test Tournament: Jannik Sinner vs Andrey Rublev",
         "player": "Jannik Sinner",
         "group_item_title": "Jannik Sinner",
         "yes_price": yes_price,
@@ -1216,7 +1216,7 @@ class TestGammaFetchExtractsBidAsk:
             "markets": [{
                 "id": "mkt_x",
                 "conditionId": "cond_x",
-                "question": "Will Jannik Sinner beat Andrey Rublev?",
+                "question": "Test Tournament: Jannik Sinner vs Andrey Rublev",
                 "outcomePrices": '["0.70", "0.30"]',
                 "bestAsk": 0.71,
                 "bestBid": 0.69,
@@ -1252,7 +1252,7 @@ class TestGammaFetchExtractsBidAsk:
             "markets": [{
                 "id": "mkt_y",
                 "conditionId": "cond_y",
-                "question": "Will Jannik Sinner beat Andrey Rublev?",
+                "question": "Test Tournament: Jannik Sinner vs Andrey Rublev",
                 "outcomePrices": '["0.60", "0.40"]',
                 # bestAsk / bestBid intentionally omitted
                 "clobTokenIds": '["TY", "TN"]',
@@ -1348,14 +1348,36 @@ class TestDerivativeMarketFilter:
         assert len(out) == 1
         assert out[0]["question"] == "Valencia: Dusan Lajovic vs Daniel Altmaier"
 
-    def test_outright_kept_for_downstream_filter(self):
-        """Outright markets pass the shape filter; _validate_same_event
-        will reject them later because only one player surname appears.
+    def test_set_handicap_rejected(self):
+        """Set Handicap markets name BOTH players' surnames in the
+        question (e.g. "Set Handicap: Sinner (-1.5) vs Medvedev (+1.5)"),
+        so the downstream two-surname check in _validate_same_event lets
+        them through. The shape filter must catch them upstream — this
+        is the exact bug that produced a phantom $26 Sinner -1.5 fill in
+        prod when sharp's 81% match-winner quote was compared to PM's
+        7.7% handicap price.
+        """
+        out = self._fetch_with_markets([
+            self._make_market("Set Handicap: Sinner (-1.5) vs Medvedev (+1.5)"),
+        ])
+        assert out == []
+
+    def test_tournament_outright_rejected(self):
+        """Tournament-outright markets ("Will X win the 2026 French
+        Open?") name only one player; _validate_same_event would reject
+        them downstream, but the shape filter rejects them upstream too
+        so we don't burn a CLOB call.
         """
         out = self._fetch_with_markets([
             self._make_market("Will Jannik Sinner win the 2026 French Open?"),
         ])
-        assert len(out) == 1
+        assert out == []
+
+    def test_calendar_grand_slam_rejected(self):
+        out = self._fetch_with_markets([
+            self._make_market("Will no player win a Calendar Grand Slam in 2026?"),
+        ])
+        assert out == []
 
     def test_mixed_event_keeps_only_winner(self):
         out = self._fetch_with_markets([
@@ -1363,6 +1385,7 @@ class TestDerivativeMarketFilter:
             self._make_market("Lajovic vs. Altmaier: Set 1 Games O/U 9.5"),
             self._make_market("Lajovic vs. Altmaier: Match O/U 22.5"),
             self._make_market("Set 1 Winner: Lajovic vs Altmaier"),
+            self._make_market("Set Handicap: Lajovic (-1.5) vs Altmaier (+1.5)"),
             self._make_market("Dusan Lajovic vs. Daniel Altmaier: Total Sets O/U 2.5"),
         ])
         assert len(out) == 1

@@ -1260,32 +1260,37 @@ class TennisArbStrategy:
 # -- Helpers --
 
 
-# Substrings (lowercased) that mark a Polymarket tennis market as a
-# *derivative* of the match — Set 1 Games O/U, Match O/U, Total Sets O/U,
-# Set 1 Winner, Completed Match, etc. Smarkets only quotes the
-# straight-up match-winner price, so any of these can never produce a
-# legitimate sharp-vs-PM divergence and would only generate noise if
-# they reached the comparison stage.
-_DERIVATIVE_QUESTION_KEYWORDS: tuple[str, ...] = (
-    "o/u",
-    "total sets",
-    "set 1 winner",
-    "set winner",
-    "completed match",
+# Regex patterns (case-insensitive) that mark a Polymarket tennis market
+# as something other than a head-to-head match-winner — Set 1 Games O/U,
+# Match O/U, Total Sets O/U, Set N Winner, Completed Match, Set Handicap,
+# tournament outrights ("Will X win the 2026 ..."), Calendar Grand Slam
+# futures. Smarkets only quotes the straight-up match-winner price, so
+# none of these have a sharp counterpart; they can only produce phantom
+# signals if they reach the comparison stage. In particular, Set Handicap
+# markets pair both players' surnames in the question and would otherwise
+# slip past the downstream `_validate_same_event` two-surname check.
+_DERIVATIVE_QUESTION_PATTERNS: tuple[str, ...] = (
+    r"\bo/u\b",
+    r"\btotal sets\b",
+    r"\bset \d+ winner\b",      # "Set 1 Winner", "Set 2 Winner", ...
+    r"\bset winner\b",
+    r"\bcompleted match\b",
+    r"\bhandicap\b",            # "Set Handicap: X (-1.5) vs Y (+1.5)"
+    r"^\s*will\b",              # "Will X win the 2026 ...?" tournament outrights
+    r"\bwin the \d{4}\b",       # belt-and-braces for outright phrasing variants
+    r"\bgrand slam\b",          # "Will [no] player win a Calendar Grand Slam in 2026?"
 )
+_DERIVATIVE_REGEX = re.compile("|".join(_DERIVATIVE_QUESTION_PATTERNS), re.IGNORECASE)
 
 
 def _is_derivative_market(question: str) -> bool:
-    """True if the market question is a derivative we can't price.
-
-    Pattern-match only — we don't need to know which kind it is, just
-    that no sharp quote exists for any of them. The check runs at fetch
-    time so the comparison loop and CLOB revalidation never see them.
+    """True if the market question is anything other than a head-to-head
+    match-winner. Runs at fetch time so the comparison loop and CLOB
+    revalidation never see derivatives.
     """
     if not question:
         return False
-    q = question.lower()
-    return any(kw in q for kw in _DERIVATIVE_QUESTION_KEYWORDS)
+    return bool(_DERIVATIVE_REGEX.search(question))
 
 
 def _surname(name: str) -> str:
