@@ -137,6 +137,14 @@ gcloud compute ssh "$INSTANCE" \
 
         echo "Container started:"
         docker ps --filter name=poly-poly-bot --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+        # Reclaim space: previous build is now untagged (<none>) and each
+        # deploy adds ~1.5GB. Without this, the 20GB boot disk fills in
+        # ~10 deploys. Only touches dangling images + stopped containers;
+        # tagged images (python:3.12-slim base, current poly-poly-bot) stay.
+        echo "Pruning dangling images and stopped containers..."
+        docker image prune -f
+        docker container prune -f
     '
 
 # ─── Step 5: Verify ──────────────────────────────────────────────
