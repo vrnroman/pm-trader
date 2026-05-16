@@ -241,27 +241,62 @@ def test_active_set_excludes_no_link_by_default():
     assert cids == {"c_linked"}
 
 
-def test_pm_fetch_failure_doesnt_crash_refresh():
-    """Gamma being down must not stop the cache loop — return what we had,
-    log, move on."""
-    def _boom() -> list[dict]:
+def test_pm_fetch_failure_preserves_prior_entries():
+    """Gamma 503 between refreshes must NOT wipe the cache — the scan
+    loop runs every 20s and 10 min of empty cache = 30 zero-signal scans.
+    Preserve the last good snapshot until the next successful refresh."""
+    mt = datetime(2026, 5, 16, 14, 0, tzinfo=timezone.utc)
+    good_pm = [_pm(
+        "c1", "Sinner", "T: Sinner vs Alcaraz",
+        other_player="Alcaraz", pm_match_time=mt.isoformat(),
+    )]
+    sharp = [_odds("Sinner", "Alcaraz", mt)]
+    call_count = [0]
+
+    def _fetch_pm():
+        call_count[0] += 1
+        if call_count[0] == 1:
+            return good_pm
         raise RuntimeError("gamma 503")
 
     cache = PMDiscoveryCache(
-        smarkets_provider=_provider([]),
+        smarkets_provider=_provider(sharp),
         tours=["ATP"],
-        fetch_pm_fn=_boom,
+        fetch_pm_fn=_fetch_pm,
     )
 
-    stats = cache.refresh()
-    assert stats["cache_size"] == 0
-    assert stats["pm_markets"] == 0
+    s1 = cache.refresh()
+    assert s1["cache_size"] == 1
+    assert s1["linked"] == 1
+
+    s2 = cache.refresh()
+    assert s2["pm_fetch_failed"] is True
+    assert s2["preserved_prior_entries"] is True
+    assert s2["cache_size"] == 1  # prior entry retained
+    assert s2["linked"] == 1
+    assert cache.get_entry("c1") is not None  # still there
 
 
-def test_smarkets_fetch_failure_keeps_pm_entries_unmatched():
-    pm_markets = [_pm("c1", "P1", "T: P1 vs O1", other_player="O1")]
+def test_smarkets_fetch_failure_preserves_prior_entries():
+    """Same principle as PM-fetch failure but for Smarkets."""
+    mt = datetime(2026, 5, 16, 14, 0, tzinfo=timezone.utc)
+    pm_markets = [_pm(
+        "c1", "Sinner", "T: Sinner vs Alcaraz",
+        other_player="Alcaraz", pm_match_time=mt.isoformat(),
+    )]
+    sharp_cycles = iter([
+        [_odds("Sinner", "Alcaraz", mt)],
+        RuntimeError("smarkets 500"),
+    ])
+
+    def _fetch_or_raise(**kw):
+        val = next(sharp_cycles)
+        if isinstance(val, Exception):
+            raise val
+        return val
+
     provider = MagicMock()
-    provider.fetch_tennis_odds.side_effect = RuntimeError("smarkets 500")
+    provider.fetch_tennis_odds.side_effect = _fetch_or_raise
 
     cache = PMDiscoveryCache(
         smarkets_provider=provider,
@@ -269,6 +304,29 @@ def test_smarkets_fetch_failure_keeps_pm_entries_unmatched():
         fetch_pm_fn=lambda: pm_markets,
     )
 
+    s1 = cache.refresh()
+    assert s1["linked"] == 1
+
+    s2 = cache.refresh()
+    assert s2["smarkets_fetch_failed"] is True
+    assert s2["preserved_prior_entries"] is True
+    assert s2["cache_size"] == 1  # prior link survives even though sharp fetch died
+    assert s2["linked"] == 1
+
+
+def test_first_refresh_with_fetch_failure_yields_empty_cache():
+    """No prior state to preserve → cache is empty, but we still don't crash
+    and we don't claim to have entries."""
+    def _boom() -> list[dict]:
+        raise RuntimeError("gamma 503 cold start")
+    cache = PMDiscoveryCache(
+        smarkets_provider=_provider([]),
+        tours=["ATP"],
+        fetch_pm_fn=_boom,
+    )
     stats = cache.refresh()
-    assert stats["cache_size"] == 1
-    assert stats["no_link"] == 1
+    assert stats["pm_fetch_failed"] is True
+    assert stats["cache_size"] == 0
+    assert cache.active_set() == []
+
+

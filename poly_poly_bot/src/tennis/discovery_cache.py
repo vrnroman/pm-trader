@@ -80,19 +80,62 @@ class PMDiscoveryCache:
     # Refresh
     # ------------------------------------------------------------------
     def refresh(self) -> dict:
-        """Hydrate the cache from Gamma + Smarkets. Returns telemetry."""
+        """Hydrate the cache from Gamma + Smarkets. Returns telemetry.
+
+        On EITHER fetch failure we preserve the prior cache state rather
+        than wiping it. The scan loop runs every 20s; a transient Gamma
+        503 that empties the cache would starve the per-scan loop of
+        signals for up to 10 minutes (next refresh). Better to keep
+        slightly stale data than to go blind.
+        """
         t0 = time.monotonic()
+        pm_fetch_failed = False
+        smarkets_fetch_failed = False
         try:
             pm_markets = self._fetch_pm()
         except Exception as exc:
             logger.exception(f"Discovery cache: Gamma fetch failed: {exc}")
             pm_markets = []
+            pm_fetch_failed = True
 
         try:
             sharp_odds = self._provider.fetch_tennis_odds(tours=self._tours)
         except Exception as exc:
             logger.exception(f"Discovery cache: Smarkets fetch failed: {exc}")
             sharp_odds = []
+            smarkets_fetch_failed = True
+
+        if pm_fetch_failed or smarkets_fetch_failed:
+            # Don't replace _entries on transient errors. Surface the
+            # failure via telemetry; next refresh tick (or the on-error
+            # backoff retry) will try again. Cache age keeps ticking so
+            # the scan loop can decide to bail if data gets too stale.
+            with self._lock:
+                size = len(self._entries)
+                linked = sum(
+                    1
+                    for e in self._entries.values()
+                    if e.get("linked_match_key") not in (None, _NO_LINK)
+                )
+            stats = {
+                "pm_markets": len(pm_markets),
+                "cache_size": size,
+                "linked": linked,
+                "no_link": size - linked,
+                "relinked_this_cycle": 0,
+                "retried_nolink": 0,
+                "sharp_odds": len(sharp_odds),
+                "elapsed_s": round(time.monotonic() - t0, 3),
+                "pm_fetch_failed": pm_fetch_failed,
+                "smarkets_fetch_failed": smarkets_fetch_failed,
+                "preserved_prior_entries": True,
+            }
+            logger.warning(
+                f"PM discovery cache: refresh aborted "
+                f"(gamma_failed={pm_fetch_failed}, smarkets_failed={smarkets_fetch_failed}) — "
+                f"keeping {size} prior entries"
+            )
+            return stats
 
         # Build a key → odds index once so per-PM rematching is O(N) over
         # sharp odds, not O(N²) over (PM, sharp) pairs.
