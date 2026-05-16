@@ -177,6 +177,7 @@ def _init_tennis_strategy():
     """Initialize the Tennis Arb strategy instance."""
     global _tennis_strategy
     from src.tennis.tennis_arb import TennisArbStrategy
+    from src.tennis.discovery_cache import PMDiscoveryCache
     from src.copy_trading.clob_client import create_clob_client
 
     tennis_tournaments = [t.strip() for t in CONFIG.tennis_tournaments.split(",")]
@@ -200,6 +201,19 @@ def _init_tennis_strategy():
         clob_client=clob_client,
         revalidation_min_divergence=CONFIG.tennis_revalidation_min_divergence,
     )
+
+    # Background discovery cache. Hydrated immediately on .start(); the
+    # per-scan loop in Batch 3 will read its active_set() instead of
+    # calling Gamma directly. For Batch 2 the cache is observable via
+    # logs but not yet consumed.
+    _tennis_strategy.discovery_cache = PMDiscoveryCache(
+        smarkets_provider=_tennis_strategy._provider,
+        tours=tennis_tournaments,
+        max_event_date_delta_days=_tennis_strategy.max_event_date_delta_days,
+        refresh_interval_s=600.0,
+    )
+    _tennis_strategy.discovery_cache.start()
+
     return _tennis_strategy
 
 

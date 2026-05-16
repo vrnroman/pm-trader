@@ -128,6 +128,12 @@ class TennisArbStrategy:
         self._resolve_min_interval_s: float = 300.0
         self._last_resolve_at: float = 0.0
 
+        # Optional PMDiscoveryCache attached by main.py at startup. Batch 2
+        # only hydrates the cache for observability; Batch 3 starts reading
+        # from it in the per-scan loop. Stays None when discovery is
+        # disabled (e.g. in unit tests).
+        self.discovery_cache = None
+
     def scan(self) -> list[dict]:
         """Run a single scan: fetch odds, find markets, detect divergences.
 
@@ -640,151 +646,14 @@ class TennisArbStrategy:
 
     def _fetch_polymarket_tennis_markets(self) -> list[dict]:
         """Fetch active tennis match markets from Polymarket Gamma API."""
-        all_markets: list[dict] = []
-        offset = 0
+        def _bump(_n: int) -> None:
+            self._gamma_calls_in_scan = getattr(self, "_gamma_calls_in_scan", 0) + 1
 
-        while True:
-            try:
-                self._gamma_calls_in_scan = getattr(self, "_gamma_calls_in_scan", 0) + 1
-                resp = requests.get(
-                    f"{GAMMA_API_URL}/events",
-                    params={
-                        "tag_slug": "tennis",
-                        "limit": 100,
-                        "offset": offset,
-                        "active": "true",
-                        # Without closed=false, Gamma returns all-time tennis
-                        # events (thousands of closed historical markets) and
-                        # the currently-live ones (e.g. Monte Carlo final) get
-                        # buried past offset=2000.
-                        "closed": "false",
-                    },
-                    timeout=30,
-                )
-                resp.raise_for_status()
-                events = resp.json()
-
-                if not events:
-                    break
-
-                for event in events:
-                    markets = event.get("markets", [])
-                    event_title = event.get("title", "")
-                    event_slug = event.get("slug", "")
-                    event_end_date = event.get("endDate", "") or event.get("end_date", "")
-
-                    for market in markets:
-                        # Gamma's event-level endDate is the tournament's UMA
-                        # resolution deadline (often days after the match). The
-                        # per-market `gameStartTime` is the actual scheduled
-                        # match moment and should be preferred for the
-                        # same-event-date guard. Fall back to endDate, then
-                        # event endDate, only if gameStartTime is missing.
-                        pm_match_time = (
-                            market.get("gameStartTime")
-                            or market.get("endDate")
-                            or event_end_date
-                        )
-                        # Parse market metadata
-                        volume_str = market.get("volume", "0")
-                        try:
-                            volume = float(volume_str)
-                        except (ValueError, TypeError):
-                            volume = 0.0
-
-                        liquidity_str = market.get("liquidity", "0")
-                        try:
-                            liquidity = float(liquidity_str)
-                        except (ValueError, TypeError):
-                            liquidity = 0.0
-
-                        # Filter by volume and liquidity thresholds
-                        if volume < self.min_volume:
-                            continue
-                        if liquidity < self.min_liquidity:
-                            continue
-
-                        # Reject derivative markets (Set 1 Winner, Set/Match
-                        # Games O/U, Total Sets O/U, Completed Match, …).
-                        # Smarkets only quotes the match-winner price, so
-                        # derivatives have no sharp counterpart and can
-                        # only ever produce phantom signals. The volume
-                        # gate happens to filter them all today, but
-                        # making this explicit prevents a future
-                        # min_volume tweak from letting them leak in.
-                        if _is_derivative_market(market.get("question", "")):
-                            continue
-
-                        # Parse prices. outcomePrices is the mid (avg of
-                        # bestBid/bestAsk) — we keep it for take-profit and
-                        # display, but the divergence filter uses bestAsk
-                        # because it's the actual cost to buy. bestBid is
-                        # used to derive the NO side's ask (no_ask ≈ 1 − bid)
-                        # so we can also evaluate buying NO when the OTHER
-                        # player is the one sharp says is underpriced.
-                        prices = market.get("outcomePrices")
-                        if isinstance(prices, str):
-                            try:
-                                prices = json.loads(prices)
-                            except (json.JSONDecodeError, TypeError):
-                                prices = None
-
-                        yes_price = float(prices[0]) if prices and len(prices) > 0 else None
-                        if yes_price is None or yes_price <= 0.01 or yes_price >= 0.99:
-                            continue
-
-                        try:
-                            yes_ask = float(market.get("bestAsk")) if market.get("bestAsk") is not None else yes_price
-                        except (ValueError, TypeError):
-                            yes_ask = yes_price
-                        try:
-                            yes_bid = float(market.get("bestBid")) if market.get("bestBid") is not None else yes_price
-                        except (ValueError, TypeError):
-                            yes_bid = yes_price
-
-                        # Parse token IDs
-                        token_ids = market.get("clobTokenIds")
-                        if isinstance(token_ids, str):
-                            try:
-                                token_ids = json.loads(token_ids)
-                            except (json.JSONDecodeError, TypeError):
-                                token_ids = None
-
-                        question = market.get("question", "")
-                        player = _extract_player_from_question(question)
-
-                        all_markets.append({
-                            "event_title": event_title,
-                            "event_slug": event_slug,
-                            "event_end_date": event_end_date,
-                            "pm_match_time": pm_match_time,
-                            "question": question,
-                            "player": player,
-                            "group_item_title": market.get("groupItemTitle", ""),
-                            "yes_price": yes_price,
-                            "yes_ask": yes_ask,
-                            "yes_bid": yes_bid,
-                            "volume": volume,
-                            "liquidity": liquidity,
-                            "market_id": market.get("id", ""),
-                            "condition_id": market.get("conditionId", ""),
-                            "token_id_yes": (
-                                token_ids[0] if token_ids and len(token_ids) > 0 else ""
-                            ),
-                            "token_id_no": (
-                                token_ids[1] if token_ids and len(token_ids) > 1 else ""
-                            ),
-                        })
-
-                offset += 100
-                if offset > 2000:
-                    break
-
-            except requests.RequestException as e:
-                logger.error(f"Polymarket tennis fetch failed: {e}")
-                break
-
-        return all_markets
+        return fetch_pm_tennis_markets_raw(
+            min_volume=self.min_volume,
+            min_liquidity=self.min_liquidity,
+            on_gamma_call=_bump,
+        )
 
     # ------------------------------------------------------------------
     # Take-profit gate
@@ -1287,6 +1156,161 @@ _DERIVATIVE_QUESTION_PATTERNS: tuple[str, ...] = (
     r"\bgrand slam\b",          # "Will [no] player win a Calendar Grand Slam in 2026?"
 )
 _DERIVATIVE_REGEX = re.compile("|".join(_DERIVATIVE_QUESTION_PATTERNS), re.IGNORECASE)
+
+
+def fetch_pm_tennis_markets_raw(
+    min_volume: float,
+    min_liquidity: float,
+    on_gamma_call=None,
+) -> list[dict]:
+    """Paginated fetch from Gamma /events for active tennis markets.
+
+    Module-level so the per-scan path (TennisArbStrategy) and the
+    background discovery cache can share one canonical Gamma fetch +
+    parse + filter pipeline. Pass ``min_volume=0`` / ``min_liquidity=0``
+    to get the unfiltered superset (used by the discovery cache so the
+    liquidity gate can be re-applied per scan against fresh data).
+
+    ``on_gamma_call`` is invoked once per page with the page count for
+    telemetry; callers that don't care can leave it None.
+    """
+    all_markets: list[dict] = []
+    offset = 0
+
+    while True:
+        try:
+            if on_gamma_call is not None:
+                on_gamma_call(1)
+            resp = requests.get(
+                f"{GAMMA_API_URL}/events",
+                params={
+                    "tag_slug": "tennis",
+                    "limit": 100,
+                    "offset": offset,
+                    "active": "true",
+                    # Without closed=false, Gamma returns all-time tennis
+                    # events (thousands of closed historical markets) and
+                    # the currently-live ones (e.g. Monte Carlo final) get
+                    # buried past offset=2000.
+                    "closed": "false",
+                },
+                timeout=30,
+            )
+            resp.raise_for_status()
+            events = resp.json()
+
+            if not events:
+                break
+
+            for event in events:
+                markets = event.get("markets", [])
+                event_title = event.get("title", "")
+                event_slug = event.get("slug", "")
+                event_end_date = event.get("endDate", "") or event.get("end_date", "")
+
+                for market in markets:
+                    # Gamma's event-level endDate is the tournament's UMA
+                    # resolution deadline (often days after the match). The
+                    # per-market `gameStartTime` is the actual scheduled
+                    # match moment and should be preferred for the
+                    # same-event-date guard. Fall back to endDate, then
+                    # event endDate, only if gameStartTime is missing.
+                    pm_match_time = (
+                        market.get("gameStartTime")
+                        or market.get("endDate")
+                        or event_end_date
+                    )
+                    volume_str = market.get("volume", "0")
+                    try:
+                        volume = float(volume_str)
+                    except (ValueError, TypeError):
+                        volume = 0.0
+
+                    liquidity_str = market.get("liquidity", "0")
+                    try:
+                        liquidity = float(liquidity_str)
+                    except (ValueError, TypeError):
+                        liquidity = 0.0
+
+                    if volume < min_volume:
+                        continue
+                    if liquidity < min_liquidity:
+                        continue
+
+                    # Reject derivative markets (Set 1 Winner, Set/Match
+                    # Games O/U, Total Sets O/U, Completed Match, Set
+                    # Handicap, tournament outrights, …). Smarkets only
+                    # quotes match-winner so derivatives have no sharp
+                    # counterpart.
+                    if _is_derivative_market(market.get("question", "")):
+                        continue
+
+                    # outcomePrices is the mid; bestAsk is the actual cost
+                    # to buy. We keep mid for take-profit/display and use
+                    # bestAsk for divergence. bestBid drives the NO ask
+                    # via no_ask ≈ 1 - bid.
+                    prices = market.get("outcomePrices")
+                    if isinstance(prices, str):
+                        try:
+                            prices = json.loads(prices)
+                        except (json.JSONDecodeError, TypeError):
+                            prices = None
+
+                    yes_price = float(prices[0]) if prices and len(prices) > 0 else None
+                    if yes_price is None or yes_price <= 0.01 or yes_price >= 0.99:
+                        continue
+
+                    try:
+                        yes_ask = float(market.get("bestAsk")) if market.get("bestAsk") is not None else yes_price
+                    except (ValueError, TypeError):
+                        yes_ask = yes_price
+                    try:
+                        yes_bid = float(market.get("bestBid")) if market.get("bestBid") is not None else yes_price
+                    except (ValueError, TypeError):
+                        yes_bid = yes_price
+
+                    token_ids = market.get("clobTokenIds")
+                    if isinstance(token_ids, str):
+                        try:
+                            token_ids = json.loads(token_ids)
+                        except (json.JSONDecodeError, TypeError):
+                            token_ids = None
+
+                    question = market.get("question", "")
+                    player = _extract_player_from_question(question)
+
+                    all_markets.append({
+                        "event_title": event_title,
+                        "event_slug": event_slug,
+                        "event_end_date": event_end_date,
+                        "pm_match_time": pm_match_time,
+                        "question": question,
+                        "player": player,
+                        "group_item_title": market.get("groupItemTitle", ""),
+                        "yes_price": yes_price,
+                        "yes_ask": yes_ask,
+                        "yes_bid": yes_bid,
+                        "volume": volume,
+                        "liquidity": liquidity,
+                        "market_id": market.get("id", ""),
+                        "condition_id": market.get("conditionId", ""),
+                        "token_id_yes": (
+                            token_ids[0] if token_ids and len(token_ids) > 0 else ""
+                        ),
+                        "token_id_no": (
+                            token_ids[1] if token_ids and len(token_ids) > 1 else ""
+                        ),
+                    })
+
+            offset += 100
+            if offset > 2000:
+                break
+
+        except requests.RequestException as e:
+            logger.error(f"Polymarket tennis fetch failed: {e}")
+            break
+
+    return all_markets
 
 
 def _is_derivative_market(question: str) -> bool:
