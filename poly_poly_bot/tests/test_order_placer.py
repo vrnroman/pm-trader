@@ -189,6 +189,53 @@ def test_buy_invalid_args_returns_none():
     assert place_buy_yes(clob_client=MagicMock(), token_id="T", bet_size_usd=0, ref_price=0.5) is None
 
 
+# --- FAK no-fill detection (Batch 4) --------------------------------------
+
+
+def test_buy_marks_unfilled_when_size_matched_zero():
+    """FAK posted but matched 0 shares — caller (scan loop) uses unfilled=True
+    to drive a single retry against a fresh book."""
+    client = _mock_client(_book(asks=[(0.55, 100)], bids=[(0.45, 100)], tick=0.01))
+    client.get_order.return_value = {"size_matched": 0, "price": "0.56"}
+    client.get_trades.return_value = []
+
+    with patch("src.tennis.order_placer.CONFIG") as cfg:
+        cfg.live_order_slippage_bps = 50
+        result = place_buy_yes(clob_client=client, token_id="T", bet_size_usd=10.0, ref_price=0.50)
+
+    assert result["unfilled"] is True
+    # paper-book hygiene: filled_shares falls back to planned shares so a
+    # later SELL doesn't see a 0-share position
+    assert result["filled_shares"] == result["shares"]
+
+
+def test_buy_not_unfilled_on_partial_fill():
+    """size_matched > 0 → real fill → no retry."""
+    client = _mock_client(_book(asks=[(0.55, 100)], bids=[(0.45, 100)], tick=0.01))
+    client.get_order.return_value = {"size_matched": "10", "price": "0.56"}
+    client.get_trades.return_value = []
+
+    with patch("src.tennis.order_placer.CONFIG") as cfg:
+        cfg.live_order_slippage_bps = 50
+        result = place_buy_yes(clob_client=client, token_id="T", bet_size_usd=10.0, ref_price=0.50)
+
+    assert result["unfilled"] is False
+    assert result["filled_shares"] == pytest.approx(10.0)
+
+
+def test_buy_not_unfilled_when_get_order_errors():
+    """get_order failure = unknown fill state. Must NOT mark unfilled
+    because retrying could double exposure if the original actually filled."""
+    client = _mock_client(_book(asks=[(0.55, 100)], bids=[(0.45, 100)], tick=0.01))
+    client.get_order.side_effect = RuntimeError("api 503")
+
+    with patch("src.tennis.order_placer.CONFIG") as cfg:
+        cfg.live_order_slippage_bps = 50
+        result = place_buy_yes(clob_client=client, token_id="T", bet_size_usd=10.0, ref_price=0.50)
+
+    assert result["unfilled"] is False
+
+
 # --- place_sell_yes --------------------------------------------------------
 
 

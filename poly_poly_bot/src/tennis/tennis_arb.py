@@ -147,6 +147,9 @@ class TennisArbStrategy:
         self._gamma_calls_in_scan = 0
         self._scan_clob_calls = 0
         self._scan_clob_s = 0.0
+        self._scan_fak_retry_attempted = 0
+        self._scan_fak_retry_filled = 0
+        self._scan_fak_retry_dropped_below_floor = 0
         smarkets_calls_baseline = getattr(self._provider, "call_count", 0)
         try:
             return self._scan_body(metrics, scan_started_at)
@@ -158,6 +161,9 @@ class TennisArbStrategy:
             metrics["gamma_calls"] = self._gamma_calls_in_scan
             metrics["clob_revalidation_calls"] = self._scan_clob_calls
             metrics["clob_revalidation_s"] = round(self._scan_clob_s, 3)
+            metrics["fak_retry_attempted"] = self._scan_fak_retry_attempted
+            metrics["fak_retry_filled"] = self._scan_fak_retry_filled
+            metrics["fak_retry_dropped_below_floor"] = self._scan_fak_retry_dropped_below_floor
             self._save_metrics(metrics)
 
     def _scan_body(self, metrics: dict, scan_started_at: float) -> list[dict]:
@@ -507,7 +513,7 @@ class TennisArbStrategy:
                     logger.info(f"Tennis arb: live BUY skipped — {reason}")
                     signal["live_status"] = f"skipped:daily_cap({reason})"
                 else:
-                    from src.tennis.order_placer import place_buy_yes
+                    from src.tennis.order_placer import place_buy_yes, _fetch_book
                     t_order = time.monotonic()
                     live = place_buy_yes(
                         clob_client=self.clob_client,
@@ -516,6 +522,57 @@ class TennisArbStrategy:
                         ref_price=pm_price,
                         book_hint=book_hint,
                     )
+                    # FAK no-fill retry: a 0-fill FAK means the book moved
+                    # between revalidation and submission (or the slippage
+                    # buffer wasn't wide enough). Re-fetch the live book,
+                    # verify the divergence still clears the floor, and
+                    # retry once with a fresh book_hint. Single retry only —
+                    # if the second attempt also fails the market is moving
+                    # faster than we can chase it.
+                    if live and live.get("unfilled"):
+                        self._scan_fak_retry_attempted += 1
+                        try:
+                            new_ask, new_bid, new_tick = _fetch_book(
+                                self.clob_client, comp.polymarket_token_id
+                            )
+                        except Exception as exc:
+                            logger.warning(
+                                f"Tennis arb: FAK retry book fetch failed: {exc} — "
+                                f"giving up on signal"
+                            )
+                            new_ask = 0.0
+                            new_bid = 0.0
+                            new_tick = 0.0
+                        if new_ask > 0:
+                            retry_edge = comp.sharp_prob - new_ask
+                            if retry_edge >= self.revalidation_min_divergence:
+                                logger.info(
+                                    f"Tennis arb: FAK 0-fill, retrying — "
+                                    f"new ask={new_ask:.3f} edge={retry_edge:+.1%} "
+                                    f"({pm.get('question','')})"
+                                )
+                                retry_hint = (new_ask, new_bid, new_tick)
+                                live = place_buy_yes(
+                                    clob_client=self.clob_client,
+                                    token_id=comp.polymarket_token_id,
+                                    bet_size_usd=bet_size,
+                                    ref_price=new_ask,
+                                    book_hint=retry_hint,
+                                )
+                                if live and not live.get("unfilled"):
+                                    self._scan_fak_retry_filled += 1
+                                # Reflect the price/edge that actually drove
+                                # the retry on the emitted signal.
+                                pm_price = new_ask
+                                edge = retry_edge
+                            else:
+                                self._scan_fak_retry_dropped_below_floor += 1
+                                logger.info(
+                                    f"Tennis arb: FAK 0-fill, retry skipped — "
+                                    f"new edge {retry_edge:+.1%} < floor "
+                                    f"{self.revalidation_min_divergence:.1%} "
+                                    f"({pm.get('question','')})"
+                                )
                     order_place_s = time.monotonic() - t_order
                     if live and live.get("order_id"):
                         signal["live"] = True

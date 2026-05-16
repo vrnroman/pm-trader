@@ -89,8 +89,13 @@ def _post_order_with_retry(clob_client: ClobClient, order, order_type: OrderType
 
 def _fetch_fill(
     clob_client: ClobClient, order_id: str, fallback_price: float
-) -> tuple[float, float]:
-    """Return (filled_shares, avg_fill_price) for a just-placed FAK order.
+) -> tuple[float, float, bool]:
+    """Return (filled_shares, avg_fill_price, fill_certain).
+
+    ``fill_certain`` distinguishes "definitively 0 fills" from "API call
+    failed, fill state unknown". A retry path can act on the first but
+    must NOT retry on the second — re-submitting on an opaque outcome
+    could double exposure if the original actually did fill.
 
     The bot used to record paper-book positions sized off the *requested*
     bet, not the actual fill. FAK orders can fill below the requested size
@@ -104,12 +109,12 @@ def _fetch_fill(
     Strategy: pull the placed order via get_order for ``size_matched`` (the
     canonical filled share count). Then fetch get_trades filtered on the
     token to derive the size-weighted avg fill price; the order's ``price``
-    field is the limit, not the realised VWAP. On any API failure or empty
-    response, return ``(0.0, fallback_price)`` so the caller can fall back to
-    the planned request size rather than crashing the order path.
+    field is the limit, not the realised VWAP. On any get_order failure or
+    empty response, return ``(0.0, fallback_price, False)`` — uncertain. On
+    a clean ``size_matched == 0``, return ``(0.0, fallback_price, True)``.
     """
     if not order_id:
-        return 0.0, fallback_price
+        return 0.0, fallback_price, False
     try:
         order = clob_client.get_order(order_id)
     except Exception as exc:
@@ -117,17 +122,19 @@ def _fetch_fill(
             f"[tennis-live] get_order({order_id[:10]}…) failed: "
             f"{error_message(exc)} — falling back to limit price"
         )
-        return 0.0, fallback_price
+        return 0.0, fallback_price, False
 
     if not isinstance(order, dict):
-        return 0.0, fallback_price
+        return 0.0, fallback_price, False
 
     try:
         size_matched = float(order.get("size_matched") or 0)
     except (TypeError, ValueError):
         size_matched = 0.0
     if size_matched <= 0:
-        return 0.0, fallback_price
+        # FAK is atomic — size_matched=0 from a successfully-fetched order
+        # means the order definitively did not fill. Safe to retry.
+        return 0.0, fallback_price, True
 
     token_id = order.get("asset_id") or ""
     # VWAP via get_trades. Filter to our taker_order_id since the listing is
@@ -143,11 +150,11 @@ def _fetch_fill(
             f"[tennis-live] get_trades for {order_id[:10]}… failed: "
             f"{error_message(exc)} — using limit price as fill price"
         )
-        return size_matched, float(order.get("price") or fallback_price)
+        return size_matched, float(order.get("price") or fallback_price), True
 
     matched_trades = [t for t in trades if t.get("taker_order_id") == order_id]
     if not matched_trades:
-        return size_matched, float(order.get("price") or fallback_price)
+        return size_matched, float(order.get("price") or fallback_price), True
 
     total_size = 0.0
     total_usdc = 0.0
@@ -162,9 +169,9 @@ def _fetch_fill(
         total_size += s
         total_usdc += s * p
     if total_size <= 0:
-        return size_matched, float(order.get("price") or fallback_price)
+        return size_matched, float(order.get("price") or fallback_price), True
 
-    return total_size, total_usdc / total_size
+    return total_size, total_usdc / total_size, True
 
 
 def _fetch_book(clob_client: ClobClient, token_id: str) -> tuple[float, float, float]:
@@ -296,14 +303,20 @@ def place_buy_yes(
     order_id = _extract_order_id(resp)
     if not order_id:
         logger.warning(f"[tennis-live] BUY posted but no order_id in resp: {resp}")
-        return {"order_id": "", "shares": shares, "order_price": order_price}
+        return {"order_id": "", "shares": shares, "order_price": order_price, "unfilled": False}
 
-    filled_shares, avg_fill_price = _fetch_fill(
+    filled_shares, avg_fill_price, fill_certain = _fetch_fill(
         clob_client, order_id, fallback_price=order_price
     )
-    # If fill reconcile came up empty, fall back to the request — better to
-    # record planned shares than nothing. The paper-book will still flip to
-    # the real fill on the next reconcile pass (none today, but reserved).
+    # `unfilled` is True only when the order DEFINITIVELY didn't fill —
+    # FAK matched nothing and we got a clean get_order response saying so.
+    # When reconcile errored (fill_certain=False) we don't know, so the
+    # caller must NOT retry (could double exposure). When some shares
+    # filled, also not "unfilled".
+    unfilled = fill_certain and filled_shares <= 0
+    # Mask 0-fill to planned shares for paper-book sizing hygiene. Existing
+    # behavior — the `unfilled` flag is what the caller uses for the retry
+    # decision, separate from the bookkeeping fallback.
     if filled_shares <= 0:
         filled_shares = shares
         avg_fill_price = order_price
@@ -313,6 +326,7 @@ def place_buy_yes(
         "order_price": order_price,
         "filled_shares": filled_shares,
         "filled_avg_price": avg_fill_price,
+        "unfilled": unfilled,
     }
 
 
@@ -385,7 +399,7 @@ def place_sell_yes(
         logger.warning(f"[tennis-live] SELL posted but no order_id in resp: {resp}")
         return {"order_id": "", "shares": sell_shares, "order_price": order_price}
 
-    filled_shares, avg_fill_price = _fetch_fill(
+    filled_shares, avg_fill_price, _fill_certain = _fetch_fill(
         clob_client, order_id, fallback_price=order_price
     )
     if filled_shares <= 0:
