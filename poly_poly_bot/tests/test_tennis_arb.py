@@ -42,6 +42,24 @@ class TestExtractPlayerFromQuestion:
     def test_unrecognized_format(self):
         assert _extract_player_from_question("Random market question") == ""
 
+    def test_strips_tournament_prefix_before_vs(self):
+        """Real PM Gamma shape: 'Tournament: Player A vs Player B'. Used to
+        return 'Valencia: Alejandro Tabilo' which broke downstream matching."""
+        assert _extract_player_from_question(
+            "Valencia: Alejandro Tabilo vs Miomir Kecmanovic"
+        ) == "Alejandro Tabilo"
+        assert _extract_player_from_question(
+            "Bucharest Open: Emilio Nava vs Mariano Navone"
+        ) == "Emilio Nava"
+
+    def test_strips_qualification_prefix(self):
+        """Multi-segment prefix with comma — strip everything before the last
+        colon (the qualifier marker)."""
+        assert _extract_player_from_question(
+            "GP SAR La Princesse Lalla Meryem, Qualification: "
+            "Anastasia Zolotareva vs Zhibek Kulambayeva"
+        ) == "Anastasia Zolotareva"
+
 
 # ── Name normalization tests ────────────────────────────────────────────
 

@@ -584,8 +584,10 @@ class TestVolumeGate:
     resting orders. Empirical motivation: during live testing, Valentin Royer
     vs Marco Cecchinato (ATP Challenger) produced a +15pp "edge" against
     Polymarket despite having only 3 traded units on Smarkets — the quotes
-    were stale resting orders, not validated price discovery. The gate
-    drops any market with volume below `_MIN_SMARKETS_VOLUME` (default 100).
+    were stale resting orders, not validated price discovery. Default
+    threshold lowered from 100 → 2 (2026-05-16) after discovering the
+    volume field is in pennies/cents, not units — see _MIN_SMARKETS_VOLUME
+    note in smarkets.py.
     """
 
     def _base_routes_for_norrie(self) -> dict:
@@ -611,10 +613,10 @@ class TestVolumeGate:
         assert odds[0].player_a == "Cameron Norrie"
 
     def test_low_volume_market_dropped(self):
-        """Market with volume below threshold (default 100) is silently dropped."""
+        """Market with volume below threshold (default 2) is silently dropped."""
         routes = self._base_routes_for_norrie()
         routes["/v3/markets/135840158/volumes/"] = FakeResponse(200, {
-            "volumes": [{"market_id": "135840158", "volume": 3, "double_stake_volume": 6}],
+            "volumes": [{"market_id": "135840158", "volume": 1, "double_stake_volume": 2}],
         })
         sess = make_session(routes)
         provider = SmarketsProvider(session=sess)
@@ -676,8 +678,8 @@ class TestVolumeGate:
                 "volumes": [
                     # Norrie: plenty of volume (passes gate)
                     {"market_id": "135840158", "volume": 4798, "double_stake_volume": 9596},
-                    # WTA event: only 3 trades (thin — gated out)
-                    {"market_id": "136000001", "volume": 3, "double_stake_volume": 6},
+                    # WTA event: only 1 traded unit (below new threshold of 2 — gated out)
+                    {"market_id": "136000001", "volume": 1, "double_stake_volume": 2},
                 ],
             }),
         }
@@ -688,11 +690,11 @@ class TestVolumeGate:
         assert odds[0].player_a == "Cameron Norrie"
 
     def test_boundary_equal_to_threshold_passes(self):
-        """Market with volume exactly at the threshold (100) should PASS
+        """Market with volume exactly at the threshold (2) should PASS
         because the gate uses `<` not `<=`."""
         routes = self._base_routes_for_norrie()
         routes["/v3/markets/135840158/volumes/"] = FakeResponse(200, {
-            "volumes": [{"market_id": "135840158", "volume": 100, "double_stake_volume": 200}],
+            "volumes": [{"market_id": "135840158", "volume": 2, "double_stake_volume": 4}],
         })
         sess = make_session(routes)
         provider = SmarketsProvider(session=sess)
@@ -701,10 +703,10 @@ class TestVolumeGate:
         assert odds[0].player_a == "Cameron Norrie"
 
     def test_boundary_one_below_threshold_dropped(self):
-        """Market with volume one below the threshold (99) should be dropped."""
+        """Market with volume one below the threshold (1) should be dropped."""
         routes = self._base_routes_for_norrie()
         routes["/v3/markets/135840158/volumes/"] = FakeResponse(200, {
-            "volumes": [{"market_id": "135840158", "volume": 99, "double_stake_volume": 198}],
+            "volumes": [{"market_id": "135840158", "volume": 1, "double_stake_volume": 2}],
         })
         sess = make_session(routes)
         provider = SmarketsProvider(session=sess)

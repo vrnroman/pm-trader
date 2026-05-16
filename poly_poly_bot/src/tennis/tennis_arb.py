@@ -1733,27 +1733,35 @@ def _validate_same_event(
 
 
 def _extract_player_from_question(question: str) -> str:
-    """Extract player name from Polymarket market question.
+    """Extract player A's name from a Polymarket market question.
 
     Common patterns:
       - "Will Jannik Sinner win the 2026 ATP Monte-Carlo Masters?"
-      - "Sinner vs Rublev: Who will win?"
       - "Jannik Sinner to win ATP Monte Carlo"
+      - "Sinner vs Rublev: Who will win?"               (no tournament prefix)
+      - "Valencia: Alejandro Tabilo vs Miomir Kecmanovic"  (tournament prefix)
+      - "GP SAR La Princesse Lalla Meryem, Qualification: Anastasia Zolotareva vs Zhibek Kulambayeva"
+
+    The "vs" branch used to return the WHOLE prefix-up-to-vs (e.g.
+    "Valencia: Alejandro Tabilo") which made downstream surname matching
+    noisy. Strip everything before the last colon in the captured group.
     """
-    # Pattern: "Will <player> win..."
     m = re.match(r"Will (.+?) win\b", question, re.IGNORECASE)
     if m:
         return m.group(1).strip()
 
-    # Pattern: "<player> to win..."
     m = re.match(r"(.+?) to win\b", question, re.IGNORECASE)
     if m:
         return m.group(1).strip()
 
-    # Pattern: "<player_a> vs <player_b>"
-    m = re.search(r"(.+?)\s+vs\.?\s+(.+?)[\s:?]", question, re.IGNORECASE)
+    # Pattern: "[<tournament>: ]<player_a> vs <player_b>". Anchor on " vs "
+    # to find player A's right boundary, then drop any "Tournament:" prefix.
+    m = re.search(r"(.+?)\s+vs\.?\s", question, re.IGNORECASE)
     if m:
-        return m.group(1).strip()
+        player_a = m.group(1).strip()
+        if ":" in player_a:
+            player_a = player_a.rsplit(":", 1)[-1].strip()
+        return player_a
 
     return ""
 

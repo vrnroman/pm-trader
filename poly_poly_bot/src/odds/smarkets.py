@@ -100,7 +100,17 @@ _CONTRACTS_CACHE_TTL_S = 86400.0  # contract metadata never changes mid-match
 # consensus). Gating on traded volume filters those ghosts without losing
 # real signals (a normal mid-match WTA 250 like Rakhimova/Kalieva had 178
 # traded units in our verification run).
-_MIN_SMARKETS_VOLUME = int(os.getenv("SMARKETS_MIN_VOLUME", "100"))
+# Default lowered from 100 → 2 (2026-05-16 audit). The volume returned by
+# Smarkets is in pennies/cents, not units: a busy Coco Gauff match-winner
+# market only shows ~1700 ("£17 traded") and a live ATP Challenger like
+# Tabilo/Kecmanovic shows 9 ("£0.09"). The 100-floor was effectively
+# requiring £1+ traded, which silently dropped 28 of 36 ATP/WTA singles
+# at scan time (every fixture before significant trading flow accumulated)
+# — including the live matches we most wanted to bet. Lowered to 2 to keep
+# only the "has ever traded at all" tier; 0 would let in totally untouched
+# books whose resting quotes are pure maker speculation (the Royer/Cecchinato
+# ghost-signal scenario this gate originally guarded against).
+_MIN_SMARKETS_VOLUME = int(os.getenv("SMARKETS_MIN_VOLUME", "2"))
 
 # Tennis market types we care about. Smarkets uses "Match winner" for
 # singles head-to-heads; everything else (set winner, total games, etc.) is
