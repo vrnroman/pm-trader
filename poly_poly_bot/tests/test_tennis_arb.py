@@ -352,6 +352,124 @@ class TestScanIntegration:
         assert signals == []
 
 
+# ── Cache-mode scan path (Batch 3) ──────────────────────────────────────
+
+
+class TestScanCacheMode:
+    """Per-scan path that reads from PMDiscoveryCache and prices off live
+    CLOB books via fetch_books_batched. Verifies the new path emits a
+    signal driven by the CLOB ask, not Gamma."""
+
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_cache_mode_emits_signal_from_live_clob_ask(self, mock_odds):
+        from datetime import timezone as _tz
+        from src.tennis.discovery_cache import PMDiscoveryCache
+
+        mt = datetime(2026, 5, 16, 14, 0, tzinfo=_tz.utc)
+        sharp = MatchOdds.from_decimal_odds(
+            source="smarkets",
+            tournament="ATP Test",
+            tour="ATP",
+            player_a="Jannik Sinner",
+            player_b="Andrey Rublev",
+            odds_a=1.40,
+            odds_b=3.00,
+            match_time=mt,
+        )
+        mock_odds.return_value = [sharp]
+
+        pm = {
+            "event_title": "Sinner vs Rublev",
+            "event_slug": "sr",
+            "event_end_date": "",
+            "pm_match_time": mt.isoformat(),
+            "question": "ATP Test: Jannik Sinner vs Andrey Rublev",
+            "player": "Jannik Sinner",
+            "group_item_title": "Jannik Sinner",
+            "yes_price": 0.65,  # stale Gamma price — should NOT be used
+            "yes_ask": 0.65,
+            "yes_bid": 0.60,
+            "volume": 200000.0,
+            "liquidity": 50000.0,
+            "market_id": "mkt_sr",
+            "condition_id": "cond_sr",
+            "token_id_yes": "tok_yes_sr",
+            "token_id_no": "tok_no_sr",
+        }
+
+        # Live CLOB asks differ from Gamma — proves cache mode uses live data.
+        live_books = {
+            "tok_yes_sr": (0.55, 0.45, 0.01),  # YES ask 0.55, edge = 0.71-0.55 = 0.16
+            "tok_no_sr": (0.40, 0.30, 0.01),   # NO ask 0.40, edge = 0.29-0.40 = -0.11 (skip)
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir, \
+             patch("src.tennis.order_placer.fetch_books_batched",
+                   return_value=(live_books, {"shard_count": 1})), \
+             patch.object(__import__("src.config", fromlist=["CONFIG"]).CONFIG,
+                          "tennis_use_discovery_cache", True), \
+             patch.object(__import__("src.config", fromlist=["CONFIG"]).CONFIG,
+                          "min_order_size_usd", 5.0):
+
+            strategy = TennisArbStrategy(
+                min_divergence=0.05,
+                preview_mode=True,
+                data_dir=tmpdir,
+                min_volume=0.0,
+                min_liquidity=0.0,
+                clob_client=MagicMock(),  # non-None so the path doesn't bail early
+            )
+
+            # Pre-populate the cache directly (don't start the refresh thread).
+            cache = PMDiscoveryCache(
+                smarkets_provider=strategy._provider,
+                tours=["ATP"],
+                fetch_pm_fn=lambda: [pm],
+            )
+            cache.refresh()
+            strategy.discovery_cache = cache
+
+            signals = strategy.scan()
+
+        # Should emit ONE signal — the YES side with live CLOB ask 0.55.
+        # NO side's edge is negative; gets filtered before signal stage.
+        yes_signals = [s for s in signals if s.get("token_id") == "tok_yes_sr"]
+        assert len(yes_signals) == 1, f"expected 1 YES signal, got {signals}"
+        sig = yes_signals[0]
+        assert sig["polymarket_price"] == 0.55  # live CLOB, NOT Gamma's 0.65
+        assert sig["divergence"] > 0.10
+        assert sig["side"] == "BUY YES"
+
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_cache_mode_skips_when_active_set_empty(self, mock_odds):
+        """No active matches in cache → scan returns immediately, no
+        Smarkets/CLOB work."""
+        from src.tennis.discovery_cache import PMDiscoveryCache
+
+        mock_odds.return_value = []
+
+        with tempfile.TemporaryDirectory() as tmpdir, \
+             patch.object(__import__("src.config", fromlist=["CONFIG"]).CONFIG,
+                          "tennis_use_discovery_cache", True):
+
+            strategy = TennisArbStrategy(
+                min_divergence=0.05,
+                preview_mode=True,
+                data_dir=tmpdir,
+                clob_client=MagicMock(),
+            )
+            cache = PMDiscoveryCache(
+                smarkets_provider=strategy._provider,
+                tours=["ATP"],
+                fetch_pm_fn=lambda: [],  # empty PM list
+            )
+            cache.refresh()
+            strategy.discovery_cache = cache
+
+            signals = strategy.scan()
+            assert signals == []
+
+
 # ── Paper-book + auto-resolve integration ─────────────────────────────
 
 

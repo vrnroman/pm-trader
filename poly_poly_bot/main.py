@@ -250,81 +250,21 @@ def refresh_tennis_clob_client() -> None:
         _tennis_strategy.clob_client = new_client
 
 
-def _parse_match_windows() -> list[tuple[datetime, datetime, int]]:
-    """Parse TENNIS_MATCH_WINDOWS env var into list of (start_utc, end_utc, interval_s).
-
-    Format: 'YYYY-MM-DDTHH:MM~YYYY-MM-DDTHH:MM/interval_s,...' (UTC times)
-    Example: '2026-04-12T08:30~2026-04-12T12:30/60'
-    """
-    raw = os.environ.get("TENNIS_MATCH_WINDOWS", "").strip()
-    if not raw:
-        return []
-
-    windows = []
-    for entry in raw.split(","):
-        entry = entry.strip()
-        if not entry:
-            continue
-        try:
-            time_part, interval_str = entry.split("/")
-            start_str, end_str = time_part.split("~")
-            start = datetime.fromisoformat(start_str).replace(tzinfo=timezone.utc)
-            end = datetime.fromisoformat(end_str).replace(tzinfo=timezone.utc)
-            interval = int(interval_str)
-            windows.append((start, end, interval))
-        except (ValueError, IndexError) as e:
-            logger.error(f"Invalid TENNIS_MATCH_WINDOWS entry '{entry}': {e}")
-    return windows
-
-
 def _tennis_scanner_loop():
-    """Periodically scan for tennis arb opportunities.
+    """Periodically scan for tennis arb opportunities at TENNIS_SCAN_INTERVAL.
 
-    If TENNIS_MATCH_WINDOWS is set, uses high-frequency polling during match
-    windows and skips polling outside them. Otherwise uses the default interval.
+    The discovery cache + per-scan active-set filter handles "are there live
+    matches right now" — if not, scan returns empty almost instantly. So we
+    don't need a match-windows gate any more; a steady 20s cadence is the
+    intended baseline.
     """
     global _tennis_strategy
     if _tennis_strategy is None:
         _init_tennis_strategy()
 
-    match_windows = _parse_match_windows()
-    if match_windows:
-        for start, end, interval in match_windows:
-            logger.info(f"Tennis match window: {start.isoformat()} to {end.isoformat()} (every {interval}s)")
-        logger.info("Tennis scanner will ONLY poll during match windows")
-    else:
-        logger.info(f"Tennis arb scanner started (interval={CONFIG.tennis_scan_interval}s)")
+    logger.info(f"Tennis arb scanner started (interval={CONFIG.tennis_scan_interval}s)")
 
     while not _shutdown_event.is_set():
-        now = datetime.now(timezone.utc)
-
-        if match_windows:
-            # Find if we're inside any match window
-            active_interval = None
-            next_window_in = None
-            for start, end, interval in match_windows:
-                if start <= now <= end:
-                    active_interval = interval
-                    break
-                elif now < start:
-                    secs_until = (start - now).total_seconds()
-                    if next_window_in is None or secs_until < next_window_in:
-                        next_window_in = secs_until
-
-            if active_interval is None:
-                # Not in any window — sleep until next window or 5 min
-                if next_window_in is not None:
-                    sleep_for = min(next_window_in, 300)
-                    logger.debug(f"Tennis: outside match window, next in {next_window_in:.0f}s")
-                else:
-                    sleep_for = 300  # All windows passed
-                _shutdown_event.wait(sleep_for)
-                continue
-
-            scan_interval = active_interval
-        else:
-            scan_interval = CONFIG.tennis_scan_interval
-
         try:
             signals = _tennis_strategy.scan()
             if signals:
@@ -333,7 +273,7 @@ def _tennis_scanner_loop():
             logger.error(f"Tennis arb scan failed: {e}")
             telegram_bot.send_message(f"[TENNIS] Scan failed: <code>{e}</code>")
 
-        _shutdown_event.wait(scan_interval)
+        _shutdown_event.wait(CONFIG.tennis_scan_interval)
 
 
 # -- Scheduler --

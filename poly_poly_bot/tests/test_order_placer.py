@@ -236,6 +236,110 @@ def test_buy_not_unfilled_when_get_order_errors():
     assert result["unfilled"] is False
 
 
+# --- fetch_books_batched (Batch 3) ---------------------------------------
+
+
+from src.tennis.order_placer import fetch_books_batched  # noqa: E402
+
+
+def _batched_book(asset_id: str, ask: float = 0.50, bid: float = 0.45, tick: float = 0.01) -> dict:
+    return {
+        "asset_id": asset_id,
+        "bids": [{"price": str(bid), "size": "100"}],
+        "asks": [{"price": str(ask), "size": "100"}],
+        "tick_size": str(tick),
+    }
+
+
+def test_batched_returns_empty_on_empty_input():
+    client = MagicMock()
+    out, tel = fetch_books_batched(client, [])
+    assert out == {}
+    assert tel["shard_count"] == 0
+    client.get_order_books.assert_not_called()
+
+
+def test_batched_single_shard_for_small_set():
+    """≤ chunk_size tokens → 1 shard."""
+    client = MagicMock()
+    client.get_order_books.return_value = [_batched_book(f"t{i}") for i in range(5)]
+
+    out, tel = fetch_books_batched(client, [f"t{i}" for i in range(5)])
+
+    assert tel["shard_count"] == 1
+    assert len(out) == 5
+    assert client.get_order_books.call_count == 1
+
+
+def test_batched_balanced_chunks_for_eleven_tokens():
+    """N=11 → 2 shards of 6 and 5 (not 10+1). User #8 requirement."""
+    client = MagicMock()
+    # Return whatever was passed in; we'll inspect call args to verify chunks.
+    def echo(params):
+        return [_batched_book(p.token_id) for p in params]
+    client.get_order_books.side_effect = echo
+
+    tokens = [f"t{i}" for i in range(11)]
+    out, tel = fetch_books_batched(client, tokens, chunk_size=10, max_workers=4)
+
+    assert tel["shard_count"] == 2
+    assert len(out) == 11
+    # Inspect the two call argument lists for size 6 and 5 (order not
+    # guaranteed by ThreadPoolExecutor — sort by length).
+    sizes = sorted(len(call.args[0]) for call in client.get_order_books.call_args_list)
+    assert sizes == [5, 6]
+
+
+def test_batched_caps_shards_at_four():
+    """Even N=80 → 4 shards (per bench, 4-way is the empirical winner)."""
+    client = MagicMock()
+    def echo(params):
+        return [_batched_book(p.token_id) for p in params]
+    client.get_order_books.side_effect = echo
+
+    tokens = [f"t{i}" for i in range(80)]
+    out, tel = fetch_books_batched(client, tokens, chunk_size=10, max_workers=4)
+
+    assert tel["shard_count"] == 4
+    assert len(out) == 80
+
+
+def test_batched_429_fallback_to_single_call():
+    """Any shard 429s → circuit breaker retries the whole set in one call. (#9)"""
+    client = MagicMock()
+
+    call_count = [0]
+    def maybe_429(params):
+        call_count[0] += 1
+        if call_count[0] == 1:
+            raise RuntimeError("HTTP 429 too many requests")
+        return [_batched_book(p.token_id) for p in params]
+
+    client.get_order_books.side_effect = maybe_429
+    tokens = [f"t{i}" for i in range(40)]
+    out, tel = fetch_books_batched(client, tokens, chunk_size=10, max_workers=4)
+
+    assert tel["rate_limited"] is True
+    assert tel["fallback_used"] is True
+    assert len(out) == 40
+
+
+def test_batched_parses_asset_id_for_token_mapping():
+    """Output dict keys must come from each book's asset_id field, not from
+    input order — confirmed by live probe of get_order_books."""
+    client = MagicMock()
+    # Return books in reversed order to prove we don't rely on input order.
+    client.get_order_books.return_value = [
+        _batched_book("t_z", ask=0.20),
+        _batched_book("t_a", ask=0.80),
+    ]
+
+    out, _ = fetch_books_batched(client, ["t_a", "t_z"], chunk_size=10)
+
+    assert out["t_a"][0] == pytest.approx(0.80)
+    assert out["t_z"][0] == pytest.approx(0.20)
+
+
 # --- place_sell_yes --------------------------------------------------------
 
 

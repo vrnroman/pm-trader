@@ -174,22 +174,22 @@ def _fetch_fill(
     return total_size, total_usdc / total_size, True
 
 
-def _fetch_book(clob_client: ClobClient, token_id: str) -> tuple[float, float, float]:
-    """Return (best_ask, best_bid, tick_size) from the live CLOB orderbook.
+def _parse_book(book: dict | object) -> tuple[float, float, float]:
+    """Extract (best_ask, best_bid, tick_size) from a CLOB book payload.
 
-    Bids/asks come back sorted ascending and descending respectively, so
-    the best price (highest bid / lowest ask) is the LAST entry of each.
+    Shared between the singular get_order_book path and the batched
+    get_order_books path. Both return either a dict (current behavior on
+    prod) or an OrderBookSummary dataclass depending on client version.
+    Bids ascend / asks descend → best price is the last entry.
     """
-    book = clob_client.get_order_book(token_id)
-    if not isinstance(book, dict):
-        # py-clob-client-v2 may return an OrderBookSummary dataclass.
-        bids = list(getattr(book, "bids", []) or [])
-        asks = list(getattr(book, "asks", []) or [])
-        tick = float(getattr(book, "tick_size", 0.01) or 0.01)
-    else:
+    if isinstance(book, dict):
         bids = book.get("bids") or []
         asks = book.get("asks") or []
         tick = float(book.get("tick_size") or 0.01)
+    else:
+        bids = list(getattr(book, "bids", []) or [])
+        asks = list(getattr(book, "asks", []) or [])
+        tick = float(getattr(book, "tick_size", 0.01) or 0.01)
 
     def _price(entry):
         if isinstance(entry, dict):
@@ -199,6 +199,127 @@ def _fetch_book(clob_client: ClobClient, token_id: str) -> tuple[float, float, f
     best_ask = _price(asks[-1]) if asks else 0.0
     best_bid = _price(bids[-1]) if bids else 0.0
     return best_ask, best_bid, tick
+
+
+def _book_asset_id(book: dict | object) -> str:
+    """Extract the token_id (asset_id) the book belongs to. Confirmed via
+    live probe — the CLOB returns asset_id alongside bids/asks/tick_size
+    on the batched response, so we can map results back to input tokens
+    by id rather than relying on input order."""
+    if isinstance(book, dict):
+        return str(book.get("asset_id") or "")
+    return str(getattr(book, "asset_id", "") or "")
+
+
+def fetch_books_batched(
+    clob_client: ClobClient,
+    token_ids: list[str],
+    *,
+    chunk_size: int = 10,
+    max_workers: int = 4,
+) -> tuple[dict[str, tuple[float, float, float]], dict]:
+    """Parallel batched get_order_books with dynamic shard count.
+
+    Shard count = min(ceil(N / chunk_size), max_workers). For N=11 this
+    yields 2 balanced shards of (6, 5), not (10, 1) — matches the user's
+    request #8. The bench (BACKLOG.md, 2026-05-16) showed 4-way wins at
+    p95 over 1-way for N=40, and ties for smaller N; capping at 4
+    preserves that win without throttling.
+
+    Returns ``(books_by_token, telemetry)``. ``books_by_token`` maps each
+    requested token_id to ``(best_ask, best_bid, tick)``; tokens for which
+    the CLOB returned nothing are absent. ``telemetry`` records:
+      - shard_count
+      - elapsed_s
+      - rate_limited (bool) — 429 from any shard → we retried once with
+        a single batched call (#9 circuit breaker)
+      - fallback_used (bool) — the single-batch retry actually fired
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from py_clob_client_v2.clob_types import BookParams
+
+    telemetry: dict = {
+        "shard_count": 0,
+        "elapsed_s": 0.0,
+        "rate_limited": False,
+        "fallback_used": False,
+    }
+    if not token_ids:
+        return {}, telemetry
+
+    n = len(token_ids)
+    shards = min(max(1, (n + chunk_size - 1) // chunk_size), max_workers)
+    telemetry["shard_count"] = shards
+
+    # Balanced chunks: spread tokens evenly so a slow shard doesn't drag
+    # the tail. N=11, shards=2 → [6, 5], not [10, 1].
+    base, rem = divmod(n, shards)
+    chunks: list[list[str]] = []
+    idx = 0
+    for i in range(shards):
+        size = base + (1 if i < rem else 0)
+        chunks.append(token_ids[idx:idx + size])
+        idx += size
+
+    def _call(chunk: list[str]) -> list:
+        params = [BookParams(token_id=t) for t in chunk]
+        return clob_client.get_order_books(params) or []
+
+    def _is_rate_limit(exc: BaseException) -> bool:
+        s = str(exc).lower()
+        return "429" in s or "rate" in s or "too many" in s
+
+    t0 = time.monotonic()
+    results: list = []
+    rate_limited = False
+
+    if shards == 1:
+        try:
+            results = _call(chunks[0])
+        except Exception as exc:
+            if _is_rate_limit(exc):
+                rate_limited = True
+            else:
+                logger.warning(f"CLOB batched fetch failed: {exc}")
+    else:
+        with ThreadPoolExecutor(max_workers=shards) as pool:
+            futures = {pool.submit(_call, c): c for c in chunks}
+            for fut in as_completed(futures):
+                try:
+                    results.extend(fut.result())
+                except Exception as exc:
+                    if _is_rate_limit(exc):
+                        rate_limited = True
+                    else:
+                        logger.warning(f"CLOB batched shard failed: {exc}")
+
+    if rate_limited:
+        # Circuit breaker (#9): fall back to a single batched call for
+        # this scan. Parallel fan-out can trip a rate ceiling that a
+        # single batched call wouldn't.
+        telemetry["rate_limited"] = True
+        try:
+            results = _call(token_ids)
+            telemetry["fallback_used"] = True
+        except Exception as exc:
+            logger.error(f"CLOB batched fetch (rate-limit fallback) failed: {exc}")
+            results = []
+
+    out: dict[str, tuple[float, float, float]] = {}
+    for book in results:
+        asset_id = _book_asset_id(book)
+        if not asset_id:
+            continue
+        out[asset_id] = _parse_book(book)
+
+    telemetry["elapsed_s"] = round(time.monotonic() - t0, 3)
+    return out, telemetry
+
+
+def _fetch_book(clob_client: ClobClient, token_id: str) -> tuple[float, float, float]:
+    """Return (best_ask, best_bid, tick_size) from the live CLOB orderbook."""
+    book = clob_client.get_order_book(token_id)
+    return _parse_book(book)
 
 
 def _round_to_tick(price: float, tick_size: float) -> float:

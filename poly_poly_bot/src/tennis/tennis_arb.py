@@ -167,6 +167,637 @@ class TennisArbStrategy:
             self._save_metrics(metrics)
 
     def _scan_body(self, metrics: dict, scan_started_at: float) -> list[dict]:
+        """Dispatch between the legacy (Gamma-per-scan) path and the cache
+        path. Both share the dedupe / sizing / order / paper-book loop via
+        ``_process_candidate``.
+        """
+        use_cache = (
+            self.discovery_cache is not None
+            and CONFIG.tennis_use_discovery_cache
+        )
+        if use_cache:
+            return self._scan_body_with_cache(metrics, scan_started_at)
+        return self._scan_body_legacy(metrics, scan_started_at)
+
+    # ------------------------------------------------------------------
+    # Cache-mode scan path (Batch 3)
+    # ------------------------------------------------------------------
+    def _scan_body_with_cache(self, metrics: dict, scan_started_at: float) -> list[dict]:
+        """Per-scan path that reads from the discovery cache and prices off
+        live CLOB books, eliminating per-scan Gamma and the revalidation
+        dance entirely.
+        """
+        from src.tennis.discovery_cache import _match_key
+        from src.tennis.order_placer import fetch_books_batched
+
+        logger.info(
+            f"Tennis arb scan starting (cache mode, provider={self._provider.name})"
+        )
+
+        # Step 0: settle paper positions resolved since last scan
+        t_phase = time.monotonic()
+        self._resolve_settled_paper_positions()
+        metrics["resolve_s"] = round(time.monotonic() - t_phase, 3)
+
+        # Step 1: read active PM markets from the discovery cache. The
+        # cache filter applies the time-window gate (live or starts within
+        # 20min) and the liquidity floor. Markets without a linked Smarkets
+        # fixture are dropped.
+        cache = self.discovery_cache
+        active_pm = cache.active_set(
+            window_back_s=7200.0,
+            window_fwd_s=1200.0,
+            min_liquidity=self.min_liquidity,
+            require_link=True,
+        )
+        cache_stats = cache.stats()
+        metrics["cache_age_s"] = cache_stats.get("age_s")
+        metrics["cache_size"] = cache_stats.get("size")
+        metrics["active_set_size"] = len(active_pm)
+        metrics["pm_markets_count"] = len(active_pm)
+        metrics["gamma_s"] = 0.0  # no per-scan Gamma in cache mode
+        if not active_pm:
+            logger.info(
+                f"Tennis arb: no active markets in cache (size={cache_stats.get('size')}, "
+                f"age={cache_stats.get('age_s')}s)"
+            )
+            return []
+
+        # Step 2: fresh Smarkets quotes. _fetch_tennis_events is cached
+        # 10min (Batch 1) so this call mostly costs quotes + volumes;
+        # those are still per-scan to keep live mids honest.
+        t_phase = time.monotonic()
+        sharp_odds = self._provider.fetch_tennis_odds(tours=self.tournaments)
+        metrics["smarkets_s"] = round(time.monotonic() - t_phase, 3)
+        metrics["sharp_odds_count"] = len(sharp_odds)
+        if not sharp_odds:
+            logger.info("Tennis arb: Smarkets returned no odds")
+            return []
+
+        # Step 3: index sharp odds by the cache's match key and intersect
+        # with active linked PM markets. Stale links (sharp fixture vanished
+        # since last refresh) are dropped here.
+        sharp_by_key = {_match_key(o): o for o in sharp_odds}
+        linked_pm = [
+            pm for pm in active_pm
+            if pm.get("linked_match_key") in sharp_by_key
+        ]
+        metrics["linked_active_count"] = len(linked_pm)
+        if not linked_pm:
+            logger.info(
+                f"Tennis arb: {len(active_pm)} active PM markets but none "
+                f"have a current Smarkets fixture — skipping"
+            )
+            return []
+
+        # Step 4: batched CLOB books fetch (4-way parallel max). One call
+        # per scan replaces ~N per-candidate _fetch_book revalidations.
+        if self.clob_client is None:
+            logger.info("Tennis arb: no clob_client — skipping cache-mode scan")
+            return []
+        token_ids: list[str] = []
+        for pm in linked_pm:
+            for k in ("token_id_yes", "token_id_no"):
+                tok = pm.get(k) or ""
+                if tok:
+                    token_ids.append(tok)
+        t_phase = time.monotonic()
+        books_by_token, books_telemetry = fetch_books_batched(
+            self.clob_client, token_ids
+        )
+        metrics["clob_books_s"] = round(time.monotonic() - t_phase, 3)
+        metrics["clob_books_telemetry"] = books_telemetry
+        metrics["clob_books_count"] = len(books_by_token)
+
+        # Step 5: TP gate against live CLOB prices (no Gamma involvement).
+        t_phase = time.monotonic()
+        tp_events = self._check_take_profit_from_books(books_by_token)
+        metrics["take_profit_s"] = round(time.monotonic() - t_phase, 3)
+        metrics["take_profit_events"] = len(tp_events)
+
+        # Step 6: build comparisons (live CLOB ask in polymarket_price).
+        t_phase = time.monotonic()
+        comparisons = self._build_comparisons_live(
+            linked_pm, sharp_by_key, books_by_token
+        )
+        metrics["match_compare_s"] = round(time.monotonic() - t_phase, 3)
+        metrics["comparisons_count"] = len(comparisons)
+        logger.info(f"Tennis arb: {len(comparisons)} comparisons (cache mode)")
+
+        for comp, pm in comparisons:
+            logger.info(
+                f"  >> {comp.match_odds.player_a} vs {comp.match_odds.player_b} | "
+                f"Sharp: {comp.sharp_prob:.1%} / CLOB ask: {comp.polymarket_price:.1%} | "
+                f"Edge: {comp.divergence:+.1%} | {pm.get('question', '')}"
+            )
+
+        # Step 7: divergence + re-bet gate loop (shared with legacy via
+        # _process_candidate). Pre-fetched book skips revalidation.
+        bet_state = self._load_bet_state()
+        signals: list[dict] = []
+        skipped_dedupe_counter = [0]
+        signal_latencies: list[dict] = []
+
+        for comp, pm in comparisons:
+            if comp.divergence < self.min_divergence:
+                continue
+            t_detect = time.monotonic()
+            book_hint = books_by_token.get(comp.polymarket_token_id)
+            signal = self._process_candidate(
+                comp=comp,
+                pm=pm,
+                pm_price=comp.polymarket_price,
+                edge=comp.divergence,
+                gamma_price=comp.polymarket_price,  # alias — no Gamma involved
+                live_ask=comp.polymarket_price,
+                drift_pp=None,
+                book_hint=book_hint,
+                bet_state=bet_state,
+                signal_latencies=signal_latencies,
+                t_detect=t_detect,
+                revalidate_s=0.0,
+                skipped_dedupe_counter=skipped_dedupe_counter,
+            )
+            if signal is not None:
+                signals.append(signal)
+
+        if skipped_dedupe_counter[0]:
+            logger.info(
+                f"Tennis arb: skipped {skipped_dedupe_counter[0]} re-bet(s) — "
+                f"edge did not grow by {self.min_edge_step:.0%}"
+            )
+
+        metrics["signals_count"] = len(signals)
+        metrics["dropped_dedupe"] = skipped_dedupe_counter[0]
+        metrics["signal_latencies"] = signal_latencies
+
+        if signals:
+            self._save_bet_state(bet_state)
+        signals.sort(key=lambda s: s["divergence"], reverse=True)
+
+        if signals:
+            logger.info(
+                f"Tennis arb: {len(signals)} signal(s) above "
+                f"{self.min_divergence:.0%} threshold"
+            )
+            for s in signals:
+                logger.info(
+                    f"  {s['tournament']}: {s['player_a']} vs {s['player_b']} — "
+                    f"Sharp: {s['sharp_prob']:.1%} / PM: {s['polymarket_price']:.1%} — "
+                    f"Edge: {s['divergence']:.1%} — {s['side']} @ ${s['bet_size']:.0f}"
+                )
+        else:
+            logger.info("Tennis arb: no signals above threshold")
+
+        self._save_signals(signals)
+        return tp_events + signals
+
+    def _build_comparisons_live(
+        self,
+        linked_pm: list[dict],
+        sharp_by_key: dict,
+        books_by_token: dict[str, tuple[float, float, float]],
+    ) -> list[tuple]:
+        """Build OddsComparison objects pricing off live CLOB books.
+
+        For each linked PM entry produces up to 2 comparisons (YES + NO).
+        Skips sides whose token has no live book or empty ask. Sharp probs
+        are routed to YES/NO via _match_player_to_odds — same logic as the
+        legacy _match_and_compare but the matching is already pre-resolved
+        on the cache.
+        """
+        comparisons: list[tuple] = []
+        for pm in linked_pm:
+            link = pm.get("linked_match_key")
+            odds = sharp_by_key.get(link)
+            if odds is None:
+                continue
+            pm_player = pm.get("player", "")
+            if not pm_player:
+                continue
+            side, _ = _match_player_to_odds(
+                pm_player, odds.player_a, odds.player_b,
+                odds.implied_prob_a, odds.implied_prob_b,
+            )
+            if side is None:
+                continue
+
+            if side == "A":
+                yes_player, yes_sharp = odds.player_a, odds.implied_prob_a
+                no_player, no_sharp = odds.player_b, odds.implied_prob_b
+            else:
+                yes_player, yes_sharp = odds.player_b, odds.implied_prob_b
+                no_player, no_sharp = odds.player_a, odds.implied_prob_a
+
+            tok_yes = pm.get("token_id_yes") or ""
+            tok_no = pm.get("token_id_no") or ""
+
+            # YES side: divergence vs live best_ask
+            yes_book = books_by_token.get(tok_yes)
+            if yes_book and yes_book[0] > 0:
+                yes_ask = yes_book[0]
+                comparisons.append((
+                    OddsComparison(
+                        match_odds=odds,
+                        polymarket_condition_id=pm["condition_id"],
+                        polymarket_token_id=tok_yes,
+                        polymarket_market_id=pm["market_id"],
+                        polymarket_question=pm["question"],
+                        polymarket_player=yes_player,
+                        polymarket_price=yes_ask,
+                        sharp_prob=yes_sharp,
+                        divergence=yes_sharp - yes_ask,
+                        polymarket_volume=pm.get("volume", 0.0),
+                        polymarket_liquidity=pm.get("liquidity", 0.0),
+                        outcome_side="YES",
+                    ),
+                    pm,
+                ))
+
+            # NO side: derived ask = 1 - YES best_bid (if YES bid valid).
+            no_book = books_by_token.get(tok_no)
+            if no_book and no_book[0] > 0 and tok_no:
+                # If we have a real NO book, prefer that ask directly.
+                no_ask = no_book[0]
+                comparisons.append((
+                    OddsComparison(
+                        match_odds=odds,
+                        polymarket_condition_id=pm["condition_id"],
+                        polymarket_token_id=tok_no,
+                        polymarket_market_id=pm["market_id"],
+                        polymarket_question=pm["question"],
+                        polymarket_player=no_player,
+                        polymarket_price=no_ask,
+                        sharp_prob=no_sharp,
+                        divergence=no_sharp - no_ask,
+                        polymarket_volume=pm.get("volume", 0.0),
+                        polymarket_liquidity=pm.get("liquidity", 0.0),
+                        outcome_side="NO",
+                    ),
+                    pm,
+                ))
+        return comparisons
+
+    def _process_candidate(
+        self,
+        *,
+        comp,
+        pm: dict,
+        pm_price: float,
+        edge: float,
+        gamma_price: float,
+        live_ask: float | None,
+        drift_pp: float | None,
+        book_hint: tuple[float, float, float] | None,
+        bet_state: dict,
+        signal_latencies: list[dict],
+        t_detect: float,
+        revalidate_s: float,
+        skipped_dedupe_counter: list[int],
+    ) -> dict | None:
+        """Re-bet gate → sizing → signal build → order placement → paper-book
+        record → per-candidate latency for ONE comparison.
+
+        Shared between legacy and cache-mode scan paths so the dedupe gate
+        and order-placement logic exist in exactly one place. Caller is
+        responsible for the divergence filter and for resolving the
+        ``book_hint``. Mutates ``bet_state`` on emit and increments
+        ``skipped_dedupe_counter[0]`` on dedupe skips. Returns the signal
+        dict to append, or None on skip.
+        """
+        order_place_s = 0.0
+
+        # Re-bet gate. State is keyed by condition_id (the Polymarket
+        # event), so a FLIP to the opposite token counts against the
+        # per-event bet cap.
+        state_key = comp.polymarket_condition_id
+        prev = bet_state.get(state_key)
+        is_second_bet = False
+        if prev is not None:
+            bets_count = int(prev.get("times_emitted") or 0)
+            if bets_count >= self.max_bets_per_event:
+                skipped_dedupe_counter[0] += 1
+                signal_latencies.append({
+                    "outcome": "cap_reached",
+                    "revalidate_ms": round(revalidate_s * 1000),
+                    "order_place_ms": 0,
+                    "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                })
+                logger.debug(
+                    f"Tennis arb: skip re-bet {pm.get('question','')} — "
+                    f"bets_count {bets_count} ≥ cap {self.max_bets_per_event}"
+                )
+                return None
+
+            first_edge = float(prev.get("first_divergence", prev.get("last_divergence", 0.0)))
+            first_pm_prev = float(prev.get("first_pm_price", prev.get("last_pm_price", 0.0)))
+            first_sharp = float(prev.get("first_sharp_prob", prev.get("last_sharp_prob", 0.0)))
+            first_token = prev.get("first_token_id") or prev.get("last_token_id") or ""
+            same_side = (
+                first_token
+                and comp.polymarket_token_id
+                and first_token == comp.polymarket_token_id
+            )
+
+            if edge < first_edge + self.min_edge_step:
+                skipped_dedupe_counter[0] += 1
+                signal_latencies.append({
+                    "outcome": "edge_step",
+                    "revalidate_ms": round(revalidate_s * 1000),
+                    "order_place_ms": 0,
+                    "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                })
+                logger.debug(
+                    f"Tennis arb: skip re-bet {pm.get('question','')} — "
+                    f"edge {edge:.1%} vs first {first_edge:.1%} "
+                    f"(step {self.min_edge_step:.0%})"
+                )
+                return None
+
+            if same_side:
+                if pm_price < first_pm_prev:
+                    skipped_dedupe_counter[0] += 1
+                    signal_latencies.append({
+                        "outcome": "pm_dropped",
+                        "revalidate_ms": round(revalidate_s * 1000),
+                        "order_place_ms": 0,
+                        "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                    })
+                    logger.debug(
+                        f"Tennis arb: skip re-bet {pm.get('question','')} — "
+                        f"PM dropped {first_pm_prev:.3f}→{pm_price:.3f}"
+                    )
+                    return None
+                if comp.sharp_prob <= first_sharp:
+                    skipped_dedupe_counter[0] += 1
+                    signal_latencies.append({
+                        "outcome": "sharp_flat",
+                        "revalidate_ms": round(revalidate_s * 1000),
+                        "order_place_ms": 0,
+                        "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
+                    })
+                    logger.debug(
+                        f"Tennis arb: skip re-bet {pm.get('question','')} — "
+                        f"sharp didn't move up {first_sharp:.3f}→{comp.sharp_prob:.3f}"
+                    )
+                    return None
+            is_second_bet = True
+
+        kelly_for_this_bet = (
+            self.second_bet_kelly_fraction if is_second_bet else None
+        )
+        bet_size = self._calculate_bet_size(
+            comp.sharp_prob, pm_price, kelly_fraction=kelly_for_this_bet,
+        )
+
+        event_slug = pm.get("event_slug", "")
+        polymarket_url = (
+            f"https://polymarket.com/event/{event_slug}" if event_slug else ""
+        )
+        outcome_label = (
+            comp.polymarket_player
+            or pm.get("group_item_title")
+            or ""
+        )
+
+        signal = {
+            "strategy": "tennis_arb",
+            "tournament": comp.match_odds.tournament,
+            "tour": comp.match_odds.tour,
+            "player_a": comp.match_odds.player_a,
+            "player_b": comp.match_odds.player_b,
+            "target_player": comp.polymarket_player,
+            "outcome_label": outcome_label,
+            "sharp_source": comp.match_odds.source,
+            "sharp_prob": round(comp.sharp_prob, 4),
+            "sharp_odds_a": comp.match_odds.odds_a,
+            "sharp_odds_b": comp.match_odds.odds_b,
+            "polymarket_price": round(pm_price, 4),
+            "polymarket_gamma_price": round(gamma_price, 4),
+            "live_ask": round(live_ask, 4) if live_ask is not None else None,
+            "divergence": round(edge, 4),
+            "gamma_divergence": round(comp.divergence, 4),
+            "side": comp.side,
+            "bet_size": round(bet_size, 2),
+            "kelly_size": round(bet_size, 2),
+            "market_id": comp.polymarket_market_id,
+            "condition_id": comp.polymarket_condition_id,
+            "token_id": comp.polymarket_token_id,
+            "event_title": pm.get("event_title", ""),
+            "event_slug": event_slug,
+            "polymarket_url": polymarket_url,
+            "polymarket_question": pm.get("question", ""),
+            "polymarket_volume": comp.polymarket_volume,
+            "polymarket_liquidity": comp.polymarket_liquidity,
+            "match_time": (
+                comp.match_odds.match_time.isoformat()
+                if comp.match_odds.match_time
+                else None
+            ),
+            "timestamp": datetime.now(SGT).isoformat(),
+            "preview": runtime_state.is_preview(3),
+        }
+
+        # Live execution
+        in_preview = runtime_state.is_preview(3)
+        if in_preview:
+            signal["live_status"] = "preview"
+        elif self.clob_client is None:
+            signal["live_status"] = "skipped:no_clob_client"
+            logger.warning(
+                f"Tennis arb: live BUY skipped — clob_client is None "
+                f"(token={comp.polymarket_token_id[:12] if comp.polymarket_token_id else ''})"
+            )
+        elif bet_size < CONFIG.min_order_size_usd:
+            signal["live_status"] = (
+                f"skipped:bet_below_min(${bet_size:.2f}<${CONFIG.min_order_size_usd:.2f})"
+            )
+            logger.info(
+                f"Tennis arb: live BUY skipped — bet ${bet_size:.2f} < "
+                f"min ${CONFIG.min_order_size_usd:.2f}"
+            )
+        elif not comp.polymarket_token_id:
+            signal["live_status"] = "skipped:no_token_id"
+            logger.warning("Tennis arb: live BUY skipped — empty token_id")
+        else:
+            from src.copy_trading.daily_spend_guard import can_spend, record_spend
+            ok, reason = can_spend(bet_size)
+            if not ok:
+                logger.info(f"Tennis arb: live BUY skipped — {reason}")
+                signal["live_status"] = f"skipped:daily_cap({reason})"
+            else:
+                from src.tennis.order_placer import place_buy_yes, _fetch_book
+                t_order = time.monotonic()
+                live = place_buy_yes(
+                    clob_client=self.clob_client,
+                    token_id=comp.polymarket_token_id,
+                    bet_size_usd=bet_size,
+                    ref_price=pm_price,
+                    book_hint=book_hint,
+                )
+                # FAK no-fill retry: a 0-fill FAK means the book moved
+                # between revalidation and submission (or the slippage
+                # buffer wasn't wide enough). Re-fetch the live book,
+                # verify the divergence still clears the floor, and
+                # retry once with a fresh book_hint. Single retry only.
+                if live and live.get("unfilled"):
+                    self._scan_fak_retry_attempted += 1
+                    try:
+                        new_ask, new_bid, new_tick = _fetch_book(
+                            self.clob_client, comp.polymarket_token_id
+                        )
+                    except Exception as exc:
+                        logger.warning(
+                            f"Tennis arb: FAK retry book fetch failed: {exc} — "
+                            f"giving up on signal"
+                        )
+                        new_ask = 0.0
+                        new_bid = 0.0
+                        new_tick = 0.0
+                    if new_ask > 0:
+                        retry_edge = comp.sharp_prob - new_ask
+                        # Reuse min_divergence as the retry floor; in
+                        # cache mode revalidation_min_divergence is unused
+                        # but min_divergence is the live-CLOB gate.
+                        retry_floor = max(
+                            self.revalidation_min_divergence,
+                            self.min_divergence,
+                        )
+                        if retry_edge >= retry_floor:
+                            logger.info(
+                                f"Tennis arb: FAK 0-fill, retrying — "
+                                f"new ask={new_ask:.3f} edge={retry_edge:+.1%} "
+                                f"({pm.get('question','')})"
+                            )
+                            retry_hint = (new_ask, new_bid, new_tick)
+                            live = place_buy_yes(
+                                clob_client=self.clob_client,
+                                token_id=comp.polymarket_token_id,
+                                bet_size_usd=bet_size,
+                                ref_price=new_ask,
+                                book_hint=retry_hint,
+                            )
+                            if live and not live.get("unfilled"):
+                                self._scan_fak_retry_filled += 1
+                            pm_price = new_ask
+                            edge = retry_edge
+                        else:
+                            self._scan_fak_retry_dropped_below_floor += 1
+                            logger.info(
+                                f"Tennis arb: FAK 0-fill, retry skipped — "
+                                f"new edge {retry_edge:+.1%} < floor "
+                                f"{retry_floor:.1%} "
+                                f"({pm.get('question','')})"
+                            )
+                order_place_s = time.monotonic() - t_order
+                if live and live.get("order_id"):
+                    signal["live"] = True
+                    signal["live_order_id"] = live["order_id"]
+                    signal["live_order_price"] = live["order_price"]
+                    signal["live_shares"] = live["shares"]
+                    filled = live.get("filled_shares") or live["shares"]
+                    avg_px = live.get("filled_avg_price") or live["order_price"]
+                    signal["live_filled_shares"] = filled
+                    signal["live_filled_avg_price"] = avg_px
+                    signal["live_status"] = "placed"
+                    record_spend(bet_size, source="tennis")
+                else:
+                    err = (live or {}).get("error") or "no_order_id_in_response"
+                    signal["live_status"] = f"failed:{err}"
+
+        # Paper-book
+        if self.paper_book is not None:
+            action = self.paper_book.process_signal(signal)
+            signal["paper_action"] = action["action"]
+            if action.get("realized_pnl_usd") is not None:
+                signal["paper_realized_pnl_usd"] = action["realized_pnl_usd"]
+            if action.get("position_id"):
+                signal["paper_position_id"] = action["position_id"]
+
+        # Latency record
+        detect_to_order_s = time.monotonic() - t_detect
+        latency = {
+            "outcome": signal.get("live_status", "unknown"),
+            "revalidate_ms": round(revalidate_s * 1000),
+            "order_place_ms": round(order_place_s * 1000),
+            "detect_to_order_ms": round(detect_to_order_s * 1000),
+            "side": comp.outcome_side,
+            "gamma_ask": round(gamma_price, 4),
+            "live_ask": round(live_ask, 4) if live_ask is not None else None,
+            "drift_pp": drift_pp,
+        }
+        signal["latency_ms"] = latency
+        signal_latencies.append(latency)
+
+        # bet_state update
+        if prev is None:
+            first_div = round(edge, 4)
+            first_pm_val = round(pm_price, 4)
+            first_sharp_val = round(comp.sharp_prob, 4)
+            first_token_val = comp.polymarket_token_id
+            first_ts = signal["timestamp"]
+        else:
+            first_div = float(prev.get("first_divergence", prev.get("last_divergence", round(edge, 4))))
+            first_pm_val = float(prev.get("first_pm_price", prev.get("last_pm_price", round(pm_price, 4))))
+            first_sharp_val = float(prev.get("first_sharp_prob", prev.get("last_sharp_prob", round(comp.sharp_prob, 4))))
+            first_token_val = prev.get("first_token_id") or prev.get("last_token_id") or comp.polymarket_token_id
+            first_ts = prev.get("first_ts") or prev.get("last_ts") or signal["timestamp"]
+        bet_state[state_key] = {
+            "first_divergence": first_div,
+            "first_pm_price": first_pm_val,
+            "first_sharp_prob": first_sharp_val,
+            "first_token_id": first_token_val,
+            "first_ts": first_ts,
+            "last_divergence": round(edge, 4),
+            "last_pm_price": round(pm_price, 4),
+            "last_sharp_prob": round(comp.sharp_prob, 4),
+            "last_token_id": comp.polymarket_token_id,
+            "last_bet_size": round(bet_size, 2),
+            "last_ts": signal["timestamp"],
+            "times_emitted": int(prev.get("times_emitted", 0)) + 1 if prev else 1,
+            "question": pm.get("question", ""),
+            "event_title": pm.get("event_title", ""),
+        }
+        return signal
+
+    def _check_take_profit_from_books(
+        self, books_by_token: dict[str, tuple[float, float, float]]
+    ) -> list[dict]:
+        """Cache-mode TP gate. Synthesizes a poly_markets-shaped list from
+        the discovery cache + live CLOB books (yes_price = best_ask from
+        the live book) and delegates to the legacy ``_check_take_profit``
+        so the closing logic — live SELL, event-dict construction, signal
+        persistence — stays in one place.
+
+        Positions whose token isn't in this scan's books map are skipped
+        and re-checked next scan; the legacy gate has the same fallthrough.
+        """
+        if self.paper_book is None or self.take_profit_ratio <= 0:
+            return []
+        # Pull a wider cache slice than the trading active_set: held
+        # positions can outlive the +20min trading window when a match runs
+        # long. require_link=False because TP doesn't care about Smarkets.
+        active = self.discovery_cache.active_set(
+            window_back_s=86400.0,
+            window_fwd_s=86400.0,
+            require_link=False,
+            min_liquidity=0.0,
+        )
+        synth: list[dict] = []
+        for pm in active:
+            tok = pm.get("token_id_yes") or ""
+            if not tok:
+                continue
+            book = books_by_token.get(tok)
+            if not book or book[0] <= 0:
+                continue
+            synth.append({**pm, "yes_price": book[0]})
+        return self._check_take_profit(synth)
+
+    # ------------------------------------------------------------------
+    # Legacy (Gamma-per-scan) scan path
+    # ------------------------------------------------------------------
+    def _scan_body_legacy(self, metrics: dict, scan_started_at: float) -> list[dict]:
         logger.info(f"Tennis arb scan starting (provider={self._provider.name})")
 
         # Step 0: Settle any open paper positions whose underlying Polymarket
@@ -222,42 +853,28 @@ class TennisArbStrategy:
 
         # Step 4: Filter by divergence threshold + re-bet gate
         bet_state = self._load_bet_state()
-        signals = []
-        skipped_dedupe = 0
-        # Per-signal "noticed divergence → order submitted" stopwatches. Stored
-        # on metrics so we can answer "how fresh is the price our order hit?"
-        # without grepping logs.
+        signals: list[dict] = []
+        skipped_dedupe_counter = [0]
         signal_latencies: list[dict] = []
         for comp, pm in comparisons:
             if comp.divergence < self.min_divergence:
                 continue
 
-            # Stopwatch starts here: this is the moment we "noticed" the
-            # divergence is large enough to act on. Everything below (live
-            # revalidation, re-bet gate, sizing, order placement) is counted
-            # against detect→order latency.
             t_detect = time.monotonic()
             revalidate_s = 0.0
-            order_place_s = 0.0
 
             # Live revalidation: Gamma's bestAsk/bestBid are cached and can
             # lag the live CLOB book by a few seconds on fast-moving thin
             # markets. Refetch the CLOB book once the cheap filter passes
-            # so the bet-or-skip decision uses the real fill cost.
-            #
-            #   Gamma edge ≥ min_divergence (8%)  →  cheap candidate
-            #   live edge  ≥ revalidation_min_divergence (6%)  →  fire
-            #   live edge below floor              →  drop, Gamma was stale
-            #
-            # The 8% / 6% gap absorbs short-lived Gamma cache drift.
+            # so the bet-or-skip decision uses the real fill cost. The
+            # captured (ask, bid, tick) tuple is forwarded as book_hint to
+            # place_buy_yes — skips the second CLOB roundtrip on the live
+            # order path.
             pm_price = comp.polymarket_price
             edge = comp.divergence
             gamma_price = comp.polymarket_price
             live_ask: float | None = None
-            # Capture the full revalidation book once so place_buy_yes can
-            # reuse it without a second CLOB roundtrip. ~270ms p50 saved on
-            # the live-order path; the slippage_bps buffer absorbs the
-            # ~50-300ms drift between revalidation and order submit.
+            drift_pp: float | None = None
             book_hint: tuple[float, float, float] | None = None
             if (
                 self.clob_client is not None
@@ -299,10 +916,6 @@ class TennisArbStrategy:
                     continue
                 live_ask = best_ask
                 live_edge = comp.sharp_prob - best_ask
-                # Drift = how much the live ask moved AWAY from Gamma's
-                # cached ask. Positive = CLOB more expensive than Gamma
-                # claimed (the common failure mode that produces the
-                # phantom-edge funnel).
                 drift_pp = round((best_ask - comp.polymarket_price) * 100, 2)
                 if live_edge < self.revalidation_min_divergence:
                     signal_latencies.append({
@@ -328,352 +941,32 @@ class TennisArbStrategy:
                 edge = live_edge
                 book_hint = (best_ask, best_bid, tick)
 
-            # Re-bet gate. State is keyed by condition_id (the Polymarket
-            # event), so a FLIP to the opposite token counts against the
-            # per-event bet cap.
-            #
-            # First bet: no gate beyond min_divergence + live revalidation.
-            #
-            # Re-bet on the *same* side (token_id matches first_token_id):
-            #   1. bets_count must be < max_bets_per_event
-            #   2. live edge must have grown by ≥ min_edge_step vs first bet
-            #   3. PM price didn't drop vs first bet (else we're catching a
-            #      falling knife — PM moved toward sharp, not away)
-            #   4. Sharp probability moved further from PM since first bet
-            #      (the move is sharp leading, not PM converging)
-            #
-            # FLIP (token_id differs from first_token_id): still counts
-            # toward the cap, but the first-bet anchors don't apply (the
-            # thesis is on a different side, comparing prices is meaningless).
-            state_key = comp.polymarket_condition_id
-            prev = bet_state.get(state_key)
-            is_second_bet = False
-            if prev is not None:
-                bets_count = int(prev.get("times_emitted") or 0)
-                if bets_count >= self.max_bets_per_event:
-                    skipped_dedupe += 1
-                    signal_latencies.append({
-                        "outcome": "cap_reached",
-                        "revalidate_ms": round(revalidate_s * 1000),
-                        "order_place_ms": 0,
-                        "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
-                    })
-                    logger.debug(
-                        f"Tennis arb: skip re-bet {pm.get('question','')} — "
-                        f"bets_count {bets_count} ≥ cap {self.max_bets_per_event}"
-                    )
-                    continue
-
-                first_edge = float(prev.get("first_divergence", prev.get("last_divergence", 0.0)))
-                first_pm = float(prev.get("first_pm_price", prev.get("last_pm_price", 0.0)))
-                first_sharp = float(prev.get("first_sharp_prob", prev.get("last_sharp_prob", 0.0)))
-                first_token = prev.get("first_token_id") or prev.get("last_token_id") or ""
-                same_side = (
-                    first_token
-                    and comp.polymarket_token_id
-                    and first_token == comp.polymarket_token_id
-                )
-
-                if edge < first_edge + self.min_edge_step:
-                    skipped_dedupe += 1
-                    signal_latencies.append({
-                        "outcome": "edge_step",
-                        "revalidate_ms": round(revalidate_s * 1000),
-                        "order_place_ms": 0,
-                        "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
-                    })
-                    logger.debug(
-                        f"Tennis arb: skip re-bet {pm.get('question','')} — "
-                        f"edge {edge:.1%} vs first {first_edge:.1%} "
-                        f"(step {self.min_edge_step:.0%})"
-                    )
-                    continue
-
-                if same_side:
-                    if pm_price < first_pm:
-                        skipped_dedupe += 1
-                        signal_latencies.append({
-                            "outcome": "pm_dropped",
-                            "revalidate_ms": round(revalidate_s * 1000),
-                            "order_place_ms": 0,
-                            "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
-                        })
-                        logger.debug(
-                            f"Tennis arb: skip re-bet {pm.get('question','')} — "
-                            f"PM dropped {first_pm:.3f}→{pm_price:.3f}"
-                        )
-                        continue
-                    if comp.sharp_prob <= first_sharp:
-                        skipped_dedupe += 1
-                        signal_latencies.append({
-                            "outcome": "sharp_flat",
-                            "revalidate_ms": round(revalidate_s * 1000),
-                            "order_place_ms": 0,
-                            "detect_to_order_ms": round((time.monotonic() - t_detect) * 1000),
-                        })
-                        logger.debug(
-                            f"Tennis arb: skip re-bet {pm.get('question','')} — "
-                            f"sharp didn't move up {first_sharp:.3f}→{comp.sharp_prob:.3f}"
-                        )
-                        continue
-                is_second_bet = True
-
-            kelly_for_this_bet = (
-                self.second_bet_kelly_fraction if is_second_bet else None
+            signal = self._process_candidate(
+                comp=comp,
+                pm=pm,
+                pm_price=pm_price,
+                edge=edge,
+                gamma_price=gamma_price,
+                live_ask=live_ask,
+                drift_pp=drift_pp,
+                book_hint=book_hint,
+                bet_state=bet_state,
+                signal_latencies=signal_latencies,
+                t_detect=t_detect,
+                revalidate_s=revalidate_s,
+                skipped_dedupe_counter=skipped_dedupe_counter,
             )
-            bet_size = self._calculate_bet_size(
-                comp.sharp_prob, pm_price, kelly_fraction=kelly_for_this_bet,
-            )
+            if signal is not None:
+                signals.append(signal)
 
-            event_slug = pm.get("event_slug", "")
-            polymarket_url = (
-                f"https://polymarket.com/event/{event_slug}" if event_slug else ""
-            )
-            # comp.polymarket_player is set per-side (YES → question player,
-            # NO → the other player), so it's authoritative. group_item_title
-            # only ever names the YES-side player and would mislabel NO bets.
-            outcome_label = (
-                comp.polymarket_player
-                or pm.get("group_item_title")
-                or ""
-            )
-
-            signal = {
-                "strategy": "tennis_arb",
-                "tournament": comp.match_odds.tournament,
-                "tour": comp.match_odds.tour,
-                "player_a": comp.match_odds.player_a,
-                "player_b": comp.match_odds.player_b,
-                "target_player": comp.polymarket_player,
-                "outcome_label": outcome_label,
-                "sharp_source": comp.match_odds.source,
-                "sharp_prob": round(comp.sharp_prob, 4),
-                "sharp_odds_a": comp.match_odds.odds_a,
-                "sharp_odds_b": comp.match_odds.odds_b,
-                "polymarket_price": round(pm_price, 4),
-                "polymarket_gamma_price": round(gamma_price, 4),
-                "live_ask": round(live_ask, 4) if live_ask is not None else None,
-                "divergence": round(edge, 4),
-                "gamma_divergence": round(comp.divergence, 4),
-                "side": comp.side,
-                "bet_size": round(bet_size, 2),
-                "kelly_size": round(bet_size, 2),
-                "market_id": comp.polymarket_market_id,
-                "condition_id": comp.polymarket_condition_id,
-                "token_id": comp.polymarket_token_id,
-                "event_title": pm.get("event_title", ""),
-                "event_slug": event_slug,
-                "polymarket_url": polymarket_url,
-                "polymarket_question": pm.get("question", ""),
-                "polymarket_volume": comp.polymarket_volume,
-                "polymarket_liquidity": comp.polymarket_liquidity,
-                "match_time": (
-                    comp.match_odds.match_time.isoformat()
-                    if comp.match_odds.match_time
-                    else None
-                ),
-                "timestamp": datetime.now(SGT).isoformat(),
-                "preview": runtime_state.is_preview(3),
-            }
-
-            # Live execution: place a real BUY YES order on the CLOB before
-            # the paper book records the position so the recorded position
-            # carries the actual order_id. If the live BUY fails the signal
-            # still gets emitted/paper-booked so we don't lose the trail; it
-            # just stays a paper-only position.
-            #
-            # signal["live_status"] is always populated so the Telegram alert
-            # and downstream tooling can show why a live order did or didn't
-            # post — the previous silent skip path made it look like live mode
-            # was broken when it was just gated.
-            in_preview = runtime_state.is_preview(3)
-            if in_preview:
-                signal["live_status"] = "preview"
-            elif self.clob_client is None:
-                signal["live_status"] = "skipped:no_clob_client"
-                logger.warning(
-                    f"Tennis arb: live BUY skipped — clob_client is None "
-                    f"(token={comp.polymarket_token_id[:12] if comp.polymarket_token_id else ''})"
-                )
-            elif bet_size < CONFIG.min_order_size_usd:
-                signal["live_status"] = (
-                    f"skipped:bet_below_min(${bet_size:.2f}<${CONFIG.min_order_size_usd:.2f})"
-                )
-                logger.info(
-                    f"Tennis arb: live BUY skipped — bet ${bet_size:.2f} < "
-                    f"min ${CONFIG.min_order_size_usd:.2f}"
-                )
-            elif not comp.polymarket_token_id:
-                signal["live_status"] = "skipped:no_token_id"
-                logger.warning("Tennis arb: live BUY skipped — empty token_id")
-            else:
-                from src.copy_trading.daily_spend_guard import can_spend, record_spend
-                ok, reason = can_spend(bet_size)
-                if not ok:
-                    logger.info(f"Tennis arb: live BUY skipped — {reason}")
-                    signal["live_status"] = f"skipped:daily_cap({reason})"
-                else:
-                    from src.tennis.order_placer import place_buy_yes, _fetch_book
-                    t_order = time.monotonic()
-                    live = place_buy_yes(
-                        clob_client=self.clob_client,
-                        token_id=comp.polymarket_token_id,
-                        bet_size_usd=bet_size,
-                        ref_price=pm_price,
-                        book_hint=book_hint,
-                    )
-                    # FAK no-fill retry: a 0-fill FAK means the book moved
-                    # between revalidation and submission (or the slippage
-                    # buffer wasn't wide enough). Re-fetch the live book,
-                    # verify the divergence still clears the floor, and
-                    # retry once with a fresh book_hint. Single retry only —
-                    # if the second attempt also fails the market is moving
-                    # faster than we can chase it.
-                    if live and live.get("unfilled"):
-                        self._scan_fak_retry_attempted += 1
-                        try:
-                            new_ask, new_bid, new_tick = _fetch_book(
-                                self.clob_client, comp.polymarket_token_id
-                            )
-                        except Exception as exc:
-                            logger.warning(
-                                f"Tennis arb: FAK retry book fetch failed: {exc} — "
-                                f"giving up on signal"
-                            )
-                            new_ask = 0.0
-                            new_bid = 0.0
-                            new_tick = 0.0
-                        if new_ask > 0:
-                            retry_edge = comp.sharp_prob - new_ask
-                            if retry_edge >= self.revalidation_min_divergence:
-                                logger.info(
-                                    f"Tennis arb: FAK 0-fill, retrying — "
-                                    f"new ask={new_ask:.3f} edge={retry_edge:+.1%} "
-                                    f"({pm.get('question','')})"
-                                )
-                                retry_hint = (new_ask, new_bid, new_tick)
-                                live = place_buy_yes(
-                                    clob_client=self.clob_client,
-                                    token_id=comp.polymarket_token_id,
-                                    bet_size_usd=bet_size,
-                                    ref_price=new_ask,
-                                    book_hint=retry_hint,
-                                )
-                                if live and not live.get("unfilled"):
-                                    self._scan_fak_retry_filled += 1
-                                # Reflect the price/edge that actually drove
-                                # the retry on the emitted signal.
-                                pm_price = new_ask
-                                edge = retry_edge
-                            else:
-                                self._scan_fak_retry_dropped_below_floor += 1
-                                logger.info(
-                                    f"Tennis arb: FAK 0-fill, retry skipped — "
-                                    f"new edge {retry_edge:+.1%} < floor "
-                                    f"{self.revalidation_min_divergence:.1%} "
-                                    f"({pm.get('question','')})"
-                                )
-                    order_place_s = time.monotonic() - t_order
-                    if live and live.get("order_id"):
-                        signal["live"] = True
-                        signal["live_order_id"] = live["order_id"]
-                        signal["live_order_price"] = live["order_price"]
-                        signal["live_shares"] = live["shares"]
-                        # Realised fill (post-FAK matching). Used by the paper-book
-                        # to record the actual position size and entry VWAP instead
-                        # of the requested bet — without this, partial FAK fills
-                        # leave the book over-sized and a later SELL hits "not
-                        # enough balance / allowance" (2026-05-12 Garin incident).
-                        # Falls back to the requested size+limit if get_order /
-                        # get_trades didn't return usable data.
-                        filled = live.get("filled_shares") or live["shares"]
-                        avg_px = live.get("filled_avg_price") or live["order_price"]
-                        signal["live_filled_shares"] = filled
-                        signal["live_filled_avg_price"] = avg_px
-                        signal["live_status"] = "placed"
-                        record_spend(bet_size, source="tennis")
-                    else:
-                        err = (live or {}).get("error") or "no_order_id_in_response"
-                        signal["live_status"] = f"failed:{err}"
-
-            # Paper-book: open / flip-close / hold based on existing position.
-            # FLIP closes the existing YES at the implied current PM price for
-            # our side (1 - new_signal_price) and opens the new YES position;
-            # the realized PnL on the close is attached to the signal so the
-            # Telegram alert can surface it.
-            if self.paper_book is not None:
-                action = self.paper_book.process_signal(signal)
-                signal["paper_action"] = action["action"]
-                if action.get("realized_pnl_usd") is not None:
-                    signal["paper_realized_pnl_usd"] = action["realized_pnl_usd"]
-                if action.get("position_id"):
-                    signal["paper_position_id"] = action["position_id"]
-
-            # Per-signal latency: from "noticed divergence" to "order placed
-            # (or terminal skip reason)". Includes revalidation HTTP, dedupe
-            # checks, sizing, daily-spend guard, and the place_buy_yes call.
-            # Stored on the signal so it shows up in tennis_trades.jsonl and
-            # on the scan-metrics record for aggregate analysis.
-            detect_to_order_s = time.monotonic() - t_detect
-            latency = {
-                "outcome": signal.get("live_status", "unknown"),
-                "revalidate_ms": round(revalidate_s * 1000),
-                "order_place_ms": round(order_place_s * 1000),
-                "detect_to_order_ms": round(detect_to_order_s * 1000),
-                "side": comp.outcome_side,
-                "gamma_ask": round(comp.polymarket_price, 4),
-                "live_ask": round(live_ask, 4) if live_ask is not None else None,
-                "drift_pp": (
-                    round((live_ask - comp.polymarket_price) * 100, 2)
-                    if live_ask is not None else None
-                ),
-            }
-            signal["latency_ms"] = latency
-            signal_latencies.append(latency)
-
-            signals.append(signal)
-
-            # Record in state for future gate checks. Stores both the
-            # first-bet anchors (used by the same-side rebet gate to confirm
-            # PM didn't drop and sharp moved up vs original entry) and a
-            # snapshot of the latest bet for debugging.
-            if prev is None:
-                first_div = round(edge, 4)
-                first_pm = round(pm_price, 4)
-                first_sharp = round(comp.sharp_prob, 4)
-                first_token = comp.polymarket_token_id
-                first_ts = signal["timestamp"]
-            else:
-                first_div = float(prev.get("first_divergence", prev.get("last_divergence", round(edge, 4))))
-                first_pm = float(prev.get("first_pm_price", prev.get("last_pm_price", round(pm_price, 4))))
-                first_sharp = float(prev.get("first_sharp_prob", prev.get("last_sharp_prob", round(comp.sharp_prob, 4))))
-                first_token = prev.get("first_token_id") or prev.get("last_token_id") or comp.polymarket_token_id
-                first_ts = prev.get("first_ts") or prev.get("last_ts") or signal["timestamp"]
-            bet_state[state_key] = {
-                "first_divergence": first_div,
-                "first_pm_price": first_pm,
-                "first_sharp_prob": first_sharp,
-                "first_token_id": first_token,
-                "first_ts": first_ts,
-                "last_divergence": round(edge, 4),
-                "last_pm_price": round(pm_price, 4),
-                "last_sharp_prob": round(comp.sharp_prob, 4),
-                "last_token_id": comp.polymarket_token_id,
-                "last_bet_size": round(bet_size, 2),
-                "last_ts": signal["timestamp"],
-                "times_emitted": int(prev.get("times_emitted", 0)) + 1 if prev else 1,
-                "question": pm.get("question", ""),
-                "event_title": pm.get("event_title", ""),
-            }
-
-        if skipped_dedupe:
+        if skipped_dedupe_counter[0]:
             logger.info(
-                f"Tennis arb: skipped {skipped_dedupe} re-bet(s) — edge did "
+                f"Tennis arb: skipped {skipped_dedupe_counter[0]} re-bet(s) — edge did "
                 f"not grow by {self.min_edge_step:.0%}"
             )
 
         metrics["signals_count"] = len(signals)
-        metrics["dropped_dedupe"] = skipped_dedupe
+        metrics["dropped_dedupe"] = skipped_dedupe_counter[0]
         metrics["signal_latencies"] = signal_latencies
 
         if signals:
