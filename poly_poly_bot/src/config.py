@@ -168,7 +168,7 @@ class Config:
     schedule_minute_sgt: int = _opt_int("SCHEDULE_MINUTE_SGT", 0)
 
     # --- Strategy 3: Tennis Arb (Smarkets-only) ---
-    tennis_min_divergence: float = _opt_float("TENNIS_MIN_DIVERGENCE", 0.08)
+    tennis_min_divergence: float = _opt_float("TENNIS_MIN_DIVERGENCE", 0.06)
     # After Gamma's edge clears tennis_min_divergence, we refetch the live
     # CLOB ask (which is what we'd actually pay) and recompute the edge.
     # If the live edge is still ≥ this floor, we fire — otherwise the
@@ -180,8 +180,8 @@ class Config:
     tennis_kelly_fraction: float = _opt_float("TENNIS_KELLY_FRACTION", 0.3)
     tennis_scan_interval: int = _opt_int("TENNIS_SCAN_INTERVAL", 300)
     tennis_tournaments: str = _optional("TENNIS_TOURNAMENTS", "ATP,WTA")
-    tennis_min_polymarket_volume: float = _opt_float("TENNIS_MIN_POLYMARKET_VOLUME", 50000)
-    tennis_min_polymarket_liquidity: float = _opt_float("TENNIS_MIN_POLYMARKET_LIQUIDITY", 10000)
+    tennis_min_polymarket_volume: float = _opt_float("TENNIS_MIN_POLYMARKET_VOLUME", 20000)
+    tennis_min_polymarket_liquidity: float = _opt_float("TENNIS_MIN_POLYMARKET_LIQUIDITY", 5000)
     tennis_take_profit_ratio: float = _opt_float("TENNIS_TAKE_PROFIT_RATIO", 3.0)
 
     # --- APIs ---

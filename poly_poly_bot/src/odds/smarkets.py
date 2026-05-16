@@ -88,7 +88,7 @@ _RATE_LIMIT_SAFETY_FLOOR = 3
 _DEFAULT_REQUEST_TIMEOUT = 15.0
 
 # Cache TTLs
-_EVENTS_CACHE_TTL_S = 300.0  # rebuild event list every 5 minutes
+_EVENTS_CACHE_TTL_S = 600.0  # rebuild event list every 10 minutes
 _CONTRACTS_CACHE_TTL_S = 86400.0  # contract metadata never changes mid-match
 
 # Minimum Smarkets traded volume required before a market's price is trusted

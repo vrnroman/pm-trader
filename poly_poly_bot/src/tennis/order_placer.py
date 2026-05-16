@@ -219,6 +219,7 @@ def place_buy_yes(
     token_id: str,
     bet_size_usd: float,
     ref_price: float,
+    book_hint: tuple[float, float, float] | None = None,
 ) -> Optional[dict]:
     """Cross the spread with a BUY at best_ask × (1 + slippage_bps/10000), FAK.
 
@@ -226,6 +227,12 @@ def place_buy_yes(
     Gamma's lastTradePrice is too stale on fast-moving books, and the old
     cents-only rounding was killing the buffer on cheap markets. We always
     quote off the live CLOB ask now.
+
+    `book_hint=(best_ask, best_bid, tick)` lets the caller pass in an
+    already-fetched book to skip the second CLOB roundtrip. The caller is
+    on the hook for freshness — if the hint is more than a few hundred ms
+    old, the FAK may not fill; the existing slippage_bps buffer is what
+    absorbs that drift.
 
     Returns ``{order_id, shares, order_price}`` on submission, ``{"error":
     msg, ...}`` on CLOB rejection, or ``None`` only on invalid input.
@@ -237,12 +244,15 @@ def place_buy_yes(
         )
         return None
 
-    try:
-        best_ask, _, tick = _fetch_book(clob_client, token_id)
-    except Exception as exc:
-        msg = error_message(exc)
-        logger.error(f"[tennis-live] BUY book fetch failed: {msg}")
-        return {"error": f"book_fetch_failed:{msg}"}
+    if book_hint is not None:
+        best_ask, _, tick = book_hint
+    else:
+        try:
+            best_ask, _, tick = _fetch_book(clob_client, token_id)
+        except Exception as exc:
+            msg = error_message(exc)
+            logger.error(f"[tennis-live] BUY book fetch failed: {msg}")
+            return {"error": f"book_fetch_failed:{msg}"}
 
     if best_ask <= 0:
         logger.warning(f"[tennis-live] BUY skipped: empty book token={token_id[:12]}...")
@@ -311,8 +321,13 @@ def place_sell_yes(
     token_id: str,
     shares: float,
     ref_price: float,
+    book_hint: tuple[float, float, float] | None = None,
 ) -> Optional[dict]:
-    """Cross the spread with a SELL at best_bid × (1 - slippage_bps/10000), FAK."""
+    """Cross the spread with a SELL at best_bid × (1 - slippage_bps/10000), FAK.
+
+    `book_hint=(best_ask, best_bid, tick)` skips the second CLOB roundtrip
+    when the caller already has a fresh book.
+    """
     if shares <= 0 or not token_id:
         logger.warning(
             f"[tennis-live] SELL skipped: invalid args "
@@ -320,12 +335,15 @@ def place_sell_yes(
         )
         return None
 
-    try:
-        _, best_bid, tick = _fetch_book(clob_client, token_id)
-    except Exception as exc:
-        msg = error_message(exc)
-        logger.error(f"[tennis-live] SELL book fetch failed: {msg}")
-        return {"error": f"book_fetch_failed:{msg}"}
+    if book_hint is not None:
+        _, best_bid, tick = book_hint
+    else:
+        try:
+            _, best_bid, tick = _fetch_book(clob_client, token_id)
+        except Exception as exc:
+            msg = error_message(exc)
+            logger.error(f"[tennis-live] SELL book fetch failed: {msg}")
+            return {"error": f"book_fetch_failed:{msg}"}
 
     if best_bid <= 0:
         logger.warning(f"[tennis-live] SELL skipped: empty book token={token_id[:12]}...")

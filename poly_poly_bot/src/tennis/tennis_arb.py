@@ -46,12 +46,12 @@ class TennisArbStrategy:
 
     def __init__(
         self,
-        min_divergence: float = 0.08,
+        min_divergence: float = 0.06,
         max_bet_size: float = 165.0,
         kelly_fraction: float = 0.3,
         tournaments: list[str] | None = None,
-        min_volume: float = 50_000.0,
-        min_liquidity: float = 10_000.0,
+        min_volume: float = 20_000.0,
+        min_liquidity: float = 5_000.0,
         preview_mode: bool = True,
         data_dir: str = "",
         min_edge_step: float = 0.05,
@@ -242,6 +242,11 @@ class TennisArbStrategy:
             edge = comp.divergence
             gamma_price = comp.polymarket_price
             live_ask: float | None = None
+            # Capture the full revalidation book once so place_buy_yes can
+            # reuse it without a second CLOB roundtrip. ~270ms p50 saved on
+            # the live-order path; the slippage_bps buffer absorbs the
+            # ~50-300ms drift between revalidation and order submit.
+            book_hint: tuple[float, float, float] | None = None
             if (
                 self.clob_client is not None
                 and comp.polymarket_token_id
@@ -251,7 +256,7 @@ class TennisArbStrategy:
                 t_clob = time.monotonic()
                 self._scan_clob_calls += 1
                 try:
-                    best_ask, _, _ = _fetch_book(self.clob_client, comp.polymarket_token_id)
+                    best_ask, best_bid, tick = _fetch_book(self.clob_client, comp.polymarket_token_id)
                 except Exception as exc:
                     revalidate_s = time.monotonic() - t_clob
                     self._scan_clob_s += revalidate_s
@@ -309,6 +314,7 @@ class TennisArbStrategy:
                     continue
                 pm_price = best_ask
                 edge = live_edge
+                book_hint = (best_ask, best_bid, tick)
 
             # Re-bet gate. State is keyed by condition_id (the Polymarket
             # event), so a FLIP to the opposite token counts against the
@@ -502,6 +508,7 @@ class TennisArbStrategy:
                         token_id=comp.polymarket_token_id,
                         bet_size_usd=bet_size,
                         ref_price=pm_price,
+                        book_hint=book_hint,
                     )
                     order_place_s = time.monotonic() - t_order
                     if live and live.get("order_id"):
