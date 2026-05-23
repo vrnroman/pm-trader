@@ -383,7 +383,10 @@ class TestScanCacheMode:
         from datetime import timezone as _tz
         from src.tennis.discovery_cache import PMDiscoveryCache
 
-        mt = datetime(2026, 5, 16, 14, 0, tzinfo=_tz.utc)
+        # Anchor to "now" so the fixture always lands inside active_set's
+        # trading window (now-2h .. now+20min). A hardcoded date silently
+        # ages out of the window and the scan emits nothing.
+        mt = datetime.now(_tz.utc)
         sharp = MatchOdds.from_decimal_odds(
             source="smarkets",
             tournament="ATP Test",
@@ -654,6 +657,47 @@ class TestPaperBookIntegration:
             signals = strategy.scan()
             assert not any(s.get("paper_action") == "TAKE_PROFIT" for s in signals)
             assert strategy.paper_book.open_position_count() == 1
+
+    @patch.object(TennisArbStrategy, "_fetch_polymarket_tennis_markets")
+    @patch("src.tennis.tennis_arb.SmarketsProvider.fetch_tennis_odds")
+    def test_take_profit_fires_on_no_side_position(self, mock_odds, mock_pm):
+        """Regression: NO-side positions must reach the TP gate too.
+
+        The old price_by_token map keyed only token_id_yes, so a NO position
+        (token_id == token_id_no) never matched and the gate silently skipped
+        it. Here a NO position is opened then its NO price triples; the gate
+        must close it.
+        """
+        # sharp_sinner=0.60 → YES underwater, but Rublev (NO) sharp 0.40 vs
+        # NO ask (1 - yes_bid) = 0.31 → +0.09 edge → BUY NO at 0.31.
+        mock_odds.return_value = _sinner_rublev_odds(sharp_sinner=0.60)
+        mock_pm.return_value = _pm_sinner_rublev(yes_ask=0.70, yes_bid=0.69)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            strategy = TennisArbStrategy(
+                min_divergence=0.08, preview_mode=True, data_dir=tmpdir,
+                clob_client=None, revalidation_min_divergence=0.0,
+                take_profit_ratio=3.0,
+            )
+            signals = strategy.scan()
+            opened = [s for s in signals if s.get("paper_action") == "OPEN"]
+            assert len(opened) == 1
+            assert opened[0]["side"] == "BUY NO"
+            pos = strategy.paper_book.open_positions()[0]
+            assert pos["token_id"] == "TOK_NO"
+            assert pos["entry_price"] == pytest.approx(0.31, abs=1e-4)
+
+            # NO price triples: yes_bid drops to 0.07 → NO ask = 0.93 = 3×.
+            # YES stays underwater (sharp 0.60 < ask 0.95) so no fresh signal.
+            mock_pm.return_value = _pm_sinner_rublev(yes_ask=0.95, yes_bid=0.07)
+            signals = strategy.scan()
+
+            tp = [s for s in signals if s.get("paper_action") == "TAKE_PROFIT"]
+            assert len(tp) == 1
+            assert tp[0]["entry_price"] == pytest.approx(0.31, abs=1e-4)
+            assert tp[0]["exit_price"] == pytest.approx(0.93, abs=1e-4)
+            assert tp[0]["ratio"] == pytest.approx(3.0, abs=1e-3)
+            assert strategy.paper_book.open_position_count() == 0
 
     def test_fetch_market_resolution_reads_clob_tokens(self):
         """The resolver must read winner state from the CLOB
@@ -1131,6 +1175,9 @@ def _pm_sinner_rublev(yes_ask: float, yes_bid: float | None = None,
         "yes_price": yes_price,
         "yes_ask": yes_ask,
         "yes_bid": yes_bid,
+        # Mirror production: _fetch_polymarket_tennis_markets derives NO ask
+        # as 1 - yes_bid so the TP gate can price NO-side positions.
+        "no_price": round(1.0 - yes_bid, 6) if 0.0 < yes_bid < 1.0 else 0.0,
         "volume": 200000,
         "liquidity": 50000,
         "market_id": "mkt_sr",

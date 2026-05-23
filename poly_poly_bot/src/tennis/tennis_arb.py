@@ -783,15 +783,24 @@ class TennisArbStrategy:
             require_link=False,
             min_liquidity=0.0,
         )
+        # Expose the live best_ask for both sides so the gate can price NO
+        # positions off the NO token's own book, not just the YES token.
         synth: list[dict] = []
         for pm in active:
-            tok = pm.get("token_id_yes") or ""
-            if not tok:
-                continue
-            book = books_by_token.get(tok)
-            if not book or book[0] <= 0:
-                continue
-            synth.append({**pm, "yes_price": book[0]})
+            tok_yes = pm.get("token_id_yes") or ""
+            tok_no = pm.get("token_id_no") or ""
+            entry = {**pm}
+            has_price = False
+            yes_book = books_by_token.get(tok_yes) if tok_yes else None
+            if yes_book and yes_book[0] > 0:
+                entry["yes_price"] = yes_book[0]
+                has_price = True
+            no_book = books_by_token.get(tok_no) if tok_no else None
+            if no_book and no_book[0] > 0:
+                entry["no_price"] = no_book[0]
+                has_price = True
+            if has_price:
+                synth.append(entry)
         return self._check_take_profit(synth)
 
     # ------------------------------------------------------------------
@@ -1029,12 +1038,17 @@ class TennisArbStrategy:
         if not open_positions:
             return []
 
-        # token_id → (current_yes_price, pm_dict)
-        price_by_token: dict[str, tuple[float, dict]] = {
-            pm["token_id_yes"]: (pm["yes_price"], pm)
-            for pm in poly_markets
-            if pm.get("token_id_yes")
-        }
+        # token_id → (current_price, pm_dict). Both sides are mapped so that
+        # NO-side positions (whose token_id == token_id_no) reach the gate.
+        # Before this they were silently skipped: only YES tokens were keyed,
+        # so a NO position's lookup always returned None and the TP gate never
+        # ran on it — only FLIP/VOID/RESOLVED could ever close a NO position.
+        price_by_token: dict[str, tuple[float, dict]] = {}
+        for pm in poly_markets:
+            if pm.get("token_id_yes"):
+                price_by_token[pm["token_id_yes"]] = (pm["yes_price"], pm)
+            if pm.get("token_id_no") and pm.get("no_price"):
+                price_by_token[pm["token_id_no"]] = (pm["no_price"], pm)
 
         events: list[dict] = []
         for pos in open_positions:
@@ -1640,6 +1654,12 @@ def fetch_pm_tennis_markets_raw(
                         "yes_price": yes_price,
                         "yes_ask": yes_ask,
                         "yes_bid": yes_bid,
+                        # NO ask ≈ 1 − YES bid (same derivation the NO-side
+                        # comparison uses). Lets the TP gate price NO positions
+                        # in the legacy/Gamma scan path.
+                        "no_price": (
+                            round(1.0 - yes_bid, 6) if 0.0 < yes_bid < 1.0 else 0.0
+                        ),
                         "volume": volume,
                         "liquidity": liquidity,
                         "market_id": market.get("id", ""),
