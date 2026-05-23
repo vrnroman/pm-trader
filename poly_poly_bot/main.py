@@ -298,13 +298,11 @@ def _tennis_stream_mode() -> str:
         streamable.append("pinnacle")
     if not streamable or not CONFIG.polymarket_rtds_ws_url:
         logger.warning(
-            "Tennis: stream requested (provider=%s, RTDS on) but creds/URL "
-            "incomplete (betsapi_token=%s, pinnacle_key=%s, rtds_ws_url=%s) — "
-            "falling back to legacy scan loop",
-            mode,
-            bool(CONFIG.betsapi_token),
-            bool(CONFIG.pinnacle_rapidapi_key),
-            bool(CONFIG.polymarket_rtds_ws_url),
+            f"Tennis: stream requested (provider={mode}, RTDS on) but creds/URL "
+            f"incomplete (betsapi_token={bool(CONFIG.betsapi_token)}, "
+            f"pinnacle_key={bool(CONFIG.pinnacle_rapidapi_key)}, "
+            f"rtds_ws_url={bool(CONFIG.polymarket_rtds_ws_url)}) — "
+            f"falling back to legacy scan loop"
         )
         return "legacy"
     return "stream"
