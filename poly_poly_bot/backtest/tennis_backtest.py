@@ -293,14 +293,34 @@ def simulate_backtest(
 
             bet_size = min(kelly * kelly_fraction * max_bet_size, max_bet_size)
 
+            # Per-market fee from the snapshot (§6). Polymarket exposes
+            # `fee_rate_bps` per market; tennis match-winner is 0bp today but
+            # the election regime ran 200bp, so read it instead of hardcoding
+            # the old 0.98 / 1.02 multipliers. Default to 0 (with a warning)
+            # when the snapshot predates the field.
+            fee_bps = market.get("fee_rate_bps")
+            if fee_bps is None:
+                fee_bps = market.get("feeRateBps")
+            if fee_bps is None:
+                logger.warning(
+                    "snapshot lacks fee_rate_bps for %s — assuming 0bp",
+                    market.get("conditionId") or market.get("id") or "?",
+                )
+                fee_rate = 0.0
+            else:
+                try:
+                    fee_rate = max(0.0, float(fee_bps) / 10000.0)
+                except (ValueError, TypeError):
+                    fee_rate = 0.0
+
             # Calculate P&L
             if resolved_yes:
-                # Won: bought YES at entry_price, pays out 1.0
-                pnl = bet_size * (1.0 / entry_price - 1.0) * 0.98  # 2% fee
+                # Won: bought YES at entry_price, pays out 1.0 (less fee)
+                pnl = bet_size * (1.0 / entry_price - 1.0) * (1.0 - fee_rate)
                 outcome = "win"
             else:
                 # Lost: bought YES, market resolved NO
-                pnl = -bet_size * 1.02  # Lost bet + fee
+                pnl = -bet_size * (1.0 + fee_rate)  # Lost bet + fee
                 outcome = "loss"
 
             trade = BacktestTrade(

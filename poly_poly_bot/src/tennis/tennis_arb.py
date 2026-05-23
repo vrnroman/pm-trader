@@ -17,11 +17,13 @@ Core loop:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from difflib import SequenceMatcher
 
@@ -29,7 +31,8 @@ import requests
 
 from src import runtime_state
 from src.config import CONFIG
-from src.odds.models import MatchOdds, OddsComparison
+from src.odds.base import OddsProvider
+from src.odds.models import MatchOdds, OddsComparison, PriceChange
 from src.odds.smarkets import SmarketsProvider
 from src.tennis.paper_book import TennisPaperBook
 
@@ -127,6 +130,12 @@ class TennisArbStrategy:
         # cheaper than once per scan when scan_interval is 60s.
         self._resolve_min_interval_s: float = 300.0
         self._last_resolve_at: float = 0.0
+
+        # Per-market CLOB fee cache (§6). condition_id → taker fee as a
+        # fraction (e.g. 0.02 for 200bp). Fetched once per market on first
+        # observation, then free. Tennis match-winner is 0bp today, but the
+        # election regime ran 200bp, so we read it instead of assuming 0.
+        self._fee_cache: dict[str, float] = {}
 
         # Optional PMDiscoveryCache attached by main.py at startup. Batch 2
         # only hydrates the cache for observability; Batch 3 starts reading
@@ -299,7 +308,7 @@ class TennisArbStrategy:
         signal_latencies: list[dict] = []
 
         for comp, pm in comparisons:
-            if comp.divergence < self.min_divergence:
+            if comp.divergence < self.min_edge_for_market(comp.polymarket_condition_id):
                 continue
             t_detect = time.monotonic()
             book_hint = books_by_token.get(comp.polymarket_token_id)
@@ -866,7 +875,7 @@ class TennisArbStrategy:
         skipped_dedupe_counter = [0]
         signal_latencies: list[dict] = []
         for comp, pm in comparisons:
-            if comp.divergence < self.min_divergence:
+            if comp.divergence < self.min_edge_for_market(comp.polymarket_condition_id):
                 continue
 
             t_detect = time.monotonic()
@@ -1352,6 +1361,265 @@ class TennisArbStrategy:
                     ))
 
         return comparisons
+
+    # ------------------------------------------------------------------
+    # Per-market fee model (§6)
+    # ------------------------------------------------------------------
+    def _fee_for_market(self, condition_id: str) -> float:
+        """Taker fee for ``condition_id`` as a fraction, cached per market.
+
+        We cross the spread (FAK BUY), so the taker fee is what eats the
+        edge. ``GET /markets/{condition_id}`` exposes ``taker_fee_rate_bps`` /
+        ``maker_fee_rate_bps``; we read the taker rate. One round-trip per
+        market on first sight, then served from cache.
+
+        Returns 0.0 (and does NOT hit the network) when there's no CLOB
+        client — that's the test / no-creds path, and it keeps the proven
+        scan loop offline and unchanged when fees are irrelevant.
+        """
+        if not condition_id:
+            return 0.0
+        if condition_id in self._fee_cache:
+            return self._fee_cache[condition_id]
+        fee = 0.0
+        if self.clob_client is not None:
+            try:
+                resp = requests.get(
+                    f"{CLOB_API_URL}/markets/{condition_id}", timeout=10
+                )
+                if resp.ok:
+                    market = resp.json()
+                    if isinstance(market, dict):
+                        taker = market.get("taker_fee_rate_bps")
+                        if taker is None:
+                            taker = market.get("takerFeeRateBps")
+                        if taker is not None:
+                            fee = max(0.0, float(taker) / 10000.0)
+            except (requests.RequestException, ValueError, TypeError) as exc:
+                logger.debug(
+                    f"Tennis arb: fee lookup failed for {condition_id[:10]}…: {exc}"
+                )
+        self._fee_cache[condition_id] = fee
+        return fee
+
+    def min_edge_for_market(self, condition_id: str) -> float:
+        """Minimum *gross* divergence required to fire on this market.
+
+        Lifts the base ``min_divergence`` by the market's taker fee so the
+        net edge after fees still clears the floor. With 0bp fees (tennis
+        today) this is just ``min_divergence``.
+        """
+        return self.min_divergence + self._fee_for_market(condition_id)
+
+    # ------------------------------------------------------------------
+    # Event-driven eval (§5) — wakes on a sharp PriceChange, prices off the
+    # RTDS book mirror at zero added latency.
+    # ------------------------------------------------------------------
+    def _active_pm_for_stream(self) -> list[dict]:
+        """Candidate PM markets for the event-driven matcher.
+
+        Reads the discovery cache's active set (require_link=False so we can
+        match against any sharp provider, not just the Smarkets links the
+        cache was built from). Falls back to a one-shot Gamma fetch if the
+        cache isn't attached (mainly tests).
+        """
+        if self.discovery_cache is not None:
+            try:
+                return self.discovery_cache.active_set(
+                    require_link=False, min_liquidity=self.min_liquidity
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(f"Tennis stream: active_set failed: {exc}")
+                return []
+        return self._fetch_polymarket_tennis_markets()
+
+    def eval_price_change(
+        self,
+        provider: OddsProvider,
+        pc: PriceChange,
+        get_book,
+        provider_obs: dict,
+        *,
+        ab_mode: bool = False,
+    ) -> list[dict]:
+        """Evaluate one sharp PriceChange against the PM book mirror.
+
+        1. Resolve the fresh both-sides MatchOdds for the event from the
+           triggering provider's snapshot.
+        2. Find matching PM market(s) in the discovery cache active set.
+        3. Read the PM book from the RTDS mirror (``get_book``) — zero added
+           latency, no fresh REST call on the hot path.
+        4. PM-staleness gate: require ``source_ts - pm_book_ts >= MIN_PM_LAG_MS``
+           so we only fire when PM provably hasn't repainted yet.
+        5. Fee-adjusted divergence ≥ min_divergence → reuse ``_process_candidate``
+           (sizing / order / paper-book identical to the scan path).
+
+        ``get_book(token_id)`` returns ``(book, last_update_ts)`` where book
+        exposes ``best_ask`` and ``as_tuple()``. ``provider_obs`` accumulates
+        per-(condition_id, provider) timestamps + probs for the A/B telemetry.
+        """
+        odds = provider.get_match_odds(pc.event_id)
+        if odds is None:
+            return []
+        candidates = self._active_pm_for_stream()
+        if not candidates:
+            return []
+
+        bet_state = self._load_bet_state()
+        signals: list[dict] = []
+        skipped = [0]
+        latencies: list[dict] = []
+
+        for pm in candidates:
+            pm_player = pm.get("player", "")
+            if not pm_player:
+                continue
+            side, _ = _match_player_to_odds(
+                pm_player, odds.player_a, odds.player_b,
+                odds.implied_prob_a, odds.implied_prob_b,
+            )
+            if side is None:
+                continue
+            ok, _reason = _validate_same_event(
+                pm, odds.player_a, odds.player_b,
+                odds.match_time, self.max_event_date_delta_days,
+            )
+            if not ok:
+                continue
+
+            if side == "A":
+                yes_player, yes_sharp = odds.player_a, odds.implied_prob_a
+                no_player, no_sharp = odds.player_b, odds.implied_prob_b
+            else:
+                yes_player, yes_sharp = odds.player_b, odds.implied_prob_b
+                no_player, no_sharp = odds.player_a, odds.implied_prob_a
+
+            cid = pm.get("condition_id", "")
+            # Record this provider's observation for the A/B lead/diff fields.
+            provider_obs.setdefault(cid, {})[provider.name] = {
+                "source_ts": pc.source_ts,
+                "recv_ts": time.time(),
+                "prob": yes_sharp,
+            }
+
+            for outcome_side, tok_key, player, sharp in (
+                ("YES", "token_id_yes", yes_player, yes_sharp),
+                ("NO", "token_id_no", no_player, no_sharp),
+            ):
+                token = pm.get(tok_key) or ""
+                if not token:
+                    continue
+                book, book_ts = get_book(token)
+                if book is None or book_ts is None:
+                    continue
+                ask = book.best_ask
+                if ask <= 0:
+                    continue
+
+                # PM-staleness gate: prove PM hasn't already repainted.
+                lag_ms = (pc.source_ts - book_ts) * 1000.0
+                if lag_ms < CONFIG.min_pm_lag_ms:
+                    latencies.append({
+                        "outcome": "pm_not_stale",
+                        "side": outcome_side,
+                        "pm_lag_ms": round(lag_ms, 1),
+                    })
+                    continue
+
+                gross = sharp - ask
+                net = gross - self._fee_for_market(cid)
+                if net < self.min_divergence:
+                    continue
+
+                comp = OddsComparison(
+                    match_odds=odds,
+                    polymarket_condition_id=cid,
+                    polymarket_token_id=token,
+                    polymarket_market_id=pm.get("market_id", ""),
+                    polymarket_question=pm.get("question", ""),
+                    polymarket_player=player,
+                    polymarket_price=ask,
+                    sharp_prob=sharp,
+                    divergence=net,
+                    polymarket_volume=pm.get("volume", 0.0),
+                    polymarket_liquidity=pm.get("liquidity", 0.0),
+                    outcome_side=outcome_side,
+                )
+                t_detect = time.monotonic()
+                signal = self._process_candidate(
+                    comp=comp,
+                    pm=pm,
+                    pm_price=ask,
+                    edge=net,
+                    gamma_price=ask,
+                    live_ask=ask,
+                    drift_pp=None,
+                    book_hint=book.as_tuple(),
+                    bet_state=bet_state,
+                    signal_latencies=latencies,
+                    t_detect=t_detect,
+                    revalidate_s=0.0,
+                    skipped_dedupe_counter=skipped,
+                )
+                if signal is not None:
+                    self._attach_stream_telemetry(
+                        signal, provider, pc, cid, book_ts, provider_obs, ab_mode
+                    )
+                    signals.append(signal)
+
+        if signals:
+            self._save_bet_state(bet_state)
+            self._save_signals(signals)
+            for s in signals:
+                logger.info(
+                    f"Tennis stream [{provider.name}]: {s['player_a']} vs "
+                    f"{s['player_b']} — Sharp {s['sharp_prob']:.1%} / PM "
+                    f"{s['polymarket_price']:.1%} — Edge {s['divergence']:.1%} — "
+                    f"{s['side']} @ ${s['bet_size']:.0f} "
+                    f"(sharp→eval {s.get('sharp_event_to_eval_ms')}ms, "
+                    f"PM stale {s.get('sharp_event_to_pm_book_ms')}ms)"
+                )
+        return signals
+
+    @staticmethod
+    def _attach_stream_telemetry(
+        signal: dict,
+        provider: OddsProvider,
+        pc: PriceChange,
+        condition_id: str,
+        pm_book_ts: float,
+        provider_obs: dict,
+        ab_mode: bool,
+    ) -> None:
+        """Stamp the five streaming-telemetry fields onto a signal (§5).
+
+        - triggering_provider: which provider's event woke this eval.
+        - sharp_event_to_eval_ms: sharp_event_ts → eval_complete_ts (internal latency).
+        - sharp_event_to_pm_book_ms: sharp_event_ts → pm_book_last_update_ts (PM staleness).
+        - betsapi_vs_pinnacle_diff_pp / _lead_ms: only when both providers have
+          observed this market within the last 30s; null otherwise.
+        """
+        now = time.time()
+        signal["triggering_provider"] = provider.name
+        signal["sharp_event_to_eval_ms"] = round((now - pc.source_ts) * 1000, 1)
+        signal["sharp_event_to_pm_book_ms"] = round((pc.source_ts - pm_book_ts) * 1000, 1)
+
+        diff_pp = None
+        lead_ms = None
+        if ab_mode:
+            obs = provider_obs.get(condition_id, {})
+            ba = obs.get("betsapi")
+            pn = obs.get("pinnacle")
+            if (
+                ba and pn
+                and (now - ba["recv_ts"]) <= 30.0
+                and (now - pn["recv_ts"]) <= 30.0
+            ):
+                diff_pp = round((ba["prob"] - pn["prob"]) * 100, 2)
+                # positive = BetsAPI saw the move first (earlier source_ts).
+                lead_ms = round((pn["source_ts"] - ba["source_ts"]) * 1000, 1)
+        signal["betsapi_vs_pinnacle_diff_pp"] = diff_pp
+        signal["betsapi_vs_pinnacle_lead_ms"] = lead_ms
 
     def _calculate_bet_size(
         self,
@@ -1844,3 +2112,204 @@ def _match_player_to_odds(
         return "A", prob_a
     else:
         return "B", prob_b
+
+
+# ----------------------------------------------------------------------
+# Event-driven streaming engine (§5)
+# ----------------------------------------------------------------------
+
+
+def build_sharp_providers(
+    mode: str, *, discovery_cache=None
+) -> list[OddsProvider]:
+    """Construct the sharp providers named in ``TENNIS_SHARP_PROVIDER``.
+
+    Allowed tokens: betsapi | pinnacle | smarkets, '+'-joined. Order is
+    fixed (betsapi, pinnacle, smarkets) so telemetry attribution is stable.
+    Falls back to betsapi+pinnacle if nothing recognizable is named.
+    """
+    mode = (mode or "").strip().lower()
+    providers: list[OddsProvider] = []
+    if "betsapi" in mode:
+        from src.odds.betsapi import BetsApiProvider
+        providers.append(BetsApiProvider(discovery_cache=discovery_cache))
+    if "pinnacle" in mode:
+        from src.odds.pinnacle_rapidapi import PinnacleRapidApiProvider
+        providers.append(PinnacleRapidApiProvider())
+    if "smarkets" in mode:
+        providers.append(SmarketsProvider())
+    if not providers:
+        from src.odds.betsapi import BetsApiProvider
+        from src.odds.pinnacle_rapidapi import PinnacleRapidApiProvider
+        providers = [
+            BetsApiProvider(discovery_cache=discovery_cache),
+            PinnacleRapidApiProvider(),
+        ]
+    return providers
+
+
+class TennisStreamEngine:
+    """Event-driven runner: every configured provider's stream feeds one
+    queue; a single consumer wakes per PriceChange, evaluates against the
+    RTDS book mirror, and places orders via the strategy's existing path.
+
+    The eval runs on a dedicated single-thread executor so the asyncio loop
+    (producers + RTDS WS) stays responsive while ``_process_candidate`` does
+    its blocking CLOB I/O, and so bet-state writes are serialized.
+    """
+
+    def __init__(
+        self,
+        strategy: TennisArbStrategy,
+        providers: list[OddsProvider],
+        rtds=None,
+        *,
+        on_signals=None,
+        heartbeat_interval: float | None = None,
+    ):
+        self.strategy = strategy
+        self.providers = providers
+        self.rtds = rtds
+        self.on_signals = on_signals
+        self.heartbeat_interval = (
+            heartbeat_interval
+            if heartbeat_interval is not None
+            else CONFIG.tennis_heartbeat_interval
+        )
+        names = {p.name for p in providers}
+        self.ab_mode = "betsapi" in names and "pinnacle" in names
+        self.queue: asyncio.Queue = asyncio.Queue()
+        self._provider_obs: dict = {}
+        self._last_event_at = time.monotonic()
+        self._stopped = False
+        self._executor = ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="tennis-eval"
+        )
+
+    def _get_book(self, token_id):
+        if self.rtds is not None:
+            return self.rtds.get_book(token_id)
+        return None, None
+
+    def stop(self) -> None:
+        self._stopped = True
+        if self.rtds is not None:
+            self.rtds.stop()
+
+    async def run(self) -> None:
+        logger.info(
+            "Tennis stream engine: providers=%s rtds=%s ab_mode=%s heartbeat=%ss",
+            [p.name for p in self.providers],
+            self.rtds is not None,
+            self.ab_mode,
+            self.heartbeat_interval,
+        )
+        tasks = [asyncio.create_task(self._producer(p)) for p in self.providers]
+        if self.rtds is not None:
+            tasks.append(asyncio.create_task(self.rtds.run()))
+        tasks.append(asyncio.create_task(self._consumer()))
+        tasks.append(asyncio.create_task(self._heartbeat()))
+        try:
+            await asyncio.gather(*tasks)
+        finally:
+            self._executor.shutdown(wait=False)
+
+    async def _producer(self, provider: OddsProvider) -> None:
+        while not self._stopped:
+            try:
+                async for pc in provider.stream_price_changes(["tennis"]):
+                    await self.queue.put((provider, pc))
+                    if self._stopped:
+                        return
+            except Exception as exc:  # noqa: BLE001 — a producer must never kill the engine
+                logger.warning(
+                    "Tennis stream: producer %s errored: %s", provider.name, exc
+                )
+                await asyncio.sleep(1.0)
+
+    async def _consumer(self) -> None:
+        loop = asyncio.get_event_loop()
+        while not self._stopped:
+            provider, pc = await self.queue.get()
+            self._last_event_at = time.monotonic()
+            try:
+                signals = await loop.run_in_executor(
+                    self._executor, self._eval, provider, pc
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.error("Tennis stream: eval failed: %s", exc)
+                continue
+            self._emit(signals)
+
+    def _eval(self, provider: OddsProvider, pc: PriceChange) -> list[dict]:
+        return self.strategy.eval_price_change(
+            provider, pc, self._get_book, self._provider_obs, ab_mode=self.ab_mode
+        )
+
+    async def _heartbeat(self) -> None:
+        """Idle-queue fallback: if no event for heartbeat_interval seconds,
+        run a full snapshot sweep to catch anything the streams missed."""
+        loop = asyncio.get_event_loop()
+        while not self._stopped:
+            await asyncio.sleep(self.heartbeat_interval)
+            if self._stopped:
+                break
+            idle = time.monotonic() - self._last_event_at
+            if idle < self.heartbeat_interval:
+                continue
+            logger.info(
+                "Tennis stream: queue idle %.0fs ≥ %ss — full snapshot sweep",
+                idle, self.heartbeat_interval,
+            )
+            try:
+                signals = await loop.run_in_executor(
+                    self._executor, self.strategy.scan
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.error("Tennis stream: heartbeat sweep failed: %s", exc)
+                continue
+            self._last_event_at = time.monotonic()
+            self._emit(signals)
+
+    def _emit(self, signals: list[dict]) -> None:
+        if signals and self.on_signals is not None:
+            try:
+                self.on_signals(signals)
+            except Exception as exc:  # noqa: BLE001
+                logger.error("Tennis stream: on_signals callback failed: %s", exc)
+
+
+def build_tennis_stream_engine(
+    strategy: TennisArbStrategy, *, on_signals=None
+) -> TennisStreamEngine:
+    """Assemble providers + RTDS mirror + engine for ``strategy``.
+
+    The RTDS mirror's REST fallback/reconciliation fetcher is backed by the
+    strategy's CLOB client (the same singleton the order path uses).
+    """
+    providers = build_sharp_providers(
+        CONFIG.tennis_sharp_provider, discovery_cache=strategy.discovery_cache
+    )
+    rtds = None
+    if CONFIG.polymarket_use_rtds:
+        from src.polymarket.rtds_stream import OrderBook, RTDSStream
+        from src.tennis.order_placer import _fetch_book
+
+        def _rest_fetcher(token_id: str):
+            if strategy.clob_client is None:
+                return None
+            try:
+                ask, bid, tick = _fetch_book(strategy.clob_client, token_id)
+            except Exception:  # noqa: BLE001
+                return None
+            return OrderBook(
+                bids=[(bid, 1.0)] if bid > 0 else [],
+                asks=[(ask, 1.0)] if ask > 0 else [],
+                tick_size=tick or 0.01,
+            )
+
+        rtds = RTDSStream(
+            discovery_cache=strategy.discovery_cache,
+            rest_book_fetcher=_rest_fetcher,
+        )
+    return TennisStreamEngine(strategy, providers, rtds, on_signals=on_signals)

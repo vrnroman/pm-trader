@@ -171,6 +171,7 @@ def run_strategy2(target_date: datetime) -> list[dict]:
 # -- Strategy #3: Tennis Odds Arbitrage --
 
 _tennis_strategy = None
+_tennis_engine = None
 
 
 def _init_tennis_strategy():
@@ -274,6 +275,81 @@ def _tennis_scanner_loop():
             telegram_bot.send_message(f"[TENNIS] Scan failed: <code>{e}</code>")
 
         _shutdown_event.wait(CONFIG.tennis_scan_interval)
+
+
+def _tennis_stream_mode() -> str:
+    """Decide between the event-driven stream and the legacy scan loop.
+
+    Returns "stream" only when RTDS is on AND at least one streaming sharp
+    provider is fully configured AND the RTDS WS URL is set. Otherwise
+    "legacy" — the proven scan loop. This is the fail-safe: deploying before
+    the BetsAPI/Pinnacle/RTDS creds are set leaves prod behaviour unchanged.
+    """
+    if not CONFIG.polymarket_use_rtds:
+        return "legacy"  # non-negotiable kill switch (§4)
+    mode = (CONFIG.tennis_sharp_provider or "").strip().lower()
+    if "betsapi" not in mode and "pinnacle" not in mode:
+        # smarkets-only (or unrecognised) → old Smarkets path unchanged (§9.6)
+        return "legacy"
+    streamable = []
+    if "betsapi" in mode and CONFIG.betsapi_token:
+        streamable.append("betsapi")
+    if "pinnacle" in mode and CONFIG.pinnacle_rapidapi_key:
+        streamable.append("pinnacle")
+    if not streamable or not CONFIG.polymarket_rtds_ws_url:
+        logger.warning(
+            "Tennis: stream requested (provider=%s, RTDS on) but creds/URL "
+            "incomplete (betsapi_token=%s, pinnacle_key=%s, rtds_ws_url=%s) — "
+            "falling back to legacy scan loop",
+            mode,
+            bool(CONFIG.betsapi_token),
+            bool(CONFIG.pinnacle_rapidapi_key),
+            bool(CONFIG.polymarket_rtds_ws_url),
+        )
+        return "legacy"
+    return "stream"
+
+
+def _tennis_stream_loop():
+    """Run the event-driven streaming engine on a dedicated asyncio loop.
+
+    Lives on its own daemon thread (like the scanner loop) so it doesn't
+    contend with Strategy #1's main asyncio task.
+    """
+    global _tennis_strategy, _tennis_engine
+    if _tennis_strategy is None:
+        _init_tennis_strategy()
+
+    from src.tennis.tennis_arb import build_tennis_stream_engine
+
+    engine = build_tennis_stream_engine(
+        _tennis_strategy, on_signals=telegram_bot.send_tennis_signals
+    )
+    _tennis_engine = engine
+    logger.info("Tennis arb streaming engine started")
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    async def _supervise():
+        engine_task = asyncio.create_task(engine.run())
+        # Watch the cross-thread shutdown Event and stop the engine cleanly.
+        while not _shutdown_event.is_set() and not engine_task.done():
+            await asyncio.sleep(1.0)
+        engine.stop()
+        engine_task.cancel()
+        try:
+            await engine_task
+        except (asyncio.CancelledError, Exception):  # noqa: BLE001
+            pass
+
+    try:
+        loop.run_until_complete(_supervise())
+    except Exception as e:  # noqa: BLE001
+        logger.error(f"Tennis streaming engine crashed: {e}")
+        telegram_bot.send_message(f"[TENNIS] Streaming engine crashed: <code>{e}</code>")
+    finally:
+        loop.close()
 
 
 # -- Scheduler --
@@ -436,13 +512,24 @@ async def main():
         scheduler_thread.start()
         logger.info("Strategy #2 scheduler started")
 
-    # Start Strategy #3 scanner in a thread
+    # Start Strategy #3 in a thread — event-driven stream when fully
+    # configured, otherwise the proven legacy scan loop (fail-safe).
     if CONFIG.strategy3_enabled:
-        tennis_thread = threading.Thread(
-            target=_tennis_scanner_loop, daemon=True, name="tennis-scanner"
-        )
-        tennis_thread.start()
-        logger.info("Tennis arb scanner started")
+        mode = _tennis_stream_mode()
+        if mode == "stream":
+            tennis_thread = threading.Thread(
+                target=_tennis_stream_loop, daemon=True, name="tennis-stream"
+            )
+            tennis_thread.start()
+            logger.info(
+                f"Tennis arb streaming engine started (provider={CONFIG.tennis_sharp_provider})"
+            )
+        else:
+            tennis_thread = threading.Thread(
+                target=_tennis_scanner_loop, daemon=True, name="tennis-scanner"
+            )
+            tennis_thread.start()
+            logger.info("Tennis arb scanner started (legacy scan loop)")
     else:
         logger.info("Strategy #3 disabled, skipping tennis arb scanner")
 

@@ -190,6 +190,33 @@ class Config:
     tennis_min_polymarket_liquidity: float = _opt_float("TENNIS_MIN_POLYMARKET_LIQUIDITY", 5000)
     tennis_take_profit_ratio: float = _opt_float("TENNIS_TAKE_PROFIT_RATIO", 3.0)
 
+    # --- Strategy 3: dual-sharp REST stream + RTDS (event-driven path) ---
+    # Sharp provider selection. Allowed: betsapi | pinnacle | betsapi+pinnacle
+    # | smarkets | betsapi+pinnacle+smarkets. Default is dual-sharp so we
+    # collect a week of BetsAPI-vs-Pinnacle lead-ms telemetry before flipping
+    # to a single-provider primary (rollout §12 step 7).
+    tennis_sharp_provider: str = _optional("TENNIS_SHARP_PROVIDER", "betsapi+pinnacle")
+    # BetsAPI (primary REST 1Hz-per-event poller).
+    betsapi_token: str = _optional("BETSAPI_TOKEN", "")
+    betsapi_base_url: str = _optional("BETSAPI_BASE_URL", "https://api.b365api.com")
+    betsapi_poll_hz_per_event: float = _opt_float("BETSAPI_POLL_HZ_PER_EVENT", 1.0)
+    betsapi_primary_book: str = _optional("BETSAPI_PRIMARY_BOOK", "pinnacle")
+    # RapidAPI Pinnacle Odds (secondary REST ?since= delta poller).
+    pinnacle_rapidapi_key: str = _optional("PINNACLE_RAPIDAPI_KEY", "")
+    pinnacle_rapidapi_host: str = _optional(
+        "PINNACLE_RAPIDAPI_HOST", "pinnacle-odds.p.rapidapi.com"
+    )
+    pinnacle_poll_interval_ms: float = _opt_float("PINNACLE_POLL_INTERVAL_MS", 1000.0)
+    # Event-driven eval gates.
+    tennis_heartbeat_interval: float = _opt_float("TENNIS_HEARTBEAT_INTERVAL", 30.0)
+    # PM staleness gate: only fire if the sharp event is at least this many ms
+    # newer than the PM book we'd trade against (proves PM hasn't repainted).
+    min_pm_lag_ms: float = _opt_float("MIN_PM_LAG_MS", 100.0)
+    # Polymarket RTDS WebSocket book mirror. Non-negotiable kill switch: flip
+    # false to revert every PM read to the existing REST path.
+    polymarket_use_rtds: bool = _opt_bool("POLYMARKET_USE_RTDS", True)
+    polymarket_rtds_ws_url: str = _optional("POLYMARKET_RTDS_WS_URL", "")
+
     # --- APIs ---
     clob_api_url: str = _optional("CLOB_API_URL", "https://clob.polymarket.com")
     data_api_url: str = _optional("DATA_API_URL", "https://data-api.polymarket.com")

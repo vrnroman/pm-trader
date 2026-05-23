@@ -232,6 +232,22 @@ def send_tennis_signals(signals: list[dict]):
                 f"  <i>(Gamma quoted {gamma_price:.1%}, edge "
                 f"{gamma_div:+.1%} — revalidated at live ask)</i>"
             )
+        # Streaming telemetry (event-driven path only). Compact one/two lines
+        # so the operator can eyeball latency + provider lead without the log.
+        trig = s.get("triggering_provider")
+        if trig:
+            tele = (
+                f"  ⚡ {_esc(trig)} | sharp→eval {s.get('sharp_event_to_eval_ms')}ms"
+                f" | PM stale {s.get('sharp_event_to_pm_book_ms')}ms"
+            )
+            block.append(tele)
+            diff_pp = s.get("betsapi_vs_pinnacle_diff_pp")
+            lead_ms = s.get("betsapi_vs_pinnacle_lead_ms")
+            if diff_pp is not None or lead_ms is not None:
+                block.append(
+                    f"  📊 BetsAPI vs Pinnacle: diff {diff_pp}pp | lead {lead_ms}ms"
+                )
+
         if url:
             block.append(f'  <a href="{_esc(url)}">Polymarket link</a>')
 

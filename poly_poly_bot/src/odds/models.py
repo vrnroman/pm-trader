@@ -2,10 +2,31 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
+
+
+@dataclass(frozen=True)
+class PriceChange:
+    """One sharp-price delta emitted by a streaming odds provider.
+
+    Plain frozen dataclass (not pydantic) so it's cheap to construct on the
+    hot path — one per side per observed tick. ``old_price`` is None on the
+    first observation of a (event, side) pair.
+    """
+
+    provider: str            # "betsapi" | "pinnacle" | "smarkets"
+    sport: str               # "tennis"
+    event_id: str            # provider-native id
+    market_key: str          # e.g. "match_winner"
+    side: str                # "home" | "away"
+    old_price: float | None  # decimal odds, None on first observation
+    new_price: float         # decimal odds
+    source_ts: float         # provider-supplied event ts, unix seconds
+    received_ts: float       # local wall clock when message arrived
 
 
 class MatchOdds(BaseModel):

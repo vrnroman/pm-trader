@@ -1641,3 +1641,271 @@ class TestRevalidationDropTelemetry:
         assert latency["gamma_ask"] == pytest.approx(0.58, abs=1e-4)
         assert latency["live_ask"] == pytest.approx(0.60, abs=1e-4)
         assert latency["drift_pp"] == pytest.approx(2.0, abs=1e-2)
+
+
+# ── Event-driven streaming engine (§5/§8) ───────────────────────────────
+
+
+class _FakeBook:
+    """Minimal stand-in for rtds_stream.OrderBook."""
+
+    def __init__(self, ask, bid=0.0, tick=0.01):
+        self._ask = ask
+        self._bid = bid
+        self._tick = tick
+
+    @property
+    def best_ask(self):
+        return self._ask
+
+    def as_tuple(self):
+        return (self._ask, self._bid, self._tick)
+
+
+class _FakeProvider:
+    def __init__(self, name, odds_by_event, deltas=None):
+        self._name = name
+        self._odds = odds_by_event
+        self._deltas = deltas or []
+
+    @property
+    def name(self):
+        return self._name
+
+    def fetch_tennis_odds(self, tours=None):
+        return list(self._odds.values())
+
+    def get_match_odds(self, event_id):
+        return self._odds.get(event_id)
+
+    async def stream_price_changes(self, sports):
+        for pc in self._deltas:
+            yield pc
+
+
+def _stream_odds():
+    return MatchOdds.from_decimal_odds(
+        source="betsapi",
+        tournament="ATP Test",
+        tour="ATP",
+        player_a="Player Alpha",
+        player_b="Player Bravo",
+        odds_a=1.30,
+        odds_b=3.50,
+    )
+
+
+def _stream_pm():
+    return {
+        "event_title": "Player Alpha vs Player Bravo",
+        "event_slug": "alpha-vs-bravo",
+        "event_end_date": "",
+        "pm_match_time": "",
+        "question": "Player Alpha vs Player Bravo",
+        "player": "Player Alpha",
+        "group_item_title": "Player Alpha",
+        "volume": 200000,
+        "liquidity": 50000,
+        "market_id": "m1",
+        "condition_id": "cond1",
+        "token_id_yes": "TOKA",
+        "token_id_no": "TOKB",
+    }
+
+
+def _make_pc(source_ts):
+    from src.odds.models import PriceChange
+    return PriceChange(
+        provider="betsapi",
+        sport="tennis",
+        event_id="E1",
+        market_key="match_winner",
+        side="home",
+        old_price=None,
+        new_price=1.30,
+        source_ts=source_ts,
+        received_ts=source_ts,
+    )
+
+
+def _stream_strategy(tmpdir):
+    strategy = TennisArbStrategy(
+        min_divergence=0.06,
+        max_bet_size=100,
+        preview_mode=True,
+        data_dir=tmpdir,
+    )
+    strategy.discovery_cache = MagicMock()
+    strategy.discovery_cache.active_set.return_value = [_stream_pm()]
+    return strategy
+
+
+class TestBuildSharpProviders:
+    @pytest.mark.parametrize(
+        "mode,expected",
+        [
+            ("betsapi", ["betsapi"]),
+            ("pinnacle", ["pinnacle"]),
+            ("betsapi+pinnacle", ["betsapi", "pinnacle"]),
+            ("smarkets", ["smarkets"]),
+            ("betsapi+pinnacle+smarkets", ["betsapi", "pinnacle", "smarkets"]),
+            ("", ["betsapi", "pinnacle"]),  # fallback
+        ],
+    )
+    def test_provider_selection_modes(self, mode, expected):
+        from src.tennis.tennis_arb import build_sharp_providers
+        provs = build_sharp_providers(mode)
+        assert [p.name for p in provs] == expected
+
+
+class TestEventDrivenEval:
+    def test_fires_and_stamps_telemetry(self):
+        import time as _t
+        with tempfile.TemporaryDirectory() as tmp:
+            strategy = _stream_strategy(tmp)
+            now = _t.time()
+            pc = _make_pc(now)
+            provider = _FakeProvider("betsapi", {"E1": _stream_odds()})
+
+            def get_book(token):
+                # PM book is 1s older than the sharp event → 1000ms stale → passes gate.
+                return (_FakeBook(0.50), now - 1.0) if token == "TOKA" else (None, None)
+
+            signals = strategy.eval_price_change(
+                provider, pc, get_book, {}, ab_mode=False
+            )
+
+        assert len(signals) == 1
+        sig = signals[0]
+        assert sig["side"] == "BUY YES"
+        assert sig["divergence"] > 0.06
+        # Five telemetry fields (§5):
+        assert sig["triggering_provider"] == "betsapi"
+        assert sig["sharp_event_to_eval_ms"] >= 0
+        assert sig["sharp_event_to_pm_book_ms"] == pytest.approx(1000.0, abs=200.0)
+        # Single-provider mode → A/B fields null.
+        assert sig["betsapi_vs_pinnacle_diff_pp"] is None
+        assert sig["betsapi_vs_pinnacle_lead_ms"] is None
+
+    def test_pm_staleness_gate_rejects_fresh_book(self):
+        import time as _t
+        with tempfile.TemporaryDirectory() as tmp:
+            strategy = _stream_strategy(tmp)
+            now = _t.time()
+            pc = _make_pc(now)
+            provider = _FakeProvider("betsapi", {"E1": _stream_odds()})
+
+            def get_book(token):
+                # Book updated AT the sharp event ts → lag 0ms < MIN_PM_LAG_MS → skip.
+                return (_FakeBook(0.50), now) if token == "TOKA" else (None, None)
+
+            signals = strategy.eval_price_change(
+                provider, pc, get_book, {}, ab_mode=False
+            )
+        assert signals == []
+
+    def test_no_signal_when_book_missing(self):
+        import time as _t
+        with tempfile.TemporaryDirectory() as tmp:
+            strategy = _stream_strategy(tmp)
+            pc = _make_pc(_t.time())
+            provider = _FakeProvider("betsapi", {"E1": _stream_odds()})
+            signals = strategy.eval_price_change(
+                provider, pc, lambda _t: (None, None), {}, ab_mode=False
+            )
+        assert signals == []
+
+    def test_ab_mode_populates_diff_and_lead(self):
+        import time as _t
+        with tempfile.TemporaryDirectory() as tmp:
+            strategy = _stream_strategy(tmp)
+            now = _t.time()
+            pc = _make_pc(now)
+            provider = _FakeProvider("betsapi", {"E1": _stream_odds()})
+            # Pre-seed a recent Pinnacle observation for the same market so
+            # the A/B fields can be computed when BetsAPI fires.
+            provider_obs = {
+                "cond1": {
+                    "pinnacle": {
+                        "source_ts": now - 0.05,
+                        "recv_ts": now,
+                        "prob": 0.70,
+                    }
+                }
+            }
+
+            def get_book(token):
+                return (_FakeBook(0.50), now - 1.0) if token == "TOKA" else (None, None)
+
+            signals = strategy.eval_price_change(
+                provider, pc, get_book, provider_obs, ab_mode=True
+            )
+
+        assert len(signals) == 1
+        sig = signals[0]
+        assert sig["betsapi_vs_pinnacle_diff_pp"] is not None
+        assert sig["betsapi_vs_pinnacle_lead_ms"] is not None
+
+
+class TestStreamEngine:
+    """Drives the consumer/heartbeat tasks directly (no full run()/gather)
+    so the tests terminate deterministically."""
+
+    @staticmethod
+    async def _drain(task, collected, *, ticks=100):
+        import asyncio as _a
+        for _ in range(ticks):
+            if collected:
+                break
+            await _a.sleep(0.02)
+        task.cancel()
+        try:
+            await task
+        except BaseException:
+            pass
+
+    @pytest.mark.asyncio
+    async def test_consumer_dispatch_emits_signal_from_queue(self):
+        import asyncio as _a
+        import time as _t
+        from src.tennis.tennis_arb import TennisStreamEngine
+
+        class _FakeRtds:
+            def get_book(self, token):
+                return (_FakeBook(0.50), _t.time() - 1.0) if token == "TOKA" else (None, None)
+
+            def stop(self):
+                pass
+
+        with tempfile.TemporaryDirectory() as tmp:
+            strategy = _stream_strategy(tmp)
+            provider = _FakeProvider("betsapi", {"E1": _stream_odds()})
+            collected = []
+            engine = TennisStreamEngine(
+                strategy, [provider], _FakeRtds(), on_signals=collected.extend
+            )
+            task = _a.create_task(engine._consumer())
+            await engine.queue.put((provider, _make_pc(_t.time())))
+            await self._drain(task, collected)
+
+        assert collected, "expected a streamed signal off the queue"
+        assert collected[0]["triggering_provider"] == "betsapi"
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_fires_full_sweep_when_idle(self):
+        import asyncio as _a
+        from src.tennis.tennis_arb import TennisStreamEngine
+
+        with tempfile.TemporaryDirectory() as tmp:
+            strategy = _stream_strategy(tmp)
+            strategy.scan = MagicMock(return_value=[{"strategy": "tennis_arb", "x": 1}])
+            collected = []
+            engine = TennisStreamEngine(
+                strategy, [], None,
+                on_signals=collected.extend, heartbeat_interval=0.05,
+            )
+            task = _a.create_task(engine._heartbeat())
+            await self._drain(task, collected)
+
+        assert strategy.scan.called
+        assert collected and collected[0]["strategy"] == "tennis_arb"
