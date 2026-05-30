@@ -79,9 +79,33 @@ Implemented in `select_copy_targets()`; current targets via
 4. **Capacity.** ROI is on a few-$k of deployed capital per wallet per window;
    absolute $ edge is bounded by their bet sizes and market depth.
 
+## Execution / copyability (forward harness, first live cycles)
+
+The forward paper-copy harness (`src/copy_trading/copy_paper.py`,
+`scripts/copy_paper_run.py`) copies each detected target BUY against the
+*current* live book (max 200bps chase) instead of the target's price. First
+live cycles over the watchlists:
+
+| Watchlist | Detected | Filled at realistic price | Fill rate |
+|---|---|---|---|
+| Sports (top by ROI) | 29 | 2 | **7%** |
+| Research (top by ROI) | 33 | 10 | **30%** |
+
+**Key execution finding:** the highest-ROI "sports" wallets are largely *in-play
+tennis traders* — they buy a player at a low price mid-match that then comes
+back to win. That edge is **un-copyable**: by the time their trade prints on the
+data-api, the in-play price has already moved past our slippage tolerance (93%
+of their trades were unfillable). Slow markets (research/politics) are ~4x more
+copyable because the price barely moves between their trade and our copy.
+
+This *reverses* the naive read of the backtest: sports has the highest raw ROI
+but the lowest copyable ROI. **The copyable edge likely lives in slower
+markets**, even though their raw ROI is lower. The forward ledger's realized
+PnL — net of drag — is what decides, per wallet and per segment.
+
 ## Next step
 
-Forward paper-copy harness: track the watchlist wallets live, simulate copies
-at realistic entry prices, and accumulate realized out-of-sample PnL. Graduate a
-wallet to small live capital only once its *copied* PnL (net of spread/fees) is
-positive in our own ledger.
+Run `scripts/copy_paper_run.py --loop` over both watchlists through a multi-week
+window to accumulate *closed* paper positions. Graduate a wallet to small live
+capital only once its copied PnL (net of spread/fees/drag) is positive in our
+ledger. Prioritise wallets whose edge is in slow, copyable markets.
