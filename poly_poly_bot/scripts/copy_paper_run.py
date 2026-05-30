@@ -26,109 +26,23 @@ import os
 import sys
 import time
 
-import requests
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.copy_trading.copy_paper import CopyPaperEngine, PaperCopyLedger, report
-from src.copy_trading.trader_scoring import classify_market
+from src.copy_trading.copy_paper_live import (
+    fetch_asks,
+    load_watchlist_wallets,
+    make_detector,
+    resolve,
+)
 
-DATA = os.environ.get("DATA_API_URL", "https://data-api.polymarket.com")
-GAMMA = "https://gamma-api.polymarket.com"
-CLOB = "https://clob.polymarket.com"
 LEDGER_PATH = os.environ.get("COPY_PAPER_LEDGER", "data/copy_paper_ledger.jsonl")
-
-_S = requests.Session()
-
-
-def _get(base, path, **params):
-    for _ in range(3):
-        try:
-            r = _S.get(base + path, params=params, timeout=25)
-            if r.status_code == 200:
-                return r.json()
-        except requests.RequestException:
-            pass
-        time.sleep(0.3)
-    return None
-
-
-def make_detector(wallets: list[str], max_age_s: float, min_usd: float):
-    """Return a detector() that yields fresh target BUY trades."""
-
-    def detect() -> list[dict]:
-        out = []
-        cutoff = time.time() - max_age_s
-        for w in wallets:
-            acts = _get(DATA, "/activity", user=w, limit=30) or []
-            for a in acts:
-                if a.get("type") != "TRADE" or a.get("side") != "BUY":
-                    continue
-                ts = float(a.get("timestamp") or 0)
-                if ts < cutoff:
-                    continue
-                price = float(a.get("price") or 0)
-                if not (0.05 <= price <= 0.95):
-                    continue
-                usd = float(a.get("usdcSize") or 0)
-                if usd < min_usd:
-                    continue
-                tx = a.get("transactionHash") or ""
-                token = a.get("asset") or ""
-                if not tx or not token:
-                    continue
-                out.append({
-                    "copy_id": f"{tx}-{token}",
-                    "target": w,
-                    "condition_id": a.get("conditionId", ""),
-                    "token_id": token,
-                    "outcome_index": int(a.get("outcomeIndex") or 0),
-                    "category": classify_market(a.get("title", "")),
-                    "their_price": price,
-                    "their_usd": usd,
-                })
-        return out
-
-    return detect
-
-
-def fetch_asks(token_id: str) -> list[tuple[float, float]]:
-    b = _get(CLOB, "/book", token_id=token_id)
-    if not b:
-        return []
-    return [(float(a["price"]), float(a["size"])) for a in (b.get("asks") or [])]
-
-
-def resolve(condition_id: str):
-    if not condition_id:
-        return None
-    j = _get(GAMMA, "/markets", condition_ids=condition_id, closed="true")
-    if not j:
-        return None
-    op = j[0].get("outcomePrices")
-    if isinstance(op, str):
-        try:
-            op = json.loads(op)
-        except json.JSONDecodeError:
-            return None
-    if not op:
-        return None
-    for i, p in enumerate(op):
-        try:
-            if float(p) >= 0.99:
-                return i
-        except (ValueError, TypeError):
-            continue
-    return None
 
 
 def load_wallets(args) -> list[str]:
     if args.wallets:
         return [w.strip() for w in args.wallets.split(",") if w.strip()]
-    if args.watchlist and os.path.exists(args.watchlist):
-        data = json.load(open(args.watchlist))
-        return [t["wallet"] for t in data.get("targets", [])]
-    return []
+    return load_watchlist_wallets(args.watchlist)
 
 
 def main():

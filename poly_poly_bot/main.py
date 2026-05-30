@@ -277,6 +277,56 @@ def _tennis_scanner_loop():
         _shutdown_event.wait(CONFIG.tennis_scan_interval)
 
 
+def _copy_paper_loop():
+    """Strategy 1b validation: forward paper-copy of watchlist wallets.
+
+    Measures execution-realistic copy PnL (entries against the live book, net of
+    drag) and tracks it to resolution. Places NO real orders — it is a
+    measurement harness whose ledger gates whether any wallet earns real capital.
+    """
+    from src.copy_trading.copy_paper import report
+    from src.copy_trading.copy_paper_runner import CopyPaperRunner
+
+    def _on_cycle(summary, ledger):
+        if summary.opened or summary.resolved:
+            logger.info(
+                f"[COPY-PAPER] opened={summary.opened} resolved={summary.resolved} "
+                f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
+            )
+        if summary.resolved:
+            r = report(ledger)
+            telegram_bot.send_message(
+                f"[COPY-PAPER] {summary.resolved} resolved | "
+                f"realized ${r['realized_pnl']:+.2f} ROI {r['realized_roi']:+.1%} "
+                f"(drag ${r['execution_drag_cost']:.2f}, hit {r['hit_rate']:.0%}, "
+                f"n={r['closed']})"
+            )
+
+    runner = CopyPaperRunner(
+        ledger_path=CONFIG.copy_paper_ledger,
+        watchlist_path=CONFIG.copy_paper_watchlist,
+        max_copy_usd=CONFIG.copy_paper_max_usd,
+        copy_pct=CONFIG.copy_paper_copy_pct,
+        max_slippage_bps=CONFIG.copy_paper_max_slippage_bps,
+        max_age_s=CONFIG.copy_paper_max_age_s,
+        min_usd=CONFIG.copy_paper_min_usd,
+        cycle_interval_s=CONFIG.copy_paper_interval_s,
+        on_cycle=_on_cycle,
+    )
+    n = len(runner.wallets())
+    logger.info(
+        f"Copy-paper harness started (wallets={n}, interval={CONFIG.copy_paper_interval_s}s, "
+        f"max ${CONFIG.copy_paper_max_usd:.0f}/copy, PREVIEW measurement only)"
+    )
+    if n == 0:
+        logger.warning(
+            "[COPY-PAPER] no watchlist wallets at %s — generate one with "
+            "`python -m backtest.trader_scoring_backtest watchlist`",
+            CONFIG.copy_paper_watchlist,
+        )
+    runner.run_forever(_shutdown_event)
+
+
 def _tennis_stream_mode() -> str:
     """Decide between the event-driven stream and the legacy scan loop.
 
@@ -530,6 +580,17 @@ async def main():
             logger.info("Tennis arb scanner started (legacy scan loop)")
     else:
         logger.info("Strategy #3 disabled, skipping tennis arb scanner")
+
+    # Start the copy-paper validation harness (Strategy 1b) in a thread.
+    # Measurement only — never places real orders — so it is always safe to run.
+    if CONFIG.copy_paper_enabled:
+        copy_paper_thread = threading.Thread(
+            target=_copy_paper_loop, daemon=True, name="copy-paper"
+        )
+        copy_paper_thread.start()
+        logger.info("Copy-paper harness thread started")
+    else:
+        logger.info("Copy-paper harness disabled (set COPY_PAPER_ENABLED=true)")
 
     # Start Strategy #1 (Copy Trading) natively via asyncio
     s1_crashed = False

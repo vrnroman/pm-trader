@@ -217,6 +217,25 @@ class Config:
     polymarket_use_rtds: bool = _opt_bool("POLYMARKET_USE_RTDS", True)
     polymarket_rtds_ws_url: str = _optional("POLYMARKET_RTDS_WS_URL", "")
 
+    # --- Copy-paper harness (Strategy 1b validation; PREVIEW-only, no orders) ---
+    # Forward measurement of execution-realistic copy PnL on watchlist wallets.
+    # Graduates a wallet to real capital only after positive net-of-drag PnL.
+    copy_paper_enabled: bool = _opt_bool("COPY_PAPER_ENABLED", False)
+    copy_paper_watchlist: str = _optional(
+        "COPY_PAPER_WATCHLIST",
+        str(Path(__file__).resolve().parent.parent / "data" / "copy_watchlist.json"),
+    )
+    copy_paper_ledger: str = _optional(
+        "COPY_PAPER_LEDGER",
+        str(Path(__file__).resolve().parent.parent / "data" / "copy_paper_ledger.jsonl"),
+    )
+    copy_paper_max_usd: float = _opt_float("COPY_PAPER_MAX_USD", 50.0)
+    copy_paper_copy_pct: float = _opt_float("COPY_PAPER_COPY_PCT", 1.0)
+    copy_paper_max_slippage_bps: int = _opt_int("COPY_PAPER_MAX_SLIPPAGE_BPS", 200)
+    copy_paper_max_age_s: float = _opt_float("COPY_PAPER_MAX_AGE_S", 21600.0)
+    copy_paper_min_usd: float = _opt_float("COPY_PAPER_MIN_USD", 500.0)
+    copy_paper_interval_s: int = _opt_int("COPY_PAPER_INTERVAL_S", 120)
+
     # --- APIs ---
     clob_api_url: str = _optional("CLOB_API_URL", "https://clob.polymarket.com")
     data_api_url: str = _optional("DATA_API_URL", "https://data-api.polymarket.com")
