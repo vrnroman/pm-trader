@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from src.copy_trading.trader_scoring import (
     MarketResult,
+    WalletMetrics,
     WalletScore,
     classify_market,
+    compute_wallet_metrics,
     realized_market_results,
     score_wallet,
     select_copy_targets,
+    select_targets,
 )
 
 
@@ -184,3 +187,69 @@ def test_select_copy_targets_top_k_cap():
     assert len(picks) == 2
     # highest pnl/roi first
     assert picks[0].address == "0x5"
+
+
+# --------------------------------------------------------------------------- #
+# WalletMetrics — robust scoring (t-stat, concentration, recency)
+# --------------------------------------------------------------------------- #
+
+def test_metrics_tstat_rewards_consistency():
+    steady = WalletMetrics(capital=1000, pnl=300, n_closed=10, pnls=[30] * 10)
+    lucky = WalletMetrics(capital=1000, pnl=300, n_closed=10,
+                          pnls=[-20] * 9 + [480])  # same total, one big hit
+    assert steady.tstat > lucky.tstat
+    # both have the same raw ROI
+    assert abs(steady.roi - lucky.roi) < 1e-9
+
+
+def test_metrics_concentration():
+    spread = WalletMetrics(pnls=[10, 10, 10, 10])
+    assert abs(spread.concentration - 0.25) < 1e-9
+    onebet = WalletMetrics(pnls=[-5, -5, 100])
+    assert onebet.concentration == 1.0  # all gross profit from one market
+
+
+def test_metrics_recency_requires_recent_profit():
+    ok = WalletMetrics(pnl=20, early_pnl=10, late_pnl=10, early_n=3, late_n=3)
+    assert ok.recency_ok
+    went_cold = WalletMetrics(pnl=5, early_pnl=40, late_pnl=-35, early_n=3, late_n=4)
+    assert not went_cold.recency_ok
+
+
+def test_compute_wallet_metrics_window_and_split():
+    acts = [
+        _trade("A", 0, "BUY", 100, 40, 1000), _redeem("A", 100, 1500),   # +60 early
+        _trade("B", 0, "BUY", 100, 50, 8000),
+        _trade("B", 0, "SELL", 100, 80, 8500),                            # +30 late
+    ]
+    m = compute_wallet_metrics(acts, start_ts=0, end_ts=10000, recency_split_ts=5000)
+    assert m.n_closed == 2
+    assert m.early_n == 1 and m.late_n == 1
+    assert m.early_pnl == 60 and m.late_pnl == 30
+
+
+def test_select_targets_robust_filters_then_ranks_by_tstat():
+    scored = {
+        "0xconsistent": WalletMetrics(capital=8000, pnl=800, n_closed=20,
+                                      wins=14, pnls=[40] * 20,
+                                      early_pnl=400, late_pnl=400, early_n=10, late_n=10),
+        "0xonebet": WalletMetrics(capital=8000, pnl=2000, n_closed=20, wins=5,
+                                  pnls=[-20] * 19 + [2380],  # huge ROI, all one bet
+                                  early_pnl=2380, late_pnl=-380, early_n=10, late_n=10),
+        "0xcold": WalletMetrics(capital=8000, pnl=100, n_closed=20, wins=10,
+                                pnls=[20] * 10 + [-15] * 10,
+                                early_pnl=400, late_pnl=-300, early_n=10, late_n=10),
+    }
+    picks = select_targets(scored, method="robust", top_k=10)
+    addrs = [p.address for p in picks]
+    # one-bet (concentration=1.0) and cold (late_pnl<0) are filtered out
+    assert addrs == ["0xconsistent"]
+
+
+def test_select_targets_roi_method_matches_legacy_ranking():
+    scored = {
+        "0xa": WalletMetrics(capital=10000, pnl=2000, n_closed=15, pnls=[i for i in range(15)]),
+        "0xb": WalletMetrics(capital=10000, pnl=500, n_closed=15, pnls=[i for i in range(15)]),
+    }
+    picks = select_targets(scored, method="roi", top_k=2)
+    assert picks[0].address == "0xa"  # higher ROI first

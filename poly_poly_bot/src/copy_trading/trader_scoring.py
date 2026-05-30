@@ -238,3 +238,137 @@ def select_copy_targets(
     ]
     eligible.sort(key=lambda rw: rw.score.roi, reverse=True)
     return eligible[:top_k]
+
+
+# ---------------------------------------------------------------------------
+# Robust scoring — validated to ~triple forward ROI vs raw-ROI ranking.
+# Raw ROI rewards one lucky bet; the t-statistic of per-market PnL rewards
+# repeatable edge, a concentration cap drops single-bet wallets, and a recency
+# check keeps only wallets still winning lately. See COPY_TRADING_FINDINGS.md:
+#   raw ROI +9.4% | t-stat +26.2% | recency+conc+t-stat +34.7% (TOP-20 forward).
+# ---------------------------------------------------------------------------
+
+@dataclass
+class WalletMetrics:
+    """Per-wallet stats over a window's provably-closed markets."""
+
+    capital: float = 0.0
+    pnl: float = 0.0
+    n_closed: int = 0
+    wins: int = 0
+    pnls: list[float] = field(default_factory=list)
+    early_pnl: float = 0.0
+    late_pnl: float = 0.0
+    early_n: int = 0
+    late_n: int = 0
+
+    @property
+    def roi(self) -> float:
+        return self.pnl / self.capital if self.capital > 0 else 0.0
+
+    @property
+    def hit_rate(self) -> float:
+        return self.wins / self.n_closed if self.n_closed > 0 else 0.0
+
+    @property
+    def tstat(self) -> float:
+        """t-stat of mean per-market PnL — edge per unit of noise."""
+        import statistics
+        n = len(self.pnls)
+        if n < 2:
+            return 0.0
+        sd = statistics.pstdev(self.pnls)
+        return statistics.mean(self.pnls) / (sd / (n ** 0.5)) if sd > 0 else 0.0
+
+    @property
+    def concentration(self) -> float:
+        """Share of gross profit from the single best market (1.0 = all of it)."""
+        gross = sum(p for p in self.pnls if p > 0)
+        return max(self.pnls) / gross if gross > 0 else 1.0
+
+    @property
+    def recency_ok(self) -> bool:
+        """Edge present in the recent half (and overall), not just historically."""
+        if self.early_n and self.late_n:
+            return self.early_pnl > 0 and self.late_pnl > 0
+        return self.pnl > 0
+
+    def rank_score(self, method: str) -> float:
+        if method == "tstat":
+            return self.tstat
+        if method == "median_roi":
+            import statistics
+            return (statistics.median(p / self.capital for p in self.pnls)
+                    if self.pnls and self.capital > 0 else 0.0)
+        return self.roi
+
+
+def compute_wallet_metrics(
+    activity: Iterable[dict],
+    *,
+    start_ts: float = 0.0,
+    end_ts: float = float("inf"),
+    category: str = "ALL",
+    recency_split_ts: float | None = None,
+) -> WalletMetrics:
+    """WalletMetrics over closed markets resolved within [start_ts, end_ts)."""
+    if recency_split_ts is None and start_ts > 0 and end_ts < float("inf"):
+        recency_split_ts = (start_ts + end_ts) / 2.0
+    m = WalletMetrics()
+    for r in realized_market_results(activity):
+        if not r.closed or not (start_ts <= r.last_ts < end_ts):
+            continue
+        if category != "ALL" and r.category != category:
+            continue
+        m.capital += r.capital
+        m.pnl += r.pnl
+        m.n_closed += 1
+        m.pnls.append(r.pnl)
+        if r.pnl > 0:
+            m.wins += 1
+        if recency_split_ts is not None:
+            if r.last_ts < recency_split_ts:
+                m.early_pnl += r.pnl
+                m.early_n += 1
+            else:
+                m.late_pnl += r.pnl
+                m.late_n += 1
+    return m
+
+
+@dataclass
+class RankedMetrics:
+    address: str
+    metrics: WalletMetrics
+
+
+def select_targets(
+    scored: dict[str, WalletMetrics],
+    *,
+    method: str = "robust",
+    min_capital: float = 5000.0,
+    min_closed: int = 10,
+    top_k: int = 20,
+    max_concentration: float = 0.6,
+    require_recency: bool = True,
+) -> list[RankedMetrics]:
+    """Validated copy-target selection.
+
+    method="robust" (default): filter concentration <= max_concentration and
+    (if require_recency) recent-half profitability, then rank by t-stat.
+    method="tstat"/"roi"/"median_roi": that metric with only the reliability
+    filters (capital, closed count).
+    """
+    rank_by = "tstat" if method == "robust" else method
+    out = []
+    for addr, m in scored.items():
+        if m.capital < min_capital or m.n_closed < min_closed:
+            continue
+        if method == "robust":
+            if m.concentration > max_concentration:
+                continue
+            if require_recency and not m.recency_ok:
+                continue
+        out.append(RankedMetrics(addr, m))
+    out.sort(key=lambda rm: rm.metrics.rank_score(rank_by), reverse=True)
+    return out[:top_k]
