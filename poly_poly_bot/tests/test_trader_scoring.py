@@ -194,12 +194,20 @@ def test_select_copy_targets_top_k_cap():
 # --------------------------------------------------------------------------- #
 
 def test_metrics_tstat_rewards_consistency():
-    steady = WalletMetrics(capital=1000, pnl=300, n_closed=10, pnls=[30] * 10)
+    # low (non-zero) variance around the same mean -> high t-stat
+    steady = WalletMetrics(capital=1000, pnl=300, n_closed=10,
+                           pnls=[28, 29, 30, 31, 32, 30, 29, 31, 30, 30])
     lucky = WalletMetrics(capital=1000, pnl=300, n_closed=10,
                           pnls=[-20] * 9 + [480])  # same total, one big hit
     assert steady.tstat > lucky.tstat
     # both have the same raw ROI
     assert abs(steady.roi - lucky.roi) < 1e-9
+
+
+def test_metrics_tstat_zero_variance_is_degenerate_zero():
+    # all-identical PnL has no dispersion; we return 0 rather than infinity
+    flat = WalletMetrics(capital=1000, pnl=300, n_closed=10, pnls=[30] * 10)
+    assert flat.tstat == 0.0
 
 
 def test_metrics_concentration():
