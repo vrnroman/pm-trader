@@ -38,7 +38,12 @@ import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.copy_trading.trader_scoring import score_wallet, select_copy_targets
+from src.copy_trading.trader_scoring import (
+    compute_wallet_metrics,
+    score_wallet,
+    select_copy_targets,
+    select_targets,
+)
 
 DATA_API = os.environ.get("DATA_API_URL", "https://data-api.polymarket.com")
 
@@ -180,30 +185,33 @@ def cmd_validate(args, activity: dict[str, list[dict]]):
 def cmd_watchlist(args, activity: dict[str, list[dict]]):
     lookback = time.time() - args.lookback_days * 86400
     scored = {
-        w: score_wallet(a, start_ts=lookback, category=args.category)
+        w: compute_wallet_metrics(a, start_ts=lookback, category=args.category)
         for w, a in activity.items()
     }
-    picks = select_copy_targets(
-        scored, min_capital=args.min_capital,
+    picks = select_targets(
+        scored, method=args.method, min_capital=args.min_capital,
         min_closed=args.min_closed, top_k=args.top_k,
     )
-    print(f"\nCopy watchlist — category={args.category} lookback={args.lookback_days}d")
-    print(f"{'rank':>4} {'wallet':42} {'ROI':>8} {'PnL':>10} {'closed':>6} {'hit%':>6}")
+    print(f"\nCopy watchlist — category={args.category} lookback={args.lookback_days}d "
+          f"method={args.method}")
+    print(f"{'rank':>4} {'wallet':42} {'ROI':>8} {'tstat':>6} {'conc':>5} "
+          f"{'PnL':>10} {'closed':>6} {'hit%':>6}")
     out = []
     for i, rw in enumerate(picks, 1):
-        s = rw.score
-        print(f"{i:>4} {rw.address:42} {s.roi:>+7.1%} {s.pnl:>+10,.0f} "
-              f"{s.n_closed:>6} {s.hit_rate:>5.0%}")
+        s = rw.metrics
+        print(f"{i:>4} {rw.address:42} {s.roi:>+7.1%} {s.tstat:>6.1f} "
+              f"{s.concentration:>5.0%} {s.pnl:>+10,.0f} {s.n_closed:>6} {s.hit_rate:>5.0%}")
         out.append({
             "rank": i, "wallet": rw.address, "roi": round(s.roi, 4),
+            "tstat": round(s.tstat, 3), "concentration": round(s.concentration, 3),
             "pnl": round(s.pnl, 2), "n_closed": s.n_closed,
             "hit_rate": round(s.hit_rate, 4), "capital": round(s.capital, 2),
         })
     if args.output:
         os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
         json.dump({"category": args.category, "lookback_days": args.lookback_days,
-                   "generated": int(time.time()), "targets": out},
-                  open(args.output, "w"), indent=2)
+                   "method": args.method, "generated": int(time.time()),
+                   "targets": out}, open(args.output, "w"), indent=2)
         print(f"\nwrote {args.output}")
 
 
@@ -221,6 +229,10 @@ def main():
     ap.add_argument("--min-capital", type=float, default=5000.0)
     ap.add_argument("--min-closed", type=int, default=10)
     ap.add_argument("--top-k", type=int, default=20)
+    ap.add_argument("--method", default="robust",
+                    choices=["robust", "tstat", "roi", "median_roi"],
+                    help="(watchlist) selection metric; robust = recency + "
+                         "concentration filter ranked by t-stat (validated best)")
     ap.add_argument("--output", default=None)
     args = ap.parse_args()
     args.cutoffs = [c.strip() for c in args.cutoffs.split(",") if c.strip()]

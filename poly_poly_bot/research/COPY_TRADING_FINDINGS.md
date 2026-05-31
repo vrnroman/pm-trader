@@ -103,9 +103,49 @@ but the lowest copyable ROI. **The copyable edge likely lives in slower
 markets**, even though their raw ROI is lower. The forward ledger's realized
 PnL — net of drag — is what decides, per wallet and per segment.
 
+## Better selection 1 — robust scoring (t-stat + concentration + recency)
+
+Ranking by raw ROI rewards one lucky bet. Re-tested on the full 1036-wallet
+cache (273 qualified, cutoff 2026-03-15, ~2.5-month forward window), ranking by
+the **t-statistic of per-market PnL** roughly triples forward returns, and a
+combined filter does better still:
+
+| Selection metric (TOP-20) | Forward agg ROI | % profitable |
+|---|---|---|
+| raw ROI (original) | +9.4% | 70% |
+| median per-market ROI | +12.5% | 70% |
+| **t-stat of per-market PnL** | **+26.2%** | 80% |
+| recent-half-positive + concentration ≤ 0.6, ranked by t-stat | **+34.7%** | 75% |
+
+Shipped as `select_targets(method="robust")` in `trader_scoring.py`. Raw ROI
+rewards variance; t-stat rewards *repeatable* edge; the concentration cap drops
+single-bet wallets; the recency check keeps only wallets still winning lately.
+
+## Better selection 2 — lead-lag / informed-money (copyability, not outcome)
+
+`backtest/lead_lag_backtest.py` + `src/copy_trading/lead_lag.py` ask a different
+question: after a wallet BUYS, does the price move *its way* over the next hours
+(informed timing), and how much of that survives a realistic 15-min copy delay
+(*capture*)? Measured on the robust TOP-30 (40 most-recent BUYs each, 28-day
+window, delay 15m / horizon 4h):
+
+- Strong **dispersion**: per-trade capture ranges from **+43¢** (leads the
+  market, 100% hit) down to **−12¢** (fades). Median ≈ 0 (market is efficient
+  on average) — so the *ranking* is the value.
+- **Copyability is now explicit**: the `lead − capture` gap is the latency tax.
+  One wallet had lead +7.5¢ but **capture +0.0¢** — its whole edge vanishes in
+  the delay. Outcome-ROI ranking can't see this; lead-lag rejects it correctly.
+- **The decisive cross-check**: two wallets that ranked *top by realized ROI*
+  (`0xd06c…`, `0xc33a…`) rank near the **bottom** on capture (−12¢, −4¢). Their
+  ROI came from holding to resolution, **not** from copyable timing.
+
+**Headline rule: ROI-good ≠ copyable.** Use realized-ROI/t-stat to find skilled
+wallets, then **gate on positive delayed-capture** to keep only the ones a real
+copier can actually ride. Rank/select on *capture*, not lead, not outcome ROI.
+
 ## Next step
 
-Run `scripts/copy_paper_run.py --loop` over both watchlists through a multi-week
-window to accumulate *closed* paper positions. Graduate a wallet to small live
-capital only once its copied PnL (net of spread/fees/drag) is positive in our
-ledger. Prioritise wallets whose edge is in slow, copyable markets.
+Build the watchlist as: robust scorer (skill) ∩ positive lead-lag capture
+(copyability). Run `scripts/copy_paper_run.py --loop` over it to accumulate
+*closed* paper positions, and graduate a wallet to small live capital only once
+its copied PnL (net of spread/fees/drag) is positive in the ledger.
