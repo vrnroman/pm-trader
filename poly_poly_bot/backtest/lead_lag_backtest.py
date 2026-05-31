@@ -110,7 +110,12 @@ def fetch_price_series(token: str) -> list[tuple[float, float]]:
 def analyze_wallet(wallet: str, buys: list[dict], delay_s: float, horizon_s: float) -> WalletLeadLag:
     w = WalletLeadLag()
     tokens = {b["token"] for b in buys}
-    series_by_token = {t: fetch_price_series(t) for t in tokens}
+    # price-history is the bottleneck (one call per token) — fetch in parallel.
+    series_by_token: dict[str, list[tuple[float, float]]] = {}
+    with ThreadPoolExecutor(max_workers=12) as ex:
+        futs = {ex.submit(fetch_price_series, t): t for t in tokens}
+        for f in as_completed(futs):
+            series_by_token[futs[f]] = f.result()
     for b in buys:
         series = series_by_token.get(b["token"])
         if not series:
@@ -130,6 +135,9 @@ def main():
     ap.add_argument("--horizon-min", type=float, default=240)
     ap.add_argument("--min-usd", type=float, default=500)
     ap.add_argument("--min-trades", type=int, default=5)
+    ap.add_argument("--max-trades-per-wallet", type=int, default=60,
+                    help="cap most-recent BUYs analysed per wallet (bounds the "
+                         "price-history fetch for high-frequency wallets)")
     ap.add_argument("--output", default=None)
     args = ap.parse_args()
 
@@ -164,6 +172,8 @@ def main():
         buys = buys_by_wallet.get(w, [])
         if len(buys) < args.min_trades:
             continue
+        # most-recent BUYs first (fetch_recent_buys returns newest-first)
+        buys = buys[:args.max_trades_per_wallet]
         agg = analyze_wallet(w, buys, delay_s, horizon_s)
         if agg.n < args.min_trades:
             continue
