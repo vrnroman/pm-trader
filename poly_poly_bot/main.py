@@ -321,7 +321,9 @@ def _copy_paper_loop():
     if n == 0:
         logger.warning(
             "[COPY-PAPER] no watchlist wallets at %s — generate one with "
-            "`python -m backtest.trader_scoring_backtest watchlist`",
+            "`python -m backtest.two_stage_watchlist --cache-dir data/wcache "
+            "--output %s` (skill ∩ copyability)",
+            CONFIG.copy_paper_watchlist,
             CONFIG.copy_paper_watchlist,
         )
     runner.run_forever(_shutdown_event)
