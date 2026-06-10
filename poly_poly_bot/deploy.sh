@@ -12,6 +12,28 @@ INSTANCE="poly-poly-bot"
 ZONE="asia-northeast1-a"   # Tokyo, Japan
 MACHINE="e2-small"          # 2 vCPU, 2GB RAM
 
+# SSH transport. In CI (GitHub Actions) the runner has no route to the VM's
+# SSH port, so set DEPLOY_USE_IAP=1 to tunnel ssh/scp through IAP — no public
+# IP or open-to-the-world firewall rule required. Local deploys leave it unset
+# and connect directly, exactly as before.
+SSH_FLAGS=()
+if [ "${DEPLOY_USE_IAP:-0}" = "1" ]; then
+    SSH_FLAGS=(--tunnel-through-iap)
+    echo "  SSH: tunneling through IAP"
+fi
+
+# The app lives in ~/app of the SSH login user. Locally you connect as your own
+# gcloud identity; in CI the service account is a *different* Linux user with a
+# *different* home, so it would deploy into the wrong place and miss the
+# existing container + data volume. Set DEPLOY_SSH_USER to the username whose
+# ~/app holds the current deployment so CI lands in the same home. Unset =
+# connect as the caller's default user (local behaviour, unchanged).
+TARGET="$INSTANCE"
+if [ -n "${DEPLOY_SSH_USER:-}" ]; then
+    TARGET="${DEPLOY_SSH_USER}@${INSTANCE}"
+    echo "  SSH user: $DEPLOY_SSH_USER"
+fi
+
 echo "=== Poly Poly Bot Deployment (Python-only) ==="
 echo "  Project: $GCP_PROJECT_ID"
 echo "  Instance: $INSTANCE"
@@ -90,18 +112,18 @@ echo "  Archive: $(du -h "$ARCHIVE" | cut -f1)"
 
 # ─── Step 3: Upload ─────────────────────────────────────────────
 echo "[3/5] Uploading to VM..."
-gcloud compute ssh "$INSTANCE" \
-    --project="$GCP_PROJECT_ID" --zone="$ZONE" \
+gcloud compute ssh "$TARGET" \
+    --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
     --command='mkdir -p ~/app'
-gcloud compute scp "$ARCHIVE" "$INSTANCE:~/deploy.tar.gz" \
+gcloud compute scp "${SSH_FLAGS[@]}" "$ARCHIVE" "$TARGET:~/deploy.tar.gz" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE"
-gcloud compute scp .env "$INSTANCE:~/app/.env" \
+gcloud compute scp "${SSH_FLAGS[@]}" .env "$TARGET:~/app/.env" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE"
 
 # ─── Step 4: Build & Run ─────────────────────────────────────────
 echo "[4/5] Building & starting on VM..."
-gcloud compute ssh "$INSTANCE" \
-    --project="$GCP_PROJECT_ID" --zone="$ZONE" \
+gcloud compute ssh "$TARGET" \
+    --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
     --command='
         set -e
         mkdir -p ~/app
@@ -150,8 +172,8 @@ gcloud compute ssh "$INSTANCE" \
 # ─── Step 5: Verify ──────────────────────────────────────────────
 echo "[5/5] Verifying..."
 sleep 3
-gcloud compute ssh "$INSTANCE" \
-    --project="$GCP_PROJECT_ID" --zone="$ZONE" \
+gcloud compute ssh "$TARGET" \
+    --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
     --command='docker logs poly-poly-bot --tail 20'
 
 echo ""
