@@ -1,5 +1,20 @@
 .env
+.env.*
+!.env.example
 .DS_Store
 .vscode/
 __pycache__/
 *.pyc
+
+# Secrets / credentials — never commit
+*.pem
+*.key
+*-key.json
+*-credentials.json
+*deployer*.json
+*sa-key*.json
+service-account*.json
+gcp-*.json
+secrets/
+.secrets/
+credentials/
