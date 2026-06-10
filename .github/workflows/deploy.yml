@@ -1,0 +1,83 @@
+name: Deploy
+
+# Manual "deploy from your phone" button. Open the repo in the GitHub mobile
+# app (or web) -> Actions -> Deploy -> Run workflow. Nothing deploys on push;
+# this is the only trigger, so a deploy is always a deliberate tap.
+on:
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: "Run the full test suite before deploying"
+        type: boolean
+        default: true
+
+concurrency:
+  # never let two deploys race onto the same VM
+  group: deploy-poly-poly-bot
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test gate
+    runs-on: ubuntu-latest
+    if: ${{ inputs.run_tests }}
+    defaults:
+      run:
+        working-directory: poly_poly_bot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt ruff
+      - name: Lint (ruff F821 — undefined names)
+        run: ruff check --select F821 src main.py
+      - name: Full test suite
+        run: python -m pytest tests/ -q
+
+  deploy:
+    name: Deploy to GCP VM
+    runs-on: ubuntu-latest
+    # run after the gate; `always() && !failure()` lets deploy proceed when the
+    # test job is *skipped* (run_tests=false) but blocks it if tests actually fail
+    needs: [test]
+    if: ${{ always() && needs.test.result != 'failure' && needs.test.result != 'cancelled' }}
+    defaults:
+      run:
+        working-directory: poly_poly_bot
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Materialize .env from secret
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          if [ -z "$ENV_FILE" ]; then
+            echo "::error::ENV_FILE secret is empty — add it in repo Settings > Secrets"
+            exit 1
+          fi
+          printf '%s' "$ENV_FILE" > .env
+          echo "wrote .env ($(wc -l < .env) lines)"
+
+      - name: Deploy (IAP tunnel)
+        env:
+          DEPLOY_USE_IAP: "1"
+          # the Linux user whose ~/app holds the live deployment (repo variable,
+          # not a secret); must match your local deploy user so data persists
+          DEPLOY_SSH_USER: ${{ vars.DEPLOY_SSH_USER }}
+        run: bash deploy.sh
+
+      - name: Scrub secrets from runner
+        if: always()
+        run: rm -f .env
