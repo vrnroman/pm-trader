@@ -1,9 +1,13 @@
 name: Deploy
 
-# Manual "deploy from your phone" button. Open the repo in the GitHub mobile
-# app (or web) -> Actions -> Deploy -> Run workflow. Nothing deploys on push;
-# this is the only trigger, so a deploy is always a deliberate tap.
+# Two ways in:
+#   * Auto-deploy on merge — every push to main runs the test gate and, if it
+#     passes, deploys to the GCP VM. Merging a PR ships it.
+#   * Manual button — Actions -> Deploy -> Run workflow (e.g. from the GitHub
+#     mobile app) to deploy on demand, with an optional skip-tests escape hatch.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       run_tests:
@@ -20,7 +24,9 @@ jobs:
   test:
     name: Test gate
     runs-on: ubuntu-latest
-    if: ${{ inputs.run_tests }}
+    # Always gate auto-deploys (push); on a manual run honour the run_tests
+    # toggle so the skip-tests escape hatch still works.
+    if: ${{ github.event_name == 'push' || inputs.run_tests }}
     defaults:
       run:
         working-directory: poly_poly_bot
