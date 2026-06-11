@@ -236,6 +236,28 @@ class Config:
     copy_paper_min_usd: float = _opt_float("COPY_PAPER_MIN_USD", 500.0)
     copy_paper_interval_s: int = _opt_int("COPY_PAPER_INTERVAL_S", 120)
 
+    # --- Wallet discovery (continuously hunts copyable wallets -> paper) ---
+    # Runs the discovery funnel on a schedule; pings Telegram on each new
+    # qualifier and adds it to the paper watchlist. Never touches live capital.
+    wallet_discovery_enabled: bool = _opt_bool("WALLET_DISCOVERY_ENABLED", False)
+    wallet_discovery_interval_s: int = _opt_int("WALLET_DISCOVERY_INTERVAL_S", 21600)  # 6h
+    wallet_discovery_universe: int = _opt_int("WALLET_DISCOVERY_UNIVERSE", 850)
+    wallet_discovery_skill_pool: int = _opt_int("WALLET_DISCOVERY_SKILL_POOL", 40)
+    wallet_discovery_cap: int = _opt_int("WALLET_DISCOVERY_CAP", 25)
+    wallet_discovery_min_capture_cents: float = _opt_float("WALLET_DISCOVERY_MIN_CAPTURE_CENTS", 1.5)
+    wallet_discovery_min_tstat: float = _opt_float("WALLET_DISCOVERY_MIN_TSTAT", 10.0)
+    wallet_discovery_drop_capture_cents: float = _opt_float("WALLET_DISCOVERY_DROP_CAPTURE_CENTS", 1.0)
+    wallet_discovery_auto_remove: bool = _opt_bool("WALLET_DISCOVERY_AUTO_REMOVE", True)
+    wallet_discovery_category: str = _optional("WALLET_DISCOVERY_CATEGORY", "ALL")
+    wallet_discovery_cache_dir: str = _optional(
+        "WALLET_DISCOVERY_CACHE_DIR",
+        str(Path(__file__).resolve().parent.parent / "data" / "wcache"),
+    )
+    wallet_discovery_state: str = _optional(
+        "WALLET_DISCOVERY_STATE",
+        str(Path(__file__).resolve().parent.parent / "data" / "discovery_state.json"),
+    )
+
     # --- APIs ---
     clob_api_url: str = _optional("CLOB_API_URL", "https://clob.polymarket.com")
     data_api_url: str = _optional("DATA_API_URL", "https://data-api.polymarket.com")
