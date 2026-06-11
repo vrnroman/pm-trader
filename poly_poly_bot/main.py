@@ -329,6 +329,38 @@ def _copy_paper_loop():
     runner.run_forever(_shutdown_event)
 
 
+def _discovery_loop():
+    """Continuously hunt for copyable wallets and feed them to the paper harness.
+
+    Runs the funnel (universe -> robust skill -> lead-lag copyability) on a
+    schedule. Each new qualifier is Telegram-pinged and written to the paper
+    watchlist (auto-paper) so measurement starts while you analyze. Never places
+    real orders and never edits the live `.env` tiers — promotion stays manual.
+    """
+    from src.copy_trading.discovery import DiscoveryConfig
+    from src.copy_trading.discovery_runner import DiscoveryRunner
+
+    cfg = DiscoveryConfig(
+        category=CONFIG.wallet_discovery_category,
+        universe=CONFIG.wallet_discovery_universe,
+        skill_pool=CONFIG.wallet_discovery_skill_pool,
+        watchlist_cap=CONFIG.wallet_discovery_cap,
+        min_capture_cents=CONFIG.wallet_discovery_min_capture_cents,
+        min_tstat=CONFIG.wallet_discovery_min_tstat,
+        drop_capture_cents=CONFIG.wallet_discovery_drop_capture_cents,
+        auto_remove=CONFIG.wallet_discovery_auto_remove,
+    )
+    runner = DiscoveryRunner(
+        config=cfg,
+        watchlist_path=CONFIG.copy_paper_watchlist,   # feeds the paper harness
+        state_path=CONFIG.wallet_discovery_state,
+        cache_dir=CONFIG.wallet_discovery_cache_dir,
+        cycle_interval_s=CONFIG.wallet_discovery_interval_s,
+        notify=lambda msg: telegram_bot.send_message(msg),
+    )
+    runner.run_forever(_shutdown_event)
+
+
 def _tennis_stream_mode() -> str:
     """Decide between the event-driven stream and the legacy scan loop.
 
@@ -593,6 +625,17 @@ async def main():
         logger.info("Copy-paper harness thread started")
     else:
         logger.info("Copy-paper harness disabled (set COPY_PAPER_ENABLED=true)")
+
+    # Start the continuous wallet-discovery hunter (feeds the paper watchlist).
+    # Measurement/selection only — never places real orders or edits live tiers.
+    if CONFIG.wallet_discovery_enabled:
+        discovery_thread = threading.Thread(
+            target=_discovery_loop, daemon=True, name="wallet-discovery"
+        )
+        discovery_thread.start()
+        logger.info("Wallet-discovery thread started")
+    else:
+        logger.info("Wallet discovery disabled (set WALLET_DISCOVERY_ENABLED=true)")
 
     # Start Strategy #1 (Copy Trading) natively via asyncio
     s1_crashed = False

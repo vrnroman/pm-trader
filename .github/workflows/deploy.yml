@@ -70,6 +70,22 @@ jobs:
           printf '%s' "$ENV_FILE" > .env
           echo "wrote .env ($(wc -l < .env) lines)"
 
+          # Default-on activation flags. Only appended if the ENV_FILE secret
+          # doesn't already set them, so the secret stays the source of truth —
+          # set the key there to override (e.g. WALLET_DISCOVERY_ENABLED=false).
+          # docker --env-file takes the last value, so appended lines win only
+          # over an absent key, never over one the secret defines earlier.
+          ensure_env() {
+            if ! grep -q "^$1=" .env; then
+              printf '\n%s=%s\n' "$1" "$2" >> .env
+              echo "  + $1=$2 (deploy default)"
+            else
+              echo "  = $1 kept from secret"
+            fi
+          }
+          ensure_env WALLET_DISCOVERY_ENABLED true
+          ensure_env COPY_PAPER_ENABLED true
+
       - name: Deploy (IAP tunnel)
         env:
           DEPLOY_USE_IAP: "1"

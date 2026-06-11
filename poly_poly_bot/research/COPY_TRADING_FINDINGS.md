@@ -143,9 +143,32 @@ window, delay 15m / horizon 4h):
 wallets, then **gate on positive delayed-capture** to keep only the ones a real
 copier can actually ride. Rank/select on *capture*, not lead, not outcome ROI.
 
+## Automation — continuous discovery (in-bot)
+
+`src/copy_trading/discovery.py` + `discovery_data.py` + `discovery_runner.py`
+turn the manual two-stage funnel into an always-on hunter, started as a daemon
+thread from `main.py` (gated by `WALLET_DISCOVERY_ENABLED`, default off).
+
+Each sweep (default every 6h): build universe → robust skill score → lead-lag
+copyability on the skill pool *plus every wallet already on the watchlist* (so
+decay is measurable). A **strict** bar qualifies wallets — capture ≥ 1.5¢/trade
+AND t-stat ≥ 10 — with **hysteresis** (stays until capture < 1.0¢) so wallets
+near the line don't flap. Then it:
+
+- **writes `data/copy_watchlist.json` atomically** → the paper harness picks the
+  wallet up within 120s (auto-paper while you analyze);
+- **Telegram-pings each newly-qualified wallet** with its stats + Polymarket
+  profile link (one init summary on the first sweep, not a ping storm);
+- **auto-removes decayed wallets** from the paper watchlist (configurable);
+- persists `data/discovery_state.json` so restarts don't re-ping.
+
+It never places real orders and never edits the live `.env` tiers — promotion to
+real capital stays a manual decision after you review the paper PnL. Enable with
+`WALLET_DISCOVERY_ENABLED=true` (and `COPY_PAPER_ENABLED=true` to run the ledger);
+tune via the `WALLET_DISCOVERY_*` env vars in `config.py`.
+
 ## Next step
 
-Build the watchlist as: robust scorer (skill) ∩ positive lead-lag capture
-(copyability). Run `scripts/copy_paper_run.py --loop` over it to accumulate
-*closed* paper positions, and graduate a wallet to small live capital only once
-its copied PnL (net of spread/fees/drag) is positive in the ledger.
+With discovery + paper running, review the accumulating ledger and graduate a
+wallet to small live capital (add to a `STRATEGY_1x_WALLETS` tier) only once its
+copied PnL — net of spread/fees/drag — is positive.
