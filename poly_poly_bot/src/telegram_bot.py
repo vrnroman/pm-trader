@@ -580,42 +580,99 @@ def _handle_status():
     send_message("\n".join(lines))
 
 
+def _compute_s1_pnl():
+    """Compute Strategy #1 (copy trading) P&L from the realized ledger plus
+    open inventory positions marked to current market prices."""
+    from src.copy_trading import inventory
+    from src.copy_trading import pnl as s1pnl
+
+    realized_rows = s1pnl.load_realized()
+    positions = inventory.get_positions()
+    # Mark to midpoint (no exit fee — copy positions redeem on-chain fee-free).
+    open_pos = s1pnl.value_open_positions(positions, _fetch_midpoint, fee=0.0)
+    return s1pnl.summarize(realized_rows, open_pos)
+
+
+def _render_s1_block(s1) -> list[str]:
+    """Render the Strategy #1 section of the /pnl report."""
+    lines = ["<b>Strategy #1 — Copy Traders</b>"]
+    if not CONFIG.strategy1_enabled:
+        lines.append("  [disabled]")
+        return lines
+
+    realized_str = f"  Realized:    ${s1.realized_pnl:+.2f}"
+    if s1.realized_trades:
+        hit = s1.hit_rate or 0.0
+        realized_str += f"  ({s1.realized_wins}W/{s1.realized_losses}L, {hit:.0%} hit)"
+    lines.append(realized_str)
+
+    lines.append(f"  Unrealized:  ${s1.unrealized_pnl:+.2f}")
+    lines.append(f"  Net:         ${s1.net_pnl:+.2f}")
+
+    if s1.open_positions:
+        roi = s1.unrealized_roi
+        roi_str = f", ROI {roi:+.1%}" if roi is not None else ""
+        lines.append(
+            f"  Open bets:   {s1.open_positions}  "
+            f"(mkt ${s1.market_value:.2f} / cost ${s1.cost_basis:.2f}{roi_str})"
+        )
+        if s1.unpriced:
+            lines.append(f"  ⚠ {s1.unpriced} position(s) unpriced (no live quote)")
+        # Best/worst open movers (mark-to-market) — actionable at a glance.
+        priced = [p for p in s1.positions if p.unrealized_pnl is not None]
+        if priced:
+            best = max(priced, key=lambda p: p.unrealized_pnl)
+            worst = min(priced, key=lambda p: p.unrealized_pnl)
+            lines.append(
+                f"  ▲ best:  ${best.unrealized_pnl:+.2f}  "
+                f"{_esc(best.market[:40] or best.token_id[:12])}"
+            )
+            if worst is not best:
+                lines.append(
+                    f"  ▼ worst: ${worst.unrealized_pnl:+.2f}  "
+                    f"{_esc(worst.market[:40] or worst.token_id[:12])}"
+                )
+    else:
+        lines.append("  Open bets:   0")
+    return lines
+
+
 def _handle_pnl():
     """Handle /pnl command — unified P&L report across all strategies."""
-    lines = ["\U0001f4ca <b>P&amp;L Report</b>", ""]
-
-    # Track totals for the summary
     grand_realized = 0.0
     grand_unrealized = 0.0
     grand_open_bets = 0
 
+    s1 = _compute_s1_pnl() if CONFIG.strategy1_enabled else None
+    s2_trades = _load_s2_trades() if CONFIG.strategy2_enabled else []
+
+    # Both Strategy #1 (open inventory) and Strategy #2 (open weather bets)
+    # need live quotes; warn the user once if a fetch round-trip is coming.
+    needs_live = (s1 is not None and s1.open_positions > 0) or bool(s2_trades)
+    if needs_live:
+        send_message("\U0001f4ca <b>P&amp;L Report</b>\nFetching live prices...")
+
+    lines = ["\U0001f4ca <b>P&amp;L Report</b>", ""]
+
     # -- Strategy #1 (Copy Traders) --
-    lines.append("<b>Strategy #1 — Copy Traders</b>")
-    if CONFIG.strategy1_enabled:
-        s1_trades = _load_s1_trades()
-        s1_realized = sum((t.get("pnl") or 0) for t in s1_trades) if s1_trades else 0.0
-        grand_realized += s1_realized
-        lines.append(f"  Realized:    ${s1_realized:+.2f}")
-        lines.append(f"  Unrealized:  $0.00")
-        lines.append(f"  Open bets:   0")
+    if s1 is not None:
+        grand_realized += s1.realized_pnl
+        grand_unrealized += s1.unrealized_pnl
+        grand_open_bets += s1.open_positions
+        lines.extend(_render_s1_block(s1))
     else:
+        lines.append("<b>Strategy #1 — Copy Traders</b>")
         lines.append("  [disabled]")
 
     lines.append("")
 
     # -- Strategy #2 (Weather Betting) --
     lines.append("<b>Strategy #2 — Weather Betting</b>")
-    trades = _load_s2_trades()
-
     if CONFIG.strategy2_enabled:
-        if trades:
-            send_message("\n".join(lines) + "\nFetching live prices...")
-
-            # Enrich with live prices
-            trades = _enrich_with_live_prices(trades)
-
-            resolved = [t for t in trades if t.get("resolved")]
-            open_positions = [t for t in trades if not t.get("resolved")]
+        if s2_trades:
+            s2_trades = _enrich_with_live_prices(s2_trades)
+            resolved = [t for t in s2_trades if t.get("resolved")]
+            open_positions = [t for t in s2_trades if not t.get("resolved")]
 
             s2_realized = sum((t.get("pnl") or 0) for t in resolved)
             s2_unrealized = sum((t.get("unrealized_pnl") or 0) for t in open_positions
@@ -626,22 +683,6 @@ def _handle_pnl():
             grand_unrealized += s2_unrealized
             grand_open_bets += s2_open
 
-            # Rebuild lines after interim message
-            lines = ["\U0001f4ca <b>P&amp;L Report</b>", ""]
-
-            # Re-add Strategy #1
-            lines.append("<b>Strategy #1 \u2014 Copy Traders</b>")
-            if CONFIG.strategy1_enabled:
-                s1_trades_re = _load_s1_trades()
-                s1_re = sum((t.get("pnl") or 0) for t in s1_trades_re) if s1_trades_re else 0.0
-                lines.append(f"  Realized:    ${s1_re:+.2f}")
-                lines.append("  Unrealized:  $0.00")
-                lines.append("  Open bets:   0")
-            else:
-                lines.append("  [disabled]")
-            lines.append("")
-
-            lines.append("<b>Strategy #2 \u2014 Weather Betting</b>")
             lines.append(f"  Realized:    ${s2_realized:+.2f}")
             lines.append(f"  Unrealized:  ${s2_unrealized:+.2f}")
             lines.append(f"  Open bets:   {s2_open}")
@@ -650,7 +691,7 @@ def _handle_pnl():
                                 if t.get("unrealized_pct") is not None
                                 and t.get("unrealized_pct") >= TAKE_PROFIT_PCT)
             if tp_candidates > 0:
-                lines.append(f"  \U0001f3af {tp_candidates} position(s) above {TAKE_PROFIT_PCT:.0%} \u2014 /takeprofit")
+                lines.append(f"  \U0001f3af {tp_candidates} position(s) above {TAKE_PROFIT_PCT:.0%} — /takeprofit")
         else:
             lines.append("  Realized:    $0.00")
             lines.append("  Unrealized:  $0.00")
@@ -661,7 +702,7 @@ def _handle_pnl():
     lines.append("")
 
     # -- Strategy #3 (Tennis Arb) --
-    lines.append("<b>Strategy #3 \u2014 Tennis Arb</b>")
+    lines.append("<b>Strategy #3 — Tennis Arb</b>")
     if CONFIG.strategy3_enabled:
         tennis_trades = _load_s3_trades()
         if tennis_trades:
@@ -686,7 +727,7 @@ def _handle_pnl():
 
     # -- Grand Total --
     lines.append("")
-    lines.append("\u2500" * 14)
+    lines.append("─" * 14)
     lines.append("<b>TOTAL:</b>")
     lines.append(f"  Realized:    ${grand_realized:+.2f}")
     lines.append(f"  Unrealized:  ${grand_unrealized:+.2f}")
@@ -695,7 +736,7 @@ def _handle_pnl():
     lines.append(f"  Net P&amp;L:     ${net_pnl:+.2f}")
 
     if CONFIG.preview_mode:
-        lines.append(f"\n<i>PREVIEW MODE \u2014 positions are simulated</i>")
+        lines.append(f"\n<i>PREVIEW MODE — positions are simulated</i>")
 
     send_message("\n".join(lines))
 
