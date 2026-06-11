@@ -6,6 +6,7 @@ on-chain. Skips neg-risk positions. Calculates P&L for reporting.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Optional
 
 import httpx
@@ -172,9 +173,11 @@ async def check_and_redeem_positions(private_key: str) -> RedeemResult:
                 redeemed_markets.append(title)
                 total_shares += shares
 
-                # P&L calculation: curPrice > 0.5 means the outcome won
+                # P&L calculation: curPrice > 0.5 means the outcome won. A
+                # winning binary share redeems for $1, a losing one for $0.
                 cost_basis = shares * avg_price
-                returned = shares if cur_price > 0.5 else 0.0
+                won = cur_price > 0.5
+                returned = shares if won else 0.0
 
                 details.append(RedeemDetail(
                     title=title,
@@ -182,6 +185,26 @@ async def check_and_redeem_positions(private_key: str) -> RedeemResult:
                     cost_basis=cost_basis,
                     returned=returned,
                 ))
+
+                # Persist realized P&L so /pnl can report it. This is the only
+                # place a copy position is closed, so this ledger is the source
+                # of truth for Strategy 1 realized P&L.
+                try:
+                    from src.copy_trading.pnl import append_realized
+                    append_realized({
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "title": title,
+                        "condition_id": condition_id,
+                        "token_id": pos.get("tokenId", ""),
+                        "shares": round(shares, 6),
+                        "avg_price": round(avg_price, 6),
+                        "cost_basis": round(cost_basis, 6),
+                        "returned": round(returned, 6),
+                        "pnl": round(returned - cost_basis, 6),
+                        "won": won,
+                    })
+                except Exception as led_err:
+                    logger.warn(f"[redeemer] Failed to record realized P&L: {error_message(led_err)}")
 
                 # Update local inventory
                 try:
