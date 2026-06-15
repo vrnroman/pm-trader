@@ -253,6 +253,12 @@ class Config:
     wallet_discovery_drop_capture_cents: float = _opt_float("WALLET_DISCOVERY_DROP_CAPTURE_CENTS", 1.0)
     wallet_discovery_auto_remove: bool = _opt_bool("WALLET_DISCOVERY_AUTO_REMOVE", True)
     wallet_discovery_category: str = _optional("WALLET_DISCOVERY_CATEGORY", "ALL")
+    # Gated Claude second-opinion (Strategy 1c): for the top-N statistically
+    # qualified wallets, ask Claude to vet a compact dossier. Alert-only, never
+    # auto-trades; off by default and needs ANTHROPIC_API_KEY.
+    wallet_discovery_llm_review_enabled: bool = _opt_bool("WALLET_DISCOVERY_LLM_REVIEW_ENABLED", False)
+    wallet_discovery_llm_review_top_n: int = _opt_int("WALLET_DISCOVERY_LLM_REVIEW_TOP_N", 5)
+    wallet_discovery_llm_model: str = _optional("WALLET_DISCOVERY_LLM_MODEL", "claude-opus-4-8")
     # Activity-cache TTL: kept just under a daily scan so each sweep re-fetches
     # fresh trades once (never twice). prune_cache deletes files older than this,
     # so it doubles as the disk-eviction horizon. Universe defaults to wallets
