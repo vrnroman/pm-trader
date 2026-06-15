@@ -146,8 +146,81 @@ def test_build_universe_stops_on_short_page_and_paces(monkeypatch):
     monkeypatch.setattr(dd, "_get", fake_get)
 
     wallets = dd.build_universe(target=10_000, min_amounts=(500,),
-                                max_offset=100_000, page_pause_s=0.3)
+                                max_offset=100_000, page_pause_s=0.3, window_s=0)
 
     assert pages == [0, 500]              # stopped after the short second page
     assert pauses == [0.3]               # paused once, between the two pages
     assert len(wallets) == 503
+
+
+def test_build_universe_window_stops_at_cutoff(monkeypatch):
+    """With a time window, paging a combo stops as soon as the newest-first feed
+    crosses the cutoff — older trades are skipped, not collected."""
+    monkeypatch.setattr(dd.time, "sleep", lambda s: None)
+    now = 1_000_000.0
+    monkeypatch.setattr(dd.time, "time", lambda: now)
+    requested: list[int] = []
+
+    def fake_get(session, base, path, **params):
+        requested.append(params["offset"])
+        if params["offset"] == 0:                       # all inside the window
+            return [{"proxyWallet": f"0xA{j}", "timestamp": now - 100}
+                    for j in range(500)]
+        # second page straddles the cutoff: half fresh, half too old
+        return ([{"proxyWallet": f"0xB{j}", "timestamp": now - 100} for j in range(3)]
+                + [{"proxyWallet": f"0xC{j}", "timestamp": now - 9_999} for j in range(2)])
+
+    monkeypatch.setattr(dd, "_get", fake_get)
+    wallets = dd.build_universe(target=10_000, min_amounts=(500,),
+                                max_offset=100_000, page_pause_s=0, window_s=3600)
+
+    assert requested == [0, 500]                        # stopped once cutoff crossed
+    assert "0xC0" not in wallets                         # stale wallet excluded
+    assert len([w for w in wallets if w.startswith("0xB")]) == 3
+    assert len(wallets) == 503                           # 500 fresh + 3 fresh
+
+
+def test_build_universe_expand_filters_queries_all_combos(monkeypatch):
+    """expand_filters fans out across side (BUY/SELL) × taker (true/false) for
+    each stake tier and unions the wallets."""
+    monkeypatch.setattr(dd.time, "sleep", lambda s: None)
+    seen_params: list[tuple] = []
+
+    def fake_get(session, base, path, **params):
+        seen_params.append((params["filterAmount"], params.get("side"), params["takerOnly"]))
+        return [{"proxyWallet": f"0x{params.get('side')}_{params['takerOnly']}"}]  # short page
+
+    monkeypatch.setattr(dd, "_get", fake_get)
+    wallets = dd.build_universe(target=10_000, min_amounts=(500,),
+                                page_pause_s=0, window_s=0, expand_filters=True)
+
+    combos = set(seen_params)
+    assert combos == {(500, "BUY", "true"), (500, "BUY", "false"),
+                      (500, "SELL", "true"), (500, "SELL", "false")}
+    assert len(wallets) == 4                              # one distinct wallet per combo
+
+
+def test_prune_cache_removes_stale_and_caps_count(monkeypatch, tmp_path):
+    import os
+    import time as _t
+    d = tmp_path / "wcache"
+    d.mkdir()
+    now = _t.time()
+    # 2 stale (older than ttl), 3 fresh
+    ages = {"old1": 100_000, "old2": 90_000, "f1": 10, "f2": 20, "f3": 30}
+    for name, age in ages.items():
+        p = d / f"{name}.json"
+        p.write_text("[]")
+        os.utime(p, (now - age, now - age))
+    (d / "notes.txt").write_text("ignore me")           # non-json untouched
+
+    removed = dd.prune_cache(str(d), ttl_s=86400, max_files=None)
+    assert removed == 2                                  # both stale gone
+    left = {f for f in os.listdir(d) if f.endswith(".json")}
+    assert left == {"f1.json", "f2.json", "f3.json"}
+    assert (d / "notes.txt").exists()
+
+    # hard cap: keep only the 1 newest of the 3 fresh (f1 has the smallest age)
+    removed2 = dd.prune_cache(str(d), ttl_s=86400, max_files=1)
+    assert removed2 == 2
+    assert {f for f in os.listdir(d) if f.endswith(".json")} == {"f1.json"}

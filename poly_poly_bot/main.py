@@ -354,6 +354,7 @@ def _discovery_loop():
         watchlist_path=CONFIG.copy_paper_watchlist,   # feeds the paper harness
         state_path=CONFIG.wallet_discovery_state,
         cache_dir=CONFIG.wallet_discovery_cache_dir,
+        activity_ttl_s=CONFIG.wallet_discovery_activity_ttl_s,
         cycle_interval_s=CONFIG.wallet_discovery_interval_s,
         notify=lambda msg: telegram_bot.send_message(msg),
     )

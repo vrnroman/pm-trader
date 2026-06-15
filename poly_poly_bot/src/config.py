@@ -253,6 +253,12 @@ class Config:
     wallet_discovery_drop_capture_cents: float = _opt_float("WALLET_DISCOVERY_DROP_CAPTURE_CENTS", 1.0)
     wallet_discovery_auto_remove: bool = _opt_bool("WALLET_DISCOVERY_AUTO_REMOVE", True)
     wallet_discovery_category: str = _optional("WALLET_DISCOVERY_CATEGORY", "ALL")
+    # Activity-cache TTL: kept just under a daily scan so each sweep re-fetches
+    # fresh trades once (never twice). prune_cache deletes files older than this,
+    # so it doubles as the disk-eviction horizon. Universe defaults to wallets
+    # active in the last WALLET_DISCOVERY_UNIVERSE_WINDOW_S (86400 = 24h); set
+    # WALLET_DISCOVERY_EXPAND_FILTERS=true for a wider (BUY/SELL × taker) sweep.
+    wallet_discovery_activity_ttl_s: int = _opt_int("WALLET_DISCOVERY_ACTIVITY_TTL_S", 82800)  # 23h
     wallet_discovery_cache_dir: str = _optional(
         "WALLET_DISCOVERY_CACHE_DIR",
         str(Path(__file__).resolve().parent.parent / "data" / "wcache"),

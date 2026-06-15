@@ -54,7 +54,18 @@ def _get(session, base, path, **params):
             if r.status_code == 200:
                 return r.json()
             if r.status_code == 429:
-                time.sleep(1.0)
+                # Empirically the data-API sends `Retry-After: 0` (no real hint),
+                # so fall back to a fixed 1s cool-off; honour a larger value if
+                # the server ever starts sending one.
+                try:
+                    wait = float(r.headers.get("Retry-After") or 0)
+                except ValueError:
+                    wait = 0.0
+                time.sleep(max(wait, 1.0))
+                continue
+            if 400 <= r.status_code < 500:
+                return None  # client error (e.g. offset cap exceeded) won't fix on retry
+            # else 5xx — fall through to the backoff sleep and retry
         except requests.RequestException:
             pass
         time.sleep(0.25)
@@ -67,40 +78,122 @@ def build_universe(
     min_amounts=(3000, 1200, 500, 250, 100),
     max_offset: int | None = None,
     page_pause_s: float | None = None,
+    window_s: float | None = None,
+    expand_filters: bool | None = None,
 ) -> list[str]:
-    """Active taker wallets from the recent trade feed.
+    """Wallets active in the recent trade feed (default: the last ``window_s``).
 
-    For a *wide* insider sweep, pass a large ``target`` (e.g. 200k): we page each
-    stake tier — high tiers first, so the strongest wallets seed the set — until
-    the tier runs dry, the per-tier offset budget (``max_offset``) is exhausted,
-    or we've collected ``target`` unique wallets, then take whatever we found.
-    Lower tiers (down to $100) widen the net to catch insiders placing modest
-    bets, not just whales. A short ``page_pause_s`` between pages keeps these
-    long deep-paging runs under the data-API 429 ceiling.
+    NOTE: the data-API hard-caps ``/trades`` pagination at **offset 3000**
+    (beyond it returns HTTP 400 "max historical activity offset of 3000
+    exceeded"), so a single filter exposes only its ~3500 most-recent trades.
+    We widen the net two ways:
+
+    * **stake tiers** ($3000 → $100, high first so the strongest wallets seed
+      the set and modest-bet insiders are still caught);
+    * **filter expansion** (``expand_filters``): each tier is also queried per
+      ``side`` (BUY/SELL) and ``takerOnly`` (true=takers, false=incl. makers).
+      Each filter combination is its own newest-first feed, so the union covers
+      more distinct wallets within the same recent window — at the cost of ~20×
+      the requests. Off by default; turn on for a wider (but slower) sweep.
+
+    ``window_s`` makes this an *active-in-the-last-N-seconds* universe: trades
+    older than the cutoff are skipped, and because the feed is newest-first we
+    stop paging a filter combo as soon as it crosses the cutoff (so a 24h sweep
+    rarely needs the full offset budget). ``window_s=0`` disables the window and
+    pages each combo to ``max_offset`` (the legacy top-stake behaviour).
+
+    Stops a combo when it runs dry, the offset budget (``max_offset``, capped at
+    the API's 3000) is hit, the window cutoff is crossed, or we've collected
+    ``target`` unique wallets. A short ``page_pause_s`` between pages keeps us
+    under the 429 ceiling.
     """
     if max_offset is None:
-        max_offset = int(os.environ.get("WALLET_DISCOVERY_UNIVERSE_MAX_OFFSET", "100000"))
+        max_offset = int(os.environ.get("WALLET_DISCOVERY_UNIVERSE_MAX_OFFSET", "3000"))
     if page_pause_s is None:
         page_pause_s = float(os.environ.get("WALLET_DISCOVERY_PAGE_PAUSE_S", "0.3"))
+    if window_s is None:
+        window_s = float(os.environ.get("WALLET_DISCOVERY_UNIVERSE_WINDOW_S", "86400"))
+    if expand_filters is None:
+        expand_filters = os.environ.get(
+            "WALLET_DISCOVERY_EXPAND_FILTERS", "false").strip().lower() == "true"
+
+    cutoff = (time.time() - window_s) if window_s and window_s > 0 else None
+    sides = ("BUY", "SELL") if expand_filters else (None,)
+    takers = ("true", "false") if expand_filters else ("true",)
+    combos = [(amt, side, taker)
+              for amt in min_amounts for side in sides for taker in takers]
+
     s = requests.Session()
     seen: set[str] = set()
-    for amt in min_amounts:
+    for amt, side, taker in combos:
         off = 0
-        while off < max_offset and len(seen) < target:
-            tr = _get(s, DATA_API, "/trades", limit=500, offset=off,
-                      filterType="CASH", filterAmount=amt, takerOnly="true")
+        while off <= max_offset and len(seen) < target:  # offset 3000 itself is valid
+            params = dict(limit=500, offset=off, filterType="CASH",
+                          filterAmount=amt, takerOnly=taker)
+            if side:
+                params["side"] = side
+            tr = _get(s, DATA_API, "/trades", **params)
             if not tr:
                 break
+            crossed = False
             for t in tr:
+                if cutoff is not None and float(t.get("timestamp") or 0) < cutoff:
+                    crossed = True  # newest-first: this and the rest are too old
+                    continue
                 w = t.get("proxyWallet")
                 if w:
                     seen.add(w)
+            if crossed:
+                break  # remaining offsets are entirely outside the window
             off += 500
             if len(tr) < 500:
-                break  # tier exhausted — no point paging an empty offset
+                break  # combo exhausted — no point paging an empty offset
             if page_pause_s > 0:
                 time.sleep(page_pause_s)
     return list(seen)[:target]
+
+
+def prune_cache(cache_dir: str | None, ttl_s: float, max_files: int | None = None) -> int:
+    """Bound the on-disk /activity cache; return how many files were removed.
+
+    The universe churns every sweep, so wallets that drop out leave their
+    ``{wallet}.json`` behind. Without pruning these orphans accumulate forever
+    (~1 MB each at the 4000-record cap → tens of GB), eventually filling a small
+    VM's disk. We delete anything older than ``ttl_s`` (it would be re-fetched on
+    use anyway), then, if the directory is still over ``max_files``, drop the
+    oldest by mtime as a hard backstop. RAM is unaffected — this is purely a disk
+    guard.
+    """
+    if not cache_dir or not os.path.isdir(cache_dir):
+        return 0
+    now = time.time()
+    removed = 0
+    fresh: list[tuple[float, str]] = []
+    for name in os.listdir(cache_dir):
+        if not name.endswith(".json"):
+            continue
+        path = os.path.join(cache_dir, name)
+        try:
+            mtime = os.path.getmtime(path)
+        except OSError:
+            continue
+        if ttl_s and (now - mtime) >= ttl_s:
+            try:
+                os.remove(path)
+                removed += 1
+            except OSError:
+                pass
+        else:
+            fresh.append((mtime, path))
+    if max_files and len(fresh) > max_files:
+        fresh.sort()  # oldest first
+        for _, path in fresh[: len(fresh) - max_files]:
+            try:
+                os.remove(path)
+                removed += 1
+            except OSError:
+                pass
+    return removed
 
 
 # ─── activity (TTL-cached) ───────────────────────────────────────────────────
@@ -245,6 +338,11 @@ def evaluate_sweep(
     """
     must_include = must_include or set()
 
+    # Keep the on-disk activity cache bounded before we add this sweep's files.
+    if cache_dir:
+        prune_cache(cache_dir, activity_ttl_s,
+                    max_files=int(os.environ.get("WALLET_DISCOVERY_CACHE_MAX_FILES", "15000")))
+
     universe = build_universe(cfg.universe)
     for w in must_include:
         if w not in universe:
@@ -267,7 +365,10 @@ def evaluate_sweep(
     # + the pool regardless of universe size, so the scan scales to 200k+.
     lookback = time.time() - cfg.lookback_days * 86400
     chunk_size = max(1, int(os.environ.get("WALLET_DISCOVERY_CHUNK", "100")))
-    batch_pause_s = float(os.environ.get("WALLET_DISCOVERY_BATCH_PAUSE_S", "1.0"))
+    # 8 workers (fetch_all_activity default) sustained ~148 /activity req/s with
+    # zero 429s in testing; 16 workers started drawing 429s. So 8 workers is the
+    # real governor and a 0.5s pause between 100-wallet batches leaves margin.
+    batch_pause_s = float(os.environ.get("WALLET_DISCOVERY_BATCH_PAUSE_S", "0.5"))
     pool: list = []                              # running top-K RankedMetrics
     must_metrics: dict = {}                      # retained metrics for watchlist wallets
     for i in range(0, len(universe), chunk_size):
