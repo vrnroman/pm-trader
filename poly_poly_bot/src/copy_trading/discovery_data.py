@@ -21,8 +21,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 
 from src.copy_trading.discovery import DiscoveryConfig, Eval
-from src.copy_trading.entry_profile import is_copyable_entry
+from src.copy_trading.entry_profile import EntryProfile, entry_profile, is_copyable_entry
 from src.copy_trading.lead_lag import WalletLeadLag, analyze_buy
+from src.copy_trading.pnl_curve import CurveMetrics, curve_metrics, fetch_pnl_curve
 from src.copy_trading.trader_scoring import compute_wallet_metrics, select_targets
 
 DATA_API = os.environ.get("DATA_API_URL", "https://data-api.polymarket.com")
@@ -288,6 +289,22 @@ def fetch_price_series(token: str, cache: dict) -> list[tuple[float, float]]:
     return series
 
 
+def wallet_entry_profile(wallet: str, cache_dir: str | None, ttl_s: float) -> EntryProfile:
+    """Entry-price discipline from a wallet's (cached) activity; never raises."""
+    try:
+        return entry_profile(fetch_activity(wallet, cache_dir, ttl_s))
+    except Exception:
+        return EntryProfile()
+
+
+def wallet_curve_metrics(wallet: str) -> CurveMetrics:
+    """PnL-curve shape from the user-pnl endpoint; never raises."""
+    try:
+        return curve_metrics(fetch_pnl_curve(wallet))
+    except Exception:
+        return CurveMetrics()
+
+
 def lead_lag_wallet(buys, delay_s, horizon_s, price_cache) -> WalletLeadLag:
     w = WalletLeadLag()
     tokens = {b["token"] for b in buys}
@@ -412,13 +429,21 @@ def evaluate_sweep(
     for w in to_eval:
         if _stopping(stop):
             break
-        buys = fetch_recent_buys(w, since, cfg.min_usd)
         m = metric_by_wallet.get(w)
         tstat = m.tstat if m else 0.0
         roi = m.roi if m else 0.0
+        # Entry discipline + PnL-curve shape: cheap on the small deep-eval set,
+        # and the curve makes heavy traders (capped at ~3.5k /activity records)
+        # scoreable on their long arc. Both degrade to neutral defaults on error.
+        ep = wallet_entry_profile(w, cache_dir, activity_ttl_s)
+        cm = wallet_curve_metrics(w)
+        sig = dict(tail_ratio=ep.tail_ratio, copyable_ratio=ep.copyable_ratio,
+                   curve_sharpe=cm.sharpe, curve_drawdown=cm.max_drawdown_frac,
+                   net_pnl=cm.net_pnl)
+        buys = fetch_recent_buys(w, since, cfg.min_usd)
         if len(buys) < cfg.min_ll_trades:
-            # not enough recent data to judge copyability — record skill only
-            evaluated[w] = Eval(wallet=w, roi=roi, tstat=tstat)
+            # not enough recent data to judge copyability — record skill + signals
+            evaluated[w] = Eval(wallet=w, roi=roi, tstat=tstat, **sig)
             continue
         agg = lead_lag_wallet(buys[:60], delay_s, horizon_s, price_cache)
         evaluated[w] = Eval(
@@ -426,5 +451,6 @@ def evaluate_sweep(
             capture_cents=agg.avg_capture * 100,
             lead_cents=agg.avg_lead * 100,
             hit_rate=agg.capture_hit_rate, n=agg.n,
+            **sig,
         )
     return evaluated

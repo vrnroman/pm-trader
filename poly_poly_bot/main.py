@@ -357,6 +357,9 @@ def _discovery_loop():
         activity_ttl_s=CONFIG.wallet_discovery_activity_ttl_s,
         cycle_interval_s=CONFIG.wallet_discovery_interval_s,
         notify=lambda msg: telegram_bot.send_message(msg),
+        llm_review_enabled=CONFIG.wallet_discovery_llm_review_enabled,
+        llm_review_top_n=CONFIG.wallet_discovery_llm_review_top_n,
+        llm_model=CONFIG.wallet_discovery_llm_model,
     )
     runner.run_forever(_shutdown_event)
 

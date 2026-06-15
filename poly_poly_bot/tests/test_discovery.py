@@ -33,6 +33,24 @@ def test_entry_requires_capture_and_tstat():
     assert r.new_state.initialized is True
 
 
+def test_tail_dominated_wallet_is_rejected():
+    # both skilled + capture-qualified; 0xT's buy flow is tail-dominated (un-copyable)
+    good = Eval(wallet="0xG", capture_cents=2.0, tstat=12.0, tail_ratio=0.1)
+    tail = Eval(wallet="0xT", capture_cents=2.0, tstat=12.0, tail_ratio=0.9)
+    r = run_discovery_cycle({"0xG": good, "0xT": tail}, DiscoveryState(), CFG)
+    assert [e.wallet for e in r.watchlist] == ["0xG"]   # tail buyer filtered out
+
+
+def test_tail_gate_threshold_configurable():
+    tail = Eval(wallet="0xT", capture_cents=2.0, tstat=12.0, tail_ratio=0.4)
+    lenient = run_discovery_cycle({"0xT": tail}, DiscoveryState(),
+                                  DiscoveryConfig(max_tail_ratio=0.5))
+    strict = run_discovery_cycle({"0xT": tail}, DiscoveryState(),
+                                 DiscoveryConfig(max_tail_ratio=0.3))
+    assert [e.wallet for e in lenient.watchlist] == ["0xT"]
+    assert strict.watchlist == []
+
+
 def test_notify_once_then_silent():
     evaluated = {"0xA": _ev("0xA", 2.0)}
     r1 = run_discovery_cycle(evaluated, DiscoveryState(), CFG)

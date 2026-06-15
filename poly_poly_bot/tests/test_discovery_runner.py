@@ -96,6 +96,59 @@ def test_format_find_has_profile_link_and_stats():
     assert "paper watchlist" in msg
 
 
+def test_llm_review_annotates_only_new_qualifiers_when_enabled(tmp_path):
+    from src.copy_trading.llm_review import LLMVerdict
+
+    sink: list[str] = []
+    reviewed: list[str] = []
+
+    def fake_review(dossier, model=None):
+        reviewed.append(dossier["wallet"])
+        return LLMVerdict("follow", "high", True, 0.8, "steady curve, copyable")
+
+    seq = [
+        {"0xA": _ev("0xA", 2.0)},                          # sweep 1: init (no review)
+        {"0xA": _ev("0xA", 2.0), "0xB": _ev("0xB", 2.5)},  # sweep 2: 0xB is new
+    ]
+    calls = {"i": 0}
+
+    def fake_eval(cfg, **kw):
+        d = seq[min(calls["i"], len(seq) - 1)]
+        calls["i"] += 1
+        return d
+
+    r = DiscoveryRunner(
+        config=CFG,
+        watchlist_path=str(tmp_path / "copy_watchlist.json"),
+        state_path=str(tmp_path / "discovery_state.json"),
+        notify=sink.append,
+        evaluate=fake_eval,
+        llm_review=fake_review,
+        llm_review_enabled=True,
+        now=lambda: 1000.0,
+    )
+    r.run_once()        # init — no per-wallet review
+    assert reviewed == []
+    sink.clear()
+    r.run_once()        # 0xB newly qualified → reviewed + annotated
+
+    assert reviewed == ["0xB"]                  # only the new qualifier
+    assert len(sink) == 1
+    assert "Claude: *follow*" in sink[0] and "steady curve" in sink[0]
+
+
+def test_llm_review_off_by_default_leaves_ping_clean(tmp_path):
+    sink: list[str] = []
+    r = _runner(tmp_path, [
+        {"0xA": _ev("0xA", 2.0)},
+        {"0xA": _ev("0xA", 2.0), "0xB": _ev("0xB", 2.5)},
+    ], sink)
+    r.run_once()
+    sink.clear()
+    r.run_once()
+    assert "Claude" not in sink[0]              # no LLM line when disabled
+
+
 def test_release_freed_memory_never_raises():
     """Runs in the daemon loop after every sweep to return the peak heap to
     the OS. Must be safe on any platform — on non-glibc dev boxes malloc_trim

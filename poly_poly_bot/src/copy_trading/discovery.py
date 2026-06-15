@@ -42,6 +42,9 @@ class DiscoveryConfig:
     min_capture_cents: float = 1.5
     min_tstat: float = 10.0
     drop_capture_cents: float = 1.0
+    # entry-discipline gate: reject wallets whose buy $ is tail-dominated
+    # (settlement-lag scooping near $1 — un-copyable). Lenient by default.
+    max_tail_ratio: float = 0.5
     # paper watchlist size cap
     watchlist_cap: int = 25
     # auto-remove decayed wallets from paper (False = keep accumulating)
@@ -59,6 +62,13 @@ class Eval:
     lead_cents: float = 0.0
     hit_rate: float = 0.0
     n: int = 0
+    # entry-price discipline (F2) — share of buy $ at tail / in the copyable band
+    tail_ratio: float = 0.0
+    copyable_ratio: float = 1.0
+    # PnL-curve shape (F1) — long-arc consistency, robust to the /activity cap
+    curve_sharpe: float = 0.0
+    curve_drawdown: float = 0.0
+    net_pnl: float = 0.0
 
 
 @dataclass
@@ -120,6 +130,8 @@ def run_discovery_cycle(
     for w, e in evaluated.items():
         if e.tstat < cfg.min_tstat:
             continue
+        if e.tail_ratio > cfg.max_tail_ratio:
+            continue  # tail-dominated buy flow — un-copyable, skip even if skilled
         entered = e.capture_cents >= cfg.min_capture_cents
         retained = w in prev_on and _retain_on_decay(cfg, e)
         if entered or retained:

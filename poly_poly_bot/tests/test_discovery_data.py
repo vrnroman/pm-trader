@@ -23,6 +23,9 @@ def _stub_scoring(monkeypatch):
                         lambda a, **kw: SimpleNamespace(tstat=5.0, roi=0.1))
     monkeypatch.setattr(dd, "select_targets", lambda scored, **kw: [])
     monkeypatch.setattr(dd, "fetch_recent_buys", lambda *a, **k: [])
+    # neutralise the deep-eval signal fetches (no network in tests)
+    monkeypatch.setattr(dd, "wallet_entry_profile", lambda *a, **k: dd.EntryProfile())
+    monkeypatch.setattr(dd, "wallet_curve_metrics", lambda *a, **k: dd.CurveMetrics())
     monkeypatch.setenv("WALLET_DISCOVERY_BATCH_PAUSE_S", "0")  # no real sleeps in tests
 
 
@@ -120,6 +123,8 @@ def test_evaluate_sweep_streams_global_topk_across_chunks(monkeypatch):
     monkeypatch.setattr(dd, "compute_wallet_metrics",
                         lambda a, **kw: _FakeMetrics(int(a[0]["w"][2:])))
     monkeypatch.setattr(dd, "fetch_recent_buys", lambda *a, **k: [])
+    monkeypatch.setattr(dd, "wallet_entry_profile", lambda *a, **k: dd.EntryProfile())
+    monkeypatch.setattr(dd, "wallet_curve_metrics", lambda *a, **k: dd.CurveMetrics())
     monkeypatch.setenv("WALLET_DISCOVERY_CHUNK", "30")  # 9 chunks, none holds the top 40
     monkeypatch.setenv("WALLET_DISCOVERY_BATCH_PAUSE_S", "0")
 
