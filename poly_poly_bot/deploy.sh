@@ -10,7 +10,12 @@ GCP_PROJECT_ID="${GCP_PROJECT_ID:-roman-vm}"
 
 INSTANCE="poly-poly-bot"
 ZONE="asia-northeast1-a"   # Tokyo, Japan
-MACHINE="e2-small"          # 2 vCPU (shared/burstable), 2GB RAM
+MACHINE="e2-medium"         # 2 vCPU (1.0 baseline, burst to 2), 4GB RAM.
+                            # Upsized from e2-small on 2026-06-15: the e2-small
+                            # (0.5 vCPU baseline, 2GB) was CPU-throttled enough
+                            # that even `docker load` of the shipped image
+                            # starved sshd, and 2GB likely caused the
+                            # network-dead episodes.
 IMAGE_TAG="poly-poly-bot:latest"
 IMAGE_TAR="/tmp/poly-poly-bot-image.tar.gz"
 
