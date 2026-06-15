@@ -9,6 +9,7 @@ from src.copy_trading.copy_paper import (
     CopyPaperEngine,
     PaperCopyLedger,
     PaperPosition,
+    format_resolution_telegram,
     report,
     simulate_copy_fill,
 )
@@ -51,6 +52,31 @@ def test_fill_depth_limited():
     # only $5 of asks available within slippage, want $50
     fill = simulate_copy_fill(0.50, [(0.50, 10)], copy_usd=50, max_slippage_bps=10)
     assert abs(fill.spent - 5.0) < 1e-6  # 10 shares * 0.50
+
+
+def test_fill_skips_stale_dust_ask_below_floor():
+    # Regression for the "drag $-30950" blow-up: a dust ask at 0.001 sitting
+    # under a 0.62 market is stale data. It must be skipped, not swept — else a
+    # $50 budget buys ~50k shares and the drag metric explodes.
+    fill = simulate_copy_fill(
+        0.62, [(0.001, 1_000_000), (0.63, 1000)], copy_usd=50, max_slippage_bps=200,
+    )
+    assert fill.avg_price >= 0.62 * 0.5         # filled on the credible level, not the dust
+    assert fill.shares < 200                    # ~80 shares, not ~50k
+    assert abs(fill.drag_bps) < 500             # bounded, not -9984bps
+
+
+def test_fill_unfilled_when_only_sub_floor_liquidity():
+    # If the *only* liquidity is non-credible deep-discount dust, treat as unfilled.
+    fill = simulate_copy_fill(0.62, [(0.001, 1_000_000)], copy_usd=50)
+    assert fill.shares == 0 and fill.spent == 0
+
+
+def test_fill_allows_genuine_favourable_move_within_floor():
+    # A real pullback to 0.40 from a 0.62 entry (within the 50% floor) still fills.
+    fill = simulate_copy_fill(0.62, [(0.40, 10000)], copy_usd=50, max_slippage_bps=200)
+    assert fill.shares > 0
+    assert abs(fill.avg_price - 0.40) < 1e-9
 
 
 # --------------------------------------------------------------------------- #
@@ -177,3 +203,97 @@ def test_report_aggregates_drag_and_roi():
         assert abs(r["realized_pnl"] - ((100 - 52) + (-52))) < 1e-6  # -4
         assert abs(r["execution_drag_cost"] - 4.0) < 1e-6  # 2 per trade * 2
         assert r["hit_rate"] == 0.5
+
+
+# --------------------------------------------------------------------------- #
+# Resolution context + Telegram formatting
+# --------------------------------------------------------------------------- #
+
+def test_resolved_positions_carry_market_context():
+    # detector context (title/slug) must survive onto the closed position so the
+    # notification can name what resolved instead of only counting it.
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        tr = _trade("t1", "TOK", oi=0)
+        tr["title"] = "Will BTC hit $100k in 2025?"
+        tr["slug"] = "btc-100k-2025"
+        eng = CopyPaperEngine(
+            led, detector=lambda: [tr],
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: 0,          # resolves to outcome 0 immediately
+            max_copy_usd=50,
+        )
+        s = eng.run_cycle(now=100)
+        assert s.opened == 1 and s.resolved == 1
+        assert len(s.resolved_positions) == 1
+        p = s.resolved_positions[0]
+        assert p.title == "Will BTC hit $100k in 2025?"
+        assert p.slug == "btc-100k-2025"
+        assert p.won is True
+
+
+def test_format_resolution_telegram_win_names_market_and_links():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        p = _pos(copy_id="w", title="Will BTC hit $100k in 2025?",
+                 slug="btc-100k-2025", shares=100, spent=50,
+                 their_price=0.50, entry_price=0.52, drag_bps=400)
+        p.realize(won=True, now=1.0)
+        led.add(p)
+        msg = format_resolution_telegram([p], report(led))
+        assert "Will BTC hit $100k in 2025?" in msg          # what resolved
+        assert "polymarket.com/event/btc-100k-2025" in msg   # dig deeper
+        assert "✅ WON" in msg
+        assert "+400bps drag" in msg                         # per-position drag
+        assert "<b>Ledger:</b>" in msg                       # cumulative footer
+
+
+def test_report_quarantines_pre_fix_dust_positions():
+    # A pre-fix dust fill (entry far below their price) must not pollute the
+    # cumulative stats; it is excluded and counted under "quarantined".
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        good = _pos(copy_id="g", shares=100, spent=50, their_price=0.50,
+                    entry_price=0.52)
+        good.realize(won=True, now=1.0)
+        dust = _pos(copy_id="x", shares=50000, spent=50, their_price=0.62,
+                    entry_price=0.001)           # the blown-up fill
+        dust.realize(won=False, now=1.0)
+        led.add(good)
+        led.add(dust)
+        r = report(led)
+        assert r["closed"] == 1                   # dust excluded from closed
+        assert r["quarantined"] == 1
+        assert abs(r["realized_pnl"] - (100 - 50)) < 1e-6   # only the good one
+        assert r["realized_roi"] > 0              # not dragged to -100%/-30k
+
+
+def test_format_resolution_skips_dust_block_but_notes_it():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        good = _pos(copy_id="g", title="Real market?", slug="real-mkt",
+                    shares=100, spent=50, their_price=0.50, entry_price=0.52)
+        good.realize(won=True, now=1.0)
+        dust = _pos(copy_id="x", title="garbage", shares=50000, spent=50,
+                    their_price=0.62, entry_price=0.001)
+        dust.realize(won=False, now=1.0)
+        led.add(good)
+        led.add(dust)
+        msg = format_resolution_telegram([good, dust], report(led))
+        assert "Real market?" in msg
+        assert "garbage" not in msg               # dust block suppressed
+        assert "1 market resolved" in msg         # only the credible one counted
+        assert "1 stale dust-fill position excluded" in msg
+
+
+def test_format_resolution_telegram_loss_and_titleless_fallback():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        p = _pos(copy_id="l", title="", category="politics",
+                 shares=100, spent=50, their_price=0.50)
+        p.realize(won=False, now=1.0)
+        led.add(p)
+        msg = format_resolution_telegram([p], report(led))
+        assert "❌ LOST" in msg
+        assert "(politics market)" in msg     # falls back to category when untitled
+        assert "1 market resolved" in msg     # singular

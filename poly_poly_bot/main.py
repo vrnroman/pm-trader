@@ -284,7 +284,7 @@ def _copy_paper_loop():
     drag) and tracks it to resolution. Places NO real orders — it is a
     measurement harness whose ledger gates whether any wallet earns real capital.
     """
-    from src.copy_trading.copy_paper import report
+    from src.copy_trading.copy_paper import format_resolution_telegram, report
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
 
     def _on_cycle(summary, ledger):
@@ -294,12 +294,8 @@ def _copy_paper_loop():
                 f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
             )
         if summary.resolved:
-            r = report(ledger)
             telegram_bot.send_message(
-                f"[COPY-PAPER] {summary.resolved} resolved | "
-                f"realized ${r['realized_pnl']:+.2f} ROI {r['realized_roi']:+.1%} "
-                f"(drag ${r['execution_drag_cost']:.2f}, hit {r['hit_rate']:.0%}, "
-                f"n={r['closed']})"
+                format_resolution_telegram(summary.resolved_positions, report(ledger))
             )
 
     runner = CopyPaperRunner(

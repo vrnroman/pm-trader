@@ -65,14 +65,13 @@ def _profile_url(wallet: str) -> str:
 
 
 def format_find(e: Eval) -> str:
-    """Telegram body for a newly-qualified wallet."""
+    """Telegram body for a newly-qualified wallet (HTML parse mode)."""
     return (
-        "🔍 *New copyable wallet*\n"
-        f"`{e.wallet}`\n"
-        f"• capture *{e.capture_cents:+.2f}¢*/trade (hit {e.hit_rate:.0%}, n={e.n})\n"
-        f"• ROI {e.roi:+.0%}  ·  t-stat {e.tstat:.1f}\n"
-        f"• added to paper watchlist — measuring now\n"
-        f"Analyze: {_profile_url(e.wallet)}"
+        "🔍 <b>New copyable wallet</b> — added to paper watchlist, measuring now\n"
+        f"<code>{e.wallet}</code>\n"
+        f"Edge: <b>{e.capture_cents:+.2f}¢</b>/trade · hit {e.hit_rate:.0%} · "
+        f"ROI {e.roi:+.0%} · t-stat {e.tstat:.1f} (n={e.n})\n"
+        f"👤 {_profile_url(e.wallet)}"
     )
 
 
@@ -144,7 +143,7 @@ class DiscoveryRunner:
             top = ", ".join(f"{e.wallet[:8]}…({e.capture_cents:+.1f}¢)"
                             for e in result.watchlist[:5])
             self._send(
-                f"🔍 *Discovery initialized* — {len(result.watchlist)} wallets on "
+                f"🔍 <b>Discovery initialized</b> — {len(result.watchlist)} wallets on "
                 f"the paper watchlist.\nTop: {top or '—'}"
             )
         else:

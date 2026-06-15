@@ -60,13 +60,18 @@ def make_detector(wallets: list[str], max_age_s: float, min_usd: float):
                 token = a.get("asset") or ""
                 if not tx or not token:
                     continue
+                title = a.get("title", "") or ""
                 out.append({
                     "copy_id": f"{tx}-{token}",
                     "target": w,
                     "condition_id": a.get("conditionId", ""),
                     "token_id": token,
                     "outcome_index": int(a.get("outcomeIndex") or 0),
-                    "category": classify_market(a.get("title", "")),
+                    "category": classify_market(title),
+                    "title": title,
+                    # event slug drives the polymarket.com/event/<slug> link;
+                    # data-api uses eventSlug, falling back to the market slug.
+                    "slug": a.get("eventSlug") or a.get("slug") or "",
                     "their_price": price,
                     "their_usd": usd,
                 })
