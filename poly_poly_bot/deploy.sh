@@ -10,7 +10,17 @@ GCP_PROJECT_ID="${GCP_PROJECT_ID:-roman-vm}"
 
 INSTANCE="poly-poly-bot"
 ZONE="asia-northeast1-a"   # Tokyo, Japan
-MACHINE="e2-small"          # 2 vCPU, 2GB RAM
+MACHINE="e2-small"          # 2 vCPU (shared/burstable), 2GB RAM
+IMAGE_TAG="poly-poly-bot:latest"
+IMAGE_TAR="/tmp/poly-poly-bot-image.tar.gz"
+
+# Build host vs run host:
+#   The image is built HERE (a fast, resourceful machine — the GitHub
+#   Actions runner, native amd64) and the finished image is shipped to the
+#   VM, which only `docker load`s and runs it. The e2-small never compiles
+#   pandas/scipy/web3 again, so deploys are minutes not 40+ min, and a
+#   CPU-starved VM can't wedge the build (which on 2026-06-15 stopped the
+#   old container, ran a 40-min build, and left the bot down throughout).
 
 # SSH transport. In CI (GitHub Actions) the runner has no route to the VM's
 # SSH port, so set DEPLOY_USE_IAP=1 to tunnel ssh/scp through IAP — no public
@@ -34,12 +44,24 @@ if [ -n "${DEPLOY_SSH_USER:-}" ]; then
     echo "  SSH user: $DEPLOY_SSH_USER"
 fi
 
-echo "=== Poly Poly Bot Deployment (Python-only) ==="
+echo "=== Poly Poly Bot Deployment (build-here → load-on-VM) ==="
 echo "  Project: $GCP_PROJECT_ID"
 echo "  Instance: $INSTANCE"
 echo "  Zone: $ZONE"
 echo "  Machine: $MACHINE"
 echo ""
+
+# ─── Step 0: Docker required on THIS host ────────────────────────
+# We build the image locally now. macOS arm64 has no docker by default —
+# the canonical deploy path is `git push origin main` (CI builds + ships).
+# To deploy by hand from a docker-equipped host, that host must have docker.
+if ! command -v docker >/dev/null 2>&1; then
+    echo "❌ docker not found on this host."
+    echo "   This deploy builds the image here and ships it to the VM, so the"
+    echo "   build host needs docker. Either push to main (CI builds it for you)"
+    echo "   or install a runtime (e.g. macOS: 'brew install colima docker && colima start')."
+    exit 1
+fi
 
 # ─── Step 1: Ensure VM exists ────────────────────────────────────
 if ! gcloud compute instances describe "$INSTANCE" \
@@ -65,71 +87,36 @@ else
     echo "[1/5] VM exists, reusing."
 fi
 
-# ─── Step 1.5: Pre-deploy gates (lint + smoke) ───────────────────
-# These catch the class of latent bug that took down the bot on
-# 2026-05-10: undefined names and lazy imports of names that don't
-# exist. Fail fast here before we ship a broken image to prod.
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-RUFF=""
-if [ -x "$SCRIPT_DIR/.venv/bin/ruff" ]; then
-    RUFF="$SCRIPT_DIR/.venv/bin/ruff"
-elif command -v ruff >/dev/null 2>&1; then
-    RUFF="ruff"
-fi
+# ─── Step 2: Build image HERE (native amd64 on the runner) ───────
+# The Dockerfile's RUN steps run the lint (ruff F821) + import smoke gate, so
+# a broken image fails the build before it's ever shipped — same gate as
+# before, just on a fast host. --platform linux/amd64 is a no-op on the amd64
+# runner and forces a VM-compatible image if built on an arm64 Mac.
+# .dockerignore keeps .env and the git/cache/data dirs out of the image.
+echo "[2/5] Building image on $(uname -m) host: $IMAGE_TAG ..."
+DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t "$IMAGE_TAG" .
 
-if [ -n "$RUFF" ]; then
-    echo "[1.5/5] Lint: ruff F821 (undefined names)..."
-    if ! "$RUFF" check --select F821 "$SCRIPT_DIR/src" "$SCRIPT_DIR/main.py"; then
-        echo "❌ Lint failed; refusing to deploy."
-        exit 1
-    fi
-else
-    echo "[1.5/5] ruff not found locally; lint will still run in Docker build (install local: pip install ruff)"
-fi
+echo "  Saving + compressing image..."
+docker save "$IMAGE_TAG" | gzip > "$IMAGE_TAR"
+echo "  Image archive: $(du -h "$IMAGE_TAR" | cut -f1)"
 
-# The full smoke + lint gate runs inside the Docker build on the VM
-# (Dockerfile RUN steps). No way to skip it from here.
-
-# ─── Step 2: Archive code ────────────────────────────────────────
-echo "[2/5] Archiving code..."
-ARCHIVE="/tmp/poly-poly-bot-deploy.tar.gz"
-tar czf "$ARCHIVE" \
-    --exclude='.git' \
-    --exclude='cache' \
-    --exclude='results' \
-    --exclude='logs' \
-    --exclude='data' \
-    --exclude='__pycache__' \
-    --exclude='.env' \
-    --exclude='.DS_Store' \
-    --exclude='.pytest_cache' \
-    --exclude='.ruff_cache' \
-    --exclude='*.egg-info' \
-    --exclude='tests' \
-    -C "$(dirname "$0")" .
-
-echo "  Archive: $(du -h "$ARCHIVE" | cut -f1)"
-
-# ─── Step 3: Upload ─────────────────────────────────────────────
-echo "[3/5] Uploading to VM..."
+# ─── Step 3: Upload image + .env ─────────────────────────────────
+echo "[3/5] Uploading image to VM (IAP)..."
 gcloud compute ssh "$TARGET" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
     --command='mkdir -p ~/app'
-gcloud compute scp "${SSH_FLAGS[@]}" "$ARCHIVE" "$TARGET:~/deploy.tar.gz" \
+gcloud compute scp "${SSH_FLAGS[@]}" "$IMAGE_TAR" "$TARGET:~/poly-poly-bot-image.tar.gz" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE"
 gcloud compute scp "${SSH_FLAGS[@]}" .env "$TARGET:~/app/.env" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE"
 
-# ─── Step 4: Build & Run ─────────────────────────────────────────
-echo "[4/5] Building & starting on VM..."
+# ─── Step 4: Load & Run on VM (NO build) ─────────────────────────
+echo "[4/5] Loading & starting on VM..."
 gcloud compute ssh "$TARGET" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
     --command='
         set -e
-        mkdir -p ~/app
         cd ~/app
-        tar xzf ~/deploy.tar.gz
-        rm ~/deploy.tar.gz
 
         # Preserve data across deployments
         mkdir -p data cache results logs
@@ -139,14 +126,17 @@ gcloud compute ssh "$TARGET" \
         # .env. Telegram /live 3 CONFIRM re-creates the file as needed.
         rm -f data/runtime_state.json
 
-        # Stop existing container
+        # Load the prebuilt image (seconds, no compiling)
+        echo "Loading image..."
+        docker load < ~/poly-poly-bot-image.tar.gz
+        rm -f ~/poly-poly-bot-image.tar.gz
+
+        # Swap container: stop old, run new. The old container stays up until
+        # right before the new one starts, so downtime is the few seconds of
+        # load+restart — not a multi-minute build.
         docker stop poly-poly-bot 2>/dev/null || true
         docker rm poly-poly-bot 2>/dev/null || true
 
-        # Build
-        docker build -t poly-poly-bot .
-
-        # Run
         docker run -d \
             --name poly-poly-bot \
             --restart unless-stopped \
@@ -155,15 +145,14 @@ gcloud compute ssh "$TARGET" \
             -v ~/app/cache:/app/cache \
             -v ~/app/results:/app/results \
             -v ~/app/logs:/app/logs \
-            poly-poly-bot
+            poly-poly-bot:latest
 
         echo "Container started:"
         docker ps --filter name=poly-poly-bot --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
-        # Reclaim space: previous build is now untagged (<none>) and each
-        # deploy adds ~1.5GB. Without this, the 20GB boot disk fills in
-        # ~10 deploys. Only touches dangling images + stopped containers;
-        # tagged images (python:3.12-slim base, current poly-poly-bot) stay.
+        # Reclaim space: the previous image is now untagged (<none>). Without
+        # this the 20GB boot disk fills over time. Only touches dangling
+        # images + stopped containers; the current tagged image stays.
         echo "Pruning dangling images and stopped containers..."
         docker image prune -f
         docker container prune -f
@@ -178,9 +167,9 @@ gcloud compute ssh "$TARGET" \
 
 echo ""
 echo "=== Deployment complete ==="
-echo "  Monitor: gcloud compute ssh $INSTANCE --zone=$ZONE --command='docker logs -f poly-poly-bot'"
-echo "  Stop:    gcloud compute ssh $INSTANCE --zone=$ZONE --command='docker stop poly-poly-bot'"
-echo "  Logs:    gcloud compute ssh $INSTANCE --zone=$ZONE --command='cat ~/app/logs/bot-\$(date +%Y-%m-%d).log'"
+echo "  Monitor: gcloud compute ssh $INSTANCE --zone=$ZONE --tunnel-through-iap --command='docker logs -f poly-poly-bot'"
+echo "  Stop:    gcloud compute ssh $INSTANCE --zone=$ZONE --tunnel-through-iap --command='docker stop poly-poly-bot'"
+echo "  Logs:    gcloud compute ssh $INSTANCE --zone=$ZONE --tunnel-through-iap --command='cat ~/app/logs/bot-\$(date +%Y-%m-%d).log'"
 
 # Cleanup
-rm -f "$ARCHIVE"
+rm -f "$IMAGE_TAR"

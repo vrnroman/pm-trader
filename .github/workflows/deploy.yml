@@ -92,9 +92,16 @@ jobs:
           ensure_env WALLET_DISCOVERY_ENABLED true
           ensure_env COPY_PAPER_ENABLED true
 
-      - name: Deploy (IAP tunnel)
+      # deploy.sh builds the image HERE on the runner (native amd64, fast,
+      # already GCP-authed) and ships the finished image to the VM, which only
+      # `docker load`s + runs it. The e2-small never compiles again — this
+      # replaces the old build-on-VM path that ran a 40-min CPU-starved build
+      # and left the bot down throughout (2026-06-15). GitHub-hosted runners
+      # ship Docker + BuildKit, so no extra setup step is needed.
+      - name: Build image + deploy (IAP tunnel)
         env:
           DEPLOY_USE_IAP: "1"
+          DOCKER_BUILDKIT: "1"
           # the Linux user whose ~/app holds the live deployment (repo variable,
           # not a secret); must match your local deploy user so data persists
           DEPLOY_SSH_USER: ${{ vars.DEPLOY_SSH_USER }}
