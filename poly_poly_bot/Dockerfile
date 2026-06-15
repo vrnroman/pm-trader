@@ -2,6 +2,15 @@ FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ && rm -rf /var/lib/apt/lists/*
 
+# glibc malloc tuning. This is a ~19-thread process using numpy/pandas/scipy/
+# web3. By default glibc spins up to 8*ncpu per-thread malloc arenas, each of
+# which hoards freed memory and never returns it to the OS — so RSS balloons
+# far above live-object size (measured 2026-06-15: ~1.44GB anonymous heap vs a
+# ~210MB code floor). Capping arenas + lowering the trim threshold reclaims
+# freed heap, cutting steady-state and post-discovery-sweep RSS substantially.
+ENV MALLOC_ARENA_MAX=2 \
+    MALLOC_TRIM_THRESHOLD_=131072
+
 WORKDIR /app
 
 COPY requirements.txt .

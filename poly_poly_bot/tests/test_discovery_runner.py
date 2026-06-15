@@ -94,3 +94,14 @@ def test_format_find_has_profile_link_and_stats():
     assert "polymarket.com/profile/0xABC" in msg
     assert "+2.34¢" in msg
     assert "paper watchlist" in msg
+
+
+def test_release_freed_memory_never_raises():
+    """Runs in the daemon loop after every sweep to return the peak heap to
+    the OS. Must be safe on any platform — on non-glibc dev boxes malloc_trim
+    is absent, so it should gc.collect and best-effort trim, swallowing the
+    latter. A raise here would kill the discovery thread."""
+    from src.copy_trading.discovery_runner import _release_freed_memory
+
+    _release_freed_memory()  # must not raise
+    _release_freed_memory()  # idempotent / repeatable
