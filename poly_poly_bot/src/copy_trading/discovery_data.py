@@ -200,15 +200,27 @@ def evaluate_sweep(
     if _stopping(stop):
         return {}
 
-    activity = fetch_all_activity(universe, cache_dir, activity_ttl_s, stop=stop)
+    # Fetch + score the universe in CHUNKS so we never hold every wallet's raw
+    # /activity in memory at once. Only the compact per-wallet metrics survive a
+    # chunk; each chunk's multi-MB raw activity is dropped (`del`) before the
+    # next is fetched, so freed memory is reused and the peak is bounded to
+    # ~one chunk. The unchunked version held all ~850 wallets at once and peaked
+    # ~2.5GB (OOM on a 2GB VM). Activity is disk-cached, so chunking changes
+    # only *when* data is resident, not the network volume; and `activity` is
+    # not needed past scoring (lead-lag below re-fetches via fetch_recent_buys).
+    lookback = time.time() - cfg.lookback_days * 86400
+    chunk_size = max(1, int(os.environ.get("WALLET_DISCOVERY_CHUNK", "100")))
+    scored: dict = {}
+    for i in range(0, len(universe), chunk_size):
+        if _stopping(stop):
+            return {}
+        chunk = universe[i:i + chunk_size]
+        activity = fetch_all_activity(chunk, cache_dir, activity_ttl_s, stop=stop)
+        for w, a in activity.items():
+            scored[w] = compute_wallet_metrics(a, start_ts=lookback, category=cfg.category)
+        del activity  # release this chunk's raw activity before the next fetch
     if _stopping(stop):
         return {}
-
-    lookback = time.time() - cfg.lookback_days * 86400
-    scored = {
-        w: compute_wallet_metrics(a, start_ts=lookback, category=cfg.category)
-        for w, a in activity.items()
-    }
     skilled = select_targets(
         scored, method=cfg.method, min_capital=cfg.min_capital,
         min_closed=cfg.min_closed, top_k=cfg.skill_pool,
