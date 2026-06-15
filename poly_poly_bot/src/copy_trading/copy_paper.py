@@ -43,6 +43,7 @@ def simulate_copy_fill(
     copy_usd: float,
     *,
     max_slippage_bps: int = 200,
+    min_fill_frac: float = 0.5,
 ) -> FillSim:
     """Simulate copying a BUY by walking the live asks book.
 
@@ -50,12 +51,22 @@ def simulate_copy_fill(
     budget is filled or the price exceeds ``their_price * (1 + max_slippage)``
     (we don't chase beyond that). Captures the realistic adverse-selection cost
     of acting after the target.
+
+    Levels priced below ``their_price * min_fill_frac`` are skipped as stale or
+    erroneous book data: a credible same-side ask can't sit far under the price
+    the target just paid (a real CLOB ask below the market would be arbitraged
+    instantly). Without this floor a single dust ask (e.g. 0.001 under a 0.62
+    market) gets swept, inflating the share count and producing a nonsensical
+    favourable "drag" of tens of thousands of dollars.
     """
     if their_price <= 0 or copy_usd <= 0 or not asks:
         return FillSim(0.0, 0.0, 0.0, 0)
     max_price = their_price * (1 + max_slippage_bps / 10000.0)
+    min_price = their_price * min_fill_frac
     spent = shares = 0.0
     for price, size in sorted(asks):
+        if price < min_price:
+            continue  # non-credible deep-discount level — skip, don't sweep it
         if price > max_price or price >= 1.0 or size <= 0:
             break
         take_usd = min(copy_usd - spent, price * size)

@@ -54,6 +54,31 @@ def test_fill_depth_limited():
     assert abs(fill.spent - 5.0) < 1e-6  # 10 shares * 0.50
 
 
+def test_fill_skips_stale_dust_ask_below_floor():
+    # Regression for the "drag $-30950" blow-up: a dust ask at 0.001 sitting
+    # under a 0.62 market is stale data. It must be skipped, not swept — else a
+    # $50 budget buys ~50k shares and the drag metric explodes.
+    fill = simulate_copy_fill(
+        0.62, [(0.001, 1_000_000), (0.63, 1000)], copy_usd=50, max_slippage_bps=200,
+    )
+    assert fill.avg_price >= 0.62 * 0.5         # filled on the credible level, not the dust
+    assert fill.shares < 200                    # ~80 shares, not ~50k
+    assert abs(fill.drag_bps) < 500             # bounded, not -9984bps
+
+
+def test_fill_unfilled_when_only_sub_floor_liquidity():
+    # If the *only* liquidity is non-credible deep-discount dust, treat as unfilled.
+    fill = simulate_copy_fill(0.62, [(0.001, 1_000_000)], copy_usd=50)
+    assert fill.shares == 0 and fill.spent == 0
+
+
+def test_fill_allows_genuine_favourable_move_within_floor():
+    # A real pullback to 0.40 from a 0.62 entry (within the 50% floor) still fills.
+    fill = simulate_copy_fill(0.62, [(0.40, 10000)], copy_usd=50, max_slippage_bps=200)
+    assert fill.shares > 0
+    assert abs(fill.avg_price - 0.40) < 1e-9
+
+
 # --------------------------------------------------------------------------- #
 # PaperPosition.realize
 # --------------------------------------------------------------------------- #
