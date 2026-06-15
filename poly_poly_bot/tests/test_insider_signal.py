@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.copy_trading.insider_signal import (
     copy_pnl_per_dollar,
+    hours_to_resolution,
+    is_informed_early_bet,
     is_insider_shaped,
     prior_trade_count,
     trade_usd,
@@ -41,6 +45,37 @@ def test_is_insider_shaped_thresholds_configurable():
                              max_prior=10, min_bet=500)
     assert not is_insider_shaped(prior_count=8, bet_usd=600, is_geo=True,
                                  max_prior=5, min_bet=500)
+
+
+def test_hours_to_resolution():
+    assert hours_to_resolution(1000.0, 1000.0 + 7200) == 2.0   # 2h before
+    assert hours_to_resolution(1000.0, None) is None
+    assert hours_to_resolution(1000.0, 0) is None
+    assert hours_to_resolution(1000.0, 500.0) == pytest.approx(-0.1389, abs=1e-3)  # after
+
+
+def test_is_informed_early_bet_drops_youth_and_geo_keeps_timing():
+    # veteran (no prior_count arg at all), non-geo, large, mid-book, early → yes
+    assert is_informed_early_bet(bet_usd=5000, entry_price=0.4,
+                                 hours_before_resolution=72)
+    # last-minute (settlement-lag scooping) → rejected even if large
+    assert not is_informed_early_bet(bet_usd=5000, entry_price=0.4,
+                                     hours_before_resolution=2)
+    # tail entry (near-certain) → rejected even if early
+    assert not is_informed_early_bet(bet_usd=5000, entry_price=0.97,
+                                     hours_before_resolution=72)
+    # too small → rejected
+    assert not is_informed_early_bet(bet_usd=100, entry_price=0.4,
+                                     hours_before_resolution=72)
+    # unknown resolution time → can't confirm early → rejected
+    assert not is_informed_early_bet(bet_usd=5000, entry_price=0.4,
+                                     hours_before_resolution=None)
+
+
+def test_is_informed_early_bet_thresholds_configurable():
+    assert is_informed_early_bet(bet_usd=600, entry_price=0.5,
+                                 hours_before_resolution=10,
+                                 min_bet=500, min_hours=6)
 
 
 def test_copy_pnl_per_dollar():
