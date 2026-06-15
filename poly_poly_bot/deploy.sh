@@ -16,16 +16,21 @@ MACHINE="e2-medium"         # 2 vCPU (1.0 baseline, burst to 2), 4GB RAM.
                             # that even `docker load` of the shipped image
                             # starved sshd, and 2GB likely caused the
                             # network-dead episodes.
-IMAGE_TAG="poly-poly-bot:latest"
-IMAGE_TAR="/tmp/poly-poly-bot-image.tar.gz"
 
-# Build host vs run host:
-#   The image is built HERE (a fast, resourceful machine — the GitHub
-#   Actions runner, native amd64) and the finished image is shipped to the
-#   VM, which only `docker load`s and runs it. The e2-small never compiles
-#   pandas/scipy/web3 again, so deploys are minutes not 40+ min, and a
-#   CPU-starved VM can't wedge the build (which on 2026-06-15 stopped the
-#   old container, ran a 40-min build, and left the bot down throughout).
+# ─── Artifact Registry ───────────────────────────────────────────
+# The build host (CI runner, native amd64) builds the image and PUSHES it to
+# Artifact Registry; the VM PULLS it over Google's internal network. This
+# replaces the old "docker save | gzip → scp over IAP → docker load" path,
+# which crawled at ~0.75 MB/s pushing a ~500MB tarball through the IAP SSH
+# tunnel (~10 min). AR pulls in the same region take seconds.
+AR_LOCATION="asia-northeast1"           # same region as the VM → fast pulls
+AR_HOST="${AR_LOCATION}-docker.pkg.dev"
+AR_REPO="poly-poly-bot"
+IMAGE="${AR_HOST}/${GCP_PROJECT_ID}/${AR_REPO}/poly-poly-bot"
+GIT_SHA="$(git rev-parse --short HEAD 2>/dev/null || echo manual)"
+IMAGE_SHA="${IMAGE}:${GIT_SHA}"   # immutable per-commit tag (kept for rollback)
+IMAGE_LATEST="${IMAGE}:latest"    # moving tag the VM runs (so old image becomes
+                                  # dangling on the next pull → prune reclaims it)
 
 # SSH transport. In CI (GitHub Actions) the runner has no route to the VM's
 # SSH port, so set DEPLOY_USE_IAP=1 to tunnel ssh/scp through IAP — no public
@@ -49,22 +54,21 @@ if [ -n "${DEPLOY_SSH_USER:-}" ]; then
     echo "  SSH user: $DEPLOY_SSH_USER"
 fi
 
-echo "=== Poly Poly Bot Deployment (build-here → load-on-VM) ==="
+echo "=== Poly Poly Bot Deployment (build → push to AR → VM pulls) ==="
 echo "  Project: $GCP_PROJECT_ID"
-echo "  Instance: $INSTANCE"
-echo "  Zone: $ZONE"
-echo "  Machine: $MACHINE"
+echo "  Instance: $INSTANCE ($MACHINE)"
+echo "  Image: $IMAGE_SHA"
 echo ""
 
 # ─── Step 0: Docker required on THIS host ────────────────────────
-# We build the image locally now. macOS arm64 has no docker by default —
-# the canonical deploy path is `git push origin main` (CI builds + ships).
-# To deploy by hand from a docker-equipped host, that host must have docker.
+# We build + push the image here. macOS arm64 has no docker by default — the
+# canonical deploy path is `git push origin main` (CI builds + pushes). To
+# deploy by hand, the build host needs docker.
 if ! command -v docker >/dev/null 2>&1; then
     echo "❌ docker not found on this host."
-    echo "   This deploy builds the image here and ships it to the VM, so the"
-    echo "   build host needs docker. Either push to main (CI builds it for you)"
-    echo "   or install a runtime (e.g. macOS: 'brew install colima docker && colima start')."
+    echo "   This deploy builds + pushes the image, so the build host needs docker."
+    echo "   Either push to main (CI builds it for you) or install a runtime"
+    echo "   (e.g. macOS: 'brew install colima docker && colima start')."
     exit 1
 fi
 
@@ -92,53 +96,75 @@ else
     echo "[1/5] VM exists, reusing."
 fi
 
-# ─── Step 2: Build image HERE (native amd64 on the runner) ───────
-# The Dockerfile's RUN steps run the lint (ruff F821) + import smoke gate, so
-# a broken image fails the build before it's ever shipped — same gate as
-# before, just on a fast host. --platform linux/amd64 is a no-op on the amd64
-# runner and forces a VM-compatible image if built on an arm64 Mac.
-# .dockerignore keeps .env and the git/cache/data dirs out of the image.
-echo "[2/5] Building image on $(uname -m) host: $IMAGE_TAG ..."
-DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t "$IMAGE_TAG" .
+# Ensure the AR repo exists (idempotent). The CI service account has
+# artifactregistry.writer, which includes describe, so this is a no-op for it;
+# an admin identity will create the repo if it's somehow missing.
+gcloud artifacts repositories describe "$AR_REPO" \
+    --location="$AR_LOCATION" --project="$GCP_PROJECT_ID" >/dev/null 2>&1 || \
+gcloud artifacts repositories create "$AR_REPO" \
+    --repository-format=docker --location="$AR_LOCATION" \
+    --project="$GCP_PROJECT_ID" --description="poly-poly-bot deploy images"
 
-echo "  Saving + compressing image..."
-docker save "$IMAGE_TAG" | gzip > "$IMAGE_TAR"
-echo "  Image archive: $(du -h "$IMAGE_TAR" | cut -f1)"
+# ─── Step 2: Build HERE + push to Artifact Registry ──────────────
+# The Dockerfile's RUN steps run the lint (ruff F821) + import smoke gate, so a
+# broken image fails the build before it's ever pushed. --platform linux/amd64
+# is a no-op on the amd64 runner and forces a VM-compatible image on an arm64
+# Mac. .dockerignore keeps .env + git/cache/data out of the image.
+echo "[2/5] Building image on $(uname -m) host + pushing to AR..."
+DOCKER_BUILDKIT=1 docker build --platform linux/amd64 -t "$IMAGE_SHA" -t "$IMAGE_LATEST" .
 
-# ─── Step 3: Upload image + .env ─────────────────────────────────
-echo "[3/5] Uploading image to VM (IAP)..."
+# Configure docker to auth to AR with the active gcloud identity (CI SA on the
+# runner; your user creds locally), then push. Both tags share layers, so the
+# second push is metadata-only.
+gcloud auth configure-docker "$AR_HOST" --quiet
+docker push "$IMAGE_SHA"
+docker push "$IMAGE_LATEST"
+
+# ─── Step 3: Upload .env + AR pull token ─────────────────────────
+echo "[3/5] Uploading .env + AR pull token to VM..."
 gcloud compute ssh "$TARGET" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
     --command='mkdir -p ~/app'
-gcloud compute scp "${SSH_FLAGS[@]}" "$IMAGE_TAR" "$TARGET:~/poly-poly-bot-image.tar.gz" \
-    --project="$GCP_PROJECT_ID" --zone="$ZONE"
 gcloud compute scp "${SSH_FLAGS[@]}" .env "$TARGET:~/app/.env" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE"
 
-# ─── Step 4: Load & Run on VM (NO build) ─────────────────────────
-echo "[4/5] Loading & starting on VM..."
+# The VM's service account lacks the cloud-platform/AR OAuth scope, so it can't
+# mint its own pull token. Instead mint one HERE (from the deploy identity,
+# which has AR read) and ship it as a short-lived file the VM feeds to
+# `docker login` — keeps the token off the command line / argv.
+TOKEN_FILE="$(mktemp)"
+gcloud auth print-access-token > "$TOKEN_FILE"
+gcloud compute scp "${SSH_FLAGS[@]}" "$TOKEN_FILE" "$TARGET:~/app/.ar_token" \
+    --project="$GCP_PROJECT_ID" --zone="$ZONE"
+rm -f "$TOKEN_FILE"
+
+# ─── Step 4: Pull & Run on VM (no build, no tarball) ─────────────
+echo "[4/5] Pulling image on VM and starting..."
 gcloud compute ssh "$TARGET" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
     --command='
         set -e
+        AR_HOST="'"$AR_HOST"'"
+        IMAGE="'"$IMAGE_LATEST"'"
         cd ~/app
 
         # Preserve data across deployments
         mkdir -p data cache results logs
 
-        # Force preview mode on every deploy: drop the persisted
-        # preview/live toggle so the bot boots with PREVIEW_MODE from
-        # .env. Telegram /live 3 CONFIRM re-creates the file as needed.
+        # Force preview mode on every deploy: drop the persisted preview/live
+        # toggle so the bot boots with PREVIEW_MODE from .env. Telegram
+        # /live 3 CONFIRM re-creates the file as needed.
         rm -f data/runtime_state.json
 
-        # Load the prebuilt image (seconds, no compiling)
-        echo "Loading image..."
-        docker load < ~/poly-poly-bot-image.tar.gz
-        rm -f ~/poly-poly-bot-image.tar.gz
+        # Authenticate to AR with the shipped token, then drop it immediately.
+        docker login -u oauth2accesstoken --password-stdin "$AR_HOST" < ~/app/.ar_token
+        rm -f ~/app/.ar_token
 
-        # Swap container: stop old, run new. The old container stays up until
-        # right before the new one starts, so downtime is the few seconds of
-        # load+restart — not a multi-minute build.
+        echo "Pulling $IMAGE ..."
+        docker pull "$IMAGE"
+
+        # Swap container: stop old, run new. Downtime is the few seconds of
+        # pull (usually cached) + restart.
         docker stop poly-poly-bot 2>/dev/null || true
         docker rm poly-poly-bot 2>/dev/null || true
 
@@ -150,14 +176,16 @@ gcloud compute ssh "$TARGET" \
             -v ~/app/cache:/app/cache \
             -v ~/app/results:/app/results \
             -v ~/app/logs:/app/logs \
-            poly-poly-bot:latest
+            "$IMAGE"
 
         echo "Container started:"
         docker ps --filter name=poly-poly-bot --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
-        # Reclaim space: the previous image is now untagged (<none>). Without
-        # this the 20GB boot disk fills over time. Only touches dangling
-        # images + stopped containers; the current tagged image stays.
+        docker logout "$AR_HOST" >/dev/null 2>&1 || true
+
+        # Reclaim space: the previous :latest image is now untagged (<none>)
+        # because the pull re-pointed the tag. Only touches dangling images +
+        # stopped containers; the current image stays.
         echo "Pruning dangling images and stopped containers..."
         docker image prune -f
         docker container prune -f
@@ -171,10 +199,7 @@ gcloud compute ssh "$TARGET" \
     --command='docker logs poly-poly-bot --tail 20'
 
 echo ""
-echo "=== Deployment complete ==="
+echo "=== Deployment complete ($IMAGE_SHA) ==="
 echo "  Monitor: gcloud compute ssh $INSTANCE --zone=$ZONE --tunnel-through-iap --command='docker logs -f poly-poly-bot'"
 echo "  Stop:    gcloud compute ssh $INSTANCE --zone=$ZONE --tunnel-through-iap --command='docker stop poly-poly-bot'"
-echo "  Logs:    gcloud compute ssh $INSTANCE --zone=$ZONE --tunnel-through-iap --command='cat ~/app/logs/bot-\$(date +%Y-%m-%d).log'"
-
-# Cleanup
-rm -f "$IMAGE_TAR"
+echo "  Rollback: re-pull a prior tag, e.g. docker pull $IMAGE:<old-sha> && docker run ... $IMAGE:<old-sha>"

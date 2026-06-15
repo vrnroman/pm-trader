@@ -93,12 +93,13 @@ jobs:
           ensure_env COPY_PAPER_ENABLED true
 
       # deploy.sh builds the image HERE on the runner (native amd64, fast,
-      # already GCP-authed) and ships the finished image to the VM, which only
-      # `docker load`s + runs it. The e2-small never compiles again — this
-      # replaces the old build-on-VM path that ran a 40-min CPU-starved build
-      # and left the bot down throughout (2026-06-15). GitHub-hosted runners
-      # ship Docker + BuildKit, so no extra setup step is needed.
-      - name: Build image + deploy (IAP tunnel)
+      # already GCP-authed), PUSHES it to Artifact Registry, and the VM PULLS it
+      # over Google's internal network — the VM never builds and never receives
+      # a tarball over IAP. This replaces the old build-on-VM path (40-min
+      # CPU-starved build, 2026-06-15) and the interim save|gzip→scp→load path
+      # (~10-min IAP transfer). GitHub-hosted runners ship Docker + BuildKit,
+      # and the CI SA has artifactregistry.writer, so no extra setup step.
+      - name: Build image + push to AR + deploy (IAP tunnel)
         env:
           DEPLOY_USE_IAP: "1"
           DOCKER_BUILDKIT: "1"
