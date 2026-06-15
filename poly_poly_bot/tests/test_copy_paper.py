@@ -248,6 +248,44 @@ def test_format_resolution_telegram_win_names_market_and_links():
         assert "<b>Ledger:</b>" in msg                       # cumulative footer
 
 
+def test_report_quarantines_pre_fix_dust_positions():
+    # A pre-fix dust fill (entry far below their price) must not pollute the
+    # cumulative stats; it is excluded and counted under "quarantined".
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        good = _pos(copy_id="g", shares=100, spent=50, their_price=0.50,
+                    entry_price=0.52)
+        good.realize(won=True, now=1.0)
+        dust = _pos(copy_id="x", shares=50000, spent=50, their_price=0.62,
+                    entry_price=0.001)           # the blown-up fill
+        dust.realize(won=False, now=1.0)
+        led.add(good)
+        led.add(dust)
+        r = report(led)
+        assert r["closed"] == 1                   # dust excluded from closed
+        assert r["quarantined"] == 1
+        assert abs(r["realized_pnl"] - (100 - 50)) < 1e-6   # only the good one
+        assert r["realized_roi"] > 0              # not dragged to -100%/-30k
+
+
+def test_format_resolution_skips_dust_block_but_notes_it():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        good = _pos(copy_id="g", title="Real market?", slug="real-mkt",
+                    shares=100, spent=50, their_price=0.50, entry_price=0.52)
+        good.realize(won=True, now=1.0)
+        dust = _pos(copy_id="x", title="garbage", shares=50000, spent=50,
+                    their_price=0.62, entry_price=0.001)
+        dust.realize(won=False, now=1.0)
+        led.add(good)
+        led.add(dust)
+        msg = format_resolution_telegram([good, dust], report(led))
+        assert "Real market?" in msg
+        assert "garbage" not in msg               # dust block suppressed
+        assert "1 market resolved" in msg         # only the credible one counted
+        assert "1 stale dust-fill position excluded" in msg
+
+
 def test_format_resolution_telegram_loss_and_titleless_fallback():
     with tempfile.TemporaryDirectory() as d:
         led = PaperCopyLedger(os.path.join(d, "l.jsonl"))

@@ -29,6 +29,13 @@ from typing import Callable, Optional
 # Fill simulation (pure)
 # --------------------------------------------------------------------------- #
 
+# Floor on a credible fill price, as a fraction of the target's price. A
+# same-side ask far below what the target just paid is stale/erroneous book
+# data (a real CLOB ask under the market is arbitraged instantly), so we don't
+# fill there. Shared by the live fill simulator and the dust-position guard.
+MIN_FILL_FRAC = 0.5
+
+
 @dataclass
 class FillSim:
     avg_price: float      # our realised average entry price (0 if unfilled)
@@ -43,7 +50,7 @@ def simulate_copy_fill(
     copy_usd: float,
     *,
     max_slippage_bps: int = 200,
-    min_fill_frac: float = 0.5,
+    min_fill_frac: float = MIN_FILL_FRAC,
 ) -> FillSim:
     """Simulate copying a BUY by walking the live asks book.
 
@@ -254,16 +261,36 @@ class CopyPaperEngine:
 # Reporting
 # --------------------------------------------------------------------------- #
 
+def is_dust_fill(p: PaperPosition, min_fill_frac: float = MIN_FILL_FRAC) -> bool:
+    """True if a position's recorded entry is an implausible deep-discount fill.
+
+    These can only exist in ledgers written before ``simulate_copy_fill`` grew
+    its price floor — a $50 budget swept a stale ~0.001 ask into ~50k shares,
+    which is what made the cumulative drag read ``-$30000``. Excluding them keeps
+    the cumulative stats and notifications honest without rewriting history.
+    """
+    return (
+        p.their_price > 0
+        and 0 < p.entry_price < p.their_price * min_fill_frac
+    )
+
+
 def report(ledger: PaperCopyLedger) -> dict:
-    closed = ledger.closed_positions()
+    open_all = ledger.open_positions()
+    closed_all = ledger.closed_positions()
+    open_pos = [p for p in open_all if not is_dust_fill(p)]
+    closed = [p for p in closed_all if not is_dust_fill(p)]
+    quarantined = (len(open_all) - len(open_pos)) + (len(closed_all) - len(closed))
     spent = sum(p.spent for p in closed)
     pnl = sum(p.pnl for p in closed)
     ideal = sum(p.ideal_pnl for p in closed)
     wins = sum(1 for p in closed if p.won)
     drags = [p.drag_bps for p in closed]
     return {
-        "open": len(ledger.open_positions()),
+        "open": len(open_pos),
         "closed": len(closed),
+        # positions excluded as pre-fix dust fills (0 once the ledger is clean):
+        "quarantined": quarantined,
         "capital_deployed": round(spent, 2),
         "realized_pnl": round(pnl, 2),
         "realized_roi": round(pnl / spent, 4) if spent else 0.0,
@@ -302,11 +329,15 @@ def format_resolution_telegram(resolved: list[PaperPosition], rep: dict) -> str:
     of cumulative-ledger context. Replaces the old cryptic one-liner that mixed
     a per-cycle event count with whole-ledger aggregates.
     """
-    n = len(resolved)
+    # Skip pre-fix dust fills: a stale open position can still resolve after the
+    # fix deploys, and its garbage entry price would render a nonsensical block.
+    shown = [p for p in resolved if not is_dust_fill(p)]
+    stale = len(resolved) - len(shown)
+    n = len(shown)
     plural = "s" if n != 1 else ""
     lines = [f"📋 <b>Paper-copy</b> — {n} market{plural} resolved"]
 
-    for p in resolved:
+    for p in shown:
         won = p.won
         verdict = "✅ WON" if won else "❌ LOST"
         title = _esc(p.title) or f"({p.category} market)"
@@ -321,6 +352,13 @@ def format_resolution_telegram(resolved: list[PaperPosition], rep: dict) -> str:
         )
         if p.slug:
             lines.append(f"🔗 https://polymarket.com/event/{p.slug}")
+
+    if stale:
+        lines.append("")
+        lines.append(
+            f"⚠️ {stale} stale dust-fill position{'s' if stale != 1 else ''} "
+            "excluded (pre-fix data)"
+        )
 
     lines.append("")
     lines.append(
