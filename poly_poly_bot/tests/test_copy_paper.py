@@ -9,6 +9,7 @@ from src.copy_trading.copy_paper import (
     CopyPaperEngine,
     PaperCopyLedger,
     PaperPosition,
+    format_resolution_telegram,
     report,
     simulate_copy_fill,
 )
@@ -177,3 +178,59 @@ def test_report_aggregates_drag_and_roi():
         assert abs(r["realized_pnl"] - ((100 - 52) + (-52))) < 1e-6  # -4
         assert abs(r["execution_drag_cost"] - 4.0) < 1e-6  # 2 per trade * 2
         assert r["hit_rate"] == 0.5
+
+
+# --------------------------------------------------------------------------- #
+# Resolution context + Telegram formatting
+# --------------------------------------------------------------------------- #
+
+def test_resolved_positions_carry_market_context():
+    # detector context (title/slug) must survive onto the closed position so the
+    # notification can name what resolved instead of only counting it.
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        tr = _trade("t1", "TOK", oi=0)
+        tr["title"] = "Will BTC hit $100k in 2025?"
+        tr["slug"] = "btc-100k-2025"
+        eng = CopyPaperEngine(
+            led, detector=lambda: [tr],
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: 0,          # resolves to outcome 0 immediately
+            max_copy_usd=50,
+        )
+        s = eng.run_cycle(now=100)
+        assert s.opened == 1 and s.resolved == 1
+        assert len(s.resolved_positions) == 1
+        p = s.resolved_positions[0]
+        assert p.title == "Will BTC hit $100k in 2025?"
+        assert p.slug == "btc-100k-2025"
+        assert p.won is True
+
+
+def test_format_resolution_telegram_win_names_market_and_links():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        p = _pos(copy_id="w", title="Will BTC hit $100k in 2025?",
+                 slug="btc-100k-2025", shares=100, spent=50,
+                 their_price=0.50, entry_price=0.52, drag_bps=400)
+        p.realize(won=True, now=1.0)
+        led.add(p)
+        msg = format_resolution_telegram([p], report(led))
+        assert "Will BTC hit $100k in 2025?" in msg          # what resolved
+        assert "polymarket.com/event/btc-100k-2025" in msg   # dig deeper
+        assert "✅ WON" in msg
+        assert "+400bps drag" in msg                         # per-position drag
+        assert "<b>Ledger:</b>" in msg                       # cumulative footer
+
+
+def test_format_resolution_telegram_loss_and_titleless_fallback():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        p = _pos(copy_id="l", title="", category="politics",
+                 shares=100, spent=50, their_price=0.50)
+        p.realize(won=False, now=1.0)
+        led.add(p)
+        msg = format_resolution_telegram([p], report(led))
+        assert "❌ LOST" in msg
+        assert "(politics market)" in msg     # falls back to category when untitled
+        assert "1 market resolved" in msg     # singular

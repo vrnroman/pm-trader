@@ -90,6 +90,10 @@ class PaperPosition:
     spent: float
     drag_bps: int
     opened_ts: float
+    # human-readable context for notifications (optional; default-safe so old
+    # ledger lines that predate these keys still load):
+    title: str = ""         # market question, e.g. "Will BTC hit $100k in 2025?"
+    slug: str = ""          # PM event slug -> polymarket.com/event/<slug>
     # filled on resolution:
     closed: bool = False
     won: Optional[bool] = None
@@ -171,6 +175,9 @@ class CycleSummary:
     opened: int = 0
     skipped_unfilled: int = 0
     resolved: int = 0
+    # the positions that resolved *this* cycle, so callers can name them in a
+    # notification instead of only reporting cumulative ledger aggregates.
+    resolved_positions: list["PaperPosition"] = field(default_factory=list)
 
 
 class CopyPaperEngine:
@@ -214,6 +221,7 @@ class CopyPaperEngine:
                 copy_id=cid, target=tr["target"], condition_id=tr["condition_id"],
                 token_id=tr["token_id"], outcome_index=int(tr["outcome_index"]),
                 category=tr.get("category", "other"), their_price=tr["their_price"],
+                title=tr.get("title", ""), slug=tr.get("slug", ""),
                 entry_price=fill.avg_price, shares=fill.shares, spent=fill.spent,
                 drag_bps=fill.drag_bps, opened_ts=now,
             ))
@@ -225,6 +233,7 @@ class CopyPaperEngine:
                 continue
             pos.realize(won=(winner == pos.outcome_index), now=now)
             s.resolved += 1
+            s.resolved_positions.append(pos)
         if s.resolved:
             self.ledger.save()
         return s
@@ -252,3 +261,61 @@ def report(ledger: PaperCopyLedger) -> dict:
         "avg_drag_bps": round(sum(drags) / len(drags), 1) if drags else 0.0,
         "hit_rate": round(wins / len(closed), 4) if closed else 0.0,
     }
+
+
+# --------------------------------------------------------------------------- #
+# Telegram formatting (presentation; HTML parse mode)
+# --------------------------------------------------------------------------- #
+
+def _esc(s: str) -> str:
+    """Minimal HTML escape for Telegram (parse_mode=HTML)."""
+    return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _short_wallet(w: str) -> str:
+    w = w or ""
+    return f"{w[:6]}…{w[-4:]}" if len(w) > 12 else (w or "—")
+
+
+def _signed_usd(x: float) -> str:
+    """'+$69' / '-$50' — sign before the dollar sign so it reads as money."""
+    return f"{'+' if x >= 0 else '-'}${abs(x):,.0f}"
+
+
+def format_resolution_telegram(resolved: list[PaperPosition], rep: dict) -> str:
+    """Build the human-readable Telegram message for resolved paper copies.
+
+    One block per market that just settled — what it was (the question), whether
+    the copy won or lost, the cost→payout economics, the execution drag we ate,
+    and a link to dig deeper on Polymarket — followed by a single labelled line
+    of cumulative-ledger context. Replaces the old cryptic one-liner that mixed
+    a per-cycle event count with whole-ledger aggregates.
+    """
+    n = len(resolved)
+    plural = "s" if n != 1 else ""
+    lines = [f"📋 <b>Paper-copy</b> — {n} market{plural} resolved"]
+
+    for p in resolved:
+        won = p.won
+        verdict = "✅ WON" if won else "❌ LOST"
+        title = _esc(p.title) or f"({p.category} market)"
+        payout = p.spent + p.pnl  # = shares if won else 0
+        roi = (p.pnl / p.spent * 100.0) if p.spent else 0.0
+        lines.append("")  # blank line separates blocks
+        lines.append(f'{verdict} · "{title}"')
+        lines.append(
+            f"copied <code>{_short_wallet(p.target)}</code> · "
+            f"${p.spent:,.0f} → ${payout:,.0f} ({_signed_usd(p.pnl)}, {roi:+.0f}%) · "
+            f"entry {p.entry_price:.3f} vs their {p.their_price:.3f} ({p.drag_bps:+d}bps drag)"
+        )
+        if p.slug:
+            lines.append(f"🔗 https://polymarket.com/event/{p.slug}")
+
+    lines.append("")
+    lines.append(
+        "📊 <b>Ledger:</b> "
+        f"{rep['closed']} closed · realized {_signed_usd(rep['realized_pnl'])} "
+        f"(ROI {rep['realized_roi'] * 100:+.0f}%) · hit {rep['hit_rate'] * 100:.0f}% · "
+        f"avg drag {rep['avg_drag_bps']:+.0f}bps · {rep['open']} open"
+    )
+    return "\n".join(lines)
