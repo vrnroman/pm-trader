@@ -319,12 +319,11 @@ def _copy_paper_loop():
         f"max ${CONFIG.copy_paper_max_usd:.0f}/copy, PREVIEW measurement only)"
     )
     if n == 0:
+        wl = CONFIG.copy_paper_watchlist
         logger.warning(
-            "[COPY-PAPER] no watchlist wallets at %s — generate one with "
-            "`python -m backtest.two_stage_watchlist --cache-dir data/wcache "
-            "--output %s` (skill ∩ copyability)",
-            CONFIG.copy_paper_watchlist,
-            CONFIG.copy_paper_watchlist,
+            f"[COPY-PAPER] no watchlist wallets at {wl} — generate one with "
+            f"`python -m backtest.two_stage_watchlist --cache-dir data/wcache "
+            f"--output {wl}` (skill ∩ copyability)"
         )
     runner.run_forever(_shutdown_event)
 
