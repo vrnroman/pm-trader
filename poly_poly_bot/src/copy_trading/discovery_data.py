@@ -21,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 
 from src.copy_trading.discovery import DiscoveryConfig, Eval
+from src.copy_trading.entry_profile import is_copyable_entry
 from src.copy_trading.lead_lag import WalletLeadLag, analyze_buy
 from src.copy_trading.trader_scoring import compute_wallet_metrics, select_targets
 
@@ -258,7 +259,7 @@ def fetch_recent_buys(wallet: str, since_ts: float, min_usd: float) -> list[dict
             if a.get("type") != "TRADE" or a.get("side") != "BUY":
                 continue
             price = float(a.get("price") or 0)
-            if not (0.05 <= price <= 0.95):
+            if not is_copyable_entry(price):  # skip tail entries (no copyable edge)
                 continue
             usd = float(a.get("usdcSize") or 0) or float(a.get("size") or 0) * price
             if usd < min_usd:
