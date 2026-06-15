@@ -240,8 +240,12 @@ class Config:
     # Runs the discovery funnel on a schedule; pings Telegram on each new
     # qualifier and adds it to the paper watchlist. Never touches live capital.
     wallet_discovery_enabled: bool = _opt_bool("WALLET_DISCOVERY_ENABLED", False)
-    wallet_discovery_interval_s: int = _opt_int("WALLET_DISCOVERY_INTERVAL_S", 21600)  # 6h
-    wallet_discovery_universe: int = _opt_int("WALLET_DISCOVERY_UNIVERSE", 850)
+    # Wide insider sweep: scan a large universe (take whatever the trade feed
+    # yields up to this cap) on a slow multi-day cadence. The funnel paces its
+    # requests (WALLET_DISCOVERY_PAGE_PAUSE_S / _BATCH_PAUSE_S) to stay under the
+    # 429 ceiling and streams the scoring in chunks so RAM stays bounded.
+    wallet_discovery_interval_s: int = _opt_int("WALLET_DISCOVERY_INTERVAL_S", 345600)  # 4d
+    wallet_discovery_universe: int = _opt_int("WALLET_DISCOVERY_UNIVERSE", 200000)
     wallet_discovery_skill_pool: int = _opt_int("WALLET_DISCOVERY_SKILL_POOL", 40)
     wallet_discovery_cap: int = _opt_int("WALLET_DISCOVERY_CAP", 25)
     wallet_discovery_min_capture_cents: float = _opt_float("WALLET_DISCOVERY_MIN_CAPTURE_CENTS", 1.5)

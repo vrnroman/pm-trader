@@ -33,6 +33,20 @@ def _stopping(ev: threading.Event | None) -> bool:
     return ev is not None and ev.is_set()
 
 
+def _sleep_unless_stopped(ev: threading.Event | None, secs: float) -> None:
+    """Pace the sweep without sleeping through a shutdown request.
+
+    Used to space out the many requests of a wide (200k-wallet) scan so we stay
+    under the data-API 429 ceiling. Returns immediately if the stop event fires,
+    so a deploy/shutdown doesn't have to wait out a pacing pause."""
+    if secs <= 0:
+        return
+    if ev is not None:
+        ev.wait(secs)
+    else:
+        time.sleep(secs)
+
+
 def _get(session, base, path, **params):
     for _ in range(4):
         try:
@@ -48,13 +62,31 @@ def _get(session, base, path, **params):
 
 
 # ─── universe ────────────────────────────────────────────────────────────────
-def build_universe(target: int, min_amounts=(3000, 1200, 500)) -> list[str]:
-    """Active, large-stake taker wallets from the recent trade feed."""
+def build_universe(
+    target: int,
+    min_amounts=(3000, 1200, 500, 250, 100),
+    max_offset: int | None = None,
+    page_pause_s: float | None = None,
+) -> list[str]:
+    """Active taker wallets from the recent trade feed.
+
+    For a *wide* insider sweep, pass a large ``target`` (e.g. 200k): we page each
+    stake tier — high tiers first, so the strongest wallets seed the set — until
+    the tier runs dry, the per-tier offset budget (``max_offset``) is exhausted,
+    or we've collected ``target`` unique wallets, then take whatever we found.
+    Lower tiers (down to $100) widen the net to catch insiders placing modest
+    bets, not just whales. A short ``page_pause_s`` between pages keeps these
+    long deep-paging runs under the data-API 429 ceiling.
+    """
+    if max_offset is None:
+        max_offset = int(os.environ.get("WALLET_DISCOVERY_UNIVERSE_MAX_OFFSET", "100000"))
+    if page_pause_s is None:
+        page_pause_s = float(os.environ.get("WALLET_DISCOVERY_PAGE_PAUSE_S", "0.3"))
     s = requests.Session()
     seen: set[str] = set()
     for amt in min_amounts:
         off = 0
-        while off < 6000 and len(seen) < target:
+        while off < max_offset and len(seen) < target:
             tr = _get(s, DATA_API, "/trades", limit=500, offset=off,
                       filterType="CASH", filterAmount=amt, takerOnly="true")
             if not tr:
@@ -64,6 +96,10 @@ def build_universe(target: int, min_amounts=(3000, 1200, 500)) -> list[str]:
                 if w:
                     seen.add(w)
             off += 500
+            if len(tr) < 500:
+                break  # tier exhausted — no point paging an empty offset
+            if page_pause_s > 0:
+                time.sleep(page_pause_s)
     return list(seen)[:target]
 
 
@@ -177,6 +213,22 @@ def lead_lag_wallet(buys, delay_s, horizon_s, price_cache) -> WalletLeadLag:
 
 
 # ─── full sweep: universe -> skill -> copyability -> Eval rows ────────────────
+def _merge_topk(pool: list, chunk_scored: dict, cfg: DiscoveryConfig) -> list:
+    """Fold a chunk's scored wallets into the running top-K skill pool.
+
+    ``pool`` is the prior winners (RankedMetrics). We re-run the same
+    filter+rank over the union of the pool and the chunk, capped at
+    ``skill_pool``. Because each input already holds at least the global top-K
+    it can contribute, the top-K of the union is exact — so this streams 200k
+    wallets through fixed memory without changing which wallets are selected."""
+    combined = {rm.address: rm.metrics for rm in pool}
+    combined.update(chunk_scored)
+    return select_targets(
+        combined, method=cfg.method, min_capital=cfg.min_capital,
+        min_closed=cfg.min_closed, top_k=cfg.skill_pool,
+    )
+
+
 def evaluate_sweep(
     cfg: DiscoveryConfig,
     *,
@@ -201,30 +253,44 @@ def evaluate_sweep(
         return {}
 
     # Fetch + score the universe in CHUNKS so we never hold every wallet's raw
-    # /activity in memory at once. Only the compact per-wallet metrics survive a
-    # chunk; each chunk's multi-MB raw activity is dropped (`del`) before the
-    # next is fetched, so freed memory is reused and the peak is bounded to
-    # ~one chunk. The unchunked version held all ~850 wallets at once and peaked
-    # ~2.5GB (OOM on a 2GB VM). Activity is disk-cached, so chunking changes
-    # only *when* data is resident, not the network volume; and `activity` is
-    # not needed past scoring (lead-lag below re-fetches via fetch_recent_buys).
+    # /activity in memory at once. The unchunked version held all wallets at once
+    # and peaked ~2.5GB (OOM on a 2GB VM). Activity is disk-cached, so chunking
+    # changes only *when* data is resident, not the network volume; and
+    # `activity` is not needed past scoring (lead-lag below re-fetches via
+    # fetch_recent_buys).
+    #
+    # We also keep only a STREAMING top-K skill pool rather than every wallet's
+    # metrics: at 200k wallets the compact metrics dict (a per-market PnL list
+    # each) would itself dwarf RAM. After each chunk we fold its survivors into a
+    # running pool capped at ``skill_pool`` (top-K of a union == top-K of each
+    # part's top-K), then drop the chunk entirely. Peak is bounded to ~one chunk
+    # + the pool regardless of universe size, so the scan scales to 200k+.
     lookback = time.time() - cfg.lookback_days * 86400
     chunk_size = max(1, int(os.environ.get("WALLET_DISCOVERY_CHUNK", "100")))
-    scored: dict = {}
+    batch_pause_s = float(os.environ.get("WALLET_DISCOVERY_BATCH_PAUSE_S", "1.0"))
+    pool: list = []                              # running top-K RankedMetrics
+    must_metrics: dict = {}                      # retained metrics for watchlist wallets
     for i in range(0, len(universe), chunk_size):
         if _stopping(stop):
             return {}
         chunk = universe[i:i + chunk_size]
         activity = fetch_all_activity(chunk, cache_dir, activity_ttl_s, stop=stop)
+        chunk_scored: dict = {}
         for w, a in activity.items():
-            scored[w] = compute_wallet_metrics(a, start_ts=lookback, category=cfg.category)
+            m = compute_wallet_metrics(a, start_ts=lookback, category=cfg.category)
+            chunk_scored[w] = m
+            if w in must_include:
+                must_metrics[w] = m
         del activity  # release this chunk's raw activity before the next fetch
+        pool = _merge_topk(pool, chunk_scored, cfg)
+        del chunk_scored
+        # Pause between batches so a wide sweep paces its /activity calls under
+        # the data-API 429 ceiling (skip after the last chunk).
+        if i + chunk_size < len(universe):
+            _sleep_unless_stopped(stop, batch_pause_s)
     if _stopping(stop):
         return {}
-    skilled = select_targets(
-        scored, method=cfg.method, min_capital=cfg.min_capital,
-        min_closed=cfg.min_closed, top_k=cfg.skill_pool,
-    )
+    skilled = pool
     # metrics lookup for roi/tstat by wallet
     metric_by_wallet = {rm.address: rm.metrics for rm in skilled}
 
@@ -233,8 +299,8 @@ def evaluate_sweep(
     for w in must_include:
         if w not in metric_by_wallet:
             to_eval.append(w)
-            if w in scored:
-                metric_by_wallet[w] = scored[w]
+            if w in must_metrics:
+                metric_by_wallet[w] = must_metrics[w]
 
     since = time.time() - min(cfg.ll_lookback_days, HISTORY_RETENTION_DAYS - 1) * 86400
     delay_s, horizon_s = cfg.delay_min * 60, cfg.horizon_min * 60

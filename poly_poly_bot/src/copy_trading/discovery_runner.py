@@ -37,13 +37,13 @@ logger = logging.getLogger("poly_poly_bot")
 def _release_freed_memory() -> None:
     """Hand the sweep's freed heap back to the OS.
 
-    A sweep allocates large transient structures — the raw /activity for the
-    whole universe (up to ~4000 records × ~850 wallets) plus lead-lag price
-    series. Once ``evaluate_sweep`` returns those are unreferenced, but under
-    glibc the freed blocks sit in per-thread arenas that ``free`` won't return
-    without an explicit trim, so RSS would otherwise stay pinned at the sweep's
-    high-water mark for the full 6h until the next cycle. gc first (drop any
-    cycles), then ``malloc_trim`` to actually release the arenas.
+    A sweep allocates large transient structures — the raw /activity per chunk
+    plus lead-lag price series. Once ``evaluate_sweep`` returns those are
+    unreferenced, but under glibc the freed blocks sit in per-thread arenas that
+    ``free`` won't return without an explicit trim, so RSS would otherwise stay
+    pinned at the sweep's high-water mark for the whole multi-day idle window
+    until the next cycle. gc first (drop any cycles), then ``malloc_trim`` to
+    actually release the arenas.
     """
     gc.collect()
     try:
@@ -173,8 +173,8 @@ class DiscoveryRunner:
                 self.run_once(stop=shutdown_event)
             except Exception:  # pragma: no cover - loop must survive any failure
                 logger.warning("[DISCOVERY] sweep failed; continuing", exc_info=True)
-            # Release the sweep's large transient heap before sleeping 6h, so
-            # RSS doesn't stay pinned at the peak for the whole idle window.
+            # Release the sweep's large transient heap before the multi-day
+            # sleep, so RSS doesn't stay pinned at the peak the whole idle window.
             _release_freed_memory()
             shutdown_event.wait(self.cycle_interval_s)
 
