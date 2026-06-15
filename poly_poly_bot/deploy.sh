@@ -168,9 +168,18 @@ gcloud compute ssh "$TARGET" \
         docker stop poly-poly-bot 2>/dev/null || true
         docker rm poly-poly-bot 2>/dev/null || true
 
+        # --memory guardrail: on the 2GB e2-small the bot runs ~640MB steady
+        # and ~1GB at the chunked discovery peak, so 1500m leaves headroom yet
+        # caps a runaway. If the container ever exceeds it, the cgroup OOM-kills
+        # just THIS container (which --restart brings back) instead of the
+        # kernel OOM-killer taking down the guest agent / networking and
+        # network-deading the whole VM (the 2026-06-15 outage). memory-swap=
+        # memory disables swap for the container.
         docker run -d \
             --name poly-poly-bot \
             --restart unless-stopped \
+            --memory=1500m \
+            --memory-swap=1500m \
             --env-file .env \
             -v ~/app/data:/app/data \
             -v ~/app/cache:/app/cache \
