@@ -52,3 +52,21 @@ def test_fetch_does_not_cache_open_market(tmp_path, monkeypatch):
     r = fetch_resolution("0xopen", cache_dir=str(tmp_path))
     assert r.winning_index is None
     assert not (tmp_path / "res_0xopen.json").exists()   # open markets aren't cached
+
+
+def test_fetch_resolutions_batches_and_caches(tmp_path, monkeypatch):
+    calls = {"n": 0}
+
+    def fake_batch(session, cids):
+        calls["n"] += 1
+        return [{"conditionId": c, "closed": True, "outcomePrices": ["1", "0"],
+                 "endDate": "2026-05-01T00:00:00Z"} for c in cids]
+
+    monkeypatch.setattr(mr, "_get_batch", fake_batch)
+    cids = [f"0x{i:02d}" for i in range(120)]
+    res = mr.fetch_resolutions(cids, cache_dir=str(tmp_path), batch_size=50)
+    assert len(res) == 120 and all(r.winning_index == 0 for r in res.values())
+    assert calls["n"] == 3                                   # 120 / 50 -> 3 batched calls
+    # second run is fully served from disk cache -> no further batch calls
+    res2 = mr.fetch_resolutions(cids, cache_dir=str(tmp_path), batch_size=50)
+    assert len(res2) == 120 and calls["n"] == 3

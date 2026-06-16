@@ -105,22 +105,87 @@ def fetch_resolution(
     return res
 
 
+def _read_cache(condition_id: str, cache_dir: str | None) -> MarketResolution | None:
+    if not cache_dir:
+        return None
+    path = os.path.join(cache_dir, f"res_{condition_id}.json")
+    if os.path.exists(path):
+        try:
+            d = json.load(open(path))
+            return MarketResolution(winning_index=d.get("winning_index"),
+                                    end_ts=float(d.get("end_ts") or 0.0))
+        except (json.JSONDecodeError, OSError):
+            pass
+    return None
+
+
+def _write_cache(condition_id: str, res: MarketResolution, cache_dir: str | None) -> None:
+    if not cache_dir or res.winning_index is None:  # only cache immutable resolved markets
+        return
+    path = os.path.join(cache_dir, f"res_{condition_id}.json")
+    try:
+        tmp = path + ".tmp"
+        json.dump({"winning_index": res.winning_index, "end_ts": res.end_ts}, open(tmp, "w"))
+        os.replace(tmp, path)
+    except OSError:
+        pass
+
+
+def _get_batch(session: requests.Session, cids: list[str]) -> list[dict]:
+    """One Gamma call for up to ~50 markets (repeated condition_ids params)."""
+    params = [("condition_ids", c) for c in cids] + [("limit", str(len(cids)))]
+    for _ in range(3):
+        try:
+            r = session.get(GAMMA_API + "/markets", params=params, timeout=30)
+            if r.status_code == 200:
+                j = r.json()
+                return j if isinstance(j, list) else ([j] if isinstance(j, dict) else [])
+            if 400 <= r.status_code < 500 and r.status_code != 429:
+                return []
+        except requests.RequestException:
+            pass
+        time.sleep(0.25)
+    return []
+
+
 def fetch_resolutions(
     condition_ids,
     cache_dir: str | None = None,
     workers: int = 8,
+    batch_size: int = 50,
 ) -> dict[str, MarketResolution]:
-    """Resolutions for many markets, concurrently; skips any that fail to fetch."""
+    """Resolutions for many markets. Disk-cached resolved markets are read
+    first; the rest are fetched in **batched** Gamma calls (one request per
+    ``batch_size`` markets) across a thread pool — turning tens of thousands of
+    per-market calls into hundreds. Markets that fail to fetch are skipped."""
     out: dict[str, MarketResolution] = {}
-    cids = list(dict.fromkeys(condition_ids))  # dedupe, keep order
+    misses: list[str] = []
+    for c in dict.fromkeys(condition_ids):  # dedupe, keep order
+        cached = _read_cache(c, cache_dir)
+        if cached is not None:
+            out[c] = cached
+        else:
+            misses.append(c)
+    if not misses:
+        return out
+
+    batches = [misses[i:i + batch_size] for i in range(0, len(misses), batch_size)]
+
+    def run(batch):
+        markets = _get_batch(requests.Session(), batch)
+        res: dict[str, MarketResolution] = {}
+        for m in markets:
+            cid = m.get("conditionId")
+            if cid:
+                res[cid] = parse_resolution(m)
+        return res
+
     with ThreadPoolExecutor(max_workers=workers) as ex:
-        futs = {ex.submit(fetch_resolution, c, cache_dir): c for c in cids}
-        for f in as_completed(futs):
-            r = None
+        for f in as_completed([ex.submit(run, b) for b in batches]):
             try:
-                r = f.result()
+                for cid, r in f.result().items():
+                    out[cid] = r
+                    _write_cache(cid, r, cache_dir)
             except Exception:
-                r = None
-            if r is not None:
-                out[futs[f]] = r
+                pass
     return out
