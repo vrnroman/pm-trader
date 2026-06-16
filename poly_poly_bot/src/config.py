@@ -220,7 +220,9 @@ class Config:
     # --- Copy-paper harness (Strategy 1b validation; PREVIEW-only, no orders) ---
     # Forward measurement of execution-realistic copy PnL on watchlist wallets.
     # Graduates a wallet to real capital only after positive net-of-drag PnL.
-    copy_paper_enabled: bool = _opt_bool("COPY_PAPER_ENABLED", False)
+    # On by default: paper-only (places no real orders), so it's safe to run
+    # everywhere. Set COPY_PAPER_ENABLED=false to stop it.
+    copy_paper_enabled: bool = _opt_bool("COPY_PAPER_ENABLED", True)
     copy_paper_watchlist: str = _optional(
         "COPY_PAPER_WATCHLIST",
         str(Path(__file__).resolve().parent.parent / "data" / "copy_watchlist.json"),
@@ -239,7 +241,9 @@ class Config:
     # --- Wallet discovery (continuously hunts copyable wallets -> paper) ---
     # Runs the discovery funnel on a schedule; pings Telegram on each new
     # qualifier and adds it to the paper watchlist. Never touches live capital.
-    wallet_discovery_enabled: bool = _opt_bool("WALLET_DISCOVERY_ENABLED", False)
+    # On by default: discovery only writes a paper watchlist + Telegram pings,
+    # never touches live capital. Set WALLET_DISCOVERY_ENABLED=false to stop it.
+    wallet_discovery_enabled: bool = _opt_bool("WALLET_DISCOVERY_ENABLED", True)
     # Wide insider sweep: scan a large universe (take whatever the trade feed
     # yields up to this cap) on a slow multi-day cadence. The funnel paces its
     # requests (WALLET_DISCOVERY_PAGE_PAUSE_S / _BATCH_PAUSE_S) to stay under the
