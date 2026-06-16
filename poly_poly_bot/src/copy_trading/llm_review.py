@@ -140,8 +140,7 @@ def review_wallet(
             model=model,
             max_tokens=max_tokens,
             thinking={"type": "adaptive"},
-            output_config={"effort": "medium",
-                           "format": {"type": "json_schema", "schema": _VERDICT_SCHEMA}},
+            output_config={"format": {"type": "json_schema", "schema": _VERDICT_SCHEMA}},
             system=_SYSTEM,
             messages=[{"role": "user",
                        "content": "Vet this wallet dossier:\n"

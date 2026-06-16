@@ -244,7 +244,7 @@ class Config:
     # yields up to this cap) on a slow multi-day cadence. The funnel paces its
     # requests (WALLET_DISCOVERY_PAGE_PAUSE_S / _BATCH_PAUSE_S) to stay under the
     # 429 ceiling and streams the scoring in chunks so RAM stays bounded.
-    wallet_discovery_interval_s: int = _opt_int("WALLET_DISCOVERY_INTERVAL_S", 345600)  # 4d
+    wallet_discovery_interval_s: int = _opt_int("WALLET_DISCOVERY_INTERVAL_S", 86400)  # 1d
     wallet_discovery_universe: int = _opt_int("WALLET_DISCOVERY_UNIVERSE", 200000)
     wallet_discovery_skill_pool: int = _opt_int("WALLET_DISCOVERY_SKILL_POOL", 40)
     wallet_discovery_cap: int = _opt_int("WALLET_DISCOVERY_CAP", 25)
@@ -259,12 +259,13 @@ class Config:
     wallet_discovery_llm_review_enabled: bool = _opt_bool("WALLET_DISCOVERY_LLM_REVIEW_ENABLED", False)
     wallet_discovery_llm_review_top_n: int = _opt_int("WALLET_DISCOVERY_LLM_REVIEW_TOP_N", 5)
     wallet_discovery_llm_model: str = _optional("WALLET_DISCOVERY_LLM_MODEL", "claude-opus-4-8")
-    # Activity-cache TTL: kept just under a daily scan so each sweep re-fetches
-    # fresh trades once (never twice). prune_cache deletes files older than this,
-    # so it doubles as the disk-eviction horizon. Universe defaults to wallets
-    # active in the last WALLET_DISCOVERY_UNIVERSE_WINDOW_S (86400 = 24h); set
+    # Activity-cache TTL: set ABOVE the sweep interval so a returning wallet is
+    # served from cache instead of re-fetched (TTL < interval would expire every
+    # time and never hit). 30h vs a 24h sweep. prune_cache deletes files older
+    # than this, so it doubles as the disk-eviction horizon. Universe defaults to
+    # wallets active in the last WALLET_DISCOVERY_UNIVERSE_WINDOW_S (24h); set
     # WALLET_DISCOVERY_EXPAND_FILTERS=true for a wider (BUY/SELL × taker) sweep.
-    wallet_discovery_activity_ttl_s: int = _opt_int("WALLET_DISCOVERY_ACTIVITY_TTL_S", 82800)  # 23h
+    wallet_discovery_activity_ttl_s: int = _opt_int("WALLET_DISCOVERY_ACTIVITY_TTL_S", 108000)  # 30h
     wallet_discovery_cache_dir: str = _optional(
         "WALLET_DISCOVERY_CACHE_DIR",
         str(Path(__file__).resolve().parent.parent / "data" / "wcache"),
