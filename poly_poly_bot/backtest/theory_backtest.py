@@ -119,12 +119,18 @@ def fetch_all(wallets, cache_dir, workers=10):
 # --------------------------------------------------------------------------- #
 # Forward copy-PnL with exit-following
 # --------------------------------------------------------------------------- #
-def _forward_copy_rois(forward_acts, resolutions, min_usd=100.0):
+def _forward_copy_rois(forward_acts, resolutions, min_usd=100.0, slippage_bps=0.0):
     """Copy each forward BUY and close it the way the target did.
 
     Returns a list of per-copy ROI-per-$1: exit at the target's SELL if they
     sold that outcome later, else the resolution payoff if known, else skipped.
+
+    ``slippage_bps`` models execution drag: we enter *worse* than the target
+    (pay a higher price -> fewer shares) and exit *worse* (sell into a lower
+    bid), since a copier reacts after the target and pays the spread. At 0 this
+    is the drag-free upper bound.
     """
+    slip = slippage_bps / 10000.0
     # index sells per (cid, oi): (ts, price, size)
     sells: dict[tuple, list] = {}
     buys = []
@@ -146,16 +152,17 @@ def _forward_copy_rois(forward_acts, resolutions, min_usd=100.0):
 
     rois = []
     for cid, oi, ts, price in buys:
+        entry = min(0.99, price * (1.0 + slip))   # we fill worse than they did
         later = [s for s in sells.get((cid, oi), []) if s[0] >= ts]
-        if later:  # exit-following: close when the target sells
+        if later:  # exit-following: close when the target sells (into a worse bid)
             tot_sz = sum(s[2] for s in later) or 1.0
-            exit_price = sum(s[1] * s[2] for s in later) / tot_sz
-            rois.append(exit_price / price - 1.0)
+            exit_price = sum(s[1] * s[2] for s in later) / tot_sz * (1.0 - slip)
+            rois.append(exit_price / entry - 1.0)
             continue
         res = resolutions.get(cid)
         if res is not None and res.winning_index is not None:
             won = (oi is not None and int(oi) == int(res.winning_index))
-            rois.append((1.0 / price - 1.0) if won else -1.0)
+            rois.append((1.0 / entry - 1.0) if won else -1.0)
         # else: unresolved and not exited — can't score, skip
     return rois
 
@@ -200,7 +207,7 @@ def calibrate(args):
             continue
         ctxs[w] = build_context(w, lb, now=cutoff, resolutions=resolutions,
                                 lookback_ts=0.0)
-        fwd_rois[w] = _forward_copy_rois(fw, resolutions, args.min_usd)
+        fwd_rois[w] = _forward_copy_rois(fw, resolutions, args.min_usd, args.slippage_bps)
 
     # diagnostics: why some theories can't fire in this (recent, mostly-open) sample
     n_skill = sum(1 for c in ctxs.values() if c.metrics.n_closed >= 10)
@@ -266,6 +273,8 @@ def main():
     c.add_argument("--universe", type=int, default=400)
     c.add_argument("--forward-days", type=int, default=30)
     c.add_argument("--min-usd", type=float, default=100.0)
+    c.add_argument("--slippage-bps", type=float, default=0.0,
+                   help="execution drag: copier fills worse than the target on entry+exit")
     c.add_argument("--cache-dir", default="data/wcache")
     c.add_argument("--res-cache", default="data/rescache")
     c.add_argument("--wallets-from", default="", help="dir of cached {wallet}.json to reuse as universe")
