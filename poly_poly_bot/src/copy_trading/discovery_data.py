@@ -24,7 +24,9 @@ from src.copy_trading.discovery import DiscoveryConfig, Eval
 from src.copy_trading.entry_profile import EntryProfile, entry_profile, is_copyable_entry
 from src.copy_trading.lead_lag import WalletLeadLag, analyze_buy
 from src.copy_trading.pnl_curve import CurveMetrics, curve_metrics, fetch_pnl_curve
+from src.copy_trading.theories import evaluate_all
 from src.copy_trading.trader_scoring import compute_wallet_metrics, select_targets
+from src.copy_trading.wallet_context import WalletContext, build_context
 
 DATA_API = os.environ.get("DATA_API_URL", "https://data-api.polymarket.com")
 CLOB = "https://clob.polymarket.com"
@@ -305,6 +307,23 @@ def wallet_curve_metrics(wallet: str) -> CurveMetrics:
         return CurveMetrics()
 
 
+def build_wallet_context(wallet: str, cache_dir: str | None, ttl_s: float, *,
+                         now: float, lookback_ts: float, category: str,
+                         curve: CurveMetrics, capture_cents: float = 0.0,
+                         lead_cents: float = 0.0, capture_hit_rate: float = 0.0,
+                         n_capture: int = 0) -> WalletContext:
+    """Build the theory feature bundle from a wallet's (cached) activity; the
+    curve + lead-lag scalars are injected from the deep stage. Never raises."""
+    try:
+        acts = fetch_activity(wallet, cache_dir, ttl_s)
+        return build_context(wallet, acts, now=now, lookback_ts=lookback_ts,
+                             category=category, curve=curve, capture_cents=capture_cents,
+                             lead_cents=lead_cents, capture_hit_rate=capture_hit_rate,
+                             n_capture=n_capture)
+    except Exception:
+        return WalletContext(wallet=wallet, now=now, curve=curve)
+
+
 def lead_lag_wallet(buys, delay_s, horizon_s, price_cache) -> WalletLeadLag:
     w = WalletLeadLag()
     tokens = {b["token"] for b in buys}
@@ -432,25 +451,28 @@ def evaluate_sweep(
         m = metric_by_wallet.get(w)
         tstat = m.tstat if m else 0.0
         roi = m.roi if m else 0.0
-        # Entry discipline + PnL-curve shape: cheap on the small deep-eval set,
-        # and the curve makes heavy traders (capped at ~3.5k /activity records)
-        # scoreable on their long arc. Both degrade to neutral defaults on error.
-        ep = wallet_entry_profile(w, cache_dir, activity_ttl_s)
-        cm = wallet_curve_metrics(w)
-        sig = dict(tail_ratio=ep.tail_ratio, copyable_ratio=ep.copyable_ratio,
-                   curve_sharpe=cm.sharpe, curve_drawdown=cm.max_drawdown_frac,
-                   net_pnl=cm.net_pnl)
+        # lead-lag copyability (capture) first — it feeds theories 1c/1h
+        capture = lead = hit = 0.0
+        n_cap = 0
         buys = fetch_recent_buys(w, since, cfg.min_usd)
-        if len(buys) < cfg.min_ll_trades:
-            # not enough recent data to judge copyability — record skill + signals
-            evaluated[w] = Eval(wallet=w, roi=roi, tstat=tstat, **sig)
-            continue
-        agg = lead_lag_wallet(buys[:60], delay_s, horizon_s, price_cache)
+        if len(buys) >= cfg.min_ll_trades:
+            agg = lead_lag_wallet(buys[:60], delay_s, horizon_s, price_cache)
+            capture, lead = agg.avg_capture * 100, agg.avg_lead * 100
+            hit, n_cap = agg.capture_hit_rate, agg.n
+        # PnL curve + full feature context, then run the independent theories.
+        cm = wallet_curve_metrics(w)
+        ctx = build_wallet_context(
+            w, cache_dir, activity_ttl_s, now=time.time(), lookback_ts=lookback,
+            category=cfg.category, curve=cm, capture_cents=capture, lead_cents=lead,
+            capture_hit_rate=hit, n_capture=n_cap)
+        flags = evaluate_all(ctx, enabled=cfg.enabled_theories)
+        ep = ctx.entry
         evaluated[w] = Eval(
             wallet=w, roi=roi, tstat=tstat,
-            capture_cents=agg.avg_capture * 100,
-            lead_cents=agg.avg_lead * 100,
-            hit_rate=agg.capture_hit_rate, n=agg.n,
-            **sig,
+            capture_cents=capture, lead_cents=lead, hit_rate=hit, n=n_cap,
+            tail_ratio=ep.tail_ratio, copyable_ratio=ep.copyable_ratio,
+            curve_sharpe=cm.sharpe, curve_drawdown=cm.max_drawdown_frac, net_pnl=cm.net_pnl,
+            flagged_by=tuple(f.theory for f in flags),
+            reason=" | ".join(f.reason for f in flags),
         )
     return evaluated

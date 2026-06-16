@@ -72,6 +72,12 @@ def format_find(e: Eval, verdict=None) -> str:
     lines = [
         "🔍 *New copyable wallet*",
         f"`{e.wallet}`",
+    ]
+    if e.flagged_by:
+        lines.append(f"• flagged by *{', '.join(e.flagged_by)}*")
+        if e.reason:
+            lines.append(f"  _{e.reason}_")
+    lines += [
         f"• capture *{e.capture_cents:+.2f}¢*/trade (hit {e.hit_rate:.0%}, n={e.n})",
         f"• ROI {e.roi:+.0%}  ·  t-stat {e.tstat:.1f}  ·  tail {e.tail_ratio:.0%}",
     ]

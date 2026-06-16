@@ -96,6 +96,13 @@ def test_format_find_has_profile_link_and_stats():
     assert "paper watchlist" in msg
 
 
+def test_format_find_shows_theory_reasons():
+    e = Eval(wallet="0xABC", capture_cents=2.0, tstat=12.0,
+             flagged_by=("1f", "1g"), reason="early-exit swing: 10 round-trips")
+    msg = format_find(e)
+    assert "flagged by *1f, 1g*" in msg and "early-exit swing" in msg
+
+
 def test_llm_review_annotates_only_new_qualifiers_when_enabled(tmp_path):
     from src.copy_trading.llm_review import LLMVerdict
 
