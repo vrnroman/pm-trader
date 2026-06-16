@@ -82,6 +82,42 @@ def fetch_asks(token_id: str) -> list[tuple[float, float]]:
     return [(float(a["price"]), float(a["size"])) for a in (b.get("asks") or [])]
 
 
+def fetch_bids(token_id: str) -> list[tuple[float, float]]:
+    """Best-bid-first list — the price we could SELL into when mirroring an exit."""
+    b = _get(CLOB, "/book", token_id=token_id)
+    if not b:
+        return []
+    bids = [(float(x["price"]), float(x["size"])) for x in (b.get("bids") or [])]
+    bids.sort(reverse=True)  # highest (best) bid first
+    return bids
+
+
+def make_exit_detector(wallets: list[str], max_age_s: float):
+    """Return a detector() yielding recent target SELLs (to mirror as exits)."""
+
+    def detect() -> list[dict]:
+        out = []
+        cutoff = time.time() - max_age_s
+        for w in wallets:
+            acts = _get(DATA, "/activity", user=w, limit=30) or []
+            for a in acts:
+                if a.get("type") != "TRADE" or a.get("side") != "SELL":
+                    continue
+                if float(a.get("timestamp") or 0) < cutoff:
+                    continue
+                token = a.get("asset") or ""
+                if not token:
+                    continue
+                out.append({
+                    "target": w,
+                    "token_id": token,
+                    "their_price": float(a.get("price") or 0),
+                })
+        return out
+
+    return detect
+
+
 def resolve(condition_id: str) -> Optional[int]:
     """Winning outcome index for a resolved market, else None (still open)."""
     if not condition_id:

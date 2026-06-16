@@ -15,7 +15,8 @@ def _trade(copy_id="t1"):
                 outcome_index=0, category="research", their_price=0.50, their_usd=1000)
 
 
-def _runner(tmp, wallets=None, watchlist_path=None, feed=None, on_cycle=None):
+def _runner(tmp, wallets=None, watchlist_path=None, feed=None, on_cycle=None,
+            exits=None, bid=None):
     feed = feed if feed is not None else [_trade()]
     return CopyPaperRunner(
         ledger_path=os.path.join(tmp, "l.jsonl"),
@@ -24,9 +25,26 @@ def _runner(tmp, wallets=None, watchlist_path=None, feed=None, on_cycle=None):
         detector_factory=lambda w, age, usd: (lambda: feed),
         book_fetcher=lambda t: [(0.51, 10000)],
         resolver=lambda c: None,
+        exit_detector_factory=lambda w, age: (lambda: exits or []),
+        bid_fetcher=lambda t: (bid if bid is not None else []),
         on_cycle=on_cycle,
         cycle_interval_s=0,
     )
+
+
+def test_exit_following_closes_open_copy_when_target_sells():
+    with tempfile.TemporaryDirectory() as d:
+        # cycle 1: open a copy of 0xT's BUY on TOK
+        r = _runner(d, wallets=["0xT"])
+        assert r.run_once().opened == 1
+        # cycle 2: target sells TOK; no fresh buys -> we exit at the 0.60 bid
+        r._detector_factory = lambda w, age, usd: (lambda: [])
+        r._exit_detector_factory = lambda w, age: (
+            lambda: [{"target": "0xT", "token_id": "TOK", "their_price": 0.60}])
+        r._bid_fetcher = lambda t: [(0.60, 5000)]
+        s = r.run_once()
+        assert s.exited == 1 and not r.ledger.open_positions()
+        assert r.ledger.closed_positions()[0].exited_early is True
 
 
 def test_run_once_opens_position_with_explicit_wallets():
