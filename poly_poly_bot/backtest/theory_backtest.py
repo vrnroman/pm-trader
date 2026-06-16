@@ -202,6 +202,17 @@ def calibrate(args):
                                 lookback_ts=0.0)
         fwd_rois[w] = _forward_copy_rois(fw, resolutions, args.min_usd)
 
+    # diagnostics: why some theories can't fire in this (recent, mostly-open) sample
+    n_skill = sum(1 for c in ctxs.values() if c.metrics.n_closed >= 10)
+    n_curve = sum(1 for c in ctxs.values() if c.curve.n > 0)
+    n_capture = sum(1 for c in ctxs.values() if c.n_capture > 0)
+    n_ls = sum(1 for c in ctxs.values()
+               if sum(1 for b in c.buys if b.won is not None and 0.05 <= b.price <= 0.40) >= 8)
+    n_trips = sum(1 for c in ctxs.values() if len(c.round_trips) >= 8)
+    print(f"diagnostics: {len(ctxs)} ctxs | >=10 closed: {n_skill} | curve pts: {n_curve} "
+          f"| capture: {n_capture} | >=8 resolved-longshot buys: {n_ls} | >=8 round-trips: {n_trips}",
+          file=sys.stderr)
+
     scored = [w for w in ctxs if fwd_rois.get(w)]  # wallets with forward copy activity
     pop_rois = [r for w in scored for r in fwd_rois[w]]
     pop_mean = st.mean(pop_rois) if pop_rois else 0.0
@@ -235,7 +246,8 @@ def _variant_grid():
     """A small stricter-threshold grid per theory for the calibration sweep."""
     return {
         "1a": [("default", {}), ("strict", {"min_bet": 5000, "min_hours": 48})],
-        "1b": [("default", {}), ("t15", {"min_tstat": 15}), ("t20", {"min_tstat": 20})],
+        "1b": [("default", {}), ("t2", {"min_tstat": 2}), ("t3", {"min_tstat": 3}),
+               ("t5", {"min_tstat": 5})],
         "1c": [("default", {}), ("cap2.5", {"min_capture_cents": 2.5})],
         "1d": [("default", {}), ("sharpe.5", {"min_sharpe": 0.5, "max_drawdown_frac": 0.3})],
         "1e": [("default", {}), ("edge.1", {"min_edge": 0.10, "min_n": 12})],

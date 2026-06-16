@@ -237,7 +237,9 @@ REGISTRY: dict[str, Theory] = {
                  {"min_bet": 2000.0, "min_hours": 24.0, "min_count": 1},
                  "news/geo early insider", needs_resolution=True),
     "1b": Theory("1b", theory_1b_skill,
-                 {"min_capital": 5000.0, "min_closed": 10, "min_tstat": 10.0},
+                 # calibration run1: tstat>=10 flagged 0; tstat~3 → +0.64 copy-ROI,
+                 # 85% hit, ~0.9/day, +0.30 vs a survivorship-inflated baseline.
+                 {"min_capital": 5000.0, "min_closed": 10, "min_tstat": 3.0},
                  "consistent closed-position skill"),
     "1c": Theory("1c", theory_1c_copyable,
                  {"min_capture_cents": 1.5, "min_n": 4, "min_tstat": 10.0},
@@ -250,10 +252,12 @@ REGISTRY: dict[str, Theory] = {
                  {"longshot_lo": 0.05, "longshot_hi": 0.40, "min_n": 8, "min_edge": 0.05},
                  "longshot calibration edge", needs_resolution=True),
     "1f": Theory("1f", theory_1f_swing,
-                 {"min_n": 8, "min_win_rate": 0.55, "min_mean_roi": 0.05},
+                 # run1 win.6: +0.55 copy-ROI, 84% hit, ~1.8/day, +0.20 vs baseline
+                 {"min_n": 8, "min_win_rate": 0.60, "min_mean_roi": 0.08},
                  "early-exit swing trader"),
     "1g": Theory("1g", theory_1g_specialist,
-                 {"min_n": 10, "min_roi": 0.15, "min_frac": 0.5},
+                 # run1 roi.3: +0.79 copy-ROI, 85% hit, ~0.5/day, +0.45 (best theory)
+                 {"min_n": 10, "min_roi": 0.30, "min_frac": 0.5},
                  "category specialist"),
     "1h": Theory("1h", theory_1h_catalyst,
                  {"min_lead_cents": 4.0, "min_n": 4},
