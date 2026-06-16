@@ -348,6 +348,8 @@ def _discovery_loop():
         min_tstat=CONFIG.wallet_discovery_min_tstat,
         drop_capture_cents=CONFIG.wallet_discovery_drop_capture_cents,
         auto_remove=CONFIG.wallet_discovery_auto_remove,
+        enabled_theories=frozenset(
+            t.strip() for t in CONFIG.wallet_discovery_theories.split(",") if t.strip()),
     )
     runner = DiscoveryRunner(
         config=cfg,
