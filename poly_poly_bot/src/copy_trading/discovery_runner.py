@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import ctypes
 import gc
+import html
 import json
 import logging
 import os
@@ -68,29 +69,28 @@ def _profile_url(wallet: str) -> str:
 
 
 def format_find(e: Eval, verdict=None) -> str:
-    """Telegram body for a newly-qualified wallet (with optional Claude verdict)."""
+    """Telegram body for a newly-qualified wallet (HTML parse mode; optional Claude verdict)."""
     lines = [
-        "🔍 *New copyable wallet*",
-        f"`{e.wallet}`",
+        "🔍 <b>New copyable wallet</b> — added to paper watchlist, measuring now",
+        f"<code>{e.wallet}</code>",
     ]
     if e.flagged_by:
-        lines.append(f"• flagged by *{', '.join(e.flagged_by)}*")
+        lines.append(f"Flagged by <b>{', '.join(e.flagged_by)}</b>")
         if e.reason:
-            lines.append(f"  _{e.reason}_")
-    lines += [
-        f"• capture *{e.capture_cents:+.2f}¢*/trade (hit {e.hit_rate:.0%}, n={e.n})",
-        f"• ROI {e.roi:+.0%}  ·  t-stat {e.tstat:.1f}  ·  tail {e.tail_ratio:.0%}",
-    ]
+            lines.append(f"<i>{html.escape(e.reason)}</i>")
+    lines.append(
+        f"Edge: <b>{e.capture_cents:+.2f}¢</b>/trade · hit {e.hit_rate:.0%} · "
+        f"ROI {e.roi:+.0%} · t-stat {e.tstat:.1f} (n={e.n}) · tail {e.tail_ratio:.0%}"
+    )
     if e.curve_sharpe or e.net_pnl:
-        lines.append(f"• curve sharpe {e.curve_sharpe:+.2f}  ·  maxDD {e.curve_drawdown:.0%}")
+        lines.append(f"Curve: sharpe {e.curve_sharpe:+.2f} · maxDD {e.curve_drawdown:.0%}")
     if verdict is not None:
         lines.append(
-            f"• 🤖 Claude: *{verdict.verdict}* (insider {verdict.insider_likelihood}, "
+            f"🤖 Claude: <b>{verdict.verdict}</b> (insider {verdict.insider_likelihood}, "
             f"copyable {'yes' if verdict.copyable else 'no'}, conf {verdict.confidence:.0%})"
         )
-        lines.append(f"  _{verdict.reasoning}_")
-    lines.append("• added to paper watchlist — measuring now")
-    lines.append(f"Analyze: {_profile_url(e.wallet)}")
+        lines.append(f"<i>{html.escape(verdict.reasoning)}</i>")
+    lines.append(f"👤 {_profile_url(e.wallet)}")
     return "\n".join(lines)
 
 
@@ -183,7 +183,7 @@ class DiscoveryRunner:
             top = ", ".join(f"{e.wallet[:8]}…({e.capture_cents:+.1f}¢)"
                             for e in result.watchlist[:5])
             self._send(
-                f"🔍 *Discovery initialized* — {len(result.watchlist)} wallets on "
+                f"🔍 <b>Discovery initialized</b> — {len(result.watchlist)} wallets on "
                 f"the paper watchlist.\nTop: {top or '—'}"
             )
         else:

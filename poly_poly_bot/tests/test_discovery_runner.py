@@ -100,7 +100,7 @@ def test_format_find_shows_theory_reasons():
     e = Eval(wallet="0xABC", capture_cents=2.0, tstat=12.0,
              flagged_by=("1f", "1g"), reason="early-exit swing: 10 round-trips")
     msg = format_find(e)
-    assert "flagged by *1f, 1g*" in msg and "early-exit swing" in msg
+    assert "Flagged by <b>1f, 1g</b>" in msg and "early-exit swing" in msg
 
 
 def test_llm_review_annotates_only_new_qualifiers_when_enabled(tmp_path):
@@ -141,7 +141,7 @@ def test_llm_review_annotates_only_new_qualifiers_when_enabled(tmp_path):
 
     assert reviewed == ["0xB"]                  # only the new qualifier
     assert len(sink) == 1
-    assert "Claude: *follow*" in sink[0] and "steady curve" in sink[0]
+    assert "Claude: <b>follow</b>" in sink[0] and "steady curve" in sink[0]
 
 
 def test_llm_review_off_by_default_leaves_ping_clean(tmp_path):

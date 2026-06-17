@@ -29,6 +29,13 @@ from typing import Callable, Optional
 # Fill simulation (pure)
 # --------------------------------------------------------------------------- #
 
+# Floor on a credible fill price, as a fraction of the target's price. A
+# same-side ask far below what the target just paid is stale/erroneous book
+# data (a real CLOB ask under the market is arbitraged instantly), so we don't
+# fill there. Shared by the live fill simulator and the dust-position guard.
+MIN_FILL_FRAC = 0.5
+
+
 @dataclass
 class FillSim:
     avg_price: float      # our realised average entry price (0 if unfilled)
@@ -43,6 +50,7 @@ def simulate_copy_fill(
     copy_usd: float,
     *,
     max_slippage_bps: int = 200,
+    min_fill_frac: float = MIN_FILL_FRAC,
 ) -> FillSim:
     """Simulate copying a BUY by walking the live asks book.
 
@@ -50,12 +58,22 @@ def simulate_copy_fill(
     budget is filled or the price exceeds ``their_price * (1 + max_slippage)``
     (we don't chase beyond that). Captures the realistic adverse-selection cost
     of acting after the target.
+
+    Levels priced below ``their_price * min_fill_frac`` are skipped as stale or
+    erroneous book data: a credible same-side ask can't sit far under the price
+    the target just paid (a real CLOB ask below the market would be arbitraged
+    instantly). Without this floor a single dust ask (e.g. 0.001 under a 0.62
+    market) gets swept, inflating the share count and producing a nonsensical
+    favourable "drag" of tens of thousands of dollars.
     """
     if their_price <= 0 or copy_usd <= 0 or not asks:
         return FillSim(0.0, 0.0, 0.0, 0)
     max_price = their_price * (1 + max_slippage_bps / 10000.0)
+    min_price = their_price * min_fill_frac
     spent = shares = 0.0
     for price, size in sorted(asks):
+        if price < min_price:
+            continue  # non-credible deep-discount level — skip, don't sweep it
         if price > max_price or price >= 1.0 or size <= 0:
             break
         take_usd = min(copy_usd - spent, price * size)
@@ -90,6 +108,10 @@ class PaperPosition:
     spent: float
     drag_bps: int
     opened_ts: float
+    # human-readable context for notifications (optional; default-safe so old
+    # ledger lines that predate these keys still load):
+    title: str = ""         # market question, e.g. "Will BTC hit $100k in 2025?"
+    slug: str = ""          # PM event slug -> polymarket.com/event/<slug>
     # filled on resolution OR on following the target's exit:
     closed: bool = False
     won: Optional[bool] = None
@@ -188,6 +210,9 @@ class CycleSummary:
     skipped_unfilled: int = 0
     resolved: int = 0
     exited: int = 0  # closed by following the target's SELL
+    # the positions that resolved *this* cycle, so callers can name them in a
+    # notification instead of only reporting cumulative ledger aggregates.
+    resolved_positions: list["PaperPosition"] = field(default_factory=list)
 
 
 class CopyPaperEngine:
@@ -237,6 +262,7 @@ class CopyPaperEngine:
                 copy_id=cid, target=tr["target"], condition_id=tr["condition_id"],
                 token_id=tr["token_id"], outcome_index=int(tr["outcome_index"]),
                 category=tr.get("category", "other"), their_price=tr["their_price"],
+                title=tr.get("title", ""), slug=tr.get("slug", ""),
                 entry_price=fill.avg_price, shares=fill.shares, spent=fill.spent,
                 drag_bps=fill.drag_bps, opened_ts=now,
             ))
@@ -266,6 +292,7 @@ class CopyPaperEngine:
                 continue
             pos.realize(won=(winner == pos.outcome_index), now=now)
             s.resolved += 1
+            s.resolved_positions.append(pos)
         if s.resolved or s.exited:
             self.ledger.save()
         return s
@@ -275,16 +302,36 @@ class CopyPaperEngine:
 # Reporting
 # --------------------------------------------------------------------------- #
 
+def is_dust_fill(p: PaperPosition, min_fill_frac: float = MIN_FILL_FRAC) -> bool:
+    """True if a position's recorded entry is an implausible deep-discount fill.
+
+    These can only exist in ledgers written before ``simulate_copy_fill`` grew
+    its price floor — a $50 budget swept a stale ~0.001 ask into ~50k shares,
+    which is what made the cumulative drag read ``-$30000``. Excluding them keeps
+    the cumulative stats and notifications honest without rewriting history.
+    """
+    return (
+        p.their_price > 0
+        and 0 < p.entry_price < p.their_price * min_fill_frac
+    )
+
+
 def report(ledger: PaperCopyLedger) -> dict:
-    closed = ledger.closed_positions()
+    open_all = ledger.open_positions()
+    closed_all = ledger.closed_positions()
+    open_pos = [p for p in open_all if not is_dust_fill(p)]
+    closed = [p for p in closed_all if not is_dust_fill(p)]
+    quarantined = (len(open_all) - len(open_pos)) + (len(closed_all) - len(closed))
     spent = sum(p.spent for p in closed)
     pnl = sum(p.pnl for p in closed)
     ideal = sum(p.ideal_pnl for p in closed)
     wins = sum(1 for p in closed if p.won)
     drags = [p.drag_bps for p in closed]
     return {
-        "open": len(ledger.open_positions()),
+        "open": len(open_pos),
         "closed": len(closed),
+        # positions excluded as pre-fix dust fills (0 once the ledger is clean):
+        "quarantined": quarantined,
         "capital_deployed": round(spent, 2),
         "realized_pnl": round(pnl, 2),
         "realized_roi": round(pnl / spent, 4) if spent else 0.0,
@@ -293,3 +340,72 @@ def report(ledger: PaperCopyLedger) -> dict:
         "avg_drag_bps": round(sum(drags) / len(drags), 1) if drags else 0.0,
         "hit_rate": round(wins / len(closed), 4) if closed else 0.0,
     }
+
+
+# --------------------------------------------------------------------------- #
+# Telegram formatting (presentation; HTML parse mode)
+# --------------------------------------------------------------------------- #
+
+def _esc(s: str) -> str:
+    """Minimal HTML escape for Telegram (parse_mode=HTML)."""
+    return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _short_wallet(w: str) -> str:
+    w = w or ""
+    return f"{w[:6]}…{w[-4:]}" if len(w) > 12 else (w or "—")
+
+
+def _signed_usd(x: float) -> str:
+    """'+$69' / '-$50' — sign before the dollar sign so it reads as money."""
+    return f"{'+' if x >= 0 else '-'}${abs(x):,.0f}"
+
+
+def format_resolution_telegram(resolved: list[PaperPosition], rep: dict) -> str:
+    """Build the human-readable Telegram message for resolved paper copies.
+
+    One block per market that just settled — what it was (the question), whether
+    the copy won or lost, the cost→payout economics, the execution drag we ate,
+    and a link to dig deeper on Polymarket — followed by a single labelled line
+    of cumulative-ledger context. Replaces the old cryptic one-liner that mixed
+    a per-cycle event count with whole-ledger aggregates.
+    """
+    # Skip pre-fix dust fills: a stale open position can still resolve after the
+    # fix deploys, and its garbage entry price would render a nonsensical block.
+    shown = [p for p in resolved if not is_dust_fill(p)]
+    stale = len(resolved) - len(shown)
+    n = len(shown)
+    plural = "s" if n != 1 else ""
+    lines = [f"📋 <b>Paper-copy</b> — {n} market{plural} resolved"]
+
+    for p in shown:
+        won = p.won
+        verdict = "✅ WON" if won else "❌ LOST"
+        title = _esc(p.title) or f"({p.category} market)"
+        payout = p.spent + p.pnl  # = shares if won else 0
+        roi = (p.pnl / p.spent * 100.0) if p.spent else 0.0
+        lines.append("")  # blank line separates blocks
+        lines.append(f'{verdict} · "{title}"')
+        lines.append(
+            f"copied <code>{_short_wallet(p.target)}</code> · "
+            f"${p.spent:,.0f} → ${payout:,.0f} ({_signed_usd(p.pnl)}, {roi:+.0f}%) · "
+            f"entry {p.entry_price:.3f} vs their {p.their_price:.3f} ({p.drag_bps:+d}bps drag)"
+        )
+        if p.slug:
+            lines.append(f"🔗 https://polymarket.com/event/{p.slug}")
+
+    if stale:
+        lines.append("")
+        lines.append(
+            f"⚠️ {stale} stale dust-fill position{'s' if stale != 1 else ''} "
+            "excluded (pre-fix data)"
+        )
+
+    lines.append("")
+    lines.append(
+        "📊 <b>Ledger:</b> "
+        f"{rep['closed']} closed · realized {_signed_usd(rep['realized_pnl'])} "
+        f"(ROI {rep['realized_roi'] * 100:+.0f}%) · hit {rep['hit_rate'] * 100:.0f}% · "
+        f"avg drag {rep['avg_drag_bps']:+.0f}bps · {rep['open']} open"
+    )
+    return "\n".join(lines)
