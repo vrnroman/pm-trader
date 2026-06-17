@@ -30,6 +30,7 @@ Attribution & double-counting rules (see ``build_unified``):
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
@@ -39,6 +40,49 @@ from src.copy_trading.pnl import OpenPositionPnl
 _UNKNOWN_WALLET = "(unknown)"
 UNTAGGED_A = "untagged-A"
 UNTAGGED_B = "untagged-B"
+
+# Resolved-sample maturity bands — "is there enough *settled* paper data to
+# judge this wallet/theory yet?" A freshly-enabled theory (1a/1e/1j) looks like
+# noise until enough of its copies resolve, so we annotate by settled count.
+MATURITY_THIN = 5      # below this: too few resolved bets to read the ROI as signal
+MATURITY_READY = 15    # at/above this: enough settled data to consider promoting
+
+
+def wilson_lower_bound(wins: int, n: int, z: float = 1.96) -> Optional[float]:
+    """Lower bound of the Wilson score interval for a hit-rate over ``n``
+    resolved bets (None when n==0). Honest about small samples: 3/3 wins gives
+    ~0.44, not 1.0 — so a tiny lucky streak doesn't read as a proven edge. The
+    band tightens toward the point estimate as ``n`` grows."""
+    if n <= 0:
+        return None
+    phat = wins / n
+    denom = 1.0 + z * z / n
+    centre = phat + z * z / (2 * n)
+    margin = z * math.sqrt((phat * (1 - phat) + z * z / (4 * n)) / n)
+    return max(0.0, (centre - margin) / denom)
+
+
+def maturity_tag(n_closed: int) -> str:
+    """A glyph for how much *settled* data backs a wallet/theory's numbers."""
+    if n_closed < MATURITY_THIN:
+        return "\U0001f9ca"   # 🧊 thin — too few resolved bets to trust
+    if n_closed < MATURITY_READY:
+        return "\U0001f331"   # 🌱 building
+    return "✅"           # ✅ enough settled data
+
+
+def promotion_verdict(net_pnl: float, n_closed: int) -> tuple[str, str]:
+    """(verdict, reason) for the promote-paper-wallet-to-real-money decision.
+
+    Gates on *settled sample size* + *positive measured PnL* — deliberately NOT
+    on hit-rate, because a +EV longshot theory (e.g. 1e) wins well under 50% of
+    the time by design and a hit-rate gate would wrongly hold it. Advisory only;
+    promotion stays a manual ``.env`` edit the owner makes."""
+    if n_closed < MATURITY_READY:
+        return ("HOLD", f"only {n_closed} resolved (need ≥{MATURITY_READY})")
+    if net_pnl <= 0:
+        return ("HOLD", "paper PnL not positive")
+    return ("PROMOTE-READY", f"{n_closed} resolved, ${net_pnl:+.0f} paper")
 
 
 # --------------------------------------------------------------------------- #

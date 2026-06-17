@@ -252,6 +252,8 @@ def _handle_pnl():
     Strategy labels are ``A:1a``/``A:1b``/``A:1c`` (executor tiers) and
     ``B:1a``..``B:1j`` (discovery theories the paper-copied wallet was flagged
     by), plus ``untagged-*`` for un-attributed positions."""
+    from src.copy_trading import pnl_unified as u
+
     unified, a_wallets, b_wallets, n_unpriced = _compute_unified()
 
     all_w = a_wallets + b_wallets
@@ -273,7 +275,7 @@ def _handle_pnl():
         lines.append(f"  ⚠ {n_unpriced} position(s) unpriced (no live quote)")
 
     lines.append("")
-    lines.append("<b>By strategy</b>  <i>(net | realized/unrealized | ROI | wallets | closed/open)</i>")
+    lines.append("<b>By strategy</b>  <i>(🧊/🌱/✅ settled | net | r/u | ROI | wallets | closed/open | hit lo)</i>")
     if not unified.strategies:
         lines.append("  (no positions yet)")
     for sp in unified.strategies:
@@ -283,9 +285,16 @@ def _handle_pnl():
             pnl_str = f"r ${sp.realized_pnl:+.0f}/u ${sp.unrealized_pnl:+.0f}"
         else:
             pnl_str = f"r ${sp.realized_pnl:+.0f}"
+        # Maturity glyph + Wilson hit-rate lower bound so a tiny-n fluke (common
+        # for the freshly-enabled 1a/1e/1j) doesn't read as a proven edge.
+        tag = u.maturity_tag(sp.n_closed)
+        lo = u.wilson_lower_bound(sp.wins, sp.wins + sp.losses)
+        hit_str = ""
+        if lo is not None:
+            hit_str = f" · hit {sp.wins / (sp.wins + sp.losses):.0%} (lo {lo:.0%})"
         lines.append(
-            f"<code>{_esc(sp.label)}</code>  ${sp.net_pnl:+.2f}  ({pnl_str}, {roi_str})  "
-            f"— {sp.n_wallets}w {sp.n_closed}c/{sp.n_open}o"
+            f"{tag} <code>{_esc(sp.label)}</code>  ${sp.net_pnl:+.2f}  ({pnl_str}, {roi_str})  "
+            f"— {sp.n_wallets}w {sp.n_closed}c/{sp.n_open}o{hit_str}"
         )
 
     lines.append("")
@@ -297,11 +306,21 @@ def _handle_pnl():
 
 
 def _wallet_line(w) -> str:
-    """One leaderboard row: addr, net P&L, ROI, win/loss record."""
+    """One leaderboard row: maturity glyph, addr, net P&L, ROI, win/loss record,
+    and — for paper (System B) wallets — a PROMOTE-READY/HOLD verdict that gates
+    the manual promote-to-real-money call on settled sample size + positive PnL."""
+    from src.copy_trading import pnl_unified as u
+
     roi = w.roi
     roi_str = f"ROI {roi:+.0%}" if roi is not None else "ROI n/a"
     rec = f", {w.wins}W/{w.losses}L" if (w.wins + w.losses) else ""
-    return f"<code>{_short_wallet(w.wallet)}</code> ${w.net_pnl:+.2f} ({roi_str}{rec})"
+    tag = u.maturity_tag(w.n_closed)
+    verdict = ""
+    if w.system == "B":
+        v, reason = u.promotion_verdict(w.net_pnl, w.n_closed)
+        verdict = f" → {v}: {reason}"
+    return (f"{tag} <code>{_short_wallet(w.wallet)}</code> "
+            f"${w.net_pnl:+.2f} ({roi_str}{rec}){verdict}")
 
 
 def _handle_wallets():

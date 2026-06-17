@@ -7,12 +7,16 @@ import pytest
 from src.copy_trading.copy_paper import PaperPosition
 from src.copy_trading.pnl import OpenPositionPnl
 from src.copy_trading.pnl_unified import (
+    MATURITY_READY,
     UNTAGGED_A,
     UNTAGGED_B,
     aggregate_system_a,
     aggregate_system_b,
     best_worst,
     build_unified,
+    maturity_tag,
+    promotion_verdict,
+    wilson_lower_bound,
 )
 
 
@@ -181,3 +185,38 @@ def test_best_worst_roi_excludes_undefined_roi():
     bw = best_worst(b, k=3)
     assert bw.by_roi_best == [] and bw.by_roi_worst == []
     assert [w.wallet for w in bw.by_pnl_best] == ["0xopen"]
+
+
+# --------------------------------------------------------------------------- #
+# Maturity / confidence annotations (promote-vs-noise observability)
+# --------------------------------------------------------------------------- #
+
+def test_wilson_lower_bound_is_honest_about_small_n():
+    assert wilson_lower_bound(0, 0) is None              # no data
+    # a 3/3 lucky streak must NOT look like a proven edge
+    assert wilson_lower_bound(3, 3) < 0.5
+    # the band tightens toward the point estimate as n grows
+    lo_small = wilson_lower_bound(8, 10)
+    lo_big = wilson_lower_bound(80, 100)
+    assert lo_small < lo_big < 0.80
+    # bounded to [0, point estimate]
+    assert 0.0 <= wilson_lower_bound(1, 20) <= 0.05
+
+
+def test_maturity_tag_bands_on_settled_count():
+    assert maturity_tag(0) == maturity_tag(4) == "\U0001f9ca"     # 🧊 thin
+    assert maturity_tag(5) == maturity_tag(14) == "\U0001f331"    # 🌱 building
+    assert maturity_tag(MATURITY_READY) == maturity_tag(40) == "✅"
+
+
+def test_promotion_verdict_gates_on_sample_size_then_pnl_not_hitrate():
+    # too few resolved -> HOLD regardless of PnL
+    v, reason = promotion_verdict(net_pnl=120.0, n_closed=6)
+    assert v == "HOLD" and "resolved" in reason
+    # enough resolved but not profitable -> HOLD
+    v, reason = promotion_verdict(net_pnl=-3.0, n_closed=20)
+    assert v == "HOLD" and "positive" in reason
+    # enough resolved + positive paper PnL -> ready (even a sub-50% longshot
+    # theory qualifies: the gate is PnL, not hit-rate)
+    v, reason = promotion_verdict(net_pnl=40.0, n_closed=MATURITY_READY)
+    assert v == "PROMOTE-READY"
