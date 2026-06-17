@@ -1,4 +1,8 @@
-"""Unified configuration for all three strategies."""
+"""Unified configuration for the copy-trading bot (Strategy #1).
+
+The Weather (#2) and Tennis Arb (#3) strategies were decommissioned on
+2026-06-17; see DECOMMISSIONED.md to restore them from git history.
+"""
 
 from __future__ import annotations
 import os
@@ -109,8 +113,6 @@ _s1a_enabled = _opt_bool("STRATEGY_1A_ENABLED", bool(os.environ.get("STRATEGY_1A
 _s1b_enabled = _opt_bool("STRATEGY_1B_ENABLED", bool(os.environ.get("STRATEGY_1B_WALLETS", "").strip()))
 _s1c_enabled = _opt_bool("STRATEGY_1C_ENABLED", False)
 _strategy1_enabled = _s1a_enabled or _s1b_enabled or _s1c_enabled
-_strategy2_enabled = _opt_bool("STRATEGY2_ENABLED", False)
-_strategy3_enabled = _opt_bool("STRATEGY3_ENABLED", False)
 
 _user_addresses = _load_user_addresses()
 
@@ -125,8 +127,6 @@ class Config:
 
     # --- Strategy toggles ---
     strategy1_enabled: bool = _strategy1_enabled
-    strategy2_enabled: bool = _strategy2_enabled
-    strategy3_enabled: bool = _strategy3_enabled
 
     # --- Global ---
     preview_mode: bool = _opt_bool("PREVIEW_MODE", True)
@@ -157,65 +157,6 @@ class Config:
     max_copies_per_market_side: int = _opt_int("MAX_COPIES_PER_MARKET_SIDE", 2)
     redeem_interval_hours: float = _opt_float("REDEEM_INTERVAL_HOURS", 0.5)
     trade_monitor_mode: str = _optional("TRADE_MONITOR_MODE", "data-api")
-
-    # --- Strategy 2: Weather Betting ---
-    cities_to_bet: str = _optional("CITIES_TO_BET", "nyc,chicago,denver,dallas")
-    days_in_advance: int = _opt_int("DAYS_IN_ADVANCE", 4)
-    min_edge: float = _opt_float("MIN_EDGE", 0.10)
-    bet_size: float = _opt_float("BET_SIZE", 10.0)
-    max_bets_per_city: int = _opt_int("MAX_BETS_PER_CITY", 2)
-    schedule_hour_sgt: int = _opt_int("SCHEDULE_HOUR_SGT", 15)
-    schedule_minute_sgt: int = _opt_int("SCHEDULE_MINUTE_SGT", 0)
-
-    # --- Strategy 3: Tennis Arb (Smarkets-only) ---
-    tennis_min_divergence: float = _opt_float("TENNIS_MIN_DIVERGENCE", 0.06)
-    # After Gamma's edge clears tennis_min_divergence, we refetch the live
-    # CLOB ask (which is what we'd actually pay) and recompute the edge.
-    # If the live edge is still ≥ this floor, we fire — otherwise the
-    # signal is dropped because Gamma's last-trade price was stale.
-    tennis_revalidation_min_divergence: float = _opt_float(
-        "TENNIS_REVALIDATION_MIN_DIVERGENCE", 0.06
-    )
-    tennis_max_bet_size: float = _opt_float("TENNIS_MAX_BET_SIZE", 165.0)
-    tennis_kelly_fraction: float = _opt_float("TENNIS_KELLY_FRACTION", 0.3)
-    tennis_scan_interval: int = _opt_int("TENNIS_SCAN_INTERVAL", 20)
-    # Per-scan discovery-cache path (Batch 3). When True, the scanner reads
-    # the pre-warmed PM ↔ Smarkets cache and prices off live CLOB books in
-    # one batched call, eliminating per-scan Gamma and the revalidation
-    # dance. Flip to False to fall back to the legacy Gamma-per-scan path
-    # without redeploying.
-    tennis_use_discovery_cache: bool = _opt_bool("TENNIS_USE_DISCOVERY_CACHE", True)
-    tennis_tournaments: str = _optional("TENNIS_TOURNAMENTS", "ATP,WTA")
-    tennis_min_polymarket_volume: float = _opt_float("TENNIS_MIN_POLYMARKET_VOLUME", 20000)
-    tennis_min_polymarket_liquidity: float = _opt_float("TENNIS_MIN_POLYMARKET_LIQUIDITY", 5000)
-    tennis_take_profit_ratio: float = _opt_float("TENNIS_TAKE_PROFIT_RATIO", 3.0)
-
-    # --- Strategy 3: dual-sharp REST stream + RTDS (event-driven path) ---
-    # Sharp provider selection. Allowed: betsapi | pinnacle | betsapi+pinnacle
-    # | smarkets | betsapi+pinnacle+smarkets. Default is dual-sharp so we
-    # collect a week of BetsAPI-vs-Pinnacle lead-ms telemetry before flipping
-    # to a single-provider primary (rollout §12 step 7).
-    tennis_sharp_provider: str = _optional("TENNIS_SHARP_PROVIDER", "betsapi+pinnacle")
-    # BetsAPI (primary REST 1Hz-per-event poller).
-    betsapi_token: str = _optional("BETSAPI_TOKEN", "")
-    betsapi_base_url: str = _optional("BETSAPI_BASE_URL", "https://api.b365api.com")
-    betsapi_poll_hz_per_event: float = _opt_float("BETSAPI_POLL_HZ_PER_EVENT", 1.0)
-    betsapi_primary_book: str = _optional("BETSAPI_PRIMARY_BOOK", "pinnacle")
-    # RapidAPI Pinnacle Odds (secondary REST ?since= delta poller).
-    pinnacle_rapidapi_key: str = _optional("PINNACLE_RAPIDAPI_KEY", "")
-    pinnacle_rapidapi_host: str = _optional(
-        "PINNACLE_RAPIDAPI_HOST", "pinnacle-odds.p.rapidapi.com"
-    )
-    pinnacle_poll_interval_ms: float = _opt_float("PINNACLE_POLL_INTERVAL_MS", 1000.0)
-    # Event-driven eval gates.
-    tennis_heartbeat_interval: float = _opt_float("TENNIS_HEARTBEAT_INTERVAL", 30.0)
-    # PM staleness gate: only fire if the sharp event is at least this many ms
-    # newer than the PM book we'd trade against (proves PM hasn't repainted).
-    min_pm_lag_ms: float = _opt_float("MIN_PM_LAG_MS", 100.0)
-    # Polymarket RTDS WebSocket book mirror. Non-negotiable kill switch: flip
-    # false to revert every PM read to the existing REST path.
-    polymarket_use_rtds: bool = _opt_bool("POLYMARKET_USE_RTDS", True)
-    polymarket_rtds_ws_url: str = _optional("POLYMARKET_RTDS_WS_URL", "")
 
     # --- Copy-paper harness (Strategy 1b validation; PREVIEW-only, no orders) ---
     # Forward measurement of execution-realistic copy PnL on watchlist wallets.

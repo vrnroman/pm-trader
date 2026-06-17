@@ -155,8 +155,6 @@ def s1_pnl_env(monkeypatch, tmp_path):
 
     monkeypatch.setattr(CONFIG, "data_dir", str(tmp_path))
     monkeypatch.setattr(CONFIG, "strategy1_enabled", True)
-    monkeypatch.setattr(CONFIG, "strategy2_enabled", False)
-    monkeypatch.setattr(CONFIG, "strategy3_enabled", False)
     monkeypatch.setattr(CONFIG, "preview_mode", False)
 
     buf: list[str] = []
@@ -184,7 +182,7 @@ def test_pnl_reports_real_unrealized_and_open_count(s1_pnl_env):
 
     assert "Unrealized:  $+20.00" in out
     assert "Open bets:   1" in out
-    assert "Open bets:   0" not in out.split("Strategy #2")[0]  # not in the S1 block
+    assert "Open bets:   0" not in out  # the one open position is reflected everywhere
 
 
 def test_pnl_reports_realized_from_ledger_with_record(s1_pnl_env):

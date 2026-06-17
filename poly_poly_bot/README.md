@@ -1,39 +1,44 @@
 # Poly Poly Bot v2.0
 
-Unified Polymarket trading bot with three independent strategies, running as a single Python process.
+Polymarket copy-trading bot (Strategy #1), running as a single Python process.
+
+> **Decommissioned strategies:** Weather Betting (#2) and Tennis Arbitrage (#3)
+> were removed on 2026-06-17. See [DECOMMISSIONED.md](DECOMMISSIONED.md) for how
+> to restore them from git history.
 
 ## Overview
 
 | Strategy | Description | Signal Source |
 |----------|-------------|---------------|
 | **1 - Copy Trading** | Copy insider/whale trades with tiered risk (1a geopolitical insiders, 1b leaderboard whales, 1c auto-detect new insiders) | Polymarket Data API / on-chain |
-| **2 - Weather Betting** | Bet on temperature markets using NOAA ensemble forecasts | NOAA GFS/GEFS API |
-| **3 - Tennis Arbitrage** | Exploit divergence between sharp bookmaker odds and Polymarket prices | The Odds API / scrapers |
+
+Alongside the live copy trader, two measurement-only harnesses run in
+background threads: the **copy-paper validation harness** (forward paper-copy
+PnL) and **wallet discovery** (continuously hunts copyable wallets into the
+paper watchlist). Neither places real orders.
 
 ## Architecture
 
 ```
 poly_poly_bot/
-  main.py              # Entry point — starts enabled strategies
+  main.py              # Entry point — starts Strategy #1 + measurement harnesses
   src/
-    config.py          # Unified .env configuration
+    config.py          # .env configuration
     config_validators.py
     models.py          # Pydantic data models
     utils.py           # Shared utilities
     logger.py          # Structured logging
     constants.py       # Contract addresses, ABIs
-    copy_trading/      # Strategy 1: risk manager, order executor, trade monitor
-    weather/           # Strategy 2: forecast, market matching, betting
-    strategies/        # Strategy 3: tennis arb logic
-    odds/              # Odds providers (oddspapi, scraper)
+    copy_trading/      # Strategy 1: risk manager, order executor, trade monitor,
+                       #             copy-paper harness, wallet discovery, geo scanner
+    basket_arb/        # Basket-arbitrage helpers
+    telegram_bot.py    # Telegram control surface
   tests/               # pytest test suite
   data/                # Runtime state (risk state, inventory, trade history)
   cache/               # API response caches
   results/             # Backtest results
   logs/                # Application logs
 ```
-
-All three strategies share the same configuration system, Telegram notifier, and CLOB client. Each strategy can be independently enabled/disabled via environment variables.
 
 ## Quick Start
 
@@ -89,24 +94,6 @@ All configuration lives in `.env`. See `.env.example` for the full reference.
 
 Each tier has independent: `WALLETS`, `COPY_PERCENTAGE`, `MAX_BET`, `MIN_BET`, `MAX_TOTAL_EXPOSURE`, `MAX_PRICE`, `MIN_TRADER_BET`.
 
-### Strategy 2: Weather Betting
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `STRATEGY2_ENABLED` | `false` | Enable weather strategy |
-| `CITIES_TO_BET` | `nyc,chicago,denver,dallas` | Cities to monitor |
-| `MIN_EDGE` | `0.10` | Minimum edge (10%) to place bet |
-| `BET_SIZE` | `10.0` | USD per bet |
-
-### Strategy 3: Tennis Arbitrage
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `STRATEGY3_ENABLED` | `false` | Enable tennis arb strategy |
-| `ODDSPAPI_API_KEY` | | The Odds API key |
-| `TENNIS_MIN_DIVERGENCE` | `0.10` | Minimum edge (10%) |
-| `TENNIS_KELLY_FRACTION` | `0.25` | Quarter-Kelly sizing |
-
 ## Testing
 
 ```bash
@@ -120,7 +107,7 @@ python -m pytest tests/ --cov=src --cov-report=term-missing
 make lint
 ```
 
-The test suite covers: config validators, utilities, risk managers (legacy and tiered), order verification, inventory tracking, trade store, trade queues, pattern detection, market price snapshots, strategy configuration, tennis arbitrage, and odds providers.
+The test suite covers: config validators, utilities, risk managers (legacy and tiered), order verification, inventory tracking, trade store, trade queues, market price snapshots, strategy configuration, copy-paper validation, wallet discovery, and the Telegram control surface.
 
 ## Deployment
 

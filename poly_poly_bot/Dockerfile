@@ -28,8 +28,7 @@ RUN pip install --no-cache-dir ruff && \
     python -c "\
 import main; \
 from src.copy_trading import runner, trade_executor, inventory, clob_client, order_executor; \
-from src.tennis import tennis_arb, order_placer, paper_book; \
-from src import telegram_bot, runtime_state; \
+from src import telegram_bot; \
 from src.copy_trading.trade_executor import _trade_store, _trade_queue, _inventory, _risk_manager, _tiered_risk, _strategy_config; \
 _trade_store(); _trade_queue(); _inventory(); _risk_manager(); _tiered_risk(); _strategy_config(); \
 print('SMOKE OK')" && \

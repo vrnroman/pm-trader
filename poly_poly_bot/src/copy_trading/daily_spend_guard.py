@@ -1,9 +1,8 @@
 """Global per-UTC-day spend guardrail.
 
-Single source of truth for "how much USD has the bot bet today, across every
-strategy". Used by Strategy 1 (copy trading, both legacy and tiered) and
-Strategy 3 (tennis arb) so a hard cap holds even when multiple strategies
-run side by side.
+Single source of truth for "how much USD has the bot bet today". Used by
+Strategy 1 (copy trading, both legacy and tiered) so a hard cap holds across
+all copy tiers running side by side.
 
 State persists to data/daily-spend.json with atomic writes and resets on
 UTC date rollover.
@@ -103,7 +102,7 @@ def can_spend(amount_usd: float) -> tuple[bool, str]:
 def record_spend(amount_usd: float, source: str) -> None:
     """Record a successful placement against the daily cap.
 
-    ``source`` is a free-form tag (e.g. ``"copy:1a"``, ``"tennis"``) used in
+    ``source`` is a free-form tag (e.g. ``"copy:1a"``, ``"copy:1b"``) used in
     the log line so the audit trail is self-describing.
     """
     if amount_usd <= 0:

@@ -32,10 +32,6 @@ def test_main_imports():
 @pytest.mark.parametrize(
     "module",
     [
-        "src.runtime_state",
-        "src.tennis.tennis_arb",
-        "src.tennis.paper_book",
-        "src.tennis.order_placer",
         "src.copy_trading.runner",
         "src.copy_trading.trade_executor",
         "src.copy_trading.trade_queue",

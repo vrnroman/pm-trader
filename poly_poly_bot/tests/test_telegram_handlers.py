@@ -9,13 +9,12 @@ exercised together.
 What we mock:
   - ``send_message``: captured into a list so we can assert what the user
     would have seen.
-  - The handler callbacks (``on_tennis_scan_request``,
-    ``on_refresh_clob_client``): set to MagicMock so we can confirm they
-    fire without standing up the real subsystems.
+  - The handler callbacks (``on_refresh_clob_client``): set to MagicMock so
+    we can confirm they fire without standing up the real subsystems.
 
-We do NOT mock the modules the handlers operate on (``runtime_state``,
-``set_private_key``) — those are pure in-process state changes and
-testing the real implementation is the point.
+We do NOT mock the modules the handlers operate on (``set_private_key``) —
+those are pure in-process state changes and testing the real implementation
+is the point.
 """
 
 from __future__ import annotations
@@ -39,23 +38,9 @@ def mock_callbacks(monkeypatch):
     """Replace the on_* callbacks so handlers run without real subsystems."""
     from src import telegram_bot
     cbs = MagicMock()
-    cbs.on_tennis_scan_request = MagicMock(return_value=[])
     cbs.on_refresh_clob_client = MagicMock()
-    cbs.on_predict_request = MagicMock(return_value=[])
-    monkeypatch.setattr(telegram_bot, "on_tennis_scan_request", cbs.on_tennis_scan_request)
     monkeypatch.setattr(telegram_bot, "on_refresh_clob_client", cbs.on_refresh_clob_client)
-    monkeypatch.setattr(telegram_bot, "on_predict_request", cbs.on_predict_request)
     return cbs
-
-
-@pytest.fixture(autouse=True)
-def _reset_runtime_state(tmp_path, monkeypatch):
-    """Point runtime_state at a tmp file and reset its in-memory cache."""
-    from src import runtime_state
-    monkeypatch.setattr(runtime_state, "_path", lambda: str(tmp_path / "rs.json"))
-    runtime_state._state = None
-    yield
-    runtime_state._state = None
 
 
 @pytest.fixture(autouse=True)
@@ -65,47 +50,6 @@ def _reset_private_key(monkeypatch):
     snap = config._private_key
     yield
     config._private_key = snap
-
-
-# ------------------------------------------------------------------
-# Mode toggle (the most user-facing safety lever)
-# ------------------------------------------------------------------
-
-def test_preview_3_switches_to_preview(captured_messages, mock_callbacks):
-    from src import runtime_state, telegram_bot
-    runtime_state.set_preview(3, False)  # start in live
-    telegram_bot._handle_command("/preview 3")
-    assert runtime_state.is_preview(3) is True
-    assert any("PREVIEW" in m for m in captured_messages)
-
-
-def test_live_3_requires_confirm(captured_messages, mock_callbacks):
-    """Without CONFIRM, the strategy must NOT flip live."""
-    from src import runtime_state, telegram_bot
-    telegram_bot._handle_command("/live 3")
-    assert runtime_state.is_preview(3) is True  # unchanged
-    assert any("CONFIRM" in m for m in captured_messages)
-
-
-def test_live_3_with_confirm_flips_live(captured_messages, mock_callbacks):
-    from src import runtime_state, telegram_bot
-    telegram_bot._handle_command("/live 3 CONFIRM")
-    assert runtime_state.is_preview(3) is False
-    assert any("LIVE" in m for m in captured_messages)
-
-
-def test_live_other_strategy_rejected(captured_messages, mock_callbacks):
-    """Only Strategy #3 is exposed; /live 1 and /live 2 must be rejected."""
-    from src import runtime_state, telegram_bot
-    telegram_bot._handle_command("/live 1 CONFIRM")
-    assert runtime_state.is_preview(1) is True  # unchanged
-
-
-def test_mode_command_lists_strategies(captured_messages, mock_callbacks):
-    from src import telegram_bot
-    telegram_bot._handle_command("/mode")
-    out = "\n".join(captured_messages)
-    assert "#1" in out and "#2" in out and "#3" in out
 
 
 # ------------------------------------------------------------------
@@ -183,22 +127,6 @@ def test_shutdown_with_confirm_schedules_exit(captured_messages, mock_callbacks)
     assert any("Shutting down" in m for m in captured_messages)
 
 
-# ------------------------------------------------------------------
-# Dispatch ordering regression
-# ------------------------------------------------------------------
-
-def test_tennis_pnl_dispatched_before_tennis(captured_messages, mock_callbacks, monkeypatch):
-    """The /tennis_pnl handler must win over /tennis since startswith matches both."""
-    from src import telegram_bot
-    pnl_called = MagicMock()
-    tennis_called = MagicMock()
-    monkeypatch.setattr(telegram_bot, "_handle_tennis_pnl", pnl_called)
-    monkeypatch.setattr(telegram_bot, "_handle_tennis", tennis_called)
-    telegram_bot._handle_command("/tennis_pnl")
-    pnl_called.assert_called_once()
-    tennis_called.assert_not_called()
-
-
 # ==================================================================
 # Full update-path tests (synthesized Telegram getUpdates payloads)
 #
@@ -231,19 +159,17 @@ def _update(text: str, chat_id=CHAT_ID, update_id: int = 1) -> dict:
 def test_update_from_wrong_chat_id_is_ignored(configured_chat, captured_messages, mock_callbacks):
     """A regression in the chat-id filter is the difference between a
     private bot and a public one. Pin it."""
-    from src import runtime_state, telegram_bot
-    runtime_state.set_preview(3, False)
-    telegram_bot._process_update(_update("/preview 3", chat_id=WRONG_CHAT_ID))
-    # State unchanged, no message sent.
-    assert runtime_state.is_preview(3) is False
+    from src import telegram_bot
+    telegram_bot._process_update(_update("/status", chat_id=WRONG_CHAT_ID))
+    # No message sent — the command never reached a handler.
     assert captured_messages == []
 
 
 def test_update_from_correct_chat_id_dispatches(configured_chat, captured_messages, mock_callbacks):
-    from src import runtime_state, telegram_bot
-    runtime_state.set_preview(3, False)
-    telegram_bot._process_update(_update("/preview 3"))
-    assert runtime_state.is_preview(3) is True
+    from src import telegram_bot
+    telegram_bot._process_update(_update("/status"))
+    # /status always emits a status message.
+    assert captured_messages != []
 
 
 def test_update_with_non_command_text_ignored(configured_chat, captured_messages, mock_callbacks, monkeypatch):
@@ -279,15 +205,13 @@ def test_handler_exception_does_not_kill_polling(configured_chat, captured_messa
 def test_update_with_string_chat_id_also_works(configured_chat, captured_messages, mock_callbacks):
     """Telegram sometimes sends chat.id as int, sometimes as str (bot
     libraries vary). The bot stringifies before compare — pin both."""
-    from src import runtime_state, telegram_bot
-    runtime_state.set_preview(3, False)
-    telegram_bot._process_update(_update("/preview 3", chat_id=int(CHAT_ID)))
-    assert runtime_state.is_preview(3) is True
+    from src import telegram_bot
+    telegram_bot._process_update(_update("/status", chat_id=int(CHAT_ID)))
+    assert captured_messages != []
 
 
 # ------------------------------------------------------------------
 # End-to-end: real Telegram payload → state mutation
-# These are the exact scenarios the user originally specified.
 # ------------------------------------------------------------------
 
 def test_e2e_setkey_clear(configured_chat, captured_messages, mock_callbacks):
@@ -307,216 +231,6 @@ def test_e2e_setkey_clear_without_confirm_no_op(configured_chat, captured_messag
     telegram_bot._process_update(_update("/setkey clear"))
     assert config.get_private_key() == "ab" * 32  # unchanged
     mock_callbacks.on_refresh_clob_client.assert_not_called()
-
-
-def test_e2e_preview_3_flips_runtime_state(configured_chat, captured_messages, mock_callbacks):
-    from src import runtime_state, telegram_bot
-    runtime_state.set_preview(3, False)
-    telegram_bot._process_update(_update("/preview 3"))
-    assert runtime_state.is_preview(3) is True
-
-
-def test_e2e_live_3_requires_confirm_via_full_path(configured_chat, captured_messages, mock_callbacks):
-    from src import runtime_state, telegram_bot
-    telegram_bot._process_update(_update("/live 3"))
-    assert runtime_state.is_preview(3) is True  # unchanged: no CONFIRM
-
-
-# ==================================================================
-# /tennis_pnl — report shape, mode filter, recent-window filter,
-# stale-void safety net
-# ==================================================================
-
-
-@pytest.fixture
-def tennis_pnl_env(monkeypatch, tmp_path):
-    """Stand up a paper book on disk and wire telegram_bot to read from it.
-
-    Returns (book, captured) — the live ``TennisPaperBook`` so tests can
-    backdate timestamps directly, and a list of strings the handler tried
-    to send (so each test can grep the rendered output).
-    """
-    from src import telegram_bot
-    from src.tennis.paper_book import TennisPaperBook
-
-    monkeypatch.setattr(telegram_bot.CONFIG, "strategy3_enabled", True)
-    monkeypatch.setattr(telegram_bot.CONFIG, "data_dir", str(tmp_path))
-
-    captured: list[str] = []
-    monkeypatch.setattr(telegram_bot, "send_message", lambda text, **_kw: captured.append(text))
-    # Skip live midpoint fetches — tests don't have network and we want
-    # determinism. ``None`` means the handler treats unrealized as zero,
-    # which is fine for shape/filter assertions.
-    monkeypatch.setattr(telegram_bot, "_fetch_midpoint", lambda _tid: None)
-    # Default: no resolve callback wired (tests can override).
-    monkeypatch.setattr(telegram_bot, "on_tennis_resolve_request", None)
-
-    book = TennisPaperBook(data_dir=str(tmp_path))
-    return book, captured
-
-
-def _open_signal(**kw):
-    """Build a minimal signal dict the paper book accepts."""
-    base = {
-        "strategy": "tennis_arb",
-        "condition_id": "0xMATCH1",
-        "token_id": "TOKA",
-        "market_id": "M1",
-        "polymarket_price": 0.40,
-        "bet_size": 10.0,
-        "player_a": "Alpha",
-        "player_b": "Bravo",
-        "target_player": "Alpha",
-        "outcome_label": "Alpha",
-        "sharp_prob": 0.65,
-        "divergence": 0.15,
-        "event_title": "Atp Test Cup",
-        "event_slug": "test-cup-2026",
-        "polymarket_url": "https://polymarket.com/event/test-cup-2026",
-        "tournament": "Atp Test",
-        "match_time": "2026-05-06T14:00:00+00:00",
-        "side": "A",
-        "live": False,
-    }
-    base.update(kw)
-    return base
-
-
-def test_tennis_pnl_shows_summary_lines(tennis_pnl_env):
-    """The header must show four summary numbers: Realized overall / today
-    / yesterday + Unrealized. The user explicitly asked for these four —
-    no per-event R/U breakdown anywhere in the message."""
-    book, captured = tennis_pnl_env
-    book.process_signal(_open_signal())  # one open position
-    from src import telegram_bot
-    telegram_bot._handle_command("/tennis_pnl")
-    out = "\n".join(captured)
-    assert "Realized overall:" in out
-    assert "Realized today:" in out
-    assert "Realized yesterday:" in out
-    assert "Unrealized:" in out
-    # No "Total PnL" line, no per-event R/U split.
-    assert "Total PnL:" not in out
-    assert "(R $" not in out
-
-
-def test_tennis_pnl_calls_resolve_callback_first(tennis_pnl_env, monkeypatch):
-    """Before reading the book, the handler must trigger a force-resolve
-    so any markets that settled since the last scheduled tick are picked
-    up. Otherwise the report shows stale OPEN rows for finished matches.
-    """
-    book, captured = tennis_pnl_env
-    book.process_signal(_open_signal())
-    resolve_cb = MagicMock()
-    from src import telegram_bot
-    monkeypatch.setattr(telegram_bot, "on_tennis_resolve_request", resolve_cb)
-    telegram_bot._handle_command("/tennis_pnl")
-    resolve_cb.assert_called_once()
-
-
-def test_tennis_pnl_voids_stale_open_positions(tennis_pnl_env):
-    """A position open for >3 days with no resolution must be voided so
-    /tennis_pnl stops reporting it as OPEN."""
-    from datetime import datetime, timedelta, timezone
-    book, captured = tennis_pnl_env
-    book.process_signal(_open_signal())
-    pid = book.open_positions()[0]["id"]
-    old = datetime.now(timezone.utc) - timedelta(days=10)
-    book._state["open_positions"][pid]["opened_at"] = old.isoformat()
-    book._save()
-
-    from src import telegram_bot
-    telegram_bot._handle_command("/tennis_pnl")
-
-    # Re-read state from disk (the handler instantiates its own book).
-    from src.tennis.paper_book import TennisPaperBook
-    book2 = TennisPaperBook(data_dir=telegram_bot.CONFIG.data_dir)
-    assert book2.open_position_count() == 0
-    assert any(p["exit_reason"] == "STALE_VOID" for p in book2.closed_positions())
-
-
-def test_tennis_pnl_does_not_list_closed_events_by_name(tennis_pnl_env):
-    """Closed positions are summed into the Realized lines — they are
-    NOT listed individually in the report. The Open positions section
-    only shows currently-active bets."""
-    book, captured = tennis_pnl_env
-    book.process_signal(_open_signal(
-        condition_id="0xJUST", token_id="JUST_A",
-        event_title="Just Closed Event",
-    ))
-    book.resolve("0xJUST", winning_token_id="JUST_A")  # winner → +PnL
-
-    from src import telegram_bot
-    telegram_bot._handle_command("/tennis_pnl")
-    out = "\n".join(captured)
-    # The event title is gone — only the realized PnL contribution survives.
-    assert "Just Closed Event" not in out
-
-
-def test_tennis_pnl_realized_today_includes_just_resolved_position(tennis_pnl_env):
-    """A position that resolved today (in SGT) must be reflected in the
-    Realized today total — that's what the line is for."""
-    book, captured = tennis_pnl_env
-    book.process_signal(_open_signal(
-        condition_id="0xWIN", token_id="JUST_A", price=0.40, size=10.0,
-        event_title="Today Event",
-    ))
-    book.resolve("0xWIN", winning_token_id="JUST_A")  # +$15 (10/0.40 * (1 - 0.40))
-
-    from src import telegram_bot
-    telegram_bot._handle_command("/tennis_pnl")
-    out = "\n".join(captured)
-    # The position is gone from open → must show in Realized today.
-    # Don't pin the exact number (timezone edge cases around midnight
-    # would make this flaky); just assert it's non-zero and positive.
-    import re
-    m = re.search(r"Realized today: <b>\$([+\-\d.]+)</b>", out)
-    assert m is not None, f"missing Realized today line in: {out!r}"
-    assert float(m.group(1)) > 0, f"expected positive realized-today, got {m.group(1)}"
-
-
-def test_tennis_pnl_live_mode_excludes_preview_positions(tennis_pnl_env):
-    """When Strategy #3 is in LIVE mode, ``live=False`` (preview) deals
-    must not appear. The point: in live trading the user only cares about
-    real placed orders' PnL, not the paper-only signals."""
-    from src import runtime_state, telegram_bot
-    runtime_state.set_preview(3, False)  # live mode
-
-    book, captured = tennis_pnl_env
-    book.process_signal(_open_signal(
-        condition_id="0xPREV", token_id="PREV_A",
-        event_title="Preview Only Event",
-        live=False,
-    ))
-    book.process_signal(_open_signal(
-        condition_id="0xLIVE", token_id="LIVE_A",
-        event_title="Real Live Event",
-        live=True,
-    ))
-
-    telegram_bot._handle_command("/tennis_pnl")
-    out = "\n".join(captured)
-    assert "Real Live Event" in out
-    assert "Preview Only Event" not in out
-    assert "Mode: LIVE" in out
-
-
-def test_tennis_pnl_preview_mode_includes_all_positions(tennis_pnl_env):
-    """In PREVIEW mode, paper signals are the whole point — show them."""
-    from src import runtime_state, telegram_bot
-    runtime_state.set_preview(3, True)
-
-    book, captured = tennis_pnl_env
-    book.process_signal(_open_signal(
-        condition_id="0xPREV", token_id="PREV_A",
-        event_title="Preview Only Event",
-        live=False,
-    ))
-
-    telegram_bot._handle_command("/tennis_pnl")
-    out = "\n".join(captured)
-    assert "Preview Only Event" in out
-    assert "Mode: PREVIEW" in out
 
 
 # ------------------------------------------------------------------

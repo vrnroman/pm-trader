@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Backtest + watchlist builder for copy-trading selection (Strategy 1b).
 
-Unlike the legacy tennis backtest (which fabricated "sharp" odds from resolved
-outcomes and was therefore lookahead-biased), this is a genuine out-of-sample
-test: it ranks wallets by realized closed-position ROI over a *lookback* window
+This is a genuine out-of-sample test (no lookahead): it ranks wallets by
+realized closed-position ROI over a *lookback* window
 using only information available at the cutoff, then measures how those wallets
 actually performed in the *forward* window.
 

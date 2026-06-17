@@ -1,10 +1,10 @@
 """In-bot runner for the forward paper-copy harness (Strategy 1b).
 
 Wraps `CopyPaperEngine` with watchlist loading and a cycle loop so `main.py`
-can start it as a daemon thread, exactly like the tennis scanner. It reloads the
-watchlist each cycle (so regenerating the watchlist file takes effect without a
-restart) and places NO real orders — it only accumulates the paper ledger whose
-net-of-drag PnL gates real capital.
+can start it as a daemon thread. It reloads the watchlist each cycle (so
+regenerating the watchlist file takes effect without a restart) and places NO
+real orders — it only accumulates the paper ledger whose net-of-drag PnL gates
+real capital.
 
 Live data access (detection/books/resolution) is injected from
 `copy_paper_live` by default but overridable for tests.
