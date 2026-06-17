@@ -125,6 +125,24 @@ def test_cap_keeps_top_by_capture():
     assert len(r.newly_qualified) == 3
 
 
+def test_flagged_wallet_not_starved_by_capture_heavy_wallets():
+    # cap=3; three high-capture legacy wallets vs one theory-only wallet at
+    # capture 0. A capture-only sort would bury the flagged wallet last and cap
+    # it out — flag-count-first must keep it on paper so the theory is measured.
+    evaluated = {
+        "0xH1": Eval(wallet="0xH1", capture_cents=5.0, tstat=12.0),
+        "0xH2": Eval(wallet="0xH2", capture_cents=4.0, tstat=12.0),
+        "0xH3": Eval(wallet="0xH3", capture_cents=3.0, tstat=12.0),
+        "0xF": Eval(wallet="0xF", capture_cents=0.0, tstat=2.0,
+                    flagged_by=("1e",), reason="longshot calibration edge"),
+    }
+    r = run_discovery_cycle(evaluated, DiscoveryState(), CFG)  # cap=3
+    papered = {e.wallet for e in r.watchlist}
+    assert "0xF" in papered                      # flagged wallet keeps a slot
+    assert r.watchlist[0].wallet == "0xF"         # ranked first (1 flag > 0 flags)
+    assert len(r.watchlist) == 3                  # cap honoured (0xH3 dropped)
+
+
 def test_capped_out_wallet_is_not_notified_or_papered():
     # 4 qualifiers, cap 3 -> the weakest is neither on watchlist nor "newly qualified"
     evaluated = {f"0x{i}": _ev(f"0x{i}", float(i + 1)) for i in range(4)}

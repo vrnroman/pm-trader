@@ -139,6 +139,59 @@ def test_evaluate_sweep_streams_global_topk_across_chunks(monkeypatch):
     assert set(out) == expected
 
 
+def test_evaluate_sweep_fetches_and_threads_resolutions_only_when_needed(monkeypatch):
+    """A resolution-needing theory (1a/1e) makes the sweep fetch market
+    resolutions once and thread them into each wallet's context; with no such
+    theory enabled it neither fetches nor passes any."""
+    from src.copy_trading.wallet_context import MarketResolution
+
+    universe = ["0x0001"]
+    acts = {"0x0001": [{"type": "TRADE", "side": "BUY", "conditionId": "0xCID"}]}
+    monkeypatch.setattr(dd, "build_universe", lambda target, **kw: list(universe))
+    monkeypatch.setattr(dd, "fetch_all_activity",
+                        lambda wallets, *a, **k: {w: acts.get(w, []) for w in wallets})
+    monkeypatch.setattr(dd, "compute_wallet_metrics",
+                        lambda a, **kw: SimpleNamespace(tstat=5.0, roi=0.1))
+    monkeypatch.setattr(dd, "select_targets",
+                        lambda scored, **kw: [SimpleNamespace(address=w, metrics=m)
+                                              for w, m in scored.items()])
+    monkeypatch.setattr(dd, "fetch_recent_buys", lambda *a, **k: [])
+    monkeypatch.setattr(dd, "wallet_entry_profile", lambda *a, **k: dd.EntryProfile())
+    monkeypatch.setattr(dd, "wallet_curve_metrics", lambda *a, **k: dd.CurveMetrics())
+
+    seen: dict = {}
+
+    def fake_build_ctx(w, *a, resolutions=None, **k):
+        seen["resolutions"] = resolutions
+        return dd.WalletContext(wallet=w, now=0.0)
+
+    monkeypatch.setattr(dd, "build_wallet_context", fake_build_ctx)
+
+    res_calls = {"n": 0, "cids": None}
+
+    def fake_fetch_res(cids, cache_dir=None, **k):
+        res_calls["n"] += 1
+        res_calls["cids"] = set(cids)
+        return {c: MarketResolution(winning_index=1, end_ts=1.0) for c in cids}
+
+    monkeypatch.setattr(dd, "fetch_resolutions", fake_fetch_res)
+    monkeypatch.setenv("WALLET_DISCOVERY_BATCH_PAUSE_S", "0")
+
+    # 1e enabled (needs_resolution) → resolutions fetched for the BUY's market
+    # and threaded into the context.
+    dd.evaluate_sweep(DiscoveryConfig(enabled_theories=frozenset({"1e"})))
+    assert res_calls["n"] == 1
+    assert res_calls["cids"] == {"0xCID"}
+    assert seen["resolutions"] == {"0xCID": MarketResolution(winning_index=1, end_ts=1.0)}
+
+    # only non-resolution theories → no fetch, empty resolutions passed through
+    res_calls["n"] = 0
+    seen.clear()
+    dd.evaluate_sweep(DiscoveryConfig(enabled_theories=frozenset({"1b"})))
+    assert res_calls["n"] == 0
+    assert seen["resolutions"] == {}
+
+
 def test_build_universe_stops_on_short_page_and_paces(monkeypatch):
     """A page shorter than the limit means the tier is exhausted — stop paging
     it (don't burn the whole offset budget) and move to the next stake tier."""

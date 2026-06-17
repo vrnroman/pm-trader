@@ -116,6 +116,7 @@ def _discovery_loop():
         auto_remove=CONFIG.wallet_discovery_auto_remove,
         enabled_theories=frozenset(
             t.strip() for t in CONFIG.wallet_discovery_theories.split(",") if t.strip()),
+        res_cache_dir=CONFIG.wallet_discovery_res_cache,
     )
     runner = DiscoveryRunner(
         config=cfg,

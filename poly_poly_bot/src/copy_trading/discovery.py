@@ -13,8 +13,8 @@ Qualification uses **hysteresis** so wallets hovering at the bar don't flap on
 and off paper each sweep:
   * enter  : capture >= min_capture_cents AND tstat >= min_tstat
   * stay   : already on, capture >= drop_capture_cents AND tstat >= min_tstat
-A capped top-N (by capture) becomes the live paper watchlist, so "pinged" always
-equals "now on paper".
+A capped top-N (by theory-agreement, then capture) becomes the live paper
+watchlist, so "pinged" always equals "now on paper".
 """
 
 from __future__ import annotations
@@ -46,13 +46,20 @@ class DiscoveryConfig:
     # (settlement-lag scooping near $1 — un-copyable). Lenient by default.
     max_tail_ratio: float = 0.5
     # independent strategy theories (1a..1j) that can qualify a wallet (OR'd with
-    # the legacy capture+tstat gate). Defaults to the backtest-supported set;
-    # 1a (negative edge), 1e (needs resolution data), 1j (variance) are off.
-    enabled_theories: frozenset = frozenset({"1b", "1c", "1d", "1f", "1g", "1h", "1i"})
+    # the legacy capture+tstat gate). All ten run by default — discovery is
+    # paper-only, so every theory earns or fails on measured paper PnL before any
+    # manual promotion to real capital. 1a/1e need market-resolution data, which
+    # the sweep now fetches on demand (see discovery_data.evaluate_sweep).
+    enabled_theories: frozenset = frozenset(
+        {"1a", "1b", "1c", "1d", "1e", "1f", "1g", "1h", "1i", "1j"})
     # paper watchlist size cap
     watchlist_cap: int = 25
     # auto-remove decayed wallets from paper (False = keep accumulating)
     auto_remove: bool = True
+    # on-disk cache for market resolutions (1a/1e need how each market settled).
+    # Resolved markets are immutable so they're cached permanently; None disables
+    # the cache (every sweep re-fetches).
+    res_cache_dir: str | None = None
 
 
 @dataclass(frozen=True)
@@ -152,8 +159,13 @@ def run_discovery_cycle(
         if entered or retained:
             qualified[w] = e
 
-    # rank by capture, keep top-N
-    ranked = sorted(qualified.values(), key=lambda e: e.capture_cents, reverse=True)
+    # Rank by how many independent theories agree (flag count), then capture, and
+    # keep the top-N. Capture is the lead-lag signal only theories 1c/1h produce,
+    # so a capture-only sort would bury every wallet that a non-capture theory
+    # (1a/1b/1d/1e/1g/1i/1j) flagged at capture 0 and starve it out of the cap.
+    # Flag-count-first keeps each theory represented; capture breaks ties.
+    ranked = sorted(qualified.values(),
+                    key=lambda e: (len(e.flagged_by), e.capture_cents), reverse=True)
     watchlist = ranked[: cfg.watchlist_cap]
     on_now = {e.wallet for e in watchlist}
 

@@ -13,6 +13,7 @@ only fetches and assembles ``Eval`` rows for ``discovery.run_discovery_cycle``.
 from __future__ import annotations
 
 import json
+import logging
 import os
 import threading
 import time
@@ -23,10 +24,13 @@ import requests
 from src.copy_trading.discovery import DiscoveryConfig, Eval
 from src.copy_trading.entry_profile import EntryProfile, entry_profile, is_copyable_entry
 from src.copy_trading.lead_lag import WalletLeadLag, analyze_buy
+from src.copy_trading.market_resolution import fetch_resolutions
 from src.copy_trading.pnl_curve import CurveMetrics, curve_metrics, fetch_pnl_curve
-from src.copy_trading.theories import evaluate_all
+from src.copy_trading.theories import REGISTRY, evaluate_all
 from src.copy_trading.trader_scoring import compute_wallet_metrics, select_targets
 from src.copy_trading.wallet_context import WalletContext, build_context
+
+logger = logging.getLogger("poly_poly_bot")
 
 DATA_API = os.environ.get("DATA_API_URL", "https://data-api.polymarket.com")
 CLOB = "https://clob.polymarket.com"
@@ -311,15 +315,17 @@ def build_wallet_context(wallet: str, cache_dir: str | None, ttl_s: float, *,
                          now: float, lookback_ts: float, category: str,
                          curve: CurveMetrics, capture_cents: float = 0.0,
                          lead_cents: float = 0.0, capture_hit_rate: float = 0.0,
-                         n_capture: int = 0) -> WalletContext:
+                         n_capture: int = 0, resolutions: dict | None = None) -> WalletContext:
     """Build the theory feature bundle from a wallet's (cached) activity; the
-    curve + lead-lag scalars are injected from the deep stage. Never raises."""
+    curve + lead-lag scalars are injected from the deep stage. ``resolutions``
+    (conditionId -> MarketResolution) enriches each BUY with won/early so the
+    resolution theories (1a/1e) can fire. Never raises."""
     try:
         acts = fetch_activity(wallet, cache_dir, ttl_s)
         return build_context(wallet, acts, now=now, lookback_ts=lookback_ts,
-                             category=category, curve=curve, capture_cents=capture_cents,
-                             lead_cents=lead_cents, capture_hit_rate=capture_hit_rate,
-                             n_capture=n_capture)
+                             category=category, curve=curve, resolutions=resolutions,
+                             capture_cents=capture_cents, lead_cents=lead_cents,
+                             capture_hit_rate=capture_hit_rate, n_capture=n_capture)
     except Exception:
         return WalletContext(wallet=wallet, now=now, curve=curve)
 
@@ -444,6 +450,26 @@ def evaluate_sweep(
     delay_s, horizon_s = cfg.delay_min * 60, cfg.horizon_min * 60
     price_cache: dict[str, list] = {}
 
+    # Theories 1a/1e judge trades by how each market settled (which outcome won,
+    # how early the bet was placed). Fetch those resolutions ONCE for the
+    # deep-eval wallets' BUYs — batched + disk-cached (resolved markets are
+    # immutable) — but only when an enabled theory actually needs them, so the
+    # default-off case adds zero API cost. Re-reads from the activity cache the
+    # chunk loop already populated (fetch_all_activity is the test seam).
+    resolutions: dict = {}
+    if to_eval and any(t in REGISTRY and REGISTRY[t].needs_resolution
+                       for t in cfg.enabled_theories):
+        res_acts = fetch_all_activity(to_eval, cache_dir, activity_ttl_s, stop=stop)
+        cids = {ev.get("conditionId")
+                for acts in res_acts.values() for ev in acts
+                if ev.get("type") == "TRADE" and ev.get("side") == "BUY"
+                and ev.get("conditionId")}
+        del res_acts  # only the cid set is needed downstream — free the raw activity
+        if cids and not _stopping(stop):
+            resolutions = fetch_resolutions(cids, cfg.res_cache_dir)
+            logger.info("[DISCOVERY] resolutions: %d/%d markets settled (for 1a/1e)",
+                        len(resolutions), len(cids))
+
     evaluated: dict[str, Eval] = {}
     for w in to_eval:
         if _stopping(stop):
@@ -464,7 +490,7 @@ def evaluate_sweep(
         ctx = build_wallet_context(
             w, cache_dir, activity_ttl_s, now=time.time(), lookback_ts=lookback,
             category=cfg.category, curve=cm, capture_cents=capture, lead_cents=lead,
-            capture_hit_rate=hit, n_capture=n_cap)
+            capture_hit_rate=hit, n_capture=n_cap, resolutions=resolutions)
         flags = evaluate_all(ctx, enabled=cfg.enabled_theories)
         ep = ctx.entry
         evaluated[w] = Eval(

@@ -209,9 +209,12 @@ class Config:
     wallet_discovery_llm_review_enabled: bool = _opt_bool("WALLET_DISCOVERY_LLM_REVIEW_ENABLED", False)
     wallet_discovery_llm_review_top_n: int = _opt_int("WALLET_DISCOVERY_LLM_REVIEW_TOP_N", 5)
     wallet_discovery_llm_model: str = _optional("WALLET_DISCOVERY_LLM_MODEL", "claude-opus-4-8")
-    # Independent strategy theories that may qualify a wallet (OR'd). Backtest-
-    # supported default; add 1a/1e/1j to experiment. See research/THEORY_FINDINGS.md.
-    wallet_discovery_theories: str = _optional("WALLET_DISCOVERY_THEORIES", "1b,1c,1d,1f,1g,1h,1i")
+    # Independent strategy theories that may qualify a wallet (OR'd). All ten on
+    # by default — discovery is paper-only, so each theory proves out on measured
+    # paper PnL before any manual promotion. 1a/1e need market-resolution data,
+    # fetched on demand in the sweep. See research/THEORY_FINDINGS.md.
+    wallet_discovery_theories: str = _optional(
+        "WALLET_DISCOVERY_THEORIES", "1a,1b,1c,1d,1e,1f,1g,1h,1i,1j")
     # Activity-cache TTL: set ABOVE the sweep interval so a returning wallet is
     # served from cache instead of re-fetched (TTL < interval would expire every
     # time and never hit). 30h vs a 24h sweep. prune_cache deletes files older
@@ -222,6 +225,12 @@ class Config:
     wallet_discovery_cache_dir: str = _optional(
         "WALLET_DISCOVERY_CACHE_DIR",
         str(Path(__file__).resolve().parent.parent / "data" / "wcache"),
+    )
+    # Market-resolution cache (how each market settled) — feeds theories 1a/1e.
+    # Resolved markets are immutable, so this grows slowly and is reused forever.
+    wallet_discovery_res_cache: str = _optional(
+        "WALLET_DISCOVERY_RES_CACHE",
+        str(Path(__file__).resolve().parent.parent / "data" / "rescache"),
     )
     wallet_discovery_state: str = _optional(
         "WALLET_DISCOVERY_STATE",
