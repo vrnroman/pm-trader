@@ -16,6 +16,7 @@ from __future__ import annotations
 import math
 from typing import Iterable
 
+from src.copy_trading.entry_profile import MAX_ENTRY, MIN_ENTRY, is_copyable_entry
 from src.copy_trading.pattern_detector import is_geopolitical_market
 
 
@@ -55,8 +56,57 @@ def is_insider_shaped(
     max_prior: int = 5,
     min_bet: float = 1000.0,
 ) -> bool:
-    """A large, concentrated bet from a young account on a news/geo market."""
+    """A large, concentrated bet from a young account on a news/geo market.
+
+    Legacy Strategy-1a shape. Retained for the backtest and the alert-only
+    detector, but see INSIDER_FINDINGS: youth turned out to be an *anti*-signal
+    (veterans outperformed). Prefer ``is_informed_early_bet`` for live scoring.
+    """
     return is_geo and bet_usd >= min_bet and prior_count <= max_prior
+
+
+def hours_to_resolution(trade_ts: float, resolution_ts: float | None) -> float | None:
+    """Hours between a trade and the market's resolution, or ``None`` if unknown."""
+    if not resolution_ts or resolution_ts <= 0:
+        return None
+    return (resolution_ts - trade_ts) / 3600.0
+
+
+def is_informed_early_bet(
+    *,
+    bet_usd: float,
+    entry_price: float,
+    hours_before_resolution: float | None,
+    min_bet: float = 1000.0,
+    min_hours: float = 24.0,
+    min_entry: float = MIN_ENTRY,
+    max_entry: float = MAX_ENTRY,
+) -> bool:
+    """Track-record-agnostic informed-positioning shape.
+
+    A large, copyable-priced bet placed *early* — well before resolution — which
+    is what genuine informed money looks like and what settlement-lag scooping is
+    not. Deliberately drops the two parts of ``is_insider_shaped`` the
+    INSIDER_FINDINGS backtest discredited:
+
+      * **account age** — youth was an anti-signal (veterans outperformed), so a
+        seasoned consistent earner placing such a bet is *more* interesting, not
+        less;
+      * **the geo-only restriction** — informed timing isn't confined to
+        geopolitics.
+
+    The decisive filters that remain are size, a non-tail entry price (no point
+    copying a near-certain $0.95+ outcome), and **early timing** — the single
+    discriminator the old signal lacked, since ~98% of large bets land within
+    24h of resolution.
+    """
+    if bet_usd < min_bet:
+        return False
+    if not is_copyable_entry(entry_price, min_entry, max_entry):
+        return False
+    if hours_before_resolution is None or hours_before_resolution < min_hours:
+        return False
+    return True
 
 
 def copy_pnl_per_dollar(price: float, won: bool) -> float:
@@ -84,5 +134,6 @@ def wilson_interval(wins: int, n: int, z: float = 1.96) -> tuple[float, float]:
 # heavier pattern_detector module directly.
 __all__ = [
     "trade_usd", "prior_trade_count", "is_insider_shaped",
+    "hours_to_resolution", "is_informed_early_bet",
     "copy_pnl_per_dollar", "wilson_interval", "is_geopolitical_market",
 ]

@@ -1,0 +1,35 @@
+universe: 400 wallets from cache data/wcache
+  fetched 100/400
+  fetched 200/400
+  fetched 300/400
+  fetched 400/400
+fetching resolutions for 52861 markets...
+  4243 resolved
+
+scored 163 wallets with forward bets; population copy-ROI/$ = +0.346 (n=13345)
+
+theory                 variant    flagged  /day  copyROI  hit%   vsPop
+------------------------------------------------------------------------
+news/geo early insider default         26   0.9   +0.159  70%  -0.187
+news/geo early insider strict          17   0.6   +0.089  70%  -0.257
+consistent closed-posi default          0   0.0        —     —       —
+consistent closed-posi t15              0   0.0        —     —       —
+consistent closed-posi t20              0   0.0        —     —       —
+copyable lead-lag      default          0   0.0        —     —       —
+copyable lead-lag      cap2.5           0   0.0        —     —       —
+steady compounder (PnL default          0   0.0        —     —       —
+steady compounder (PnL sharpe.5         0   0.0        —     —       —
+longshot calibration e default          0   0.0        —     —       —
+longshot calibration e edge.1           0   0.0        —     —       —
+early-exit swing trade default         66   2.2   +0.524  82%  +0.177
+early-exit swing trade win.6           55   1.8   +0.547  84%  +0.201
+category specialist    default         20   0.7   +0.649  82%  +0.303
+category specialist    roi.3           14   0.5   +0.793  85%  +0.447
+catalyst follower / in default          0   0.0        —     —       —
+catalyst follower / in lead6            0   0.0        —     —       —
+low-variance whale     default         39   1.3   +0.452  80%  +0.105
+low-variance whale     hit.65          25   0.8   +0.418  81%  +0.072
+fresh-account sniper   default          8   0.3   +0.265  76%  -0.082
+fresh-account sniper   bet5k            3   0.1   +3.191  84%  +2.845
+
+(copyROI = mean forward copy-ROI per $1, exit-following; vsPop = edge over population)

@@ -220,7 +220,9 @@ class Config:
     # --- Copy-paper harness (Strategy 1b validation; PREVIEW-only, no orders) ---
     # Forward measurement of execution-realistic copy PnL on watchlist wallets.
     # Graduates a wallet to real capital only after positive net-of-drag PnL.
-    copy_paper_enabled: bool = _opt_bool("COPY_PAPER_ENABLED", False)
+    # On by default: paper-only (places no real orders), so it's safe to run
+    # everywhere. Set COPY_PAPER_ENABLED=false to stop it.
+    copy_paper_enabled: bool = _opt_bool("COPY_PAPER_ENABLED", True)
     copy_paper_watchlist: str = _optional(
         "COPY_PAPER_WATCHLIST",
         str(Path(__file__).resolve().parent.parent / "data" / "copy_watchlist.json"),
@@ -239,9 +241,15 @@ class Config:
     # --- Wallet discovery (continuously hunts copyable wallets -> paper) ---
     # Runs the discovery funnel on a schedule; pings Telegram on each new
     # qualifier and adds it to the paper watchlist. Never touches live capital.
-    wallet_discovery_enabled: bool = _opt_bool("WALLET_DISCOVERY_ENABLED", False)
-    wallet_discovery_interval_s: int = _opt_int("WALLET_DISCOVERY_INTERVAL_S", 21600)  # 6h
-    wallet_discovery_universe: int = _opt_int("WALLET_DISCOVERY_UNIVERSE", 850)
+    # On by default: discovery only writes a paper watchlist + Telegram pings,
+    # never touches live capital. Set WALLET_DISCOVERY_ENABLED=false to stop it.
+    wallet_discovery_enabled: bool = _opt_bool("WALLET_DISCOVERY_ENABLED", True)
+    # Wide insider sweep: scan a large universe (take whatever the trade feed
+    # yields up to this cap) on a slow multi-day cadence. The funnel paces its
+    # requests (WALLET_DISCOVERY_PAGE_PAUSE_S / _BATCH_PAUSE_S) to stay under the
+    # 429 ceiling and streams the scoring in chunks so RAM stays bounded.
+    wallet_discovery_interval_s: int = _opt_int("WALLET_DISCOVERY_INTERVAL_S", 86400)  # 1d
+    wallet_discovery_universe: int = _opt_int("WALLET_DISCOVERY_UNIVERSE", 200000)
     wallet_discovery_skill_pool: int = _opt_int("WALLET_DISCOVERY_SKILL_POOL", 40)
     wallet_discovery_cap: int = _opt_int("WALLET_DISCOVERY_CAP", 25)
     wallet_discovery_min_capture_cents: float = _opt_float("WALLET_DISCOVERY_MIN_CAPTURE_CENTS", 1.5)
@@ -249,6 +257,22 @@ class Config:
     wallet_discovery_drop_capture_cents: float = _opt_float("WALLET_DISCOVERY_DROP_CAPTURE_CENTS", 1.0)
     wallet_discovery_auto_remove: bool = _opt_bool("WALLET_DISCOVERY_AUTO_REMOVE", True)
     wallet_discovery_category: str = _optional("WALLET_DISCOVERY_CATEGORY", "ALL")
+    # Gated Claude second-opinion (Strategy 1c): for the top-N statistically
+    # qualified wallets, ask Claude to vet a compact dossier. Alert-only, never
+    # auto-trades; off by default and needs ANTHROPIC_API_KEY.
+    wallet_discovery_llm_review_enabled: bool = _opt_bool("WALLET_DISCOVERY_LLM_REVIEW_ENABLED", False)
+    wallet_discovery_llm_review_top_n: int = _opt_int("WALLET_DISCOVERY_LLM_REVIEW_TOP_N", 5)
+    wallet_discovery_llm_model: str = _optional("WALLET_DISCOVERY_LLM_MODEL", "claude-opus-4-8")
+    # Independent strategy theories that may qualify a wallet (OR'd). Backtest-
+    # supported default; add 1a/1e/1j to experiment. See research/THEORY_FINDINGS.md.
+    wallet_discovery_theories: str = _optional("WALLET_DISCOVERY_THEORIES", "1b,1c,1d,1f,1g,1h,1i")
+    # Activity-cache TTL: set ABOVE the sweep interval so a returning wallet is
+    # served from cache instead of re-fetched (TTL < interval would expire every
+    # time and never hit). 30h vs a 24h sweep. prune_cache deletes files older
+    # than this, so it doubles as the disk-eviction horizon. Universe defaults to
+    # wallets active in the last WALLET_DISCOVERY_UNIVERSE_WINDOW_S (24h); set
+    # WALLET_DISCOVERY_EXPAND_FILTERS=true for a wider (BUY/SELL × taker) sweep.
+    wallet_discovery_activity_ttl_s: int = _opt_int("WALLET_DISCOVERY_ACTIVITY_TTL_S", 108000)  # 30h
     wallet_discovery_cache_dir: str = _optional(
         "WALLET_DISCOVERY_CACHE_DIR",
         str(Path(__file__).resolve().parent.parent / "data" / "wcache"),

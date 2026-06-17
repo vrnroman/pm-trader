@@ -18,8 +18,10 @@ from typing import Callable, Optional
 from src.copy_trading.copy_paper import CopyPaperEngine, CycleSummary, PaperCopyLedger
 from src.copy_trading.copy_paper_live import (
     fetch_asks,
+    fetch_bids,
     load_watchlist_wallets,
     make_detector,
+    make_exit_detector,
     resolve,
 )
 
@@ -41,6 +43,8 @@ class CopyPaperRunner:
         detector_factory: Optional[Callable[[list[str], float, float], Callable]] = None,
         book_fetcher: Optional[Callable[[str], list[tuple[float, float]]]] = None,
         resolver: Optional[Callable[[str], Optional[int]]] = None,
+        exit_detector_factory: Optional[Callable[[list[str], float], Callable]] = None,
+        bid_fetcher: Optional[Callable[[str], list[tuple[float, float]]]] = None,
         on_cycle: Optional[Callable[[CycleSummary, "PaperCopyLedger"], None]] = None,
     ):
         self.ledger = PaperCopyLedger(ledger_path)
@@ -55,6 +59,9 @@ class CopyPaperRunner:
         self._detector_factory = detector_factory or make_detector
         self._book_fetcher = book_fetcher or fetch_asks
         self._resolver = resolver or resolve
+        # exit-following: mirror the target's SELLs instead of only resolving
+        self._exit_detector_factory = exit_detector_factory or make_exit_detector
+        self._bid_fetcher = bid_fetcher or fetch_bids
         self._on_cycle = on_cycle
 
     def wallets(self) -> list[str]:
@@ -67,10 +74,12 @@ class CopyPaperRunner:
         if not wallets:
             return CycleSummary()
         detector = self._detector_factory(wallets, self.max_age_s, self.min_usd)
+        exit_detector = self._exit_detector_factory(wallets, self.max_age_s)
         engine = CopyPaperEngine(
             self.ledger, detector=detector, book_fetcher=self._book_fetcher,
             resolver=self._resolver, copy_pct=self.copy_pct,
             max_copy_usd=self.max_copy_usd, max_slippage_bps=self.max_slippage_bps,
+            exit_detector=exit_detector, bid_fetcher=self._bid_fetcher,
         )
         summary = engine.run_cycle()
         if self._on_cycle:

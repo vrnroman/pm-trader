@@ -15,12 +15,15 @@ from __future__ import annotations
 
 import ctypes
 import gc
+import html
 import json
 import logging
 import os
 import threading
 import time
 from typing import Callable, Optional
+
+from types import SimpleNamespace
 
 from src.copy_trading.discovery import (
     DiscoveryConfig,
@@ -30,6 +33,7 @@ from src.copy_trading.discovery import (
     watchlist_to_targets,
 )
 from src.copy_trading.discovery_data import evaluate_sweep
+from src.copy_trading.llm_review import DEFAULT_MODEL, build_dossier, review_wallet
 
 logger = logging.getLogger("poly_poly_bot")
 
@@ -37,13 +41,13 @@ logger = logging.getLogger("poly_poly_bot")
 def _release_freed_memory() -> None:
     """Hand the sweep's freed heap back to the OS.
 
-    A sweep allocates large transient structures — the raw /activity for the
-    whole universe (up to ~4000 records × ~850 wallets) plus lead-lag price
-    series. Once ``evaluate_sweep`` returns those are unreferenced, but under
-    glibc the freed blocks sit in per-thread arenas that ``free`` won't return
-    without an explicit trim, so RSS would otherwise stay pinned at the sweep's
-    high-water mark for the full 6h until the next cycle. gc first (drop any
-    cycles), then ``malloc_trim`` to actually release the arenas.
+    A sweep allocates large transient structures — the raw /activity per chunk
+    plus lead-lag price series. Once ``evaluate_sweep`` returns those are
+    unreferenced, but under glibc the freed blocks sit in per-thread arenas that
+    ``free`` won't return without an explicit trim, so RSS would otherwise stay
+    pinned at the sweep's high-water mark for the whole multi-day idle window
+    until the next cycle. gc first (drop any cycles), then ``malloc_trim`` to
+    actually release the arenas.
     """
     gc.collect()
     try:
@@ -64,14 +68,42 @@ def _profile_url(wallet: str) -> str:
     return f"https://polymarket.com/profile/{wallet}"
 
 
-def format_find(e: Eval) -> str:
-    """Telegram body for a newly-qualified wallet (HTML parse mode)."""
-    return (
-        "🔍 <b>New copyable wallet</b> — added to paper watchlist, measuring now\n"
-        f"<code>{e.wallet}</code>\n"
+def format_find(e: Eval, verdict=None) -> str:
+    """Telegram body for a newly-qualified wallet (HTML parse mode; optional Claude verdict)."""
+    lines = [
+        "🔍 <b>New copyable wallet</b> — added to paper watchlist, measuring now",
+        f"<code>{e.wallet}</code>",
+    ]
+    if e.flagged_by:
+        lines.append(f"Flagged by <b>{', '.join(e.flagged_by)}</b>")
+        if e.reason:
+            lines.append(f"<i>{html.escape(e.reason)}</i>")
+    lines.append(
         f"Edge: <b>{e.capture_cents:+.2f}¢</b>/trade · hit {e.hit_rate:.0%} · "
-        f"ROI {e.roi:+.0%} · t-stat {e.tstat:.1f} (n={e.n})\n"
-        f"👤 {_profile_url(e.wallet)}"
+        f"ROI {e.roi:+.0%} · t-stat {e.tstat:.1f} (n={e.n}) · tail {e.tail_ratio:.0%}"
+    )
+    if e.curve_sharpe or e.net_pnl:
+        lines.append(f"Curve: sharpe {e.curve_sharpe:+.2f} · maxDD {e.curve_drawdown:.0%}")
+    if verdict is not None:
+        lines.append(
+            f"🤖 Claude: <b>{verdict.verdict}</b> (insider {verdict.insider_likelihood}, "
+            f"copyable {'yes' if verdict.copyable else 'no'}, conf {verdict.confidence:.0%})"
+        )
+        lines.append(f"<i>{html.escape(verdict.reasoning)}</i>")
+    lines.append(f"👤 {_profile_url(e.wallet)}")
+    return "\n".join(lines)
+
+
+def _dossier_from_eval(e: Eval) -> dict:
+    """Map a sweep Eval into the llm_review dossier shape."""
+    return build_dossier(
+        e.wallet,
+        metrics=SimpleNamespace(roi=e.roi, tstat=e.tstat),
+        evaluation=e,  # has capture_cents, lead_cents, hit_rate, n
+        entry=SimpleNamespace(mean_entry=None, tail_ratio=e.tail_ratio,
+                              copyable_ratio=e.copyable_ratio),
+        curve=SimpleNamespace(net_pnl=e.net_pnl, max_drawdown_frac=e.curve_drawdown,
+                              up_ratio=None, sharpe=e.curve_sharpe),
     )
 
 
@@ -86,8 +118,12 @@ class DiscoveryRunner:
         activity_ttl_s: float = 86400.0,
         cycle_interval_s: int = 21600,
         notify: Optional[Callable[[str], None]] = None,
+        llm_review_enabled: bool = False,
+        llm_review_top_n: int = 5,
+        llm_model: str = DEFAULT_MODEL,
         # injectable for tests
         evaluate: Callable[..., dict[str, Eval]] = evaluate_sweep,
+        llm_review: Callable[..., object] = review_wallet,
         now: Callable[[], float] = time.time,
     ):
         self.cfg = config
@@ -97,7 +133,11 @@ class DiscoveryRunner:
         self.activity_ttl_s = activity_ttl_s
         self.cycle_interval_s = cycle_interval_s
         self._notify = notify
+        self.llm_review_enabled = llm_review_enabled
+        self.llm_review_top_n = llm_review_top_n
+        self.llm_model = llm_model
         self._evaluate = evaluate
+        self._llm_review = llm_review
         self._now = now
 
     # ── state IO ──
@@ -147,8 +187,9 @@ class DiscoveryRunner:
                 f"the paper watchlist.\nTop: {top or '—'}"
             )
         else:
+            verdicts = self._review_newly_qualified(result.newly_qualified)
             for e in result.newly_qualified:
-                self._send(format_find(e))
+                self._send(format_find(e, verdicts.get(e.wallet)))
 
         logger.info(
             "[DISCOVERY] swept=%d qualified=%d new=%d removed=%d watchlist=%d",
@@ -158,6 +199,25 @@ class DiscoveryRunner:
         if result.removed:
             logger.info("[DISCOVERY] decayed off paper: %s", ", ".join(result.removed))
         return result
+
+    def _review_newly_qualified(self, finds: list[Eval]) -> dict:
+        """Gated Claude second-opinion on the top-N new qualifiers (alert-only).
+
+        ``newly_qualified`` is already ordered by capture, so the first N are the
+        strongest. Returns wallet -> LLMVerdict (entries may be missing on
+        failure); never raises into the sweep loop.
+        """
+        if not self.llm_review_enabled:
+            return {}
+        verdicts: dict = {}
+        for e in finds[: self.llm_review_top_n]:
+            try:
+                v = self._llm_review(_dossier_from_eval(e), model=self.llm_model)
+            except Exception:  # pragma: no cover - belt-and-suspenders
+                v = None
+            if v is not None:
+                verdicts[e.wallet] = v
+        return verdicts
 
     def run_forever(self, shutdown_event: threading.Event) -> None:
         n = len(self._load_state().on_watchlist)
@@ -172,8 +232,8 @@ class DiscoveryRunner:
                 self.run_once(stop=shutdown_event)
             except Exception:  # pragma: no cover - loop must survive any failure
                 logger.warning("[DISCOVERY] sweep failed; continuing", exc_info=True)
-            # Release the sweep's large transient heap before sleeping 6h, so
-            # RSS doesn't stay pinned at the peak for the whole idle window.
+            # Release the sweep's large transient heap before the multi-day
+            # sleep, so RSS doesn't stay pinned at the peak the whole idle window.
             _release_freed_memory()
             shutdown_event.wait(self.cycle_interval_s)
 

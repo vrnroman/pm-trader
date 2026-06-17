@@ -112,12 +112,13 @@ class PaperPosition:
     # ledger lines that predate these keys still load):
     title: str = ""         # market question, e.g. "Will BTC hit $100k in 2025?"
     slug: str = ""          # PM event slug -> polymarket.com/event/<slug>
-    # filled on resolution:
+    # filled on resolution OR on following the target's exit:
     closed: bool = False
     won: Optional[bool] = None
     pnl: float = 0.0
     ideal_pnl: float = 0.0  # PnL had we filled at their_price (drag-free)
     closed_ts: float = 0.0
+    exited_early: bool = False  # closed by mirroring the target's SELL, not resolution
 
     def realize(self, won: bool, now: Optional[float] = None) -> None:
         payout = self.shares if won else 0.0
@@ -126,6 +127,21 @@ class PaperPosition:
         ideal_cost = self.shares * self.their_price
         self.ideal_pnl = payout - ideal_cost
         self.closed = True
+        self.closed_ts = now if now is not None else time.time()
+
+    def realize_exit(self, exit_price: float, now: Optional[float] = None) -> None:
+        """Close by mirroring the target's early SELL, at our achievable exit price.
+
+        Traders don't always hold to resolution — when the target sells, we sell
+        too, booking PnL at the price we could actually get rather than waiting
+        for (and gambling on) settlement.
+        """
+        proceeds = self.shares * exit_price
+        self.pnl = proceeds - self.spent
+        self.ideal_pnl = proceeds - self.shares * self.their_price
+        self.won = self.pnl > 0
+        self.closed = True
+        self.exited_early = True
         self.closed_ts = now if now is not None else time.time()
 
 
@@ -193,6 +209,7 @@ class CycleSummary:
     opened: int = 0
     skipped_unfilled: int = 0
     resolved: int = 0
+    exited: int = 0  # closed by following the target's SELL
     # the positions that resolved *this* cycle, so callers can name them in a
     # notification instead of only reporting cumulative ledger aggregates.
     resolved_positions: list["PaperPosition"] = field(default_factory=list)
@@ -209,6 +226,8 @@ class CopyPaperEngine:
         copy_pct: float = 1.0,
         max_copy_usd: float = 50.0,
         max_slippage_bps: int = 200,
+        exit_detector: Optional[DetectFn] = None,
+        bid_fetcher: Optional[BookFn] = None,
     ):
         self.ledger = ledger
         self.detector = detector
@@ -217,6 +236,10 @@ class CopyPaperEngine:
         self.copy_pct = copy_pct
         self.max_copy_usd = max_copy_usd
         self.max_slippage_bps = max_slippage_bps
+        # exit_detector() -> target SELLs: {target, token_id, their_price};
+        # bid_fetcher(token_id) -> [(bid_price, size)] for our achievable exit.
+        self.exit_detector = exit_detector
+        self.bid_fetcher = bid_fetcher
 
     def run_cycle(self, now: Optional[float] = None) -> CycleSummary:
         now = now if now is not None else time.time()
@@ -245,6 +268,24 @@ class CopyPaperEngine:
             ))
             s.opened += 1
 
+        # exit-following: if the target sold something we hold, sell too (at our
+        # achievable bid), before falling through to the resolution path.
+        if self.exit_detector is not None:
+            held = {(p.target, p.token_id): p for p in self.ledger.open_positions()}
+            for ex in self.exit_detector():
+                pos = held.get((ex.get("target"), ex.get("token_id")))
+                if pos is None:
+                    continue
+                exit_price = ex.get("their_price")
+                if self.bid_fetcher is not None:
+                    book = self.bid_fetcher(pos.token_id)
+                    if book:
+                        exit_price = book[0][0]  # best bid
+                if exit_price is None:
+                    continue
+                pos.realize_exit(float(exit_price), now=now)
+                s.exited += 1
+
         for pos in self.ledger.open_positions():
             winner = self.resolver(pos.condition_id)
             if winner is None:
@@ -252,7 +293,7 @@ class CopyPaperEngine:
             pos.realize(won=(winner == pos.outcome_index), now=now)
             s.resolved += 1
             s.resolved_positions.append(pos)
-        if s.resolved:
+        if s.resolved or s.exited:
             self.ledger.save()
         return s
 

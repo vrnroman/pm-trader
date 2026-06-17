@@ -33,6 +33,46 @@ def test_entry_requires_capture_and_tstat():
     assert r.new_state.initialized is True
 
 
+def test_tail_dominated_wallet_is_rejected():
+    # both skilled + capture-qualified; 0xT's buy flow is tail-dominated (un-copyable)
+    good = Eval(wallet="0xG", capture_cents=2.0, tstat=12.0, tail_ratio=0.1)
+    tail = Eval(wallet="0xT", capture_cents=2.0, tstat=12.0, tail_ratio=0.9)
+    r = run_discovery_cycle({"0xG": good, "0xT": tail}, DiscoveryState(), CFG)
+    assert [e.wallet for e in r.watchlist] == ["0xG"]   # tail buyer filtered out
+
+
+def test_tail_gate_threshold_configurable():
+    tail = Eval(wallet="0xT", capture_cents=2.0, tstat=12.0, tail_ratio=0.4)
+    lenient = run_discovery_cycle({"0xT": tail}, DiscoveryState(),
+                                  DiscoveryConfig(max_tail_ratio=0.5))
+    strict = run_discovery_cycle({"0xT": tail}, DiscoveryState(),
+                                 DiscoveryConfig(max_tail_ratio=0.3))
+    assert [e.wallet for e in lenient.watchlist] == ["0xT"]
+    assert strict.watchlist == []
+
+
+def test_theory_flag_qualifies_via_or_path():
+    # below the legacy capture/t-stat gate, but an independent theory flagged it
+    e = Eval(wallet="0xF", capture_cents=0.0, tstat=2.0,
+             flagged_by=("1g",), reason="sports specialist: ROI +40% over 12 markets")
+    r = run_discovery_cycle({"0xF": e}, DiscoveryState(), CFG)
+    assert [x.wallet for x in r.watchlist] == ["0xF"]
+    assert r.new_state.on_watchlist["0xF"]["flagged_by"] == ["1g"]
+    assert "specialist" in r.new_state.on_watchlist["0xF"]["reason"]
+
+
+def test_unflagged_below_gate_not_qualified():
+    e = Eval(wallet="0xN", capture_cents=0.0, tstat=2.0)   # fails legacy, no flag
+    assert run_discovery_cycle({"0xN": e}, DiscoveryState(), CFG).watchlist == []
+
+
+def test_tail_gate_blocks_even_a_flagged_wallet():
+    # copyability filter is universal — a tail-dominated wallet is skipped even
+    # when a theory likes it (we still couldn't follow it at a fillable price)
+    e = Eval(wallet="0xT", flagged_by=("1g",), tail_ratio=0.9, tstat=2.0)
+    assert run_discovery_cycle({"0xT": e}, DiscoveryState(), CFG).watchlist == []
+
+
 def test_notify_once_then_silent():
     evaluated = {"0xA": _ev("0xA", 2.0)}
     r1 = run_discovery_cycle(evaluated, DiscoveryState(), CFG)

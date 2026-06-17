@@ -172,3 +172,45 @@ tune via the `WALLET_DISCOVERY_*` env vars in `config.py`.
 With discovery + paper running, review the accumulating ledger and graduate a
 wallet to small live capital (add to a `STRATEGY_1x_WALLETS` tier) only once its
 copied PnL — net of spread/fees/drag — is positive.
+
+## Discovery v2 — wider universe, more signals, gated LLM opinion
+
+A second pass widened and hardened the funnel. The motivating API facts (probed
+empirically): the global `/trades` feed hard-caps pagination at **offset ~3000**,
+and **per-wallet `/activity` also caps at ~3,500 records** — so a heavy trader's
+full year can't be replayed trade-by-trade, and there is no time cursor to walk
+history. Changes:
+
+- **24h-active universe** (`build_universe(window_s=…)`, default 24h). The
+  universe is now "who traded recently", newest-first paging stops at the window
+  cutoff, and optional filter expansion (BUY/SELL × taker) widens the recent net.
+- **Disk-safe cache.** Per-wallet `/activity` is cached on disk (~1 MB/wallet at
+  the 4000-record cap); at scale the real risk is **disk, not RAM** (RAM is
+  bounded by streaming top-K + chunked fetch). `prune_cache` evicts files older
+  than the TTL each sweep (TTL ≈ 23h, just under a daily scan) plus a hard
+  file-count cap, so orphaned wallets can't fill the VM disk.
+- **PnL-curve signal** (`pnl_curve.py`). The `user-pnl` endpoint returns a
+  wallet's cumulative-PnL time series over its whole life. Shape metrics (trend
+  slope, max drawdown, up-day ratio, a JSON-safe Sharpe) let heavy traders the
+  3,500-cap can't fully replay still be judged on their long arc — steady earner
+  vs lucky-spike gambler.
+- **Entry discipline** (`entry_profile.py`). USD-weighted distribution of a
+  wallet's BUY entry prices. The qualification gate rejects **tail-dominated**
+  flow (`tail_ratio > max_tail_ratio`) — settlement-lag scooping near $1, the
+  INSIDER_FINDINGS dead end, is un-copyable even when "skilled". The copyable
+  band (0.05–0.95) is now one shared guard (`is_copyable_entry`).
+- **Generalized informed-timing** (`is_informed_early_bet`, see
+  INSIDER_FINDINGS): drops the discredited young-account + geo-only shape; gates
+  on size + non-tail entry + **early timing** instead. Account age is not
+  required — any consistent earner is a candidate.
+- **Gated Claude second opinion** (`llm_review.py`, Strategy 1c). For the top-N
+  statistically-qualified wallets, a compact dossier (skill, capture, entry
+  discipline, curve shape, recent bets) is sent to Claude for a `follow/watch/
+  skip` verdict + reasoning, annotated onto the Telegram ping. Alert-only, off by
+  default (`WALLET_DISCOVERY_LLM_REVIEW_ENABLED`), degrades to nothing on any
+  failure — it never blocks qualification or breaks a sweep.
+
+Watchlist re-evaluation/prune stays **continuous**: every sweep re-scores the
+pool *plus* every wallet already on the list, with hysteresis + `auto_remove`
+dropping decayed wallets — so "analyse the watchlist and remove the ones that
+stopped being good" happens each cycle rather than on a separate weekly job.

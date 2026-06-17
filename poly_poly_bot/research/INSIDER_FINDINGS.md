@@ -62,3 +62,16 @@ The backtest and the `is_insider_shaped` signal are retained: the existing live
 `pattern_detector` (alert-only) can still surface the rare early-insider shape
 for manual review, and the backtest can be re-run on future regimes (e.g. a
 spike in true insider activity) to re-test the thesis.
+
+## Follow-up: generalized informed-timing signal
+
+`is_informed_early_bet` (in `insider_signal.py`) is the live replacement that
+acts on the lessons above. It keeps the trade-*shape* idea but **drops the two
+parts this backtest discredited**: account youth (an anti-signal here — veterans
+outperformed) and the geo-only restriction. The decisive filters that remain are
+bet size, a **non-tail entry price** (no edge to copy in a near-certain $0.95+
+outcome — the shared `is_copyable_entry` guard), and **early timing** (bet placed
+≥ N hours before resolution) — the discriminator the naive shape lacked, since
+~98% of large bets land within 24h of resolution. This reframes Strategy 1a from
+"young + large + geo" to "informed positioning, regardless of track record",
+complementing 1b's "consistent, copyable earner" selection.

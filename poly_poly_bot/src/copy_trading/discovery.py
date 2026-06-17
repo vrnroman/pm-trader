@@ -42,6 +42,13 @@ class DiscoveryConfig:
     min_capture_cents: float = 1.5
     min_tstat: float = 10.0
     drop_capture_cents: float = 1.0
+    # entry-discipline gate: reject wallets whose buy $ is tail-dominated
+    # (settlement-lag scooping near $1 — un-copyable). Lenient by default.
+    max_tail_ratio: float = 0.5
+    # independent strategy theories (1a..1j) that can qualify a wallet (OR'd with
+    # the legacy capture+tstat gate). Defaults to the backtest-supported set;
+    # 1a (negative edge), 1e (needs resolution data), 1j (variance) are off.
+    enabled_theories: frozenset = frozenset({"1b", "1c", "1d", "1f", "1g", "1h", "1i"})
     # paper watchlist size cap
     watchlist_cap: int = 25
     # auto-remove decayed wallets from paper (False = keep accumulating)
@@ -59,6 +66,16 @@ class Eval:
     lead_cents: float = 0.0
     hit_rate: float = 0.0
     n: int = 0
+    # entry-price discipline (F2) — share of buy $ at tail / in the copyable band
+    tail_ratio: float = 0.0
+    copyable_ratio: float = 1.0
+    # PnL-curve shape (F1) — long-arc consistency, robust to the /activity cap
+    curve_sharpe: float = 0.0
+    curve_drawdown: float = 0.0
+    net_pnl: float = 0.0
+    # strategy theories that flagged this wallet + their reasons (why follow it)
+    flagged_by: tuple = ()
+    reason: str = ""
 
 
 @dataclass
@@ -101,6 +118,8 @@ def _meta(e: Eval) -> dict:
         "capture_cents": round(e.capture_cents, 3),
         "lead_cents": round(e.lead_cents, 3),
         "hit_rate": round(e.hit_rate, 3), "n": e.n,
+        "tail_ratio": round(e.tail_ratio, 3),
+        "flagged_by": list(e.flagged_by), "reason": e.reason,
     }
 
 
@@ -118,10 +137,18 @@ def run_discovery_cycle(
 
     qualified: dict[str, Eval] = {}
     for w, e in evaluated.items():
-        if e.tstat < cfg.min_tstat:
-            continue
-        entered = e.capture_cents >= cfg.min_capture_cents
-        retained = w in prev_on and _retain_on_decay(cfg, e)
+        if e.tail_ratio > cfg.max_tail_ratio:
+            continue  # tail-dominated buy flow — un-copyable, skip regardless of theory
+        flagged = bool(e.flagged_by)
+        # legacy lead-lag gate (== theory 1c) OR any independent theory fired
+        legacy = e.tstat >= cfg.min_tstat and e.capture_cents >= cfg.min_capture_cents
+        entered = legacy or flagged
+        # retain a prior wallet while it's still flagged, or (legacy path) while
+        # its t-stat holds the floor and capture hasn't decayed out — the t-stat
+        # floor applies even in keep mode, so a collapsed wallet is dropped.
+        retained_legacy = (w in prev_on and e.tstat >= cfg.min_tstat
+                           and _retain_on_decay(cfg, e))
+        retained = (w in prev_on and flagged) or retained_legacy
         if entered or retained:
             qualified[w] = e
 
