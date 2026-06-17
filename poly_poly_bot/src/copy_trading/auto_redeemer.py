@@ -188,7 +188,14 @@ async def check_and_redeem_positions(private_key: str) -> RedeemResult:
 
                 # Persist realized P&L so /pnl can report it. This is the only
                 # place a copy position is closed, so this ledger is the source
-                # of truth for Strategy 1 realized P&L.
+                # of truth for Strategy 1 realized P&L. We read the local
+                # inventory position first to attribute the row to its strategy
+                # tier and the followed wallet (stamped at buy time).
+                try:
+                    from src.copy_trading.inventory import get_position
+                    inv_pos = get_position(pos.get("tokenId", "")) or {}
+                except Exception:
+                    inv_pos = {}
                 try:
                     from src.copy_trading.pnl import append_realized
                     append_realized({
@@ -202,6 +209,9 @@ async def check_and_redeem_positions(private_key: str) -> RedeemResult:
                         "returned": round(returned, 6),
                         "pnl": round(returned - cost_basis, 6),
                         "won": won,
+                        "tier": inv_pos.get("tier", ""),
+                        "trader_address": inv_pos.get("trader_address", ""),
+                        "exit": "resolution",
                     })
                 except Exception as led_err:
                     logger.warn(f"[redeemer] Failed to record realized P&L: {error_message(led_err)}")

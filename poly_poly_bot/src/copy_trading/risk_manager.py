@@ -271,6 +271,13 @@ def adjust_placement(trade: DetectedTrade, delta_usd: float) -> None:
     logger.info(f"[risk] Adjusted placement by ${delta_usd:+.2f} | daily total: ${_state.daily_volume_usd:.2f}")
 
 
+def reset_state() -> None:
+    """Reset in-memory risk accounting to zero (paired with a P&L reset). Does
+    not write disk — the reset routine clears risk-state.json separately."""
+    global _state
+    _state = RiskState()
+
+
 def get_risk_status() -> dict:
     """Return current risk state summary for Telegram status commands."""
     _load_state()

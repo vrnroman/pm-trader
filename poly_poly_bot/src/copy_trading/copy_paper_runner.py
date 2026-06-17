@@ -19,6 +19,7 @@ from src.copy_trading.copy_paper import CopyPaperEngine, CycleSummary, PaperCopy
 from src.copy_trading.copy_paper_live import (
     fetch_asks,
     fetch_bids,
+    load_watchlist_flagged_by,
     load_watchlist_wallets,
     make_detector,
     make_exit_detector,
@@ -40,7 +41,7 @@ class CopyPaperRunner:
         min_usd: float = 500.0,
         cycle_interval_s: int = 120,
         # injectable dependencies (defaults are the live ones)
-        detector_factory: Optional[Callable[[list[str], float, float], Callable]] = None,
+        detector_factory: Optional[Callable[[list[str], float, float, dict], Callable]] = None,
         book_fetcher: Optional[Callable[[str], list[tuple[float, float]]]] = None,
         resolver: Optional[Callable[[str], Optional[int]]] = None,
         exit_detector_factory: Optional[Callable[[list[str], float], Callable]] = None,
@@ -69,11 +70,21 @@ class CopyPaperRunner:
             return self._explicit_wallets
         return load_watchlist_wallets(self.watchlist_path or "")
 
+    def flagged_by_map(self) -> dict:
+        """Wallet -> discovery theories, reloaded from the watchlist each cycle
+        so newly-flagged wallets are attributed without a restart. Empty when
+        running on an explicit wallet list (no watchlist file)."""
+        if self._explicit_wallets or not self.watchlist_path:
+            return {}
+        return load_watchlist_flagged_by(self.watchlist_path)
+
     def run_once(self) -> CycleSummary:
         wallets = self.wallets()
         if not wallets:
             return CycleSummary()
-        detector = self._detector_factory(wallets, self.max_age_s, self.min_usd)
+        detector = self._detector_factory(
+            wallets, self.max_age_s, self.min_usd, self.flagged_by_map()
+        )
         exit_detector = self._exit_detector_factory(wallets, self.max_age_s)
         engine = CopyPaperEngine(
             self.ledger, detector=detector, book_fetcher=self._book_fetcher,

@@ -284,6 +284,13 @@ def release_tiered_exposure(tier: StrategyTier, amount: float) -> None:
     )
 
 
+def reset_state() -> None:
+    """Reset every tier's open exposure + daily volume to zero (paired with a
+    P&L reset). Does not write disk — the reset routine clears the state file."""
+    for tier_key in _tier_exposures:
+        _tier_exposures[tier_key] = TierExposure()
+
+
 def get_tiered_risk_status() -> dict:
     """Return current tiered risk state summary for Telegram status commands."""
     _load_state()

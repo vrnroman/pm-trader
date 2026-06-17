@@ -156,6 +156,11 @@ class Config:
     max_spread_bps: int = _opt_int("MAX_SPREAD_BPS", 500)
     max_copies_per_market_side: int = _opt_int("MAX_COPIES_PER_MARKET_SIDE", 2)
     redeem_interval_hours: float = _opt_float("REDEEM_INTERVAL_HOURS", 0.5)
+    # Paper-mode realization: in preview the on-chain redeemer is gated off, so
+    # System-A copy positions would never realize. When enabled, the periodic
+    # loop books realized P&L for resolved preview positions (and preview SELLs
+    # book an early-exit P&L) so /pnl reflects a real paper track record.
+    preview_realize_enabled: bool = _opt_bool("PREVIEW_REALIZE_ENABLED", True)
     trade_monitor_mode: str = _optional("TRADE_MONITOR_MODE", "data-api")
 
     # --- Copy-paper harness (Strategy 1b validation; PREVIEW-only, no orders) ---

@@ -112,6 +112,10 @@ class PaperPosition:
     # ledger lines that predate these keys still load):
     title: str = ""         # market question, e.g. "Will BTC hit $100k in 2025?"
     slug: str = ""          # PM event slug -> polymarket.com/event/<slug>
+    # Discovery strategy theories that flagged the target wallet (e.g. ("1b","1f")),
+    # stamped at open so per-strategy P&L attribution is stable even as the
+    # watchlist re-flags the wallet later. Default-safe: old ledger lines load as ().
+    flagged_by: tuple = ()
     # filled on resolution OR on following the target's exit:
     closed: bool = False
     won: Optional[bool] = None
@@ -263,6 +267,7 @@ class CopyPaperEngine:
                 token_id=tr["token_id"], outcome_index=int(tr["outcome_index"]),
                 category=tr.get("category", "other"), their_price=tr["their_price"],
                 title=tr.get("title", ""), slug=tr.get("slug", ""),
+                flagged_by=tuple(tr.get("flagged_by", ())),
                 entry_price=fill.avg_price, shares=fill.shares, spent=fill.spent,
                 drag_bps=fill.drag_bps, opened_ts=now,
             ))

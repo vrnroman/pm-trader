@@ -176,6 +176,43 @@ def _check_market_quality(
     return None
 
 
+def _book_preview_exit(trade, sell_shares: float) -> None:
+    """Book an early-exit realized-P&L row when a preview position is sold by
+    mirroring the trader (paper analogue of an exit). Best-effort; attribution
+    (tier/trader) is read from the held inventory position."""
+    try:
+        from datetime import datetime, timezone
+
+        from src.copy_trading.inventory import get_position
+        from src.copy_trading.pnl import append_realized
+
+        held = get_position(trade.token_id)
+        if not held:
+            return
+        avg = float(held.get("avg_price", 0) or 0)
+        qty = min(sell_shares, float(held.get("shares", 0) or 0))
+        if qty <= 0:
+            return
+        pnl = qty * (trade.price - avg)
+        append_realized({
+            "timestamp": trade.timestamp or datetime.now(timezone.utc).isoformat(),
+            "title": trade.market,
+            "condition_id": trade.condition_id,
+            "token_id": trade.token_id,
+            "shares": round(qty, 6),
+            "avg_price": round(avg, 6),
+            "cost_basis": round(qty * avg, 6),
+            "returned": round(qty * trade.price, 6),
+            "pnl": round(pnl, 6),
+            "won": pnl > 0,
+            "tier": held.get("tier", "") or "",
+            "trader_address": trade.trader_address,
+            "exit": "sell",
+        })
+    except Exception as exc:
+        logger.warn(f"[exec] preview exit booking failed: {error_message(exc)}")
+
+
 # ---------------------------------------------------------------------------
 # Order execution
 # ---------------------------------------------------------------------------
@@ -493,9 +530,14 @@ async def place_trade_orders(
                 # Record in inventory for preview tracking
                 if trade.side == "BUY":
                     shares = copy_size / trade.price if trade.price > 0 else 0
-                    record_buy(trade.token_id, shares, trade.price, market_key, trade.market)
+                    record_buy(
+                        trade.token_id, shares, trade.price, market_key, trade.market,
+                        tier=tier or "", trader_address=trade.trader_address,
+                    )
                 elif trade.side == "SELL":
                     shares = copy_size / trade.price if trade.price > 0 else 0
+                    if shares > 0 and CONFIG.preview_realize_enabled:
+                        _book_preview_exit(trade, shares)
                     record_sell(trade.token_id, shares)
 
                 record_trade_history(TradeRecord(
@@ -649,6 +691,8 @@ async def process_verifications(
                             fill.fill_price,
                             po.market_key,
                             trade.market,
+                            tier=po.tier or "",
+                            trader_address=trade.trader_address,
                         )
                     elif trade.side == "SELL":
                         record_sell(trade.token_id, new_shares)
@@ -697,6 +741,8 @@ async def process_verifications(
                             fill.fill_price,
                             po.market_key,
                             trade.market,
+                            tier=po.tier or "",
+                            trader_address=trade.trader_address,
                         )
                     elif trade.side == "SELL":
                         record_sell(trade.token_id, new_shares)
@@ -869,6 +915,8 @@ async def recover_pending_orders(clob_client: ClobClient) -> None:
                             fill.fill_price,
                             po.market_key,
                             trade.market,
+                            tier=po.tier or "",
+                            trader_address=trade.trader_address,
                         )
                     elif trade.side == "SELL":
                         record_sell(trade.token_id, new_shares)
@@ -890,6 +938,8 @@ async def recover_pending_orders(clob_client: ClobClient) -> None:
                             fill.fill_price,
                             po.market_key,
                             trade.market,
+                            tier=po.tier or "",
+                            trader_address=trade.trader_address,
                         )
                     elif trade.side == "SELL":
                         record_sell(trade.token_id, new_shares)

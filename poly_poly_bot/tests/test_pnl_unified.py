@@ -1,0 +1,183 @@
+"""Unified per-strategy + per-wallet P&L aggregation (pure)."""
+
+from __future__ import annotations
+
+import pytest
+
+from src.copy_trading.copy_paper import PaperPosition
+from src.copy_trading.pnl import OpenPositionPnl
+from src.copy_trading.pnl_unified import (
+    UNTAGGED_A,
+    UNTAGGED_B,
+    aggregate_system_a,
+    aggregate_system_b,
+    best_worst,
+    build_unified,
+)
+
+
+# --------------------------------------------------------------------------- #
+# Builders
+# --------------------------------------------------------------------------- #
+
+def _open(token, trader, tier, shares, avg, cur):
+    cost = shares * avg
+    upnl = None if cur is None else shares * cur - cost
+    return OpenPositionPnl(
+        token_id=token, market="M", shares=shares, avg_price=avg, cur_price=cur,
+        cost=cost, value=(0.0 if cur is None else shares * cur),
+        unrealized_pnl=upnl, unrealized_pct=(None if cur is None else upnl / cost),
+        tier=tier, trader_address=trader,
+    )
+
+
+def _paper(target, *, flagged_by=(), closed=False, won=None, pnl=0.0, spent=50.0,
+           their_price=0.50, entry_price=0.50, copy_id="c"):
+    return PaperPosition(
+        copy_id=copy_id, target=target, condition_id="0xC", token_id="TOK",
+        outcome_index=0, category="research", their_price=their_price,
+        entry_price=entry_price, shares=spent / entry_price, spent=spent,
+        drag_bps=0, opened_ts=0.0, flagged_by=flagged_by,
+        closed=closed, won=won, pnl=pnl,
+    )
+
+
+# --------------------------------------------------------------------------- #
+# System A
+# --------------------------------------------------------------------------- #
+
+def test_system_a_groups_realized_by_stamped_tier_and_wallet():
+    rows = [
+        {"trader_address": "0xAaa", "tier": "1a", "pnl": 10.0, "cost_basis": 40.0, "won": True},
+        {"trader_address": "0xAaa", "tier": "1a", "pnl": -4.0, "cost_basis": 20.0, "won": False},
+        {"trader_address": "0xBbb", "tier": "1b", "pnl": 6.0, "cost_basis": 30.0, "won": True},
+    ]
+    wallets = aggregate_system_a(rows, [])
+    by_addr = {w.wallet: w for w in wallets}
+    assert by_addr["0xaaa"].realized_pnl == 6.0
+    assert by_addr["0xaaa"].wins == 1 and by_addr["0xaaa"].losses == 1
+    assert by_addr["0xaaa"].strategies == ("A:1a",)
+    assert by_addr["0xaaa"].roi == pytest.approx(6.0 / 60.0)
+    assert by_addr["0xbbb"].strategies == ("A:1b",)
+
+
+def test_system_a_falls_back_to_tier_of_then_untagged():
+    rows = [
+        {"trader_address": "0xCcc", "pnl": 5.0, "cost_basis": 10.0, "won": True},   # no tier -> fallback
+        {"trader_address": "", "pnl": 2.0, "cost_basis": 5.0, "won": True},          # no wallet -> untagged
+    ]
+    wallets = aggregate_system_a(rows, [], tier_of=lambda a: "1c" if a == "0xccc" else None)
+    by_addr = {w.wallet: w for w in wallets}
+    assert by_addr["0xccc"].strategies == ("A:1c",)
+    assert UNTAGGED_A in by_addr["(unknown)"].strategies
+
+
+def test_system_a_open_positions_add_unrealized_and_cost():
+    opens = [_open("t1", "0xAaa", "1a", shares=100, avg=0.40, cur=0.60)]   # +20 unrealized
+    wallets = aggregate_system_a([], opens)
+    w = wallets[0]
+    assert w.unrealized_pnl == pytest.approx(20.0)
+    assert w.open_cost == pytest.approx(40.0)
+    assert w.n_open == 1
+    assert w.roi == pytest.approx(20.0 / 40.0)   # priced open cost feeds ROI
+
+
+def test_system_a_unpriced_open_excluded_from_roi_denominator():
+    opens = [_open("t1", "0xAaa", "1a", shares=10, avg=0.30, cur=None)]
+    wallets = aggregate_system_a([], opens)
+    w = wallets[0]
+    assert w.unrealized_pnl == 0.0
+    assert w.open_cost == pytest.approx(3.0)
+    assert w.cost_basis == 0.0       # unpriced -> not measured
+    assert w.roi is None
+
+
+# --------------------------------------------------------------------------- #
+# System B
+# --------------------------------------------------------------------------- #
+
+def test_system_b_multi_theory_wallet_listed_under_each_theory_once_in_total():
+    positions = [
+        _paper("0xT", flagged_by=("1b", "1f"), closed=True, won=True, pnl=30.0, spent=50.0),
+    ]
+    wallets = aggregate_system_b(positions)
+    assert len(wallets) == 1
+    w = wallets[0]
+    assert set(w.strategies) == {"B:1b", "B:1f"}
+    assert w.realized_pnl == 30.0
+
+    unified = build_unified([], wallets)
+    labels = {s.label: s for s in unified.strategies}
+    # the wallet's PnL shows in BOTH theory blocks ...
+    assert labels["B:1b"].realized_pnl == 30.0
+    assert labels["B:1f"].realized_pnl == 30.0
+    # ... but the grand total counts it once.
+    assert unified.total_realized == 30.0
+
+
+def test_system_b_excludes_dust_fills():
+    # entry far below their_price -> dust (pre-fix stale book sweep)
+    dust = _paper("0xT", closed=True, won=False, pnl=-49.0, spent=50.0,
+                  their_price=0.60, entry_price=0.001)
+    wallets = aggregate_system_b([dust])
+    assert wallets == []
+
+
+def test_system_b_flagged_by_fallback_to_current_watchlist_then_untagged():
+    p_fallback = _paper("0xT", flagged_by=(), closed=True, won=True, pnl=5.0, copy_id="a")
+    p_orphan = _paper("0xZ", flagged_by=(), closed=True, won=True, pnl=7.0, copy_id="b")
+    wallets = aggregate_system_b([p_fallback, p_orphan], flagged_by_now={"0xt": ["1d"]})
+    by = {w.wallet: w for w in wallets}
+    assert by["0xt"].strategies == ("B:1d",)
+    assert by["0xz"].strategies == (UNTAGGED_B,)
+
+
+def test_system_b_open_positions_count_but_dont_feed_roi():
+    positions = [_paper("0xT", flagged_by=("1b",), closed=False, spent=50.0)]
+    wallets = aggregate_system_b(positions)
+    w = wallets[0]
+    assert w.n_open == 1 and w.n_closed == 0
+    assert w.open_cost == 50.0
+    assert w.cost_basis == 0.0
+    assert w.roi is None
+    assert w.net_pnl == 0.0
+
+
+# --------------------------------------------------------------------------- #
+# Unification + ranking
+# --------------------------------------------------------------------------- #
+
+def test_build_unified_orders_strategies_and_sums_total_over_unique_wallets():
+    a = aggregate_system_a(
+        [{"trader_address": "0xA", "tier": "1a", "pnl": 10.0, "cost_basis": 20.0, "won": True}], []
+    )
+    b = aggregate_system_b([_paper("0xB", flagged_by=("1c",), closed=True, won=True, pnl=5.0)])
+    unified = build_unified(a, b)
+    labels = [s.label for s in unified.strategies]
+    assert labels == ["A:1a", "B:1c"]          # A before B
+    assert unified.total_realized == 15.0
+    assert unified.total_net == 15.0
+
+
+def test_best_worst_ranks_by_pnl_and_roi():
+    a = aggregate_system_a(
+        [
+            {"trader_address": "0x1", "tier": "1a", "pnl": 100.0, "cost_basis": 1000.0, "won": True},  # +10% ROI
+            {"trader_address": "0x2", "tier": "1a", "pnl": -50.0, "cost_basis": 100.0, "won": False},  # -50% ROI
+            {"trader_address": "0x3", "tier": "1a", "pnl": 5.0, "cost_basis": 10.0, "won": True},   # +50% ROI
+            {"trader_address": "0x4", "tier": "1a", "pnl": 1.0, "cost_basis": 100.0, "won": True},  # +1% ROI
+        ],
+        [],
+    )
+    bw = best_worst(a, k=2)
+    assert [w.wallet for w in bw.by_pnl_best] == ["0x1", "0x3"]
+    assert [w.wallet for w in bw.by_pnl_worst] == ["0x2", "0x4"]
+    assert bw.by_roi_best[0].wallet == "0x3"     # highest ROI
+    assert bw.by_roi_worst[0].wallet == "0x2"    # most negative ROI
+
+
+def test_best_worst_roi_excludes_undefined_roi():
+    b = aggregate_system_b([_paper("0xOpen", flagged_by=("1b",), closed=False, spent=50.0)])
+    bw = best_worst(b, k=3)
+    assert bw.by_roi_best == [] and bw.by_roi_worst == []
+    assert [w.wallet for w in bw.by_pnl_best] == ["0xopen"]

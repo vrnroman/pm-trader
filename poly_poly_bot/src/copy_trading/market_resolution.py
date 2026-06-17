@@ -105,6 +105,19 @@ def fetch_resolution(
     return res
 
 
+def fetch_market(condition_id: str, session: requests.Session | None = None) -> dict | None:
+    """Return the raw Gamma market dict for a condition id (or None on failure).
+
+    Unlike ``fetch_resolution`` this is uncached and exposes the full market —
+    notably ``clobTokenIds`` and ``outcomePrices`` — which the preview realizer
+    needs to map a held token to its outcome index and resolution. Resolved
+    positions are dropped from inventory after first use, so re-fetching only
+    ever hits still-open markets."""
+    if not condition_id:
+        return None
+    return _get(session or requests.Session(), condition_id)
+
+
 def _read_cache(condition_id: str, cache_dir: str | None) -> MarketResolution | None:
     if not cache_dir:
         return None

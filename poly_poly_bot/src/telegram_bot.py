@@ -45,10 +45,12 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "start", "description": "Show all commands"},
     {"command": "help", "description": "Show all commands"},
     {"command": "status", "description": "Balance, positions, daily limits"},
-    {"command": "pnl", "description": "P&L: realized + unrealized"},
+    {"command": "pnl", "description": "P&L by strategy: realized + unrealized + total"},
+    {"command": "wallets", "description": "3 best & worst wallets per strategy (by PnL & ROI)"},
     {"command": "history", "description": "Last 10 copy trades"},
     {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
     {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
+    {"command": "reset", "description": "Zero all P&L + risk/spend state (archives first; needs CONFIRM)"},
     {"command": "shutdown", "description": "Graceful shutdown (Docker restarts container)"},
 ]
 
@@ -156,10 +158,14 @@ def _handle_command(text: str):
         _handle_status()
     elif text.startswith("/pnl"):
         _handle_pnl()
+    elif text.startswith("/wallets"):
+        _handle_wallets()
     elif text.startswith("/check"):
         _handle_check()
     elif text.startswith("/setkey"):
         _handle_setkey(text)
+    elif text.startswith("/reset"):
+        _handle_reset(text)
     elif text.startswith("/shutdown"):
         _handle_shutdown(text)
     elif text.startswith("/help") or text.startswith("/start"):
@@ -197,97 +203,140 @@ def _handle_status():
     send_message("\n".join(lines))
 
 
-def _compute_s1_pnl():
-    """Compute Strategy #1 (copy trading) P&L from the realized ledger plus
-    open inventory positions marked to current market prices."""
+def _short_wallet(w: str) -> str:
+    """0x1234…cdef — compact wallet address for leaderboard lines."""
+    w = w or ""
+    return f"{w[:6]}…{w[-4:]}" if len(w) > 12 else (w or "—")
+
+
+def _compute_unified():
+    """Build the unified per-strategy / per-wallet P&L across both copy systems.
+
+    System A = tiered executor (``realized-pnl.jsonl`` + open inventory marked to
+    midpoint, attributed by tier/trader). System B = the paper-copy harness
+    ledger (attributed by ``target`` wallet + discovery theories). Returns
+    ``(unified, a_wallets, b_wallets, n_unpriced)`` so /pnl and /wallets share
+    one computation.
+    """
     from src.copy_trading import inventory
     from src.copy_trading import pnl as s1pnl
+    from src.copy_trading import pnl_unified as u
+    from src.copy_trading.copy_paper import PaperCopyLedger
+    from src.copy_trading.copy_paper_live import load_watchlist_flagged_by
+    from src.copy_trading.strategy_config import get_wallet_tier
 
+    # System A — tiered executor
     realized_rows = s1pnl.load_realized()
     positions = inventory.get_positions()
-    # Mark to midpoint (no exit fee — copy positions redeem on-chain fee-free).
     open_pos = s1pnl.value_open_positions(positions, _fetch_midpoint, fee=0.0)
-    return s1pnl.summarize(realized_rows, open_pos)
+    n_unpriced = sum(1 for p in open_pos if p.unrealized_pnl is None)
+    a_wallets = u.aggregate_system_a(realized_rows, open_pos, tier_of=get_wallet_tier)
 
+    # System B — paper-copy harness
+    try:
+        ledger = PaperCopyLedger(CONFIG.copy_paper_ledger)
+        paper_positions = list(ledger.positions.values())
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"copy-paper ledger load failed: {e}")
+        paper_positions = []
+    flagged_now = load_watchlist_flagged_by(CONFIG.copy_paper_watchlist)
+    b_wallets = u.aggregate_system_b(paper_positions, flagged_now)
 
-def _render_s1_block(s1) -> list[str]:
-    """Render the Strategy #1 section of the /pnl report."""
-    lines = ["<b>Strategy #1 — Copy Traders</b>"]
-    if not CONFIG.strategy1_enabled:
-        lines.append("  [disabled]")
-        return lines
-
-    realized_str = f"  Realized:    ${s1.realized_pnl:+.2f}"
-    if s1.realized_trades:
-        hit = s1.hit_rate or 0.0
-        realized_str += f"  ({s1.realized_wins}W/{s1.realized_losses}L, {hit:.0%} hit)"
-    lines.append(realized_str)
-
-    lines.append(f"  Unrealized:  ${s1.unrealized_pnl:+.2f}")
-    lines.append(f"  Net:         ${s1.net_pnl:+.2f}")
-
-    if s1.open_positions:
-        roi = s1.unrealized_roi
-        roi_str = f", ROI {roi:+.1%}" if roi is not None else ""
-        lines.append(
-            f"  Open bets:   {s1.open_positions}  "
-            f"(mkt ${s1.market_value:.2f} / cost ${s1.cost_basis:.2f}{roi_str})"
-        )
-        if s1.unpriced:
-            lines.append(f"  ⚠ {s1.unpriced} position(s) unpriced (no live quote)")
-        # Best/worst open movers (mark-to-market) — actionable at a glance.
-        priced = [p for p in s1.positions if p.unrealized_pnl is not None]
-        if priced:
-            best = max(priced, key=lambda p: p.unrealized_pnl)
-            worst = min(priced, key=lambda p: p.unrealized_pnl)
-            lines.append(
-                f"  ▲ best:  ${best.unrealized_pnl:+.2f}  "
-                f"{_esc(best.market[:40] or best.token_id[:12])}"
-            )
-            if worst is not best:
-                lines.append(
-                    f"  ▼ worst: ${worst.unrealized_pnl:+.2f}  "
-                    f"{_esc(worst.market[:40] or worst.token_id[:12])}"
-                )
-    else:
-        lines.append("  Open bets:   0")
-    return lines
+    unified = u.build_unified(a_wallets, b_wallets)
+    return unified, a_wallets, b_wallets, n_unpriced
 
 
 def _handle_pnl():
-    """Handle /pnl command — Strategy #1 P&L report."""
-    s1 = _compute_s1_pnl() if CONFIG.strategy1_enabled else None
+    """Handle /pnl — unified P&L: overall total + per-strategy breakdown.
 
-    if s1 is not None and s1.open_positions > 0:
-        send_message("\U0001f4ca <b>P&amp;L Report</b>\nFetching live prices...")
+    Strategy labels are ``A:1a``/``A:1b``/``A:1c`` (executor tiers) and
+    ``B:1a``..``B:1j`` (discovery theories the paper-copied wallet was flagged
+    by), plus ``untagged-*`` for un-attributed positions."""
+    unified, a_wallets, b_wallets, n_unpriced = _compute_unified()
+
+    all_w = a_wallets + b_wallets
+    total_open = sum(w.n_open for w in all_w)
+    total_closed = sum(w.n_closed for w in all_w)
+    wins = sum(w.wins for w in all_w)
+    losses = sum(w.losses for w in all_w)
 
     lines = ["\U0001f4ca <b>P&amp;L Report</b>", ""]
-
-    if s1 is not None:
-        lines.extend(_render_s1_block(s1))
-        grand_realized = s1.realized_pnl
-        grand_unrealized = s1.unrealized_pnl
-        grand_open_bets = s1.open_positions
-    else:
-        lines.append("<b>Strategy #1 — Copy Traders</b>")
-        lines.append("  [disabled]")
-        grand_realized = 0.0
-        grand_unrealized = 0.0
-        grand_open_bets = 0
+    lines.append("<b>TOTAL</b>")
+    lines.append(f"  Realized:    ${unified.total_realized:+.2f}")
+    lines.append(f"  Unrealized:  ${unified.total_unrealized:+.2f}")
+    lines.append(f"  Net:         ${unified.total_net:+.2f}")
+    lines.append(f"  Open bets:   {total_open}")
+    if total_closed:
+        hit = wins / total_closed if total_closed else 0.0
+        lines.append(f"  Record:      {wins}W/{losses}L ({hit:.0%} hit)")
+    if n_unpriced:
+        lines.append(f"  ⚠ {n_unpriced} position(s) unpriced (no live quote)")
 
     lines.append("")
-    lines.append("─" * 14)
-    lines.append("<b>TOTAL:</b>")
-    lines.append(f"  Realized:    ${grand_realized:+.2f}")
-    lines.append(f"  Unrealized:  ${grand_unrealized:+.2f}")
-    lines.append(f"  Open bets:   {grand_open_bets}")
-    net_pnl = grand_realized + grand_unrealized
-    lines.append(f"  Net P&amp;L:     ${net_pnl:+.2f}")
+    lines.append("<b>By strategy</b>  <i>(net | realized/unrealized | ROI | wallets | closed/open)</i>")
+    if not unified.strategies:
+        lines.append("  (no positions yet)")
+    for sp in unified.strategies:
+        roi = sp.roi
+        roi_str = f"ROI {roi:+.0%}" if roi is not None else "ROI n/a"
+        if sp.system == "A":
+            pnl_str = f"r ${sp.realized_pnl:+.0f}/u ${sp.unrealized_pnl:+.0f}"
+        else:
+            pnl_str = f"r ${sp.realized_pnl:+.0f}"
+        lines.append(
+            f"<code>{_esc(sp.label)}</code>  ${sp.net_pnl:+.2f}  ({pnl_str}, {roi_str})  "
+            f"— {sp.n_wallets}w {sp.n_closed}c/{sp.n_open}o"
+        )
 
+    lines.append("")
+    lines.append("<i>/wallets — 3 best &amp; worst wallets per strategy</i>")
     if CONFIG.preview_mode:
-        lines.append(f"\n<i>PREVIEW MODE — positions are simulated</i>")
+        lines.append("<i>PREVIEW MODE — positions are simulated</i>")
 
-    send_message("\n".join(lines))
+    _send_chunked("\n".join(lines))
+
+
+def _wallet_line(w) -> str:
+    """One leaderboard row: addr, net P&L, ROI, win/loss record."""
+    roi = w.roi
+    roi_str = f"ROI {roi:+.0%}" if roi is not None else "ROI n/a"
+    rec = f", {w.wins}W/{w.losses}L" if (w.wins + w.losses) else ""
+    return f"<code>{_short_wallet(w.wallet)}</code> ${w.net_pnl:+.2f} ({roi_str}{rec})"
+
+
+def _handle_wallets():
+    """Handle /wallets — per strategy, the 3 best & 3 worst wallets by P&L and
+    by ROI. These are the promote-to-real-money / drop candidates."""
+    from src.copy_trading import pnl_unified as u
+
+    unified, _a, _b, _n = _compute_unified()
+    if not unified.strategies:
+        send_message("\U0001f3c5 <b>Wallet leaderboard</b>\nNo positions yet.")
+        return
+
+    lines = [
+        "\U0001f3c5 <b>Wallet leaderboard</b> <i>(promotion / removal candidates)</i>",
+        "",
+    ]
+    for sp in unified.strategies:
+        bw = u.best_worst(sp.wallets, k=3)
+        lines.append(f"<b>{_esc(sp.label)}</b>  ({sp.n_wallets}w)")
+        lines.append("  ▲ best PnL:")
+        for w in bw.by_pnl_best:
+            lines.append("     " + _wallet_line(w))
+        lines.append("  ▼ worst PnL:")
+        for w in bw.by_pnl_worst:
+            lines.append("     " + _wallet_line(w))
+        if bw.by_roi_best:
+            lines.append("  ▲ best ROI:")
+            for w in bw.by_roi_best:
+                lines.append("     " + _wallet_line(w))
+            lines.append("  ▼ worst ROI:")
+            for w in bw.by_roi_worst:
+                lines.append("     " + _wallet_line(w))
+        lines.append("")
+
+    _send_chunked("\n".join(lines))
 
 
 def _handle_history():
@@ -393,6 +442,40 @@ def _handle_setkey(text: str):
         "Restart will reload the .env key."
     )
     logger.warning(f"PRIVATE_KEY rotated in memory via /setkey (EOA={eoa})")
+
+
+def _handle_reset(text: str):
+    """Handle /reset CONFIRM — zero all P&L + risk/spend state (archives first).
+
+    Clears both copy systems' ledgers/state and the executor's in-memory
+    counters. The paper-copy harness holds its ledger in memory in a daemon
+    thread, so to fully clear System B you must restart: this prompts a
+    /shutdown so the container comes back up on the empty ledger. For a
+    guaranteed-clean reset, run ``python -m scripts.reset_pnl --confirm`` on the
+    VM with the bot stopped.
+    """
+    parts = text.split()
+    if len(parts) != 2 or parts[1] != "CONFIRM":
+        send_message(
+            "Usage: <code>/reset CONFIRM</code>\n"
+            "Zeroes <b>all</b> P&amp;L + risk/spend state for both copy systems "
+            "(archives a timestamped backup first). Open/unredeemed bets are dropped.\n"
+            "After it runs, send <code>/shutdown CONFIRM</code> so the paper "
+            "harness restarts on the empty ledger."
+        )
+        return
+
+    from src.copy_trading.reset_pnl import reset_pnl
+
+    res = reset_pnl(CONFIG.data_dir, confirm=True, copy_paper_ledger=CONFIG.copy_paper_ledger)
+    logger.warning("P&L reset via /reset CONFIRM")
+    send_message(
+        "🧹 <b>P&amp;L reset</b> — " + _esc(res.summary()) + ".\n"
+        "Executor + risk/spend state zeroed and backed up to <code>data/archive/</code>.\n"
+        "The paper-copy harness keeps its ledger in memory — send "
+        "<code>/shutdown CONFIRM</code> now to restart it on the empty ledger "
+        "(Docker brings the container back automatically)."
+    )
 
 
 def _handle_shutdown(text: str):
@@ -557,12 +640,14 @@ def _handle_help():
         "<b>Polymarket Copy-Trading Bot — Commands</b>\n\n"
         "<b>Strategy #1 — Copy Trading</b>\n"
         "<code>/status</code> — Bot status, balance, positions\n"
-        "<code>/pnl</code> — P&amp;L: realized + unrealized\n"
+        "<code>/pnl</code> — P&amp;L by strategy: realized + unrealized + total\n"
+        "<code>/wallets</code> — 3 best &amp; worst wallets per strategy (PnL &amp; ROI)\n"
         "<code>/history</code> — Last 10 copy trades\n"
         "<code>/check</code> — Verify trading setup (read-only)\n\n"
         "<b>Safety levers</b>\n"
         "<code>/setkey clear CONFIRM</code> — Wipe in-memory private key\n"
         "<code>/setkey 0xHEX CONFIRM</code> — Replace key in memory\n"
+        "<code>/reset CONFIRM</code> — Zero all P&amp;L + risk/spend state (archives first)\n"
         "<code>/shutdown CONFIRM</code> — Graceful exit (container will restart)\n\n"
         "<code>/help</code> — Show this message\n\n"
         f"Strategy #1: {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"

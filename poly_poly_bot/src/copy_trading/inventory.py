@@ -118,8 +118,17 @@ def record_buy(
     price: float,
     market_key: str = "",
     market: str = "",
+    tier: str = "",
+    trader_address: str = "",
 ) -> None:
-    """Record a BUY fill. Updates weighted average price."""
+    """Record a BUY fill. Updates weighted average price.
+
+    ``tier`` (1a/1b/1c) and ``trader_address`` (the followed wallet whose trade
+    we copied) are stamped on the position so realized P&L can be attributed to
+    a strategy and a wallet. They're set on first open and preserved on
+    subsequent weighted-average adds (first-opener wins), so the dominant
+    one-tracked-wallet-per-token case is attributed correctly.
+    """
     pos = _positions.get(token_id)
     if pos is None:
         _positions[token_id] = {
@@ -127,6 +136,8 @@ def record_buy(
             "avg_price": price,
             "market_key": market_key,
             "market": market,
+            "tier": tier,
+            "trader_address": trader_address,
         }
     else:
         new_avg = weighted_avg_price(pos["shares"], pos["avg_price"], shares, price)
@@ -136,6 +147,11 @@ def record_buy(
             pos["market_key"] = market_key
         if market:
             pos["market"] = market
+        # Preserve the original attribution; only fill if it was missing.
+        if tier and not pos.get("tier"):
+            pos["tier"] = tier
+        if trader_address and not pos.get("trader_address"):
+            pos["trader_address"] = trader_address
     _save_inventory()
     logger.info(
         f"[inventory] BUY {shares:.4f} shares of {token_id[:12]}... @ ${price:.4f} | "
@@ -160,6 +176,13 @@ def record_sell(token_id: str, shares: float) -> None:
             f"remaining: {pos['shares']:.4f}"
         )
     _save_inventory()
+
+
+def reset_state() -> None:
+    """Drop all in-memory positions (paired with a P&L reset). Does not touch
+    disk — the reset routine clears the inventory file separately."""
+    global _positions
+    _positions = {}
 
 
 def has_position(token_id: str) -> bool:
@@ -266,11 +289,16 @@ async def sync_inventory_from_api(proxy_wallet: str) -> int:
         if shares <= 0:
             continue
 
+        # Preserve locally-stamped attribution (tier/trader) across reconciliation;
+        # the Data API doesn't carry it, and dropping it would orphan realized P&L.
+        prev = _positions.get(token_id, {})
         _positions[token_id] = {
             "shares": shares,
             "avg_price": avg_price,
             "market_key": condition_id,
             "market": market,
+            "tier": prev.get("tier", ""),
+            "trader_address": prev.get("trader_address", ""),
         }
         synced += 1
 

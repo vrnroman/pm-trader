@@ -156,6 +156,11 @@ def s1_pnl_env(monkeypatch, tmp_path):
     monkeypatch.setattr(CONFIG, "data_dir", str(tmp_path))
     monkeypatch.setattr(CONFIG, "strategy1_enabled", True)
     monkeypatch.setattr(CONFIG, "preview_mode", False)
+    # Keep System B (paper-copy harness) out of these System-A tests: point its
+    # ledger + watchlist at non-existent tmp paths so the unified /pnl shows
+    # only the inventory/realized-ledger data the test sets up.
+    monkeypatch.setattr(CONFIG, "copy_paper_ledger", str(tmp_path / "paper.jsonl"))
+    monkeypatch.setattr(CONFIG, "copy_paper_watchlist", str(tmp_path / "wl.json"))
 
     buf: list[str] = []
     monkeypatch.setattr(telegram_bot, "send_message", lambda text, **_kw: buf.append(text))

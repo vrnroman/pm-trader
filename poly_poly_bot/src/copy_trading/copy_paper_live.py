@@ -35,8 +35,19 @@ def _get(base: str, path: str, **params):
     return None
 
 
-def make_detector(wallets: list[str], max_age_s: float, min_usd: float):
-    """Return a detector() yielding fresh, large target BUY trades to copy."""
+def make_detector(
+    wallets: list[str],
+    max_age_s: float,
+    min_usd: float,
+    flagged_by_map: Optional[dict] = None,
+):
+    """Return a detector() yielding fresh, large target BUY trades to copy.
+
+    ``flagged_by_map`` maps a lowercased wallet -> list of discovery strategy
+    theories that flagged it; each emitted trade carries that list so the paper
+    position can be attributed to a strategy at open time.
+    """
+    fb = {k.lower(): v for k, v in (flagged_by_map or {}).items()}
 
     def detect() -> list[dict]:
         out = []
@@ -72,6 +83,7 @@ def make_detector(wallets: list[str], max_age_s: float, min_usd: float):
                     # event slug drives the polymarket.com/event/<slug> link;
                     # data-api uses eventSlug, falling back to the market slug.
                     "slug": a.get("eventSlug") or a.get("slug") or "",
+                    "flagged_by": tuple(fb.get(w.lower(), ())),
                     "their_price": price,
                     "their_usd": usd,
                 })
@@ -156,3 +168,23 @@ def load_watchlist_wallets(path: str) -> list[str]:
     except (json.JSONDecodeError, OSError):
         return []
     return [t["wallet"] for t in data.get("targets", []) if t.get("wallet")]
+
+
+def load_watchlist_flagged_by(path: str) -> dict:
+    """Map lowercased wallet -> list of discovery theories (``flagged_by``).
+
+    Lets the paper harness stamp each opened position with the strategy theories
+    that qualified the target, for per-strategy P&L attribution. Missing file or
+    missing field -> empty map / empty list."""
+    if not path or not os.path.exists(path):
+        return {}
+    try:
+        data = json.load(open(path))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    out: dict = {}
+    for t in data.get("targets", []):
+        w = t.get("wallet")
+        if w:
+            out[w.lower()] = list(t.get("flagged_by", []))
+    return out

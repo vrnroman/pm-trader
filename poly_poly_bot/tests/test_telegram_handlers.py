@@ -234,6 +234,102 @@ def test_e2e_setkey_clear_without_confirm_no_op(configured_chat, captured_messag
 
 
 # ------------------------------------------------------------------
+# /reset — zero all P&L + risk/spend state
+# ------------------------------------------------------------------
+
+def test_reset_without_confirm_is_noop(captured_messages, monkeypatch):
+    from src import telegram_bot
+    called = {"n": 0}
+    import src.copy_trading.reset_pnl as rp
+    monkeypatch.setattr(rp, "reset_pnl", lambda *a, **k: called.__setitem__("n", called["n"] + 1))
+
+    telegram_bot._handle_command("/reset")
+    assert called["n"] == 0
+    assert "Usage:" in captured_messages[-1]
+
+
+def test_reset_confirm_invokes_reset_pnl(captured_messages, monkeypatch):
+    from src import telegram_bot
+    import src.copy_trading.reset_pnl as rp
+
+    class _Res:
+        def summary(self):
+            return "archived 3, cleared 3, skipped 6"
+
+    calls = {"n": 0}
+
+    def fake_reset(data_dir, **kw):
+        calls["n"] += 1
+        assert kw.get("confirm") is True
+        return _Res()
+
+    monkeypatch.setattr(rp, "reset_pnl", fake_reset)
+    telegram_bot._handle_command("/reset CONFIRM")
+    assert calls["n"] == 1
+    assert "P&amp;L reset" in captured_messages[-1]
+
+
+# ------------------------------------------------------------------
+# /pnl + /wallets — unified per-strategy / per-wallet P&L
+# ------------------------------------------------------------------
+
+def _unified_fixture():
+    """Synthetic unified P&L: one 1a executor wallet (realized win + open) and
+    two paper wallets on theory 1b (one winner, one loser)."""
+    from src.copy_trading import pnl_unified as u
+    from src.copy_trading.copy_paper import PaperPosition
+    from src.copy_trading.pnl import OpenPositionPnl
+
+    a = u.aggregate_system_a(
+        [{"trader_address": "0xaaa111", "tier": "1a", "pnl": 10.0, "cost_basis": 40.0, "won": True}],
+        [OpenPositionPnl("tok", "M", 100, 0.5, 0.6, cost=50.0, value=60.0,
+                         unrealized_pnl=10.0, unrealized_pct=0.2,
+                         tier="1a", trader_address="0xaaa111")],
+        tier_of=lambda _w: None,
+    )
+
+    def pp(target, pnl, copy_id):
+        return PaperPosition(
+            copy_id=copy_id, target=target, condition_id="c", token_id="t",
+            outcome_index=0, category="x", their_price=0.5, entry_price=0.5,
+            shares=100, spent=50.0, drag_bps=0, opened_ts=0.0,
+            flagged_by=("1b",), closed=True, won=(pnl > 0), pnl=pnl,
+        )
+
+    b = u.aggregate_system_b([pp("0xbbb222", 20.0, "c1"), pp("0xccc333", -15.0, "c2")])
+    return u.build_unified(a, b), a, b, 0
+
+
+def test_pnl_unified_shows_total_and_per_strategy(captured_messages, monkeypatch):
+    from src import telegram_bot
+
+    monkeypatch.setattr(telegram_bot, "_compute_unified", _unified_fixture)
+    monkeypatch.setattr(telegram_bot.CONFIG, "preview_mode", True)
+    telegram_bot._handle_command("/pnl")
+    out = captured_messages[-1]
+
+    assert "<b>TOTAL</b>" in out
+    assert "Realized:    $+15.00" in out   # A:10 + B:(20-15)=5
+    assert "Unrealized:  $+10.00" in out   # A open mark
+    assert "Net:         $+25.00" in out
+    assert "A:1a" in out and "B:1b" in out
+    assert "PREVIEW MODE" in out
+
+
+def test_wallets_lists_best_and_worst_per_strategy(captured_messages, monkeypatch):
+    from src import telegram_bot
+
+    monkeypatch.setattr(telegram_bot, "_compute_unified", _unified_fixture)
+    telegram_bot._handle_command("/wallets")
+    out = captured_messages[-1]
+
+    assert "Wallet leaderboard" in out
+    assert "B:1b" in out
+    assert "best PnL" in out and "worst PnL" in out
+    assert "0xbbb222" in out and "0xccc333" in out   # both paper wallets ranked
+
+
+# ------------------------------------------------------------------
 # Bot menu (setMyCommands) parity with the dispatcher
 # ------------------------------------------------------------------
 

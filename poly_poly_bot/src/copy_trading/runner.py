@@ -215,8 +215,22 @@ async def _periodic_loop() -> None:
                         await telegram.positions_redeemed(result.count, result.details)
                 except Exception as err:
                     logger.warn(f"Auto-redeem failed: {error_message(err)}")
+            elif (CONFIG.preview_mode and CONFIG.preview_realize_enabled
+                  and now - last_redeem >= redeem_interval_s):
+                # Paper analogue of the redeemer: book realized P&L for resolved
+                # preview positions so /pnl reflects a real paper track record.
+                last_redeem = now
+                try:
+                    from src.copy_trading.preview_resolver import run_preview_realization
+                    n = await asyncio.to_thread(run_preview_realization)
+                    if n:
+                        logger.info(f"Realized {n} resolved preview position(s)")
+                except Exception as err:
+                    logger.warn(f"Preview realization failed: {error_message(err)}")
 
-            if now - last_reconcile >= reconcile_interval_s:
+            # Reconcile against the real proxy wallet only when trading live —
+            # in preview the simulated inventory is authoritative (see startup).
+            if not CONFIG.preview_mode and now - last_reconcile >= reconcile_interval_s:
                 try:
                     await sync_inventory_from_api(CONFIG.proxy_wallet)
                     last_reconcile = now
@@ -271,7 +285,11 @@ async def run_copy_trading() -> None:
         logger.info("Checking token approvals...")
         check_and_set_approvals(get_private_key())
 
-    await sync_inventory_from_api(CONFIG.proxy_wallet)
+    # Reconcile against the real proxy wallet only when trading live. In preview
+    # the simulated inventory is the source of truth; syncing would overwrite it
+    # with the proxy wallet's real (or empty) positions and destroy the paper book.
+    if not CONFIG.preview_mode:
+        await sync_inventory_from_api(CONFIG.proxy_wallet)
     logger.info(f"Inventory: {get_inventory_summary()}")
 
     clob_client = create_clob_client()

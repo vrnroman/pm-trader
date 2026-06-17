@@ -118,6 +118,14 @@ def record_spend(amount_usd: float, source: str) -> None:
     )
 
 
+def reset_state() -> None:
+    """Reset daily-spend tracking to zero (paired with a P&L reset). Does not
+    write disk — the reset routine clears daily-spend.json separately."""
+    global _state
+    with _lock:
+        _state = _State()
+
+
 def status() -> dict:
     """Snapshot for /status-style commands."""
     with _lock:

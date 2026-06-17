@@ -22,7 +22,7 @@ def _runner(tmp, wallets=None, watchlist_path=None, feed=None, on_cycle=None,
         ledger_path=os.path.join(tmp, "l.jsonl"),
         watchlist_path=watchlist_path,
         wallets=wallets,
-        detector_factory=lambda w, age, usd: (lambda: feed),
+        detector_factory=lambda w, age, usd, fb=None: (lambda: feed),
         book_fetcher=lambda t: [(0.51, 10000)],
         resolver=lambda c: None,
         exit_detector_factory=lambda w, age: (lambda: exits or []),
@@ -38,7 +38,7 @@ def test_exit_following_closes_open_copy_when_target_sells():
         r = _runner(d, wallets=["0xT"])
         assert r.run_once().opened == 1
         # cycle 2: target sells TOK; no fresh buys -> we exit at the 0.60 bid
-        r._detector_factory = lambda w, age, usd: (lambda: [])
+        r._detector_factory = lambda w, age, usd, fb=None: (lambda: [])
         r._exit_detector_factory = lambda w, age: (
             lambda: [{"target": "0xT", "token_id": "TOK", "their_price": 0.60}])
         r._bid_fetcher = lambda t: [(0.60, 5000)]
@@ -88,7 +88,7 @@ def test_run_forever_survives_cycle_exception():
         ev = threading.Event()
         calls = {"n": 0}
 
-        def boom(w, age, usd):
+        def boom(w, age, usd, fb=None):
             def detect():
                 calls["n"] += 1
                 ev.set()

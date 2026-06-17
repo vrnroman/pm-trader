@@ -85,6 +85,8 @@ class OpenPositionPnl:
     value: float                      # mark-to-market value (0 if unpriced)
     unrealized_pnl: Optional[float]   # None when no live price available
     unrealized_pct: Optional[float]
+    tier: str = ""                    # strategy tier (1a/1b/1c) stamped at buy time
+    trader_address: str = ""          # followed wallet whose trade we copied
 
 
 @dataclass
@@ -177,6 +179,8 @@ def value_open_positions(
             value=value,
             unrealized_pnl=upnl,
             unrealized_pct=upct,
+            tier=pos.get("tier", "") or "",
+            trader_address=pos.get("trader_address", "") or "",
         ))
     return out
 
