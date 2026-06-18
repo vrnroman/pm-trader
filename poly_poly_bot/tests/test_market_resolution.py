@@ -54,6 +54,44 @@ def test_fetch_does_not_cache_open_market(tmp_path, monkeypatch):
     assert not (tmp_path / "res_0xopen.json").exists()   # open markets aren't cached
 
 
+def test_get_queries_closed_markets(monkeypatch):
+    # Regression: Gamma's /markets defaults to OPEN markets, so resolution
+    # lookups MUST pass closed=true or they silently return nothing.
+    seen = {}
+
+    class _Resp:
+        status_code = 200
+
+        def json(self):
+            return [{"conditionId": "0xabc", "closed": True, "outcomePrices": ["1", "0"]}]
+
+    class _Sess:
+        def get(self, url, params=None, timeout=None):
+            seen["params"] = params
+            return _Resp()
+
+    mr._get(_Sess(), "0xabc")
+    assert seen["params"].get("closed") == "true"
+
+
+def test_get_batch_queries_closed_markets(monkeypatch):
+    seen = {}
+
+    class _Resp:
+        status_code = 200
+
+        def json(self):
+            return []
+
+    class _Sess:
+        def get(self, url, params=None, timeout=None):
+            seen["params"] = params
+            return _Resp()
+
+    mr._get_batch(_Sess(), ["0xa", "0xb"])
+    assert ("closed", "true") in seen["params"]
+
+
 def test_fetch_resolutions_batches_and_caches(tmp_path, monkeypatch):
     calls = {"n": 0}
 

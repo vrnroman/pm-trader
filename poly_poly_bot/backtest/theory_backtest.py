@@ -33,7 +33,7 @@ import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.copy_trading.entry_profile import is_copyable_entry
+from src.copy_trading.copy_replay import forward_copy_rois
 from src.copy_trading.market_resolution import fetch_resolutions
 from src.copy_trading.theories import REGISTRY, evaluate_all
 from src.copy_trading.wallet_context import build_context
@@ -122,49 +122,13 @@ def fetch_all(wallets, cache_dir, workers=10):
 def _forward_copy_rois(forward_acts, resolutions, min_usd=100.0, slippage_bps=0.0):
     """Copy each forward BUY and close it the way the target did.
 
-    Returns a list of per-copy ROI-per-$1: exit at the target's SELL if they
-    sold that outcome later, else the resolution payoff if known, else skipped.
-
-    ``slippage_bps`` models execution drag: we enter *worse* than the target
-    (pay a higher price -> fewer shares) and exit *worse* (sell into a lower
-    bid), since a copier reacts after the target and pays the spread. At 0 this
-    is the drag-free upper bound.
+    Thin wrapper over ``copy_replay.forward_copy_rois`` (the shared definition of
+    "what a copy earns", also used by the live discovery sweep). Exit-following
+    is on here so a swing trader is scored on the round trip, not on holding to
+    resolution.
     """
-    slip = slippage_bps / 10000.0
-    # index sells per (cid, oi): (ts, price, size)
-    sells: dict[tuple, list] = {}
-    buys = []
-    for ev in forward_acts:
-        if ev.get("type") != "TRADE":
-            continue
-        cid, oi = ev.get("conditionId"), ev.get("outcomeIndex")
-        price = float(ev.get("price") or 0.0)
-        if not cid or price <= 0:
-            continue
-        ts = float(ev.get("timestamp") or 0.0)
-        size = float(ev.get("size") or 0.0)
-        if ev.get("side") == "SELL":
-            sells.setdefault((cid, oi), []).append((ts, price, size))
-        elif ev.get("side") == "BUY":
-            usd = float(ev.get("usdcSize") or 0.0) or size * price
-            if usd >= min_usd and is_copyable_entry(price):
-                buys.append((cid, oi, ts, price))
-
-    rois = []
-    for cid, oi, ts, price in buys:
-        entry = min(0.99, price * (1.0 + slip))   # we fill worse than they did
-        later = [s for s in sells.get((cid, oi), []) if s[0] >= ts]
-        if later:  # exit-following: close when the target sells (into a worse bid)
-            tot_sz = sum(s[2] for s in later) or 1.0
-            exit_price = sum(s[1] * s[2] for s in later) / tot_sz * (1.0 - slip)
-            rois.append(exit_price / entry - 1.0)
-            continue
-        res = resolutions.get(cid)
-        if res is not None and res.winning_index is not None:
-            won = (oi is not None and int(oi) == int(res.winning_index))
-            rois.append((1.0 / entry - 1.0) if won else -1.0)
-        # else: unresolved and not exited — can't score, skip
-    return rois
+    return forward_copy_rois(forward_acts, resolutions, min_usd=min_usd,
+                             slippage_bps=slippage_bps, follow_exits=True)
 
 
 def _split(acts, cutoff):

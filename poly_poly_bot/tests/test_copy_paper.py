@@ -177,6 +177,93 @@ def test_engine_opens_dedups_and_resolves():
         assert led.closed_positions()[0].won is True
 
 
+def test_engine_fill_gate_skips_chase():
+    # fill at 0.52 vs their 0.50 = +400bps; gate at 100bps -> don't chase.
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        eng = CopyPaperEngine(
+            led, detector=lambda: [_trade("t1", "TOK", their_price=0.50)],
+            book_fetcher=lambda t: [(0.52, 10000)],
+            resolver=lambda c: None, max_slippage_bps=500, fill_gate_bps=100,
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 0 and s.skipped_fill_gate == 1
+
+
+def test_engine_fill_gate_allows_no_drag_fill():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        eng = CopyPaperEngine(
+            led, detector=lambda: [_trade("t1", "TOK", their_price=0.50)],
+            book_fetcher=lambda t: [(0.50, 10000)],   # zero drag
+            resolver=lambda c: None, fill_gate_bps=100,
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 1 and s.skipped_fill_gate == 0
+
+
+def test_engine_first_entry_only_skips_readd():
+    # two BUYs (different tx) into the SAME target+market -> only the first opens.
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        eng = CopyPaperEngine(
+            led, detector=lambda: [_trade("t1", "TOK"), _trade("t2", "TOK")],
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: None, first_entry_only=True,
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 1 and s.skipped_not_first_entry == 1
+
+
+def test_engine_slate_cap_per_wallet_day():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        feed = [_trade("t1", "A"), _trade("t2", "B"), _trade("t3", "C")]  # same target
+        eng = CopyPaperEngine(
+            led, detector=lambda: feed,
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: None, max_copies_per_wallet_day=2,
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 2 and s.skipped_slate_cap == 1
+
+
+def test_engine_slate_cap_per_category_day():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+
+        def tr(cid, tok, cat):
+            return dict(copy_id=cid, target="0x" + tok, condition_id="0xC" + tok,
+                        token_id=tok, outcome_index=0, category=cat,
+                        their_price=0.50, their_usd=1000)
+        feed = [tr("t1", "A", "sports"), tr("t2", "B", "sports"), tr("t3", "C", "crypto")]
+        eng = CopyPaperEngine(
+            led, detector=lambda: feed,
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: None, max_copies_per_category_day=1,
+        )
+        s = eng.run_cycle(now=1)
+        # one sports + one crypto open; the 2nd sports is capped
+        assert s.opened == 2 and s.skipped_slate_cap == 1
+
+
+def test_engine_slate_cap_persists_across_cycles_same_day():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        feed = [[_trade("t1", "A")], [_trade("t2", "B")]]  # same target, two cycles
+        cycle = [0]
+        eng = CopyPaperEngine(
+            led, detector=lambda: feed[cycle[0]],
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: None, max_copies_per_wallet_day=1,
+        )
+        s1 = eng.run_cycle(now=100)            # day 0
+        assert s1.opened == 1
+        cycle[0] = 1
+        s2 = eng.run_cycle(now=200)            # same UTC day -> cap already hit
+        assert s2.opened == 0 and s2.skipped_slate_cap == 1
+
+
 def test_engine_skips_unfilled():
     with tempfile.TemporaryDirectory() as d:
         led = PaperCopyLedger(os.path.join(d, "l.jsonl"))

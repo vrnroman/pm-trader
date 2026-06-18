@@ -38,6 +38,19 @@ REWARD_TYPES = frozenset({"REWARD", "MAKER_REBATE", "YIELD"})
 SHARE_EPSILON = 1.0
 
 
+def tstat(values) -> float:
+    """t-stat of the mean of ``values`` (mean / standard error) — edge per unit
+    of noise. 0 for fewer than two points or zero spread. The single definition
+    of t-stat used across the bot (wallet skill scoring + copy-replay)."""
+    import statistics
+    vals = list(values)
+    n = len(vals)
+    if n < 2:
+        return 0.0
+    sd = statistics.pstdev(vals)
+    return statistics.mean(vals) / (sd / (n ** 0.5)) if sd > 0 else 0.0
+
+
 # ---------------------------------------------------------------------------
 # Market categorisation (drives per-segment scoring; sports is the strongest
 # segment empirically, research the weakest/noisiest).
@@ -273,12 +286,7 @@ class WalletMetrics:
     @property
     def tstat(self) -> float:
         """t-stat of mean per-market PnL — edge per unit of noise."""
-        import statistics
-        n = len(self.pnls)
-        if n < 2:
-            return 0.0
-        sd = statistics.pstdev(self.pnls)
-        return statistics.mean(self.pnls) / (sd / (n ** 0.5)) if sd > 0 else 0.0
+        return tstat(self.pnls)
 
     @property
     def concentration(self) -> float:

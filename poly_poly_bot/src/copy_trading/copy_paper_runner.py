@@ -40,6 +40,11 @@ class CopyPaperRunner:
         max_age_s: float = 21600,
         min_usd: float = 500.0,
         cycle_interval_s: int = 120,
+        # entry guardrails (forwarded to the engine; see CopyPaperEngine)
+        fill_gate_bps: Optional[int] = None,
+        first_entry_only: bool = False,
+        max_copies_per_wallet_day: Optional[int] = None,
+        max_copies_per_category_day: Optional[int] = None,
         # injectable dependencies (defaults are the live ones)
         detector_factory: Optional[Callable[[list[str], float, float, dict], Callable]] = None,
         book_fetcher: Optional[Callable[[str], list[tuple[float, float]]]] = None,
@@ -57,6 +62,10 @@ class CopyPaperRunner:
         self.max_age_s = max_age_s
         self.min_usd = min_usd
         self.cycle_interval_s = cycle_interval_s
+        self.fill_gate_bps = fill_gate_bps
+        self.first_entry_only = first_entry_only
+        self.max_copies_per_wallet_day = max_copies_per_wallet_day
+        self.max_copies_per_category_day = max_copies_per_category_day
         self._detector_factory = detector_factory or make_detector
         self._book_fetcher = book_fetcher or fetch_asks
         self._resolver = resolver or resolve
@@ -91,6 +100,9 @@ class CopyPaperRunner:
             resolver=self._resolver, copy_pct=self.copy_pct,
             max_copy_usd=self.max_copy_usd, max_slippage_bps=self.max_slippage_bps,
             exit_detector=exit_detector, bid_fetcher=self._bid_fetcher,
+            fill_gate_bps=self.fill_gate_bps, first_entry_only=self.first_entry_only,
+            max_copies_per_wallet_day=self.max_copies_per_wallet_day,
+            max_copies_per_category_day=self.max_copies_per_category_day,
         )
         summary = engine.run_cycle()
         if self._on_cycle:

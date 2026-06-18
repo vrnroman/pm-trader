@@ -166,3 +166,49 @@ def test_targets_serialization_matches_watchlist_shape():
     assert out["targets"][0]["wallet"] == "0xA"
     assert out["targets"][0]["rank"] == 1
     assert "capture_cents" in out["targets"][0]
+    # copy-replay selection signal is serialized for the harness + observability
+    assert "copy_roi" in out["targets"][0]
+    assert "copy_n" in out["targets"][0]
+    assert "fade" in out["targets"][0]
+
+
+# --------------------------------------------------------------------------- #
+# Copy-replay selection gate + rank (the ROI-leak fix)
+# --------------------------------------------------------------------------- #
+
+def test_copy_replay_gate_drops_proven_negative_wallet():
+    # a theory likes it, but replaying our copy action (hold to resolution) over
+    # enough resolved bets proves it loses — drop it regardless of the flag.
+    bad = Eval(wallet="0xBAD", flagged_by=("1g",), tstat=2.0, tail_ratio=0.1,
+               copy_n=15, copy_roi=-0.30)
+    assert run_discovery_cycle({"0xBAD": bad}, DiscoveryState(), CFG).watchlist == []
+
+
+def test_copy_replay_thin_sample_is_not_dropped():
+    # too few resolved replayed copies to judge -> insufficient evidence, keep it
+    thin = Eval(wallet="0xTHIN", flagged_by=("1g",), tstat=2.0, tail_ratio=0.1,
+                copy_n=5, copy_roi=-0.30)
+    r = run_discovery_cycle({"0xTHIN": thin}, DiscoveryState(), CFG)
+    assert [e.wallet for e in r.watchlist] == ["0xTHIN"]
+
+
+def test_copy_validated_wallet_ranks_above_higher_flag_count():
+    # 0xVAL has a PROVEN positive copy-and-hold edge; 0xMULTI has more theory
+    # flags + capture but no replay data. Copy-validated must rank first.
+    val = Eval(wallet="0xVAL", flagged_by=("1b",), tstat=12.0, capture_cents=0.0,
+               copy_n=20, copy_roi=0.50)
+    multi = Eval(wallet="0xMULTI", flagged_by=("1b", "1c", "1g"), tstat=12.0,
+                 capture_cents=5.0)
+    r = run_discovery_cycle({"0xVAL": val, "0xMULTI": multi}, DiscoveryState(), CFG)
+    assert r.watchlist[0].wallet == "0xVAL"
+    assert {e.wallet for e in r.watchlist} == {"0xVAL", "0xMULTI"}
+
+
+def test_copy_replay_gate_off_keeps_negative_wallet():
+    cfg = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0,
+                          drop_capture_cents=1.0, watchlist_cap=3,
+                          copy_replay_gate=False)
+    bad = Eval(wallet="0xBAD", flagged_by=("1g",), tstat=2.0, tail_ratio=0.1,
+               copy_n=15, copy_roi=-0.30)
+    r = run_discovery_cycle({"0xBAD": bad}, DiscoveryState(), cfg)
+    assert [e.wallet for e in r.watchlist] == ["0xBAD"]  # gate disabled -> legacy path

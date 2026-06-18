@@ -183,6 +183,17 @@ class Config:
     copy_paper_max_age_s: float = _opt_float("COPY_PAPER_MAX_AGE_S", 21600.0)
     copy_paper_min_usd: float = _opt_float("COPY_PAPER_MIN_USD", 500.0)
     copy_paper_interval_s: int = _opt_int("COPY_PAPER_INTERVAL_S", 120)
+    # Entry guardrails (cut the copies that historically leaked ROI). Reversible
+    # via env; set a cap <= 0 to disable it. fill-gate: skip a copy whose
+    # achievable fill is > this many bps ABOVE the target's price (don't chase a
+    # moved book). first-entry-only: copy the opening trade per market, not
+    # averaging-down adds. The per-day caps are the slate circuit-breaker —
+    # one correlated same-day slate (the 82-copy World-Cup day that drove the
+    # observed -25%) can't dominate the book.
+    copy_paper_fill_gate_bps: int = _opt_int("COPY_PAPER_FILL_GATE_BPS", 150)
+    copy_paper_first_entry_only: bool = _opt_bool("COPY_PAPER_FIRST_ENTRY_ONLY", True)
+    copy_paper_max_per_wallet_day: int = _opt_int("COPY_PAPER_MAX_PER_WALLET_DAY", 3)
+    copy_paper_max_per_category_day: int = _opt_int("COPY_PAPER_MAX_PER_CATEGORY_DAY", 8)
 
     # --- Wallet discovery (continuously hunts copyable wallets -> paper) ---
     # Runs the discovery funnel on a schedule; pings Telegram on each new
@@ -203,6 +214,15 @@ class Config:
     wallet_discovery_drop_capture_cents: float = _opt_float("WALLET_DISCOVERY_DROP_CAPTURE_CENTS", 1.0)
     wallet_discovery_auto_remove: bool = _opt_bool("WALLET_DISCOVERY_AUTO_REMOVE", True)
     wallet_discovery_category: str = _optional("WALLET_DISCOVERY_CATEGORY", "ALL")
+    # Copy-replay selection gate: score each candidate on OUR copy action (copy
+    # its copyable BUYs, hold to resolution) and DROP wallets whose measured
+    # copy-and-hold edge is proven-negative, regardless of theory — so selection
+    # measures the same action the live harness takes. Ranks copy-validated
+    # wallets first. Set the gate false to fall back to the legacy theory rank.
+    wallet_discovery_copy_replay_gate: bool = _opt_bool("WALLET_DISCOVERY_COPY_REPLAY_GATE", True)
+    wallet_discovery_min_copy_replay_n: int = _opt_int("WALLET_DISCOVERY_MIN_COPY_REPLAY_N", 12)
+    wallet_discovery_min_copy_replay_roi: float = _opt_float("WALLET_DISCOVERY_MIN_COPY_REPLAY_ROI", 0.0)
+    wallet_discovery_fade_roi: float = _opt_float("WALLET_DISCOVERY_FADE_ROI", -0.10)
     # Gated Claude second-opinion (Strategy 1c): for the top-N statistically
     # qualified wallets, ask Claude to vet a compact dossier. Alert-only, never
     # auto-trades; off by default and needs ANTHROPIC_API_KEY.

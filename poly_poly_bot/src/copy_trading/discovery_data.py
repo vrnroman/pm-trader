@@ -21,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 
+from src.copy_trading.copy_replay import score_copy_replay
 from src.copy_trading.discovery import DiscoveryConfig, Eval
 from src.copy_trading.entry_profile import EntryProfile, entry_profile, is_copyable_entry
 from src.copy_trading.lead_lag import WalletLeadLag, analyze_buy
@@ -456,9 +457,12 @@ def evaluate_sweep(
     # immutable) — but only when an enabled theory actually needs them, so the
     # default-off case adds zero API cost. Re-reads from the activity cache the
     # chunk loop already populated (fetch_all_activity is the test seam).
+    # Resolutions are needed by 1a/1e AND by the copy-replay selection gate
+    # (which labels each BUY won/lost to replay copying it held to resolution).
+    needs_res = cfg.copy_replay_gate or any(
+        t in REGISTRY and REGISTRY[t].needs_resolution for t in cfg.enabled_theories)
     resolutions: dict = {}
-    if to_eval and any(t in REGISTRY and REGISTRY[t].needs_resolution
-                       for t in cfg.enabled_theories):
+    if to_eval and needs_res:
         res_acts = fetch_all_activity(to_eval, cache_dir, activity_ttl_s, stop=stop)
         cids = {ev.get("conditionId")
                 for acts in res_acts.values() for ev in acts
@@ -467,8 +471,8 @@ def evaluate_sweep(
         del res_acts  # only the cid set is needed downstream — free the raw activity
         if cids and not _stopping(stop):
             resolutions = fetch_resolutions(cids, cfg.res_cache_dir)
-            logger.info("[DISCOVERY] resolutions: %d/%d markets settled (for 1a/1e)",
-                        len(resolutions), len(cids))
+            logger.info("[DISCOVERY] resolutions: %d/%d markets settled "
+                        "(copy-replay gate + 1a/1e)", len(resolutions), len(cids))
 
     evaluated: dict[str, Eval] = {}
     for w in to_eval:
@@ -493,11 +497,19 @@ def evaluate_sweep(
             capture_hit_rate=hit, n_capture=n_cap, resolutions=resolutions)
         flags = evaluate_all(ctx, enabled=cfg.enabled_theories)
         ep = ctx.entry
+        # copy-replay: replay copying this wallet's copyable BUYs (first entry
+        # per market) held to resolution — the SAME action the live harness
+        # takes — so selection measures what we actually do, not the wallet's
+        # own closed-position ROI. exit_* is the two-horizon diagnostic.
+        crs = score_copy_replay(ctx.buys, ctx.round_trips, min_usd=cfg.min_usd)
+        fade = crs.fade_label(min_n=cfg.min_copy_replay_n, fade_roi=cfg.fade_roi) is not None
         evaluated[w] = Eval(
             wallet=w, roi=roi, tstat=tstat,
             capture_cents=capture, lead_cents=lead, hit_rate=hit, n=n_cap,
             tail_ratio=ep.tail_ratio, copyable_ratio=ep.copyable_ratio,
             curve_sharpe=cm.sharpe, curve_drawdown=cm.max_drawdown_frac, net_pnl=cm.net_pnl,
+            copy_roi=crs.mean_roi, copy_tstat=crs.tstat, copy_n=crs.n,
+            copy_hit=crs.hit_rate, exit_roi=crs.exit_mean_roi, exit_n=crs.exit_n, fade=fade,
             flagged_by=tuple(f.theory for f in flags),
             reason=" | ".join(f.reason for f in flags),
         )

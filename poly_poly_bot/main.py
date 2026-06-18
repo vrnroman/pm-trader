@@ -63,10 +63,22 @@ def _copy_paper_loop():
                 f"[COPY-PAPER] opened={summary.opened} resolved={summary.resolved} "
                 f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
             )
+        skips = (summary.skipped_fill_gate + summary.skipped_not_first_entry
+                 + summary.skipped_slate_cap)
+        if skips:
+            logger.info(
+                f"[COPY-PAPER] guardrail skips: fill-gate={summary.skipped_fill_gate} "
+                f"first-entry={summary.skipped_not_first_entry} "
+                f"slate-cap={summary.skipped_slate_cap}"
+            )
         if summary.resolved:
             telegram_bot.send_message(
                 format_resolution_telegram(summary.resolved_positions, report(ledger))
             )
+
+    # A cap <= 0 disables that guardrail (engine treats None as off).
+    def _cap(v):
+        return v if v and v > 0 else None
 
     runner = CopyPaperRunner(
         ledger_path=CONFIG.copy_paper_ledger,
@@ -77,6 +89,10 @@ def _copy_paper_loop():
         max_age_s=CONFIG.copy_paper_max_age_s,
         min_usd=CONFIG.copy_paper_min_usd,
         cycle_interval_s=CONFIG.copy_paper_interval_s,
+        fill_gate_bps=_cap(CONFIG.copy_paper_fill_gate_bps),
+        first_entry_only=CONFIG.copy_paper_first_entry_only,
+        max_copies_per_wallet_day=_cap(CONFIG.copy_paper_max_per_wallet_day),
+        max_copies_per_category_day=_cap(CONFIG.copy_paper_max_per_category_day),
         on_cycle=_on_cycle,
     )
     n = len(runner.wallets())
@@ -117,6 +133,10 @@ def _discovery_loop():
         enabled_theories=frozenset(
             t.strip() for t in CONFIG.wallet_discovery_theories.split(",") if t.strip()),
         res_cache_dir=CONFIG.wallet_discovery_res_cache,
+        copy_replay_gate=CONFIG.wallet_discovery_copy_replay_gate,
+        min_copy_replay_n=CONFIG.wallet_discovery_min_copy_replay_n,
+        min_copy_replay_roi=CONFIG.wallet_discovery_min_copy_replay_roi,
+        fade_roi=CONFIG.wallet_discovery_fade_roi,
     )
     runner = DiscoveryRunner(
         config=cfg,

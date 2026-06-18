@@ -184,12 +184,21 @@ def test_evaluate_sweep_fetches_and_threads_resolutions_only_when_needed(monkeyp
     assert res_calls["cids"] == {"0xCID"}
     assert seen["resolutions"] == {"0xCID": MarketResolution(winning_index=1, end_ts=1.0)}
 
-    # only non-resolution theories → no fetch, empty resolutions passed through
+    # only non-resolution theories AND the copy-replay gate off → no fetch,
+    # empty resolutions passed through. (With the gate on — the default —
+    # resolutions are always fetched so copies can be replayed to resolution.)
+    res_calls["n"] = 0
+    seen.clear()
+    dd.evaluate_sweep(DiscoveryConfig(enabled_theories=frozenset({"1b"}),
+                                      copy_replay_gate=False))
+    assert res_calls["n"] == 0
+    assert seen["resolutions"] == {}
+
+    # gate on (default) → resolutions fetched even for a non-resolution theory
     res_calls["n"] = 0
     seen.clear()
     dd.evaluate_sweep(DiscoveryConfig(enabled_theories=frozenset({"1b"})))
-    assert res_calls["n"] == 0
-    assert seen["resolutions"] == {}
+    assert res_calls["n"] == 1
 
 
 def test_build_universe_stops_on_short_page_and_paces(monkeypatch):

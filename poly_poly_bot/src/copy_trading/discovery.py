@@ -21,6 +21,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from src.copy_trading.copy_replay import proven_negative, proven_positive
+
 
 @dataclass(frozen=True)
 class DiscoveryConfig:
@@ -42,6 +44,19 @@ class DiscoveryConfig:
     min_capture_cents: float = 1.5
     min_tstat: float = 10.0
     drop_capture_cents: float = 1.0
+    # copy-replay selection gate — score each candidate on OUR copy action
+    # (copy its copyable BUYs, hold to resolution) and DROP wallets whose
+    # measured copy-and-hold edge is proven-negative, regardless of which theory
+    # flagged them. This fixes the core leak: the legacy metric rewarded a
+    # wallet's own closed-position ROI, but the live harness only copies the
+    # 0.05-0.95 middle of the book and holds it — so favorite-buyers / scalpers
+    # whose edge is in near-locks + early exits looked great yet lost when
+    # copied. The watchlist now ranks copy-validated wallets first. Reversible:
+    # set copy_replay_gate=False to fall back to the legacy theory-agreement rank.
+    copy_replay_gate: bool = True
+    min_copy_replay_n: int = 12        # resolved replayed copies before we judge a wallet
+    min_copy_replay_roi: float = 0.0   # mean copy-and-hold ROI/$ bar to qualify / not be dropped
+    fade_roi: float = -0.10            # at/below this (with enough n) -> FADE label (diagnostic)
     # entry-discipline gate: reject wallets whose buy $ is tail-dominated
     # (settlement-lag scooping near $1 — un-copyable). Lenient by default.
     max_tail_ratio: float = 0.5
@@ -80,6 +95,16 @@ class Eval:
     curve_sharpe: float = 0.0
     curve_drawdown: float = 0.0
     net_pnl: float = 0.0
+    # copy-replay (copy this wallet's copyable BUYs, hold to resolution) — the
+    # selection signal that measures the SAME action the live harness takes.
+    # exit_roi/exit_n are the two-horizon diagnostic (round-trip / exit-follow).
+    copy_roi: float = 0.0
+    copy_tstat: float = 0.0
+    copy_n: int = 0
+    copy_hit: float = 0.0
+    exit_roi: float = 0.0
+    exit_n: int = 0
+    fade: bool = False
     # strategy theories that flagged this wallet + their reasons (why follow it)
     flagged_by: tuple = ()
     reason: str = ""
@@ -126,6 +151,10 @@ def _meta(e: Eval) -> dict:
         "lead_cents": round(e.lead_cents, 3),
         "hit_rate": round(e.hit_rate, 3), "n": e.n,
         "tail_ratio": round(e.tail_ratio, 3),
+        # copy-replay selection signal (+ two-horizon exit diagnostic + fade tag)
+        "copy_roi": round(e.copy_roi, 4), "copy_tstat": round(e.copy_tstat, 3),
+        "copy_n": e.copy_n, "copy_hit": round(e.copy_hit, 3),
+        "exit_roi": round(e.exit_roi, 4), "exit_n": e.exit_n, "fade": e.fade,
         "flagged_by": list(e.flagged_by), "reason": e.reason,
     }
 
@@ -146,6 +175,15 @@ def run_discovery_cycle(
     for w, e in evaluated.items():
         if e.tail_ratio > cfg.max_tail_ratio:
             continue  # tail-dominated buy flow — un-copyable, skip regardless of theory
+        # copy-replay gate: drop wallets PROVEN to lose under our actual copy
+        # action — enough resolved replayed copies AND a mean copy-and-hold
+        # ROI/$ below the bar — no matter which theory flagged them. Wallets with
+        # too little replay data are NOT dropped (insufficient evidence); they
+        # just rank below copy-validated ones in the cap.
+        if cfg.copy_replay_gate and proven_negative(
+                e.copy_n, e.copy_roi,
+                min_n=cfg.min_copy_replay_n, min_roi=cfg.min_copy_replay_roi):
+            continue
         flagged = bool(e.flagged_by)
         # legacy lead-lag gate (== theory 1c) OR any independent theory fired
         legacy = e.tstat >= cfg.min_tstat and e.capture_cents >= cfg.min_capture_cents
@@ -159,13 +197,15 @@ def run_discovery_cycle(
         if entered or retained:
             qualified[w] = e
 
-    # Rank by how many independent theories agree (flag count), then capture, and
-    # keep the top-N. Capture is the lead-lag signal only theories 1c/1h produce,
-    # so a capture-only sort would bury every wallet that a non-capture theory
-    # (1a/1b/1d/1e/1g/1i/1j) flagged at capture 0 and starve it out of the cap.
-    # Flag-count-first keeps each theory represented; capture breaks ties.
-    ranked = sorted(qualified.values(),
-                    key=lambda e: (len(e.flagged_by), e.capture_cents), reverse=True)
+    # Rank copy-VALIDATED wallets first (proven positive copy-and-hold edge),
+    # ordered by their measured copy ROI — selection now leads with the same
+    # action the live harness takes. Ties and unproven wallets fall back to the
+    # legacy order: theory-agreement (flag count), then capture. Flag-count
+    # before capture keeps each non-capture theory (1a/1b/1d/1e/1g/1i/1j)
+    # represented rather than buried by the lead-lag-only signal. When no wallet
+    # has replay data this reduces exactly to the legacy (flag-count, capture)
+    # ranking, so behaviour is unchanged until copy-replay data accrues.
+    ranked = sorted(qualified.values(), key=lambda e: _rank_key(cfg, e), reverse=True)
     watchlist = ranked[: cfg.watchlist_cap]
     on_now = {e.wallet for e in watchlist}
 
@@ -184,6 +224,25 @@ def run_discovery_cycle(
         removed=removed,
         first_init=not prev.initialized,
     )
+
+
+def _copy_validated(cfg: DiscoveryConfig, e: Eval) -> bool:
+    """A wallet with enough resolved replayed copies AND a positive measured
+    copy-and-hold edge — i.e. it earns under the action we actually take."""
+    return cfg.copy_replay_gate and proven_positive(
+        e.copy_n, e.copy_roi,
+        min_n=cfg.min_copy_replay_n, min_roi=cfg.min_copy_replay_roi)
+
+
+def _rank_key(cfg: DiscoveryConfig, e: Eval):
+    """Watchlist priority: copy-validated wallets first (by measured copy ROI),
+    then the legacy theory-agreement / capture order. Reduces exactly to
+    (flag-count, capture) when no replay data exists, so it is backward-safe."""
+    proven = _copy_validated(cfg, e)
+    return (1 if proven else 0,
+            e.copy_roi if proven else 0.0,
+            len(e.flagged_by),
+            e.capture_cents)
 
 
 def _retain_on_decay(cfg: DiscoveryConfig, e: Eval) -> bool:

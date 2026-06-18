@@ -82,6 +82,15 @@ def format_find(e: Eval, verdict=None) -> str:
         f"Edge: <b>{e.capture_cents:+.2f}¢</b>/trade · hit {e.hit_rate:.0%} · "
         f"ROI {e.roi:+.0%} · t-stat {e.tstat:.1f} (n={e.n}) · tail {e.tail_ratio:.0%}"
     )
+    # Copy-replay = what copying this wallet (hold-to-resolution) actually earns —
+    # the selection signal that matches the harness. exit ROI is the diagnostic.
+    if e.copy_n:
+        tag = " ⚠️FADE" if e.fade else (" ✅" if e.copy_roi > 0 else "")
+        lines.append(
+            f"Copy-replay: <b>{e.copy_roi:+.0%}</b>/$ hold-to-res "
+            f"(hit {e.copy_hit:.0%}, n={e.copy_n}, t {e.copy_tstat:.1f}) · "
+            f"exit {e.exit_roi:+.0%} (n={e.exit_n}){tag}"
+        )
     if e.curve_sharpe or e.net_pnl:
         lines.append(f"Curve: sharpe {e.curve_sharpe:+.2f} · maxDD {e.curve_drawdown:.0%}")
     if verdict is not None:

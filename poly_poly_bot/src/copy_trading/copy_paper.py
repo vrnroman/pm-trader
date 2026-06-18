@@ -212,6 +212,10 @@ class CycleSummary:
     detected: int = 0
     opened: int = 0
     skipped_unfilled: int = 0
+    # guardrail skips (why a detected BUY was NOT copied):
+    skipped_fill_gate: int = 0          # our fill would chase too far above their price
+    skipped_not_first_entry: int = 0    # averaging-down / re-entry into a copied market
+    skipped_slate_cap: int = 0          # per-(wallet|category)-day concentration cap hit
     resolved: int = 0
     exited: int = 0  # closed by following the target's SELL
     # the positions that resolved *this* cycle, so callers can name them in a
@@ -232,6 +236,18 @@ class CopyPaperEngine:
         max_slippage_bps: int = 200,
         exit_detector: Optional[DetectFn] = None,
         bid_fetcher: Optional[BookFn] = None,
+        # --- entry guardrails (all default-OFF so the bare engine is unchanged;
+        # the live runner switches them on from config) ---
+        # fill-gate: skip a copy whose achievable fill is more than this many bps
+        # ABOVE the target's price — i.e. don't chase a moved book (None = off).
+        fill_gate_bps: Optional[int] = None,
+        # only copy a wallet's FIRST entry into a (market, outcome); skip its
+        # averaging-down / re-entry buys (the harness copies the opening trade).
+        first_entry_only: bool = False,
+        # slate circuit-breaker: cap copies opened per UTC day per wallet and per
+        # category, so one correlated same-day slate can't dominate (None = off).
+        max_copies_per_wallet_day: Optional[int] = None,
+        max_copies_per_category_day: Optional[int] = None,
     ):
         self.ledger = ledger
         self.detector = detector
@@ -244,15 +260,48 @@ class CopyPaperEngine:
         # bid_fetcher(token_id) -> [(bid_price, size)] for our achievable exit.
         self.exit_detector = exit_detector
         self.bid_fetcher = bid_fetcher
+        self.fill_gate_bps = fill_gate_bps
+        self.first_entry_only = first_entry_only
+        self.max_copies_per_wallet_day = max_copies_per_wallet_day
+        self.max_copies_per_category_day = max_copies_per_category_day
 
     def run_cycle(self, now: Optional[float] = None) -> CycleSummary:
         now = now if now is not None else time.time()
         s = CycleSummary()
 
+        # Guardrail state, seeded from the existing ledger so caps/dedup persist
+        # across cycles and restarts, then updated as we open within this cycle.
+        day = int(now // 86400)
+        entered_tokens = {(p.target, p.token_id) for p in self.ledger.positions.values()}
+        wallet_day: dict[str, int] = {}
+        cat_day: dict[str, int] = {}
+        for p in self.ledger.positions.values():
+            if int((p.opened_ts or 0) // 86400) == day:
+                wallet_day[p.target] = wallet_day.get(p.target, 0) + 1
+                cat_day[p.category] = cat_day.get(p.category, 0) + 1
+
         for tr in self.detector():
             s.detected += 1
             cid = tr["copy_id"]
             if self.ledger.has(cid):
+                continue
+            target = tr["target"]
+            token = tr["token_id"]
+            category = tr.get("category", "other")
+            # first-entry-only: skip averaging-down / re-entry into a market we
+            # already copied from this target (we copy the opening trade only).
+            if self.first_entry_only and (target, token) in entered_tokens:
+                s.skipped_not_first_entry += 1
+                continue
+            # slate circuit-breaker: cap correlated same-day copies per wallet
+            # and per category before we even price the book.
+            if (self.max_copies_per_wallet_day is not None
+                    and wallet_day.get(target, 0) >= self.max_copies_per_wallet_day):
+                s.skipped_slate_cap += 1
+                continue
+            if (self.max_copies_per_category_day is not None
+                    and cat_day.get(category, 0) >= self.max_copies_per_category_day):
+                s.skipped_slate_cap += 1
                 continue
             copy_usd = min(self.max_copy_usd, tr.get("their_usd", 0) * self.copy_pct)
             fill = simulate_copy_fill(
@@ -262,16 +311,24 @@ class CopyPaperEngine:
             if fill.shares <= 0:
                 s.skipped_unfilled += 1
                 continue
+            # fill-gate: don't chase a moved book — skip when our achievable fill
+            # is more than fill_gate_bps above the target's price.
+            if self.fill_gate_bps is not None and fill.drag_bps > self.fill_gate_bps:
+                s.skipped_fill_gate += 1
+                continue
             self.ledger.add(PaperPosition(
-                copy_id=cid, target=tr["target"], condition_id=tr["condition_id"],
-                token_id=tr["token_id"], outcome_index=int(tr["outcome_index"]),
-                category=tr.get("category", "other"), their_price=tr["their_price"],
+                copy_id=cid, target=target, condition_id=tr["condition_id"],
+                token_id=token, outcome_index=int(tr["outcome_index"]),
+                category=category, their_price=tr["their_price"],
                 title=tr.get("title", ""), slug=tr.get("slug", ""),
                 flagged_by=tuple(tr.get("flagged_by", ())),
                 entry_price=fill.avg_price, shares=fill.shares, spent=fill.spent,
                 drag_bps=fill.drag_bps, opened_ts=now,
             ))
             s.opened += 1
+            entered_tokens.add((target, token))
+            wallet_day[target] = wallet_day.get(target, 0) + 1
+            cat_day[category] = cat_day.get(category, 0) + 1
 
         # exit-following: if the target sold something we hold, sell too (at our
         # achievable bid), before falling through to the resolution path.

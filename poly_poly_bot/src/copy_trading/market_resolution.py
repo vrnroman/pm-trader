@@ -60,8 +60,14 @@ def parse_resolution(market: dict) -> MarketResolution:
 def _get(session: requests.Session, condition_id: str) -> dict | None:
     for _ in range(3):
         try:
+            # closed=true is REQUIRED: Gamma's /markets defaults to OPEN markets
+            # only, so without it a resolved market returns nothing — which
+            # silently starved every resolution lookup (theories 1a/1e + the
+            # copy-replay gate) and preview realization. A still-open market just
+            # isn't returned, which callers already treat as "unresolved".
             r = session.get(GAMMA_API + "/markets",
-                            params={"condition_ids": condition_id}, timeout=20)
+                            params={"condition_ids": condition_id, "closed": "true"},
+                            timeout=20)
             if r.status_code == 200:
                 j = r.json()
                 if isinstance(j, list):
@@ -146,7 +152,10 @@ def _write_cache(condition_id: str, res: MarketResolution, cache_dir: str | None
 
 def _get_batch(session: requests.Session, cids: list[str]) -> list[dict]:
     """One Gamma call for up to ~50 markets (repeated condition_ids params)."""
-    params = [("condition_ids", c) for c in cids] + [("limit", str(len(cids)))]
+    # closed=true is REQUIRED — see _get: without it Gamma returns only open
+    # markets, so a batch of resolved condition_ids comes back empty.
+    params = ([("condition_ids", c) for c in cids]
+              + [("limit", str(len(cids))), ("closed", "true")])
     for _ in range(3):
         try:
             r = session.get(GAMMA_API + "/markets", params=params, timeout=30)
