@@ -54,6 +54,33 @@ class TierConfig:
 
 
 @dataclass
+class Strategy4Config:
+    """Long-horizon bet tracking (Strategy 4) — the rule that splits 1 from 4.
+
+    Strategy 1 scores wallets on provably-closed markets, so it's blind to a
+    wallet that bets on events resolving far in the future (nothing closes for
+    months/years). Strategy 4 classifies such wallets by how early they bet
+    before resolution and tracks them on a separate clock instead of letting them
+    sit "unproven" forever in the Strategy-1 funnel. See ``horizon_profile``.
+
+    When ``enabled``, the discovery sweep also fetches end dates for the still-
+    open markets a candidate has bet on (Strategy 1 only fetches *resolved*
+    markets), so a far-future bet's horizon is actually measurable. Off by
+    default, so the extra Gamma calls only happen when long-horizon tracking is on.
+    """
+    enabled: bool = False
+    # A bet is "long-horizon" when placed at least this many days before the
+    # market's resolution. 180 ≈ 6 months — "bet something 6 months ahead".
+    long_horizon_days: float = 180.0
+    # A wallet is Strategy 4 when at least this share of its dated buy $ is
+    # long-horizon (USD-weighted, so one big far-future conviction bet counts).
+    min_long_ratio: float = 0.5
+    # Need at least this many dated buys before we'll classify a wallet at all;
+    # below it there's too little horizon evidence and it defaults to Strategy 1.
+    min_dated_buys: int = 5
+
+
+@dataclass
 class WatchlistAlertConfig:
     """Noise-control knobs for the monitor-only watchlist alerter.
 
@@ -240,6 +267,18 @@ def _load_watchlist_alert_config() -> WatchlistAlertConfig:
 
 
 WATCHLIST_ALERT = _load_watchlist_alert_config()
+
+
+def _load_strategy4_config() -> Strategy4Config:
+    return Strategy4Config(
+        enabled=_opt_bool("STRATEGY_4_ENABLED", False),
+        long_horizon_days=_opt_float("STRATEGY_4_LONG_HORIZON_DAYS", 180.0),
+        min_long_ratio=_opt_float("STRATEGY_4_MIN_LONG_RATIO", 0.5),
+        min_dated_buys=_opt_int("STRATEGY_4_MIN_DATED_BUYS", 5),
+    )
+
+
+STRATEGY_4 = _load_strategy4_config()
 
 
 def get_all_tiered_wallets() -> list[str]:

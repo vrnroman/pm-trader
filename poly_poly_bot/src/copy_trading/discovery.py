@@ -71,6 +71,17 @@ class DiscoveryConfig:
     watchlist_cap: int = 25
     # auto-remove decayed wallets from paper (False = keep accumulating)
     auto_remove: bool = True
+    # Strategy 4 — long-horizon bet tracking. When enabled, the sweep classifies
+    # each wallet by how early it bets before resolution (see horizon_profile) and
+    # routes long-horizon-dominated wallets to a SEPARATE watchlist rather than
+    # the copy funnel — they have no closed markets to score, so the copy/PnL
+    # gates can't judge them. Tracked, not skipped. Off by default (zero added
+    # API cost): the open-market end-date fetch only runs when this is on.
+    s4_enabled: bool = False
+    s4_long_horizon_days: float = 180.0
+    s4_min_long_ratio: float = 0.5
+    s4_min_dated_buys: int = 5
+    long_horizon_cap: int = 25
     # on-disk cache for market resolutions (1a/1e need how each market settled).
     # Resolved markets are immutable so they're cached permanently; None disables
     # the cache (every sweep re-fetches).
@@ -108,6 +119,12 @@ class Eval:
     # strategy theories that flagged this wallet + their reasons (why follow it)
     flagged_by: tuple = ()
     reason: str = ""
+    # bet-horizon classification (Strategy 1 = near-term, Strategy 4 = long-horizon
+    # conviction bets that won't resolve for months). "1" by default so wallets
+    # without horizon data flow through the existing funnel unchanged.
+    strategy: str = "1"
+    long_horizon_ratio: float = 0.0   # share of dated buy $ placed long before resolution
+    horizon_days: float = 0.0         # USD-weighted mean days-before-resolution
 
 
 @dataclass
@@ -142,6 +159,11 @@ class CycleResult:
     newly_qualified: list[Eval]    # entered the watchlist this sweep — ping these
     removed: list[str]             # wallets dropped from paper this sweep
     first_init: bool               # this sweep is the initial seed (send one summary)
+    # Strategy 4 — long-horizon wallets tracked separately from the copy funnel.
+    # A per-sweep snapshot (ranked by horizon), written to its own watchlist file;
+    # empty unless DiscoveryConfig.s4_enabled and the sweep classified any wallet
+    # as long-horizon. Kept out of `watchlist` so they never feed the paper copier.
+    long_horizon: list[Eval] = field(default_factory=list)
 
 
 def _meta(e: Eval) -> dict:
@@ -156,6 +178,10 @@ def _meta(e: Eval) -> dict:
         "copy_n": e.copy_n, "copy_hit": round(e.copy_hit, 3),
         "exit_roi": round(e.exit_roi, 4), "exit_n": e.exit_n, "fade": e.fade,
         "flagged_by": list(e.flagged_by), "reason": e.reason,
+        # bet-horizon classification (Strategy 1 near-term vs 4 long-horizon)
+        "strategy": e.strategy,
+        "long_horizon_ratio": round(e.long_horizon_ratio, 3),
+        "horizon_days": round(e.horizon_days, 1),
     }
 
 
@@ -170,6 +196,24 @@ def run_discovery_cycle(
     notify/remove deltas.
     """
     prev_on = set(prev.on_watchlist)
+
+    # Strategy 4: peel long-horizon wallets off BEFORE the copy funnel. They bet
+    # on far-future events with no closed markets to score, so the copy/PnL gates
+    # below can't judge them — we track them on their own clock instead of
+    # dropping them or polluting the copy watchlist. Disabled (s4_enabled=False)
+    # leaves every wallet in the near-term path, so behaviour is unchanged.
+    long_horizon_evals: list[Eval] = []
+    if cfg.s4_enabled:
+        near_term = {}
+        for w, e in evaluated.items():
+            if e.strategy == "4":
+                long_horizon_evals.append(e)
+            else:
+                near_term[w] = e
+        evaluated = near_term
+        long_horizon_evals.sort(
+            key=lambda e: (e.long_horizon_ratio, e.horizon_days), reverse=True)
+        long_horizon_evals = long_horizon_evals[: cfg.long_horizon_cap]
 
     qualified: dict[str, Eval] = {}
     for w, e in evaluated.items():
@@ -223,6 +267,7 @@ def run_discovery_cycle(
         newly_qualified=newly_qualified,
         removed=removed,
         first_init=not prev.initialized,
+        long_horizon=long_horizon_evals,
     )
 
 
@@ -266,5 +311,23 @@ def watchlist_to_targets(watchlist: list[Eval], cfg: DiscoveryConfig) -> dict:
         "targets": [
             {"rank": i + 1, "wallet": e.wallet, **_meta(e)}
             for i, e in enumerate(watchlist)
+        ],
+    }
+
+
+def long_horizon_to_targets(long_horizon: list[Eval], cfg: DiscoveryConfig) -> dict:
+    """Serialize the Strategy-4 long-horizon snapshot to its own watchlist file.
+
+    Same row shape as ``watchlist_to_targets`` (so tooling can read either), but
+    a distinct ``source`` so it's never confused with the copy watchlist the
+    paper harness consumes — these wallets are tracked, not copied.
+    """
+    return {
+        "category": cfg.category,
+        "source": "discovery_long_horizon",
+        "long_horizon_days": cfg.s4_long_horizon_days,
+        "targets": [
+            {"rank": i + 1, "wallet": e.wallet, **_meta(e)}
+            for i, e in enumerate(long_horizon)
         ],
     }

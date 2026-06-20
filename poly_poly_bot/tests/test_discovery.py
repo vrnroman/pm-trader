@@ -6,6 +6,7 @@ from src.copy_trading.discovery import (
     DiscoveryConfig,
     DiscoveryState,
     Eval,
+    long_horizon_to_targets,
     run_discovery_cycle,
     watchlist_to_targets,
 )
@@ -212,3 +213,68 @@ def test_copy_replay_gate_off_keeps_negative_wallet():
                copy_n=15, copy_roi=-0.30)
     r = run_discovery_cycle({"0xBAD": bad}, DiscoveryState(), cfg)
     assert [e.wallet for e in r.watchlist] == ["0xBAD"]  # gate disabled -> legacy path
+
+
+# --------------------------------------------------------------------------- #
+# Strategy 4 — long-horizon wallets tracked separately from the copy funnel
+# --------------------------------------------------------------------------- #
+
+S4_CFG = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0, drop_capture_cents=1.0,
+                         watchlist_cap=3, s4_enabled=True, long_horizon_cap=3)
+
+
+def test_strategy4_default_off_keeps_long_horizon_in_copy_funnel():
+    # with s4 disabled (default), a strategy-tagged wallet still flows through the
+    # near-term path unchanged — the partition is opt-in.
+    lh = Eval(wallet="0xLH", capture_cents=2.0, tstat=12.0, strategy="4")
+    r = run_discovery_cycle({"0xLH": lh}, DiscoveryState(), CFG)  # CFG has s4 off
+    assert [e.wallet for e in r.watchlist] == ["0xLH"]
+    assert r.long_horizon == []
+
+
+def test_strategy4_wallet_peeled_off_into_separate_track():
+    near = _ev("0xN", 2.0)                                  # near-term, copyable
+    longh = Eval(wallet="0xLH", capture_cents=2.0, tstat=12.0, strategy="4",
+                 long_horizon_ratio=0.8, horizon_days=300)
+    r = run_discovery_cycle({"0xN": near, "0xLH": longh}, DiscoveryState(), S4_CFG)
+    # long-horizon wallet is NOT on the copy watchlist...
+    assert [e.wallet for e in r.watchlist] == ["0xN"]
+    # ...it's tracked on the separate long-horizon list instead
+    assert [e.wallet for e in r.long_horizon] == ["0xLH"]
+
+
+def test_strategy4_list_ranked_by_horizon_and_capped():
+    evals = {
+        f"0x{i}": Eval(wallet=f"0x{i}", strategy="4",
+                       long_horizon_ratio=r, horizon_days=100 * i)
+        for i, r in enumerate([0.6, 0.9, 0.7, 0.95], start=1)
+    }
+    res = run_discovery_cycle(evals, DiscoveryState(), S4_CFG)  # long_horizon_cap=3
+    # ranked by long_horizon_ratio desc (0.95, 0.9, 0.7), capped at 3
+    assert [e.wallet for e in res.long_horizon] == ["0x4", "0x2", "0x3"]
+
+
+def test_strategy4_does_not_need_copy_gates():
+    # a long-horizon wallet has no closed markets / copy-replay data and wouldn't
+    # pass the copy funnel — it's still tracked on the long-horizon list.
+    longh = Eval(wallet="0xLH", capture_cents=0.0, tstat=0.0, strategy="4",
+                 long_horizon_ratio=0.9, horizon_days=400)
+    r = run_discovery_cycle({"0xLH": longh}, DiscoveryState(), S4_CFG)
+    assert r.watchlist == []
+    assert [e.wallet for e in r.long_horizon] == ["0xLH"]
+
+
+def test_long_horizon_serialization_is_distinct_source():
+    longh = Eval(wallet="0xLH", strategy="4", long_horizon_ratio=0.8, horizon_days=300)
+    out = long_horizon_to_targets([longh], S4_CFG)
+    assert out["source"] == "discovery_long_horizon"   # not the copy watchlist
+    assert out["targets"][0]["wallet"] == "0xLH"
+    assert out["targets"][0]["strategy"] == "4"
+    assert out["targets"][0]["long_horizon_ratio"] == 0.8
+
+
+def test_watchlist_meta_includes_strategy_tag():
+    r = run_discovery_cycle({"0xA": _ev("0xA", 2.0)}, DiscoveryState(), CFG)
+    out = watchlist_to_targets(r.watchlist, CFG)
+    assert out["targets"][0]["strategy"] == "1"        # near-term by default
+    assert "long_horizon_ratio" in out["targets"][0]

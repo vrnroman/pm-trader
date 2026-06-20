@@ -137,11 +137,17 @@ def _discovery_loop():
         min_copy_replay_n=CONFIG.wallet_discovery_min_copy_replay_n,
         min_copy_replay_roi=CONFIG.wallet_discovery_min_copy_replay_roi,
         fade_roi=CONFIG.wallet_discovery_fade_roi,
+        s4_enabled=CONFIG.strategy_4_enabled,
+        s4_long_horizon_days=CONFIG.strategy_4_long_horizon_days,
+        s4_min_long_ratio=CONFIG.strategy_4_min_long_ratio,
+        s4_min_dated_buys=CONFIG.strategy_4_min_dated_buys,
+        long_horizon_cap=CONFIG.strategy_4_cap,
     )
     runner = DiscoveryRunner(
         config=cfg,
         watchlist_path=CONFIG.copy_paper_watchlist,   # feeds the paper harness
         state_path=CONFIG.wallet_discovery_state,
+        long_horizon_watchlist_path=CONFIG.wallet_discovery_long_horizon_watchlist,
         cache_dir=CONFIG.wallet_discovery_cache_dir,
         activity_ttl_s=CONFIG.wallet_discovery_activity_ttl_s,
         cycle_interval_s=CONFIG.wallet_discovery_interval_s,
