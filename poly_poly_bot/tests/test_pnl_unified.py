@@ -16,6 +16,8 @@ from src.copy_trading.pnl_unified import (
     build_unified,
     maturity_tag,
     promotion_verdict,
+    strategy_highlights,
+    top_wallets,
     wilson_lower_bound,
 )
 
@@ -185,6 +187,80 @@ def test_best_worst_roi_excludes_undefined_roi():
     bw = best_worst(b, k=3)
     assert bw.by_roi_best == [] and bw.by_roi_worst == []
     assert [w.wallet for w in bw.by_pnl_best] == ["0xopen"]
+
+
+# --------------------------------------------------------------------------- #
+# Deduped per-strategy highlights + cross-strategy top list (/wallets layout)
+# --------------------------------------------------------------------------- #
+
+def test_strategy_highlights_lists_each_wallet_once_with_combined_tags():
+    # A strategy where the same wallets top BOTH PnL and ROI — the old four-list
+    # layout repeated each wallet up to 4×; highlights lists each once, tagged.
+    a = aggregate_system_a(
+        [
+            {"trader_address": "0x1", "tier": "1a", "pnl": 100.0, "cost_basis": 100.0, "won": True},  # +100% ROI
+            {"trader_address": "0x2", "tier": "1a", "pnl": -50.0, "cost_basis": 100.0, "won": False},  # -50% ROI
+            {"trader_address": "0x3", "tier": "1a", "pnl": 5.0, "cost_basis": 10.0, "won": True},   # +50% ROI
+            {"trader_address": "0x4", "tier": "1a", "pnl": 1.0, "cost_basis": 100.0, "won": True},  # +1% ROI
+        ],
+        [],
+    )
+    hl = strategy_highlights(a, k=2)
+    wallets = [h.wallet.wallet for h in hl]
+    assert wallets == ["0x1", "0x3", "0x4", "0x2"]   # each once, by net PnL desc
+    assert len(wallets) == len(set(wallets))         # no duplicates
+    top = hl[0]
+    assert top.pnl_best and top.roi_best             # leader carries both tags
+    assert top.tags == ["▲PnL", "▲ROI"]
+    bottom = hl[-1]
+    assert bottom.pnl_worst and bottom.roi_worst
+    assert bottom.tags == ["▼PnL", "▼ROI"]
+
+
+def test_strategy_highlights_drops_contradictory_tags_in_tiny_strategy():
+    # A lone wallet is both top and bottom of its strategy — a meaningless
+    # ranking, so it carries no tags.
+    a = aggregate_system_a(
+        [{"trader_address": "0xSolo", "tier": "1a", "pnl": 5.0, "cost_basis": 10.0, "won": True}], []
+    )
+    hl = strategy_highlights(a, k=3)
+    assert len(hl) == 1
+    assert hl[0].tags == []
+
+
+def test_strategy_highlights_dedup_across_system_a_and_b_same_address():
+    # Same address tracked under both systems are distinct entries, kept separate.
+    a = aggregate_system_a(
+        [{"trader_address": "0xDup", "tier": "1a", "pnl": 5.0, "cost_basis": 10.0, "won": True}], []
+    )
+    b = aggregate_system_b([_paper("0xdup", flagged_by=("1b",), closed=True, won=True, pnl=3.0)])
+    hl = strategy_highlights(a + b, k=3)
+    keys = {(h.wallet.system, h.wallet.wallet) for h in hl}
+    assert keys == {("A", "0xdup"), ("B", "0xdup")}
+    assert len(hl) == 2
+
+
+def test_top_wallets_ranks_unique_profitable_wallets_across_strategies():
+    a = aggregate_system_a(
+        [{"trader_address": "0xWin", "tier": "1a", "pnl": 80.0, "cost_basis": 100.0, "won": True}], []
+    )
+    # multi-theory winner appears once despite spanning two strategies
+    b = aggregate_system_b(
+        [
+            _paper("0xMulti", flagged_by=("1b", "1f"), closed=True, won=True, pnl=40.0),
+            _paper("0xLoss", flagged_by=("1c",), closed=True, won=False, pnl=-30.0),
+        ]
+    )
+    top = top_wallets(a, b, k=3)
+    wallets = [w.wallet for w in top]
+    assert wallets == ["0xwin", "0xmulti"]      # by net PnL desc, losers dropped
+    assert wallets.count("0xmulti") == 1        # listed once though it spans 1b & 1f
+
+
+def test_top_wallets_positive_only_can_be_disabled():
+    b = aggregate_system_b([_paper("0xLoss", flagged_by=("1c",), closed=True, won=False, pnl=-30.0)])
+    assert top_wallets([], b, k=3) == []                       # nothing profitable
+    assert [w.wallet for w in top_wallets([], b, k=3, positive_only=False)] == ["0xloss"]
 
 
 # --------------------------------------------------------------------------- #

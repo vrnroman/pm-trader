@@ -164,6 +164,35 @@ class BestWorst:
 
 
 @dataclass
+class WalletHighlight:
+    """One wallet that is notable within a strategy, tagged with *why* it placed
+    (top/bottom by PnL and/or ROI). The deduped per-strategy view lists each
+    wallet once carrying all of its tags, instead of the old four-list layout
+    where a wallet that led both PnL and ROI — the common case in small
+    strategies — was printed up to four times."""
+    wallet: object                    # WalletPnl
+    pnl_best: bool = False
+    pnl_worst: bool = False
+    roi_best: bool = False
+    roi_worst: bool = False
+
+    @property
+    def tags(self) -> list:
+        # A wallet that is *both* top and bottom on a metric is the whole (tiny)
+        # population — the ranking says nothing, so drop the contradictory pair.
+        out = []
+        if self.pnl_best and not self.pnl_worst:
+            out.append("▲PnL")
+        elif self.pnl_worst and not self.pnl_best:
+            out.append("▼PnL")
+        if self.roi_best and not self.roi_worst:
+            out.append("▲ROI")
+        elif self.roi_worst and not self.roi_best:
+            out.append("▼ROI")
+        return out
+
+
+@dataclass
 class UnifiedPnl:
     strategies: list = field(default_factory=list)   # list[StrategyPnl], ordered
     total_realized: float = 0.0
@@ -339,6 +368,54 @@ def best_worst(wallets: list, k: int = 3) -> BestWorst:
         by_roi_best=list(reversed(by_roi[-k:])),
         by_roi_worst=by_roi[:k],
     )
+
+
+def _wallet_key(w) -> tuple:
+    return (w.system, w.wallet)
+
+
+def strategy_highlights(wallets: list, k: int = 3) -> list:
+    """Deduped notable wallets for one strategy: the union of the top/bottom-``k``
+    by net PnL and by ROI, each wallet listed **once** and tagged (via
+    ``WalletHighlight``) with every ranking it placed in, ordered by net PnL
+    descending (best first). ROI itself is shown per-line by the caller, so a
+    single tagged list replaces the four overlapping best/worst lists that made
+    ``/wallets`` repeat the same wallet several times."""
+    bw = best_worst(wallets, k=k)
+    order: list = []
+    seen: dict = {}
+
+    def _mark(group, attr):
+        for w in group:
+            key = _wallet_key(w)
+            h = seen.get(key)
+            if h is None:
+                h = WalletHighlight(wallet=w)
+                seen[key] = h
+                order.append(h)
+            setattr(h, attr, True)
+
+    _mark(bw.by_pnl_best, "pnl_best")
+    _mark(bw.by_pnl_worst, "pnl_worst")
+    _mark(bw.by_roi_best, "roi_best")
+    _mark(bw.by_roi_worst, "roi_worst")
+    order.sort(key=lambda h: h.wallet.net_pnl, reverse=True)
+    return order
+
+
+def top_wallets(
+    a_wallets: list, b_wallets: list, k: int = 3, positive_only: bool = True
+) -> list:
+    """Top-``k`` unique wallets by net PnL across *all* strategies — the part-1
+    "best overall" list. Each ``WalletPnl`` is already one-per-(system, wallet),
+    so a wallet flagged by several theories appears once here even though it
+    spans several per-strategy blocks. ``positive_only`` keeps it to the
+    actually-good wallets (the promotion candidates)."""
+    allw = list(a_wallets) + list(b_wallets)
+    if positive_only:
+        allw = [w for w in allw if w.net_pnl > 0]
+    allw.sort(key=lambda w: w.net_pnl, reverse=True)
+    return allw[:k]
 
 
 # --------------------------------------------------------------------------- #
