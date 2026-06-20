@@ -46,7 +46,7 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "help", "description": "Show all commands"},
     {"command": "status", "description": "Balance, positions, daily limits"},
     {"command": "pnl", "description": "P&L by strategy: realized + unrealized + total"},
-    {"command": "wallets", "description": "3 best & worst wallets per strategy (by PnL & ROI)"},
+    {"command": "wallets", "description": "Top wallets overall + best/worst per strategy (deduped)"},
     {"command": "history", "description": "Last 10 copy trades"},
     {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
     {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
@@ -298,17 +298,21 @@ def _handle_pnl():
         )
 
     lines.append("")
-    lines.append("<i>/wallets — 3 best &amp; worst wallets per strategy</i>")
+    lines.append("<i>/wallets — top wallets overall + best/worst per strategy</i>")
     if CONFIG.preview_mode:
         lines.append("<i>PREVIEW MODE — positions are simulated</i>")
 
     _send_chunked("\n".join(lines))
 
 
-def _wallet_line(w) -> str:
+def _wallet_line(w, *, tags=None, strategies=None) -> str:
     """One leaderboard row: maturity glyph, addr, net P&L, ROI, win/loss record,
     and — for paper (System B) wallets — a PROMOTE-READY/HOLD verdict that gates
-    the manual promote-to-real-money call on settled sample size + positive PnL."""
+    the manual promote-to-real-money call on settled sample size + positive PnL.
+
+    ``tags`` annotates *why* a wallet is notable within a strategy (e.g.
+    ``▲PnL ▲ROI``); ``strategies`` lists the strategy labels a wallet spans (used
+    in the cross-strategy top section)."""
     from src.copy_trading import pnl_unified as u
 
     roi = w.roi
@@ -319,16 +323,26 @@ def _wallet_line(w) -> str:
     if w.system == "B":
         v, reason = u.promotion_verdict(w.net_pnl, w.n_closed)
         verdict = f" → {v}: {reason}"
-    return (f"{tag} <code>{_short_wallet(w.wallet)}</code> "
+    line = (f"{tag} <code>{_short_wallet(w.wallet)}</code> "
             f"${w.net_pnl:+.2f} ({roi_str}{rec}){verdict}")
+    if strategies:
+        line += f"  <i>[{_esc(', '.join(strategies))}]</i>"
+    elif tags:
+        line += f"  <i>{_esc(' '.join(tags))}</i>"
+    return line
 
 
 def _handle_wallets():
-    """Handle /wallets — per strategy, the 3 best & 3 worst wallets by P&L and
-    by ROI. These are the promote-to-real-money / drop candidates."""
+    """Handle /wallets — a readable promote/drop leaderboard.
+
+    Part 1 is the top wallets *across all strategies* (the best overall promotion
+    candidates, each shown once with the strategies it spans). Part 2 is a
+    per-strategy breakdown that lists each wallet **once**, tagged with whether it
+    led/trailed on PnL and/or ROI — replacing the old four overlapping best/worst
+    lists that printed the same wallet several times."""
     from src.copy_trading import pnl_unified as u
 
-    unified, _a, _b, _n = _compute_unified()
+    unified, a_w, b_w, _n = _compute_unified()
     if not unified.strategies:
         send_message("\U0001f3c5 <b>Wallet leaderboard</b>\nNo positions yet.")
         return
@@ -336,23 +350,23 @@ def _handle_wallets():
     lines = [
         "\U0001f3c5 <b>Wallet leaderboard</b> <i>(promotion / removal candidates)</i>",
         "",
+        "<b>\U0001f3c6 Top wallets — all strategies</b>",
     ]
+    top = u.top_wallets(a_w, b_w, k=3)
+    if top:
+        for w in top:
+            lines.append("  " + _wallet_line(w, strategies=list(w.strategies)))
+    else:
+        lines.append("  <i>(no profitable wallets yet)</i>")
+
+    lines.append("")
+    lines.append("<b>By strategy</b>  <i>(▲/▼ = top/bottom by PnL / ROI)</i>")
+    lines.append("")
+
     for sp in unified.strategies:
-        bw = u.best_worst(sp.wallets, k=3)
         lines.append(f"<b>{_esc(sp.label)}</b>  ({sp.n_wallets}w)")
-        lines.append("  ▲ best PnL:")
-        for w in bw.by_pnl_best:
-            lines.append("     " + _wallet_line(w))
-        lines.append("  ▼ worst PnL:")
-        for w in bw.by_pnl_worst:
-            lines.append("     " + _wallet_line(w))
-        if bw.by_roi_best:
-            lines.append("  ▲ best ROI:")
-            for w in bw.by_roi_best:
-                lines.append("     " + _wallet_line(w))
-            lines.append("  ▼ worst ROI:")
-            for w in bw.by_roi_worst:
-                lines.append("     " + _wallet_line(w))
+        for h in u.strategy_highlights(sp.wallets, k=3):
+            lines.append("  " + _wallet_line(h.wallet, tags=h.tags))
         lines.append("")
 
     _send_chunked("\n".join(lines))
@@ -660,7 +674,7 @@ def _handle_help():
         "<b>Strategy #1 — Copy Trading</b>\n"
         "<code>/status</code> — Bot status, balance, positions\n"
         "<code>/pnl</code> — P&amp;L by strategy: realized + unrealized + total\n"
-        "<code>/wallets</code> — 3 best &amp; worst wallets per strategy (PnL &amp; ROI)\n"
+        "<code>/wallets</code> — Top wallets overall + best/worst per strategy\n"
         "<code>/history</code> — Last 10 copy trades\n"
         "<code>/check</code> — Verify trading setup (read-only)\n\n"
         "<b>Safety levers</b>\n"

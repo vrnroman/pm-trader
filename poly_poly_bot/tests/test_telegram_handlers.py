@@ -316,7 +316,7 @@ def test_pnl_unified_shows_total_and_per_strategy(captured_messages, monkeypatch
     assert "PREVIEW MODE" in out
 
 
-def test_wallets_lists_best_and_worst_per_strategy(captured_messages, monkeypatch):
+def test_wallets_lists_top_overall_then_per_strategy_deduped(captured_messages, monkeypatch):
     from src import telegram_bot
 
     monkeypatch.setattr(telegram_bot, "_compute_unified", _unified_fixture)
@@ -324,9 +324,15 @@ def test_wallets_lists_best_and_worst_per_strategy(captured_messages, monkeypatc
     out = captured_messages[-1]
 
     assert "Wallet leaderboard" in out
+    # Part 1: top wallets across all strategies (only profitable ones)
+    assert "Top wallets — all strategies" in out
+    assert "By strategy" in out
     assert "B:1b" in out
-    assert "best PnL" in out and "worst PnL" in out
-    assert "0xbbb222" in out and "0xccc333" in out   # both paper wallets ranked
+    # both paper wallets ranked under the strategy, each shown once (deduped)
+    assert "0xbbb222" in out and "0xccc333" in out
+    assert out.count("0xccc333") == 1   # losing wallet appears once, not 4×
+    # winner (net +20) is profitable -> appears in BOTH the top section and 1b
+    assert out.count("0xbbb222") == 2
 
 
 # ------------------------------------------------------------------
