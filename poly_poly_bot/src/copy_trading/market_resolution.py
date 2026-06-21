@@ -170,6 +170,68 @@ def _get_batch(session: requests.Session, cids: list[str]) -> list[dict]:
     return []
 
 
+def _get_open_batch(session: requests.Session, cids: list[str]) -> list[dict]:
+    """One Gamma call for up to ~50 markets WITHOUT the ``closed`` filter.
+
+    Mirrors ``_get_batch`` but omits ``closed=true``, so it returns *open*
+    markets — the ones ``fetch_resolutions`` deliberately skips. Used only by
+    Strategy 4, which needs a far-future market's ``endDate`` to know how early a
+    still-open bet was placed."""
+    params = [("condition_ids", c) for c in cids] + [("limit", str(len(cids)))]
+    for _ in range(3):
+        try:
+            r = session.get(GAMMA_API + "/markets", params=params, timeout=30)
+            if r.status_code == 200:
+                j = r.json()
+                return j if isinstance(j, list) else ([j] if isinstance(j, dict) else [])
+            if 400 <= r.status_code < 500 and r.status_code != 429:
+                return []
+        except requests.RequestException:
+            pass
+        time.sleep(0.25)
+    return []
+
+
+def fetch_open_end_dates(
+    condition_ids,
+    workers: int = 8,
+    batch_size: int = 50,
+) -> dict[str, MarketResolution]:
+    """End dates for still-OPEN markets, as unresolved ``MarketResolution`` rows.
+
+    Strategy 4 needs to know how far in the future a wallet's *open* bets resolve,
+    but ``fetch_resolutions`` only sees closed markets. This fills the gap: each
+    returned row has ``winning_index=None`` (still open) and ``end_ts`` set from
+    the market's ``endDate``, which is exactly what ``wallet_context`` reads to
+    compute ``hours_before_resolution``. Not cached — open markets aren't
+    immutable and their end date can shift. Markets that fail to fetch are
+    skipped; rows with no usable end date are omitted.
+    """
+    cids = list(dict.fromkeys(c for c in condition_ids if c))
+    if not cids:
+        return {}
+    batches = [cids[i:i + batch_size] for i in range(0, len(cids), batch_size)]
+
+    def run(batch):
+        markets = _get_open_batch(requests.Session(), batch)
+        res: dict[str, MarketResolution] = {}
+        for m in markets:
+            cid = m.get("conditionId")
+            r = parse_resolution(m)
+            if cid and r.end_ts:
+                res[cid] = MarketResolution(winning_index=None, end_ts=r.end_ts)
+        return res
+
+    out: dict[str, MarketResolution] = {}
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        for f in as_completed([ex.submit(run, b) for b in batches]):
+            try:
+                out.update(f.result())
+            except Exception:
+                pass
+    return out
+
+
 def fetch_resolutions(
     condition_ids,
     cache_dir: str | None = None,

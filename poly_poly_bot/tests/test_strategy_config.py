@@ -8,8 +8,10 @@ import pytest
 from src.copy_trading.strategy_config import (
     TierConfig,
     Strategy1cConfig,
+    Strategy4Config,
     get_tier_config,
     get_wallet_tier,
+    STRATEGY_4,
     TIER_1A,
     TIER_1B,
     TIER_1C,
@@ -65,3 +67,12 @@ class TestTieredModeDetection:
     def test_get_tier_config_unknown_raises(self):
         with pytest.raises(ValueError, match="Unknown tier"):
             get_tier_config("legacy")
+
+
+class TestStrategy4Config:
+    def test_defaults_off_with_six_month_horizon(self):
+        assert isinstance(STRATEGY_4, Strategy4Config)
+        assert STRATEGY_4.enabled is False           # opt-in
+        assert STRATEGY_4.long_horizon_days == 180.0  # ~6 months
+        assert 0.0 < STRATEGY_4.min_long_ratio <= 1.0
+        assert STRATEGY_4.min_dated_buys > 0

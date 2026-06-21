@@ -24,8 +24,9 @@ import requests
 from src.copy_trading.copy_replay import score_copy_replay
 from src.copy_trading.discovery import DiscoveryConfig, Eval
 from src.copy_trading.entry_profile import EntryProfile, entry_profile, is_copyable_entry
+from src.copy_trading.horizon_profile import classify_strategy, horizon_profile
 from src.copy_trading.lead_lag import WalletLeadLag, analyze_buy
-from src.copy_trading.market_resolution import fetch_resolutions
+from src.copy_trading.market_resolution import fetch_open_end_dates, fetch_resolutions
 from src.copy_trading.pnl_curve import CurveMetrics, curve_metrics, fetch_pnl_curve
 from src.copy_trading.theories import REGISTRY, evaluate_all
 from src.copy_trading.trader_scoring import compute_wallet_metrics, select_targets
@@ -462,17 +463,27 @@ def evaluate_sweep(
     needs_res = cfg.copy_replay_gate or any(
         t in REGISTRY and REGISTRY[t].needs_resolution for t in cfg.enabled_theories)
     resolutions: dict = {}
-    if to_eval and needs_res:
+    if to_eval and (needs_res or cfg.s4_enabled):
         res_acts = fetch_all_activity(to_eval, cache_dir, activity_ttl_s, stop=stop)
         cids = {ev.get("conditionId")
                 for acts in res_acts.values() for ev in acts
                 if ev.get("type") == "TRADE" and ev.get("side") == "BUY"
                 and ev.get("conditionId")}
         del res_acts  # only the cid set is needed downstream — free the raw activity
-        if cids and not _stopping(stop):
+        if cids and needs_res and not _stopping(stop):
             resolutions = fetch_resolutions(cids, cfg.res_cache_dir)
             logger.info("[DISCOVERY] resolutions: %d/%d markets settled "
                         "(copy-replay gate + 1a/1e)", len(resolutions), len(cids))
+        # Strategy 4: the resolved set above only dates CLOSED markets, but a
+        # long-horizon bettor's positions are mostly still OPEN. Fetch end dates
+        # for the as-yet-unresolved markets so a far-future bet's horizon is
+        # measurable; merge them in as unresolved (winning_index=None) rows.
+        if cids and cfg.s4_enabled and not _stopping(stop):
+            open_cids = [c for c in cids if c not in resolutions]
+            open_dates = fetch_open_end_dates(open_cids) if open_cids else {}
+            resolutions.update(open_dates)
+            logger.info("[DISCOVERY] long-horizon: dated %d/%d open markets "
+                        "(Strategy 4)", len(open_dates), len(open_cids))
 
     evaluated: dict[str, Eval] = {}
     for w in to_eval:
@@ -503,6 +514,16 @@ def evaluate_sweep(
         # own closed-position ROI. exit_* is the two-horizon diagnostic.
         crs = score_copy_replay(ctx.buys, ctx.round_trips, min_usd=cfg.min_usd)
         fade = crs.fade_label(min_n=cfg.min_copy_replay_n, fade_roi=cfg.fade_roi) is not None
+        # Strategy 1 vs 4: classify the wallet by how early it bets before
+        # resolution. Defaults to "1" when classification is off or there's too
+        # little horizon data, so the copy funnel is unaffected unless s4 is on.
+        strategy = "1"
+        hp = horizon_profile(ctx.buys, long_horizon_days=cfg.s4_long_horizon_days)
+        if cfg.s4_enabled:
+            label = classify_strategy(
+                hp, min_dated_buys=cfg.s4_min_dated_buys,
+                long_ratio_threshold=cfg.s4_min_long_ratio)
+            strategy = label or "1"
         evaluated[w] = Eval(
             wallet=w, roi=roi, tstat=tstat,
             capture_cents=capture, lead_cents=lead, hit_rate=hit, n=n_cap,
@@ -512,5 +533,8 @@ def evaluate_sweep(
             copy_hit=crs.hit_rate, exit_roi=crs.exit_mean_roi, exit_n=crs.exit_n, fade=fade,
             flagged_by=tuple(f.theory for f in flags),
             reason=" | ".join(f.reason for f in flags),
+            strategy=strategy,
+            long_horizon_ratio=hp.long_ratio,
+            horizon_days=hp.mean_horizon_days,
         )
     return evaluated

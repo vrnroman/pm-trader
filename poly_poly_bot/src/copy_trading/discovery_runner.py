@@ -29,6 +29,7 @@ from src.copy_trading.discovery import (
     DiscoveryConfig,
     DiscoveryState,
     Eval,
+    long_horizon_to_targets,
     run_discovery_cycle,
     watchlist_to_targets,
 )
@@ -123,6 +124,7 @@ class DiscoveryRunner:
         config: DiscoveryConfig,
         watchlist_path: str,
         state_path: str,
+        long_horizon_watchlist_path: Optional[str] = None,
         cache_dir: Optional[str] = None,
         activity_ttl_s: float = 86400.0,
         cycle_interval_s: int = 21600,
@@ -138,6 +140,7 @@ class DiscoveryRunner:
         self.cfg = config
         self.watchlist_path = watchlist_path
         self.state_path = state_path
+        self.long_horizon_watchlist_path = long_horizon_watchlist_path
         self.cache_dir = cache_dir
         self.activity_ttl_s = activity_ttl_s
         self.cycle_interval_s = cycle_interval_s
@@ -182,6 +185,16 @@ class DiscoveryRunner:
         # auto-paper: rewrite the watchlist the harness consumes
         _atomic_write_json(self.watchlist_path,
                            watchlist_to_targets(result.watchlist, self.cfg))
+
+        # Strategy 4: write the long-horizon wallets to their own file (a separate
+        # track — never fed to the paper copier). Snapshot the current sweep so
+        # the list reflects who's long-horizon right now.
+        if self.cfg.s4_enabled and self.long_horizon_watchlist_path:
+            _atomic_write_json(self.long_horizon_watchlist_path,
+                               long_horizon_to_targets(result.long_horizon, self.cfg))
+            if result.long_horizon:
+                logger.info("[DISCOVERY] long-horizon (Strategy 4): %d wallets tracked",
+                            len(result.long_horizon))
 
         # persist (stamp real time)
         result.new_state.last_run = self._now()

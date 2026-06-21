@@ -92,6 +92,42 @@ def test_get_batch_queries_closed_markets(monkeypatch):
     assert ("closed", "true") in seen["params"]
 
 
+def test_open_batch_does_not_filter_closed(monkeypatch):
+    # Strategy 4 needs OPEN markets, so the open batch must NOT send closed=true
+    seen = {}
+
+    class _Resp:
+        status_code = 200
+
+        def json(self):
+            return []
+
+    class _Sess:
+        def get(self, url, params=None, timeout=None):
+            seen["params"] = params
+            return _Resp()
+
+    mr._get_open_batch(_Sess(), ["0xa", "0xb"])
+    assert all(k != "closed" for k, _v in seen["params"])
+
+
+def test_fetch_open_end_dates_returns_unresolved_rows_with_end_ts(monkeypatch):
+    def fake_open_batch(session, cids):
+        return [{"conditionId": c, "closed": False, "outcomePrices": ["0.5", "0.5"],
+                 "endDate": "2026-12-01T00:00:00Z"} for c in cids]
+
+    monkeypatch.setattr(mr, "_get_open_batch", fake_open_batch)
+    res = mr.fetch_open_end_dates(["0xa", "0xb"])
+    assert set(res) == {"0xa", "0xb"}
+    assert all(r.winning_index is None and r.end_ts > 0 for r in res.values())
+
+
+def test_fetch_open_end_dates_skips_markets_without_end_date(monkeypatch):
+    monkeypatch.setattr(mr, "_get_open_batch",
+                        lambda s, cids: [{"conditionId": "0xa", "closed": False}])
+    assert mr.fetch_open_end_dates(["0xa"]) == {}
+
+
 def test_fetch_resolutions_batches_and_caches(tmp_path, monkeypatch):
     calls = {"n": 0}
 
