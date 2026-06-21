@@ -8,8 +8,10 @@ from src.copy_trading.copy_paper import PaperPosition
 from src.copy_trading.pnl import OpenPositionPnl
 from src.copy_trading.pnl_unified import (
     MATURITY_READY,
+    STRATEGY4_LABEL,
     UNTAGGED_A,
     UNTAGGED_B,
+    aggregate_strategy4,
     aggregate_system_a,
     aggregate_system_b,
     best_worst,
@@ -296,3 +298,51 @@ def test_promotion_verdict_gates_on_sample_size_then_pnl_not_hitrate():
     # theory qualifies: the gate is PnL, not hit-rate)
     v, reason = promotion_verdict(net_pnl=40.0, n_closed=MATURITY_READY)
     assert v == "PROMOTE-READY"
+
+
+# --------------------------------------------------------------------------- #
+# Strategy 4 — long-horizon paper book (marked to market, single "S4" track)
+# --------------------------------------------------------------------------- #
+
+def _s4_pos(target, *, closed=False, won=None, pnl=0.0, spent=25.0, shares=50.0,
+            mark_price=0.0, copy_id="c"):
+    unreal = shares * mark_price - spent if mark_price > 0 else 0.0
+    return PaperPosition(
+        copy_id=copy_id, target=target, condition_id="0xC", token_id="TOK",
+        outcome_index=0, category="research", their_price=0.50,
+        entry_price=spent / shares, shares=shares, spent=spent, drag_bps=0,
+        opened_ts=0.0, strategy="4", closed=closed, won=won, pnl=pnl,
+        mark_price=mark_price, unrealized_pnl=unreal,
+    )
+
+
+def test_strategy4_aggregates_under_s4_label_with_marked_unrealized():
+    positions = [
+        _s4_pos("0xL", closed=True, won=True, pnl=10.0, spent=25.0, copy_id="c1"),
+        _s4_pos("0xL", closed=False, spent=25.0, shares=50.0, mark_price=0.70, copy_id="c2"),
+    ]
+    wallets = aggregate_strategy4(positions)
+    assert len(wallets) == 1
+    w = wallets[0]
+    assert w.strategies == (STRATEGY4_LABEL,)
+    assert w.realized_pnl == 10.0
+    assert abs(w.unrealized_pnl - 10.0) < 1e-6        # 50 * 0.70 - 25
+    assert w.n_closed == 1 and w.n_open == 1
+    assert abs(w.cost_basis - 50.0) < 1e-6            # closed 25 + marked-open 25
+    assert abs(w.net_pnl - 20.0) < 1e-6               # realized 10 + unrealized 10
+
+
+def test_strategy4_unmarked_open_excluded_from_roi():
+    w = aggregate_strategy4([_s4_pos("0xL", closed=False, spent=25.0, mark_price=0.0)])[0]
+    assert w.n_open == 1 and w.cost_basis == 0.0 and w.unrealized_pnl == 0.0
+
+
+def test_strategy4_track_shows_separately_from_near_term_in_unified():
+    # the SAME wallet on both books shows two tracks: its near-term copier track
+    # (B:1b) and its long-horizon track (S4) — the dual-membership P&L view.
+    b = aggregate_system_b([_paper("0xboth", flagged_by=("1b",), closed=True, won=True, pnl=4.0)])
+    s4 = aggregate_strategy4([_s4_pos("0xboth", closed=True, won=True, pnl=6.0)])
+    unified = build_unified([], b + s4)
+    labels = {sp.label for sp in unified.strategies}
+    assert "B:1b" in labels and STRATEGY4_LABEL in labels
+    assert unified.total_realized == 10.0             # 4 + 6, both tracks counted

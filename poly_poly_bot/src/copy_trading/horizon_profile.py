@@ -40,6 +40,10 @@ STRATEGY_LONG_HORIZON = "4"  # long-horizon conviction flow — tracked separate
 DEFAULT_LONG_HORIZON_DAYS = 180.0
 DEFAULT_LONG_RATIO_THRESHOLD = 0.5
 DEFAULT_MIN_DATED_BUYS = 5
+# A wallet has a "long book" worth tracking in Strategy 4 once it has at least
+# this many distinct long-horizon buys — independent of whether long bets
+# dominate its flow (that's `long_ratio`, used only for the display label now).
+DEFAULT_MIN_LONG_BUYS = 3
 
 
 @dataclass(frozen=True)
@@ -136,3 +140,24 @@ def classify_strategy(
     if profile.long_ratio >= long_ratio_threshold:
         return STRATEGY_LONG_HORIZON
     return STRATEGY_NEAR_TERM
+
+
+def long_horizon_eligible(
+    profile: HorizonProfile,
+    *,
+    min_long_buys: int = DEFAULT_MIN_LONG_BUYS,
+) -> bool:
+    """Whether a wallet has a long-horizon book worth tracking in Strategy 4.
+
+    This is the **dual-membership** gate, and it is deliberately *not* exclusive
+    with Strategy 1. ``classify_strategy`` answers "which bucket does this wallet
+    belong to" (a single label, by which horizon dominates its $); this answers
+    the orthogonal "does this wallet have a real long book at all" — true once it
+    has ``min_long_buys`` distinct long-horizon bets, regardless of whether near-
+    term bets also dominate. A wallet that is mostly near-term-copyable but
+    reliably places a handful of far-future conviction bets is therefore *both*
+    Strategy-1 (its short bets feed the copier) and Strategy-4 (its long bets feed
+    the long-horizon book). The per-bet split happens downstream, at copy time,
+    by each bet's own resolution date.
+    """
+    return profile.n_long >= min_long_buys

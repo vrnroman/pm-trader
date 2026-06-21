@@ -83,6 +83,47 @@ def test_run_forever_stops_on_shutdown():
         assert len(r.ledger.open_positions()) == 1
 
 
+def test_runner_long_horizon_book_unions_watchlists_and_routes_by_horizon():
+    # The S4 book watches BOTH watchlists (S1 ∪ S4 wallets) and, of the detected
+    # bets, books only the long-horizon one — marked to market, stamped "4".
+    with tempfile.TemporaryDirectory() as d:
+        s1wl, s4wl = os.path.join(d, "s1.json"), os.path.join(d, "s4.json")
+        json.dump({"targets": [{"wallet": "0xS1"}]}, open(s1wl, "w"))
+        json.dump({"targets": [{"wallet": "0xS4"}]}, open(s4wl, "w"))
+
+        feed = [
+            dict(copy_id="short", target="0xS1", condition_id="0xCS", token_id="TOKS",
+                 outcome_index=0, category="research", their_price=0.50,
+                 their_usd=1000, horizon_days=10),
+            dict(copy_id="long", target="0xS4", condition_id="0xCL", token_id="TOKL",
+                 outcome_index=0, category="research", their_price=0.50,
+                 their_usd=1000, horizon_days=300),
+        ]
+        captured = {}
+
+        def det_factory(w, age, usd, fb=None, horizon_resolver=None):
+            captured["horizon_resolver"] = horizon_resolver
+            return lambda: feed
+
+        r = CopyPaperRunner(
+            ledger_path=os.path.join(d, "s4led.jsonl"),
+            watchlist_path=s1wl, extra_watchlist_paths=[s4wl],
+            min_horizon_days=180, strategy="4", mark_fetcher=lambda t: 0.55,
+            detector_factory=det_factory, book_fetcher=lambda t: [(0.50, 10000)],
+            resolver=lambda c: None,
+            exit_detector_factory=lambda w, age: (lambda: []),
+            horizon_resolver=lambda cid: None,   # inject so no live Gamma call
+            cycle_interval_s=0,
+        )
+        assert set(r.wallets()) == {"0xS1", "0xS4"}      # union watched
+        s = r.run_once()
+        assert s.opened == 1 and s.skipped_horizon == 1  # short bet skipped
+        pos = r.ledger.open_positions()[0]
+        assert pos.copy_id == "long" and pos.strategy == "4"
+        assert pos.mark_price == 0.55                    # marked to market
+        assert captured["horizon_resolver"] is not None  # resolver forwarded
+
+
 def test_run_forever_survives_cycle_exception():
     with tempfile.TemporaryDirectory() as d:
         ev = threading.Event()

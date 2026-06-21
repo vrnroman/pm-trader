@@ -116,6 +116,17 @@ class PaperPosition:
     # stamped at open so per-strategy P&L attribution is stable even as the
     # watchlist re-flags the wallet later. Default-safe: old ledger lines load as ().
     flagged_by: tuple = ()
+    # Which track booked this position — "1" (near-term copy) or "4" (long-horizon
+    # book). Routed live by the bet's own horizon, so a single wallet's short bets
+    # land here as "1" and its far-future bets as "4". Default-safe: old rows -> "1".
+    strategy: str = "1"
+    horizon_days: float = 0.0   # bet horizon at open (market endDate − entry), days
+    # Mark-to-market (Strategy-4 long-horizon positions sit open for months, so we
+    # mark them to a live mid instead of showing a blank until resolution). Unused
+    # by the near-term book, which holds briefly and reports only realized PnL.
+    mark_price: float = 0.0
+    marked_ts: float = 0.0
+    unrealized_pnl: float = 0.0
     # filled on resolution OR on following the target's exit:
     closed: bool = False
     won: Optional[bool] = None
@@ -147,6 +158,20 @@ class PaperPosition:
         self.closed = True
         self.exited_early = True
         self.closed_ts = now if now is not None else time.time()
+
+    def mark(self, mid: float, now: Optional[float] = None) -> None:
+        """Mark an open position to a current mid price (Strategy-4 book).
+
+        A long-horizon position can sit open for months; marking it to the live
+        mid gives ``/pnl`` a running unrealized P&L instead of a blank until the
+        market settles. No-op on a closed position or a non-positive mid (an
+        empty/stale book), so a transient missing quote never corrupts the mark.
+        """
+        if self.closed or mid <= 0:
+            return
+        self.mark_price = mid
+        self.unrealized_pnl = self.shares * mid - self.spent
+        self.marked_ts = now if now is not None else time.time()
 
 
 class PaperCopyLedger:
@@ -205,6 +230,8 @@ DetectFn = Callable[[], list[dict]]
 BookFn = Callable[[str], list[tuple[float, float]]]
 # resolver(condition_id) -> winning outcome_index, or None if unresolved
 ResolveFn = Callable[[str], Optional[int]]
+# mark_fetcher(token_id) -> current mid price, or None if no live quote
+MarkFn = Callable[[str], Optional[float]]
 
 
 @dataclass
@@ -216,7 +243,10 @@ class CycleSummary:
     skipped_fill_gate: int = 0          # our fill would chase too far above their price
     skipped_not_first_entry: int = 0    # averaging-down / re-entry into a copied market
     skipped_slate_cap: int = 0          # per-(wallet|category)-day concentration cap hit
+    skipped_horizon: int = 0            # bet's resolution date is on the wrong side of the
+                                        # horizon cut for this book (S1 skips longs, S4 skips shorts)
     resolved: int = 0
+    marked: int = 0  # open positions marked-to-market this cycle (Strategy-4 book)
     exited: int = 0  # closed by following the target's SELL
     # the positions that resolved *this* cycle, so callers can name them in a
     # notification instead of only reporting cumulative ledger aggregates.
@@ -248,6 +278,19 @@ class CopyPaperEngine:
         # category, so one correlated same-day slate can't dominate (None = off).
         max_copies_per_wallet_day: Optional[int] = None,
         max_copies_per_category_day: Optional[int] = None,
+        # --- bet-horizon routing (Strategy 1 vs 4) ---
+        # Only act on a detected BUY whose horizon (market endDate − now, in days,
+        # carried on the trade as ``horizon_days``) is in this book's band. The
+        # near-term book sets ``max_horizon_days`` so it skips far-future bets; the
+        # long-horizon book sets ``min_horizon_days`` so it takes only those. Both
+        # None (default) = horizon-blind, so the bare engine is unchanged.
+        min_horizon_days: Optional[float] = None,
+        max_horizon_days: Optional[float] = None,
+        # mark open positions to a live mid each cycle (the long-horizon book; the
+        # near-term book holds briefly and leaves this off).
+        mark_fetcher: Optional[MarkFn] = None,
+        # stamped on every position this engine opens, for per-strategy P&L.
+        strategy: str = "1",
     ):
         self.ledger = ledger
         self.detector = detector
@@ -256,6 +299,10 @@ class CopyPaperEngine:
         self.copy_pct = copy_pct
         self.max_copy_usd = max_copy_usd
         self.max_slippage_bps = max_slippage_bps
+        self.min_horizon_days = min_horizon_days
+        self.max_horizon_days = max_horizon_days
+        self.mark_fetcher = mark_fetcher
+        self.strategy = strategy
         # exit_detector() -> target SELLs: {target, token_id, their_price};
         # bid_fetcher(token_id) -> [(bid_price, size)] for our achievable exit.
         self.exit_detector = exit_detector
@@ -284,6 +331,19 @@ class CopyPaperEngine:
             s.detected += 1
             cid = tr["copy_id"]
             if self.ledger.has(cid):
+                continue
+            # bet-horizon routing: each book takes only bets resolving on its side
+            # of the cut. An undated bet (horizon None) is treated as near-term —
+            # the near-term book still copies it, the long-horizon book skips it,
+            # so a missing endDate never opens a months-long paper position.
+            horizon = tr.get("horizon_days")
+            if self.min_horizon_days is not None and (
+                horizon is None or horizon < self.min_horizon_days):
+                s.skipped_horizon += 1
+                continue
+            if (self.max_horizon_days is not None and horizon is not None
+                    and horizon >= self.max_horizon_days):
+                s.skipped_horizon += 1
                 continue
             target = tr["target"]
             token = tr["token_id"]
@@ -322,6 +382,8 @@ class CopyPaperEngine:
                 category=category, their_price=tr["their_price"],
                 title=tr.get("title", ""), slug=tr.get("slug", ""),
                 flagged_by=tuple(tr.get("flagged_by", ())),
+                strategy=self.strategy,
+                horizon_days=float(horizon) if horizon is not None else 0.0,
                 entry_price=fill.avg_price, shares=fill.shares, spent=fill.spent,
                 drag_bps=fill.drag_bps, opened_ts=now,
             ))
@@ -355,7 +417,18 @@ class CopyPaperEngine:
             pos.realize(won=(winner == pos.outcome_index), now=now)
             s.resolved += 1
             s.resolved_positions.append(pos)
-        if s.resolved or s.exited:
+
+        # mark-to-market: refresh unrealized PnL on whatever's still open (the
+        # long-horizon book — months between open and resolution). Runs after the
+        # resolution pass so a position that just settled isn't also re-marked.
+        if self.mark_fetcher is not None:
+            for pos in self.ledger.open_positions():
+                mid = self.mark_fetcher(pos.token_id)
+                if mid is not None and mid > 0:
+                    pos.mark(float(mid), now=now)
+                    s.marked += 1
+
+        if s.resolved or s.exited or s.marked:
             self.ledger.save()
         return s
 

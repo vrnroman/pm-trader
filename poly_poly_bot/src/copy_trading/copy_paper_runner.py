@@ -23,6 +23,7 @@ from src.copy_trading.copy_paper_live import (
     load_watchlist_wallets,
     make_detector,
     make_exit_detector,
+    make_horizon_resolver,
     resolve,
 )
 
@@ -45,12 +46,25 @@ class CopyPaperRunner:
         first_entry_only: bool = False,
         max_copies_per_wallet_day: Optional[int] = None,
         max_copies_per_category_day: Optional[int] = None,
+        # --- bet-horizon routing (Strategy 1 near-term vs 4 long-horizon) ---
+        # When set, every detected BUY is routed by its market's resolution date.
+        # The near-term book passes ``max_horizon_days`` (skip far-future bets);
+        # the long-horizon book passes ``min_horizon_days`` (take only them) plus a
+        # ``mark_fetcher`` and ``strategy="4"``. Both None = horizon-blind (the
+        # original copier). ``extra_watchlist_paths`` unions extra watchlists into
+        # the watched set (the long-horizon book watches S1 ∪ S4 wallets).
+        min_horizon_days: Optional[float] = None,
+        max_horizon_days: Optional[float] = None,
+        mark_fetcher: Optional[Callable[[str], Optional[float]]] = None,
+        strategy: str = "1",
+        extra_watchlist_paths: Optional[list[str]] = None,
         # injectable dependencies (defaults are the live ones)
-        detector_factory: Optional[Callable[[list[str], float, float, dict], Callable]] = None,
+        detector_factory: Optional[Callable[..., Callable]] = None,
         book_fetcher: Optional[Callable[[str], list[tuple[float, float]]]] = None,
         resolver: Optional[Callable[[str], Optional[int]]] = None,
         exit_detector_factory: Optional[Callable[[list[str], float], Callable]] = None,
         bid_fetcher: Optional[Callable[[str], list[tuple[float, float]]]] = None,
+        horizon_resolver: Optional[Callable[[str], Optional[float]]] = None,
         on_cycle: Optional[Callable[[CycleSummary, "PaperCopyLedger"], None]] = None,
     ):
         self.ledger = PaperCopyLedger(ledger_path)
@@ -66,6 +80,11 @@ class CopyPaperRunner:
         self.first_entry_only = first_entry_only
         self.max_copies_per_wallet_day = max_copies_per_wallet_day
         self.max_copies_per_category_day = max_copies_per_category_day
+        self.min_horizon_days = min_horizon_days
+        self.max_horizon_days = max_horizon_days
+        self.strategy = strategy
+        self._mark_fetcher = mark_fetcher
+        self._extra_watchlist_paths = list(extra_watchlist_paths or [])
         self._detector_factory = detector_factory or make_detector
         self._book_fetcher = book_fetcher or fetch_asks
         self._resolver = resolver or resolve
@@ -73,11 +92,28 @@ class CopyPaperRunner:
         self._exit_detector_factory = exit_detector_factory or make_exit_detector
         self._bid_fetcher = bid_fetcher or fetch_bids
         self._on_cycle = on_cycle
+        # One horizon resolver, built once so its end-date cache persists across
+        # cycles (one Gamma call per new market, not per cycle). Only needed when a
+        # horizon band is set; otherwise routing is blind and we never look dates up.
+        horizon_enabled = min_horizon_days is not None or max_horizon_days is not None
+        self._horizon_resolver = horizon_resolver or (
+            make_horizon_resolver() if horizon_enabled else None)
 
     def wallets(self) -> list[str]:
         if self._explicit_wallets:
             return self._explicit_wallets
-        return load_watchlist_wallets(self.watchlist_path or "")
+        # Union the primary watchlist with any extras (the long-horizon book
+        # watches both the copy watchlist and the long-horizon watchlist), keeping
+        # first-seen order and de-duping case-insensitively.
+        seen: set[str] = set()
+        out: list[str] = []
+        for path in [self.watchlist_path or ""] + self._extra_watchlist_paths:
+            for w in load_watchlist_wallets(path):
+                key = w.lower()
+                if key not in seen:
+                    seen.add(key)
+                    out.append(w)
+        return out
 
     def flagged_by_map(self) -> dict:
         """Wallet -> discovery theories, reloaded from the watchlist each cycle
@@ -85,14 +121,21 @@ class CopyPaperRunner:
         running on an explicit wallet list (no watchlist file)."""
         if self._explicit_wallets or not self.watchlist_path:
             return {}
-        return load_watchlist_flagged_by(self.watchlist_path)
+        out = load_watchlist_flagged_by(self.watchlist_path)
+        for path in self._extra_watchlist_paths:
+            for w, fb in load_watchlist_flagged_by(path).items():
+                out.setdefault(w, fb)
+        return out
 
     def run_once(self) -> CycleSummary:
         wallets = self.wallets()
         if not wallets:
             return CycleSummary()
+        det_kwargs = {}
+        if self._horizon_resolver is not None:
+            det_kwargs["horizon_resolver"] = self._horizon_resolver
         detector = self._detector_factory(
-            wallets, self.max_age_s, self.min_usd, self.flagged_by_map()
+            wallets, self.max_age_s, self.min_usd, self.flagged_by_map(), **det_kwargs
         )
         exit_detector = self._exit_detector_factory(wallets, self.max_age_s)
         engine = CopyPaperEngine(
@@ -103,6 +146,9 @@ class CopyPaperRunner:
             fill_gate_bps=self.fill_gate_bps, first_entry_only=self.first_entry_only,
             max_copies_per_wallet_day=self.max_copies_per_wallet_day,
             max_copies_per_category_day=self.max_copies_per_category_day,
+            min_horizon_days=self.min_horizon_days,
+            max_horizon_days=self.max_horizon_days,
+            mark_fetcher=self._mark_fetcher, strategy=self.strategy,
         )
         summary = engine.run_cycle()
         if self._on_cycle:

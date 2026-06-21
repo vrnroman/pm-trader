@@ -73,14 +73,19 @@ class DiscoveryConfig:
     auto_remove: bool = True
     # Strategy 4 — long-horizon bet tracking. When enabled, the sweep classifies
     # each wallet by how early it bets before resolution (see horizon_profile) and
-    # routes long-horizon-dominated wallets to a SEPARATE watchlist rather than
-    # the copy funnel — they have no closed markets to score, so the copy/PnL
-    # gates can't judge them. Tracked, not skipped. Off by default (zero added
-    # API cost): the open-market end-date fetch only runs when this is on.
+    # ALSO adds wallets with a real long-horizon book to a SEPARATE long-horizon
+    # watchlist. This is *dual membership*, not a partition: a long-horizon wallet
+    # still flows through the copy funnel on its near-term bets — only its
+    # far-future bets are routed (live, per bet) to the Strategy-4 paper book.
+    # Off by default (zero added API cost): the open-market end-date fetch only
+    # runs when this is on.
     s4_enabled: bool = False
     s4_long_horizon_days: float = 180.0
-    s4_min_long_ratio: float = 0.5
+    s4_min_long_ratio: float = 0.5      # display label only (which horizon dominates $)
     s4_min_dated_buys: int = 5
+    # A wallet joins the long-horizon track once it has this many distinct
+    # long-horizon buys — independent of the copy funnel (dual membership).
+    s4_min_long_buys: int = 3
     long_horizon_cap: int = 25
     # on-disk cache for market resolutions (1a/1e need how each market settled).
     # Resolved markets are immutable so they're cached permanently; None disables
@@ -120,9 +125,14 @@ class Eval:
     flagged_by: tuple = ()
     reason: str = ""
     # bet-horizon classification (Strategy 1 = near-term, Strategy 4 = long-horizon
-    # conviction bets that won't resolve for months). "1" by default so wallets
-    # without horizon data flow through the existing funnel unchanged.
+    # conviction bets that won't resolve for months). `strategy` is a DISPLAY label
+    # (which horizon dominates the wallet's $); "1" by default so wallets without
+    # horizon data read as near-term. `long_horizon` is the ROUTING flag — True
+    # when the wallet has a real long book — and is independent of `strategy`/the
+    # copy funnel (dual membership: a wallet can be near-term-copyable and carry a
+    # long book at once).
     strategy: str = "1"
+    long_horizon: bool = False
     long_horizon_ratio: float = 0.0   # share of dated buy $ placed long before resolution
     horizon_days: float = 0.0         # USD-weighted mean days-before-resolution
 
@@ -180,6 +190,7 @@ def _meta(e: Eval) -> dict:
         "flagged_by": list(e.flagged_by), "reason": e.reason,
         # bet-horizon classification (Strategy 1 near-term vs 4 long-horizon)
         "strategy": e.strategy,
+        "long_horizon": e.long_horizon,
         "long_horizon_ratio": round(e.long_horizon_ratio, 3),
         "horizon_days": round(e.horizon_days, 1),
     }
@@ -197,20 +208,17 @@ def run_discovery_cycle(
     """
     prev_on = set(prev.on_watchlist)
 
-    # Strategy 4: peel long-horizon wallets off BEFORE the copy funnel. They bet
-    # on far-future events with no closed markets to score, so the copy/PnL gates
-    # below can't judge them — we track them on their own clock instead of
-    # dropping them or polluting the copy watchlist. Disabled (s4_enabled=False)
-    # leaves every wallet in the near-term path, so behaviour is unchanged.
+    # Strategy 4: collect wallets with a real long-horizon book into a SEPARATE
+    # long-horizon track — but DO NOT remove them from the copy funnel. A wallet
+    # can be near-term-copyable AND carry far-future conviction bets at the same
+    # time (dual membership): its short-horizon bets keep flowing through the
+    # Strategy-1 path below, while its long-horizon bets are tracked by the
+    # Strategy-4 paper book. The per-bet split is made live, by each bet's own
+    # resolution date — here we only decide which wallets each track *watches*.
+    # Disabled (s4_enabled=False) leaves this empty, so behaviour is unchanged.
     long_horizon_evals: list[Eval] = []
     if cfg.s4_enabled:
-        near_term = {}
-        for w, e in evaluated.items():
-            if e.strategy == "4":
-                long_horizon_evals.append(e)
-            else:
-                near_term[w] = e
-        evaluated = near_term
+        long_horizon_evals = [e for e in evaluated.values() if e.long_horizon]
         long_horizon_evals.sort(
             key=lambda e: (e.long_horizon_ratio, e.horizon_days), reverse=True)
         long_horizon_evals = long_horizon_evals[: cfg.long_horizon_cap]

@@ -93,6 +93,11 @@ def _copy_paper_loop():
         first_entry_only=CONFIG.copy_paper_first_entry_only,
         max_copies_per_wallet_day=_cap(CONFIG.copy_paper_max_per_wallet_day),
         max_copies_per_category_day=_cap(CONFIG.copy_paper_max_per_category_day),
+        # When Strategy 4 is on, this near-term book stops short-copying far-future
+        # bets — they would lock paper capital for months and belong to the S4
+        # book instead. Off => horizon-blind, so behaviour is unchanged.
+        max_horizon_days=(CONFIG.strategy_4_long_horizon_days
+                          if CONFIG.strategy_4_enabled else None),
         on_cycle=_on_cycle,
     )
     n = len(runner.wallets())
@@ -107,6 +112,53 @@ def _copy_paper_loop():
             f"`python -m backtest.two_stage_watchlist --cache-dir data/wcache "
             f"--output {wl}` (skill ∩ copyability)"
         )
+    runner.run_forever(_shutdown_event)
+
+
+def _s4_paper_loop():
+    """Strategy 4: paper book for long-horizon bets, marked to market.
+
+    Watches both the copy watchlist and the long-horizon watchlist (S1 ∪ S4
+    wallets) and opens a paper position only on bets whose market resolves at or
+    beyond the horizon cut — the far-future conviction bets the near-term copier
+    now skips. Holds to resolution, marking each open position to the live mid so
+    /pnl shows a running unrealized P&L instead of a blank for months. NO orders.
+    """
+    from src.copy_trading.copy_paper_live import fetch_mid
+    from src.copy_trading.copy_paper_runner import CopyPaperRunner
+
+    def _on_cycle(summary, ledger):
+        if summary.opened or summary.resolved or summary.marked:
+            logger.info(
+                f"[S4-PAPER] opened={summary.opened} resolved={summary.resolved} "
+                f"marked={summary.marked} skipped_horizon={summary.skipped_horizon} "
+                f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
+            )
+
+    runner = CopyPaperRunner(
+        ledger_path=CONFIG.strategy_4_paper_ledger,
+        watchlist_path=CONFIG.copy_paper_watchlist,
+        extra_watchlist_paths=[CONFIG.wallet_discovery_long_horizon_watchlist],
+        max_copy_usd=CONFIG.strategy_4_paper_max_usd,
+        copy_pct=CONFIG.copy_paper_copy_pct,
+        max_slippage_bps=CONFIG.copy_paper_max_slippage_bps,
+        max_age_s=CONFIG.copy_paper_max_age_s,
+        min_usd=CONFIG.strategy_4_paper_min_usd,
+        cycle_interval_s=CONFIG.strategy_4_paper_interval_s,
+        # this book takes ONLY long-horizon bets, marks them to market, and stamps
+        # them strategy "4" for per-strategy P&L.
+        min_horizon_days=CONFIG.strategy_4_long_horizon_days,
+        mark_fetcher=fetch_mid,
+        strategy="4",
+        on_cycle=_on_cycle,
+    )
+    n = len(runner.wallets())
+    logger.info(
+        f"S4 long-horizon paper book started (wallets={n}, "
+        f"interval={CONFIG.strategy_4_paper_interval_s}s, "
+        f"horizon≥{CONFIG.strategy_4_long_horizon_days:.0f}d, "
+        f"max ${CONFIG.strategy_4_paper_max_usd:.0f}/bet, PREVIEW measurement only)"
+    )
     runner.run_forever(_shutdown_event)
 
 
@@ -141,6 +193,7 @@ def _discovery_loop():
         s4_long_horizon_days=CONFIG.strategy_4_long_horizon_days,
         s4_min_long_ratio=CONFIG.strategy_4_min_long_ratio,
         s4_min_dated_buys=CONFIG.strategy_4_min_dated_buys,
+        s4_min_long_buys=CONFIG.strategy_4_min_long_buys,
         long_horizon_cap=CONFIG.strategy_4_cap,
     )
     runner = DiscoveryRunner(
@@ -233,6 +286,16 @@ async def main():
         )
         copy_paper_thread.start()
         logger.info("Copy-paper harness thread started")
+
+        # Strategy 4: the long-horizon paper book runs alongside the near-term
+        # copier (same measurement-only guarantee), taking the far-future bets the
+        # copier now skips. Gated on both copy-paper AND strategy_4 being enabled.
+        if CONFIG.strategy_4_enabled:
+            s4_paper_thread = threading.Thread(
+                target=_s4_paper_loop, daemon=True, name="s4-paper"
+            )
+            s4_paper_thread.start()
+            logger.info("S4 long-horizon paper book thread started")
     else:
         logger.info("Copy-paper harness disabled (set COPY_PAPER_ENABLED=true)")
 

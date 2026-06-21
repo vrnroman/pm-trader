@@ -24,7 +24,11 @@ import requests
 from src.copy_trading.copy_replay import score_copy_replay
 from src.copy_trading.discovery import DiscoveryConfig, Eval
 from src.copy_trading.entry_profile import EntryProfile, entry_profile, is_copyable_entry
-from src.copy_trading.horizon_profile import classify_strategy, horizon_profile
+from src.copy_trading.horizon_profile import (
+    classify_strategy,
+    horizon_profile,
+    long_horizon_eligible,
+)
 from src.copy_trading.lead_lag import WalletLeadLag, analyze_buy
 from src.copy_trading.market_resolution import fetch_open_end_dates, fetch_resolutions
 from src.copy_trading.pnl_curve import CurveMetrics, curve_metrics, fetch_pnl_curve
@@ -514,16 +518,21 @@ def evaluate_sweep(
         # own closed-position ROI. exit_* is the two-horizon diagnostic.
         crs = score_copy_replay(ctx.buys, ctx.round_trips, min_usd=cfg.min_usd)
         fade = crs.fade_label(min_n=cfg.min_copy_replay_n, fade_roi=cfg.fade_roi) is not None
-        # Strategy 1 vs 4: classify the wallet by how early it bets before
-        # resolution. Defaults to "1" when classification is off or there's too
-        # little horizon data, so the copy funnel is unaffected unless s4 is on.
+        # Strategy 1 vs 4 — NOT exclusive (dual membership). `strategy` is a
+        # display label (which horizon dominates the wallet's $); `long_horizon`
+        # is the routing flag that ALSO adds the wallet to the Strategy-4 track
+        # when it has a real long book. The copy funnel below is unaffected — it
+        # scores every wallet on its near-term bets as before; s4 only adds the
+        # long-horizon list. Defaults keep behaviour unchanged when s4 is off.
         strategy = "1"
+        long_horizon = False
         hp = horizon_profile(ctx.buys, long_horizon_days=cfg.s4_long_horizon_days)
         if cfg.s4_enabled:
             label = classify_strategy(
                 hp, min_dated_buys=cfg.s4_min_dated_buys,
                 long_ratio_threshold=cfg.s4_min_long_ratio)
             strategy = label or "1"
+            long_horizon = long_horizon_eligible(hp, min_long_buys=cfg.s4_min_long_buys)
         evaluated[w] = Eval(
             wallet=w, roi=roi, tstat=tstat,
             capture_cents=capture, lead_cents=lead, hit_rate=hit, n=n_cap,
@@ -534,6 +543,7 @@ def evaluate_sweep(
             flagged_by=tuple(f.theory for f in flags),
             reason=" | ".join(f.reason for f in flags),
             strategy=strategy,
+            long_horizon=long_horizon,
             long_horizon_ratio=hp.long_ratio,
             horizon_days=hp.mean_horizon_days,
         )

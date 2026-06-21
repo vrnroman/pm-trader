@@ -56,10 +56,16 @@ class ResetResult:
         )
 
 
-def _target_paths(data_dir: str, copy_paper_ledger: Optional[str]) -> list[str]:
+def _target_paths(
+    data_dir: str,
+    copy_paper_ledger: Optional[str],
+    s4_paper_ledger: Optional[str] = None,
+) -> list[str]:
     """Absolute paths to every file the reset clears. ``copy_paper_ledger``
-    (System B) may live at a custom path, so it's passed in explicitly."""
+    (System B) and ``s4_paper_ledger`` (the long-horizon book) may live at custom
+    paths, so they're passed in explicitly."""
     paths = [copy_paper_ledger or os.path.join(data_dir, "copy_paper_ledger.jsonl")]
+    paths += [s4_paper_ledger or os.path.join(data_dir, "s4_paper_ledger.jsonl")]
     paths += [os.path.join(data_dir, n) for n in _LEDGER_NAMES]
     paths += [os.path.join(data_dir, n) for n in _STATE_NAMES]
     # de-dupe while preserving order (custom ledger could equal the default)
@@ -80,6 +86,7 @@ def reset_pnl(
     archive: bool = True,
     now: Optional[datetime] = None,
     copy_paper_ledger: Optional[str] = None,
+    s4_paper_ledger: Optional[str] = None,
     reset_memory: bool = True,
 ) -> ResetResult:
     """Archive + clear all P&L/risk/spend files and (optionally) reset live
@@ -91,7 +98,7 @@ def reset_pnl(
     stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
     archive_dir = os.path.join(data_dir, "archive")
 
-    for path in _target_paths(data_dir, copy_paper_ledger):
+    for path in _target_paths(data_dir, copy_paper_ledger, s4_paper_ledger):
         if not os.path.exists(path):
             res.skipped.append(path)
             continue

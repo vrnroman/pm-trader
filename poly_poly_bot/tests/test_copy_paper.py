@@ -384,3 +384,98 @@ def test_format_resolution_telegram_loss_and_titleless_fallback():
         assert "❌ LOST" in msg
         assert "(politics market)" in msg     # falls back to category when untitled
         assert "1 market resolved" in msg     # singular
+
+
+# --------------------------------------------------------------------------- #
+# Bet-horizon routing (Strategy 1 near-term vs 4 long-horizon) + mark-to-market
+# --------------------------------------------------------------------------- #
+
+def _trade_h(copy_id, token, horizon_days, their_price=0.50, their_usd=1000):
+    t = _trade(copy_id, token, their_price=their_price, their_usd=their_usd)
+    t["condition_id"] = copy_id  # distinct condition per bet for the resolver
+    t["horizon_days"] = horizon_days
+    return t
+
+
+def test_engine_long_horizon_book_takes_only_long_bets():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        feed = [_trade_h("short", "TOKS", horizon_days=10),
+                _trade_h("long", "TOKL", horizon_days=300)]
+        eng = CopyPaperEngine(
+            led, detector=lambda: feed, book_fetcher=lambda t: [(0.50, 10000)],
+            resolver=lambda c: None, max_copy_usd=25,
+            min_horizon_days=180, strategy="4",
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 1 and s.skipped_horizon == 1
+        pos = led.open_positions()[0]
+        assert pos.copy_id == "long" and pos.strategy == "4" and pos.horizon_days == 300
+
+
+def test_engine_near_term_book_skips_long_bets():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        feed = [_trade_h("short", "TOKS", horizon_days=10),
+                _trade_h("long", "TOKL", horizon_days=300)]
+        eng = CopyPaperEngine(
+            led, detector=lambda: feed, book_fetcher=lambda t: [(0.50, 10000)],
+            resolver=lambda c: None, max_horizon_days=180,
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 1 and s.skipped_horizon == 1
+        pos = led.open_positions()[0]
+        assert pos.copy_id == "short" and pos.strategy == "1"
+
+
+def test_engine_undated_bet_is_treated_near_term():
+    # No horizon_days (endDate unknown): the near-term book still copies it, the
+    # long-horizon book skips it — a missing date never opens a months-long bet.
+    with tempfile.TemporaryDirectory() as d:
+        s4 = CopyPaperEngine(
+            PaperCopyLedger(os.path.join(d, "s4.jsonl")),
+            detector=lambda: [_trade("u", "TOK")],   # no horizon_days key
+            book_fetcher=lambda t: [(0.50, 10000)],
+            resolver=lambda c: None, min_horizon_days=180)
+        assert s4.run_cycle(now=1).opened == 0
+        s1 = CopyPaperEngine(
+            PaperCopyLedger(os.path.join(d, "s1.jsonl")),
+            detector=lambda: [_trade("u", "TOK")],
+            book_fetcher=lambda t: [(0.50, 10000)],
+            resolver=lambda c: None, max_horizon_days=180)
+        assert s1.run_cycle(now=1).opened == 1
+
+
+def test_engine_marks_open_positions_to_market():
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "l.jsonl")
+        led = PaperCopyLedger(path)
+        eng = CopyPaperEngine(
+            led,
+            detector=lambda: [_trade_h("long", "TOK", horizon_days=300, their_price=0.40)],
+            book_fetcher=lambda t: [(0.40, 10000)],   # fill at 0.40 -> ~100 shares
+            resolver=lambda c: None, max_copy_usd=40,
+            min_horizon_days=180, strategy="4",
+            mark_fetcher=lambda t: 0.60,              # mid moved up to 0.60
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 1 and s.marked == 1
+        pos = led.open_positions()[0]
+        assert pos.mark_price == 0.60
+        assert abs(pos.unrealized_pnl - 20.0) < 1e-6   # 100 * (0.60 - 0.40)
+        # marking persists the ledger so a restart keeps the live mark
+        assert PaperCopyLedger(path).open_positions()[0].mark_price == 0.60
+
+
+def test_engine_mark_skipped_on_empty_book():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        eng = CopyPaperEngine(
+            led, detector=lambda: [_trade_h("long", "TOK", horizon_days=300)],
+            book_fetcher=lambda t: [(0.50, 10000)], resolver=lambda c: None,
+            min_horizon_days=180, strategy="4",
+            mark_fetcher=lambda t: None,              # no live quote
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 1 and s.marked == 0
+        assert led.open_positions()[0].mark_price == 0.0

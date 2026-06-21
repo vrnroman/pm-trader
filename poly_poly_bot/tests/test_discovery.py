@@ -216,7 +216,8 @@ def test_copy_replay_gate_off_keeps_negative_wallet():
 
 
 # --------------------------------------------------------------------------- #
-# Strategy 4 — long-horizon wallets tracked separately from the copy funnel
+# Strategy 4 — long-horizon wallets tracked alongside the copy funnel (dual
+# membership: a wallet can feed the copier AND the long-horizon book at once)
 # --------------------------------------------------------------------------- #
 
 S4_CFG = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0, drop_capture_cents=1.0,
@@ -224,28 +225,29 @@ S4_CFG = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0, drop_capture_cen
 
 
 def test_strategy4_default_off_keeps_long_horizon_in_copy_funnel():
-    # with s4 disabled (default), a strategy-tagged wallet still flows through the
-    # near-term path unchanged — the partition is opt-in.
-    lh = Eval(wallet="0xLH", capture_cents=2.0, tstat=12.0, strategy="4")
+    # with s4 disabled (default), a long-horizon-flagged wallet still flows through
+    # the near-term path unchanged and the long-horizon list stays empty — opt-in.
+    lh = Eval(wallet="0xLH", capture_cents=2.0, tstat=12.0, long_horizon=True)
     r = run_discovery_cycle({"0xLH": lh}, DiscoveryState(), CFG)  # CFG has s4 off
     assert [e.wallet for e in r.watchlist] == ["0xLH"]
     assert r.long_horizon == []
 
 
-def test_strategy4_wallet_peeled_off_into_separate_track():
-    near = _ev("0xN", 2.0)                                  # near-term, copyable
-    longh = Eval(wallet="0xLH", capture_cents=2.0, tstat=12.0, strategy="4",
-                 long_horizon_ratio=0.8, horizon_days=300)
-    r = run_discovery_cycle({"0xN": near, "0xLH": longh}, DiscoveryState(), S4_CFG)
-    # long-horizon wallet is NOT on the copy watchlist...
-    assert [e.wallet for e in r.watchlist] == ["0xN"]
-    # ...it's tracked on the separate long-horizon list instead
-    assert [e.wallet for e in r.long_horizon] == ["0xLH"]
+def test_strategy4_dual_membership_wallet_on_both_lists():
+    # a wallet that is BOTH near-term-copyable AND carries a long book appears on
+    # the copy watchlist *and* the long-horizon list — the long-horizon track no
+    # longer peels it off the copier (its short bets are still copied).
+    near = _ev("0xN", 2.0)                                  # near-term only
+    both = Eval(wallet="0xB", capture_cents=2.0, tstat=12.0, long_horizon=True,
+                long_horizon_ratio=0.8, horizon_days=300)
+    r = run_discovery_cycle({"0xN": near, "0xB": both}, DiscoveryState(), S4_CFG)
+    assert "0xB" in [e.wallet for e in r.watchlist]        # still in the copy funnel
+    assert [e.wallet for e in r.long_horizon] == ["0xB"]   # AND on the long track
 
 
 def test_strategy4_list_ranked_by_horizon_and_capped():
     evals = {
-        f"0x{i}": Eval(wallet=f"0x{i}", strategy="4",
+        f"0x{i}": Eval(wallet=f"0x{i}", long_horizon=True,
                        long_horizon_ratio=r, horizon_days=100 * i)
         for i, r in enumerate([0.6, 0.9, 0.7, 0.95], start=1)
     }
@@ -254,10 +256,10 @@ def test_strategy4_list_ranked_by_horizon_and_capped():
     assert [e.wallet for e in res.long_horizon] == ["0x4", "0x2", "0x3"]
 
 
-def test_strategy4_does_not_need_copy_gates():
-    # a long-horizon wallet has no closed markets / copy-replay data and wouldn't
-    # pass the copy funnel — it's still tracked on the long-horizon list.
-    longh = Eval(wallet="0xLH", capture_cents=0.0, tstat=0.0, strategy="4",
+def test_strategy4_long_only_wallet_tracked_without_copy_gates():
+    # a purely long-horizon wallet has no closed markets / copy-replay data and
+    # won't pass the copy funnel — it's still tracked on the long-horizon list.
+    longh = Eval(wallet="0xLH", capture_cents=0.0, tstat=0.0, long_horizon=True,
                  long_horizon_ratio=0.9, horizon_days=400)
     r = run_discovery_cycle({"0xLH": longh}, DiscoveryState(), S4_CFG)
     assert r.watchlist == []
@@ -265,11 +267,13 @@ def test_strategy4_does_not_need_copy_gates():
 
 
 def test_long_horizon_serialization_is_distinct_source():
-    longh = Eval(wallet="0xLH", strategy="4", long_horizon_ratio=0.8, horizon_days=300)
+    longh = Eval(wallet="0xLH", strategy="4", long_horizon=True,
+                 long_horizon_ratio=0.8, horizon_days=300)
     out = long_horizon_to_targets([longh], S4_CFG)
     assert out["source"] == "discovery_long_horizon"   # not the copy watchlist
     assert out["targets"][0]["wallet"] == "0xLH"
     assert out["targets"][0]["strategy"] == "4"
+    assert out["targets"][0]["long_horizon"] is True
     assert out["targets"][0]["long_horizon_ratio"] == 0.8
 
 

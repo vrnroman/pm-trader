@@ -10,7 +10,8 @@ from __future__ import annotations
 import json
 import os
 import time
-from typing import Optional
+from datetime import datetime, timezone
+from typing import Callable, Optional
 
 import requests
 
@@ -40,12 +41,19 @@ def make_detector(
     max_age_s: float,
     min_usd: float,
     flagged_by_map: Optional[dict] = None,
+    horizon_resolver: Optional[Callable[[str], Optional[float]]] = None,
 ):
     """Return a detector() yielding fresh, large target BUY trades to copy.
 
     ``flagged_by_map`` maps a lowercased wallet -> list of discovery strategy
     theories that flagged it; each emitted trade carries that list so the paper
     position can be attributed to a strategy at open time.
+
+    ``horizon_resolver`` (condition_id -> days-until-resolution) stamps each trade
+    with ``horizon_days`` so the engine can route it by its own resolution date:
+    the near-term book skips far-future bets, the long-horizon book takes only
+    them. Omitted (None) -> ``horizon_days`` is None and routing is horizon-blind
+    (every detected BUY is eligible), preserving the original behaviour.
     """
     fb = {k.lower(): v for k, v in (flagged_by_map or {}).items()}
 
@@ -72,10 +80,14 @@ def make_detector(
                 if not tx or not token:
                     continue
                 title = a.get("title", "") or ""
+                condition_id = a.get("conditionId", "")
+                horizon_days = (
+                    horizon_resolver(condition_id) if horizon_resolver else None
+                )
                 out.append({
                     "copy_id": f"{tx}-{token}",
                     "target": w,
-                    "condition_id": a.get("conditionId", ""),
+                    "condition_id": condition_id,
                     "token_id": token,
                     "outcome_index": int(a.get("outcomeIndex") or 0),
                     "category": classify_market(title),
@@ -84,6 +96,9 @@ def make_detector(
                     # data-api uses eventSlug, falling back to the market slug.
                     "slug": a.get("eventSlug") or a.get("slug") or "",
                     "flagged_by": tuple(fb.get(w.lower(), ())),
+                    # days until the bet's market resolves (None if unknown) —
+                    # routes the bet between the near-term and long-horizon books.
+                    "horizon_days": horizon_days,
                     "their_price": price,
                     "their_usd": usd,
                 })
@@ -157,6 +172,74 @@ def resolve(condition_id: str) -> Optional[int]:
         except (ValueError, TypeError):
             continue
     return None
+
+
+def _parse_end_ts(end_date: str) -> Optional[float]:
+    """Parse a Gamma ``endDate`` ISO string to a unix timestamp, or None."""
+    if not end_date:
+        return None
+    try:
+        dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.timestamp()
+    except (ValueError, TypeError):
+        return None
+
+
+def fetch_end_ts(condition_id: str) -> Optional[float]:
+    """Resolution end timestamp (unix secs) for a market via Gamma, or None.
+
+    No ``closed`` filter, so it sees *open* markets — exactly the far-future ones
+    a long-horizon bet lives in (Gamma's /markets returns only open markets unless
+    ``closed=true``). A market that's already settled returns nothing here, which
+    reads as "no horizon" → the bet is treated near-term, which is correct."""
+    if not condition_id:
+        return None
+    j = _get(GAMMA, "/markets", condition_ids=condition_id)
+    if not j:
+        return None
+    return _parse_end_ts(j[0].get("endDate") or j[0].get("endDateIso") or "")
+
+
+def make_horizon_resolver(
+    now: Callable[[], float] = time.time,
+) -> Callable[[str], Optional[float]]:
+    """Return ``horizon(condition_id) -> days until resolution`` (endDate − now).
+
+    The detector calls this on every fresh BUY so each bet can be routed by its
+    own resolution date — short bets to the near-term copier, far-future bets to
+    the long-horizon book. End dates are cached per condition (they're effectively
+    fixed), so the live loop costs one Gamma call per *new* market, not per cycle.
+    A failed lookup isn't cached, so a transient miss retries next time; it just
+    returns None meanwhile (treated as near-term)."""
+    cache: dict[str, float] = {}
+
+    def horizon(condition_id: str) -> Optional[float]:
+        if not condition_id:
+            return None
+        ts = cache.get(condition_id)
+        if ts is None:
+            ts = fetch_end_ts(condition_id)
+            if ts is None:
+                return None
+            cache[condition_id] = ts
+        return (ts - now()) / 86400.0
+
+    return horizon
+
+
+def fetch_mid(token_id: str) -> Optional[float]:
+    """Current mid price (mean of best ask and best bid) for marking a position
+    to market. None when either side of the book is empty (no usable quote)."""
+    b = _get(CLOB, "/book", token_id=token_id)
+    if not b:
+        return None
+    asks = [float(a["price"]) for a in (b.get("asks") or [])]
+    bids = [float(x["price"]) for x in (b.get("bids") or [])]
+    if not asks or not bids:
+        return None
+    return (min(asks) + max(bids)) / 2.0
 
 
 def load_watchlist_wallets(path: str) -> list[str]:

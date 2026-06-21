@@ -13,6 +13,7 @@ from src.copy_trading.horizon_profile import (
     HorizonProfile,
     classify_strategy,
     horizon_profile,
+    long_horizon_eligible,
 )
 
 
@@ -108,3 +109,23 @@ def test_classify_thresholds_are_configurable():
     # lenient ratio bar flips a 20%-long wallet to Strategy 4
     assert classify_strategy(p, min_dated_buys=5, long_ratio_threshold=0.5) == "1"
     assert classify_strategy(p, min_dated_buys=5, long_ratio_threshold=0.15) == "4"
+
+
+# --------------------------------------------------------------------------- #
+# long_horizon_eligible — the dual-membership gate (NOT exclusive with copy)
+# --------------------------------------------------------------------------- #
+def test_long_horizon_eligible_counts_distinct_long_buys():
+    # 3 long-horizon buys (>=180d) + many short ones: eligible at min_long_buys=3
+    # even though the wallet is near-term-dominated by $ (so classify_strategy="1").
+    buys = [_buy(1000, 10), _buy(1000, 20), _buy(1000, 30)] + [_buy(50, 400)] * 3
+    p = horizon_profile(buys, long_horizon_days=180)
+    assert p.n_long == 3
+    assert classify_strategy(p, min_dated_buys=5, long_ratio_threshold=0.5) == "1"  # near-term by $
+    assert long_horizon_eligible(p, min_long_buys=3) is True   # ...yet has a long book
+    assert long_horizon_eligible(p, min_long_buys=4) is False  # not enough long bets
+
+
+def test_long_horizon_ineligible_with_no_long_buys():
+    p = horizon_profile([_buy(100, 10), _buy(100, 20)], long_horizon_days=180)
+    assert p.n_long == 0
+    assert long_horizon_eligible(p, min_long_buys=1) is False

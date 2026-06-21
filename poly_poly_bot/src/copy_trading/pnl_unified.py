@@ -40,6 +40,9 @@ from src.copy_trading.pnl import OpenPositionPnl
 _UNKNOWN_WALLET = "(unknown)"
 UNTAGGED_A = "untagged-A"
 UNTAGGED_B = "untagged-B"
+# The long-horizon paper book is one track (not split by discovery theory), and
+# unlike the near-term copier its open positions are marked to market.
+STRATEGY4_LABEL = "S4"
 
 # Resolved-sample maturity bands — "is there enough *settled* paper data to
 # judge this wallet/theory yet?" A freshly-enabled theory (1a/1e/1j) looks like
@@ -312,6 +315,49 @@ def aggregate_system_b(
         for lbl in labels:
             _add_label(wp, lbl)
 
+    _round(acc.values())
+    return list(acc.values())
+
+
+def aggregate_strategy4(s4_positions: list[PaperPosition]) -> list[WalletPnl]:
+    """Per-wallet P&L for the Strategy-4 long-horizon paper book.
+
+    Distinct from ``aggregate_system_b`` (the near-term copier, whose open
+    positions carry no mark) in two ways: open long-horizon positions are *marked
+    to market* — a position carrying a ``mark_price`` contributes its unrealized
+    P&L and its capital to ROI, exactly like a priced System-A open — and every
+    wallet is grouped under the single ``S4`` track rather than per discovery
+    theory. Closed positions are realized at resolution. Dust fills excluded.
+
+    Returns its own ``WalletPnl`` list (system ``"B"`` so it slots into the unified
+    builder). A wallet that is *also* on the near-term book gets a separate
+    ``WalletPnl`` there, so its two tracks show side by side — exactly the
+    dual-membership view: short bets under the copier, long bets under S4.
+    """
+    acc: dict[str, WalletPnl] = {}
+    for p in s4_positions:
+        if is_dust_fill(p):
+            continue
+        wallet = (p.target or "").lower() or _UNKNOWN_WALLET
+        wp = acc.get(wallet)
+        if wp is None:
+            wp = WalletPnl(wallet=wallet, system="B")
+            acc[wallet] = wp
+        if p.closed:
+            wp.realized_pnl += p.pnl
+            wp.cost_basis += p.spent       # realized capital feeds ROI
+            wp.n_closed += 1
+            if p.won:
+                wp.wins += 1
+            else:
+                wp.losses += 1
+        else:
+            wp.open_cost += p.spent
+            wp.n_open += 1
+            if p.mark_price > 0:           # only a marked open contributes to ROI
+                wp.unrealized_pnl += p.unrealized_pnl
+                wp.cost_basis += p.spent
+        _add_label(wp, STRATEGY4_LABEL)
     _round(acc.values())
     return list(acc.values())
 

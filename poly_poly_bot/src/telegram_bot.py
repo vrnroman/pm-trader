@@ -242,6 +242,19 @@ def _compute_unified():
     flagged_now = load_watchlist_flagged_by(CONFIG.copy_paper_watchlist)
     b_wallets = u.aggregate_system_b(paper_positions, flagged_now)
 
+    # Strategy 4 — long-horizon paper book (its own ledger, marked to market).
+    # Appended to the System-B wallet list as the distinct "S4" track so a
+    # dual-membership wallet shows its near-term copier track and its long-horizon
+    # track side by side. Absent/empty when Strategy 4 is off.
+    if CONFIG.strategy_4_enabled:
+        try:
+            s4_ledger = PaperCopyLedger(CONFIG.strategy_4_paper_ledger)
+            s4_positions = list(s4_ledger.positions.values())
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"s4 paper ledger load failed: {e}")
+            s4_positions = []
+        b_wallets = b_wallets + u.aggregate_strategy4(s4_positions)
+
     unified = u.build_unified(a_wallets, b_wallets)
     return unified, a_wallets, b_wallets, n_unpriced
 
@@ -281,7 +294,9 @@ def _handle_pnl():
     for sp in unified.strategies:
         roi = sp.roi
         roi_str = f"ROI {roi:+.0%}" if roi is not None else "ROI n/a"
-        if sp.system == "A":
+        # Show realized + unrealized for System A and the marked-to-market S4 book;
+        # the near-term System-B copier leaves its opens unpriced, so realized only.
+        if sp.system == "A" or sp.unrealized_pnl:
             pnl_str = f"r ${sp.realized_pnl:+.0f}/u ${sp.unrealized_pnl:+.0f}"
         else:
             pnl_str = f"r ${sp.realized_pnl:+.0f}"
@@ -500,7 +515,11 @@ def _handle_reset(text: str):
 
     from src.copy_trading.reset_pnl import reset_pnl
 
-    res = reset_pnl(CONFIG.data_dir, confirm=True, copy_paper_ledger=CONFIG.copy_paper_ledger)
+    res = reset_pnl(
+        CONFIG.data_dir, confirm=True,
+        copy_paper_ledger=CONFIG.copy_paper_ledger,
+        s4_paper_ledger=CONFIG.strategy_4_paper_ledger,
+    )
     logger.warning("P&L reset via /reset CONFIRM")
     send_message(
         "🧹 <b>P&amp;L reset</b> — " + _esc(res.summary()) + ".\n"

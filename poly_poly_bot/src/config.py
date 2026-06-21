@@ -261,17 +261,35 @@ class Config:
     # resolve 6+ months out (nothing closes for a long time). When enabled, the
     # sweep classifies each candidate by how early it bets before resolution
     # (fetching end dates for its still-OPEN markets too, an extra Gamma cost)
-    # and routes long-horizon-dominated wallets to a separate watchlist instead
-    # of letting them sit unproven in the copy funnel. Off by default.
+    # and ALSO lists wallets with a real long book on a separate long-horizon
+    # watchlist — dual membership, not a partition: a wallet still flows through
+    # the copy funnel on its near-term bets, and only its far-future bets are
+    # routed (live, per bet) to the Strategy-4 paper book. Off by default.
     strategy_4_enabled: bool = _opt_bool("STRATEGY_4_ENABLED", False)
     strategy_4_long_horizon_days: float = _opt_float("STRATEGY_4_LONG_HORIZON_DAYS", 180.0)
     strategy_4_min_long_ratio: float = _opt_float("STRATEGY_4_MIN_LONG_RATIO", 0.5)
     strategy_4_min_dated_buys: int = _opt_int("STRATEGY_4_MIN_DATED_BUYS", 5)
+    # A wallet joins the long-horizon watchlist once it has this many distinct
+    # long-horizon buys, independent of the copy funnel (dual membership).
+    strategy_4_min_long_buys: int = _opt_int("STRATEGY_4_MIN_LONG_BUYS", 3)
     strategy_4_cap: int = _opt_int("STRATEGY_4_CAP", 25)
     wallet_discovery_long_horizon_watchlist: str = _optional(
         "WALLET_DISCOVERY_LONG_HORIZON_WATCHLIST",
         str(Path(__file__).resolve().parent.parent / "data" / "long_horizon_watchlist.json"),
     )
+    # Strategy-4 paper book: paper-trades the long-horizon bets routed to it,
+    # marking them to market over the months until they resolve. Separate ledger
+    # and a smaller per-bet cap than the near-term copier (capital locks up for
+    # months). Gated on strategy_4_enabled AND copy_paper_enabled. The near-term
+    # copier, when strategy_4_enabled, SKIPS bets at/over the horizon cut so they
+    # are no longer short-copied — they belong to this book instead.
+    strategy_4_paper_ledger: str = _optional(
+        "STRATEGY_4_PAPER_LEDGER",
+        str(Path(__file__).resolve().parent.parent / "data" / "s4_paper_ledger.jsonl"),
+    )
+    strategy_4_paper_max_usd: float = _opt_float("STRATEGY_4_PAPER_MAX_USD", 25.0)
+    strategy_4_paper_interval_s: int = _opt_int("STRATEGY_4_PAPER_INTERVAL_S", 600)
+    strategy_4_paper_min_usd: float = _opt_float("STRATEGY_4_PAPER_MIN_USD", 500.0)
 
     # --- APIs ---
     clob_api_url: str = _optional("CLOB_API_URL", "https://clob.polymarket.com")
