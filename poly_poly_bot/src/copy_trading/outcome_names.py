@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import time
+from collections import OrderedDict
 from typing import Callable, Optional
 
 import requests
@@ -70,9 +71,11 @@ class OutcomeNameResolver:
     repeated alerts on the same market cost one call; a None (transient failure)
     is NOT cached, so a later alert retries."""
 
-    def __init__(self, fetcher: Optional[Callable[[str], Optional[list[str]]]] = None):
+    def __init__(self, fetcher: Optional[Callable[[str], Optional[list[str]]]] = None,
+                 max_cache: int = 5000):
         self._fetch = fetcher or _gamma_fetch_outcomes
-        self._cache: dict[str, list[str]] = {}
+        self._cache: "OrderedDict[str, list[str]]" = OrderedDict()
+        self._max_cache = max_cache
 
     def outcomes(self, condition_id: str) -> list[str]:
         if not condition_id:
@@ -83,6 +86,10 @@ class OutcomeNameResolver:
         if got is None:                       # transient miss -> don't cache
             return []
         self._cache[condition_id] = got
+        # DEFAULT_RESOLVER lives for the whole process; bound the cache so a
+        # long-running bot can't grow it without limit (FIFO eviction).
+        if len(self._cache) > self._max_cache:
+            self._cache.popitem(last=False)
         return got
 
     def name(self, condition_id: str, outcome_index) -> Optional[str]:

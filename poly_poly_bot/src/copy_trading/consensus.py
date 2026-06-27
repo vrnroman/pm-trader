@@ -39,8 +39,9 @@ class ConsensusSignal:
     members: tuple = ()      # tuple[ConsensusMember] — independent, size desc
 
     @property
-    def key(self) -> tuple:
-        return (self.condition_id, self.outcome_index)
+    def key(self) -> str:
+        """Stable dedup key for the (market, outcome) cell (JSON-safe)."""
+        return f"{self.condition_id}:{self.outcome_index}"
 
     @property
     def n(self) -> int:
@@ -213,7 +214,7 @@ def new_signals(signals: list, fired: dict, now: float, cooldown_s: float) -> li
     fired (a strengthening consensus is worth a fresh ping)."""
     out = []
     for s in signals:
-        key = f"{s.condition_id}:{s.outcome_index}"
+        key = s.key
         prev = fired.get(key)
         grew = isinstance(prev, dict) and s.n > prev.get("n", 0)
         last_ts = prev.get("ts", 0.0) if isinstance(prev, dict) else (prev or 0.0)

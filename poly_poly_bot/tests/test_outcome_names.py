@@ -59,3 +59,21 @@ def test_transient_miss_not_cached():
     r = OutcomeNameResolver(fetcher=fetch)
     assert r.name("C", 0) is None             # transient failure
     assert r.name("C", 0) == "Yes"            # retried, now resolves
+
+
+def test_cache_is_bounded():
+    # the process-singleton resolver must not grow without limit
+    calls = {"n": 0}
+
+    def fetch(cid):
+        calls["n"] += 1
+        return ["Yes", "No"]
+
+    r = OutcomeNameResolver(fetcher=fetch, max_cache=3)
+    for i in range(5):
+        r.name(f"C{i}", 0)
+    assert len(r._cache) <= 3            # FIFO-evicted, bounded
+    # the oldest (C0) was evicted -> a re-query refetches
+    before = calls["n"]
+    r.name("C0", 0)
+    assert calls["n"] == before + 1

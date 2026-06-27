@@ -36,6 +36,7 @@ from src.copy_trading.discovery import (
     watchlist_to_targets,
 )
 from src.copy_trading.discovery_data import evaluate_sweep, fetch_activity
+from src.copy_trading.entry_profile import is_copyable_entry
 from src.copy_trading.llm_review import DEFAULT_MODEL, build_dossier, review_wallet
 from src.copy_trading.outcome_names import DEFAULT_RESOLVER
 from src.copy_trading.trader_scoring import classify_market
@@ -271,7 +272,7 @@ class DiscoveryRunner:
             if ts < since:
                 continue
             price = float(a.get("price") or 0)
-            if not (0.05 <= price <= 0.95):
+            if not is_copyable_entry(price):  # same band as the rest of the pipeline
                 continue
             usd = float(a.get("usdcSize") or 0) or float(a.get("size") or 0) * price
             title = a.get("title", "") or ""
