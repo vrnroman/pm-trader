@@ -25,6 +25,8 @@ from typing import Callable, Optional
 
 from types import SimpleNamespace
 
+from src.copy_trading.consensus import run_consensus_scan
+from src.copy_trading.copy_replay import proven_positive
 from src.copy_trading.discovery import (
     DiscoveryConfig,
     DiscoveryState,
@@ -33,8 +35,10 @@ from src.copy_trading.discovery import (
     run_discovery_cycle,
     watchlist_to_targets,
 )
-from src.copy_trading.discovery_data import evaluate_sweep
+from src.copy_trading.discovery_data import evaluate_sweep, fetch_activity
 from src.copy_trading.llm_review import DEFAULT_MODEL, build_dossier, review_wallet
+from src.copy_trading.outcome_names import DEFAULT_RESOLVER
+from src.copy_trading.trader_scoring import classify_market
 
 logger = logging.getLogger("poly_poly_bot")
 
@@ -132,10 +136,14 @@ class DiscoveryRunner:
         llm_review_enabled: bool = False,
         llm_review_top_n: int = 5,
         llm_model: str = DEFAULT_MODEL,
+        consensus_fired_path: Optional[str] = None,
         # injectable for tests
         evaluate: Callable[..., dict[str, Eval]] = evaluate_sweep,
         llm_review: Callable[..., object] = review_wallet,
         now: Callable[[], float] = time.time,
+        consensus_fetch_buys: Optional[Callable[[str], list]] = None,
+        consensus_funder_map: Optional[Callable[[list], dict]] = None,
+        consensus_resolver=None,
     ):
         self.cfg = config
         self.watchlist_path = watchlist_path
@@ -151,6 +159,11 @@ class DiscoveryRunner:
         self._evaluate = evaluate
         self._llm_review = llm_review
         self._now = now
+        self.consensus_fired_path = consensus_fired_path or (
+            (state_path + ".consensus.json") if state_path else None)
+        self._consensus_fetch_buys_fn = consensus_fetch_buys or self._live_consensus_buys
+        self._consensus_funder_map_fn = consensus_funder_map or self._live_funder_map
+        self._consensus_resolver = consensus_resolver or DEFAULT_RESOLVER
 
     # ── state IO ──
     def _load_state(self) -> DiscoveryState:
@@ -220,7 +233,104 @@ class DiscoveryRunner:
         )
         if result.removed:
             logger.info("[DISCOVERY] decayed off paper: %s", ", ".join(result.removed))
+
+        # consensus-of-sharps signal (signal-only) over the copy-validated wallets
+        try:
+            self._run_consensus(result.watchlist)
+        except Exception:  # a signal scan must never break the discovery loop
+            logger.warning("[DISCOVERY] consensus scan failed", exc_info=True)
         return result
+
+    # ── consensus-of-sharps signal ──
+    def _copy_validated_wallets(self, watchlist: list[Eval]) -> list[str]:
+        """Watchlist wallets proven +EV under our copy action (the 'sharps')."""
+        return [e.wallet for e in watchlist if proven_positive(
+            e.copy_n, e.copy_roi,
+            min_n=self.cfg.min_copy_replay_n, min_roi=self.cfg.min_copy_replay_roi)]
+
+    def _load_consensus_fired(self) -> dict:
+        if not self.consensus_fired_path:
+            return {}
+        try:
+            return json.load(open(self.consensus_fired_path))
+        except (json.JSONDecodeError, OSError):
+            return {}
+
+    def _save_consensus_fired(self, fired: dict) -> None:
+        if self.consensus_fired_path:
+            _atomic_write_json(self.consensus_fired_path, fired)
+
+    def _live_consensus_buys(self, wallet: str) -> list:
+        """Recent copyable BUYs (full fields) for one wallet, from cached activity."""
+        since = self._now() - self.cfg.consensus_window_s
+        out = []
+        for a in fetch_activity(wallet, self.cache_dir, self.activity_ttl_s) or []:
+            if a.get("type") != "TRADE" or a.get("side") != "BUY":
+                continue
+            ts = float(a.get("timestamp") or 0)
+            if ts < since:
+                continue
+            price = float(a.get("price") or 0)
+            if not (0.05 <= price <= 0.95):
+                continue
+            usd = float(a.get("usdcSize") or 0) or float(a.get("size") or 0) * price
+            title = a.get("title", "") or ""
+            out.append({
+                "wallet": wallet, "condition_id": a.get("conditionId"),
+                "outcome_index": a.get("outcomeIndex"), "usd": usd, "price": price,
+                "ts": ts, "title": title,
+                "slug": a.get("eventSlug") or a.get("slug") or "",
+                "category": classify_market(title),
+            })
+        return out
+
+    def _live_funder_map(self, wallets: list) -> dict:
+        """wallet(lower) -> non-CEX funder address ("" = independent). Best-effort:
+        on any failure returns {} (all treated independent) so the scan still runs."""
+        import asyncio
+
+        from src.copy_trading.wallet_funder import get_funder, is_cex_funder
+
+        async def _gather():
+            return await asyncio.gather(
+                *[get_funder(w) for w in wallets], return_exceptions=True)
+        try:
+            infos = asyncio.run(_gather())
+        except Exception:
+            logger.warning("[DISCOVERY] consensus funder map failed; "
+                           "treating all members independent", exc_info=True)
+            return {}
+        out: dict = {}
+        for w, info in zip(wallets, infos):
+            f = getattr(info, "funder", "") if not isinstance(info, Exception) else ""
+            out[w.lower()] = f if (f and not is_cex_funder(f)) else ""
+        return out
+
+    def _run_consensus(self, watchlist: list[Eval]) -> None:
+        if not self.cfg.consensus_enabled:
+            return
+        sharps = self._copy_validated_wallets(watchlist)
+        if len(sharps) < self.cfg.consensus_min_wallets:
+            logger.info("[DISCOVERY] consensus: %d copy-validated sharps (< k=%d) — skip",
+                        len(sharps), self.cfg.consensus_min_wallets)
+            return
+        fired = self._load_consensus_fired()
+        funder_of = self._consensus_funder_map_fn(sharps)
+        run_consensus_scan(
+            sharps,
+            fetch_buys=self._consensus_fetch_buys_fn,
+            resolver=self._consensus_resolver,
+            send=self._send,
+            fired=fired,
+            now=self._now(),
+            k=self.cfg.consensus_min_wallets,
+            window_s=self.cfg.consensus_window_s,
+            min_usd=self.cfg.consensus_min_usd,
+            cooldown_s=self.cfg.consensus_cooldown_s,
+            funder_of=funder_of,
+            log=lambda m: logger.info("[DISCOVERY] %s", m),
+        )
+        self._save_consensus_fired(fired)
 
     def _review_newly_qualified(self, finds: list[Eval]) -> dict:
         """Gated Claude second-opinion on the top-N new qualifiers (alert-only).

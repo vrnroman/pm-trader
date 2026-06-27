@@ -165,3 +165,72 @@ def test_release_freed_memory_never_raises():
 
     _release_freed_memory()  # must not raise
     _release_freed_memory()  # idempotent / repeatable
+
+
+# --------------------------------------------------------------------------- #
+# Consensus-of-sharps signal wiring
+# --------------------------------------------------------------------------- #
+
+from src.copy_trading.outcome_names import OutcomeNameResolver  # noqa: E402
+
+CONSENSUS_CFG = DiscoveryConfig(
+    min_capture_cents=1.5, min_tstat=10.0, drop_capture_cents=1.0, watchlist_cap=5,
+    category_select=False,            # isolate consensus from the category gate
+    min_copy_replay_n=12, min_copy_replay_roi=0.0,
+    consensus_enabled=True, consensus_min_wallets=3,
+    consensus_window_s=86400.0, consensus_min_usd=500.0, consensus_cooldown_s=43200.0,
+)
+
+
+def _sharp(w):
+    # qualifies (capture+tstat) AND is copy-validated (proven_positive)
+    return Eval(wallet=w, capture_cents=2.0, tstat=12.0, copy_n=15, copy_roi=0.2)
+
+
+def _consensus_runner(tmp_path, sink, evaluated, fetch_buys, funder_map=None):
+    return DiscoveryRunner(
+        config=CONSENSUS_CFG,
+        watchlist_path=str(tmp_path / "copy_watchlist.json"),
+        state_path=str(tmp_path / "discovery_state.json"),
+        notify=sink.append,
+        evaluate=lambda *a, **k: evaluated,
+        now=lambda: 1000.0,
+        consensus_fetch_buys=fetch_buys,
+        consensus_funder_map=funder_map or (lambda ws: {}),
+        consensus_resolver=OutcomeNameResolver(fetcher=lambda cid: ["Yes", "No"]),
+    )
+
+
+def _buy(w):
+    return [{"wallet": w, "condition_id": "C", "outcome_index": 1, "usd": 1000.0,
+             "price": 0.40, "ts": 1000.0, "title": "Will X win?", "slug": "x",
+             "category": "sports"}]
+
+
+def test_consensus_signal_emitted_and_state_persisted(tmp_path):
+    sink: list[str] = []
+    evaluated = {w: _sharp(w) for w in ("0xA", "0xB", "0xC")}
+    r = _consensus_runner(tmp_path, sink, evaluated, fetch_buys=_buy)
+    r.run_once()
+    # the consensus signal names the bought outcome
+    assert any("sharps → BUY" in m and "“No”" in m for m in sink)
+    fired = json.load(open(str(tmp_path / "discovery_state.json") + ".consensus.json"))
+    assert "C:1" in fired
+
+
+def test_consensus_skips_below_k_sharps(tmp_path):
+    sink: list[str] = []
+    evaluated = {w: _sharp(w) for w in ("0xA", "0xB")}  # only 2 sharps
+    r = _consensus_runner(tmp_path, sink, evaluated, fetch_buys=_buy)
+    r.run_once()
+    assert not any("sharps → BUY" in m for m in sink)
+
+
+def test_consensus_ignores_unvalidated_wallets(tmp_path):
+    sink: list[str] = []
+    # 2 validated sharps + 1 NOT copy-validated (copy_n below min) -> below k=3
+    evaluated = {"0xA": _sharp("0xA"), "0xB": _sharp("0xB"),
+                 "0xC": Eval(wallet="0xC", capture_cents=2.0, tstat=12.0, copy_n=3, copy_roi=0.5)}
+    r = _consensus_runner(tmp_path, sink, evaluated, fetch_buys=_buy)
+    r.run_once()
+    assert not any("sharps → BUY" in m for m in sink)

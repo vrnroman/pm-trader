@@ -204,6 +204,11 @@ def _discovery_loop():
         s4_min_dated_buys=CONFIG.strategy_4_min_dated_buys,
         s4_min_long_buys=CONFIG.strategy_4_min_long_buys,
         long_horizon_cap=CONFIG.strategy_4_cap,
+        consensus_enabled=CONFIG.consensus_enabled,
+        consensus_min_wallets=CONFIG.consensus_min_wallets,
+        consensus_window_s=CONFIG.consensus_window_hours * 3600.0,
+        consensus_min_usd=CONFIG.consensus_min_usd,
+        consensus_cooldown_s=CONFIG.consensus_cooldown_hours * 3600.0,
     )
     runner = DiscoveryRunner(
         config=cfg,

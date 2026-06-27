@@ -68,6 +68,16 @@ class DiscoveryConfig:
     category_select: bool = True
     min_category_n: int = 8
     require_approved_category: bool = True   # drop a wallet with zero winning markets
+    # Consensus-of-sharps signal (signal-only, no capital -> no slippage). When
+    # >= consensus_min_wallets INDEPENDENT copy-validated wallets BUY the same
+    # (market, outcome) within consensus_window_s, emit a Telegram signal. The
+    # kill-test showed single-wallet copy-and-hold is -EV; cross-wallet agreement
+    # is a different, slower, more reproducible object. On by default (no fill).
+    consensus_enabled: bool = True
+    consensus_min_wallets: int = 3
+    consensus_window_s: float = 86400.0      # 24h — slow convergence survives lag
+    consensus_min_usd: float = 500.0
+    consensus_cooldown_s: float = 43200.0    # 12h before a cell re-pings (unless it grows)
     # entry-discipline gate: reject wallets whose buy $ is tail-dominated
     # (settlement-lag scooping near $1 — un-copyable). Lenient by default.
     max_tail_ratio: float = 0.5

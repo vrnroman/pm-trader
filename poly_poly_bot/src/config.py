@@ -240,6 +240,16 @@ class Config:
     wallet_discovery_min_copy_replay_n: int = _opt_int("WALLET_DISCOVERY_MIN_COPY_REPLAY_N", 12)
     wallet_discovery_min_copy_replay_roi: float = _opt_float("WALLET_DISCOVERY_MIN_COPY_REPLAY_ROI", 0.0)
     wallet_discovery_fade_roi: float = _opt_float("WALLET_DISCOVERY_FADE_ROI", -0.10)
+    # Consensus-of-sharps signal (signal-only, no capital). When >= N independent
+    # copy-validated wallets BUY the same (market, outcome) within the window, the
+    # discovery sweep emits a Telegram signal (no fill -> no slippage). On by
+    # default — the kill-test showed single-wallet copy-and-hold is -EV, but
+    # cross-wallet agreement is a slower, more reproducible object worth surfacing.
+    consensus_enabled: bool = _opt_bool("CONSENSUS_ENABLED", True)
+    consensus_min_wallets: int = _opt_int("CONSENSUS_MIN_WALLETS", 3)
+    consensus_window_hours: float = _opt_float("CONSENSUS_WINDOW_HOURS", 24.0)
+    consensus_min_usd: float = _opt_float("CONSENSUS_MIN_USD", 500.0)
+    consensus_cooldown_hours: float = _opt_float("CONSENSUS_COOLDOWN_HOURS", 12.0)
     # Gated Claude second-opinion (Strategy 1c): for the top-N statistically
     # qualified wallets, ask Claude to vet a compact dossier. Alert-only, never
     # auto-trades; off by default and needs ANTHROPIC_API_KEY.
