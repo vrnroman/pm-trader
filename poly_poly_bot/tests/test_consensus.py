@@ -115,3 +115,13 @@ def test_format_honest_when_outcome_unresolved():
     resolver = OutcomeNameResolver(fetcher=lambda cid: ["Yes", "No"])  # no index 2
     msg = format_consensus_signal(sig, resolver)
     assert "Outcome #2" in msg           # honest fallback, never a fabricated side
+
+
+def test_format_flags_unverified_independence():
+    buys = [_buy("0xA", oi=1), _buy("0xB", oi=1), _buy("0xC", oi=1)]
+    sig = detect_consensus(buys, k=3, window_s=86400, min_usd=500, now=1000.0)[0]
+    resolver = OutcomeNameResolver(fetcher=lambda cid: ["Yes", "No"])
+    # verified -> no warning
+    assert "independence unverified" not in format_consensus_signal(sig, resolver, True)
+    # unverified -> honest warning, not a silent fake-independent signal
+    assert "independence unverified" in format_consensus_signal(sig, resolver, False)

@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import json
 import os
-import time
 from collections import OrderedDict
 from typing import Callable, Optional
 
@@ -39,27 +38,36 @@ def parse_outcomes(market: dict) -> list[str]:
 
 
 def _gamma_fetch_outcomes(condition_id: str) -> Optional[list[str]]:
-    """Live fetch of a market's outcome names via Gamma, or None on failure.
+    """Live fetch of a market's outcome names via Gamma, or None if unresolved.
 
-    No ``closed`` filter so it resolves names for OPEN markets too (a fresh signal
-    is on a market that hasn't settled). Returns [] only when the field is genuinely
-    absent; None on a network/HTTP miss so the resolver doesn't cache a transient
-    failure as "unresolved"."""
+    Gamma's ``/markets`` returns only OPEN markets unless ``closed=true``, but a
+    market we name can be either OPEN (a fresh consensus signal) or CLOSED (a
+    resolution alert on a settled copy). So we try the default (open) variant
+    first, then the ``closed=true`` variant — without this, every resolution-alert
+    lookup hit a closed market, got zero rows, and fell back to "Outcome #idx".
+
+    Returns the names only when non-empty; otherwise None — never an empty list —
+    so a not-yet-indexed market (Gamma lag) isn't cached as permanently nameless
+    and recovers on a later lookup. Bounded retries/timeout so a Gamma outage
+    can't block the caller (the resolution alert runs in the copy-paper thread)."""
     if not condition_id:
         return None
-    for _ in range(3):
+    # One attempt per (open, closed) variant with a tight timeout: the resolution
+    # alert resolves this synchronously in the copy-paper cycle thread, so a Gamma
+    # outage must not stall the loop. An empty result isn't cached, so a transient
+    # miss just shows "Outcome #idx" once and recovers on the next lookup.
+    for params in ({"condition_ids": condition_id},
+                   {"condition_ids": condition_id, "closed": "true"}):
         try:
-            r = requests.get(f"{GAMMA}/markets",
-                             params={"condition_ids": condition_id}, timeout=15)
+            r = requests.get(f"{GAMMA}/markets", params=params, timeout=6)
             if r.status_code == 200:
                 j = r.json()
                 rows = j if isinstance(j, list) else (j or {}).get("data") or []
-                if not rows:
-                    return []
-                return parse_outcomes(rows[0])
+                outs = parse_outcomes(rows[0]) if rows else []
+                if outs:
+                    return outs
         except requests.RequestException:
             pass
-        time.sleep(0.3)
     return None
 
 
@@ -83,8 +91,8 @@ class OutcomeNameResolver:
         if condition_id in self._cache:
             return self._cache[condition_id]
         got = self._fetch(condition_id)
-        if got is None:                       # transient miss -> don't cache
-            return []
+        if not got:                           # None (transient) OR [] (not indexed
+            return []                          # yet) -> don't cache, retry next time
         self._cache[condition_id] = got
         # DEFAULT_RESOLVER lives for the whole process; bound the cache so a
         # long-running bot can't grow it without limit (FIFO eviction).

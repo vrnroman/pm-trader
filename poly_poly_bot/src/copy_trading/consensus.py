@@ -19,6 +19,8 @@ import html
 from collections import defaultdict
 from dataclasses import dataclass
 
+from src.utils import fmt_cents
+
 
 @dataclass(frozen=True)
 class ConsensusMember:
@@ -127,10 +129,6 @@ def detect_consensus(
     return signals
 
 
-def _cents(price: float) -> str:
-    return f"{price * 100:.0f}¢"
-
-
 def _dur(seconds: float) -> str:
     s = int(max(0, seconds))
     h, rem = divmod(s, 3600)
@@ -144,25 +142,31 @@ def _short(wallet: str) -> str:
     return wallet[:8] + "…" if len(wallet) > 9 else wallet
 
 
-def format_consensus_signal(sig: "ConsensusSignal", resolver) -> str:
+def format_consensus_signal(sig: "ConsensusSignal", resolver,
+                            independence_verified: bool = True) -> str:
     """Telegram (HTML) signal that says exactly what the sharps are buying.
 
     Leads with the action + the *named* outcome so it's unmissable; the outcome
     name comes from ``resolver`` (the real market array, honest ``Outcome #idx``
     fallback — never a guessed YES/NO). Per-member breakdown shows who, how much,
-    and at what price."""
+    and at what price. When ``independence_verified`` is False (no funder data to
+    rule out a sybil cluster) the signal says so honestly rather than implying the
+    members are confirmed-independent sharps."""
     outcome = resolver.label(sig.condition_id, sig.outcome_index)
     title = html.escape(sig.title) if sig.title else "(market)"
     lines = [
         f"\U0001f91d <b>{sig.n} sharps → BUY “{html.escape(outcome)}”</b>",
         f"<b>{title}</b>",
-        f"avg <b>{_cents(sig.avg_price)}</b> · total <b>${sig.total_usd:,.0f}</b>"
+        f"avg <b>{fmt_cents(sig.avg_price)}</b> · total <b>${sig.total_usd:,.0f}</b>"
         f" · {sig.n} wallets over {_dur(sig.time_spread_s)}",
     ]
     for m in sig.members:
         lines.append(
             f" • <code>{_short(m.wallet)}</code> "
-            f"<b>${m.usd:,.0f}</b> @ {_cents(m.price)}")
+            f"<b>${m.usd:,.0f}</b> @ {fmt_cents(m.price)}")
+    if not independence_verified:
+        lines.append("⚠️ <i>independence unverified — no funder data, members "
+                     "may share a funder</i>")
     if sig.slug:
         lines.append(f"\U0001f517 https://polymarket.com/event/{sig.slug}")
     return "\n".join(lines)
@@ -181,6 +185,7 @@ def run_consensus_scan(
     min_usd: float,
     cooldown_s: float,
     funder_of=None,
+    independence_verified: bool = True,
     log=None,
 ) -> list:
     """Orchestrate one consensus scan (all I/O injected, so it unit-tests offline).
@@ -203,7 +208,7 @@ def run_consensus_scan(
         log(f"consensus: {len(wallets)} sharps · {len(buys)} recent buys · "
             f"{len(signals)} cells>=k · {len(fresh)} new (k={k})")
     for s in fresh:
-        send(format_consensus_signal(s, resolver))
+        send(format_consensus_signal(s, resolver, independence_verified))
     return fresh
 
 

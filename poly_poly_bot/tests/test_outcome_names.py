@@ -77,3 +77,11 @@ def test_cache_is_bounded():
     before = calls["n"]
     r.name("C0", 0)
     assert calls["n"] == before + 1
+
+
+def test_empty_result_not_cached_recovers(monkeypatch):
+    # #4: a not-yet-indexed market returns [] then later resolves -> must recover
+    results = [[], ["Yes", "No"]]
+    r = OutcomeNameResolver(fetcher=lambda cid: results.pop(0))
+    assert r.label("C", 0) == "Outcome #0"   # empty -> honest fallback, NOT cached
+    assert r.label("C", 0) == "Yes"          # refetched, now resolves

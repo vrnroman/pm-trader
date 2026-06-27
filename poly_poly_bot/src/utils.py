@@ -20,6 +20,17 @@ def round_cents(n: float) -> float:
     return round(n * 100) / 100
 
 
+def fmt_cents(price: float) -> str:
+    """A 0–1 probability as cents for Telegram display, keeping sub-cent precision
+    on longshots so a genuine 0.004 fill reads ``0.4¢`` instead of ``0¢`` (which
+    would make the owner misread the entry as free). One shared formatter for
+    every trade/signal message."""
+    c = price * 100.0
+    if 0 < c < 1:
+        return f"{c:.1f}¢"
+    return f"{c:.0f}¢"
+
+
 def ceil_cents(n: float) -> float:
     """Ceil to 2 decimal places."""
     return math.ceil(n * 100) / 100

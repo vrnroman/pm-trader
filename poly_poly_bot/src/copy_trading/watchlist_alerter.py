@@ -44,6 +44,7 @@ from src.config import CONFIG
 from src.copy_trading.strategy_config import WATCHLIST_ALERT, StrategyTier
 from src.logger import logger
 from src.models import DetectedTrade
+from src.utils import fmt_cents
 
 
 # (wallet_lower, condition_id_lower, side) -> last-alert epoch seconds.
@@ -223,7 +224,7 @@ async def maybe_alert_watchlist_trade(
     verb = "🟢 <b>BUY</b>" if side == "BUY" else "🔴 <b>SELL</b>"
     outcome_txt = (f" <b>“{_escape_html(outcome)}”</b>" if outcome
                    else " <i>(outcome unknown)</i>")
-    price_txt = f" @ {trade.price * 100:.0f}¢" if trade.price > 0 else ""
+    price_txt = f" @ {fmt_cents(trade.price)}" if trade.price > 0 else ""
     action_line = f"{verb}{outcome_txt}{price_txt} · <b>${cash:,.0f}</b>"
 
     lines = [

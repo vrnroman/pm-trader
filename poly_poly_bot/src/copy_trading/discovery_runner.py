@@ -285,9 +285,12 @@ class DiscoveryRunner:
             })
         return out
 
-    def _live_funder_map(self, wallets: list) -> dict:
-        """wallet(lower) -> non-CEX funder address ("" = independent). Best-effort:
-        on any failure returns {} (all treated independent) so the scan still runs."""
+    def _live_funder_map(self, wallets: list):
+        """wallet(lower) -> non-CEX funder address ("" = unknown/CEX). Returns
+        ``None`` on a total lookup failure so the caller can mark the consensus
+        signal's independence as UNVERIFIED rather than silently passing a sybil
+        cluster as independent (the anti-sybil collapse needs real funder data —
+        and it's off entirely when ETHERSCAN_API_KEY is unset)."""
         import asyncio
 
         from src.copy_trading.wallet_funder import get_funder, is_cex_funder
@@ -299,8 +302,8 @@ class DiscoveryRunner:
             infos = asyncio.run(_gather())
         except Exception:
             logger.warning("[DISCOVERY] consensus funder map failed; "
-                           "treating all members independent", exc_info=True)
-            return {}
+                           "independence will be marked UNVERIFIED", exc_info=True)
+            return None
         out: dict = {}
         for w, info in zip(wallets, infos):
             f = getattr(info, "funder", "") if not isinstance(info, Exception) else ""
@@ -310,6 +313,15 @@ class DiscoveryRunner:
     def _run_consensus(self, watchlist: list[Eval]) -> None:
         if not self.cfg.consensus_enabled:
             return
+        # Consensus members are the copy-VALIDATED wallets, which need copy-replay
+        # data (copy_n) — only produced when the sweep fetches resolutions, which
+        # it only does under copy_replay_gate. Without the gate every wallet has
+        # copy_n=0 so no sharps qualify and consensus would silently never fire;
+        # say so instead of going dark.
+        if not self.cfg.copy_replay_gate:
+            logger.info("[DISCOVERY] consensus needs copy_replay_gate=on "
+                        "(no copy-validation data otherwise) — skipping")
+            return
         sharps = self._copy_validated_wallets(watchlist)
         if len(sharps) < self.cfg.consensus_min_wallets:
             logger.info("[DISCOVERY] consensus: %d copy-validated sharps (< k=%d) — skip",
@@ -317,6 +329,11 @@ class DiscoveryRunner:
             return
         fired = self._load_consensus_fired()
         funder_of = self._consensus_funder_map_fn(sharps)
+        # independence is "verified" only if we actually got funder data to dedup
+        # on (a real lookup that returned at least one funder). None (lookup failed)
+        # or an all-empty map (ETHERSCAN key unset / all-CEX) -> mark the signal
+        # UNVERIFIED so a possible sybil cluster is flagged, not silently trusted.
+        independence_verified = bool(funder_of) and any(funder_of.values())
         run_consensus_scan(
             sharps,
             fetch_buys=self._consensus_fetch_buys_fn,
@@ -329,6 +346,7 @@ class DiscoveryRunner:
             min_usd=self.cfg.consensus_min_usd,
             cooldown_s=self.cfg.consensus_cooldown_s,
             funder_of=funder_of,
+            independence_verified=independence_verified,
             log=lambda m: logger.info("[DISCOVERY] %s", m),
         )
         self._save_consensus_fired(fired)

@@ -234,3 +234,39 @@ def test_consensus_ignores_unvalidated_wallets(tmp_path):
     r = _consensus_runner(tmp_path, sink, evaluated, fetch_buys=_buy)
     r.run_once()
     assert not any("sharps → BUY" in m for m in sink)
+
+
+def test_consensus_skipped_when_copy_replay_gate_off(tmp_path):
+    # #3 regression: without copy_replay_gate there's no copy-validation data, so
+    # consensus must skip explicitly (and log), not silently never fire.
+    sink: list[str] = []
+    cfg = DiscoveryConfig(
+        min_capture_cents=1.5, min_tstat=10.0, drop_capture_cents=1.0, watchlist_cap=5,
+        category_select=False, copy_replay_gate=False,
+        consensus_enabled=True, consensus_min_wallets=3, consensus_window_s=86400.0,
+        consensus_min_usd=500.0, consensus_cooldown_s=43200.0)
+    evaluated = {w: _sharp(w) for w in ("0xA", "0xB", "0xC")}
+    called = {"buys": 0}
+
+    def fetch_buys(w):
+        called["buys"] += 1
+        return _buy(w)
+
+    r = DiscoveryRunner(
+        config=cfg, watchlist_path=str(tmp_path / "wl.json"),
+        state_path=str(tmp_path / "st.json"), notify=sink.append,
+        evaluate=lambda *a, **k: evaluated, now=lambda: 1000.0,
+        consensus_fetch_buys=fetch_buys, consensus_funder_map=lambda ws: {})
+    r.run_once()
+    assert not any("sharps → BUY" in m for m in sink)
+    assert called["buys"] == 0          # short-circuited before any fetch
+
+
+def test_consensus_unverified_independence_noted(tmp_path):
+    # funder map empty -> independence can't be verified -> signal says so
+    sink: list[str] = []
+    evaluated = {w: _sharp(w) for w in ("0xA", "0xB", "0xC")}
+    r = _consensus_runner(tmp_path, sink, evaluated, fetch_buys=_buy,
+                          funder_map=lambda ws: {})  # no funder data
+    r.run_once()
+    assert any("independence unverified" in m for m in sink)

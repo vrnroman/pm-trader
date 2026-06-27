@@ -277,3 +277,12 @@ class TestQuantizeSellShares:
                     f"proceeds not cents: tick={tick} price={price} "
                     f"held={held} shares={shares} proceeds={price * shares}"
                 )
+
+
+def test_fmt_cents_keeps_subcent_precision():
+    from src.utils import fmt_cents
+    assert fmt_cents(0.30) == "30¢"
+    assert fmt_cents(0.07) == "7¢"         # whole cents in the normal range
+    assert fmt_cents(0.004) == "0.4¢"      # longshot: NOT "0¢" (the bug)
+    assert fmt_cents(0.001) == "0.1¢"
+    assert fmt_cents(0.95) == "95¢"
