@@ -544,14 +544,16 @@ def _signed_usd(x: float) -> str:
     return f"{'+' if x >= 0 else '-'}${abs(x):,.0f}"
 
 
-def format_resolution_telegram(resolved: list[PaperPosition], rep: dict) -> str:
+def format_resolution_telegram(resolved: list[PaperPosition], rep: dict,
+                               resolver=None) -> str:
     """Build the human-readable Telegram message for resolved paper copies.
 
-    One block per market that just settled — what it was (the question), whether
-    the copy won or lost, the cost→payout economics, the execution drag we ate,
-    and a link to dig deeper on Polymarket — followed by a single labelled line
-    of cumulative-ledger context. Replaces the old cryptic one-liner that mixed
-    a per-cycle event count with whole-ledger aggregates.
+    One block per market that just settled — what it was (the question), which
+    OUTCOME we'd bought and whether it won or lost, the cost→payout economics, the
+    execution drag we ate, and a link — followed by a single labelled line of
+    cumulative-ledger context. ``resolver`` (an ``OutcomeNameResolver``, optional)
+    names the bought outcome so each block says exactly which side settled; when
+    omitted (e.g. in tests) the outcome name is left off rather than fetched.
     """
     # Skip pre-fix dust fills: a stale open position can still resolve after the
     # fix deploys, and its garbage entry price would render a nonsensical block.
@@ -563,12 +565,16 @@ def format_resolution_telegram(resolved: list[PaperPosition], rep: dict) -> str:
 
     for p in shown:
         won = p.won
-        verdict = "✅ WON" if won else "❌ LOST"
+        verdict = "✅ <b>WON</b>" if won else "❌ <b>LOST</b>"
         title = _esc(p.title) or f"({p.category} market)"
         payout = p.spent + p.pnl  # = shares if won else 0
         roi = (p.pnl / p.spent * 100.0) if p.spent else 0.0
+        # name the outcome we'd bought so it's clear WHICH side settled
+        outcome_txt = ""
+        if resolver is not None:
+            outcome_txt = f" <b>“{_esc(resolver.label(p.condition_id, p.outcome_index))}”</b>"
         lines.append("")  # blank line separates blocks
-        lines.append(f'{verdict} · "{title}"')
+        lines.append(f'{verdict}{outcome_txt} · "{title}"')
         lines.append(
             f"copied <code>{_short_wallet(p.target)}</code> · "
             f"${p.spent:,.0f} → ${payout:,.0f} ({_signed_usd(p.pnl)}, {roi:+.0f}%) · "

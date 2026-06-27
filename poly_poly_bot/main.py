@@ -56,6 +56,7 @@ def _copy_paper_loop():
     """
     from src.copy_trading.copy_paper import format_resolution_telegram, report
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
+    from src.copy_trading.outcome_names import DEFAULT_RESOLVER
 
     def _on_cycle(summary, ledger):
         if summary.opened or summary.resolved:
@@ -76,7 +77,8 @@ def _copy_paper_loop():
             )
         if summary.resolved:
             telegram_bot.send_message(
-                format_resolution_telegram(summary.resolved_positions, report(ledger))
+                format_resolution_telegram(summary.resolved_positions, report(ledger),
+                                           resolver=DEFAULT_RESOLVER)
             )
 
     # A cap <= 0 disables that guardrail (engine treats None as off).

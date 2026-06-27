@@ -277,13 +277,13 @@ def _handle_pnl():
 
     lines = ["\U0001f4ca <b>P&amp;L Report</b>", ""]
     lines.append("<b>TOTAL</b>")
-    lines.append(f"  Realized:    ${unified.total_realized:+.2f}")
-    lines.append(f"  Unrealized:  ${unified.total_unrealized:+.2f}")
-    lines.append(f"  Net:         ${unified.total_net:+.2f}")
-    lines.append(f"  Open bets:   {total_open}")
+    lines.append(f"  Realized:    <b>${unified.total_realized:+.2f}</b>")
+    lines.append(f"  Unrealized:  <b>${unified.total_unrealized:+.2f}</b>")
+    lines.append(f"  Net:         <b>${unified.total_net:+.2f}</b>")
+    lines.append(f"  Open bets:   <b>{total_open}</b>")
     if total_closed:
         hit = wins / total_closed if total_closed else 0.0
-        lines.append(f"  Record:      {wins}W/{losses}L ({hit:.0%} hit)")
+        lines.append(f"  Record:      <b>{wins}W/{losses}L</b> ({hit:.0%} hit)")
     if n_unpriced:
         lines.append(f"  ⚠ {n_unpriced} position(s) unpriced (no live quote)")
 
@@ -308,7 +308,8 @@ def _handle_pnl():
         if lo is not None:
             hit_str = f" · hit {sp.wins / (sp.wins + sp.losses):.0%} (lo {lo:.0%})"
         lines.append(
-            f"{tag} <code>{_esc(sp.label)}</code>  ${sp.net_pnl:+.2f}  ({pnl_str}, {roi_str})  "
+            f"{tag} <b>{_esc(sp.label)}</b>  <b>${sp.net_pnl:+.2f}</b>  "
+            f"({pnl_str}, <b>{roi_str}</b>)  "
             f"— {sp.n_wallets}w {sp.n_closed}c/{sp.n_open}o{hit_str}"
         )
 
@@ -337,9 +338,9 @@ def _wallet_line(w, *, tags=None, strategies=None) -> str:
     verdict = ""
     if w.system == "B":
         v, reason = u.promotion_verdict(w.net_pnl, w.n_closed)
-        verdict = f" → {v}: {reason}"
+        verdict = f" → <b>{v}</b>: {reason}"
     line = (f"{tag} <code>{_short_wallet(w.wallet)}</code> "
-            f"${w.net_pnl:+.2f} ({roi_str}{rec}){verdict}")
+            f"<b>${w.net_pnl:+.2f}</b> ({roi_str}{rec}){verdict}")
     if strategies:
         line += f"  <i>[{_esc(', '.join(strategies))}]</i>"
     elif tags:

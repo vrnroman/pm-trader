@@ -185,9 +185,9 @@ def test_pnl_reports_real_unrealized_and_open_count(s1_pnl_env):
     telegram_bot._handle_command("/pnl")
     out = buf[-1]
 
-    assert "Unrealized:  $+20.00" in out
-    assert "Open bets:   1" in out
-    assert "Open bets:   0" not in out  # the one open position is reflected everywhere
+    assert "Unrealized:  <b>$+20.00</b>" in out
+    assert "Open bets:   <b>1</b>" in out
+    assert "Open bets:   <b>0</b>" not in out  # the one open position is reflected everywhere
 
 
 def test_pnl_reports_realized_from_ledger_with_record(s1_pnl_env):
@@ -198,7 +198,7 @@ def test_pnl_reports_realized_from_ledger_with_record(s1_pnl_env):
     telegram_bot._handle_command("/pnl")
     out = buf[-1]
 
-    assert "Realized:    $+9.00" in out
+    assert "Realized:    <b>$+9.00</b>" in out
     assert "1W/1L" in out  # win/loss record surfaced
 
 
@@ -211,9 +211,9 @@ def test_pnl_net_combines_realized_and_unrealized(s1_pnl_env):
     telegram_bot._handle_command("/pnl")
     out = buf[-1]
 
-    assert "Realized:    $+10.00" in out
-    assert "Unrealized:  $-5.00" in out
-    assert "Net:         $+5.00" in out
+    assert "Realized:    <b>$+10.00</b>" in out
+    assert "Unrealized:  <b>$-5.00</b>" in out
+    assert "Net:         <b>$+5.00</b>" in out
 
 
 def test_pnl_flags_unpriced_positions(s1_pnl_env):
@@ -225,7 +225,7 @@ def test_pnl_flags_unpriced_positions(s1_pnl_env):
     out = buf[-1]
 
     assert "unpriced" in out
-    assert "Open bets:   1" in out
+    assert "Open bets:   <b>1</b>" in out
 
 
 def test_pnl_empty_strategy1_is_all_zero(s1_pnl_env):
@@ -233,6 +233,6 @@ def test_pnl_empty_strategy1_is_all_zero(s1_pnl_env):
     telegram_bot._handle_command("/pnl")
     out = buf[-1]
 
-    assert "Realized:    $+0.00" in out
-    assert "Unrealized:  $+0.00" in out
-    assert "Open bets:   0" in out
+    assert "Realized:    <b>$+0.00</b>" in out
+    assert "Unrealized:  <b>$+0.00</b>" in out
+    assert "Open bets:   <b>0</b>" in out

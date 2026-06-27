@@ -330,9 +330,22 @@ def test_format_resolution_telegram_win_names_market_and_links():
         msg = format_resolution_telegram([p], report(led))
         assert "Will BTC hit $100k in 2025?" in msg          # what resolved
         assert "polymarket.com/event/btc-100k-2025" in msg   # dig deeper
-        assert "✅ WON" in msg
+        assert "✅ <b>WON</b>" in msg
         assert "+400bps drag" in msg                         # per-position drag
         assert "<b>Ledger:</b>" in msg                       # cumulative footer
+
+
+def test_format_resolution_telegram_names_outcome_when_resolver_given():
+    from src.copy_trading.outcome_names import OutcomeNameResolver
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        p = _pos(copy_id="w", title="Will X win?", outcome_index=0,
+                 shares=100, spent=50, their_price=0.50, entry_price=0.50)
+        p.realize(won=True, now=1.0)
+        led.add(p)
+        resolver = OutcomeNameResolver(fetcher=lambda cid: ["Yes", "No"])
+        msg = format_resolution_telegram([p], report(led), resolver=resolver)
+        assert "“Yes”" in msg            # names which side settled (index 0)
 
 
 def test_report_quarantines_pre_fix_dust_positions():
@@ -381,7 +394,7 @@ def test_format_resolution_telegram_loss_and_titleless_fallback():
         p.realize(won=False, now=1.0)
         led.add(p)
         msg = format_resolution_telegram([p], report(led))
-        assert "❌ LOST" in msg
+        assert "❌ <b>LOST</b>" in msg
         assert "(politics market)" in msg     # falls back to category when untitled
         assert "1 market resolved" in msg     # singular
 

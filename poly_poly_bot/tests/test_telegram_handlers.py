@@ -309,9 +309,9 @@ def test_pnl_unified_shows_total_and_per_strategy(captured_messages, monkeypatch
     out = captured_messages[-1]
 
     assert "<b>TOTAL</b>" in out
-    assert "Realized:    $+15.00" in out   # A:10 + B:(20-15)=5
-    assert "Unrealized:  $+10.00" in out   # A open mark
-    assert "Net:         $+25.00" in out
+    assert "Realized:    <b>$+15.00</b>" in out   # A:10 + B:(20-15)=5
+    assert "Unrealized:  <b>$+10.00</b>" in out   # A open mark
+    assert "Net:         <b>$+25.00</b>" in out
     assert "A:1a" in out and "B:1b" in out
     assert "PREVIEW MODE" in out
 

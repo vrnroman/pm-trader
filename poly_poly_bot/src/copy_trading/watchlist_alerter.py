@@ -214,22 +214,29 @@ async def maybe_alert_watchlist_trade(
     wallet = trade.trader_address or ""
     profile_url = f"https://polymarket.com/profile/{wallet}" if wallet else ""
     outcome = (getattr(trade, "outcome", "") or "").strip()
-    side_line = f"Side: {trade.side}"
-    if outcome:
-        side_line += f" {outcome}"
-    if trade.price > 0:
-        side_line += f" @ {trade.price:.3f}"
-    side_line += f"  |  Size: ${cash:,.0f}"
+    side = (trade.side or "BUY").upper()
+    # Lead with the action so it's unmissable WHAT is being traded: a coloured
+    # BUY/SELL, the exact outcome being bought/sold (its real name from the feed,
+    # an honest "(outcome unknown)" if the feed omitted it — never a guess), the
+    # price in cents, and the size. The old "Side: BUY @ 0.65" with the outcome
+    # only "if present" left side-less, ambiguous alerts.
+    verb = "🟢 <b>BUY</b>" if side == "BUY" else "🔴 <b>SELL</b>"
+    outcome_txt = (f" <b>“{_escape_html(outcome)}”</b>" if outcome
+                   else " <i>(outcome unknown)</i>")
+    price_txt = f" @ {trade.price * 100:.0f}¢" if trade.price > 0 else ""
+    action_line = f"{verb}{outcome_txt}{price_txt} · <b>${cash:,.0f}</b>"
 
     lines = [
-        f"📡 <b>Watchlist [{tier.upper()}] — {_escape_html(trade.market)}</b>",
+        action_line,
+        f"<b>{_escape_html(trade.market)}</b>",
+        f"📡 watchlist [{tier.upper()}]",
     ]
     if event_url:
         lines.append(f"🔗 {event_url}")
-    lines.append(side_line)
-    lines.append(f"Wallet: <code>{_escape_html(wallet)}</code>")
     if profile_url:
         lines.append(f"👤 {profile_url}")
+    else:
+        lines.append(f"Wallet: <code>{_escape_html(wallet)}</code>")
 
     try:
         await _send_message("\n".join(lines))

@@ -51,9 +51,24 @@ async def test_material_first_fill_fires():
     assert sent is True
     send.assert_awaited_once()
     msg = send.call_args[0][0]
-    assert "Watchlist [1B]" in msg
+    assert "[1B]" in msg                 # tier
+    assert "<b>BUY</b>" in msg           # the side is unmissable
+    assert "30¢" in msg                  # price in cents
+    assert "$600" in msg                 # size
+    assert "(outcome unknown)" in msg    # honest when feed omits the outcome name
     assert trade.market in msg
     assert trade.trader_address in msg
+
+
+@pytest.mark.asyncio
+async def test_alert_names_outcome_when_present():
+    trade = _make_trade(size=2000, price=0.30)
+    trade.outcome = "Yes"               # feed populated the outcome name
+    with patch("src.copy_trading.telegram_notifier._send_message",
+               new=AsyncMock()) as send:
+        await maybe_alert_watchlist_trade(trade, "1b")
+    msg = send.call_args[0][0]
+    assert "<b>“Yes”</b>" in msg          # says exactly which side is bought
 
 
 @pytest.mark.asyncio
