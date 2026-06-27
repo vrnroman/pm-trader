@@ -124,27 +124,44 @@ def fetch_bids(token_id: str) -> list[tuple[float, float]]:
     return bids
 
 
-def make_exit_detector(wallets: list[str], max_age_s: float):
-    """Return a detector() yielding recent target SELLs (to mirror as exits)."""
+def make_exit_detector(wallets: list[str], max_age_s: float, max_pages: int = 6):
+    """Return a detector() yielding recent target SELLs (to mirror as exits).
+
+    Pages through each wallet's activity (newest-first) until it reaches events
+    older than ``max_age_s``, so a SELL isn't missed just because an active
+    wallet printed dozens of other events after it. Without paging (the old
+    limit=30 single page) a busy scalper's exit scrolled off the first page
+    before the next poll, which is why the live book only ever mirrored ~7% of
+    exits — the one positive-edge leg. ``max_pages`` bounds the cost per wallet.
+    """
 
     def detect() -> list[dict]:
         out = []
         cutoff = time.time() - max_age_s
         for w in wallets:
-            acts = _get(DATA, "/activity", user=w, limit=30) or []
-            for a in acts:
-                if a.get("type") != "TRADE" or a.get("side") != "SELL":
-                    continue
-                if float(a.get("timestamp") or 0) < cutoff:
-                    continue
-                token = a.get("asset") or ""
-                if not token:
-                    continue
-                out.append({
-                    "target": w,
-                    "token_id": token,
-                    "their_price": float(a.get("price") or 0),
-                })
+            offset = 0
+            for _ in range(max_pages):
+                acts = _get(DATA, "/activity", user=w, limit=100, offset=offset) or []
+                if not acts:
+                    break
+                stop = False
+                for a in acts:
+                    if float(a.get("timestamp") or 0) < cutoff:
+                        stop = True
+                        continue
+                    if a.get("type") != "TRADE" or a.get("side") != "SELL":
+                        continue
+                    token = a.get("asset") or ""
+                    if not token:
+                        continue
+                    out.append({
+                        "target": w,
+                        "token_id": token,
+                        "their_price": float(a.get("price") or 0),
+                    })
+                if stop or len(acts) < 100:
+                    break
+                offset += 100
         return out
 
     return detect
@@ -242,15 +259,24 @@ def fetch_mid(token_id: str) -> Optional[float]:
     return (min(asks) + max(bids)) / 2.0
 
 
-def load_watchlist_wallets(path: str) -> list[str]:
-    """Read wallet addresses from a trader_scoring_backtest watchlist JSON."""
+def _load_targets(path: str) -> list[dict]:
+    """The ``targets`` list from a watchlist JSON, or [] on missing/corrupt file.
+
+    One place to harden watchlist parsing for every per-field loader below, so a
+    schema or error-handling change can't be applied to one loader and missed by
+    the others (which would degrade the book non-uniformly)."""
     if not path or not os.path.exists(path):
         return []
     try:
         data = json.load(open(path))
     except (json.JSONDecodeError, OSError):
         return []
-    return [t["wallet"] for t in data.get("targets", []) if t.get("wallet")]
+    return data.get("targets", []) or []
+
+
+def load_watchlist_wallets(path: str) -> list[str]:
+    """Read wallet addresses from a trader_scoring_backtest watchlist JSON."""
+    return [t["wallet"] for t in _load_targets(path) if t.get("wallet")]
 
 
 def load_watchlist_flagged_by(path: str) -> dict:
@@ -259,15 +285,50 @@ def load_watchlist_flagged_by(path: str) -> dict:
     Lets the paper harness stamp each opened position with the strategy theories
     that qualified the target, for per-strategy P&L attribution. Missing file or
     missing field -> empty map / empty list."""
-    if not path or not os.path.exists(path):
-        return {}
-    try:
-        data = json.load(open(path))
-    except (json.JSONDecodeError, OSError):
-        return {}
     out: dict = {}
-    for t in data.get("targets", []):
+    for t in _load_targets(path):
         w = t.get("wallet")
         if w:
             out[w.lower()] = list(t.get("flagged_by", []))
+    return out
+
+
+def load_watchlist_categories(path: str) -> dict:
+    """Map lowercased wallet -> set of approved "winning market" categories.
+
+    The discovery sweep stamps each target with ``approved_categories`` — the
+    market types where its copy-and-hold edge cleared real-money cost. The engine
+    restricts a wallet's copies to those categories.
+
+    Only wallets with a NON-EMPTY approved set are returned. An empty set means
+    the wallet has no PROVEN winning market yet (it's still accruing resolved
+    copies — discovery already drops wallets that have enough evidence AND no
+    winning market). Treating that as "block everything" would deadlock such a
+    wallet and could silently empty the book; instead we omit it, so the engine
+    leaves it unrestricted ("absent -> don't block") until a winning category is
+    proven, at which point it gets restricted to it."""
+    out: dict = {}
+    for t in _load_targets(path):
+        w = t.get("wallet")
+        cats = set(t.get("approved_categories") or [])
+        if w and cats:
+            out[w.lower()] = cats
+    return out
+
+
+def load_watchlist_median_usd(path: str) -> dict:
+    """Map lowercased wallet -> its own median copyable BUY size (USD).
+
+    Used for conviction sizing: a copy is scaled to the target's bet relative to
+    this median. Missing field -> wallet omitted (engine falls back to legacy
+    proportional sizing for it)."""
+    out: dict = {}
+    for t in _load_targets(path):
+        w = t.get("wallet")
+        v = t.get("median_usd")
+        if w and v:
+            try:
+                out[w.lower()] = float(v)
+            except (ValueError, TypeError):
+                continue
     return out

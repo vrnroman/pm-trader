@@ -197,7 +197,7 @@ def test_copy_validated_wallet_ranks_above_higher_flag_count():
     # 0xVAL has a PROVEN positive copy-and-hold edge; 0xMULTI has more theory
     # flags + capture but no replay data. Copy-validated must rank first.
     val = Eval(wallet="0xVAL", flagged_by=("1b",), tstat=12.0, capture_cents=0.0,
-               copy_n=20, copy_roi=0.50)
+               copy_n=20, copy_roi=0.50, approved_categories=("sports",))
     multi = Eval(wallet="0xMULTI", flagged_by=("1b", "1c", "1g"), tstat=12.0,
                  capture_cents=5.0)
     r = run_discovery_cycle({"0xVAL": val, "0xMULTI": multi}, DiscoveryState(), CFG)
@@ -208,7 +208,10 @@ def test_copy_validated_wallet_ranks_above_higher_flag_count():
 def test_copy_replay_gate_off_keeps_negative_wallet():
     cfg = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0,
                           drop_capture_cents=1.0, watchlist_cap=3,
-                          copy_replay_gate=False)
+                          copy_replay_gate=False,
+                          # isolate the copy-replay gate from the orthogonal
+                          # winning-markets gate (tested separately)
+                          require_approved_category=False)
     bad = Eval(wallet="0xBAD", flagged_by=("1g",), tstat=2.0, tail_ratio=0.1,
                copy_n=15, copy_roi=-0.30)
     r = run_discovery_cycle({"0xBAD": bad}, DiscoveryState(), cfg)
@@ -282,3 +285,66 @@ def test_watchlist_meta_includes_strategy_tag():
     out = watchlist_to_targets(r.watchlist, CFG)
     assert out["targets"][0]["strategy"] == "1"        # near-term by default
     assert "long_horizon_ratio" in out["targets"][0]
+
+
+# --------------------------------------------------------------------------- #
+# Winning-markets-only gate + serialization (item A)
+# --------------------------------------------------------------------------- #
+
+def test_drops_wallet_with_replay_data_but_no_winning_market():
+    # a category reached min_category_n (a fair chance) yet none cleared the cost
+    # floor -> nowhere profitable to copy -> drop.
+    cfg = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0,
+                          drop_capture_cents=1.0, watchlist_cap=3,
+                          min_category_n=8)
+    e = Eval(wallet="0xNW", flagged_by=("1g",), tstat=2.0, tail_ratio=0.1,
+             copy_n=20, copy_roi=0.10, approved_categories=(),
+             category_edges=(("sports", 12, -0.30, False),))
+    r = run_discovery_cycle({"0xNW": e}, DiscoveryState(), cfg)
+    assert r.watchlist == []
+
+
+def test_diversified_wallet_not_dropped_before_a_category_matures():
+    # 8+ total copies but spread across categories, NONE at min_category_n yet ->
+    # must NOT be dropped (it should keep accruing until one category matures).
+    # Regression: gating the drop on whole-wallet copy_n permanently excluded
+    # diversified wallets.
+    cfg = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0,
+                          drop_capture_cents=1.0, watchlist_cap=3, min_category_n=8)
+    e = Eval(wallet="0xDV", flagged_by=("1g",), tstat=2.0, tail_ratio=0.1,
+             copy_n=9, copy_roi=0.10, approved_categories=(),
+             category_edges=(("crypto", 4, 0.2, False), ("sports", 3, -0.1, False),
+                             ("research", 2, -0.3, False)))
+    r = run_discovery_cycle({"0xDV": e}, DiscoveryState(), cfg)
+    assert [w.wallet for w in r.watchlist] == ["0xDV"]
+
+
+def test_keeps_wallet_with_a_winning_market():
+    cfg = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0,
+                          drop_capture_cents=1.0, watchlist_cap=3,
+                          min_category_n=8)
+    e = Eval(wallet="0xWM", flagged_by=("1g",), tstat=2.0, tail_ratio=0.1,
+             copy_n=20, copy_roi=0.10, approved_categories=("crypto",))
+    r = run_discovery_cycle({"0xWM": e}, DiscoveryState(), cfg)
+    assert [w.wallet for w in r.watchlist] == ["0xWM"]
+
+
+def test_thin_replay_wallet_not_dropped_by_category_gate():
+    # below min_category_n -> insufficient evidence -> NOT dropped for lack of a
+    # winning market (consistent with the copy-replay thin-sample rule).
+    cfg = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0,
+                          drop_capture_cents=1.0, watchlist_cap=3, min_category_n=8)
+    e = Eval(wallet="0xTH", flagged_by=("1g",), tstat=2.0, tail_ratio=0.1,
+             copy_n=4, copy_roi=0.10, approved_categories=())
+    r = run_discovery_cycle({"0xTH": e}, DiscoveryState(), cfg)
+    assert [w.wallet for w in r.watchlist] == ["0xTH"]
+
+
+def test_meta_serializes_winning_markets_fields():
+    from src.copy_trading.discovery import _meta
+    e = Eval(wallet="0xWM", approved_categories=("crypto", "research"),
+             category_edges=(("crypto", 12, 0.40, True),), median_usd=1500.0)
+    m = _meta(e)
+    assert m["approved_categories"] == ["crypto", "research"]
+    assert m["category_edges"] == [["crypto", 12, 0.40, True]]
+    assert m["median_usd"] == 1500.0

@@ -57,6 +57,17 @@ class DiscoveryConfig:
     min_copy_replay_n: int = 12        # resolved replayed copies before we judge a wallet
     min_copy_replay_roi: float = 0.0   # mean copy-and-hold ROI/$ bar to qualify / not be dropped
     fade_roi: float = -0.10            # at/below this (with enough n) -> FADE label (diagnostic)
+    # winning-markets-only selection (item A). The lag-sweep kill-test proved
+    # copy-and-hold is −EV in aggregate even at zero lag, but the loss is
+    # categorical — a wallet +EV-to-copy in one market type bleeds in another. So
+    # we approve each wallet only in the categories whose copy-and-hold ROI clears
+    # real-money cost on >= min_category_n resolved copies, and DROP wallets with
+    # no approved category. min_category_n is the n=10-crypto-trap guard: a lucky
+    # tiny category is not promotable to real capital. Reversible: category_select
+    # =False keeps the legacy whole-wallet gate.
+    category_select: bool = True
+    min_category_n: int = 8
+    require_approved_category: bool = True   # drop a wallet with zero winning markets
     # entry-discipline gate: reject wallets whose buy $ is tail-dominated
     # (settlement-lag scooping near $1 — un-copyable). Lenient by default.
     max_tail_ratio: float = 0.5
@@ -121,6 +132,14 @@ class Eval:
     exit_roi: float = 0.0
     exit_n: int = 0
     fade: bool = False
+    # winning-markets-only (item A): the market categories where this wallet's
+    # copy-and-hold edge clears real-money cost (cost + margin) on >= min_category_n
+    # resolved copies — the only categories the live engine will copy it in.
+    # ``category_edges`` keeps the per-category detail for the alert/why-string.
+    approved_categories: tuple = ()
+    category_edges: tuple = ()         # tuple[ (cat, n, net_roi, approved) ]
+    # the wallet's own median copyable BUY size (USD), for conviction sizing.
+    median_usd: float = 0.0
     # strategy theories that flagged this wallet + their reasons (why follow it)
     flagged_by: tuple = ()
     reason: str = ""
@@ -187,6 +206,11 @@ def _meta(e: Eval) -> dict:
         "copy_roi": round(e.copy_roi, 4), "copy_tstat": round(e.copy_tstat, 3),
         "copy_n": e.copy_n, "copy_hit": round(e.copy_hit, 3),
         "exit_roi": round(e.exit_roi, 4), "exit_n": e.exit_n, "fade": e.fade,
+        # winning-markets-only (item A): approved categories + per-category edge
+        # detail, and the wallet's median copyable bet for conviction sizing (C).
+        "approved_categories": list(e.approved_categories),
+        "category_edges": [list(r) for r in e.category_edges],
+        "median_usd": round(e.median_usd, 2),
         "flagged_by": list(e.flagged_by), "reason": e.reason,
         # bet-horizon classification (Strategy 1 near-term vs 4 long-horizon)
         "strategy": e.strategy,
@@ -235,6 +259,17 @@ def run_discovery_cycle(
         if cfg.copy_replay_gate and proven_negative(
                 e.copy_n, e.copy_roi,
                 min_n=cfg.min_copy_replay_n, min_roi=cfg.min_copy_replay_roi):
+            continue
+        # winning-markets-only gate (item A): drop a wallet with NO market category
+        # whose copy-and-hold edge clears real-money cost — there's nowhere we can
+        # profitably copy it. Scoped to PER-CATEGORY evidence: only drop once some
+        # category has reached min_category_n (a fair chance to qualify) yet none
+        # did. Gating on whole-wallet copy_n would wrongly drop a diversified
+        # wallet whose copies are spread thin across categories (each still below
+        # min_category_n) — it should keep accruing until one category matures.
+        max_category_n = max((n for _c, n, _net, _ok in e.category_edges), default=0)
+        if (cfg.category_select and cfg.require_approved_category
+                and max_category_n >= cfg.min_category_n and not e.approved_categories):
             continue
         flagged = bool(e.flagged_by)
         # legacy lead-lag gate (== theory 1c) OR any independent theory fired
@@ -292,7 +327,14 @@ def _rank_key(cfg: DiscoveryConfig, e: Eval):
     then the legacy theory-agreement / capture order. Reduces exactly to
     (flag-count, capture) when no replay data exists, so it is backward-safe."""
     proven = _copy_validated(cfg, e)
-    return (1 if proven else 0,
+    # Winning-markets wallets rank first (item A): a wallet with >=1 category whose
+    # copy-and-hold edge clears real-money cost is the only kind we can actually
+    # profit copying. Within that, prefer more approved categories, then the
+    # legacy proven-copy-ROI / theory-agreement / capture order.
+    has_winning = 1 if (cfg.category_select and e.approved_categories) else 0
+    return (has_winning,
+            len(e.approved_categories) if cfg.category_select else 0,
+            1 if proven else 0,
             e.copy_roi if proven else 0.0,
             len(e.flagged_by),
             e.capture_cents)

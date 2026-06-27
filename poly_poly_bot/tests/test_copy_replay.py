@@ -173,3 +173,78 @@ def test_forward_slippage_makes_entry_worse():
     rois = forward_copy_rois(acts, {"C": _res(0)}, min_usd=100.0, slippage_bps=200)
     # entry 0.50*1.02 = 0.51 -> 1/0.51 - 1 ~ +0.9608, less than the drag-free +1.0
     assert rois[0] < 1.0 and rois[0] > 0.9
+
+
+# --------------------------------------------------------------------------- #
+# Per-(wallet, category) selection — "winning markets only" (item A)
+# --------------------------------------------------------------------------- #
+
+from src.copy_trading.copy_cost import CostModel  # noqa: E402
+from src.copy_trading.copy_replay import (  # noqa: E402
+    approved_category_set,
+    copy_and_hold_rois_by_category,
+    select_copyable_categories,
+)
+
+
+def _cbuy(cid, cat, price=0.5, won=True, usd=1000.0, oi=0, ts=1.0):
+    return SimpleNamespace(condition_id=cid, outcome_index=oi, price=price,
+                           usd=usd, won=won, ts=ts, category=cat)
+
+
+def test_rois_bucketed_by_category():
+    buys = [_cbuy("A", "crypto", price=0.5, won=True),
+            _cbuy("B", "sports", price=0.5, won=False)]
+    out = copy_and_hold_rois_by_category(buys)
+    assert out == {"crypto": [1.0], "sports": [-1.0]}
+
+
+def test_missing_category_defaults_to_other():
+    b = SimpleNamespace(condition_id="A", outcome_index=0, price=0.5, usd=1000.0,
+                        won=True, ts=1.0)  # no category attr
+    assert copy_and_hold_rois_by_category([b]) == {"other": [1.0]}
+
+
+def _winning_buys(cat, n, price=0.5):
+    # n winning copies in `cat`, each its own market -> mean ROI = 1/price - 1
+    return [_cbuy(f"{cat}{i}", cat, price=price, won=True) for i in range(n)]
+
+
+def test_category_approved_when_edge_clears_floor_and_n():
+    cost = CostModel(category_cost={"crypto": 0.05}, fallback=0.10, margin=0.03)
+    # 10 crypto wins at 0.5 -> mean ROI +1.0, floor = 0.05+0.03 = 0.08 -> approved
+    edges = select_copyable_categories(_winning_buys("crypto", 10), cost, min_n=8)
+    assert edges["crypto"].approved is True
+    assert edges["crypto"].n == 10
+    assert edges["crypto"].net_roi > 0
+
+
+def test_category_rejected_when_sample_too_small():
+    # the n=10-crypto-trap guard: a tiny lucky category is NOT promotable
+    cost = CostModel(fallback=0.10, margin=0.03)
+    edges = select_copyable_categories(_winning_buys("crypto", 5), cost, min_n=8)
+    assert edges["crypto"].n == 5
+    assert edges["crypto"].approved is False   # below min_n
+
+
+def test_category_rejected_when_edge_below_cost():
+    # buys at 0.95 -> win ROI = 1/0.95-1 ~= +0.053, below sports floor 0.12+0.03
+    cost = CostModel(category_cost={"sports": 0.12}, margin=0.03)
+    edges = select_copyable_categories(_winning_buys("sports", 12, price=0.95), cost, min_n=8)
+    assert edges["sports"].n == 12
+    assert edges["sports"].approved is False   # edge can't clear the spread
+
+
+def test_approved_set_filters_to_winners():
+    cost = CostModel(category_cost={"crypto": 0.05, "sports": 0.12}, margin=0.03)
+    buys = _winning_buys("crypto", 10) + _winning_buys("sports", 10, price=0.95)
+    edges = select_copyable_categories(buys, cost, min_n=8)
+    assert approved_category_set(edges) == frozenset({"crypto"})
+
+
+def test_losing_category_not_approved():
+    cost = CostModel(fallback=0.10, margin=0.03)
+    losers = [_cbuy(f"s{i}", "sports", price=0.5, won=False) for i in range(12)]
+    edges = select_copyable_categories(losers, cost, min_n=8)
+    assert edges["sports"].mean_roi == -1.0
+    assert edges["sports"].approved is False

@@ -180,7 +180,12 @@ class Config:
     copy_paper_max_usd: float = _opt_float("COPY_PAPER_MAX_USD", 50.0)
     copy_paper_copy_pct: float = _opt_float("COPY_PAPER_COPY_PCT", 1.0)
     copy_paper_max_slippage_bps: int = _opt_int("COPY_PAPER_MAX_SLIPPAGE_BPS", 200)
-    copy_paper_max_age_s: float = _opt_float("COPY_PAPER_MAX_AGE_S", 21600.0)
+    # Only copy a target BUY fresher than this. Was 6h (21600) — the lag-sweep
+    # kill-test showed lag is NOT the main driver of the loss (copy-and-hold is
+    # −EV even at zero lag), but filling a 6h-stale book is pure downside on real
+    # money, and the live detection lag was a 2h p75 / 6h max under the old cap.
+    # Cut to 1h: still generous for a 120s poll, without the multi-hour stale tail.
+    copy_paper_max_age_s: float = _opt_float("COPY_PAPER_MAX_AGE_S", 3600.0)
     copy_paper_min_usd: float = _opt_float("COPY_PAPER_MIN_USD", 500.0)
     copy_paper_interval_s: int = _opt_int("COPY_PAPER_INTERVAL_S", 120)
     # Entry guardrails (cut the copies that historically leaked ROI). Reversible
@@ -194,6 +199,18 @@ class Config:
     copy_paper_first_entry_only: bool = _opt_bool("COPY_PAPER_FIRST_ENTRY_ONLY", True)
     copy_paper_max_per_wallet_day: int = _opt_int("COPY_PAPER_MAX_PER_WALLET_DAY", 3)
     copy_paper_max_per_category_day: int = _opt_int("COPY_PAPER_MAX_PER_CATEGORY_DAY", 8)
+    # Winning-markets-only gate (item A) + conviction sizing (item C). The
+    # lag-sweep kill-test (backtest/copy_lag_backtest.py) proved copy-and-hold is
+    # −EV in aggregate at ANY lag, but the loss is categorical, so the engine
+    # copies a wallet only in the categories the watchlist marks approved for it
+    # (its copy-and-hold edge cleared real-money spread there). Conviction sizing
+    # replaces the flat $50 with size ∝ the target's bet vs its own median,
+    # winsorized. Both ON by default — they only narrow/scale what we already do,
+    # and the gate is what makes the paper book reproducible on real money.
+    copy_paper_category_gate: bool = _opt_bool("COPY_PAPER_CATEGORY_GATE", True)
+    copy_paper_conviction_base_usd: float = _opt_float("COPY_PAPER_CONVICTION_BASE_USD", 25.0)
+    copy_paper_conviction_min: float = _opt_float("COPY_PAPER_CONVICTION_MIN", 0.25)
+    copy_paper_conviction_max: float = _opt_float("COPY_PAPER_CONVICTION_MAX", 2.0)
 
     # --- Wallet discovery (continuously hunts copyable wallets -> paper) ---
     # Runs the discovery funnel on a schedule; pings Telegram on each new

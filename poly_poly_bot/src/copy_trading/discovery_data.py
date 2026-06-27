@@ -15,13 +15,19 @@ from __future__ import annotations
 import json
 import logging
 import os
+import statistics
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 
-from src.copy_trading.copy_replay import score_copy_replay
+from src.copy_trading.copy_cost import CostModel
+from src.copy_trading.copy_replay import (
+    approved_category_set,
+    score_copy_replay,
+    select_copyable_categories,
+)
 from src.copy_trading.discovery import DiscoveryConfig, Eval
 from src.copy_trading.entry_profile import EntryProfile, entry_profile, is_copyable_entry
 from src.copy_trading.horizon_profile import (
@@ -490,6 +496,7 @@ def evaluate_sweep(
                         "(Strategy 4)", len(open_dates), len(open_cids))
 
     evaluated: dict[str, Eval] = {}
+    cost_model = CostModel.from_env()  # winning-markets cost floor (item A/B)
     for w in to_eval:
         if _stopping(stop):
             break
@@ -518,6 +525,20 @@ def evaluate_sweep(
         # own closed-position ROI. exit_* is the two-horizon diagnostic.
         crs = score_copy_replay(ctx.buys, ctx.round_trips, min_usd=cfg.min_usd)
         fade = crs.fade_label(min_n=cfg.min_copy_replay_n, fade_roi=cfg.fade_roi) is not None
+        # winning-markets-only (item A): score copy-and-hold per category and keep
+        # only the categories whose net-of-cost edge clears the floor on enough
+        # resolved copies. ``approved_categories`` is what the live engine gates on.
+        cat_edges = select_copyable_categories(
+            ctx.buys, cost_model, min_n=cfg.min_category_n, min_usd=cfg.min_usd)
+        approved_cats = tuple(sorted(approved_category_set(cat_edges)))
+        cat_edge_rows = tuple(
+            (c, e.n, e.net_roi, e.approved) for c, e in sorted(cat_edges.items()))
+        # the wallet's own median copyable BUY size, for conviction sizing (item C)
+        copyable_usd = [
+            float(b.usd) for b in ctx.buys
+            if is_copyable_entry(float(getattr(b, "price", 0.0) or 0.0))
+            and float(getattr(b, "usd", 0.0) or 0.0) >= cfg.min_usd]
+        median_usd = statistics.median(copyable_usd) if copyable_usd else 0.0
         # Strategy 1 vs 4 — NOT exclusive (dual membership). `strategy` is a
         # display label (which horizon dominates the wallet's $); `long_horizon`
         # is the routing flag that ALSO adds the wallet to the Strategy-4 track
@@ -540,6 +561,8 @@ def evaluate_sweep(
             curve_sharpe=cm.sharpe, curve_drawdown=cm.max_drawdown_frac, net_pnl=cm.net_pnl,
             copy_roi=crs.mean_roi, copy_tstat=crs.tstat, copy_n=crs.n,
             copy_hit=crs.hit_rate, exit_roi=crs.exit_mean_roi, exit_n=crs.exit_n, fade=fade,
+            approved_categories=approved_cats, category_edges=cat_edge_rows,
+            median_usd=median_usd,
             flagged_by=tuple(f.theory for f in flags),
             reason=" | ".join(f.reason for f in flags),
             strategy=strategy,

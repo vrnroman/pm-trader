@@ -64,12 +64,15 @@ def _copy_paper_loop():
                 f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
             )
         skips = (summary.skipped_fill_gate + summary.skipped_not_first_entry
-                 + summary.skipped_slate_cap)
+                 + summary.skipped_slate_cap + summary.skipped_category_gate)
         if skips:
             logger.info(
                 f"[COPY-PAPER] guardrail skips: fill-gate={summary.skipped_fill_gate} "
                 f"first-entry={summary.skipped_not_first_entry} "
-                f"slate-cap={summary.skipped_slate_cap}"
+                f"slate-cap={summary.skipped_slate_cap} "
+                # the winning-markets gate is default-ON and the biggest behaviour
+                # change — log it so a quieted book always shows a reason.
+                f"category-gate={summary.skipped_category_gate}"
             )
         if summary.resolved:
             telegram_bot.send_message(
@@ -93,6 +96,12 @@ def _copy_paper_loop():
         first_entry_only=CONFIG.copy_paper_first_entry_only,
         max_copies_per_wallet_day=_cap(CONFIG.copy_paper_max_per_wallet_day),
         max_copies_per_category_day=_cap(CONFIG.copy_paper_max_per_category_day),
+        # winning-markets-only gate (item A) + conviction sizing (item C)
+        category_gate=CONFIG.copy_paper_category_gate,
+        conviction_base_usd=(CONFIG.copy_paper_conviction_base_usd
+                             if CONFIG.copy_paper_conviction_base_usd > 0 else None),
+        conviction_min=CONFIG.copy_paper_conviction_min,
+        conviction_max=CONFIG.copy_paper_conviction_max,
         # When Strategy 4 is on, this near-term book stops short-copying far-future
         # bets — they would lock paper capital for months and belong to the S4
         # book instead. Off => horizon-blind, so behaviour is unchanged.

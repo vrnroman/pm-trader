@@ -479,3 +479,105 @@ def test_engine_mark_skipped_on_empty_book():
         s = eng.run_cycle(now=1)
         assert s.opened == 1 and s.marked == 0
         assert led.open_positions()[0].mark_price == 0.0
+
+
+# --------------------------------------------------------------------------- #
+# Winning-markets-only category gate (item A)
+# --------------------------------------------------------------------------- #
+
+def test_category_gate_skips_unapproved_category():
+    # wallet 0xT approved only in crypto; its sports BUY must be skipped.
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        eng = CopyPaperEngine(
+            led, detector=lambda: [_trade("t1", "TOK")],  # category="sports"
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: None, max_copy_usd=50,
+            allowed_categories={"0xt": {"crypto"}},
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 0 and s.skipped_category_gate == 1
+
+
+def test_category_gate_allows_approved_category():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        eng = CopyPaperEngine(
+            led, detector=lambda: [_trade("t1", "TOK")],  # category="sports"
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: None, max_copy_usd=50,
+            allowed_categories={"0xt": {"sports", "crypto"}},
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 1 and s.skipped_category_gate == 0
+
+
+def test_category_gate_absent_wallet_is_unrestricted():
+    # a wallet with no entry in the map is NOT blocked (no category data yet).
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        eng = CopyPaperEngine(
+            led, detector=lambda: [_trade("t1", "TOK")],
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: None, max_copy_usd=50,
+            allowed_categories={"0xother": {"crypto"}},
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 1
+
+
+def test_category_gate_off_by_default():
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        eng = CopyPaperEngine(
+            led, detector=lambda: [_trade("t1", "TOK")],
+            book_fetcher=lambda t: [(0.51, 10000)],
+            resolver=lambda c: None, max_copy_usd=50,
+        )  # allowed_categories None -> gate off
+        s = eng.run_cycle(now=1)
+        assert s.opened == 1
+
+
+# --------------------------------------------------------------------------- #
+# Conviction sizing (item C)
+# --------------------------------------------------------------------------- #
+
+def test_conviction_size_scales_with_bet_vs_median():
+    # base 20, median 1000; a 2000 bet = 2x median -> winsorized to 2x -> $40.
+    eng = CopyPaperEngine(
+        PaperCopyLedger.__new__(PaperCopyLedger), detector=lambda: [],
+        book_fetcher=lambda t: [], resolver=lambda c: None, max_copy_usd=50,
+        wallet_median_usd={"0xt": 1000.0}, conviction_base_usd=20.0,
+    )
+    assert eng._copy_size("0xT", 2000.0) == 40.0     # 2x median, capped at 2x base
+    assert eng._copy_size("0xT", 1000.0) == 20.0     # at median -> base
+    assert eng._copy_size("0xT", 100.0) == 5.0       # 0.1x -> winsorized to 0.25x*20
+
+
+def test_conviction_size_capped_at_max():
+    eng = CopyPaperEngine(
+        PaperCopyLedger.__new__(PaperCopyLedger), detector=lambda: [],
+        book_fetcher=lambda t: [], resolver=lambda c: None, max_copy_usd=30,
+        wallet_median_usd={"0xt": 1000.0}, conviction_base_usd=20.0,
+    )
+    assert eng._copy_size("0xT", 5000.0) == 30.0     # 2x*20=40 capped to max 30
+
+
+def test_conviction_size_unknown_wallet_uses_base():
+    eng = CopyPaperEngine(
+        PaperCopyLedger.__new__(PaperCopyLedger), detector=lambda: [],
+        book_fetcher=lambda t: [], resolver=lambda c: None, max_copy_usd=50,
+        wallet_median_usd={"0xt": 1000.0}, conviction_base_usd=20.0,
+    )
+    # no median for this wallet -> multiplier 1.0 -> base
+    assert eng._copy_size("0xUNKNOWN", 5000.0) == 20.0
+
+
+def test_legacy_sizing_when_conviction_off():
+    eng = CopyPaperEngine(
+        PaperCopyLedger.__new__(PaperCopyLedger), detector=lambda: [],
+        book_fetcher=lambda t: [], resolver=lambda c: None, max_copy_usd=50,
+        copy_pct=1.0,
+    )  # no conviction config -> legacy min(max_copy_usd, their_usd*pct)
+    assert eng._copy_size("0xT", 1000.0) == 50.0     # capped
+    assert eng._copy_size("0xT", 30.0) == 30.0       # below cap

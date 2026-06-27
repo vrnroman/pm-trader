@@ -19,7 +19,9 @@ from src.copy_trading.copy_paper import CopyPaperEngine, CycleSummary, PaperCopy
 from src.copy_trading.copy_paper_live import (
     fetch_asks,
     fetch_bids,
+    load_watchlist_categories,
     load_watchlist_flagged_by,
+    load_watchlist_median_usd,
     load_watchlist_wallets,
     make_detector,
     make_exit_detector,
@@ -46,6 +48,17 @@ class CopyPaperRunner:
         first_entry_only: bool = False,
         max_copies_per_wallet_day: Optional[int] = None,
         max_copies_per_category_day: Optional[int] = None,
+        # --- winning-markets-only gate (item A) + conviction sizing (item C) ---
+        # When ``category_gate`` is on, copy a wallet's BUY only in the categories
+        # the watchlist marks approved for it (its copy-and-hold edge cleared
+        # real-money cost there). When ``conviction_base_usd`` is set, size each
+        # copy to the target's conviction (their bet vs its own median, winsorized
+        # to [conviction_min, conviction_max] of the base). Both default-off so
+        # the runner is unchanged until config switches them on.
+        category_gate: bool = False,
+        conviction_base_usd: Optional[float] = None,
+        conviction_min: float = 0.25,
+        conviction_max: float = 2.0,
         # --- bet-horizon routing (Strategy 1 near-term vs 4 long-horizon) ---
         # When set, every detected BUY is routed by its market's resolution date.
         # The near-term book passes ``max_horizon_days`` (skip far-future bets);
@@ -80,6 +93,10 @@ class CopyPaperRunner:
         self.first_entry_only = first_entry_only
         self.max_copies_per_wallet_day = max_copies_per_wallet_day
         self.max_copies_per_category_day = max_copies_per_category_day
+        self.category_gate = category_gate
+        self.conviction_base_usd = conviction_base_usd
+        self.conviction_min = conviction_min
+        self.conviction_max = conviction_max
         self.min_horizon_days = min_horizon_days
         self.max_horizon_days = max_horizon_days
         self.strategy = strategy
@@ -138,6 +155,22 @@ class CopyPaperRunner:
             wallets, self.max_age_s, self.min_usd, self.flagged_by_map(), **det_kwargs
         )
         exit_detector = self._exit_detector_factory(wallets, self.max_age_s)
+        # winning-markets gate + conviction sizing read from the watchlist each
+        # cycle (so regenerating it takes effect without a restart). Off unless
+        # the runner was configured for them AND a watchlist file is present.
+        allowed_categories = None
+        wallet_median_usd = None
+        if self.watchlist_path and not self._explicit_wallets:
+            if self.category_gate:
+                allowed_categories = load_watchlist_categories(self.watchlist_path)
+                for path in self._extra_watchlist_paths:
+                    for w, c in load_watchlist_categories(path).items():
+                        allowed_categories.setdefault(w, c)
+            if self.conviction_base_usd:
+                wallet_median_usd = load_watchlist_median_usd(self.watchlist_path)
+                for path in self._extra_watchlist_paths:
+                    for w, m in load_watchlist_median_usd(path).items():
+                        wallet_median_usd.setdefault(w, m)
         engine = CopyPaperEngine(
             self.ledger, detector=detector, book_fetcher=self._book_fetcher,
             resolver=self._resolver, copy_pct=self.copy_pct,
@@ -149,6 +182,11 @@ class CopyPaperRunner:
             min_horizon_days=self.min_horizon_days,
             max_horizon_days=self.max_horizon_days,
             mark_fetcher=self._mark_fetcher, strategy=self.strategy,
+            allowed_categories=allowed_categories,
+            wallet_median_usd=wallet_median_usd,
+            conviction_base_usd=self.conviction_base_usd,
+            conviction_min=self.conviction_min,
+            conviction_max=self.conviction_max,
         )
         summary = engine.run_cycle()
         if self._on_cycle:

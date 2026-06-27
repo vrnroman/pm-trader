@@ -243,6 +243,8 @@ class CycleSummary:
     skipped_fill_gate: int = 0          # our fill would chase too far above their price
     skipped_not_first_entry: int = 0    # averaging-down / re-entry into a copied market
     skipped_slate_cap: int = 0          # per-(wallet|category)-day concentration cap hit
+    skipped_category_gate: int = 0      # market category not in this wallet's approved
+                                        # "winning markets" set (copy-and-hold edge gate)
     skipped_horizon: int = 0            # bet's resolution date is on the wrong side of the
                                         # horizon cut for this book (S1 skips longs, S4 skips shorts)
     resolved: int = 0
@@ -291,6 +293,23 @@ class CopyPaperEngine:
         mark_fetcher: Optional[MarkFn] = None,
         # stamped on every position this engine opens, for per-strategy P&L.
         strategy: str = "1",
+        # --- winning-markets-only gate (item A) ---
+        # lowercased wallet -> set of approved market categories. When provided,
+        # a detected BUY is copied only if its category is in that wallet's set
+        # (its copy-and-hold edge cleared real-money cost there). A wallet ABSENT
+        # from the map is unrestricted (no category data yet -> don't block); an
+        # empty set means "copy none". None (default) = gate off, engine unchanged.
+        allowed_categories: Optional[dict[str, set]] = None,
+        # --- conviction sizing (item C) ---
+        # wallet -> its own median copyable BUY size (USD). With this + a base
+        # unit, each copy is sized to the target's conviction: their_usd relative
+        # to their own median, winsorized to [conviction_min, conviction_max] of
+        # the base unit, then capped at max_copy_usd. None (default) keeps the
+        # legacy min(max_copy_usd, their_usd * copy_pct) sizing.
+        wallet_median_usd: Optional[dict[str, float]] = None,
+        conviction_base_usd: Optional[float] = None,
+        conviction_min: float = 0.25,
+        conviction_max: float = 2.0,
     ):
         self.ledger = ledger
         self.detector = detector
@@ -311,6 +330,27 @@ class CopyPaperEngine:
         self.first_entry_only = first_entry_only
         self.max_copies_per_wallet_day = max_copies_per_wallet_day
         self.max_copies_per_category_day = max_copies_per_category_day
+        self.allowed_categories = (
+            {k.lower(): set(v) for k, v in allowed_categories.items()}
+            if allowed_categories is not None else None)
+        self.wallet_median_usd = (
+            {k.lower(): float(v) for k, v in wallet_median_usd.items()}
+            if wallet_median_usd is not None else None)
+        self.conviction_base_usd = conviction_base_usd
+        self.conviction_min = conviction_min
+        self.conviction_max = conviction_max
+
+    def _copy_size(self, target: str, their_usd: float) -> float:
+        """USD to deploy on a copy. Conviction-sized (target's bet vs its own
+        median, winsorized) when configured, else the legacy proportional cap."""
+        if self.wallet_median_usd is not None and self.conviction_base_usd:
+            med = self.wallet_median_usd.get((target or "").lower(), 0.0)
+            mult = 1.0
+            if med > 0:
+                mult = max(self.conviction_min,
+                           min(self.conviction_max, their_usd / med))
+            return min(self.max_copy_usd, self.conviction_base_usd * mult)
+        return min(self.max_copy_usd, their_usd * self.copy_pct)
 
     def run_cycle(self, now: Optional[float] = None) -> CycleSummary:
         now = now if now is not None else time.time()
@@ -348,6 +388,14 @@ class CopyPaperEngine:
             target = tr["target"]
             token = tr["token_id"]
             category = tr.get("category", "other")
+            # winning-markets-only gate: copy a wallet's BUY only in the market
+            # categories where its copy-and-hold edge cleared real-money cost.
+            # Absent wallet -> unrestricted (no category data); present -> enforce.
+            if self.allowed_categories is not None:
+                approved = self.allowed_categories.get((target or "").lower())
+                if approved is not None and category not in approved:
+                    s.skipped_category_gate += 1
+                    continue
             # first-entry-only: skip averaging-down / re-entry into a market we
             # already copied from this target (we copy the opening trade only).
             if self.first_entry_only and (target, token) in entered_tokens:
@@ -363,7 +411,7 @@ class CopyPaperEngine:
                     and cat_day.get(category, 0) >= self.max_copies_per_category_day):
                 s.skipped_slate_cap += 1
                 continue
-            copy_usd = min(self.max_copy_usd, tr.get("their_usd", 0) * self.copy_pct)
+            copy_usd = self._copy_size(target, tr.get("their_usd", 0) or 0.0)
             fill = simulate_copy_fill(
                 tr["their_price"], self.book_fetcher(tr["token_id"]),
                 copy_usd, max_slippage_bps=self.max_slippage_bps,
