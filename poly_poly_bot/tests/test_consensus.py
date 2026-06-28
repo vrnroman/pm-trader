@@ -122,20 +122,25 @@ def test_format_flags_unverified_independence():
     sig = detect_consensus(buys, k=3, window_s=86400, min_usd=500, now=1000.0)[0]
     resolver = OutcomeNameResolver(fetcher=lambda cid: ["Yes", "No"])
     # verified -> no warning
-    assert "independence unverified" not in format_consensus_signal(sig, resolver, True)
+    assert "independence not confirmed" not in format_consensus_signal(sig, resolver, True)
     # unverified -> honest warning, not a silent fake-independent signal
-    assert "independence unverified" in format_consensus_signal(sig, resolver, False)
+    assert "independence not confirmed" in format_consensus_signal(sig, resolver, False)
 
 
 def test_signal_independence_verified_per_signal():
     from src.copy_trading.consensus import signal_independence_verified
     buys = [_buy("0xA", oi=1), _buy("0xB", oi=1), _buy("0xC", oi=1)]
     sig = detect_consensus(buys, k=3, window_s=86400, min_usd=500, now=1000.0)[0]
-    # all members have real funder data -> verified
+    # all members looked up with real funders -> verified
     assert signal_independence_verified(sig, {"0xa": "0xf1", "0xb": "0xf2", "0xc": "0xf3"})
-    # one member lacks funder data ("" = unknown/CEX/failed) -> NOT verified for
-    # THIS signal, even though others have data
-    assert not signal_independence_verified(sig, {"0xa": "0xf1", "0xb": "", "0xc": "0xf3"})
-    # funder lookup failed entirely (None) or empty -> unverified
+    # a CEX/no-traceable-funder member ("" but PRESENT = looked up) is treated as
+    # independent, so a legitimately-independent CEX-funded consensus is verified
+    # (not falsely flagged) as long as the lookups worked (some real funder exists)
+    assert signal_independence_verified(sig, {"0xa": "0xf1", "0xb": "", "0xc": "0xf3"})
+    # a member whose lookup FAILED is ABSENT from the map -> NOT verified
+    assert not signal_independence_verified(sig, {"0xa": "0xf1", "0xc": "0xf3"})
+    # no funder data worked at all (blank key -> all "") -> can't confirm (no fail-open)
+    assert not signal_independence_verified(sig, {"0xa": "", "0xb": "", "0xc": ""})
+    # lookup failed entirely (None) -> unverified
     assert not signal_independence_verified(sig, None)
     assert not signal_independence_verified(sig, {})

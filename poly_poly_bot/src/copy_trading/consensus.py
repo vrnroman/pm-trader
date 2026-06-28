@@ -65,15 +65,23 @@ class ConsensusSignal:
 
 
 def signal_independence_verified(sig: "ConsensusSignal", funder_of) -> bool:
-    """True only if we had real funder data for EVERY one of THIS signal's members
-    — the precondition for the sybil collapse to have actually checked them all.
-    Per-signal (not a global flag): a signal whose own members all lack funder data
-    is unverified even if some other sharp elsewhere had data. ``funder_of`` None
-    (lookup failed) or any member mapping to "" (unknown/CEX/lookup-failed) ->
-    unverified, so the signal honestly says independence couldn't be confirmed."""
-    if not funder_of:
+    """True when we could actually rule out a shared funder among THIS signal's
+    members. Two conditions:
+
+      * funder lookups WORKED at all — ``funder_of`` is non-None and produced at
+        least one real funder address (``any(values)``). If every value is "" (the
+        ETHERSCAN key is unset, or all lookups failed) we have no data to dedup on,
+        so independence is NOT confirmed (don't fail open).
+      * EVERY member of this signal was successfully looked up — present as a key.
+        A member mapping to "" here is a CEX/no-traceable-funder wallet that WAS
+        checked and is treated as independent (so a legitimately-independent
+        CEX-funded consensus is NOT falsely flagged); a member ABSENT from the map
+        had a failed lookup, so its independence is unconfirmed.
+
+    Per-signal, not a global flag — a signal is judged on its own members."""
+    if not funder_of or not any(funder_of.values()):
         return False
-    return all(funder_of.get(m.wallet.lower()) for m in sig.members)
+    return all(m.wallet.lower() in funder_of for m in sig.members)
 
 
 def _independent_members(rows: list, funder_of) -> list:
@@ -177,8 +185,8 @@ def format_consensus_signal(sig: "ConsensusSignal", resolver,
             f" • <code>{_short(m.wallet)}</code> "
             f"<b>${m.usd:,.0f}</b> @ {fmt_cents(m.price)}")
     if not independence_verified:
-        lines.append("⚠️ <i>independence unverified — no funder data, members "
-                     "may share a funder</i>")
+        lines.append("⚠️ <i>independence not confirmed (limited funder data) — "
+                     "eyeball the wallets above</i>")
     if sig.slug:
         lines.append(f"\U0001f517 https://polymarket.com/event/{sig.slug}")
     return "\n".join(lines)

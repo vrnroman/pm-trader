@@ -290,6 +290,16 @@ def test_fmt_cents_keeps_subcent_precision():
 
 def test_fmt_cents_subtick_not_zero():
     from src.utils import fmt_cents
-    assert fmt_cents(0.0004) == "<0.1¢"    # 0.04¢ -> honest, NOT "0.0¢"
+    assert fmt_cents(0.0004) == "0.04¢"     # sub-cent, honest, HTML-safe (no "<")
     assert fmt_cents(0.0) == "0¢"          # literal zero
     assert fmt_cents(0.001) == "0.1¢"      # the Polymarket min tick
+
+
+def test_fmt_cents_html_safe_and_negative():
+    from src.utils import fmt_cents
+    # output is inserted RAW into parse_mode=HTML messages -> must never contain
+    # a literal '<' (which made Telegram reject the whole message and drop the alert)
+    for p in (0.0004, 0.001, 0.004, 0.07, 0.30, 0.95, 0.0, 1.0):
+        assert "<" not in fmt_cents(p), p
+    assert fmt_cents(0.0004) == "0.04¢"     # sub-cent shown honestly, no "<"
+    assert fmt_cents(-0.03) == "-3¢"        # surfaces anomalous negative data

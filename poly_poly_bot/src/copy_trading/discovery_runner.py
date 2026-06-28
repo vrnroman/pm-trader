@@ -306,7 +306,11 @@ class DiscoveryRunner:
             return None
         out: dict = {}
         for w, info in zip(wallets, infos):
-            f = getattr(info, "funder", "") if not isinstance(info, Exception) else ""
+            if isinstance(info, Exception):
+                continue                       # lookup FAILED -> absent (unverified)
+            f = getattr(info, "funder", "") or ""
+            # present-as-key = looked up; "" = CEX/no-traceable-funder (independent),
+            # a real address = its funder (used to collapse same-funder sybils).
             out[w.lower()] = f if (f and not is_cex_funder(f)) else ""
         return out
 

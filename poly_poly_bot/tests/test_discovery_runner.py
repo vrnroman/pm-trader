@@ -290,4 +290,4 @@ def test_consensus_unverified_independence_noted(tmp_path):
     r = _consensus_runner(tmp_path, sink, evaluated, fetch_buys=_buy,
                           funder_map=lambda ws: {})  # no funder data
     r.run_once()
-    assert any("independence unverified" in m for m in sink)
+    assert any("independence not confirmed" in m for m in sink)

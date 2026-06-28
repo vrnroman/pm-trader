@@ -50,16 +50,15 @@ def test_cache_fetches_once_per_condition():
     assert calls == ["C"]                     # one fetch, then cached
 
 
-def test_transient_miss_negative_cached_then_recovers_after_ttl():
+def test_transient_miss_not_cached_recovers_next_lookup():
+    # a TRANSIENT fetch failure (None) must NOT be negative-cached — a brief Gamma
+    # blip can't suppress the name for the whole TTL; the very next lookup retries.
     results = [None, ["Yes", "No"]]
     clock = {"t": 0.0}
     r = OutcomeNameResolver(fetcher=lambda cid: results.pop(0),
                             now=lambda: clock["t"], neg_ttl_s=600)
-    assert r.name("C", 0) is None             # transient failure -> negative-cached
-    assert r.name("C", 0) is None             # within TTL: NOT re-fetched (no pop)
-    assert results == [["Yes", "No"]]         # confirm the 2nd call didn't fetch
-    clock["t"] = 601                          # TTL lapsed
-    assert r.name("C", 0) == "Yes"            # now retries and resolves
+    assert r.name("C", 0) is None             # transient failure -> NOT cached
+    assert r.name("C", 0) == "Yes"            # next lookup (same instant) recovers
 
 
 def test_cache_is_bounded():

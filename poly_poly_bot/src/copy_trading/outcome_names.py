@@ -47,20 +47,23 @@ def _gamma_fetch_outcomes(condition_id: str) -> Optional[list[str]]:
     first, then the ``closed=true`` variant — without this, every resolution-alert
     lookup hit a closed market, got zero rows, and fell back to "Outcome #idx".
 
-    Returns the names only when non-empty; otherwise None. Two attempts per variant
-    with a tight 5s timeout absorb a transient Gamma blip (a one-shot signal/alert
-    only resolves the name once, so a single miss would stick), while staying
-    bounded (~20s worst case during a full outage) since the resolution alert
-    resolves this synchronously in the copy-paper cycle thread. The resolver's
-    negative cache stops a genuinely-nameless market from re-paying this each call."""
+    Returns: the names (non-empty list) when resolved; ``[]`` when Gamma DEFINITIVELY
+    has no names for it (a real 200 response with no outcomes — a not-yet-indexed or
+    broken market, safe to negative-cache); or ``None`` when every attempt failed
+    (timeout / connection error / non-200) — a TRANSIENT failure the caller must NOT
+    negative-cache, so it retries on the next lookup. Two attempts per variant at a
+    tight 5s timeout absorb a blip; bounded (~20s worst case) for the synchronous
+    copy-paper cycle thread."""
     if not condition_id:
         return None
+    saw_200 = False  # did Gamma actually answer? distinguishes "no names" from "blip"
     for params in ({"condition_ids": condition_id},
                    {"condition_ids": condition_id, "closed": "true"}):
         for attempt in range(2):
             try:
                 r = requests.get(f"{GAMMA}/markets", params=params, timeout=5)
                 if r.status_code == 200:
+                    saw_200 = True
                     j = r.json()
                     rows = j if isinstance(j, list) else (j or {}).get("data") or []
                     outs = parse_outcomes(rows[0]) if rows else []
@@ -73,18 +76,22 @@ def _gamma_fetch_outcomes(condition_id: str) -> Optional[list[str]]:
             # OR an HTTP 429/5xx) — don't hammer a rate-limited/struggling Gamma.
             if attempt == 0:
                 time.sleep(0.3)
-    return None
+    # a real 200 with no names -> [] (definitive, cacheable); all attempts failed
+    # -> None (transient, don't cache, retry next lookup).
+    return [] if saw_200 else None
 
 
 class OutcomeNameResolver:
     """``(condition_id, outcome_index) -> name`` with a per-condition cache.
 
     ``fetcher(condition_id) -> list[str] | None`` is injected for tests; the
-    default hits Gamma. A NON-EMPTY result is cached for the process. An empty
-    result (a market Gamma hasn't indexed yet, or a broken id) is NEGATIVE-cached
-    for ``neg_ttl_s`` instead — so a permanently-nameless market doesn't re-pay a
-    blocking fetch on every single lookup, yet a not-yet-indexed one still recovers
-    once the TTL lapses and Gamma returns its outcomes. ``now`` is injected for tests."""
+    default hits Gamma. A NON-EMPTY result is cached for the process. A DEFINITIVE
+    empty result (``[]`` — Gamma answered but the market has no names yet / is
+    broken) is NEGATIVE-cached for ``neg_ttl_s`` so it doesn't re-pay a blocking
+    fetch every lookup, while still recovering once the TTL lapses. A TRANSIENT
+    failure (``None`` — the fetch errored) is NOT cached at all, so the very next
+    lookup retries (a brief Gamma blip mustn't suppress a name for the whole TTL).
+    ``now`` is injected for tests."""
 
     def __init__(self, fetcher: Optional[Callable[[str], Optional[list[str]]]] = None,
                  max_cache: int = 5000, neg_ttl_s: float = 600.0,
@@ -107,7 +114,9 @@ class OutcomeNameResolver:
                 return []
             del self._neg_cache[condition_id]  # TTL lapsed -> allow a retry
         got = self._fetch(condition_id)
-        if not got:                           # None (transient) OR [] (not indexed):
+        if got is None:                       # transient fetch failure -> DON'T cache
+            return []                          # (retry on the very next lookup)
+        if not got:                           # definitive [] -> negative-cache for TTL
             self._neg_cache[condition_id] = self._now() + self._neg_ttl_s
             if len(self._neg_cache) > self._max_cache:
                 self._neg_cache.popitem(last=False)
