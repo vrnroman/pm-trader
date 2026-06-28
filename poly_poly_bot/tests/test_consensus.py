@@ -125,3 +125,17 @@ def test_format_flags_unverified_independence():
     assert "independence unverified" not in format_consensus_signal(sig, resolver, True)
     # unverified -> honest warning, not a silent fake-independent signal
     assert "independence unverified" in format_consensus_signal(sig, resolver, False)
+
+
+def test_signal_independence_verified_per_signal():
+    from src.copy_trading.consensus import signal_independence_verified
+    buys = [_buy("0xA", oi=1), _buy("0xB", oi=1), _buy("0xC", oi=1)]
+    sig = detect_consensus(buys, k=3, window_s=86400, min_usd=500, now=1000.0)[0]
+    # all members have real funder data -> verified
+    assert signal_independence_verified(sig, {"0xa": "0xf1", "0xb": "0xf2", "0xc": "0xf3"})
+    # one member lacks funder data ("" = unknown/CEX/failed) -> NOT verified for
+    # THIS signal, even though others have data
+    assert not signal_independence_verified(sig, {"0xa": "0xf1", "0xb": "", "0xc": "0xf3"})
+    # funder lookup failed entirely (None) or empty -> unverified
+    assert not signal_independence_verified(sig, None)
+    assert not signal_independence_verified(sig, {})

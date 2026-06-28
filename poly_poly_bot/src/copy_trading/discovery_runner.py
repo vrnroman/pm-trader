@@ -313,27 +313,21 @@ class DiscoveryRunner:
     def _run_consensus(self, watchlist: list[Eval]) -> None:
         if not self.cfg.consensus_enabled:
             return
-        # Consensus members are the copy-VALIDATED wallets, which need copy-replay
-        # data (copy_n) — only produced when the sweep fetches resolutions, which
-        # it only does under copy_replay_gate. Without the gate every wallet has
-        # copy_n=0 so no sharps qualify and consensus would silently never fire;
-        # say so instead of going dark.
-        if not self.cfg.copy_replay_gate:
-            logger.info("[DISCOVERY] consensus needs copy_replay_gate=on "
-                        "(no copy-validation data otherwise) — skipping")
-            return
         sharps = self._copy_validated_wallets(watchlist)
+        # Members are the copy-VALIDATED wallets, which need copy-replay data
+        # (copy_n) — produced only when the sweep fetched resolutions (under
+        # copy_replay_gate OR a resolution-needing theory OR Strategy 4). So when
+        # there are too few sharps, name the likely cause (gate off → no copy data)
+        # instead of going dark — but DON'T hard-skip on the gate alone: copy_n can
+        # still be populated via those other paths, and consensus should run then.
         if len(sharps) < self.cfg.consensus_min_wallets:
-            logger.info("[DISCOVERY] consensus: %d copy-validated sharps (< k=%d) — skip",
-                        len(sharps), self.cfg.consensus_min_wallets)
+            hint = "" if self.cfg.copy_replay_gate else \
+                " — copy_replay_gate is off, so no copy-validation data (turn it on)"
+            logger.info("[DISCOVERY] consensus: %d copy-validated sharps (< k=%d) — skip%s",
+                        len(sharps), self.cfg.consensus_min_wallets, hint)
             return
         fired = self._load_consensus_fired()
         funder_of = self._consensus_funder_map_fn(sharps)
-        # independence is "verified" only if we actually got funder data to dedup
-        # on (a real lookup that returned at least one funder). None (lookup failed)
-        # or an all-empty map (ETHERSCAN key unset / all-CEX) -> mark the signal
-        # UNVERIFIED so a possible sybil cluster is flagged, not silently trusted.
-        independence_verified = bool(funder_of) and any(funder_of.values())
         run_consensus_scan(
             sharps,
             fetch_buys=self._consensus_fetch_buys_fn,
@@ -346,7 +340,6 @@ class DiscoveryRunner:
             min_usd=self.cfg.consensus_min_usd,
             cooldown_s=self.cfg.consensus_cooldown_s,
             funder_of=funder_of,
-            independence_verified=independence_verified,
             log=lambda m: logger.info("[DISCOVERY] %s", m),
         )
         self._save_consensus_fired(fired)

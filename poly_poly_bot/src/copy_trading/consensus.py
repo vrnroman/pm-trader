@@ -64,6 +64,18 @@ class ConsensusSignal:
         return (max(ts) - min(ts)) if ts else 0.0
 
 
+def signal_independence_verified(sig: "ConsensusSignal", funder_of) -> bool:
+    """True only if we had real funder data for EVERY one of THIS signal's members
+    — the precondition for the sybil collapse to have actually checked them all.
+    Per-signal (not a global flag): a signal whose own members all lack funder data
+    is unverified even if some other sharp elsewhere had data. ``funder_of`` None
+    (lookup failed) or any member mapping to "" (unknown/CEX/lookup-failed) ->
+    unverified, so the signal honestly says independence couldn't be confirmed."""
+    if not funder_of:
+        return False
+    return all(funder_of.get(m.wallet.lower()) for m in sig.members)
+
+
 def _independent_members(rows: list, funder_of) -> list:
     """Collapse wallets that share a non-CEX funder into one voice (the largest
     bet of the cluster). ``funder_of`` maps a lowercased wallet to its funder
@@ -185,7 +197,6 @@ def run_consensus_scan(
     min_usd: float,
     cooldown_s: float,
     funder_of=None,
-    independence_verified: bool = True,
     log=None,
 ) -> list:
     """Orchestrate one consensus scan (all I/O injected, so it unit-tests offline).
@@ -208,7 +219,8 @@ def run_consensus_scan(
         log(f"consensus: {len(wallets)} sharps · {len(buys)} recent buys · "
             f"{len(signals)} cells>=k · {len(fresh)} new (k={k})")
     for s in fresh:
-        send(format_consensus_signal(s, resolver, independence_verified))
+        send(format_consensus_signal(
+            s, resolver, signal_independence_verified(s, funder_of)))
     return fresh
 
 

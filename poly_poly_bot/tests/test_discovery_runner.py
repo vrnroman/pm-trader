@@ -236,16 +236,20 @@ def test_consensus_ignores_unvalidated_wallets(tmp_path):
     assert not any("sharps → BUY" in m for m in sink)
 
 
-def test_consensus_skipped_when_copy_replay_gate_off(tmp_path):
-    # #3 regression: without copy_replay_gate there's no copy-validation data, so
-    # consensus must skip explicitly (and log), not silently never fire.
+def test_consensus_skips_with_no_validation_data(tmp_path):
+    # gate-off (or any config without resolutions) leaves copy_n=0 so no wallet is
+    # copy-validated -> consensus skips before any fetch. The fix does NOT hard-skip
+    # on the gate flag alone (copy_n can be populated via a resolution theory / S4),
+    # so we model the real cause: unvalidated wallets (copy_n=0).
     sink: list[str] = []
     cfg = DiscoveryConfig(
         min_capture_cents=1.5, min_tstat=10.0, drop_capture_cents=1.0, watchlist_cap=5,
         category_select=False, copy_replay_gate=False,
         consensus_enabled=True, consensus_min_wallets=3, consensus_window_s=86400.0,
         consensus_min_usd=500.0, consensus_cooldown_s=43200.0)
-    evaluated = {w: _sharp(w) for w in ("0xA", "0xB", "0xC")}
+    # capture+tstat qualify them onto the watchlist, but copy_n=0 -> not validated
+    evaluated = {w: Eval(wallet=w, capture_cents=2.0, tstat=12.0)
+                 for w in ("0xA", "0xB", "0xC")}
     called = {"buys": 0}
 
     def fetch_buys(w):
@@ -260,6 +264,23 @@ def test_consensus_skipped_when_copy_replay_gate_off(tmp_path):
     r.run_once()
     assert not any("sharps → BUY" in m for m in sink)
     assert called["buys"] == 0          # short-circuited before any fetch
+
+
+def test_consensus_fires_with_validated_sharps_even_if_gate_off(tmp_path):
+    # the regression the review caught: copy_n can be populated without
+    # copy_replay_gate (via a resolution theory / S4), so validated sharps must
+    # still produce a consensus signal — the old hard gate-off skip suppressed it.
+    sink: list[str] = []
+    cfg = DiscoveryConfig(
+        min_capture_cents=1.5, min_tstat=10.0, drop_capture_cents=1.0, watchlist_cap=5,
+        category_select=False, copy_replay_gate=False,
+        consensus_enabled=True, consensus_min_wallets=3, consensus_window_s=86400.0,
+        consensus_min_usd=500.0, consensus_cooldown_s=43200.0)
+    evaluated = {w: _sharp(w) for w in ("0xA", "0xB", "0xC")}  # copy_n=15 -> validated
+    r = _consensus_runner(tmp_path, sink, evaluated, fetch_buys=_buy)
+    r.cfg = cfg
+    r.run_once()
+    assert any("sharps → BUY" in m for m in sink)
 
 
 def test_consensus_unverified_independence_noted(tmp_path):

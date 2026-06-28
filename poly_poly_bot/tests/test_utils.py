@@ -286,3 +286,10 @@ def test_fmt_cents_keeps_subcent_precision():
     assert fmt_cents(0.004) == "0.4¢"      # longshot: NOT "0¢" (the bug)
     assert fmt_cents(0.001) == "0.1¢"
     assert fmt_cents(0.95) == "95¢"
+
+
+def test_fmt_cents_subtick_not_zero():
+    from src.utils import fmt_cents
+    assert fmt_cents(0.0004) == "<0.1¢"    # 0.04¢ -> honest, NOT "0.0¢"
+    assert fmt_cents(0.0) == "0¢"          # literal zero
+    assert fmt_cents(0.001) == "0.1¢"      # the Polymarket min tick

@@ -75,9 +75,10 @@ class OutcomeNameResolver:
     """``(condition_id, outcome_index) -> name`` with a per-condition cache.
 
     ``fetcher(condition_id) -> list[str] | None`` is injected for tests; the
-    default hits Gamma. A successful fetch (including an empty list) is cached so
-    repeated alerts on the same market cost one call; a None (transient failure)
-    is NOT cached, so a later alert retries."""
+    default hits Gamma. Only a NON-EMPTY result is cached, so repeated alerts on
+    the same market cost one call; a None (transient failure) OR an empty result
+    (a market Gamma hasn't indexed yet) is NOT cached, so a later alert retries and
+    the market's name recovers once Gamma returns it."""
 
     def __init__(self, fetcher: Optional[Callable[[str], Optional[list[str]]]] = None,
                  max_cache: int = 5000):

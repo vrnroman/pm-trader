@@ -22,11 +22,15 @@ def round_cents(n: float) -> float:
 
 def fmt_cents(price: float) -> str:
     """A 0–1 probability as cents for Telegram display, keeping sub-cent precision
-    on longshots so a genuine 0.004 fill reads ``0.4¢`` instead of ``0¢`` (which
-    would make the owner misread the entry as free). One shared formatter for
-    every trade/signal message."""
+    on longshots so a genuine fill never misreads as free: 0.004 → ``0.4¢``, and a
+    positive price too small to show even one decimal → ``<0.1¢`` (not ``0.0¢``).
+    One shared formatter for every trade/signal message."""
     c = price * 100.0
-    if 0 < c < 1:
+    if c <= 0:
+        return "0¢"
+    if c < 0.1:
+        return "<0.1¢"          # positive but below display resolution — not "0.0¢"
+    if c < 1:
         return f"{c:.1f}¢"
     return f"{c:.0f}¢"
 
