@@ -68,8 +68,11 @@ def _gamma_fetch_outcomes(condition_id: str) -> Optional[list[str]]:
                         return outs
                     break          # 200 but no names for this variant -> next variant
             except requests.RequestException:
-                if attempt == 0:
-                    time.sleep(0.3)
+                pass
+            # back off before the single retry on ANY non-success (connection error
+            # OR an HTTP 429/5xx) — don't hammer a rate-limited/struggling Gamma.
+            if attempt == 0:
+                time.sleep(0.3)
     return None
 
 
