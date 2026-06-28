@@ -225,7 +225,16 @@ async def fetch_all_trader_activities() -> list[DetectedTrade]:
 
     Returns a flat list of all detected trades across all traders.
     """
-    addresses = CONFIG.user_addresses
+    # Tracked tier wallets plus any runtime-promoted wallets (one-tap Telegram
+    # promote), so a promotion is detected on the next poll without a restart.
+    # Deduped case-insensitively, preserving order.
+    from src.copy_trading import promotion_state
+    seen: set[str] = set()
+    addresses: list[str] = []
+    for a in list(CONFIG.user_addresses) + promotion_state.promoted_wallets():
+        if a and a.lower() not in seen:
+            seen.add(a.lower())
+            addresses.append(a)
     if not addresses:
         return []
 

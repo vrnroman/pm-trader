@@ -231,16 +231,20 @@ def _meta(e: Eval) -> dict:
 
 
 def run_discovery_cycle(
-    evaluated: dict[str, Eval], prev: DiscoveryState, cfg: DiscoveryConfig
+    evaluated: dict[str, Eval], prev: DiscoveryState, cfg: DiscoveryConfig,
+    blacklisted: set | None = None,
 ) -> CycleResult:
     """Decide the new paper watchlist from this sweep's evaluations.
 
     ``evaluated`` must cover the freshly-scored skill pool *and* every wallet
     currently on the watchlist (the runner force-evaluates the latter so decay
-    can be measured). Returns the capped, ordered watchlist plus the
-    notify/remove deltas.
+    can be measured). ``blacklisted`` (lowercased addresses) is the set of
+    auto-demoted wallets in their cooldown window — they're excluded so a wallet
+    proven to lose under our copy action can't immediately re-qualify and squat a
+    slot. Returns the capped, ordered watchlist plus the notify/remove deltas.
     """
     prev_on = set(prev.on_watchlist)
+    blacklisted = blacklisted or set()
 
     # Strategy 4: collect wallets with a real long-horizon book into a SEPARATE
     # long-horizon track — but DO NOT remove them from the copy funnel. A wallet
@@ -252,13 +256,16 @@ def run_discovery_cycle(
     # Disabled (s4_enabled=False) leaves this empty, so behaviour is unchanged.
     long_horizon_evals: list[Eval] = []
     if cfg.s4_enabled:
-        long_horizon_evals = [e for e in evaluated.values() if e.long_horizon]
+        long_horizon_evals = [e for e in evaluated.values()
+                              if e.long_horizon and e.wallet.lower() not in blacklisted]
         long_horizon_evals.sort(
             key=lambda e: (e.long_horizon_ratio, e.horizon_days), reverse=True)
         long_horizon_evals = long_horizon_evals[: cfg.long_horizon_cap]
 
     qualified: dict[str, Eval] = {}
     for w, e in evaluated.items():
+        if w.lower() in blacklisted:
+            continue  # auto-demoted (proven-negative copy ROI) — in cooldown, skip
         if e.tail_ratio > cfg.max_tail_ratio:
             continue  # tail-dominated buy flow — un-copyable, skip regardless of theory
         # copy-replay gate: drop wallets PROVEN to lose under our actual copy

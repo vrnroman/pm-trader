@@ -123,6 +123,87 @@ def reset_pnl(
     return res
 
 
+@dataclass
+class SelectiveResetResult:
+    kept_wallets: list = field(default_factory=list)    # net-positive wallets retained
+    kept_rows: int = 0                                  # positions retained
+    dropped_rows: int = 0                               # positions wiped (incl. dust)
+    archived: str = ""                                  # backup path (or "")
+    applied: bool = False                               # False on dry-run / missing file
+
+    def summary(self) -> str:
+        return (
+            f"kept {self.kept_rows} rows across {len(self.kept_wallets)} positive "
+            f"wallet(s), dropped {self.dropped_rows} rows"
+            + (f", archived -> {self.archived}" if self.archived else "")
+        )
+
+
+def selective_reset_system_b(
+    copy_paper_ledger: str,
+    *,
+    confirm: bool,
+    archive: bool = True,
+    keep_positive: bool = True,
+    now: Optional[datetime] = None,
+) -> SelectiveResetResult:
+    """Restart the System-B paper book from zero, KEEPING net-positive wallets.
+
+    For every wallet in ``copy_paper_ledger``, sum realized P&L over its *closed*
+    positions (dust fills excluded). Wallets with net realized P&L > 0 keep ALL
+    their rows (open + closed) so their track record and settled-deal count carry
+    forward; every other wallet's rows are dropped so it starts from zero. Dust
+    fills are dropped regardless. The original ledger is archived first.
+
+    Run with the bot STOPPED — the live runner holds the ledger in memory and
+    would re-persist it over the cleared file. A no-op unless ``confirm`` (a
+    dry-run still reports the kept/dropped counts).
+    """
+    from src.copy_trading.copy_paper import PaperCopyLedger, is_dust_fill
+
+    res = SelectiveResetResult()
+    if not os.path.exists(copy_paper_ledger):
+        return res
+
+    ledger = PaperCopyLedger(copy_paper_ledger)
+    positions = list(ledger.positions.values())
+
+    net: dict[str, float] = {}
+    for p in positions:
+        if is_dust_fill(p) or not p.closed:
+            continue
+        w = (p.target or "").lower()
+        net[w] = net.get(w, 0.0) + p.pnl
+    keep_wallets = {w for w, v in net.items() if v > 0} if keep_positive else set()
+
+    kept = [p for p in positions
+            if not is_dust_fill(p) and (p.target or "").lower() in keep_wallets]
+    res.kept_wallets = sorted(keep_wallets)
+    res.kept_rows = len(kept)
+    res.dropped_rows = len(positions) - len(kept)
+
+    if not confirm:
+        return res  # dry-run: counts only, no file changes
+
+    if archive:
+        stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
+        archive_dir = os.path.join(os.path.dirname(copy_paper_ledger) or ".", "archive")
+        try:
+            os.makedirs(archive_dir, exist_ok=True)
+            dst = os.path.join(archive_dir,
+                               f"{os.path.basename(copy_paper_ledger)}.{stamp}")
+            shutil.copy2(copy_paper_ledger, dst)
+            res.archived = dst
+        except Exception as e:  # noqa: BLE001
+            logger.error(f"[reset] selective archive failed: {e}")
+
+    ledger.positions = {p.copy_id: p for p in kept}
+    ledger.save()
+    res.applied = True
+    logger.warning(f"[reset] selective System-B reset complete: {res.summary()}")
+    return res
+
+
 def _reset_memory() -> None:
     """Reset the live modules' in-memory state so a running process doesn't
     re-persist stale counters over the just-cleared files. Best-effort per

@@ -25,6 +25,7 @@ from typing import Callable, Optional
 
 from types import SimpleNamespace
 
+from src.copy_trading import promotion_state
 from src.copy_trading.consensus import run_consensus_scan
 from src.copy_trading.copy_replay import proven_positive
 from src.copy_trading.discovery import (
@@ -194,7 +195,10 @@ class DiscoveryRunner:
         if not evaluated:
             logger.info("[DISCOVERY] sweep produced no evaluations (stopped or empty)")
             return None
-        result = run_discovery_cycle(evaluated, prev, self.cfg)
+        # Exclude auto-demoted wallets (proven-negative copy ROI in their cooldown)
+        # so a bad wallet can't re-qualify and squat a watchlist slot.
+        blacklisted = promotion_state.active_blacklist(self._now())
+        result = run_discovery_cycle(evaluated, prev, self.cfg, blacklisted=blacklisted)
 
         # auto-paper: rewrite the watchlist the harness consumes
         _atomic_write_json(self.watchlist_path,

@@ -54,9 +54,40 @@ def _copy_paper_loop():
     drag) and tracks it to resolution. Places NO real orders — it is a
     measurement harness whose ledger gates whether any wallet earns real capital.
     """
+    import time
+    from src.copy_trading import governance
     from src.copy_trading.copy_paper import format_resolution_telegram, report
+    from src.copy_trading.copy_paper_live import (
+        TradeFeed, make_feed_detector, make_feed_exit_detector)
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
     from src.copy_trading.outcome_names import DEFAULT_RESOLVER
+
+    def _governance(ledger):
+        """Auto promote-offer / demote off the System-B paper ledger each cycle."""
+        if not CONFIG.copy_governance_enabled:
+            return
+        try:
+            governance.run_governance_cycle(
+                ledger.positions.values(),
+                now=time.time(),
+                promote_min_n=CONFIG.copy_promote_min_settled,
+                promote_min_roi=CONFIG.copy_promote_min_roi,
+                demote_min_n=CONFIG.copy_demote_min_settled,
+                demote_max_roi=CONFIG.copy_demote_max_roi,
+                cooldown_s=CONFIG.copy_demote_cooldown_days * 86400.0,
+                default_tier=CONFIG.promote_default_tier,
+                send_offer=lambda o: telegram_bot.send_promotion_offer(
+                    o["wallet"], o["n_closed"], o["roi"], o["net_pnl"],
+                    o.get("tier", "1b")),
+                send_demotion=lambda d: telegram_bot.send_message(
+                    f"⛔ <b>Auto-demoted</b> <code>{d['wallet']}</code> — "
+                    f"{d['n_closed']} settled copies, ROI {d['roi'] * 100:+.0f}% "
+                    f"(≤ {CONFIG.copy_demote_max_roi * 100:+.0f}%). "
+                    f"Dropped from the watchlist for "
+                    f"{CONFIG.copy_demote_cooldown_days:.0f}d."),
+            )
+        except Exception as e:
+            logger.warning(f"[COPY-PAPER] governance cycle failed: {e}")
 
     def _on_cycle(summary, ledger):
         if summary.opened or summary.resolved:
@@ -80,10 +111,28 @@ def _copy_paper_loop():
                 format_resolution_telegram(summary.resolved_positions, report(ledger),
                                            resolver=DEFAULT_RESOLVER)
             )
+        _governance(ledger)
 
     # A cap <= 0 disables that guardrail (engine treats None as off).
     def _cap(v):
         return v if v and v > 0 else None
+
+    # Shared-feed detection (item 4): one global /trades poll per cycle, filtered
+    # to watched wallets — detection cost is flat in the wallet count, so the
+    # watchlist scales to hundreds. Falls back to per-wallet polling when off.
+    detector_factory = None
+    exit_detector_factory = None
+    if CONFIG.copy_paper_feed_detection:
+        _feed = TradeFeed()
+        _feed_min = CONFIG.copy_paper_feed_min_usd
+
+        def detector_factory(wallets, max_age_s, min_usd, flagged_by_map=None, **kw):
+            return make_feed_detector(wallets, max_age_s, min_usd, flagged_by_map,
+                                      feed=_feed, feed_min_usd=_feed_min, **kw)
+
+        def exit_detector_factory(wallets, max_age_s):
+            return make_feed_exit_detector(wallets, max_age_s,
+                                           feed=_feed, feed_min_usd=_feed_min)
 
     runner = CopyPaperRunner(
         ledger_path=CONFIG.copy_paper_ledger,
@@ -109,11 +158,14 @@ def _copy_paper_loop():
         # book instead. Off => horizon-blind, so behaviour is unchanged.
         max_horizon_days=(CONFIG.strategy_4_long_horizon_days
                           if CONFIG.strategy_4_enabled else None),
+        detector_factory=detector_factory,
+        exit_detector_factory=exit_detector_factory,
         on_cycle=_on_cycle,
     )
     n = len(runner.wallets())
     logger.info(
         f"Copy-paper harness started (wallets={n}, interval={CONFIG.copy_paper_interval_s}s, "
+        f"feed-detection={CONFIG.copy_paper_feed_detection}, "
         f"max ${CONFIG.copy_paper_max_usd:.0f}/copy, PREVIEW measurement only)"
     )
     if n == 0:

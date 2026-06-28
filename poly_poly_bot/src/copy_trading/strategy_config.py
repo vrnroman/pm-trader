@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Literal, Optional
 
 from src.config_validators import parse_addresses, validate_address
+from src.copy_trading import promotion_state
 
 StrategyTier = Literal["1a", "1b", "1c", "legacy"]
 
@@ -282,7 +283,12 @@ STRATEGY_4 = _load_strategy4_config()
 
 
 def get_all_tiered_wallets() -> list[str]:
-    """All tracked wallets across tiers (for detection). Does NOT include 1c (dynamic)."""
+    """All tracked wallets across tiers (for detection). Does NOT include 1c (dynamic).
+
+    Includes runtime-promoted wallets (one-tap Telegram promote) read fresh from
+    the promoted store, so a promotion takes effect on the next cycle without a
+    restart — exactly as if the wallet had been added to STRATEGY_1B_WALLETS.
+    """
     seen: set[str] = set()
     if TIER_1A.enabled:
         for w in TIER_1A.wallets:
@@ -290,6 +296,8 @@ def get_all_tiered_wallets() -> list[str]:
     if TIER_1B.enabled:
         for w in TIER_1B.wallets:
             seen.add(w.lower())
+    for w in promotion_state.promoted_wallets():
+        seen.add(w.lower())
     return list(seen)
 
 
@@ -308,8 +316,14 @@ _build_wallet_tier_map()
 
 
 def get_wallet_tier(address: str) -> Optional[StrategyTier]:
-    """Look up which tier a wallet belongs to (case-insensitive)."""
-    return _wallet_tier_map.get(address.lower())
+    """Look up which tier a wallet belongs to (case-insensitive).
+
+    Falls back to the runtime promoted store, so a one-tap-promoted wallet routes
+    and sizes at its promoted tier (default 1b) without a restart."""
+    t = _wallet_tier_map.get(address.lower())
+    if t is not None:
+        return t
+    return promotion_state.promoted_tier_of(address)
 
 
 def get_tier_config(tier: StrategyTier) -> TierConfig:

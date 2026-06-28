@@ -15,6 +15,7 @@ from __future__ import annotations
 import threading
 from typing import Callable, Optional
 
+from src.copy_trading import promotion_state
 from src.copy_trading.copy_paper import CopyPaperEngine, CycleSummary, PaperCopyLedger
 from src.copy_trading.copy_paper_live import (
     fetch_asks,
@@ -121,15 +122,20 @@ class CopyPaperRunner:
             return self._explicit_wallets
         # Union the primary watchlist with any extras (the long-horizon book
         # watches both the copy watchlist and the long-horizon watchlist), keeping
-        # first-seen order and de-duping case-insensitively.
+        # first-seen order and de-duping case-insensitively. Auto-demoted wallets
+        # (proven-negative copy ROI) are dropped here so a demotion stops the copy
+        # immediately, without waiting for the next discovery sweep to rewrite the
+        # file. Empty blacklist (the default) -> no-op.
+        blacklisted = promotion_state.active_blacklist()
         seen: set[str] = set()
         out: list[str] = []
         for path in [self.watchlist_path or ""] + self._extra_watchlist_paths:
             for w in load_watchlist_wallets(path):
                 key = w.lower()
-                if key not in seen:
-                    seen.add(key)
-                    out.append(w)
+                if key in seen or key in blacklisted:
+                    continue
+                seen.add(key)
+                out.append(w)
         return out
 
     def flagged_by_map(self) -> dict:

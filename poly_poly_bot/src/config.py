@@ -187,7 +187,24 @@ class Config:
     # Cut to 1h: still generous for a 120s poll, without the multi-hour stale tail.
     copy_paper_max_age_s: float = _opt_float("COPY_PAPER_MAX_AGE_S", 3600.0)
     copy_paper_min_usd: float = _opt_float("COPY_PAPER_MIN_USD", 500.0)
-    copy_paper_interval_s: int = _opt_int("COPY_PAPER_INTERVAL_S", 120)
+    # Poll cadence for the near-term copier. Dropped 120s -> 60s now that
+    # detection runs off the shared global /trades feed (fixed cost regardless of
+    # how many wallets are watched — see copy_paper_feed_detection), so we can
+    # copy closer to real time. Lower is possible but each cycle also re-checks
+    # every OPEN position for resolution (a Gamma call apiece), so the floor is a
+    # trade-off, not free; 60s halves detection latency at ~2x the resolve load.
+    copy_paper_interval_s: int = _opt_int("COPY_PAPER_INTERVAL_S", 60)
+    # Shared-feed detection: instead of polling each watched wallet's /activity
+    # (N calls/cycle — heavy and rate-limit-prone at 500 wallets), poll the global
+    # data-api /trades feed ONCE per cycle and filter to watched wallets. Cost is
+    # independent of wallet count, so the watchlist scales to hundreds. On by
+    # default; set false to fall back to the legacy per-wallet detector.
+    copy_paper_feed_detection: bool = _opt_bool("COPY_PAPER_FEED_DETECTION", True)
+    # Cash floor for the shared feed's server-side filter (filterAmount). Trades
+    # below this never enter the feed, bounding its size; set at/under
+    # copy_paper_min_usd so no copyable BUY is filtered out, but low enough to
+    # still catch a watched wallet's exits. The BUY min_usd gate still applies.
+    copy_paper_feed_min_usd: float = _opt_float("COPY_PAPER_FEED_MIN_USD", 100.0)
     # Entry guardrails (cut the copies that historically leaked ROI). Reversible
     # via env; set a cap <= 0 to disable it. fill-gate: skip a copy whose
     # achievable fill is > this many bps ABOVE the target's price (don't chase a
@@ -212,6 +229,27 @@ class Config:
     copy_paper_conviction_min: float = _opt_float("COPY_PAPER_CONVICTION_MIN", 0.25)
     copy_paper_conviction_max: float = _opt_float("COPY_PAPER_CONVICTION_MAX", 2.0)
 
+    # --- Auto promote / demote governance (paper measurement -> action) ---
+    # A background pass over the System-B paper ledger each copy cycle:
+    #   * PROMOTE-offer a wallet once it has >= copy_promote_min_settled resolved
+    #     copies AND copy ROI >= copy_promote_min_roi — sent to Telegram with a
+    #     one-tap button; tapping adds it to the runtime promoted store (a wallet
+    #     can then trade in System A at promote_default_tier, still PREVIEW).
+    #   * DEMOTE (blacklist + drop from the watchlist) a wallet once it has
+    #     >= copy_demote_min_settled resolved copies AND copy ROI <=
+    #     copy_demote_max_roi, for copy_demote_cooldown_days (so it doesn't
+    #     immediately re-qualify next sweep).
+    # Advisory for promotion (you approve), automatic for demotion. On by default;
+    # paper-only — promotion never moves real money (PREVIEW_MODE still gates that).
+    copy_governance_enabled: bool = _opt_bool("COPY_GOVERNANCE_ENABLED", True)
+    copy_promote_min_settled: int = _opt_int("COPY_PROMOTE_MIN_SETTLED", 15)
+    copy_promote_min_roi: float = _opt_float("COPY_PROMOTE_MIN_ROI", 0.10)
+    copy_demote_min_settled: int = _opt_int("COPY_DEMOTE_MIN_SETTLED", 15)
+    copy_demote_max_roi: float = _opt_float("COPY_DEMOTE_MAX_ROI", -0.05)
+    copy_demote_cooldown_days: float = _opt_float("COPY_DEMOTE_COOLDOWN_DAYS", 30.0)
+    # Tier a one-tap-promoted wallet joins in System A (1a larger / 1b smaller).
+    promote_default_tier: str = _optional("PROMOTE_DEFAULT_TIER", "1b")
+
     # --- Wallet discovery (continuously hunts copyable wallets -> paper) ---
     # Runs the discovery funnel on a schedule; pings Telegram on each new
     # qualifier and adds it to the paper watchlist. Never touches live capital.
@@ -225,7 +263,12 @@ class Config:
     wallet_discovery_interval_s: int = _opt_int("WALLET_DISCOVERY_INTERVAL_S", 86400)  # 1d
     wallet_discovery_universe: int = _opt_int("WALLET_DISCOVERY_UNIVERSE", 200000)
     wallet_discovery_skill_pool: int = _opt_int("WALLET_DISCOVERY_SKILL_POOL", 40)
-    wallet_discovery_cap: int = _opt_int("WALLET_DISCOVERY_CAP", 25)
+    # Paper watchlist size cap. 500 (was 25) so a single weak wallet can't squat a
+    # scarce slot and starve out stronger candidates — discovery is paper-only, so
+    # a wide shortlist just measures more wallets in parallel. The shared-feed
+    # detector (copy_paper_feed_detection) makes per-cycle detection cost flat in
+    # the wallet count, so a big watchlist no longer multiplies API load.
+    wallet_discovery_cap: int = _opt_int("WALLET_DISCOVERY_CAP", 500)
     wallet_discovery_min_capture_cents: float = _opt_float("WALLET_DISCOVERY_MIN_CAPTURE_CENTS", 1.5)
     wallet_discovery_min_tstat: float = _opt_float("WALLET_DISCOVERY_MIN_TSTAT", 10.0)
     wallet_discovery_drop_capture_cents: float = _opt_float("WALLET_DISCOVERY_DROP_CAPTURE_CENTS", 1.0)

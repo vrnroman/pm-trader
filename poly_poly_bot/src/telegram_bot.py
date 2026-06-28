@@ -23,6 +23,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 from src.config import CONFIG
+from src.copy_trading import promotion_state
 
 logger = logging.getLogger("telegram")
 
@@ -51,6 +52,7 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
     {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
     {"command": "reset", "description": "Zero all P&L + risk/spend state (archives first; needs CONFIRM)"},
+    {"command": "promote", "description": "Promote a paper-validated wallet to System A (tier 1b, paper)"},
     {"command": "shutdown", "description": "Graceful shutdown (Docker restarts container)"},
 ]
 
@@ -66,22 +68,80 @@ def is_configured() -> bool:
     return bool(CONFIG.telegram_bot_token) and bool(CONFIG.telegram_chat_id)
 
 
-def send_message(text: str, parse_mode: str = "HTML"):
-    """Send a message to the configured Telegram chat."""
+def send_message(text: str, parse_mode: str = "HTML", reply_markup: dict | None = None) -> bool:
+    """Send a message to the configured Telegram chat.
+
+    ``reply_markup`` attaches an inline keyboard (tap-to-act buttons). Returns
+    True iff the message was actually delivered, so callers that must not repeat
+    on failure (e.g. a one-time promote offer) can gate on it."""
     if not is_configured():
-        return
+        return False
     try:
         url = f"{TELEGRAM_API.format(token=CONFIG.telegram_bot_token)}/sendMessage"
-        resp = requests.post(url, json={
+        payload = {
             "chat_id": CONFIG.telegram_chat_id,
             "text": text,
             "parse_mode": parse_mode,
             "disable_web_page_preview": True,
-        }, timeout=10)
+        }
+        if reply_markup is not None:
+            payload["reply_markup"] = reply_markup
+        resp = requests.post(url, json=payload, timeout=10)
         if not resp.ok:
             logger.warning(f"Telegram send failed: {resp.status_code} {resp.text[:200]}")
+        return bool(resp.ok)
     except Exception as e:
         logger.warning(f"Telegram send error: {e}")
+        return False
+
+
+def _answer_callback(callback_query_id: str, text: str = "") -> None:
+    """Acknowledge a button tap so Telegram stops the client-side spinner."""
+    if not is_configured() or not callback_query_id:
+        return
+    try:
+        url = f"{TELEGRAM_API.format(token=CONFIG.telegram_bot_token)}/answerCallbackQuery"
+        requests.post(url, json={"callback_query_id": callback_query_id,
+                                 "text": text[:200]}, timeout=10)
+    except Exception as e:
+        logger.warning(f"Telegram answerCallbackQuery error: {e}")
+
+
+def _edit_message(chat_id: str, message_id: int, text: str,
+                  parse_mode: str = "HTML") -> None:
+    """Replace an offer message's text (and drop its buttons) after a tap."""
+    if not is_configured() or not message_id:
+        return
+    try:
+        url = f"{TELEGRAM_API.format(token=CONFIG.telegram_bot_token)}/editMessageText"
+        requests.post(url, json={
+            "chat_id": chat_id, "message_id": message_id, "text": text,
+            "parse_mode": parse_mode, "disable_web_page_preview": True,
+        }, timeout=10)
+    except Exception as e:
+        logger.warning(f"Telegram editMessageText error: {e}")
+
+
+def _signed_usd(x: float) -> str:
+    return f"{'+' if x >= 0 else '-'}${abs(x):,.0f}"
+
+
+def send_promotion_offer(wallet: str, n_closed: int, roi: float,
+                         net_pnl: float, tier: str = "1b") -> bool:
+    """One-tap promote offer: the paper book proved this wallet out. Tapping
+    Promote adds it to System A (still PREVIEW) with no typing — no UUID to copy."""
+    text = (
+        "🎓 <b>Promote candidate</b> — paper book matured\n"
+        f"<code>{_esc(wallet)}</code>\n"
+        f"<b>{n_closed}</b> settled copies · ROI <b>{roi * 100:+.0f}%</b> · "
+        f"net <b>{_signed_usd(net_pnl)}</b>\n"
+        f"Tap to add to System A (tier {tier}, still PREVIEW/paper)."
+    )
+    keyboard = {"inline_keyboard": [[
+        {"text": f"✅ Promote → {tier}", "callback_data": f"promo:{wallet}"},
+        {"text": "✖ Dismiss", "callback_data": f"dism:{wallet}"},
+    ]]}
+    return send_message(text, reply_markup=keyboard)
 
 
 def _send_chunked(text: str, parse_mode: str = "HTML", chunk_size: int = 3800):
@@ -166,6 +226,8 @@ def _handle_command(text: str):
         _handle_setkey(text)
     elif text.startswith("/reset"):
         _handle_reset(text)
+    elif text.startswith("/promote"):
+        _handle_promote(text)
     elif text.startswith("/shutdown"):
         _handle_shutdown(text)
     elif text.startswith("/help") or text.startswith("/start"):
@@ -708,6 +770,102 @@ def _handle_help():
     )
 
 
+# --- Promote (one-tap wallet -> System A) ---
+
+def _default_promote_tier() -> str:
+    t = (CONFIG.promote_default_tier or "1b").lower()
+    return t if t in promotion_state.VALID_TIERS else "1b"
+
+
+def _resolve_promote_target(query: str) -> str | None:
+    """Map a /promote argument to a wallet address.
+
+    Accepts a full 0x address, or a prefix that uniquely matches a wallet we've
+    offered for promotion (so the owner never has to paste a whole UUID). Returns
+    None when nothing — or more than one thing — matches."""
+    q = (query or "").strip().lower()
+    if not q:
+        return None
+    if q.startswith("0x") and len(q) == 42:
+        return q
+    matches = {}
+    for rec in promotion_state.offers_map().values():
+        w = rec.get("wallet") or ""
+        if w and w.lower().startswith(q):
+            matches[w.lower()] = w
+    vals = list(matches.values())
+    return vals[0] if len(vals) == 1 else None
+
+
+def _handle_promote(text: str) -> None:
+    """/promote <wallet-or-prefix> — add a paper-validated wallet to System A.
+
+    The primary path is the one-tap button on a promote offer; this command is a
+    typed fallback that still avoids pasting the full address (a prefix works)."""
+    parts = text.split()
+    tier = _default_promote_tier()
+    if len(parts) < 2:
+        send_message(
+            "Usage: <code>/promote &lt;wallet-or-prefix&gt;</code>\n"
+            f"Adds a paper-validated wallet to System A (tier {tier}, still PREVIEW/paper).\n"
+            "Tip: just tap the <b>✅ Promote</b> button on a promote offer."
+        )
+        return
+    wallet = _resolve_promote_target(parts[1])
+    if wallet is None:
+        send_message(
+            f"No unique promote candidate matches <code>{_esc(parts[1])}</code>. "
+            "Use the full 0x address or a longer prefix."
+        )
+        return
+    promotion_state.add_promoted(wallet, tier=tier, source="telegram-cmd")
+    promotion_state.record_offer(wallet, status="accepted")
+    send_message(
+        f"✅ <b>Promoted</b> <code>{_esc(wallet)}</code> → tier {tier} "
+        "(System A, still PREVIEW/paper). It now also trades there; flip "
+        "PREVIEW_MODE off to go live."
+    )
+
+
+def _handle_callback(data: str) -> tuple[str, str | None]:
+    """Process an inline-button tap. Returns (toast, edited_message_text|None)."""
+    if data.startswith("promo:"):
+        wallet = data[len("promo:"):]
+        tier = _default_promote_tier()
+        promotion_state.add_promoted(wallet, tier=tier, source="telegram")
+        promotion_state.record_offer(wallet, status="accepted")
+        return (
+            f"Promoted → {tier}",
+            f"✅ <b>Promoted</b> <code>{_esc(wallet)}</code> → tier {tier} "
+            "(System A, still PREVIEW/paper).",
+        )
+    if data.startswith("dism:"):
+        wallet = data[len("dism:"):]
+        promotion_state.record_offer(wallet, status="dismissed")
+        return ("Dismissed", f"✖ Dismissed <code>{_esc(wallet)}</code> — not promoted.")
+    return ("Unknown action", None)
+
+
+def _process_callback(cq: dict) -> None:
+    """Filter, dispatch, and acknowledge a single callback_query (button tap)."""
+    chat_id = str(cq.get("message", {}).get("chat", {}).get("id", ""))
+    if chat_id != CONFIG.telegram_chat_id:
+        return
+    data = cq.get("data", "") or ""
+    cq_id = cq.get("id", "")
+    message_id = cq.get("message", {}).get("message_id")
+    logger.info(f"Telegram callback: {data[:60]}")
+    try:
+        toast, edited = _handle_callback(data)
+    except Exception as e:
+        logger.exception(f"Callback handler error: {e}")
+        _answer_callback(cq_id, "Error")
+        return
+    _answer_callback(cq_id, toast)
+    if edited and message_id:
+        _edit_message(chat_id, message_id, edited)
+
+
 # --- Polling ---
 
 def _process_update(update: dict) -> None:
@@ -720,6 +878,14 @@ def _process_update(update: dict) -> None:
     of letting the exception kill the polling thread (and with it, all
     future Telegram control of the bot).
     """
+    cq = update.get("callback_query")
+    if cq:
+        try:
+            _process_callback(cq)
+        except Exception as e:
+            logger.exception(f"Callback dispatch error: {e}")
+        return
+
     msg = update.get("message", {})
     chat_id = str(msg.get("chat", {}).get("id", ""))
     text = msg.get("text", "")
@@ -764,7 +930,7 @@ def _poll_loop():
             resp = requests.get(url, params={
                 "offset": last_update_id,
                 "timeout": 10,
-                "allowed_updates": '["message"]',
+                "allowed_updates": '["message","callback_query"]',
             }, timeout=15)
 
             if not resp.ok:

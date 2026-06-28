@@ -167,6 +167,172 @@ def make_exit_detector(wallets: list[str], max_age_s: float, max_pages: int = 6)
     return detect
 
 
+# --------------------------------------------------------------------------- #
+# Shared global /trades feed — near-real-time detection at fixed cost
+# --------------------------------------------------------------------------- #
+# Polls the global recent-trades feed ONCE per cycle and filters it to the
+# watched wallets, instead of hitting each wallet's /activity (N calls/cycle).
+# Detection cost is then independent of how many wallets are on the watchlist, so
+# the shortlist scales to hundreds while detection stays near-real-time.
+
+_TRADES_MAX_OFFSET = 3000  # data-api hard-caps /trades pagination here (>3000 -> HTTP 400)
+
+
+def _fetch_trades_page(min_usd: float, offset: int) -> list[dict]:
+    """One newest-first page of the global trade feed for trades >= ``min_usd``.
+
+    ``filterType=CASH&filterAmount`` bounds the feed to material trades so one poll
+    covers the recent window without paging the whole exchange; ``takerOnly=true``
+    returns each fill once (the taker leg), matching the discovery universe build.
+    """
+    return _get(
+        DATA, "/trades", limit=500, offset=offset,
+        filterType="CASH", filterAmount=int(max(min_usd, 1)), takerOnly="true",
+    ) or []
+
+
+class TradeFeed:
+    """One shared poll of the global /trades feed per cycle, cached briefly.
+
+    The BUY detector and the SELL (exit) detector both read ``recent()`` within a
+    cycle, so a short TTL collapses them onto a single fetch. Newest-first paging
+    stops as soon as it crosses the age cutoff (so a quiet window costs one page)
+    or hits the data-api's offset cap.
+    """
+
+    def __init__(self, fetch=_fetch_trades_page, now=time.time, ttl_s: float = 10.0):
+        self._fetch = fetch
+        self._now = now
+        self._ttl_s = ttl_s
+        self._cache: list[dict] = []
+        self._cache_ts: float = 0.0
+
+    def recent(self, min_usd: float, max_age_s: float) -> list[dict]:
+        if self._cache and (self._now() - self._cache_ts) < self._ttl_s:
+            return self._cache
+        cutoff = self._now() - max_age_s
+        out: list[dict] = []
+        offset = 0
+        while offset <= _TRADES_MAX_OFFSET:
+            page = self._fetch(min_usd, offset) or []
+            if not page:
+                break
+            crossed = False
+            for t in page:
+                if float(t.get("timestamp") or 0) < cutoff:
+                    crossed = True   # newest-first: this and the rest are too old
+                    break
+                out.append(t)
+            if crossed or len(page) < 500:
+                break
+            offset += 500
+        self._cache = out
+        self._cache_ts = self._now()
+        return out
+
+
+def make_feed_detector(
+    wallets: list[str],
+    max_age_s: float,
+    min_usd: float,
+    flagged_by_map: Optional[dict] = None,
+    horizon_resolver: Optional[Callable[[str], Optional[float]]] = None,
+    feed: Optional["TradeFeed"] = None,
+    feed_min_usd: Optional[float] = None,
+):
+    """Feed-based drop-in for ``make_detector`` — same emitted trade shape.
+
+    Reads the shared global feed (down to ``feed_min_usd``, a low floor so exits
+    are also visible) and keeps only watched-wallet copyable BUYs >= ``min_usd``.
+    """
+    fb = {k.lower(): v for k, v in (flagged_by_map or {}).items()}
+    watched = {w.lower() for w in wallets}
+    feed = feed if feed is not None else TradeFeed()
+    floor = feed_min_usd if feed_min_usd is not None else min_usd
+
+    def detect() -> list[dict]:
+        out = []
+        cutoff = time.time() - max_age_s
+        for t in feed.recent(floor, max_age_s):
+            w = t.get("proxyWallet") or t.get("user") or ""
+            if w.lower() not in watched:
+                continue
+            if str(t.get("side") or "").upper() != "BUY":
+                continue
+            if float(t.get("timestamp") or 0) < cutoff:
+                continue
+            price = float(t.get("price") or 0)
+            if not (0.05 <= price <= 0.95):
+                continue
+            usd = float(t.get("usdcSize") or 0) or float(t.get("size") or 0) * price
+            if usd < min_usd:
+                continue
+            tx = t.get("transactionHash") or ""
+            token = t.get("asset") or ""
+            if not tx or not token:
+                continue
+            title = t.get("title", "") or ""
+            condition_id = t.get("conditionId", "") or ""
+            horizon_days = (
+                horizon_resolver(condition_id) if horizon_resolver else None
+            )
+            out.append({
+                "copy_id": f"{tx}-{token}",
+                "target": w,
+                "condition_id": condition_id,
+                "token_id": token,
+                "outcome_index": int(t.get("outcomeIndex") or 0),
+                "category": classify_market(title),
+                "title": title,
+                "slug": t.get("eventSlug") or t.get("slug") or "",
+                "flagged_by": tuple(fb.get(w.lower(), ())),
+                "horizon_days": horizon_days,
+                "their_price": price,
+                "their_usd": usd,
+            })
+        return out
+
+    return detect
+
+
+def make_feed_exit_detector(
+    wallets: list[str],
+    max_age_s: float,
+    feed: Optional["TradeFeed"] = None,
+    feed_min_usd: float = 100.0,
+):
+    """Feed-based drop-in for ``make_exit_detector`` — watched-wallet SELLs.
+
+    Shares the same feed poll as the BUY detector (so no extra request), reading
+    down to ``feed_min_usd`` so a modest exit isn't missed by the feed's floor.
+    """
+    watched = {w.lower() for w in wallets}
+    feed = feed if feed is not None else TradeFeed()
+
+    def detect() -> list[dict]:
+        out = []
+        cutoff = time.time() - max_age_s
+        for t in feed.recent(feed_min_usd, max_age_s):
+            w = t.get("proxyWallet") or t.get("user") or ""
+            if w.lower() not in watched:
+                continue
+            if str(t.get("side") or "").upper() != "SELL":
+                continue
+            if float(t.get("timestamp") or 0) < cutoff:
+                continue
+            token = t.get("asset") or ""
+            if not token:
+                continue
+            out.append({
+                "target": w,
+                "token_id": token,
+                "their_price": float(t.get("price") or 0),
+            })
+        return out
+
+    return detect
+
+
 def resolve(condition_id: str) -> Optional[int]:
     """Winning outcome index for a resolved market, else None (still open)."""
     if not condition_id:
