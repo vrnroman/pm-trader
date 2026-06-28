@@ -50,15 +50,16 @@ def test_cache_fetches_once_per_condition():
     assert calls == ["C"]                     # one fetch, then cached
 
 
-def test_transient_miss_not_cached():
+def test_transient_miss_negative_cached_then_recovers_after_ttl():
     results = [None, ["Yes", "No"]]
-
-    def fetch(cid):
-        return results.pop(0)
-
-    r = OutcomeNameResolver(fetcher=fetch)
-    assert r.name("C", 0) is None             # transient failure
-    assert r.name("C", 0) == "Yes"            # retried, now resolves
+    clock = {"t": 0.0}
+    r = OutcomeNameResolver(fetcher=lambda cid: results.pop(0),
+                            now=lambda: clock["t"], neg_ttl_s=600)
+    assert r.name("C", 0) is None             # transient failure -> negative-cached
+    assert r.name("C", 0) is None             # within TTL: NOT re-fetched (no pop)
+    assert results == [["Yes", "No"]]         # confirm the 2nd call didn't fetch
+    clock["t"] = 601                          # TTL lapsed
+    assert r.name("C", 0) == "Yes"            # now retries and resolves
 
 
 def test_cache_is_bounded():
@@ -79,9 +80,22 @@ def test_cache_is_bounded():
     assert calls["n"] == before + 1
 
 
-def test_empty_result_not_cached_recovers(monkeypatch):
-    # #4: a not-yet-indexed market returns [] then later resolves -> must recover
+def test_empty_negative_cached_recovers_after_ttl():
+    # a not-yet-indexed market returns [] -> negative-cached (not re-fetched every
+    # call), then recovers once the TTL lapses and Gamma returns its outcomes.
+    calls = {"n": 0}
     results = [[], ["Yes", "No"]]
-    r = OutcomeNameResolver(fetcher=lambda cid: results.pop(0))
-    assert r.label("C", 0) == "Outcome #0"   # empty -> honest fallback, NOT cached
-    assert r.label("C", 0) == "Yes"          # refetched, now resolves
+
+    def fetch(cid):
+        calls["n"] += 1
+        return results.pop(0)
+
+    clock = {"t": 0.0}
+    r = OutcomeNameResolver(fetcher=fetch, now=lambda: clock["t"], neg_ttl_s=600)
+    assert r.label("C", 0) == "Outcome #0"   # empty -> honest fallback
+    assert r.label("C", 0) == "Outcome #0"   # within TTL -> negative cache, no re-fetch
+    assert r.label("C", 0) == "Outcome #0"
+    assert calls["n"] == 1                    # only ONE fetch despite 3 lookups (#3 fix)
+    clock["t"] = 601                          # TTL lapsed
+    assert r.label("C", 0) == "Yes"          # re-fetched, recovers
+    assert calls["n"] == 2

@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from collections import OrderedDict
 from typing import Callable, Optional
 
@@ -46,28 +47,29 @@ def _gamma_fetch_outcomes(condition_id: str) -> Optional[list[str]]:
     first, then the ``closed=true`` variant — without this, every resolution-alert
     lookup hit a closed market, got zero rows, and fell back to "Outcome #idx".
 
-    Returns the names only when non-empty; otherwise None — never an empty list —
-    so a not-yet-indexed market (Gamma lag) isn't cached as permanently nameless
-    and recovers on a later lookup. Bounded retries/timeout so a Gamma outage
-    can't block the caller (the resolution alert runs in the copy-paper thread)."""
+    Returns the names only when non-empty; otherwise None. Two attempts per variant
+    with a tight 5s timeout absorb a transient Gamma blip (a one-shot signal/alert
+    only resolves the name once, so a single miss would stick), while staying
+    bounded (~20s worst case during a full outage) since the resolution alert
+    resolves this synchronously in the copy-paper cycle thread. The resolver's
+    negative cache stops a genuinely-nameless market from re-paying this each call."""
     if not condition_id:
         return None
-    # One attempt per (open, closed) variant with a tight timeout: the resolution
-    # alert resolves this synchronously in the copy-paper cycle thread, so a Gamma
-    # outage must not stall the loop. An empty result isn't cached, so a transient
-    # miss just shows "Outcome #idx" once and recovers on the next lookup.
     for params in ({"condition_ids": condition_id},
                    {"condition_ids": condition_id, "closed": "true"}):
-        try:
-            r = requests.get(f"{GAMMA}/markets", params=params, timeout=6)
-            if r.status_code == 200:
-                j = r.json()
-                rows = j if isinstance(j, list) else (j or {}).get("data") or []
-                outs = parse_outcomes(rows[0]) if rows else []
-                if outs:
-                    return outs
-        except requests.RequestException:
-            pass
+        for attempt in range(2):
+            try:
+                r = requests.get(f"{GAMMA}/markets", params=params, timeout=5)
+                if r.status_code == 200:
+                    j = r.json()
+                    rows = j if isinstance(j, list) else (j or {}).get("data") or []
+                    outs = parse_outcomes(rows[0]) if rows else []
+                    if outs:
+                        return outs
+                    break          # 200 but no names for this variant -> next variant
+            except requests.RequestException:
+                if attempt == 0:
+                    time.sleep(0.3)
     return None
 
 
@@ -75,25 +77,38 @@ class OutcomeNameResolver:
     """``(condition_id, outcome_index) -> name`` with a per-condition cache.
 
     ``fetcher(condition_id) -> list[str] | None`` is injected for tests; the
-    default hits Gamma. Only a NON-EMPTY result is cached, so repeated alerts on
-    the same market cost one call; a None (transient failure) OR an empty result
-    (a market Gamma hasn't indexed yet) is NOT cached, so a later alert retries and
-    the market's name recovers once Gamma returns it."""
+    default hits Gamma. A NON-EMPTY result is cached for the process. An empty
+    result (a market Gamma hasn't indexed yet, or a broken id) is NEGATIVE-cached
+    for ``neg_ttl_s`` instead — so a permanently-nameless market doesn't re-pay a
+    blocking fetch on every single lookup, yet a not-yet-indexed one still recovers
+    once the TTL lapses and Gamma returns its outcomes. ``now`` is injected for tests."""
 
     def __init__(self, fetcher: Optional[Callable[[str], Optional[list[str]]]] = None,
-                 max_cache: int = 5000):
+                 max_cache: int = 5000, neg_ttl_s: float = 600.0,
+                 now: Callable[[], float] = time.time):
         self._fetch = fetcher or _gamma_fetch_outcomes
         self._cache: "OrderedDict[str, list[str]]" = OrderedDict()
+        self._neg_cache: "OrderedDict[str, float]" = OrderedDict()  # cid -> expiry ts
         self._max_cache = max_cache
+        self._neg_ttl_s = neg_ttl_s
+        self._now = now
 
     def outcomes(self, condition_id: str) -> list[str]:
         if not condition_id:
             return []
         if condition_id in self._cache:
             return self._cache[condition_id]
+        exp = self._neg_cache.get(condition_id)
+        if exp is not None:
+            if self._now() < exp:             # recently unresolvable -> don't re-fetch
+                return []
+            del self._neg_cache[condition_id]  # TTL lapsed -> allow a retry
         got = self._fetch(condition_id)
-        if not got:                           # None (transient) OR [] (not indexed
-            return []                          # yet) -> don't cache, retry next time
+        if not got:                           # None (transient) OR [] (not indexed):
+            self._neg_cache[condition_id] = self._now() + self._neg_ttl_s
+            if len(self._neg_cache) > self._max_cache:
+                self._neg_cache.popitem(last=False)
+            return []
         self._cache[condition_id] = got
         # DEFAULT_RESOLVER lives for the whole process; bound the cache so a
         # long-running bot can't grow it without limit (FIFO eviction).
