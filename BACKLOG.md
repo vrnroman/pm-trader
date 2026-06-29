@@ -1,5 +1,50 @@
 # Backlog
 
+## Backfill the LLM gate against the current shortlist
+
+### Why
+The Claude wallet gate (Strategy 1c) went live 2026-06-29 (commit `18d82c8`) and
+only runs on *newly* qualified wallets. The wallets already on
+`data/copy_watchlist.json` at activation time (~18, up to the 500 cap) were
+**never gated** — they were admitted before the gate existed. We want to know,
+retroactively: *if the LLM gate had been active when each shortlisted wallet
+qualified, would it still have been added?* i.e. run the same `follow/watch/skip`
+check over the whole current shortlist and surface the wallets the gate would
+have **skipped**.
+
+### How
+One-off pass (script or a one-time branch in the next discovery sweep) — does
+**not** need a full universe re-sweep, because the watchlist rows already carry
+the metrics the dossier needs:
+
+1. Read `data/copy_watchlist.json` (each `targets[]` row has `roi`, `tstat`,
+   `capture_cents`, `lead_cents`, `hit_rate`, `tail_ratio`, `copy_roi`/`copy_n`,
+   `curve_*`, etc. — see `discovery._meta`).
+2. For each wallet, rebuild the dossier (reuse `discovery_runner._dossier_from_eval`
+   shape, or map the row fields directly into `llm_review.build_dossier`).
+3. Call `llm_review.review_wallet(dossier, model=CONFIG.wallet_discovery_llm_model)`
+   for each — bounded/throttled (it's a real `claude -p` call, ~5–20 s each; the
+   full shortlist is fine sequentially on the subscription).
+4. Emit a report: per-wallet `verdict` + reasoning + cost, and the **skip list**
+   (wallets that would not have been admitted). Tag the Langfuse traces (e.g.
+   `audit:shortlist-backfill`) so they're separable from live-gate traffic.
+
+### Decision discipline
+This is an **audit, not an auto-purge**. A `skip` on a wallet that's *currently
+paper-profitable* is a flag to investigate, not an automatic removal — cross-check
+each skip against its live paper PnL (`/pnl`, `copy_paper_ledger.jsonl`) before
+deciding whether to demote/blacklist it. Decide the policy (alert-only vs prune
+on N independent skips) after seeing the first report.
+
+### Files / entry points
+- New `poly_poly_bot/scripts/audit_shortlist_llm_gate.py` (read watchlist →
+  dossier → `review_wallet` → table + skip list), or a `--once` audit flag on the
+  discovery runner.
+- Reuses: `src/copy_trading/llm_review.py`, `discovery_runner._dossier_from_eval`,
+  `src/copy_trading/langfuse_telemetry.py` (already records every call).
+- Run after the gate has accrued some live verdicts, so the audit's prompts/model
+  match what production is actually using.
+
 ## Decouple Gamma from per-scan pricing (tennis arb)
 
 ### Problem
