@@ -632,6 +632,69 @@ def _check_late_geo_bet(trade: DetectedTrade) -> Optional[PatternAlert]:
     )
 
 
+def _capture_late_bet_lead(trade: DetectedTrade) -> bool:
+    """Park a copyable late geo BUY as a resolution-gated discovery lead.
+
+    This is the *discovery* counterpart to ``_check_late_geo_bet`` (which is an
+    insider/manipulation *alert*). A genuinely informed wallet often shows up
+    first as a large in-band BUY placed close to resolution. We don't trust the
+    single bet — we queue the wallet and let the market's outcome adjudicate it:
+    only if the bet *wins* does the wallet get force-fed into the eval funnel
+    (``late_bet_queue`` → discovery ``must_include`` → score + Claude gate).
+
+    Gating (deliberately narrower than the alert):
+      - BUY only (a copyable entry, not a SELL/edge-arb near $1),
+      - price in the copyable band: 0 < price < ``near_cert_buy_price`` (0.95),
+      - size ≥ ``min_late_bet_usd``, geopolitical market,
+      - within ``close_proximity_hours`` of a known future resolution,
+      - a token id is present (needed to adjudicate the outcome later).
+
+    Returns True if a new lead was queued. Never raises — discovery is a
+    best-effort side channel and must not break alerting.
+    """
+    if not TIER_1C.late_lead_enabled:
+        return False
+    if trade.side != "BUY":
+        return False
+    if not (0.0 < trade.price < TIER_1C.near_cert_buy_price):
+        return False
+    if trade.size < TIER_1C.min_late_bet_usd:
+        return False
+    token_id = getattr(trade, "token_id", "") or ""
+    condition_id = getattr(trade, "condition_id", "") or ""
+    if not token_id or not condition_id:
+        return False
+    if not is_geopolitical_market(trade.market, condition_id):
+        return False
+
+    try:
+        from src.copy_trading.geo_market_scanner import get_geo_market
+        gm = get_geo_market(condition_id)
+    except Exception:
+        gm = None
+    if gm is None or gm.end_ts <= 0:
+        return False
+    hours_to_close = (gm.end_ts - time.time()) / 3600.0
+    if hours_to_close <= 0 or hours_to_close > TIER_1C.close_proximity_hours:
+        return False
+
+    try:
+        from src.copy_trading import late_bet_queue
+        return late_bet_queue.enqueue_lead(
+            wallet=trade.trader_address,
+            condition_id=condition_id,
+            token_id=token_id,
+            market=trade.market,
+            outcome=trade.outcome,
+            price=trade.price,
+            size=trade.size,
+            end_ts=gm.end_ts,
+        )
+    except Exception:  # pragma: no cover - lead capture must never break alerts
+        logger.warning("[late-bet] failed to queue lead")
+        return False
+
+
 def _check_thin_market_dominance(
     trade: DetectedTrade,
     wallet_is_novel: bool = False,
@@ -1001,6 +1064,11 @@ async def analyze_trade_for_patterns(
     alert = _check_late_geo_bet(trade)
     if alert is not None:
         alerts.append(alert)
+
+    # Discovery lead (not an alert): a copyable late geo BUY is parked until its
+    # market resolves; winners are force-fed into the eval funnel (see
+    # late_bet_queue). Side-effect only — does not produce a Telegram alert.
+    _capture_late_bet_lead(trade)
 
     # Pattern 5: Bet dominates a thin market's liquidity / weekly volume
     alert = _check_thin_market_dominance(trade, wallet_is_novel=wallet_is_novel)
