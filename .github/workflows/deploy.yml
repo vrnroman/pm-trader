@@ -68,6 +68,9 @@ jobs:
       - name: Materialize .env from secret
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
         run: |
           if [ -z "$ENV_FILE" ]; then
             echo "::error::ENV_FILE secret is empty — add it in repo Settings > Secrets"
@@ -75,6 +78,12 @@ jobs:
           fi
           printf '%s' "$ENV_FILE" > .env
           echo "wrote .env ($(wc -l < .env) lines)"
+
+          # polygon-rpc.com went 401 ("API key disabled, tenant disabled", 2026-06)
+          # and spammed the balance fetch. Rewrite any pinned value to a keyless
+          # working endpoint, in place — durable across deploys without editing
+          # the ENV_FILE secret (which still pins the dead URL).
+          sed -i -E 's#^RPC_URL=.*polygon-rpc\.com.*#RPC_URL=https://polygon-bor-rpc.publicnode.com#' .env
 
           # Default-on activation flags. Only appended if the ENV_FILE secret
           # doesn't already set them, so the secret stays the source of truth —
@@ -89,8 +98,25 @@ jobs:
               echo "  = $1 kept from secret"
             fi
           }
+          # Same, but the value is a secret (not echoed) and skipped if unset.
+          secret_env() {
+            if [ -n "$2" ] && ! grep -q "^$1=" .env; then
+              printf '\n%s=%s\n' "$1" "$2" >> .env
+              echo "  + $1=*** (from secret)"
+            elif [ -z "$2" ]; then
+              echo "  - $1 secret unset — skipped"
+            else
+              echo "  = $1 kept from secret"
+            fi
+          }
           ensure_env WALLET_DISCOVERY_ENABLED true
           ensure_env COPY_PAPER_ENABLED true
+          # LLM wallet gate (Strategy 1c) — activate it + its Langfuse tracing.
+          ensure_env WALLET_DISCOVERY_LLM_REVIEW_ENABLED true
+          ensure_env LANGFUSE_HOST https://jp.cloud.langfuse.com
+          secret_env CLAUDE_CODE_OAUTH_TOKEN "$CLAUDE_CODE_OAUTH_TOKEN"
+          secret_env LANGFUSE_PUBLIC_KEY "$LANGFUSE_PUBLIC_KEY"
+          secret_env LANGFUSE_SECRET_KEY "$LANGFUSE_SECRET_KEY"
 
       # deploy.sh builds the image HERE on the runner (native amd64, fast,
       # already GCP-authed), PUSHES it to Artifact Registry, and the VM PULLS it

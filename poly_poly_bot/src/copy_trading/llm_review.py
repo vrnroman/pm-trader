@@ -26,8 +26,11 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 from dataclasses import dataclass
 from typing import Any, Callable
+
+from src.copy_trading import langfuse_telemetry
 
 logger = logging.getLogger("poly_poly_bot")
 
@@ -136,13 +139,14 @@ def _build_prompt(dossier: dict) -> str:
     )
 
 
-def _claude_cli_runner(prompt: str, *, model: str, timeout_s: int) -> str | None:
-    """Run one ``claude -p`` call on the Claude subscription, return its text.
+def _claude_cli_runner(prompt: str, *, model: str, timeout_s: int) -> dict | None:
+    """Run one ``claude -p`` call on the Claude subscription, return its envelope.
 
-    Uses ``--output-format json`` (a stable envelope with a ``result`` string)
-    and runs in a throwaway temp dir so it never loads the bot's own project
-    context (CLAUDE.md, tools). Auth comes from the inherited environment
-    (``CLAUDE_CODE_OAUTH_TOKEN``). Returns ``None`` on any non-success.
+    Uses ``--output-format json`` (a stable envelope with a ``result`` string
+    plus usage/cost/latency) and runs in a throwaway temp dir so it never loads
+    the bot's own project context (CLAUDE.md, tools). Auth comes from the
+    inherited environment (``CLAUDE_CODE_OAUTH_TOKEN``). Returns the parsed
+    envelope dict, or ``None`` on any non-success.
     """
     exe = shutil.which("claude")
     if not exe:
@@ -163,7 +167,20 @@ def _claude_cli_runner(prompt: str, *, model: str, timeout_s: int) -> str | None
         logger.warning("[LLM-GATE] claude -p returned error envelope: %s",
                        str(envelope.get("subtype")))
         return None
-    return envelope.get("result")
+    return envelope
+
+
+def _verdict_from_data(data: dict) -> LLMVerdict | None:
+    try:
+        return LLMVerdict(
+            verdict=str(data["verdict"]),
+            insider_likelihood=str(data["insider_likelihood"]),
+            copyable=bool(data["copyable"]),
+            confidence=float(data["confidence"]),
+            reasoning=str(data["reasoning"]),
+        )
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 def _parse_verdict(text: str) -> dict | None:
@@ -187,28 +204,61 @@ def _parse_verdict(text: str) -> dict | None:
 def review_wallet(
     dossier: dict,
     *,
-    runner: Callable[..., str | None] | None = None,
+    runner: Callable[..., Any] | None = None,
     model: str = DEFAULT_MODEL,
     timeout_s: int = DEFAULT_TIMEOUT_S,
 ) -> LLMVerdict | None:
     """Ask Claude (via ``claude -p``) for a verdict on a dossier.
 
     Returns ``None`` on any failure so the caller can fail open. ``runner`` is
-    injectable for tests; in production it shells out to the ``claude`` CLI.
+    injectable for tests; in production it shells out to the ``claude`` CLI and
+    returns the full JSON envelope. Every call is recorded to Langfuse (a no-op
+    unless ``LANGFUSE_*`` is configured) with the prompt, verdict, token usage,
+    cost and latency.
     """
     runner = runner or _claude_cli_runner
+    prompt = _build_prompt(dossier)
+    wallet = dossier.get("wallet")
+    start = time.time()
+    res = None
     try:
-        text = runner(_build_prompt(dossier), model=model, timeout_s=timeout_s)
-        data = _parse_verdict(text) if text else None
-        if not data:
-            return None
-        return LLMVerdict(
-            verdict=str(data["verdict"]),
-            insider_likelihood=str(data["insider_likelihood"]),
-            copyable=bool(data["copyable"]),
-            confidence=float(data["confidence"]),
-            reasoning=str(data["reasoning"]),
-        )
+        res = runner(prompt, model=model, timeout_s=timeout_s)
     except Exception:  # never let the gate call break the sweep
-        logger.warning("[LLM-GATE] failed for %s", dossier.get("wallet"), exc_info=True)
-        return None
+        logger.warning("[LLM-GATE] failed for %s", wallet, exc_info=True)
+    end = time.time()
+
+    # The CLI runner returns the full envelope; an injected test runner may
+    # return the result text directly. Normalize both.
+    envelope = res if isinstance(res, dict) else None
+    text = envelope.get("result") if envelope else (res if isinstance(res, str) else None)
+    data = _parse_verdict(text) if text else None
+    verdict = _verdict_from_data(data) if data else None
+
+    error = None if verdict else ("no verdict returned" if res is None else "unparseable verdict")
+    _record(dossier, wallet, model, prompt, text, envelope, verdict, start, end, error)
+    return verdict
+
+
+def _record(dossier, wallet, model, prompt, text, envelope, verdict, start, end, error) -> None:
+    """Forward one gate call to Langfuse (no-op unless configured; never raises)."""
+    if not langfuse_telemetry.enabled():
+        return
+    meta: dict = {"wallet": wallet}
+    if verdict is not None:
+        meta.update(verdict=verdict.verdict, insider_likelihood=verdict.insider_likelihood,
+                    copyable=verdict.copyable, confidence=verdict.confidence)
+    if isinstance(dossier.get("skill"), dict):
+        meta["skill"] = dossier["skill"]
+    langfuse_telemetry.record_generation(
+        name="wallet-gate",
+        input=prompt,
+        output=(text if text is not None else ""),
+        model=model,
+        start=start, end=end,
+        usage=(envelope or {}).get("usage"),
+        cost_usd=(envelope or {}).get("total_cost_usd"),
+        duration_ms=(envelope or {}).get("duration_ms"),
+        metadata=meta,
+        tags=["wallet-gate", "claude-code", "strategy-1c"],
+        error=error,
+    )

@@ -98,7 +98,8 @@ def test_cli_runner_parses_success_envelope(monkeypatch):
 
     monkeypatch.setattr(lr.subprocess, "run", fake_run)
     out = lr._claude_cli_runner("prompt", model="claude-opus-4-8", timeout_s=5)
-    assert out == '{"verdict":"watch"}'
+    assert out["result"] == '{"verdict":"watch"}'       # full envelope returned
+    assert out["subtype"] == "success"
 
 
 def test_cli_runner_none_when_cli_absent(monkeypatch):
@@ -119,3 +120,32 @@ def test_cli_runner_none_on_error_envelope(monkeypatch):
         returncode=0, stderr="", stdout=json.dumps(
             {"subtype": "error_during_execution", "is_error": True, "result": None})))
     assert lr._claude_cli_runner("p", model="m", timeout_s=5) is None
+
+
+def test_review_wallet_records_telemetry_from_envelope(monkeypatch):
+    """When telemetry is enabled, the envelope's usage/cost/verdict are logged."""
+    recorded = {}
+    monkeypatch.setattr(lr.langfuse_telemetry, "enabled", lambda: True)
+    monkeypatch.setattr(lr.langfuse_telemetry, "record_generation",
+                        lambda **kw: recorded.update(kw))
+
+    # an injected runner that returns the full claude -p envelope shape
+    def envelope_runner(prompt, *, model, timeout_s):
+        return {
+            "subtype": "success", "is_error": False,
+            "result": json.dumps({"verdict": "skip", "insider_likelihood": "low",
+                                   "copyable": False, "confidence": 0.2,
+                                   "reasoning": "artifact"}),
+            "usage": {"input_tokens": 3000, "output_tokens": 30},
+            "total_cost_usd": 0.04, "duration_ms": 5000,
+        }
+
+    v = review_wallet({"wallet": "0xABC", "skill": {"tstat": 11}}, runner=envelope_runner)
+    assert v is not None and v.verdict == "skip"
+    assert recorded["name"] == "wallet-gate"
+    assert recorded["model"] == lr.DEFAULT_MODEL
+    assert recorded["usage"] == {"input_tokens": 3000, "output_tokens": 30}
+    assert recorded["cost_usd"] == 0.04 and recorded["duration_ms"] == 5000
+    assert recorded["metadata"]["wallet"] == "0xABC"
+    assert recorded["metadata"]["verdict"] == "skip"
+    assert recorded["error"] is None
