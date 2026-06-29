@@ -169,6 +169,15 @@ class Strategy1cConfig(TierConfig):
     # suppress all Strategy-1c pattern alerts in that case so the signal
     # channel isn't polluted by "late BUY into the obvious winner" noise.
     near_cert_buy_price: float = 0.95
+    # Late-bet lead capture (Strategy 1c → 1b discovery bridge). A large geo BUY
+    # in the copyable band (price < near_cert_buy_price) placed within
+    # close_proximity_hours of resolution is parked as a discovery *lead*; if its
+    # market later resolves in the wallet's favour the wallet is force-fed into
+    # the next discovery sweep's eval funnel. `max_resolution_wait_days` bounds
+    # how long a parked lead waits for a (possibly lagging) Gamma resolution
+    # before it's expired out of the queue.
+    late_lead_enabled: bool = True
+    late_lead_max_resolution_wait_days: float = 14.0
 
 
 def _load_tier_1a() -> TierConfig:
@@ -249,6 +258,9 @@ def _load_tier_1c() -> Strategy1cConfig:
         thin_market_weekly_ratio=_opt_float("STRATEGY_1C_THIN_MARKET_WEEKLY_RATIO", 0.60),
         max_weekly_volume_for_thin_usd=_opt_float("STRATEGY_1C_MAX_WEEKLY_VOLUME_FOR_THIN_USD", 50000),
         near_cert_buy_price=_opt_float("STRATEGY_1C_NEAR_CERT_BUY_PRICE", 0.95),
+        late_lead_enabled=_opt_bool("STRATEGY_1C_LATE_LEAD_ENABLED", True),
+        late_lead_max_resolution_wait_days=_opt_float(
+            "STRATEGY_1C_LATE_LEAD_MAX_RESOLUTION_WAIT_DAYS", 14),
     )
 
 

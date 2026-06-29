@@ -36,6 +36,7 @@ from src.copy_trading.discovery import (
     run_discovery_cycle,
     watchlist_to_targets,
 )
+from src.copy_trading import late_bet_queue
 from src.copy_trading.discovery_data import evaluate_sweep, fetch_activity
 from src.copy_trading.entry_profile import is_copyable_entry
 from src.copy_trading.llm_review import DEFAULT_MODEL, build_dossier, review_wallet
@@ -185,16 +186,44 @@ class DiscoveryRunner:
         except Exception:  # pragma: no cover - notification must not break the loop
             logger.warning("[DISCOVERY] notification failed", exc_info=True)
 
+    def _late_bet_seeds(self) -> list[str]:
+        """Resolve matured late-bet leads and return the validated-winner
+        wallets to force-include in this sweep. Best-effort: any failure yields
+        no seeds rather than aborting the sweep."""
+        try:
+            counts = late_bet_queue.process_resolutions(self._now())
+            seeds = late_bet_queue.eval_seeds()
+            if counts.get("won") or counts.get("lost") or counts.get("expired"):
+                logger.info(
+                    "[DISCOVERY] late-bet leads: won=%d lost=%d expired=%d → %d seed(s)",
+                    counts.get("won", 0), counts.get("lost", 0),
+                    counts.get("expired", 0), len(seeds),
+                )
+            return seeds
+        except Exception:  # pragma: no cover - never break the sweep
+            logger.warning("[DISCOVERY] late-bet seed processing failed", exc_info=True)
+            return []
+
     # ── one sweep ──
     def run_once(self, stop: Optional[threading.Event] = None) -> "CycleResultLike":
         prev = self._load_state()
+        # Late-bet leads: resolve any matured parked bets, then force-include the
+        # resolution-validated winners in this sweep so they get the full eval
+        # funnel (score + Claude gate) before they can reach the paper watchlist.
+        seeds = self._late_bet_seeds()
         evaluated = self._evaluate(
-            self.cfg, must_include=set(prev.on_watchlist),
+            self.cfg, must_include=set(prev.on_watchlist) | set(seeds),
             cache_dir=self.cache_dir, activity_ttl_s=self.activity_ttl_s, stop=stop,
         )
         if not evaluated:
             logger.info("[DISCOVERY] sweep produced no evaluations (stopped or empty)")
             return None
+        # Sweep ran — consume the seeds so each winner is force-scored once.
+        if seeds:
+            try:
+                late_bet_queue.clear_eval_seeds()
+            except Exception:  # pragma: no cover - never break the sweep
+                logger.warning("[DISCOVERY] failed to clear late-bet seeds", exc_info=True)
         # Exclude auto-demoted wallets (proven-negative copy ROI in their cooldown)
         # so a bad wallet can't re-qualify and squat a watchlist slot.
         blacklisted = promotion_state.active_blacklist(self._now())
@@ -234,8 +263,13 @@ class DiscoveryRunner:
                 f"the paper watchlist.\nTop: {top or '—'}"
             )
         else:
+            seed_set = {w.lower() for w in seeds}
             for e in result.newly_qualified:
-                self._send(format_find(e, verdicts.get(e.wallet)))
+                msg = format_find(e, verdicts.get(e.wallet))
+                if e.wallet.lower() in seed_set:
+                    msg = ("🎯 <b>Late-bet lead validated</b> — won its "
+                           "near-resolution bet, then cleared eval\n" + msg)
+                self._send(msg)
 
         logger.info(
             "[DISCOVERY] swept=%d qualified=%d new=%d removed=%d watchlist=%d",
