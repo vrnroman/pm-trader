@@ -293,11 +293,15 @@ class Config:
     consensus_window_hours: float = _opt_float("CONSENSUS_WINDOW_HOURS", 24.0)
     consensus_min_usd: float = _opt_float("CONSENSUS_MIN_USD", 500.0)
     consensus_cooldown_hours: float = _opt_float("CONSENSUS_COOLDOWN_HOURS", 12.0)
-    # Gated Claude second-opinion (Strategy 1c): for the top-N statistically
-    # qualified wallets, ask Claude to vet a compact dossier. Alert-only, never
-    # auto-trades; off by default and needs ANTHROPIC_API_KEY.
+    # Claude gate (Strategy 1c): the final qualitative check before a NEWLY
+    # qualified wallet is admitted to the paper watchlist. After the statistical
+    # funnel passes, Claude vets a compact dossier and a "skip" verdict blocks
+    # admission. Runs via the `claude -p` CLI on the Claude subscription
+    # (CLAUDE_CODE_OAUTH_TOKEN) — no ANTHROPIC_API_KEY needed. Off by default;
+    # fail-open (any LLM failure admits the wallet so a broken CLI never freezes
+    # discovery). top_n caps how many new wallets are gated per sweep.
     wallet_discovery_llm_review_enabled: bool = _opt_bool("WALLET_DISCOVERY_LLM_REVIEW_ENABLED", False)
-    wallet_discovery_llm_review_top_n: int = _opt_int("WALLET_DISCOVERY_LLM_REVIEW_TOP_N", 5)
+    wallet_discovery_llm_review_top_n: int = _opt_int("WALLET_DISCOVERY_LLM_REVIEW_TOP_N", 20)
     wallet_discovery_llm_model: str = _optional("WALLET_DISCOVERY_LLM_MODEL", "claude-opus-4-8")
     # Independent strategy theories that may qualify a wallet (OR'd). All ten on
     # by default — discovery is paper-only, so each theory proves out on measured
@@ -364,7 +368,10 @@ class Config:
     # --- APIs ---
     clob_api_url: str = _optional("CLOB_API_URL", "https://clob.polymarket.com")
     data_api_url: str = _optional("DATA_API_URL", "https://data-api.polymarket.com")
-    rpc_url: str = _optional("RPC_URL", "https://polygon-rpc.com")
+    # polygon-rpc.com started returning 401 ("API key disabled, tenant disabled")
+    # in 2026-06, which spammed the balance fetch every cycle. publicnode is a
+    # keyless public Polygon RPC (full eth_call support) — override via RPC_URL.
+    rpc_url: str = _optional("RPC_URL", "https://polygon-bor-rpc.publicnode.com")
     etherscan_api_key: str = _optional("ETHERSCAN_API_KEY", "")
     chain_id: int = 137
 

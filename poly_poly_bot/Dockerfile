@@ -2,6 +2,18 @@ FROM python:3.12-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ && rm -rf /var/lib/apt/lists/*
 
+# Node + Claude Code CLI. The wallet-discovery LLM gate (Strategy 1c) shells out
+# to `claude -p`, which runs on the operator's Claude subscription
+# (CLAUDE_CODE_OAUTH_TOKEN — from `claude setup-token`) rather than an
+# ANTHROPIC_API_KEY. The gate is fail-open, so if the token is unset the bot
+# still runs (new wallets are admitted ungated).
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && npm install -g @anthropic-ai/claude-code \
+    && npm cache clean --force \
+    && rm -rf /var/lib/apt/lists/*
+
 # glibc malloc tuning. This is a ~19-thread process using numpy/pandas/scipy/
 # web3. By default glibc spins up to 8*ncpu per-thread malloc arenas, each of
 # which hoards freed memory and never returns it to the OS — so RSS balloons

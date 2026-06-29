@@ -156,6 +156,70 @@ def test_llm_review_off_by_default_leaves_ping_clean(tmp_path):
     assert "Claude" not in sink[0]              # no LLM line when disabled
 
 
+def _gate_runner(tmp_path, seq, sink, verdict_fn):
+    calls = {"i": 0}
+
+    def fake_eval(cfg, **kw):
+        d = seq[min(calls["i"], len(seq) - 1)]
+        calls["i"] += 1
+        return d
+
+    return DiscoveryRunner(
+        config=CFG,
+        watchlist_path=str(tmp_path / "copy_watchlist.json"),
+        state_path=str(tmp_path / "discovery_state.json"),
+        notify=sink.append,
+        evaluate=fake_eval,
+        llm_review=verdict_fn,
+        llm_review_enabled=True,
+        now=lambda: 1000.0,
+    )
+
+
+def test_llm_gate_skip_blocks_admission(tmp_path):
+    """A 'skip' verdict keeps the new wallet off the watchlist, out of state, unpinged."""
+    from src.copy_trading.llm_review import LLMVerdict
+
+    sink: list[str] = []
+
+    def reject(dossier, model=None):
+        return LLMVerdict("skip", "low", False, 0.2, "settlement-lag scooping")
+
+    r = _gate_runner(tmp_path, [
+        {"0xA": _ev("0xA", 2.0)},                          # sweep 1: init
+        {"0xA": _ev("0xA", 2.0), "0xB": _ev("0xB", 2.5)},  # sweep 2: 0xB new → skip
+    ], sink, reject)
+    r.run_once()
+    sink.clear()
+    r.run_once()
+
+    wl = json.load(open(tmp_path / "copy_watchlist.json"))
+    assert {t["wallet"] for t in wl["targets"]} == {"0xA"}     # 0xB blocked by the gate
+    assert sink == []                                          # rejected wallet is not pinged
+    state = json.load(open(tmp_path / "discovery_state.json"))
+    assert "0xB" not in state["on_watchlist"]                  # not remembered → re-checked next sweep
+
+
+def test_llm_gate_fails_open_when_verdict_unavailable(tmp_path):
+    """A None verdict (LLM disabled/unavailable/errored) admits the wallet ungated."""
+    sink: list[str] = []
+
+    def unavailable(dossier, model=None):
+        return None
+
+    r = _gate_runner(tmp_path, [
+        {"0xA": _ev("0xA", 2.0)},
+        {"0xA": _ev("0xA", 2.0), "0xB": _ev("0xB", 2.5)},
+    ], sink, unavailable)
+    r.run_once()
+    sink.clear()
+    r.run_once()
+
+    wl = json.load(open(tmp_path / "copy_watchlist.json"))
+    assert {t["wallet"] for t in wl["targets"]} == {"0xA", "0xB"}   # admitted despite no verdict
+    assert len(sink) == 1 and "0xB" in sink[0] and "Claude" not in sink[0]
+
+
 def test_release_freed_memory_never_raises():
     """Runs in the daemon loop after every sweep to return the peak heap to
     the OS. Must be safe on any platform — on non-glibc dev boxes malloc_trim

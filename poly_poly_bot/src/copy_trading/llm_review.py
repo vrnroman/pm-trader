@@ -1,43 +1,38 @@
-"""Gated Claude second-opinion on top wallet candidates (Strategy 1c).
+"""Claude gate on newly-qualified wallet candidates (Strategy 1c).
 
 The statistical funnel (closed-position t-stat, lead-lag capture, entry
-discipline, PnL-curve shape) is the gate that *narrows* the universe. For the
-handful of wallets that survive it, this module assembles a compact dossier and
-asks Claude for a qualitative judgment the heuristics can't make — "does this
-look like a genuine informed/consistent trader worth copying, or an artifact?"
-— plus its reasoning.
+discipline, PnL-curve shape, copy-replay) is the gate that *narrows* the
+universe. For the handful of wallets that survive it, this module assembles a
+compact dossier and asks Claude for the qualitative judgment the heuristics
+can't make — "is this a genuine informed/consistent trader worth copying, or an
+artifact?" — plus its reasoning. The caller uses a ``skip`` verdict to block the
+wallet from the paper watchlist (the final admission gate).
 
-It is deliberately defensive: alert-only, never auto-trades, gated behind a
-config flag and a small top-N, and degrades to ``None`` on any error (missing
-API key, network failure, safety refusal) so a discovery sweep never breaks
-because the LLM call did. The ``anthropic`` SDK is imported lazily so the rest
-of the bot — and the test suite — runs whether or not it's installed.
+The call goes through the ``claude -p`` CLI, which runs on the operator's Claude
+subscription (auth via ``CLAUDE_CODE_OAUTH_TOKEN`` — see ``claude setup-token``)
+so no ``ANTHROPIC_API_KEY`` is required. It is deliberately defensive: it
+degrades to ``None`` on any failure (CLI missing, not authenticated, timeout,
+non-JSON output) and the caller treats ``None`` as fail-open (admit) so a broken
+CLI never freezes discovery. The subprocess runner is injectable for tests, so
+the suite never shells out.
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import os
+import re
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Callable
 
 logger = logging.getLogger("poly_poly_bot")
 
 DEFAULT_MODEL = "claude-opus-4-8"
-
-# Structured-output schema: a small, gradeable verdict (no free-form sprawl).
-_VERDICT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "verdict": {"type": "string", "enum": ["follow", "watch", "skip"]},
-        "insider_likelihood": {"type": "string", "enum": ["low", "medium", "high"]},
-        "copyable": {"type": "boolean"},
-        "confidence": {"type": "number"},
-        "reasoning": {"type": "string"},
-    },
-    "required": ["verdict", "insider_likelihood", "copyable", "confidence", "reasoning"],
-    "additionalProperties": False,
-}
+DEFAULT_TIMEOUT_S = 180
 
 _SYSTEM = (
     "You are a quantitative analyst vetting Polymarket wallets for a paper-trading "
@@ -48,7 +43,19 @@ _SYSTEM = (
     "scooping near $1, in-play markets that move before a copier can follow). "
     "Be skeptical: a high ROI from a few lucky bets, tail-price entries, or a "
     "spiky PnL curve should lower the verdict. Reward steady, low-drawdown edge "
-    "captured at copyable prices. Return only the structured verdict."
+    "captured at copyable prices."
+)
+
+_INSTRUCTION = (
+    "Respond with ONLY a single JSON object (no prose, no markdown fences) with "
+    "exactly these keys:\n"
+    '{"verdict": "follow"|"watch"|"skip", '
+    '"insider_likelihood": "low"|"medium"|"high", '
+    '"copyable": true|false, '
+    '"confidence": <number 0.0-1.0>, '
+    '"reasoning": "<one or two sentences>"}\n'
+    "Use \"skip\" only when the wallet looks like an artifact the bot should not "
+    "add. Do not use any tools; answer directly from the dossier."
 )
 
 
@@ -120,39 +127,81 @@ def _round(v, ndigits: int = 4):
     return round(float(v), ndigits) if isinstance(v, (int, float)) else v
 
 
+def _build_prompt(dossier: dict) -> str:
+    return (
+        f"{_SYSTEM}\n\n"
+        "Vet this wallet dossier and decide whether the paper bot should add it:\n"
+        f"{json.dumps(dossier, indent=2)}\n\n"
+        f"{_INSTRUCTION}"
+    )
+
+
+def _claude_cli_runner(prompt: str, *, model: str, timeout_s: int) -> str | None:
+    """Run one ``claude -p`` call on the Claude subscription, return its text.
+
+    Uses ``--output-format json`` (a stable envelope with a ``result`` string)
+    and runs in a throwaway temp dir so it never loads the bot's own project
+    context (CLAUDE.md, tools). Auth comes from the inherited environment
+    (``CLAUDE_CODE_OAUTH_TOKEN``). Returns ``None`` on any non-success.
+    """
+    exe = shutil.which("claude")
+    if not exe:
+        logger.warning("[LLM-GATE] `claude` CLI not found on PATH — skipping (fail-open)")
+        return None
+    cmd = [exe, "-p", prompt, "--output-format", "json", "--model", model]
+    with tempfile.TemporaryDirectory(prefix="llm-gate-") as cwd:
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=timeout_s,
+            cwd=cwd, env=os.environ.copy(),
+        )
+    if proc.returncode != 0:
+        logger.warning("[LLM-GATE] claude -p exit %s: %s",
+                       proc.returncode, (proc.stderr or "")[:300])
+        return None
+    envelope = json.loads(proc.stdout)
+    if envelope.get("is_error") or envelope.get("subtype") != "success":
+        logger.warning("[LLM-GATE] claude -p returned error envelope: %s",
+                       str(envelope.get("subtype")))
+        return None
+    return envelope.get("result")
+
+
+def _parse_verdict(text: str) -> dict | None:
+    """Pull the verdict JSON object out of the model's reply (tolerant of
+    stray prose or ```json fences)."""
+    if not text:
+        return None
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    m = re.search(r"\{.*\}", text, re.DOTALL)  # first balanced-ish object
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(0))
+    except json.JSONDecodeError:
+        return None
+
+
 def review_wallet(
     dossier: dict,
     *,
-    client: Any = None,
+    runner: Callable[..., str | None] | None = None,
     model: str = DEFAULT_MODEL,
-    max_tokens: int = 3000,
+    timeout_s: int = DEFAULT_TIMEOUT_S,
 ) -> LLMVerdict | None:
-    """Ask Claude for a verdict on a dossier. Returns ``None`` on any failure.
+    """Ask Claude (via ``claude -p``) for a verdict on a dossier.
 
-    ``client`` is injectable for tests; in production it's lazily constructed
-    (reads ANTHROPIC_API_KEY from the environment).
+    Returns ``None`` on any failure so the caller can fail open. ``runner`` is
+    injectable for tests; in production it shells out to the ``claude`` CLI.
     """
+    runner = runner or _claude_cli_runner
     try:
-        if client is None:
-            import anthropic  # lazy: keeps the bot importable without the SDK
-            client = anthropic.Anthropic()
-        resp = client.messages.create(
-            model=model,
-            max_tokens=max_tokens,
-            thinking={"type": "adaptive"},
-            output_config={"format": {"type": "json_schema", "schema": _VERDICT_SCHEMA}},
-            system=_SYSTEM,
-            messages=[{"role": "user",
-                       "content": "Vet this wallet dossier:\n"
-                                  + json.dumps(dossier, indent=2)}],
-        )
-        if getattr(resp, "stop_reason", None) == "refusal":
-            logger.info("[LLM-REVIEW] refusal for %s", dossier.get("wallet"))
+        text = runner(_build_prompt(dossier), model=model, timeout_s=timeout_s)
+        data = _parse_verdict(text) if text else None
+        if not data:
             return None
-        text = next((b.text for b in resp.content if getattr(b, "type", None) == "text"), None)
-        if not text:
-            return None
-        data = json.loads(text)
         return LLMVerdict(
             verdict=str(data["verdict"]),
             insider_likelihood=str(data["insider_likelihood"]),
@@ -160,6 +209,6 @@ def review_wallet(
             confidence=float(data["confidence"]),
             reasoning=str(data["reasoning"]),
         )
-    except Exception:  # never let a second-opinion call break the sweep
-        logger.warning("[LLM-REVIEW] failed for %s", dossier.get("wallet"), exc_info=True)
+    except Exception:  # never let the gate call break the sweep
+        logger.warning("[LLM-GATE] failed for %s", dossier.get("wallet"), exc_info=True)
         return None

@@ -200,7 +200,14 @@ class DiscoveryRunner:
         blacklisted = promotion_state.active_blacklist(self._now())
         result = run_discovery_cycle(evaluated, prev, self.cfg, blacklisted=blacklisted)
 
-        # auto-paper: rewrite the watchlist the harness consumes
+        # Claude gate — the FINAL admission check, after the statistical funnel.
+        # Runs only on *newly* qualified wallets (retained ones were already
+        # vetted), and a "skip" verdict drops the wallet from the watchlist and
+        # the persisted state before either is written below. Fail-open: any LLM
+        # failure admits the wallet. Skipped on the first-init seed.
+        verdicts: dict = {} if result.first_init else self._llm_gate(result)
+
+        # auto-paper: rewrite the watchlist the harness consumes (post-gate)
         _atomic_write_json(self.watchlist_path,
                            watchlist_to_targets(result.watchlist, self.cfg))
 
@@ -227,7 +234,6 @@ class DiscoveryRunner:
                 f"the paper watchlist.\nTop: {top or '—'}"
             )
         else:
-            verdicts = self._review_newly_qualified(result.newly_qualified)
             for e in result.newly_qualified:
                 self._send(format_find(e, verdicts.get(e.wallet)))
 
@@ -352,24 +358,56 @@ class DiscoveryRunner:
         )
         self._save_consensus_fired(fired)
 
-    def _review_newly_qualified(self, finds: list[Eval]) -> dict:
-        """Gated Claude second-opinion on the top-N new qualifiers (alert-only).
+    def _llm_gate(self, result) -> dict:
+        """Claude admission gate over this sweep's NEW qualifiers (mutates result).
 
-        ``newly_qualified`` is already ordered by capture, so the first N are the
-        strongest. Returns wallet -> LLMVerdict (entries may be missing on
-        failure); never raises into the sweep loop.
+        For each newly-qualified wallet (already ordered by strength), ask Claude
+        for a verdict; a ``skip`` drops the wallet from ``result.watchlist``,
+        ``result.newly_qualified`` and ``result.new_state.on_watchlist`` so it
+        never reaches the watchlist file or the persisted state. Fail-open: a
+        ``None`` verdict (LLM disabled, unavailable, or errored) admits the
+        wallet. Bounded by ``llm_review_top_n`` per sweep — any new wallets past
+        the cap are admitted ungated (with a warning) so a flood can't stall the
+        loop. Returns wallet -> LLMVerdict for the reviewed wallets (annotates
+        the Telegram pings); never raises into the sweep loop.
         """
-        if not self.llm_review_enabled:
+        if not self.llm_review_enabled or not result.newly_qualified:
             return {}
         verdicts: dict = {}
-        for e in finds[: self.llm_review_top_n]:
+        rejected: set = set()
+        for i, e in enumerate(result.newly_qualified):
+            if i >= self.llm_review_top_n:
+                logger.warning("[DISCOVERY] LLM gate cap (%d) reached — admitting %s ungated",
+                               self.llm_review_top_n, e.wallet)
+                continue
             try:
                 v = self._llm_review(_dossier_from_eval(e), model=self.llm_model)
             except Exception:  # pragma: no cover - belt-and-suspenders
                 v = None
-            if v is not None:
-                verdicts[e.wallet] = v
+            if v is None:  # fail-open: a broken gate must not freeze discovery
+                logger.warning("[DISCOVERY] LLM gate unavailable for %s — admitting (fail-open)",
+                               e.wallet)
+                continue
+            verdicts[e.wallet] = v
+            if v.verdict == "skip":
+                rejected.add(e.wallet)
+                logger.info("[DISCOVERY] LLM gate REJECTED %s (conf %.0f%%): %s",
+                            e.wallet, v.confidence * 100, v.reasoning)
+        if rejected:
+            self._drop_from_result(result, rejected)
+            logger.info("[DISCOVERY] LLM gate dropped %d/%d new wallet(s) before watchlist add",
+                        len(rejected), len(result.newly_qualified) + len(rejected))
         return verdicts
+
+    @staticmethod
+    def _drop_from_result(result, rejected: set) -> None:
+        """Remove gate-rejected wallets from the watchlist, the new-qualifier
+        list, and the persisted state so they're neither written nor remembered
+        (a rejected wallet is re-evaluated as 'new' on the next sweep)."""
+        result.watchlist = [e for e in result.watchlist if e.wallet not in rejected]
+        result.newly_qualified = [e for e in result.newly_qualified if e.wallet not in rejected]
+        for w in rejected:
+            result.new_state.on_watchlist.pop(w, None)
 
     def run_forever(self, shutdown_event: threading.Event) -> None:
         n = len(self._load_state().on_watchlist)

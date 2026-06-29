@@ -199,10 +199,19 @@ async def _periodic_loop() -> None:
         try:
             today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
             if today != _daily_summary_date:
-                balance = await get_usdc_balance()
-                await telegram.daily_summary(_daily_trade_count, get_risk_status(), max(balance, 0))
-                _daily_trade_count = 0
+                # Advance the date FIRST so a transient failure in the summary
+                # can't pin this branch and re-fire every 60s (the bug that
+                # spammed ~1.4k errors/day once uptime crossed a UTC midnight).
                 _daily_summary_date = today
+                try:
+                    # get_usdc_balance is a blocking (web3 HTTP) sync call — run it
+                    # off the event loop; awaiting the float it returns directly
+                    # would raise "object float can't be used in 'await'".
+                    balance = await asyncio.to_thread(get_usdc_balance)
+                    await telegram.daily_summary(_daily_trade_count, get_risk_status(), max(balance, 0))
+                    _daily_trade_count = 0
+                except Exception as err:
+                    logger.warn(f"Daily summary failed: {error_message(err)}")
 
             now = asyncio.get_event_loop().time()
 
@@ -280,7 +289,7 @@ async def run_copy_trading() -> None:
             logger.info(f"  1c: {'ALERT ONLY' if TIER_1C.alert_only else 'AUTO-FOLLOW'}")
 
     if not CONFIG.preview_mode:
-        balance = await get_usdc_balance()
+        balance = await asyncio.to_thread(get_usdc_balance)
         logger.info(f"USDC balance: ${balance:.2f}" if balance >= 0 else "USDC balance: unknown")
         logger.info("Checking token approvals...")
         check_and_set_approvals(get_private_key())
@@ -299,7 +308,7 @@ async def run_copy_trading() -> None:
     logger.info("Bot started. Monitoring trades...")
 
     try:
-        balance = await get_usdc_balance() if clob_client else 0
+        balance = await asyncio.to_thread(get_usdc_balance) if clob_client else 0
         await telegram.bot_started(len(CONFIG.user_addresses), max(balance, 0))
     except Exception:
         pass

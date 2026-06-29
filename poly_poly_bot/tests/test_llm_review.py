@@ -1,10 +1,9 @@
-"""Gated Claude second-opinion (Strategy 1c).
+"""Claude gate (Strategy 1c) — dossier assembly + the `claude -p` call wrapper.
 
-The LLM review runs only on wallets that already passed the statistical funnel.
-These tests pin the pure dossier assembly and the defensive call wrapper: a
-fake client exercises the happy path, and every failure mode (refusal, bad
-JSON, exception, no SDK) must degrade to None so a discovery sweep never breaks.
-No network — the anthropic SDK is never imported here.
+These tests pin the pure dossier assembly and the defensive subprocess wrapper:
+an injected runner exercises the happy path, and every failure mode (runner
+returns None, bad JSON, exception) degrades to None so the gate fails open. No
+real subprocess is spawned except the explicitly monkeypatched CLI-runner tests.
 """
 
 from __future__ import annotations
@@ -16,19 +15,16 @@ from src.copy_trading import llm_review as lr
 from src.copy_trading.llm_review import LLMVerdict, build_dossier, review_wallet
 
 
-def _fake_client(payload, *, stop_reason="end_turn"):
-    text = payload if isinstance(payload, str) else json.dumps(payload)
-    resp = SimpleNamespace(
-        stop_reason=stop_reason,
-        content=[SimpleNamespace(type="text", text=text)],
-    )
+def _runner_returning(text):
+    """A fake `claude -p` runner that records its call and returns `text`."""
+    captured: dict = {}
 
-    class _Msgs:
-        def create(self, **kw):
-            _Msgs.last_kwargs = kw
-            return resp
+    def runner(prompt, *, model, timeout_s):
+        captured.update(prompt=prompt, model=model, timeout_s=timeout_s)
+        return text
 
-    return SimpleNamespace(messages=_Msgs())
+    runner.captured = captured
+    return runner
 
 
 def test_build_dossier_pulls_signals_defensively():
@@ -57,34 +53,69 @@ def test_build_dossier_omits_missing_pieces():
 
 
 def test_review_wallet_happy_path_parses_verdict():
-    client = _fake_client({
+    runner = _runner_returning(json.dumps({
         "verdict": "follow", "insider_likelihood": "high", "copyable": True,
         "confidence": 0.8, "reasoning": "Steady curve, copyable entries.",
-    })
-    v = review_wallet({"wallet": "0xabc"}, client=client)
+    }))
+    v = review_wallet({"wallet": "0xabc"}, runner=runner, model="claude-opus-4-8")
     assert isinstance(v, LLMVerdict)
     assert v.verdict == "follow" and v.copyable is True and v.confidence == 0.8
-    # adaptive thinking + structured output were requested
-    kw = client.messages.last_kwargs
-    assert kw["thinking"] == {"type": "adaptive"}
-    assert kw["output_config"]["format"]["type"] == "json_schema"
-    assert kw["model"] == lr.DEFAULT_MODEL
+    # the dossier and model are threaded into the CLI prompt
+    assert "0xabc" in runner.captured["prompt"]
+    assert runner.captured["model"] == "claude-opus-4-8"
 
 
-def test_review_wallet_returns_none_on_refusal():
-    client = _fake_client({"verdict": "skip"}, stop_reason="refusal")
-    assert review_wallet({"wallet": "0xabc"}, client=client) is None
+def test_review_wallet_tolerates_prose_and_fences():
+    payload = {"verdict": "skip", "insider_likelihood": "low", "copyable": False,
+               "confidence": 0.3, "reasoning": "spiky curve"}
+    runner = _runner_returning("Here's my call:\n```json\n" + json.dumps(payload) + "\n```")
+    v = review_wallet({"wallet": "0xabc"}, runner=runner)
+    assert v is not None and v.verdict == "skip" and v.copyable is False
 
 
 def test_review_wallet_returns_none_on_bad_json():
-    client = _fake_client("not json at all")
-    assert review_wallet({"wallet": "0xabc"}, client=client) is None
+    assert review_wallet({"wallet": "0xabc"}, runner=_runner_returning("not json")) is None
 
 
-def test_review_wallet_returns_none_on_client_error():
-    class _Boom:
-        class messages:
-            @staticmethod
-            def create(**kw):
-                raise RuntimeError("network down")
-    assert review_wallet({"wallet": "0xabc"}, client=_Boom()) is None
+def test_review_wallet_returns_none_when_runner_returns_none():
+    assert review_wallet({"wallet": "0xabc"}, runner=_runner_returning(None)) is None
+
+
+def test_review_wallet_returns_none_on_runner_error():
+    def boom(prompt, *, model, timeout_s):
+        raise RuntimeError("cli missing")
+    assert review_wallet({"wallet": "0xabc"}, runner=boom) is None
+
+
+def test_cli_runner_parses_success_envelope(monkeypatch):
+    monkeypatch.setattr(lr.shutil, "which", lambda _: "/usr/bin/claude")
+
+    def fake_run(cmd, **kw):
+        assert "-p" in cmd and "--output-format" in cmd and "json" in cmd
+        assert "--model" in cmd
+        return SimpleNamespace(returncode=0, stderr="", stdout=json.dumps(
+            {"subtype": "success", "is_error": False, "result": '{"verdict":"watch"}'}))
+
+    monkeypatch.setattr(lr.subprocess, "run", fake_run)
+    out = lr._claude_cli_runner("prompt", model="claude-opus-4-8", timeout_s=5)
+    assert out == '{"verdict":"watch"}'
+
+
+def test_cli_runner_none_when_cli_absent(monkeypatch):
+    monkeypatch.setattr(lr.shutil, "which", lambda _: None)
+    assert lr._claude_cli_runner("p", model="m", timeout_s=5) is None
+
+
+def test_cli_runner_none_on_nonzero_exit(monkeypatch):
+    monkeypatch.setattr(lr.shutil, "which", lambda _: "/usr/bin/claude")
+    monkeypatch.setattr(lr.subprocess, "run", lambda cmd, **kw: SimpleNamespace(
+        returncode=1, stdout="", stderr="not authenticated"))
+    assert lr._claude_cli_runner("p", model="m", timeout_s=5) is None
+
+
+def test_cli_runner_none_on_error_envelope(monkeypatch):
+    monkeypatch.setattr(lr.shutil, "which", lambda _: "/usr/bin/claude")
+    monkeypatch.setattr(lr.subprocess, "run", lambda cmd, **kw: SimpleNamespace(
+        returncode=0, stderr="", stdout=json.dumps(
+            {"subtype": "error_during_execution", "is_error": True, "result": None})))
+    assert lr._claude_cli_runner("p", model="m", timeout_s=5) is None
