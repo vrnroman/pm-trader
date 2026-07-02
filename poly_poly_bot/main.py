@@ -58,7 +58,8 @@ def _copy_paper_loop():
     from src.copy_trading import governance
     from src.copy_trading.copy_paper import format_resolution_telegram, report
     from src.copy_trading.copy_paper_live import (
-        TradeFeed, make_feed_detector, make_feed_exit_detector)
+        TradeFeed, make_feed_detector, make_feed_exit_detector,
+        make_ttl_mark_fetcher)
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
     from src.copy_trading.outcome_names import DEFAULT_RESOLVER
 
@@ -158,6 +159,10 @@ def _copy_paper_loop():
         # book instead. Off => horizon-blind, so behaviour is unchanged.
         max_horizon_days=(CONFIG.strategy_4_long_horizon_days
                           if CONFIG.strategy_4_enabled else None),
+        # Mark open near-term copies to market each cycle so /pnl shows a live
+        # unrealized instead of a blank. TTL-cached (5 min) so a 60s cycle
+        # doesn't hammer the CLOB book endpoint.
+        mark_fetcher=make_ttl_mark_fetcher(),
         detector_factory=detector_factory,
         exit_detector_factory=exit_detector_factory,
         on_cycle=_on_cycle,

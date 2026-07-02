@@ -9,8 +9,9 @@ Two independent copy systems accrue P&L:
   * **System B — discovery → paper-copy harness.** ``PaperPosition`` rows in
     ``copy_paper_ledger.jsonl``: every position carries its ``target`` wallet and
     the discovery strategy theories (1a..1j) that ``flagged_by`` it. Closed
-    positions are realized (resolution or exit-following); open ones are not
-    marked to market.
+    positions are realized (resolution or exit-following); open ones are marked
+    to market when a live mid is available (else they show as open count/capital
+    only).
 
 This module is **pure** — rows/positions/price-derived inputs are injected, so it
 unit-tests without network or disk. It produces, per strategy and overall, the
@@ -22,8 +23,9 @@ Attribution & double-counting rules (see ``build_unified``):
     theories is listed under *each* theory's ``StrategyPnl`` but counted **once**
     in the grand total.
   * ROI denominator is *measured* capital: System A counts realized cost + priced
-    open cost; System B counts only closed (realized) ``spent`` — open paper bets
-    have no mark, so they don't drag ROI, they just show as open count/capital.
+    open cost; System B counts closed (realized) ``spent`` plus the cost of open
+    positions that carry a live mark — unmarked opens show as open count/capital
+    only and don't drag ROI.
   * Rows/positions with no attribution land in ``untagged-A`` / ``untagged-B`` so
     the grand total always reconciles.
 """
@@ -40,8 +42,8 @@ from src.copy_trading.pnl import OpenPositionPnl
 _UNKNOWN_WALLET = "(unknown)"
 UNTAGGED_A = "untagged-A"
 UNTAGGED_B = "untagged-B"
-# The long-horizon paper book is one track (not split by discovery theory), and
-# unlike the near-term copier its open positions are marked to market.
+# The long-horizon paper book is one track (not split by discovery theory). Like
+# the near-term copier, its open positions are marked to market when priced.
 STRATEGY4_LABEL = "S4"
 
 # Resolved-sample maturity bands — "is there enough *settled* paper data to
@@ -98,10 +100,11 @@ class WalletPnl:
     system: str                       # "A" or "B"
     strategies: tuple = ()            # labels this wallet contributes under, e.g. ("B:1b","B:1f")
     realized_pnl: float = 0.0
-    unrealized_pnl: float = 0.0       # System A only; always 0 for B
+    unrealized_pnl: float = 0.0       # System A opens + marked System-B/S4 opens
     cost_basis: float = 0.0           # ROI denominator — measured capital (see module docstring)
     open_cost: float = 0.0            # capital in still-open positions (display only)
     n_open: int = 0
+    n_open_marked: int = 0            # opens that carry a live mark (rest are unpriced)
     n_closed: int = 0
     wins: int = 0
     losses: int = 0
@@ -311,6 +314,10 @@ def aggregate_system_b(
         else:
             wp.open_cost += p.spent
             wp.n_open += 1
+            if p.mark_price > 0:           # a marked open contributes to unrealized + ROI
+                wp.unrealized_pnl += p.unrealized_pnl
+                wp.cost_basis += p.spent
+                wp.n_open_marked += 1
 
         for lbl in labels:
             _add_label(wp, lbl)
@@ -357,6 +364,7 @@ def aggregate_strategy4(s4_positions: list[PaperPosition]) -> list[WalletPnl]:
             if p.mark_price > 0:           # only a marked open contributes to ROI
                 wp.unrealized_pnl += p.unrealized_pnl
                 wp.cost_basis += p.spent
+                wp.n_open_marked += 1
         _add_label(wp, STRATEGY4_LABEL)
     _round(acc.values())
     return list(acc.values())

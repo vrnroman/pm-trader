@@ -14,8 +14,9 @@ Log files
 import glob
 import logging
 import os
+import re
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Custom log levels
@@ -105,16 +106,88 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(entry)
 
 
-def _purge_old_bot_logs(logs_dir: Path, retention_days: int) -> None:
-    """Delete bot-*.log files older than `retention_days`."""
-    import time
-    cutoff = time.time() - retention_days * 86400
+_BOT_LOG_RE = re.compile(r"bot-(\d{4}-\d{2}-\d{2})\.log$")
+
+
+def _purge_old_bot_logs(logs_dir: Path, retention_days: int,
+                        today: "datetime.date | None" = None) -> None:
+    """Delete ``bot-<date>.log`` files whose embedded UTC date is older than
+    ``retention_days``, keeping the ``retention_days`` most-recent days.
+
+    Purges by the **filename date**, not mtime: a long-running process appends
+    to today's file for hours, so its mtime is always fresh and an mtime cutoff
+    would (a) never delete the still-open file yet (b) spare genuinely old files
+    the moment the process touched them. Keying on the date in the name makes
+    the active file (always today's) unpurgeable and prunes strictly by age.
+    Only ``bot-*.log`` is touched; ``signals-*.log`` is kept forever.
+    """
+    today = today or datetime.now(timezone.utc).date()
+    cutoff = today - timedelta(days=retention_days)
     for path in logs_dir.glob("bot-*.log"):
+        m = _BOT_LOG_RE.search(path.name)
+        if not m:
+            continue
         try:
-            if path.stat().st_mtime < cutoff:
+            file_date = datetime.strptime(m.group(1), "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        if file_date <= cutoff:
+            try:
                 path.unlink()
-        except OSError:
-            pass
+            except OSError:
+                pass
+
+
+class _DailyRotatingFileHandler(logging.FileHandler):
+    """A ``FileHandler`` that writes to ``<prefix>-<UTC-date>.log`` and rolls to
+    a new dated file when the UTC date changes.
+
+    The original handler baked the date into the filename **once** at process
+    start, so a container running across a UTC midnight kept appending to the
+    start-day's file (a week of logs landing in ``bot-2026-06-29.log``). This
+    checks the date on every emit and re-points at the new day's file when it
+    turns over — preserving the ``bot-{date}.log`` / ``signals-{date}.log``
+    naming that the log-analyzer tooling globs on. ``on_rollover`` fires after a
+    successful roll (used to purge stale bot logs). ``clock`` is injectable for
+    tests; it defaults to wall-clock UTC.
+    """
+
+    def __init__(self, logs_dir: Path, prefix: str, *, clock=None,
+                 on_rollover=None, **kwargs) -> None:
+        self._logs_dir = Path(logs_dir)
+        self._prefix = prefix
+        self._clock = clock or (lambda: datetime.now(timezone.utc))
+        self._on_rollover = on_rollover
+        self._cur_date = self._clock().strftime("%Y-%m-%d")
+        super().__init__(self._path(self._cur_date), mode="a",
+                         encoding="utf-8", **kwargs)
+
+    def _path(self, date_str: str) -> Path:
+        return self._logs_dir / f"{self._prefix}-{date_str}.log"
+
+    def _maybe_roll(self) -> None:
+        today = self._clock().strftime("%Y-%m-%d")
+        if today == self._cur_date:
+            return
+        self.acquire()
+        try:
+            self._cur_date = today
+            if self.stream:
+                self.stream.close()
+                self.stream = None
+            self.baseFilename = str(self._path(today).absolute())
+            self.stream = self._open()
+        finally:
+            self.release()
+        if self._on_rollover is not None:
+            try:
+                self._on_rollover(self._logs_dir)
+            except Exception:  # a purge failure must never break logging
+                pass
+
+    def emit(self, record: logging.LogRecord) -> None:
+        self._maybe_roll()
+        super().emit(record)
 
 
 class BotLogger:
@@ -131,7 +204,7 @@ class BotLogger:
         log_format = os.environ.get("LOG_FORMAT", "text")
         logs_dir = Path(os.environ.get("LOGS_DIR", "logs"))
         logs_dir.mkdir(parents=True, exist_ok=True)
-        date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        retention = int(os.environ.get("BOT_LOG_RETENTION_DAYS", "2"))
 
         formatter: logging.Formatter
         if log_format == "json":
@@ -149,23 +222,27 @@ class BotLogger:
         self._logger.addHandler(console)
 
         # -- Signals file: deal/alert events only, kept forever --
-        signals_file = logs_dir / f"signals-{date_str}.log"
-        sig_handler = logging.FileHandler(signals_file, mode="a", encoding="utf-8")
+        # Rolls at UTC midnight so a long-running process doesn't append a week
+        # of events into the start-day's file. Never purged.
+        sig_handler = _DailyRotatingFileHandler(logs_dir, "signals")
         sig_handler.setLevel(logging.DEBUG)
         sig_handler.setFormatter(formatter)
         sig_handler.addFilter(_SignalFilter())
         self._logger.addHandler(sig_handler)
 
         # -- Operational file: everything else, auto-purged --
-        bot_file = logs_dir / f"bot-{date_str}.log"
-        ops_handler = logging.FileHandler(bot_file, mode="a", encoding="utf-8")
+        # Rolls at UTC midnight and purges stale bot logs on each rollover (not
+        # just at startup), so a container that runs for days still prunes.
+        ops_handler = _DailyRotatingFileHandler(
+            logs_dir, "bot",
+            on_rollover=lambda d: _purge_old_bot_logs(d, retention),
+        )
         ops_handler.setLevel(logging.INFO)
         ops_handler.setFormatter(formatter)
         ops_handler.addFilter(_OperationalFilter())
         self._logger.addHandler(ops_handler)
 
-        # Purge old operational logs on startup
-        retention = int(os.environ.get("BOT_LOG_RETENTION_DAYS", "2"))
+        # Purge old operational logs on startup, then on every midnight rollover.
         _purge_old_bot_logs(logs_dir, retention)
 
     def debug(self, msg: str) -> None:

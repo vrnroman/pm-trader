@@ -36,11 +36,13 @@ from src.copy_trading.discovery import (
     run_discovery_cycle,
     watchlist_to_targets,
 )
+from src.copy_trading import gate_history
 from src.copy_trading import late_bet_queue
 from src.copy_trading.discovery_data import evaluate_sweep, fetch_activity
 from src.copy_trading.entry_profile import is_copyable_entry
 from src.copy_trading.llm_review import DEFAULT_MODEL, build_dossier, review_wallet
 from src.copy_trading.outcome_names import DEFAULT_RESOLVER
+from src.copy_trading.theories import REGISTRY as THEORY_REGISTRY
 from src.copy_trading.trader_scoring import classify_market
 
 logger = logging.getLogger("poly_poly_bot")
@@ -111,12 +113,41 @@ def format_find(e: Eval, verdict=None) -> str:
     return "\n".join(lines)
 
 
+def _theory_brief(flagged_by) -> list[dict]:
+    """``[{id, desc, needs_capture}]`` for the theories that qualified a wallet.
+
+    Tells the gate WHY the wallet is here and which fields it should expect: a
+    theory with ``needs_capture=False`` (1a/1b/1d/1e/1f/1g/1i/1j) never ran the
+    lead-lag stage, so a missing ``copyability`` block is expected, not damning.
+    """
+    out: list[dict] = []
+    for tid in flagged_by:
+        th = THEORY_REGISTRY.get(tid)
+        if th is not None:
+            out.append({"id": tid, "desc": th.desc, "needs_capture": th.needs_capture})
+        else:
+            out.append({"id": tid})
+    return out
+
+
 def _dossier_from_eval(e: Eval) -> dict:
-    """Map a sweep Eval into the llm_review dossier shape."""
+    """Map a sweep Eval into the llm_review dossier shape.
+
+    The lead-lag ``copyability`` block is included ONLY when it was actually
+    measured (``e.n > 0``). When ``e.n == 0`` the wallet qualified via a
+    non-lead-lag theory and has no lead-lag sample — passing ``evaluation=None``
+    omits the block so the gate judges it on its qualifying theory + copy-replay
+    + skill + curve, rather than reading a row of zeros as a disqualifying
+    artifact. A *measured* wallet with negative capture (``e.n > 0``) keeps its
+    block and stays fully skippable — the settlement-lag scoopers still get cut.
+    """
     return build_dossier(
         e.wallet,
         metrics=SimpleNamespace(roi=e.roi, tstat=e.tstat),
-        evaluation=e,  # has capture_cents, lead_cents, hit_rate, n
+        evaluation=e if e.n > 0 else None,  # omit lead-lag block when unmeasured
+        copy_replay=e,  # copy_roi/copy_n/copy_hit/exit_roi (self-omits when copy_n==0)
+        qualifying_theories=_theory_brief(e.flagged_by),
+        why_flagged=e.reason or None,
         entry=SimpleNamespace(mean_entry=None, tail_ratio=e.tail_ratio,
                               copyable_ratio=e.copyable_ratio),
         curve=SimpleNamespace(net_pnl=e.net_pnl, max_drawdown_frac=e.curve_drawdown,
@@ -164,6 +195,11 @@ class DiscoveryRunner:
         self._now = now
         self.consensus_fired_path = consensus_fired_path or (
             (state_path + ".consensus.json") if state_path else None)
+        # Append-only gate-decision log (sibling of the discovery state file), so
+        # the accept/reject mix is queryable via /gate instead of log-trawled.
+        self.gate_history_path = (
+            os.path.join(os.path.dirname(state_path), "gate-history.jsonl")
+            if state_path else None)
         self._consensus_fetch_buys_fn = consensus_fetch_buys or self._live_consensus_buys
         self._consensus_funder_map_fn = consensus_funder_map or self._live_funder_map
         self._consensus_resolver = consensus_resolver or DEFAULT_RESOLVER
@@ -413,6 +449,7 @@ class DiscoveryRunner:
             if i >= self.llm_review_top_n:
                 logger.warning("[DISCOVERY] LLM gate cap (%d) reached — admitting %s ungated",
                                self.llm_review_top_n, e.wallet)
+                self._record_gate(e, "admit-cap", admitted=True)
                 continue
             try:
                 v = self._llm_review(_dossier_from_eval(e), model=self.llm_model)
@@ -421,8 +458,11 @@ class DiscoveryRunner:
             if v is None:  # fail-open: a broken gate must not freeze discovery
                 logger.warning("[DISCOVERY] LLM gate unavailable for %s — admitting (fail-open)",
                                e.wallet)
+                self._record_gate(e, "admit-fail-open", admitted=True)
                 continue
             verdicts[e.wallet] = v
+            self._record_gate(e, v.verdict, admitted=(v.verdict != "skip"),
+                              confidence=v.confidence, reasoning=v.reasoning)
             if v.verdict == "skip":
                 rejected.add(e.wallet)
                 logger.info("[DISCOVERY] LLM gate REJECTED %s (conf %.0f%%): %s",
@@ -432,6 +472,24 @@ class DiscoveryRunner:
             logger.info("[DISCOVERY] LLM gate dropped %d/%d new wallet(s) before watchlist add",
                         len(rejected), len(result.newly_qualified) + len(rejected))
         return verdicts
+
+    def _record_gate(self, e, verdict: str, *, admitted: bool,
+                     confidence: float = 0.0, reasoning: str = "") -> None:
+        """Append one gate decision to the history log (queryable via /gate).
+
+        Records WHY the wallet qualified (its theories) and whether lead-lag was
+        even measured, so the accept/reject mix is attributable per theory."""
+        gate_history.append(self.gate_history_path, {
+            "ts": self._now(),
+            "wallet": e.wallet,
+            "verdict": verdict,
+            "admitted": admitted,
+            "confidence": round(confidence, 3),
+            "theories": list(e.flagged_by),
+            "had_leadlag": e.n > 0,
+            "copy_n": e.copy_n,
+            "reasoning": reasoning,
+        })
 
     @staticmethod
     def _drop_from_result(result, rejected: set) -> None:

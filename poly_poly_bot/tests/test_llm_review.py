@@ -149,3 +149,33 @@ def test_review_wallet_records_telemetry_from_envelope(monkeypatch):
     assert recorded["metadata"]["wallet"] == "0xABC"
     assert recorded["metadata"]["verdict"] == "skip"
     assert recorded["error"] is None
+
+
+# --- Langfuse per-theory tags (observability, 2026-07-02) -------------------- #
+
+def test_record_adds_per_theory_tags(monkeypatch):
+    """review_wallet forwards the qualifying-theory ids as Langfuse tags so the
+    accept/reject mix can be sliced per theory in the dashboard."""
+    captured = {}
+
+    monkeypatch.setattr(lr.langfuse_telemetry, "enabled", lambda: True)
+
+    def fake_record(**kw):
+        captured.update(kw)
+
+    monkeypatch.setattr(lr.langfuse_telemetry, "record_generation", fake_record)
+
+    dossier = {
+        "wallet": "0xabc",
+        "qualifying_theories": [{"id": "1e", "desc": "longshot", "needs_capture": False},
+                                {"id": "1b", "desc": "skill", "needs_capture": False}],
+    }
+    runner = _runner_returning(json.dumps({
+        "verdict": "follow", "insider_likelihood": "low", "copyable": True,
+        "confidence": 0.7, "reasoning": "ok",
+    }))
+    lr.review_wallet(dossier, runner=runner, model="claude-opus-4-8")
+
+    assert "theory:1e" in captured["tags"]
+    assert "theory:1b" in captured["tags"]
+    assert captured["metadata"]["qualifying_theories"] == ["1e", "1b"]

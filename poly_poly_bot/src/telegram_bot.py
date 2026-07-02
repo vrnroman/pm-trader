@@ -48,6 +48,7 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "status", "description": "Balance, positions, daily limits"},
     {"command": "pnl", "description": "P&L by strategy: realized + unrealized + total"},
     {"command": "wallets", "description": "Top wallets overall + best/worst per strategy (deduped)"},
+    {"command": "gate", "description": "LLM wallet-gate: admit/reject mix + per-theory + recent rejects"},
     {"command": "history", "description": "Last 10 copy trades"},
     {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
     {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
@@ -220,6 +221,8 @@ def _handle_command(text: str):
         _handle_pnl()
     elif text.startswith("/wallets"):
         _handle_wallets()
+    elif text.startswith("/gate"):
+        _handle_gate()
     elif text.startswith("/check"):
         _handle_check()
     elif text.startswith("/setkey"):
@@ -346,8 +349,20 @@ def _handle_pnl():
     if total_closed:
         hit = wins / total_closed if total_closed else 0.0
         lines.append(f"  Record:      <b>{wins}W/{losses}L</b> ({hit:.0%} hit)")
+    # Honest open-exposure footer: the paper-copy book (System B) opens are marked
+    # to market when a live mid is available; disclose how much open capital is at
+    # risk and how much of it is unpriced (so the Unrealized above isn't mistaken
+    # for the whole picture). System A unpriced opens are counted separately.
+    b_open = sum(w.n_open for w in b_wallets)
+    if b_open:
+        b_open_cost = sum(w.open_cost for w in b_wallets)
+        b_unmarked = b_open - sum(w.n_open_marked for w in b_wallets)
+        line = f"  Paper open:  <b>${b_open_cost:,.0f}</b> in {b_open} position(s)"
+        if b_unmarked:
+            line += f" (⚠ {b_unmarked} unpriced, not in Unrealized)"
+        lines.append(line)
     if n_unpriced:
-        lines.append(f"  ⚠ {n_unpriced} position(s) unpriced (no live quote)")
+        lines.append(f"  ⚠ {n_unpriced} System-A position(s) unpriced (no live quote)")
 
     lines.append("")
     lines.append("<b>By strategy</b>  <i>(🧊/🌱/✅ settled | net | r/u | ROI | wallets | closed/open | hit lo)</i>")
@@ -356,8 +371,8 @@ def _handle_pnl():
     for sp in unified.strategies:
         roi = sp.roi
         roi_str = f"ROI {roi:+.0%}" if roi is not None else "ROI n/a"
-        # Show realized + unrealized for System A and the marked-to-market S4 book;
-        # the near-term System-B copier leaves its opens unpriced, so realized only.
+        # Show realized + unrealized for System A and any System-B/S4 strategy that
+        # has marked-to-market opens; strategies with no live mark show realized only.
         if sp.system == "A" or sp.unrealized_pnl:
             pnl_str = f"r ${sp.realized_pnl:+.0f}/u ${sp.unrealized_pnl:+.0f}"
         else:
@@ -446,6 +461,53 @@ def _handle_wallets():
         for h in u.strategy_highlights(sp.wallets, k=3):
             lines.append("  " + _wallet_line(h.wallet, tags=h.tags))
         lines.append("")
+
+    _send_chunked("\n".join(lines))
+
+
+def _gate_history_path() -> str:
+    """gate-history.jsonl lives beside the discovery state file."""
+    return os.path.join(os.path.dirname(CONFIG.wallet_discovery_state), "gate-history.jsonl")
+
+
+def _handle_gate():
+    """Handle /gate — the LLM wallet-gate admit/reject picture.
+
+    Surfaces what used to need a prod-log trawl: the accept/reject mix, the mix
+    sliced by which theory qualified each wallet (so a theory the gate rejects
+    wholesale is obvious), and the most recent rejection reasons."""
+    from src.copy_trading import gate_history
+
+    rows = gate_history.load(_gate_history_path())
+    if not rows:
+        _send_chunked("\U0001f6aa <b>LLM Gate</b>\n\n(no gate decisions logged yet)")
+        return
+    s = gate_history.summarize(rows)
+    total, adm, rej = s["total"], s["admitted"], s["rejected"]
+    adm_pct = adm / total if total else 0.0
+
+    lines = ["\U0001f6aa <b>LLM Gate</b>", ""]
+    lines.append(f"Decisions: <b>{total}</b>   admitted <b>{adm}</b> ({adm_pct:.0%})   "
+                 f"rejected <b>{rej}</b>")
+
+    if s["per_theory"]:
+        lines.append("")
+        lines.append("<b>By qualifying theory</b>  <i>(admit/total)</i>")
+        # busiest theories first
+        for tid, c in sorted(s["per_theory"].items(),
+                             key=lambda kv: -(kv[1]["admit"] + kv[1]["reject"])):
+            n = c["admit"] + c["reject"]
+            lines.append(f"  <b>{_esc(tid)}</b>  {c['admit']}/{n} admitted")
+
+    if s["recent_rejections"]:
+        lines.append("")
+        lines.append("<b>Recent rejections</b>")
+        for r in reversed(s["recent_rejections"]):
+            w = _short_wallet(r.get("wallet") or "")
+            conf = r.get("confidence")
+            conf_s = f" ({conf:.0%})" if isinstance(conf, (int, float)) else ""
+            reason = _esc((r.get("reasoning") or "")[:160])
+            lines.append(f"  <b>{w}</b>{conf_s}: {reason}")
 
     _send_chunked("\n".join(lines))
 
@@ -757,6 +819,7 @@ def _handle_help():
         "<code>/status</code> — Bot status, balance, positions\n"
         "<code>/pnl</code> — P&amp;L by strategy: realized + unrealized + total\n"
         "<code>/wallets</code> — Top wallets overall + best/worst per strategy\n"
+        "<code>/gate</code> — LLM wallet-gate: admit/reject mix + per-theory + recent rejects\n"
         "<code>/history</code> — Last 10 copy trades\n"
         "<code>/check</code> — Verify trading setup (read-only)\n\n"
         "<b>Safety levers</b>\n"

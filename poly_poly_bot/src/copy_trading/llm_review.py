@@ -40,13 +40,30 @@ DEFAULT_TIMEOUT_S = 180
 _SYSTEM = (
     "You are a quantitative analyst vetting Polymarket wallets for a paper-trading "
     "copy bot. You are given a dossier of a wallet that already passed statistical "
-    "filters (realized closed-position edge, delayed-copy capture, entry-price "
-    "discipline, PnL-curve shape). Judge whether it is a genuine, *copyable* "
-    "informed/consistent trader or a likely artifact (variance, settlement-lag "
-    "scooping near $1, in-play markets that move before a copier can follow). "
-    "Be skeptical: a high ROI from a few lucky bets, tail-price entries, or a "
-    "spiky PnL curve should lower the verdict. Reward steady, low-drawdown edge "
-    "captured at copyable prices."
+    "filters. Judge whether it is a genuine, *copyable* informed/consistent trader "
+    "or a likely artifact (variance, settlement-lag scooping near $1, in-play "
+    "markets that move before a copier can follow).\n"
+    "\n"
+    "A wallet qualifies EITHER by a delayed-copy lead-lag edge OR by an independent "
+    "theory (listed in `qualifying_theories`). Most theories do NOT require lead-lag "
+    "capture (e.g. 1b consistent skill, 1e longshot calibration, 1g category "
+    "specialist, 1i low-variance whale). Read the dossier accordingly:\n"
+    "- If the `copyability` (lead-lag) block is ABSENT, the deep lead-lag stage "
+    "simply never ran for this wallet — that is EXPECTED for a non-lead-lag theory "
+    "and is NOT a defect. Do NOT skip a wallet merely because lead-lag is absent; "
+    "judge it on its qualifying theory, the `copy_replay` copy-and-hold record, the "
+    "closed-position `skill`, entry discipline, and PnL curve.\n"
+    "- If the `copyability` block is PRESENT, it was measured. NEGATIVE capture/lead "
+    "there means a copier enters worse than the wallet — a genuine disqualifier "
+    "(settlement-lag scooping); weight it heavily toward skip.\n"
+    "- `copy_replay` (copy-and-hold ROI over resolved markets) is the most "
+    "decision-relevant copyability signal when present; a solid positive copy_replay "
+    "over a real sample is strong evidence to follow even without lead-lag.\n"
+    "\n"
+    "Be skeptical of artifacts: a high ROI from a few lucky bets, tail-price entries, "
+    "a spiky or deeply-negative PnL curve, or a large max drawdown should lower the "
+    "verdict. Reward steady, low-drawdown edge that a delayed copier can actually "
+    "capture at copyable prices."
 )
 
 _INSTRUCTION = (
@@ -58,7 +75,9 @@ _INSTRUCTION = (
     '"confidence": <number 0.0-1.0>, '
     '"reasoning": "<one or two sentences>"}\n'
     "Use \"skip\" only when the wallet looks like an artifact the bot should not "
-    "add. Do not use any tools; answer directly from the dossier."
+    "add (variance-driven, tail-dominated, negative measured capture, or a losing/"
+    "spiky curve) — NOT merely because the lead-lag copyability block is absent. "
+    "Do not use any tools; answer directly from the dossier."
 )
 
 
@@ -78,18 +97,28 @@ def build_dossier(
     evaluation: Any = None,     # Eval-like (capture_cents, lead_cents, hit_rate, n)
     entry: Any = None,          # EntryProfile-like (mean_entry, tail_ratio, copyable_ratio)
     curve: Any = None,          # CurveMetrics-like (net_pnl, max_drawdown_frac, up_ratio, sharpe)
+    copy_replay: Any = None,    # Eval-like (copy_roi, copy_n, copy_hit, exit_roi) — copy-and-hold replay
+    qualifying_theories: list[dict] | None = None,  # [{id, desc, needs_capture}, …]
+    why_flagged: str | None = None,                 # human-readable "why follow"
     portfolio_value: float | None = None,
     recent_bets: list[dict] | None = None,
 ) -> dict:
     """Assemble the compact, JSON-serializable dossier for one wallet.
 
     Pure (no network): every field is pulled defensively via getattr so callers
-    can pass whatever signals they have. Missing pieces are simply omitted.
+    can pass whatever signals they have. Missing pieces are simply omitted — in
+    particular, pass ``evaluation=None`` when the deep lead-lag stage never ran
+    (``n == 0``) so the ``copyability`` block is *absent* rather than a row of
+    zeros the model would misread as a measured no-edge.
     """
     def g(obj, name):
         return getattr(obj, name, None) if obj is not None else None
 
     d: dict = {"wallet": wallet}
+    if qualifying_theories:
+        d["qualifying_theories"] = qualifying_theories
+    if why_flagged:
+        d["why_flagged"] = why_flagged
     if metrics is not None:
         d["skill"] = {
             "roi": _round(g(metrics, "roi")),
@@ -105,6 +134,13 @@ def build_dossier(
             "lead_cents": _round(g(evaluation, "lead_cents"), 2),
             "hit_rate": _round(g(evaluation, "hit_rate")),
             "n_trades": g(evaluation, "n"),
+        }
+    if copy_replay is not None and (g(copy_replay, "copy_n") or 0) > 0:
+        d["copy_replay"] = {
+            "copy_and_hold_roi": _round(g(copy_replay, "copy_roi")),
+            "n_resolved": g(copy_replay, "copy_n"),
+            "hit_rate": _round(g(copy_replay, "copy_hit")),
+            "exit_follow_roi": _round(g(copy_replay, "exit_roi")),
         }
     if entry is not None:
         d["entry_profile"] = {
@@ -249,6 +285,13 @@ def _record(dossier, wallet, model, prompt, text, envelope, verdict, start, end,
                     copyable=verdict.copyable, confidence=verdict.confidence)
     if isinstance(dossier.get("skill"), dict):
         meta["skill"] = dossier["skill"]
+    # Per-theory tags so Langfuse can slice accept/reject rate by qualifying theory
+    # (e.g. spot "theory:1e admits ~0%") without a prod-log trawl.
+    theory_ids = [t.get("id") for t in (dossier.get("qualifying_theories") or [])
+                  if isinstance(t, dict) and t.get("id")]
+    if theory_ids:
+        meta["qualifying_theories"] = theory_ids
+    tags = ["wallet-gate", "claude-code", "strategy-1c"] + [f"theory:{t}" for t in theory_ids]
     langfuse_telemetry.record_generation(
         name="wallet-gate",
         input=prompt,
@@ -259,6 +302,6 @@ def _record(dossier, wallet, model, prompt, text, envelope, verdict, start, end,
         cost_usd=(envelope or {}).get("total_cost_usd"),
         duration_ms=(envelope or {}).get("duration_ms"),
         metadata=meta,
-        tags=["wallet-gate", "claude-code", "strategy-1c"],
+        tags=tags,
         error=error,
     )

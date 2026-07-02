@@ -316,6 +316,66 @@ def test_pnl_unified_shows_total_and_per_strategy(captured_messages, monkeypatch
     assert "PREVIEW MODE" in out
 
 
+def _unified_with_open_paper():
+    """One near-term paper wallet with a marked-to-market open + an unmarked open."""
+    from src.copy_trading import pnl_unified as u
+    from src.copy_trading.copy_paper import PaperPosition
+
+    def op(copy_id, mark):
+        p = PaperPosition(
+            copy_id=copy_id, target="0xopen", condition_id="c", token_id="t",
+            outcome_index=0, category="x", their_price=0.5, entry_price=0.5,
+            shares=100.0, spent=50.0, drag_bps=0, opened_ts=0.0,
+            flagged_by=("1b",), closed=False,
+        )
+        if mark:
+            p.mark(0.60)          # +$10 unrealized
+        return p
+
+    b = u.aggregate_system_b([op("c1", mark=True), op("c2", mark=False)])
+    return u.build_unified([], b), [], b, 0
+
+
+def test_pnl_footer_discloses_open_paper_exposure_and_unpriced(captured_messages, monkeypatch):
+    from src import telegram_bot
+
+    monkeypatch.setattr(telegram_bot, "_compute_unified", _unified_with_open_paper)
+    monkeypatch.setattr(telegram_bot.CONFIG, "preview_mode", True)
+    telegram_bot._handle_command("/pnl")
+    out = captured_messages[-1]
+
+    assert "Paper open:" in out
+    assert "$100" in out and "2 position(s)" in out   # 2 opens x $50
+    assert "1 unpriced" in out                         # the unmarked one
+    assert "Unrealized:  <b>$+10.00</b>" in out        # the marked one contributes
+
+
+def test_gate_command_shows_mix_and_per_theory(captured_messages, monkeypatch, tmp_path):
+    from src import telegram_bot
+    from src.copy_trading import gate_history
+
+    p = str(tmp_path / "gate-history.jsonl")
+    gate_history.append(p, {"wallet": "0xaaa111", "admitted": True, "theories": ["1b"]})
+    gate_history.append(p, {"wallet": "0xbbb222", "admitted": False, "theories": ["1e"],
+                            "reasoning": "variance artifact, no copyable edge", "confidence": 0.9})
+    monkeypatch.setattr(telegram_bot, "_gate_history_path", lambda: p)
+
+    telegram_bot._handle_command("/gate")
+    out = captured_messages[-1]
+
+    assert "LLM Gate" in out
+    assert "admitted <b>1</b>" in out and "rejected <b>1</b>" in out
+    assert "1e" in out and "1b" in out                 # per-theory breakdown
+    assert "variance artifact" in out                  # recent rejection reason
+
+
+def test_gate_command_handles_empty_history(captured_messages, monkeypatch, tmp_path):
+    from src import telegram_bot
+    monkeypatch.setattr(telegram_bot, "_gate_history_path", lambda: str(tmp_path / "none.jsonl"))
+    telegram_bot._handle_command("/gate")
+    assert "no gate decisions logged yet" in captured_messages[-1]
+
+
 def test_wallets_lists_top_overall_then_per_strategy_deduped(captured_messages, monkeypatch):
     from src import telegram_bot
 

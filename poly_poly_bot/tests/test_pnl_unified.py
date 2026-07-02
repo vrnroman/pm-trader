@@ -140,15 +140,34 @@ def test_system_b_flagged_by_fallback_to_current_watchlist_then_untagged():
     assert by["0xz"].strategies == (UNTAGGED_B,)
 
 
-def test_system_b_open_positions_count_but_dont_feed_roi():
+def test_system_b_unmarked_open_positions_count_but_dont_feed_roi():
+    # no live mark (mark_price defaults to 0) -> open capital shows but doesn't
+    # drag ROI or add unrealized. This is the unhappy path (mark fetch failed).
     positions = [_paper("0xT", flagged_by=("1b",), closed=False, spent=50.0)]
     wallets = aggregate_system_b(positions)
     w = wallets[0]
     assert w.n_open == 1 and w.n_closed == 0
     assert w.open_cost == 50.0
     assert w.cost_basis == 0.0
+    assert w.n_open_marked == 0
     assert w.roi is None
     assert w.net_pnl == 0.0
+
+
+def test_system_b_marked_open_positions_contribute_unrealized_and_roi():
+    # a near-term copy marked to market: shares * mid - spent feeds unrealized,
+    # and its capital feeds the ROI denominator (mirrors System A / S4).
+    p = _paper("0xT", flagged_by=("1b",), closed=False, spent=50.0)
+    p.entry_price = 0.50
+    p.shares = 100.0            # 100 * 0.50 = $50 spent
+    p.mark(0.60)               # mid 0.60 -> value 60, unrealized +10
+    wallets = aggregate_system_b([p])
+    w = wallets[0]
+    assert w.n_open == 1 and w.n_open_marked == 1
+    assert w.unrealized_pnl == pytest.approx(10.0)
+    assert w.cost_basis == pytest.approx(50.0)
+    assert w.net_pnl == pytest.approx(10.0)
+    assert w.roi == pytest.approx(0.20)
 
 
 # --------------------------------------------------------------------------- #
