@@ -274,6 +274,21 @@ def _short_wallet(w: str) -> str:
     return f"{w[:6]}…{w[-4:]}" if len(w) > 12 else (w or "—")
 
 
+def _mark_open_paper(positions, fetch_mid) -> None:
+    """Mark open (non-dust) near-term paper copies to market in place, on-read.
+
+    ``fetch_mid(token_id) -> float | None``. Only currently-open positions are
+    priced, so the network cost scales with the live book, not the ledger's full
+    history. Pure aside from the single mid fetch per open; never persists."""
+    from src.copy_trading.copy_paper import is_dust_fill
+
+    for p in positions:
+        if not p.closed and not is_dust_fill(p):
+            mid = fetch_mid(p.token_id)
+            if mid is not None and mid > 0:
+                p.mark(float(mid))
+
+
 def _compute_unified():
     """Build the unified per-strategy / per-wallet P&L across both copy systems.
 
@@ -304,6 +319,13 @@ def _compute_unified():
     except Exception as e:  # noqa: BLE001
         logger.warning(f"copy-paper ledger load failed: {e}")
         paper_positions = []
+    # Mark open near-term copies to market on-read, exactly like the System-A
+    # opens priced above. Deliberately here and NOT in the 60s harness cycle: a
+    # per-cycle mark would fire a full ledger re-serialize every minute and burst
+    # N synchronous CLOB fetches that stall trade detection. This mutates the
+    # freshly-loaded positions in memory only (never persisted) and touches the
+    # network solely when the owner asks for /pnl.
+    _mark_open_paper(paper_positions, _fetch_midpoint)
     flagged_now = load_watchlist_flagged_by(CONFIG.copy_paper_watchlist)
     b_wallets = u.aggregate_system_b(paper_positions, flagged_now)
 
@@ -478,7 +500,10 @@ def _handle_gate():
     wholesale is obvious), and the most recent rejection reasons."""
     from src.copy_trading import gate_history
 
-    rows = gate_history.load(_gate_history_path())
+    # Bounded read: gate-history.jsonl is append-only; cap the /gate summary to the
+    # most recent decisions so the command stays fast and memory-bounded no matter
+    # how long the log has grown (gate reviews accrue slowly, so this is ~years).
+    rows = gate_history.load(_gate_history_path(), limit=5000)
     if not rows:
         _send_chunked("\U0001f6aa <b>LLM Gate</b>\n\n(no gate decisions logged yet)")
         return

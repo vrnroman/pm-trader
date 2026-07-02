@@ -16,6 +16,7 @@ import logging
 import os
 import re
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -123,15 +124,21 @@ def _purge_old_bot_logs(logs_dir: Path, retention_days: int,
     """
     today = today or datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=retention_days)
+    mtime_cutoff = time.time() - retention_days * 86400
     for path in logs_dir.glob("bot-*.log"):
         m = _BOT_LOG_RE.search(path.name)
-        if not m:
-            continue
         try:
-            file_date = datetime.strptime(m.group(1), "%Y-%m-%d").date()
-        except ValueError:
+            if m:
+                file_date = datetime.strptime(m.group(1), "%Y-%m-%d").date()
+                stale = file_date <= cutoff
+            else:
+                # Odd names (bot-old.log, a truncated/legacy name) can't be dated
+                # from the filename — fall back to mtime so they still get reclaimed
+                # rather than accumulating forever (the pre-refactor behaviour).
+                stale = path.stat().st_mtime < mtime_cutoff
+        except (ValueError, OSError):
             continue
-        if file_date <= cutoff:
+        if stale:
             try:
                 path.unlink()
             except OSError:

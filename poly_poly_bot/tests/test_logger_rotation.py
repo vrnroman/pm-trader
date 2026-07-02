@@ -124,10 +124,19 @@ def test_purge_never_deletes_the_active_file_even_if_touched_now(tmp_path):
     assert not old.exists()
 
 
-def test_purge_ignores_malformed_names(tmp_path):
-    (tmp_path / "bot-notadate.log").write_text("x")
-    (tmp_path / "bot-.log").write_text("x")
+def test_purge_keeps_fresh_malformed_names_but_reclaims_old_ones(tmp_path):
+    import os
+    import time
+
+    fresh = tmp_path / "bot-notadate.log"      # odd name, just written
+    fresh.write_text("x")
+    old = tmp_path / "bot-old.log"             # odd name, ancient mtime
+    old.write_text("x")
+    os.utime(old, (time.time() - 10 * 86400, time.time() - 10 * 86400))
+
     _purge_old_bot_logs(tmp_path, 2, today=_date("2026-07-02"))
-    # non-conforming names are left alone (no crash, no delete)
-    assert (tmp_path / "bot-notadate.log").exists()
-    assert (tmp_path / "bot-.log").exists()
+
+    # can't date these from the name, so fall back to mtime (the pre-refactor
+    # behaviour): fresh survives, ancient is reclaimed instead of accumulating.
+    assert fresh.exists()
+    assert not old.exists()

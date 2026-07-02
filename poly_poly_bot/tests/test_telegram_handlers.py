@@ -350,6 +350,49 @@ def test_pnl_footer_discloses_open_paper_exposure_and_unpriced(captured_messages
     assert "Unrealized:  <b>$+10.00</b>" in out        # the marked one contributes
 
 
+def test_mark_open_paper_marks_only_open_nondust_positions():
+    from src import telegram_bot
+    from src.copy_trading.copy_paper import PaperPosition
+
+    def pos(closed, entry, shares, their=0.5):
+        return PaperPosition(
+            copy_id="c", target="0xa", condition_id="c", token_id="tok",
+            outcome_index=0, category="x", their_price=their, entry_price=entry,
+            shares=shares, spent=50.0, drag_bps=0, opened_ts=0.0,
+            flagged_by=("1b",), closed=closed,
+        )
+
+    open_pos = pos(closed=False, entry=0.50, shares=100.0)   # $50 -> mid 0.60 = +$10
+    closed_pos = pos(closed=True, entry=0.50, shares=100.0)
+    dust = pos(closed=False, entry=0.0005, shares=100000.0)  # implausible fill = dust
+
+    fetched = []
+
+    def fake_mid(token_id):
+        fetched.append(token_id)
+        return 0.60
+
+    telegram_bot._mark_open_paper([open_pos, closed_pos, dust], fake_mid)
+
+    assert open_pos.mark_price == 0.60
+    assert open_pos.unrealized_pnl == pytest.approx(10.0)
+    assert closed_pos.mark_price == 0.0        # closed never marked
+    assert dust.mark_price == 0.0              # dust skipped
+    assert fetched == ["tok"]                  # only the one open, non-dust position priced
+
+
+def test_mark_open_paper_skips_when_no_quote():
+    from src import telegram_bot
+    from src.copy_trading.copy_paper import PaperPosition
+
+    p = PaperPosition(copy_id="c", target="0xa", condition_id="c", token_id="tok",
+                      outcome_index=0, category="x", their_price=0.5, entry_price=0.5,
+                      shares=100.0, spent=50.0, drag_bps=0, opened_ts=0.0,
+                      flagged_by=("1b",), closed=False)
+    telegram_bot._mark_open_paper([p], lambda _t: None)   # dead book
+    assert p.mark_price == 0.0                            # stays unpriced
+
+
 def test_gate_command_shows_mix_and_per_theory(captured_messages, monkeypatch, tmp_path):
     from src import telegram_bot
     from src.copy_trading import gate_history

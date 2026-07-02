@@ -425,35 +425,6 @@ def fetch_mid(token_id: str) -> Optional[float]:
     return (min(asks) + max(bids)) / 2.0
 
 
-def make_ttl_mark_fetcher(
-    fetch: Callable[[str], Optional[float]] = fetch_mid,
-    *,
-    ttl_s: float = 300.0,
-    now: Callable[[], float] = time.time,
-) -> Callable[[str], Optional[float]]:
-    """Wrap a mark fetcher with a per-token TTL cache.
-
-    The near-term copy harness cycles every ~60s; marking every open position on
-    every cycle would hammer the CLOB book endpoint. A mark only needs to be
-    fresh enough for the ``/pnl`` unrealized readout, not tick-accurate, so this
-    caps live calls to at most one per token per ``ttl_s`` (default 5 min). A
-    cached ``None`` (failed/empty book) is held for the window too, so a dead
-    token doesn't retry every cycle; it surfaces as an unpriced open in ``/pnl``.
-    """
-    cache: dict[str, tuple[float, Optional[float]]] = {}
-
-    def fetcher(token_id: str) -> Optional[float]:
-        t = now()
-        hit = cache.get(token_id)
-        if hit is not None and (t - hit[0]) < ttl_s:
-            return hit[1]
-        mid = fetch(token_id)
-        cache[token_id] = (t, mid)
-        return mid
-
-    return fetcher
-
-
 def _load_targets(path: str) -> list[dict]:
     """The ``targets`` list from a watchlist JSON, or [] on missing/corrupt file.
 

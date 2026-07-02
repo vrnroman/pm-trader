@@ -58,8 +58,7 @@ def _copy_paper_loop():
     from src.copy_trading import governance
     from src.copy_trading.copy_paper import format_resolution_telegram, report
     from src.copy_trading.copy_paper_live import (
-        TradeFeed, make_feed_detector, make_feed_exit_detector,
-        make_ttl_mark_fetcher)
+        TradeFeed, make_feed_detector, make_feed_exit_detector)
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
     from src.copy_trading.outcome_names import DEFAULT_RESOLVER
 
@@ -159,10 +158,13 @@ def _copy_paper_loop():
         # book instead. Off => horizon-blind, so behaviour is unchanged.
         max_horizon_days=(CONFIG.strategy_4_long_horizon_days
                           if CONFIG.strategy_4_enabled else None),
-        # Mark open near-term copies to market each cycle so /pnl shows a live
-        # unrealized instead of a blank. TTL-cached (5 min) so a 60s cycle
-        # doesn't hammer the CLOB book endpoint.
-        mark_fetcher=make_ttl_mark_fetcher(),
+        # NB: no mark_fetcher here on purpose. The near-term book cycles every
+        # ~60s; marking in-cycle would (a) fire a full ledger re-serialize every
+        # cycle (s.marked>0) and (b) burst N synchronous CLOB /book fetches,
+        # stalling trade detection. Near-term opens are instead marked on-read in
+        # /pnl (telegram_bot._compute_unified), exactly like System-A opens — the
+        # mark only needs to be fresh when the owner looks. S4 (long-horizon, slow
+        # cycle, months to resolution) still marks in-cycle below.
         detector_factory=detector_factory,
         exit_detector_factory=exit_detector_factory,
         on_cycle=_on_cycle,
