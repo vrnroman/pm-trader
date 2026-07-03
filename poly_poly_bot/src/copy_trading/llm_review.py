@@ -275,6 +275,184 @@ def review_wallet(
     return verdict
 
 
+# --------------------------------------------------------------------------- #
+# Promotion review — a SECOND Claude gate, on the paper-copy outcomes, run before
+# a wallet is offered for promotion to real capital. Advisory only: it annotates
+# the offer, it never blocks one (the statistical floor in promotion_gate.py is
+# the block). Shares the `claude -p` runner + Langfuse plumbing above.
+# --------------------------------------------------------------------------- #
+
+_PROMO_SYSTEM = (
+    "You are a quantitative risk reviewer deciding whether a Polymarket wallet, "
+    "already measured on a paper-copy book, is a real, durable edge worth copying "
+    "with REAL capital — or a wallet whose paper record is variance, decay, or "
+    "concentration dressed up as skill.\n"
+    "\n"
+    "You are given the wallet's paper-copy performance (ROI over settled copies, "
+    "the per-bet return t-stat, the chronological second-half ROI, how many "
+    "distinct markets/categories the bets spread across, win/loss counts, the "
+    "average entry price and a win-rate confidence bound). The statistical floor "
+    "has ALREADY passed — your job is the qualitative judgment it can't make:\n"
+    "- Judge the edge on RETURN, not hit rate. A wallet that wins <50% of the "
+    "time but is profitable on longshots is legitimate; do NOT penalize a low win "
+    "rate when the ROI and return t-stat are positive.\n"
+    "- Be skeptical of: a second-half ROI far below the overall (fading edge), a "
+    "return t-stat barely positive (thin significance), bets concentrated in a "
+    "single market or category (correlated, not independent), or an ROI driven by "
+    "one or two outsized wins.\n"
+    "- Reward a steady, well-distributed, still-positive-recently edge.\n"
+    "\n"
+    "This is advice, not a veto — the owner still taps to accept and money only "
+    "moves after a separate manual step. Give your honest read and the concerns."
+)
+
+_PROMO_INSTRUCTION = (
+    "Respond with ONLY a single JSON object (no prose, no markdown fences) with "
+    "exactly these keys:\n"
+    '{"verdict": "promote"|"watch"|"reject", '
+    '"confidence": <number 0.0-1.0>, '
+    '"reasoning": "<one or two sentences>", '
+    '"concerns": ["<short concern>", ...]}\n'
+    'Use "reject" when the paper record looks like variance/decay/concentration '
+    'rather than durable edge, "watch" when it is promising but you want more '
+    'data, "promote" when it is a credible edge worth real capital. Do not use '
+    "any tools; answer directly from the dossier."
+)
+
+
+@dataclass(frozen=True)
+class PromotionVerdict:
+    verdict: str            # promote | watch | reject
+    confidence: float
+    reasoning: str
+    concerns: tuple = ()
+
+
+def build_promotion_dossier(
+    wallet: str,
+    *,
+    stats: Any = None,               # promotion_gate.PromotionStats-like
+    theories: list | None = None,    # discovery theories that flagged the wallet
+    floor_warnings: list | None = None,
+    tier: str | None = None,
+) -> dict:
+    """Assemble the compact paper-performance dossier for a promotion review.
+
+    Pure; every field pulled defensively so a partial ``stats`` still serializes."""
+    def g(name):
+        return getattr(stats, name, None) if stats is not None else None
+
+    d: dict = {"wallet": wallet, "decision": "promote to real capital?"}
+    if tier:
+        d["target_tier"] = tier
+    if theories:
+        d["qualifying_theories"] = list(theories)
+    d["paper_copy_record"] = {
+        "settled_copies": g("n_closed"),
+        "roi": _round(g("roi")),
+        "net_pnl": _round(g("net_pnl"), 2),
+        "return_tstat": _round(g("roi_tstat"), 2),
+        "second_half_roi": _round(g("second_half_roi")),
+        "wins": g("wins"),
+        "losses": g("losses"),
+        "distinct_markets": g("distinct_conditions"),
+        "distinct_categories": g("distinct_categories"),
+        "avg_entry_price": _round(g("avg_entry_price")),
+        "breakeven_winrate": _round(g("breakeven_winrate")),
+        "winrate_wilson_lb": _round(g("wilson_lb")),
+    }
+    if floor_warnings:
+        d["statistical_flags"] = list(floor_warnings)
+    return d
+
+
+def _build_promotion_prompt(dossier: dict) -> str:
+    return (
+        f"{_PROMO_SYSTEM}\n\n"
+        "Review this wallet's paper-copy record and decide whether to promote it "
+        "to real capital:\n"
+        f"{json.dumps(dossier, indent=2)}\n\n"
+        f"{_PROMO_INSTRUCTION}"
+    )
+
+
+def _promotion_verdict_from_data(data: dict) -> PromotionVerdict | None:
+    try:
+        concerns = data.get("concerns") or []
+        if not isinstance(concerns, (list, tuple)):
+            concerns = [str(concerns)]
+        return PromotionVerdict(
+            verdict=str(data["verdict"]),
+            confidence=float(data["confidence"]),
+            reasoning=str(data["reasoning"]),
+            concerns=tuple(str(c) for c in concerns),
+        )
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def review_promotion(
+    dossier: dict,
+    *,
+    runner: Callable[..., Any] | None = None,
+    model: str = DEFAULT_MODEL,
+    timeout_s: int = DEFAULT_TIMEOUT_S,
+) -> PromotionVerdict | None:
+    """Ask Claude whether a paper-validated wallet should be promoted to real
+    capital. Returns ``None`` on any failure (the caller treats that as "review
+    unavailable — surface the offer statistical-only", never as a block).
+    ``runner`` is injectable for tests. Recorded to Langfuse like the shortlist
+    gate (no-op unless configured)."""
+    runner = runner or _claude_cli_runner
+    prompt = _build_promotion_prompt(dossier)
+    wallet = dossier.get("wallet")
+    start = time.time()
+    res = None
+    try:
+        res = runner(prompt, model=model, timeout_s=timeout_s)
+    except Exception:  # never let the review break the governance cycle
+        logger.warning("[PROMOTE-GATE] LLM review failed for %s", wallet, exc_info=True)
+    end = time.time()
+
+    envelope = res if isinstance(res, dict) else None
+    text = envelope.get("result") if envelope else (res if isinstance(res, str) else None)
+    data = _parse_verdict(text) if text else None
+    verdict = _promotion_verdict_from_data(data) if data else None
+
+    error = None if verdict else ("no verdict returned" if res is None else "unparseable verdict")
+    _record_promotion(dossier, wallet, model, prompt, text, envelope, verdict, start, end, error)
+    return verdict
+
+
+def _record_promotion(dossier, wallet, model, prompt, text, envelope, verdict, start, end, error) -> None:
+    """Forward one promotion review to Langfuse (no-op unless configured; never raises)."""
+    if not langfuse_telemetry.enabled():
+        return
+    meta: dict = {"wallet": wallet}
+    if verdict is not None:
+        meta.update(verdict=verdict.verdict, confidence=verdict.confidence,
+                    concerns=list(verdict.concerns))
+    if isinstance(dossier.get("paper_copy_record"), dict):
+        meta["paper_copy_record"] = dossier["paper_copy_record"]
+    theory_ids = [t for t in (dossier.get("qualifying_theories") or []) if t]
+    if theory_ids:
+        meta["qualifying_theories"] = theory_ids
+    tags = ["promotion-gate", "claude-code", "strategy-1c-promote"] + [f"theory:{t}" for t in theory_ids]
+    langfuse_telemetry.record_generation(
+        name="promotion-gate",
+        input=prompt,
+        output=(text if text is not None else ""),
+        model=model,
+        start=start, end=end,
+        usage=(envelope or {}).get("usage"),
+        cost_usd=(envelope or {}).get("total_cost_usd"),
+        duration_ms=(envelope or {}).get("duration_ms"),
+        metadata=meta,
+        tags=tags,
+        error=error,
+    )
+
+
 def _record(dossier, wallet, model, prompt, text, envelope, verdict, start, end, error) -> None:
     """Forward one gate call to Langfuse (no-op unless configured; never raises)."""
     if not langfuse_telemetry.enabled():

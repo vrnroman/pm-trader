@@ -1,89 +1,110 @@
-"""Tests for auto promote/demote governance."""
+"""Tests for auto promote/demote governance over the trustworthy promotion gate."""
 
 from __future__ import annotations
 
-from types import SimpleNamespace
-
 import pytest
 
-from src.copy_trading import promotion_state as ps
+from src.copy_trading import gate_history, promotion_state as ps
 from src.copy_trading.copy_paper import PaperPosition
-from src.copy_trading.governance import evaluate_governance, run_governance_cycle
-
-BASE = dict(
-    promote_min_n=15, promote_min_roi=0.10,
-    demote_min_n=15, demote_max_roi=-0.05,
-    now=1000.0, cooldown_s=86400.0,
-)
-
-
-def w(wallet, n, roi, net=0.0):
-    return SimpleNamespace(wallet=wallet, n_closed=n, roi=roi, net_pnl=net)
-
-
-def _ev(wallets, **over):
-    kw = dict(promoted=set(), blacklist=set(), offered=set(), **BASE)
-    kw.update(over)
-    return evaluate_governance(wallets, **kw)
-
-
-def test_promote_offer_when_matured_positive():
-    offers, dem = _ev([w("0xA", 15, 0.12, 300)])
-    assert [o["wallet"] for o in offers] == ["0xA"]
-    assert dem == []
-
-
-def test_demote_when_matured_negative():
-    offers, dem = _ev([w("0xB", 20, -0.08, -200)])
-    assert offers == []
-    assert len(dem) == 1
-    assert dem[0]["wallet"] == "0xB"
-    assert dem[0]["until"] == BASE["now"] + BASE["cooldown_s"]
-
-
-def test_hold_in_the_middle_band():
-    offers, dem = _ev([w("0xC", 20, 0.03, 50)])
-    assert offers == [] and dem == []
-
-
-def test_hold_when_too_few_settled():
-    # great ROI but only 10 resolved — not enough evidence either way.
-    offers, dem = _ev([w("0xD", 10, 0.5, 400)])
-    assert offers == [] and dem == []
-    offers2, dem2 = _ev([w("0xD", 10, -0.5, -400)])
-    assert offers2 == [] and dem2 == []
-
-
-def test_skip_already_promoted_and_blacklisted():
-    offers, dem = _ev(
-        [w("0xA", 15, 0.2, 300), w("0xB", 20, -0.2, -300)],
-        promoted={"0xa"}, blacklist={"0xb"})
-    assert offers == [] and dem == []
-
-
-def test_offered_suppresses_repeat():
-    offers, _ = _ev([w("0xA", 15, 0.2, 300)], offered={"0xa"})
-    assert offers == []
-
-
-def test_skip_none_roi_and_non_address():
-    offers, dem = _ev([w("0xA", 15, None, 0), w("(unknown)", 20, 0.5, 500)])
-    assert offers == [] and dem == []
-
-
-# ---- integration over a real ledger via aggregate_system_b ----
+from src.copy_trading.governance import (
+    evaluate_governance, group_settled_by_wallet, run_governance_cycle)
 
 WIN = "0x" + "a" * 40
 LOSE = "0x" + "b" * 40
 
+FLOORS = dict(
+    promote_min_n=15, promote_min_roi=0.10, promote_min_tstat=0.0,
+    promote_min_second_half_roi=-0.10, promote_min_conditions=8,
+    promote_min_categories=3,
+    demote_min_n=15, demote_max_roi=-0.05, demote_min_abs_loss=5.0,
+    demote_max_wilson=0.50,
+)
 
-def _pos(target, i, pnl):
+
+def pos(target, i, *, pnl, spent=10.0, entry=0.5, won=None, condition=None, category=None):
     return PaperPosition(
-        copy_id=f"{target}-{i}", target=target, condition_id="0xC",
-        token_id=f"TOK{i}", outcome_index=0, category="research",
-        their_price=0.5, entry_price=0.5, shares=20.0, spent=10.0, drag_bps=0,
-        opened_ts=0.0, closed=True, won=(pnl > 0), pnl=pnl)
+        copy_id=f"{target}-{i}", target=target,
+        condition_id=condition if condition is not None else f"{target[:6]}-c{i}",
+        token_id=f"T{i}", outcome_index=0,
+        category=category if category is not None else f"cat{i % 4}",
+        their_price=entry, entry_price=entry, shares=spent / entry, spent=spent,
+        drag_bps=0, opened_ts=float(i), closed=True,
+        won=(pnl > 0) if won is None else won, pnl=pnl, closed_ts=float(i))
 
+
+def diversified_winner(target=WIN, n=15, pnl=1.2):
+    return [pos(target, i, pnl=pnl) for i in range(n)]
+
+
+def loser(target=LOSE, n=15):
+    return [pos(target, i, pnl=-1.0) for i in range(n)]
+
+
+def _ev(positions, **over):
+    by_wallet = group_settled_by_wallet(positions)
+    kw = dict(promoted=set(), blacklist=set(), offered=set(),
+              now=1000.0, cooldown_s=86400.0, **FLOORS)
+    kw.update(over)
+    return evaluate_governance(by_wallet, **kw)
+
+
+# --------------------------------------------------------------------------- #
+# evaluate_governance (pure)
+# --------------------------------------------------------------------------- #
+
+def test_offer_when_clears_floor():
+    offers, dem, held = _ev(diversified_winner())
+    assert [o["wallet"] for o in offers] == [WIN]
+    assert dem == [] and held == []
+
+
+def test_demote_real_loser():
+    offers, dem, held = _ev(loser())
+    assert offers == [] and held == []
+    assert dem[0]["wallet"] == LOSE
+    assert dem[0]["until"] == 1000.0 + 86400.0
+
+
+def test_held_when_clears_bar_but_fails_floor():
+    # 15 winning bets (+12% ROI) but all on ONE market -> passes n+ROI, fails floor.
+    ps_ = [pos(WIN, i, pnl=1.2, condition="cSAME", category="sports") for i in range(15)]
+    offers, dem, held = _ev(ps_)
+    assert offers == [] and dem == []
+    assert held[0]["wallet"] == WIN
+    assert any("concentrated" in r for r in held[0]["reasons"])
+
+
+def test_no_action_below_base_bar():
+    # good ROI but only 10 settled: neither an offer nor a "held" (never crossed bar).
+    offers, dem, held = _ev(diversified_winner(n=10))
+    assert offers == [] and dem == [] and held == []
+
+
+def test_skip_promoted_blacklisted_offered():
+    assert _ev(diversified_winner(), promoted={WIN.lower()})[0] == []
+    assert _ev(diversified_winner(), offered={WIN.lower()})[0] == []
+    assert _ev(loser(), blacklist={LOSE.lower()})[1] == []
+
+
+def test_longshot_offered_not_blocked():
+    # low win rate, +EV, diversified -> must be offered (the anti-longshot-bias case)
+    target = "0x" + "c" * 40
+    outcomes = ([True] * 7 + [False] * 11)
+    inter = []
+    w = [o for o in outcomes if o]; l = [o for o in outcomes if not o]
+    while w or l:
+        if l: inter.append(l.pop())
+        if w: inter.append(w.pop())
+        if l: inter.append(l.pop())
+    ps_ = [pos(target, i, pnl=(23.3 if won else -10.0), entry=0.30, won=won,
+               condition=f"c{i}", category=f"k{i % 5}") for i, won in enumerate(inter)]
+    offers, dem, held = _ev(ps_)
+    assert [o["wallet"] for o in offers] == [target]
+
+
+# --------------------------------------------------------------------------- #
+# run_governance_cycle (I/O: offers store, blacklist, history, advisory LLM)
+# --------------------------------------------------------------------------- #
 
 @pytest.fixture
 def stores(tmp_path, monkeypatch):
@@ -95,40 +116,80 @@ def stores(tmp_path, monkeypatch):
     ps.clear_cache()
 
 
-def _run(positions, sent, now=1000.0, send_ok=True):
+def _run(positions, sent, *, tmp_path, now=1000.0, send_ok=True, review_fn=None):
     return run_governance_cycle(
-        positions, now=now,
-        promote_min_n=15, promote_min_roi=0.10,
-        demote_min_n=15, demote_max_roi=-0.05,
-        cooldown_s=86400.0, default_tier="1b",
+        positions, now=now, cooldown_s=86400.0, default_tier="1b",
         send_offer=lambda o: (sent.append(o) or send_ok),
         send_demotion=lambda d: sent.append(("demote", d)),
-    )
+        review_fn=review_fn,
+        history_path=str(tmp_path / "promotion-gate-history.jsonl"),
+        **FLOORS)
 
 
-def test_cycle_offers_once_and_records(stores):
-    positions = [_pos(WIN, i, 1.2) for i in range(15)]   # roi = +12%
+def test_cycle_offers_once_and_records(stores, tmp_path):
     sent = []
-    offers, dem = _run(positions, sent)
+    offers, dem = _run(diversified_winner(), sent, tmp_path=tmp_path)
     assert len(offers) == 1 and dem == []
     assert ps.offer_status(WIN) == "offered"
-    # a second pass must NOT re-offer (deduped by the offers store)
-    offers2, _ = _run(positions, sent)
+    rows = gate_history.load(str(tmp_path / "promotion-gate-history.jsonl"))
+    assert rows[-1]["event"] == "offer" and rows[-1]["wallet"] == WIN
+    # a second pass must NOT re-offer
+    offers2, _ = _run(diversified_winner(), sent, tmp_path=tmp_path)
     assert offers2 == []
 
 
-def test_cycle_does_not_record_when_send_fails(stores):
-    positions = [_pos(WIN, i, 1.2) for i in range(15)]
+def test_cycle_llm_review_annotates_but_never_blocks(stores, tmp_path):
+    from src.copy_trading.llm_review import PromotionVerdict
+    seen = {}
+
+    def review(dossier, **kw):
+        seen["dossier"] = dossier
+        return PromotionVerdict("reject", 0.9, "looks like variance", ("thin",))
+
     sent = []
-    offers, _ = _run(positions, sent, send_ok=False)
-    assert offers == []                       # not recorded -> retried next time
+    offers, _ = _run(diversified_winner(), sent, tmp_path=tmp_path, review_fn=review)
+    assert len(offers) == 1                       # rejected by LLM but STILL offered
+    assert offers[0]["llm"].verdict == "reject"
+    assert "paper_copy_record" in seen["dossier"]
+    rows = gate_history.load(str(tmp_path / "promotion-gate-history.jsonl"))
+    assert rows[-1]["llm_verdict"] == "reject"
+
+
+def test_cycle_llm_unavailable_still_offers(stores, tmp_path):
+    sent = []
+    offers, _ = _run(diversified_winner(), sent, tmp_path=tmp_path,
+                     review_fn=lambda d, **k: None)   # review returns nothing
+    assert len(offers) == 1 and offers[0]["llm"] is None
+    assert offers[0]["llm_attempted"] is True
+
+
+def test_cycle_does_not_record_when_send_fails(stores, tmp_path):
+    sent = []
+    offers, _ = _run(diversified_winner(), sent, tmp_path=tmp_path, send_ok=False)
+    assert offers == []                            # not recorded -> retried next time
     assert ps.offer_status(WIN) is None
 
 
-def test_cycle_demotes_and_blacklists(stores):
-    positions = [_pos(LOSE, i, -1.0) for i in range(15)]   # roi = -10%
+def test_cycle_demotes_and_blacklists(stores, tmp_path):
     sent = []
-    offers, dem = _run(positions, sent)
+    offers, dem = _run(loser(), sent, tmp_path=tmp_path)
     assert offers == [] and len(dem) == 1
     assert ps.is_blacklisted(LOSE, now=1000.0) is True
     assert ("demote", dem[0]) in sent
+    rows = gate_history.load(str(tmp_path / "promotion-gate-history.jsonl"))
+    assert rows[-1]["event"] == "demote"
+
+
+def test_cycle_records_held_once(stores, tmp_path):
+    concentrated = [pos(WIN, i, pnl=1.2, condition="cSAME", category="sports")
+                    for i in range(15)]
+    sent = []
+    _run(concentrated, sent, tmp_path=tmp_path)
+    assert ps.offer_status(WIN) == "held"
+    rows = gate_history.load(str(tmp_path / "promotion-gate-history.jsonl"))
+    held_rows = [r for r in rows if r.get("event") == "held"]
+    assert len(held_rows) == 1
+    # a second cycle must NOT re-log the same hold
+    _run(concentrated, sent, tmp_path=tmp_path)
+    rows2 = gate_history.load(str(tmp_path / "promotion-gate-history.jsonl"))
+    assert len([r for r in rows2 if r.get("event") == "held"]) == 1

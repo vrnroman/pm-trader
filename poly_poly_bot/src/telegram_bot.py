@@ -48,12 +48,13 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "status", "description": "Balance, positions, daily limits"},
     {"command": "pnl", "description": "P&L by strategy: realized + unrealized + total"},
     {"command": "wallets", "description": "Top wallets overall + best/worst per strategy (deduped)"},
-    {"command": "gate", "description": "LLM wallet-gate: admit/reject mix + per-theory + recent rejects"},
+    {"command": "gate", "description": "Gate picture: shortlist admit/reject + promotion offers/holds/demotes"},
     {"command": "history", "description": "Last 10 copy trades"},
     {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
     {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
     {"command": "reset", "description": "Zero all P&L + risk/spend state (archives first; needs CONFIRM)"},
     {"command": "promote", "description": "Promote a paper-validated wallet to System A (tier 1b, paper)"},
+    {"command": "golive", "description": "Re-check a promoted wallet before the real-money PREVIEW flip"},
     {"command": "shutdown", "description": "Graceful shutdown (Docker restarts container)"},
 ]
 
@@ -127,15 +128,53 @@ def _signed_usd(x: float) -> str:
     return f"{'+' if x >= 0 else '-'}${abs(x):,.0f}"
 
 
+def _promotion_annotation(extras: dict) -> str:
+    """Render the trustworthy-gate evidence under a promote offer: the statistical
+    floor it cleared, any non-blocking flags, and the advisory Claude read. Kept
+    defensive — a partial ``extras`` still renders whatever is present."""
+    lines: list[str] = []
+    stats = extras.get("stats")
+    if stats is not None:
+        parts = []
+        tstat = getattr(stats, "roi_tstat", None)
+        if isinstance(tstat, (int, float)):
+            parts.append(f"return t {tstat:+.2f}")
+        sh = getattr(stats, "second_half_roi", None)
+        if isinstance(sh, (int, float)):
+            parts.append(f"2nd-half {sh * 100:+.0f}%")
+        dc = getattr(stats, "distinct_conditions", None)
+        dcat = getattr(stats, "distinct_categories", None)
+        if isinstance(dc, int) and isinstance(dcat, int):
+            parts.append(f"{dc} mkts / {dcat} cats")
+        if parts:
+            lines.append("Gate: " + " · ".join(parts))
+    for w in (extras.get("warnings") or []):
+        lines.append(f"⚠️ {_esc(str(w))}")
+    llm = extras.get("llm")
+    if llm is not None:
+        conf = getattr(llm, "confidence", 0.0)
+        lines.append(f"🤖 Claude: <b>{_esc(getattr(llm, 'verdict', '?'))}</b> "
+                     f"(conf {conf:.0%}) — <i>{_esc(getattr(llm, 'reasoning', ''))}</i>")
+        for c in (getattr(llm, "concerns", None) or []):
+            lines.append(f"   • {_esc(str(c))}")
+    elif extras.get("llm_attempted"):
+        lines.append("🤖 Claude review unavailable — statistical-only")
+    return ("\n" + "\n".join(lines)) if lines else ""
+
+
 def send_promotion_offer(wallet: str, n_closed: int, roi: float,
-                         net_pnl: float, tier: str = "1b") -> bool:
+                         net_pnl: float, tier: str = "1b",
+                         extras: dict | None = None) -> bool:
     """One-tap promote offer: the paper book proved this wallet out. Tapping
-    Promote adds it to System A (still PREVIEW) with no typing — no UUID to copy."""
+    Promote adds it to System A (still PREVIEW) with no typing — no UUID to copy.
+    ``extras`` (the governance offer dict) adds the trustworthy-gate evidence:
+    the statistical floor cleared, any flags, and the advisory Claude read."""
     text = (
         "🎓 <b>Promote candidate</b> — paper book matured\n"
         f"<code>{_esc(wallet)}</code>\n"
         f"<b>{n_closed}</b> settled copies · ROI <b>{roi * 100:+.0f}%</b> · "
-        f"net <b>{_signed_usd(net_pnl)}</b>\n"
+        f"net <b>{_signed_usd(net_pnl)}</b>"
+        f"{_promotion_annotation(extras or {})}\n"
         f"Tap to add to System A (tier {tier}, still PREVIEW/paper)."
     )
     keyboard = {"inline_keyboard": [[
@@ -229,6 +268,8 @@ def _handle_command(text: str):
         _handle_setkey(text)
     elif text.startswith("/reset"):
         _handle_reset(text)
+    elif text.startswith("/golive"):
+        _handle_golive(text)
     elif text.startswith("/promote"):
         _handle_promote(text)
     elif text.startswith("/shutdown"):
@@ -492,6 +533,40 @@ def _gate_history_path() -> str:
     return os.path.join(os.path.dirname(CONFIG.wallet_discovery_state), "gate-history.jsonl")
 
 
+def _promotion_gate_history_path() -> str:
+    """promotion-gate-history.jsonl lives beside the discovery gate log."""
+    return os.path.join(os.path.dirname(CONFIG.wallet_discovery_state),
+                        "promotion-gate-history.jsonl")
+
+
+def _promotion_gate_section() -> list[str]:
+    """The promote-stage gate picture: offers fired, wallets held by the new
+    rigor (and why), and auto-demotes — the trustworthy-promotion counterpart to
+    the shortlist admit/reject mix above."""
+    from src.copy_trading import gate_history
+
+    rows = gate_history.load(_promotion_gate_history_path(), limit=5000)
+    if not rows:
+        return []
+    from collections import Counter
+    events = Counter(r.get("event") for r in rows)
+    lines = ["", "🎓 <b>Promotion gate</b>",
+             f"offers <b>{events.get('offer', 0)}</b>  ·  held <b>{events.get('held', 0)}</b>  "
+             f"·  demoted <b>{events.get('demote', 0)}</b>"]
+    held = [r for r in rows if r.get("event") == "held"][-3:]
+    if held:
+        lines.append("<b>Recently held</b> <i>(cleared n+ROI, failed the rigor)</i>")
+        for r in reversed(held):
+            w = _short_wallet(r.get("wallet") or "")
+            reasons = "; ".join(r.get("reasons") or [])[:140]
+            lines.append(f"  <b>{w}</b>: {_esc(reasons)}")
+    holdouts = sum(1 for r in gate_history.load(_gate_history_path(), limit=5000)
+                   if r.get("holdout"))
+    if holdouts:
+        lines.append(f"<i>Gate holdouts admitted for calibration: {holdouts}</i>")
+    return lines
+
+
 def _handle_gate():
     """Handle /gate — the LLM wallet-gate admit/reject picture.
 
@@ -533,6 +608,8 @@ def _handle_gate():
             conf_s = f" ({conf:.0%})" if isinstance(conf, (int, float)) else ""
             reason = _esc((r.get("reasoning") or "")[:160])
             lines.append(f"  <b>{w}</b>{conf_s}: {reason}")
+
+    lines.extend(_promotion_gate_section())
 
     _send_chunked("\n".join(lines))
 
@@ -844,7 +921,8 @@ def _handle_help():
         "<code>/status</code> — Bot status, balance, positions\n"
         "<code>/pnl</code> — P&amp;L by strategy: realized + unrealized + total\n"
         "<code>/wallets</code> — Top wallets overall + best/worst per strategy\n"
-        "<code>/gate</code> — LLM wallet-gate: admit/reject mix + per-theory + recent rejects\n"
+        "<code>/gate</code> — Gate picture: shortlist admit/reject + promotion offers/holds/demotes\n"
+        "<code>/golive &lt;wallet&gt;</code> — Re-check a promoted wallet before the real-money flip\n"
         "<code>/history</code> — Last 10 copy trades\n"
         "<code>/check</code> — Verify trading setup (read-only)\n\n"
         "<b>Safety levers</b>\n"
@@ -913,6 +991,96 @@ def _handle_promote(text: str) -> None:
         "(System A, still PREVIEW/paper). It now also trades there; flip "
         "PREVIEW_MODE off to go live."
     )
+
+
+def _golive_target(query: str) -> str | None:
+    """Resolve a /golive argument to a wallet: a full 0x address, or a prefix that
+    uniquely matches a *promoted* wallet."""
+    q = (query or "").strip().lower()
+    if not q:
+        return None
+    if q.startswith("0x") and len(q) == 42:
+        return q
+    matches = {w: rec.get("wallet") or w for w, rec in promotion_state.promoted_map().items()
+               if w.startswith(q)}
+    vals = list(matches.values())
+    return (vals[0] or "").lower() if len(vals) == 1 else None
+
+
+def _wallet_ledger_view(wallet: str):
+    """(settled_positions, last_trade_ts) for a wallet from the paper-copy ledger."""
+    from src.copy_trading.copy_paper import PaperCopyLedger, is_dust_fill
+
+    key = (wallet or "").lower()
+    try:
+        ledger = PaperCopyLedger(CONFIG.copy_paper_ledger)
+    except Exception:
+        return [], None
+    settled, last_ts = [], 0.0
+    for p in ledger.positions.values():
+        if (getattr(p, "target", "") or "").lower() != key:
+            continue
+        last_ts = max(last_ts, float(getattr(p, "opened_ts", 0.0) or 0.0),
+                      float(getattr(p, "closed_ts", 0.0) or 0.0))
+        if getattr(p, "closed", False) and not is_dust_fill(p):
+            settled.append(p)
+    return settled, (last_ts or None)
+
+
+def _handle_golive(text: str) -> None:
+    """/golive <wallet-or-prefix> — re-check a promoted wallet before the manual
+    PREVIEW_MODE=false flip that puts real money behind it. Advisory: READY/HOLD
+    plus the checklist; it never flips anything."""
+    import time as _time
+
+    from src.copy_trading import promotion_gate
+
+    parts = text.split()
+    if len(parts) < 2:
+        send_message(
+            "Usage: <code>/golive &lt;wallet-or-prefix&gt;</code>\n"
+            "Re-checks a promoted wallet against the go-live bar (doubled sample, "
+            "still-positive ROI, recent activity, floor still holds) before you "
+            "flip <code>PREVIEW_MODE</code> off. Advisory only."
+        )
+        return
+    wallet = _golive_target(parts[1])
+    if wallet is None:
+        send_message(
+            f"No unique promoted wallet matches <code>{_esc(parts[1])}</code>. "
+            "Use the full 0x address or a longer prefix."
+        )
+        return
+
+    settled, last_ts = _wallet_ledger_view(wallet)
+    stats = promotion_gate.compute_stats(wallet, settled)
+    floor_kwargs = dict(
+        min_n=CONFIG.copy_promote_min_settled, min_roi=CONFIG.copy_promote_min_roi,
+        min_tstat=CONFIG.copy_promote_min_tstat,
+        min_second_half_roi=CONFIG.copy_promote_min_second_half_roi,
+        min_conditions=CONFIG.copy_promote_min_conditions,
+        min_categories=CONFIG.copy_promote_min_categories)
+    ready, checks = promotion_gate.golive_check(
+        stats, last_trade_ts=last_ts, now=_time.time(),
+        min_settled=CONFIG.copy_golive_min_settled,
+        max_idle_days=CONFIG.copy_golive_max_idle_days,
+        min_roi=CONFIG.copy_golive_min_roi, floor_kwargs=floor_kwargs)
+
+    head = "✅ <b>READY for live</b>" if ready else "⏸ <b>HOLD — not ready for live</b>"
+    lines = [f"{head} — <code>{_esc(wallet)}</code>"]
+    tier = promotion_state.promoted_tier_of(wallet)
+    if tier:
+        lines.append(f"Promoted tier {tier} · {stats.n_closed} settled · "
+                     f"ROI {(stats.roi or 0) * 100:+.0f}% · return t {stats.roi_tstat:+.2f}")
+    else:
+        lines.append("<i>Not in the promoted store — checking its paper record anyway.</i>")
+    for label, ok, detail in checks:
+        lines.append(f"{'✅' if ok else '❌'} {_esc(label)} <i>({_esc(str(detail))})</i>")
+    if ready:
+        lines.append("\nAll checks pass. Safe to flip <code>PREVIEW_MODE=false</code> when you want real money on it.")
+    else:
+        lines.append("\nHold the live flip until the ❌ checks clear.")
+    _send_chunked("\n".join(lines))
 
 
 def _handle_callback(data: str) -> tuple[str, str | None]:

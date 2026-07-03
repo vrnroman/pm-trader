@@ -247,8 +247,45 @@ class Config:
     copy_demote_min_settled: int = _opt_int("COPY_DEMOTE_MIN_SETTLED", 15)
     copy_demote_max_roi: float = _opt_float("COPY_DEMOTE_MAX_ROI", -0.05)
     copy_demote_cooldown_days: float = _opt_float("COPY_DEMOTE_COOLDOWN_DAYS", 30.0)
+    # --- Trustworthy promotion gate (statistical floor before an offer fires) ---
+    # The bare n+ROI bar above is necessary but not sufficient: 15 bets at +10%
+    # can be a decaying edge or 15 correlated bets on one market. Before an offer is
+    # surfaced, promotion_gate.evaluate_floor also requires:
+    #   * the chronological second-half ROI >= this floor (edge not reversed) — a
+    #     small negative tolerance so a high-variance longshot's noisy recent half
+    #     isn't read as decay; it catches a genuine reversal (+30% then -25%),
+    #   * the settled bets spread across >= min_conditions markets OR
+    #     >= min_categories categories (independent, not one bet measured N times),
+    #   * a per-bet RETURN t-stat >= this. It is on the RETURN, never the win rate,
+    #     so it never structurally penalizes a +EV longshot theory (which wins
+    #     <50% by design). DEFAULT 0.0 = surfaced-and-tunable, not a hard floor:
+    #     a positive value adds favorite-grade significance rigor but, because a
+    #     high-variance longshot has low signal-per-bet, it needs many more samples
+    #     to clear a positive t-stat — raise it only if you want that trade-off.
+    copy_promote_min_tstat: float = _opt_float("COPY_PROMOTE_MIN_TSTAT", 0.0)
+    copy_promote_min_second_half_roi: float = _opt_float("COPY_PROMOTE_MIN_SECOND_HALF_ROI", -0.10)
+    copy_promote_min_conditions: int = _opt_int("COPY_PROMOTE_MIN_CONDITIONS", 8)
+    copy_promote_min_categories: int = _opt_int("COPY_PROMOTE_MIN_CATEGORIES", 3)
+    # Advisory Claude review layered on TOP of the statistical floor — it annotates
+    # the offer with a promote/watch/reject read but never blocks one (the floor is
+    # the block). Off by default (a real `claude -p` call per candidate); enable in
+    # prod like the shortlist gate. Reuses CLAUDE_CODE_OAUTH_TOKEN.
+    copy_promote_llm_review: bool = _opt_bool("COPY_PROMOTE_LLM_REVIEW", False)
+    # --- Symmetric demote rigor (don't blacklist on small-sample noise) ---
+    # A demote also needs a real absolute dollar loss (not a few cents of micro-
+    # capital variance) AND a win rate that doesn't hold up (Wilson LB <= this).
+    copy_demote_min_abs_loss: float = _opt_float("COPY_DEMOTE_MIN_ABS_LOSS", 5.0)
+    copy_demote_max_wilson: float = _opt_float("COPY_DEMOTE_MAX_WILSON", 0.50)
     # Tier a one-tap-promoted wallet joins in System A (1a larger / 1b smaller).
     promote_default_tier: str = _optional("PROMOTE_DEFAULT_TIER", "1b")
+    # --- /golive pre-flip gate ---
+    # The manual PREVIEW_MODE=false flip is the ONLY step between a promoted wallet
+    # and real money. `/golive <wallet>` re-checks the wallet live before that flip:
+    # a DOUBLED settled bar, still-positive paper ROI now, recent activity, and the
+    # promotion floor still holding. Advisory — it prints READY/HOLD, it never flips.
+    copy_golive_min_settled: int = _opt_int("COPY_GOLIVE_MIN_SETTLED", 30)
+    copy_golive_max_idle_days: float = _opt_float("COPY_GOLIVE_MAX_IDLE_DAYS", 14.0)
+    copy_golive_min_roi: float = _opt_float("COPY_GOLIVE_MIN_ROI", 0.0)
 
     # --- Wallet discovery (continuously hunts copyable wallets -> paper) ---
     # Runs the discovery funnel on a schedule; pings Telegram on each new
@@ -303,6 +340,16 @@ class Config:
     wallet_discovery_llm_review_enabled: bool = _opt_bool("WALLET_DISCOVERY_LLM_REVIEW_ENABLED", False)
     wallet_discovery_llm_review_top_n: int = _opt_int("WALLET_DISCOVERY_LLM_REVIEW_TOP_N", 20)
     wallet_discovery_llm_model: str = _optional("WALLET_DISCOVERY_LLM_MODEL", "claude-opus-4-8")
+    # Gate self-calibration holdout (BACKLOG Phase 1): to measure whether the LLM
+    # shortlist gate is actually +EV, occasionally admit a wallet it would SKIP,
+    # flag the gate-history row holdout:true (keeping the original skip verdict),
+    # and let the paper harness accrue its outcome — so a later job can compare
+    # would-have-rejected ROI vs admitted ROI instead of only ever measuring the
+    # wallets we let in (a selection-biased self-congratulation loop). Off by
+    # default (frac 0 => no holdout). Exposure is capped per sweep by construction
+    # — it is deliberately admitting wallets the gate thinks are bad.
+    gate_holdout_frac: float = _opt_float("GATE_HOLDOUT_FRAC", 0.0)
+    gate_holdout_max_per_sweep: int = _opt_int("GATE_HOLDOUT_MAX_PER_SWEEP", 2)
     # Independent strategy theories that may qualify a wallet (OR'd). All ten on
     # by default — discovery is paper-only, so each theory proves out on measured
     # paper PnL before any manual promotion. 1a/1e need market-resolution data,

@@ -1,6 +1,16 @@
 # Backlog
 
-## Backfill the LLM gate against the current shortlist
+## Backfill the LLM gate against the current shortlist  ✅ SHIPPED 2026-07-03
+
+Shipped `poly_poly_bot/scripts/audit_shortlist_llm_gate.py` — reads
+`copy_watchlist.json`, rebuilds each wallet's dossier via the live
+`discovery_runner._dossier_from_eval`, runs `review_wallet`, and cross-references
+every verdict against the wallet's realized paper PnL (`copy_paper_ledger.jsonl`),
+printing a per-wallet table + the would-skip list (flagging skips that are
+paper-POSITIVE as "gate may be wrong / recovered"). Read-only, `--dry-run` /
+`--limit` / `--json`. Audit, not auto-purge. (Original spec kept below.)
+
+### Original spec
 
 ### Why
 The Claude wallet gate (Strategy 1c) went live 2026-06-29 (commit `18d82c8`) and
@@ -45,7 +55,20 @@ on N independent skips) after seeing the first report.
 - Run after the gate has accrued some live verdicts, so the audit's prompts/model
   match what production is actually using.
 
-## Measure whether the LLM gate is actually +EV (gate self-calibration)
+## Measure whether the LLM gate is actually +EV (gate self-calibration)  ⏳ PHASE 1 SHIPPED 2026-07-03
+
+**Phase 1 (holdout) shipped.** `discovery_runner._llm_gate` now: on a `skip`
+verdict, with probability `GATE_HOLDOUT_FRAC` (default 0.0 = off; enable in prod)
+and capped at `GATE_HOLDOUT_MAX_PER_SWEEP` (default 2), admits the wallet anyway,
+flags the `gate-history.jsonl` row `holdout:true, admitted:true` (keeping the
+original `skip` verdict + reasoning), and stamps a `confidence_band`
+(high/medium/low) on every row for later slicing. The counterfactual clock is
+running once the frac is turned on. **Phase 2 (the calibration report joining
+gate-history to paper PnL, sliced by confidence band) is still pending** — it
+genuinely needs weeks of holdout outcomes before it can say anything. `/gate` now
+shows the holdout count. (Original spec below; Phase 1 items are done.)
+
+### Original spec
 
 ### Why
 The Claude wallet gate decides which wallets reach the watchlist (and become

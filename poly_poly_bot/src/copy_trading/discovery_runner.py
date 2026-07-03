@@ -78,6 +78,15 @@ def _profile_url(wallet: str) -> str:
     return f"https://polymarket.com/profile/{wallet}"
 
 
+def _confidence_band(confidence: float) -> str:
+    """Bucket a gate confidence for calibration slicing (high/medium/low)."""
+    if confidence >= 0.8:
+        return "high"
+    if confidence >= 0.6:
+        return "medium"
+    return "low"
+
+
 def format_find(e: Eval, verdict=None) -> str:
     """Telegram body for a newly-qualified wallet (HTML parse mode; optional Claude verdict)."""
     lines = [
@@ -170,11 +179,14 @@ class DiscoveryRunner:
         llm_review_enabled: bool = False,
         llm_review_top_n: int = 5,
         llm_model: str = DEFAULT_MODEL,
+        holdout_frac: float = 0.0,
+        holdout_max_per_sweep: int = 2,
         consensus_fired_path: Optional[str] = None,
         # injectable for tests
         evaluate: Callable[..., dict[str, Eval]] = evaluate_sweep,
         llm_review: Callable[..., object] = review_wallet,
         now: Callable[[], float] = time.time,
+        rand: Callable[[], float] = None,
         consensus_fetch_buys: Optional[Callable[[str], list]] = None,
         consensus_funder_map: Optional[Callable[[list], dict]] = None,
         consensus_resolver=None,
@@ -190,9 +202,15 @@ class DiscoveryRunner:
         self.llm_review_enabled = llm_review_enabled
         self.llm_review_top_n = llm_review_top_n
         self.llm_model = llm_model
+        self.holdout_frac = holdout_frac
+        self.holdout_max_per_sweep = holdout_max_per_sweep
         self._evaluate = evaluate
         self._llm_review = llm_review
         self._now = now
+        if rand is None:
+            import random
+            rand = random.random
+        self._rand = rand
         self.consensus_fired_path = consensus_fired_path or (
             (state_path + ".consensus.json") if state_path else None)
         # Append-only gate-decision log (sibling of the discovery state file), so
@@ -445,6 +463,7 @@ class DiscoveryRunner:
             return {}
         verdicts: dict = {}
         rejected: set = set()
+        holdouts = 0
         for i, e in enumerate(result.newly_qualified):
             if i >= self.llm_review_top_n:
                 logger.warning("[DISCOVERY] LLM gate cap (%d) reached — admitting %s ungated",
@@ -461,30 +480,52 @@ class DiscoveryRunner:
                 self._record_gate(e, "admit-fail-open", admitted=True)
                 continue
             verdicts[e.wallet] = v
-            self._record_gate(e, v.verdict, admitted=(v.verdict != "skip"),
-                              confidence=v.confidence, reasoning=v.reasoning)
             if v.verdict == "skip":
+                # Gate self-calibration holdout: occasionally admit a would-be-skip
+                # (keeping its skip verdict/reasoning) so its paper outcome can later
+                # be compared against the admitted wallets — the counterfactual the
+                # gate's +EV can't be measured without. Capped per sweep, since it
+                # is by construction admitting wallets the gate thinks are bad.
+                if (self.holdout_frac > 0.0 and holdouts < self.holdout_max_per_sweep
+                        and self._rand() < self.holdout_frac):
+                    holdouts += 1
+                    self._record_gate(e, v.verdict, admitted=True, holdout=True,
+                                      confidence=v.confidence, reasoning=v.reasoning)
+                    logger.info("[DISCOVERY] LLM gate HOLDOUT-admitted %s (would skip, "
+                                "conf %.0f%%): measuring counterfactual",
+                                e.wallet, v.confidence * 100)
+                    continue
+                self._record_gate(e, v.verdict, admitted=False,
+                                  confidence=v.confidence, reasoning=v.reasoning)
                 rejected.add(e.wallet)
                 logger.info("[DISCOVERY] LLM gate REJECTED %s (conf %.0f%%): %s",
                             e.wallet, v.confidence * 100, v.reasoning)
+            else:
+                self._record_gate(e, v.verdict, admitted=True,
+                                  confidence=v.confidence, reasoning=v.reasoning)
         if rejected:
             self._drop_from_result(result, rejected)
             logger.info("[DISCOVERY] LLM gate dropped %d/%d new wallet(s) before watchlist add",
                         len(rejected), len(result.newly_qualified) + len(rejected))
         return verdicts
 
-    def _record_gate(self, e, verdict: str, *, admitted: bool,
+    def _record_gate(self, e, verdict: str, *, admitted: bool, holdout: bool = False,
                      confidence: float = 0.0, reasoning: str = "") -> None:
         """Append one gate decision to the history log (queryable via /gate).
 
         Records WHY the wallet qualified (its theories) and whether lead-lag was
-        even measured, so the accept/reject mix is attributable per theory."""
+        even measured, so the accept/reject mix is attributable per theory. A
+        ``holdout`` row is a would-be-skip admitted anyway to measure the
+        counterfactual; the ``confidence_band`` lets a later calibration slice
+        outcomes by how sure the gate was."""
         gate_history.append(self.gate_history_path, {
             "ts": self._now(),
             "wallet": e.wallet,
             "verdict": verdict,
             "admitted": admitted,
+            "holdout": holdout,
             "confidence": round(confidence, 3),
+            "confidence_band": _confidence_band(confidence),
             "theories": list(e.flagged_by),
             "had_leadlag": e.n > 0,
             "copy_n": e.copy_n,

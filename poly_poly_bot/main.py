@@ -62,6 +62,14 @@ def _copy_paper_loop():
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
     from src.copy_trading.outcome_names import DEFAULT_RESOLVER
 
+    # Advisory Claude promotion review (annotates the offer; never blocks it).
+    _promo_review = None
+    if CONFIG.copy_promote_llm_review:
+        from src.copy_trading.llm_review import review_promotion as _promo_review
+    # promotion-gate-history lives beside the discovery gate-history log.
+    _promo_history = os.path.join(
+        os.path.dirname(CONFIG.wallet_discovery_state), "promotion-gate-history.jsonl")
+
     def _governance(ledger):
         """Auto promote-offer / demote off the System-B paper ledger each cycle."""
         if not CONFIG.copy_governance_enabled:
@@ -72,13 +80,22 @@ def _copy_paper_loop():
                 now=time.time(),
                 promote_min_n=CONFIG.copy_promote_min_settled,
                 promote_min_roi=CONFIG.copy_promote_min_roi,
+                promote_min_tstat=CONFIG.copy_promote_min_tstat,
+                promote_min_second_half_roi=CONFIG.copy_promote_min_second_half_roi,
+                promote_min_conditions=CONFIG.copy_promote_min_conditions,
+                promote_min_categories=CONFIG.copy_promote_min_categories,
                 demote_min_n=CONFIG.copy_demote_min_settled,
                 demote_max_roi=CONFIG.copy_demote_max_roi,
+                demote_min_abs_loss=CONFIG.copy_demote_min_abs_loss,
+                demote_max_wilson=CONFIG.copy_demote_max_wilson,
                 cooldown_s=CONFIG.copy_demote_cooldown_days * 86400.0,
                 default_tier=CONFIG.promote_default_tier,
+                review_fn=_promo_review,
+                llm_model=CONFIG.wallet_discovery_llm_model,
+                history_path=_promo_history,
                 send_offer=lambda o: telegram_bot.send_promotion_offer(
                     o["wallet"], o["n_closed"], o["roi"], o["net_pnl"],
-                    o.get("tier", "1b")),
+                    o.get("tier", "1b"), extras=o),
                 send_demotion=lambda d: telegram_bot.send_message(
                     f"⛔ <b>Auto-demoted</b> <code>{d['wallet']}</code> — "
                     f"{d['n_closed']} settled copies, ROI {d['roi'] * 100:+.0f}% "
@@ -283,6 +300,8 @@ def _discovery_loop():
         llm_review_enabled=CONFIG.wallet_discovery_llm_review_enabled,
         llm_review_top_n=CONFIG.wallet_discovery_llm_review_top_n,
         llm_model=CONFIG.wallet_discovery_llm_model,
+        holdout_frac=CONFIG.gate_holdout_frac,
+        holdout_max_per_sweep=CONFIG.gate_holdout_max_per_sweep,
     )
     runner.run_forever(_shutdown_event)
 
