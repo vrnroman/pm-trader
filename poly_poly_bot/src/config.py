@@ -268,9 +268,11 @@ class Config:
     copy_promote_min_categories: int = _opt_int("COPY_PROMOTE_MIN_CATEGORIES", 3)
     # Advisory Claude review layered on TOP of the statistical floor — it annotates
     # the offer with a promote/watch/reject read but never blocks one (the floor is
-    # the block). Off by default (a real `claude -p` call per candidate); enable in
-    # prod like the shortlist gate. Reuses CLAUDE_CODE_OAUTH_TOKEN.
-    copy_promote_llm_review: bool = _opt_bool("COPY_PROMOTE_LLM_REVIEW", False)
+    # the block). ON by default: it's paper-side and advisory (fail-open), the
+    # `claude -p` call runs on the subscription (CLAUDE_CODE_OAUTH_TOKEN, no metered
+    # cost) and only fires on the rare candidate that clears the floor — so there's
+    # nothing to gain by shipping it off. Set false to silence it.
+    copy_promote_llm_review: bool = _opt_bool("COPY_PROMOTE_LLM_REVIEW", True)
     # --- Symmetric demote rigor (don't blacklist on small-sample noise) ---
     # A demote also needs a real absolute dollar loss (not a few cents of micro-
     # capital variance) AND a win rate that doesn't hold up (Wilson LB <= this).
@@ -345,10 +347,12 @@ class Config:
     # flag the gate-history row holdout:true (keeping the original skip verdict),
     # and let the paper harness accrue its outcome — so a later job can compare
     # would-have-rejected ROI vs admitted ROI instead of only ever measuring the
-    # wallets we let in (a selection-biased self-congratulation loop). Off by
-    # default (frac 0 => no holdout). Exposure is capped per sweep by construction
-    # — it is deliberately admitting wallets the gate thinks are bad.
-    gate_holdout_frac: float = _opt_float("GATE_HOLDOUT_FRAC", 0.0)
+    # wallets we let in (a selection-biased self-congratulation loop). ON by
+    # default (frac 0.1): it's paper-side and reversible, and the counterfactual it
+    # accrues is the only way Phase 2 can ever prove the gate is +EV — so the clock
+    # should be running. Exposure is capped per sweep (max 2) by construction, since
+    # it is deliberately admitting wallets the gate thinks are bad. Set frac 0 to stop.
+    gate_holdout_frac: float = _opt_float("GATE_HOLDOUT_FRAC", 0.1)
     gate_holdout_max_per_sweep: int = _opt_int("GATE_HOLDOUT_MAX_PER_SWEEP", 2)
     # Independent strategy theories that may qualify a wallet (OR'd). All ten on
     # by default — discovery is paper-only, so each theory proves out on measured

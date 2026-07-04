@@ -75,6 +75,19 @@ def test_holdout_admits_would_be_skip(tmp_path):
     assert any(e.wallet == "0xskip" for e in result.watchlist)
 
 
+def test_holdout_ping_is_labelled(tmp_path):
+    # a holdout-admitted wallet's Telegram ping must say it's a holdout, so the
+    # "Claude: skip" line doesn't read as the gate contradicting itself.
+    seq = [{"0xk": _ev("0xk", "1b")},
+           {"0xk": _ev("0xk", "1b"), "0xskip": _ev("0xskip")}]
+    sent = []
+    r = _runner(tmp_path, seq=seq, holdout_frac=1.0, rand=lambda: 0.0)
+    r._notify = lambda m: sent.append(m)
+    r.run_once(); r.run_once()
+    holdout_msgs = [m for m in sent if "Gate holdout" in m]
+    assert len(holdout_msgs) == 1 and "0xskip" in holdout_msgs[0]
+
+
 def test_holdout_respects_frac(tmp_path):
     seq = [{"0xk": _ev("0xk", "1b")},
            {"0xk": _ev("0xk", "1b"), "0xskip": _ev("0xskip")}]

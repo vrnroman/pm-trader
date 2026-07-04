@@ -288,7 +288,8 @@ class DiscoveryRunner:
         # vetted), and a "skip" verdict drops the wallet from the watchlist and
         # the persisted state before either is written below. Fail-open: any LLM
         # failure admits the wallet. Skipped on the first-init seed.
-        verdicts: dict = {} if result.first_init else self._llm_gate(result)
+        verdicts, holdouts = (({}, set()) if result.first_init
+                              else self._llm_gate(result))
 
         # auto-paper: rewrite the watchlist the harness consumes (post-gate)
         _atomic_write_json(self.watchlist_path,
@@ -320,6 +321,12 @@ class DiscoveryRunner:
             seed_set = {w.lower() for w in seeds}
             for e in result.newly_qualified:
                 msg = format_find(e, verdicts.get(e.wallet))
+                if e.wallet in holdouts:
+                    # A holdout is a wallet Claude said SKIP, admitted anyway to
+                    # measure the counterfactual — say so, so the "Claude: skip"
+                    # line below doesn't read as the gate contradicting itself.
+                    msg = ("🧪 <b>Gate holdout</b> — Claude said skip; admitted to "
+                           "paper anyway to measure whether the skip was right\n" + msg)
                 if e.wallet.lower() in seed_set:
                     msg = ("🎯 <b>Late-bet lead validated</b> — won its "
                            "near-resolution bet, then cleared eval\n" + msg)
@@ -446,7 +453,7 @@ class DiscoveryRunner:
         )
         self._save_consensus_fired(fired)
 
-    def _llm_gate(self, result) -> dict:
+    def _llm_gate(self, result) -> tuple[dict, set]:
         """Claude admission gate over this sweep's NEW qualifiers (mutates result).
 
         For each newly-qualified wallet (already ordered by strength), ask Claude
@@ -456,13 +463,15 @@ class DiscoveryRunner:
         ``None`` verdict (LLM disabled, unavailable, or errored) admits the
         wallet. Bounded by ``llm_review_top_n`` per sweep — any new wallets past
         the cap are admitted ungated (with a warning) so a flood can't stall the
-        loop. Returns wallet -> LLMVerdict for the reviewed wallets (annotates
-        the Telegram pings); never raises into the sweep loop.
+        loop. Returns ``(verdicts, holdout_wallets)``: wallet -> LLMVerdict for the
+        reviewed wallets (annotates the Telegram pings), and the set of wallets
+        holdout-admitted despite a skip. Never raises into the sweep loop.
         """
         if not self.llm_review_enabled or not result.newly_qualified:
-            return {}
+            return {}, set()
         verdicts: dict = {}
         rejected: set = set()
+        holdout_wallets: set = set()
         holdouts = 0
         for i, e in enumerate(result.newly_qualified):
             if i >= self.llm_review_top_n:
@@ -489,6 +498,7 @@ class DiscoveryRunner:
                 if (self.holdout_frac > 0.0 and holdouts < self.holdout_max_per_sweep
                         and self._rand() < self.holdout_frac):
                     holdouts += 1
+                    holdout_wallets.add(e.wallet)
                     self._record_gate(e, v.verdict, admitted=True, holdout=True,
                                       confidence=v.confidence, reasoning=v.reasoning)
                     logger.info("[DISCOVERY] LLM gate HOLDOUT-admitted %s (would skip, "
@@ -507,7 +517,7 @@ class DiscoveryRunner:
             self._drop_from_result(result, rejected)
             logger.info("[DISCOVERY] LLM gate dropped %d/%d new wallet(s) before watchlist add",
                         len(rejected), len(result.newly_qualified) + len(rejected))
-        return verdicts
+        return verdicts, holdout_wallets
 
     def _record_gate(self, e, verdict: str, *, admitted: bool, holdout: bool = False,
                      confidence: float = 0.0, reasoning: str = "") -> None:
