@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 
 from scripts import audit_shortlist_llm_gate as audit
-from src.copy_trading.llm_review import LLMVerdict
+from src.copy_trading.llm_review import RATE_LIMITED, LLMVerdict
 
 
 def test_eval_like_from_row_maps_fields():
@@ -38,6 +38,16 @@ def test_run_audit_joins_verdict_and_paper():
     # cross-referenced to realized paper PnL (the audit's whole point)
     assert by["0xSKIP"]["paper_roi"] == 0.20
     assert by["0xKEEP"]["paper_n"] == 20
+
+
+def test_run_audit_flags_rate_limited():
+    # if claude is rate-limited during the audit, those wallets are marked (not
+    # silently rendered as a verdict) so the operator knows the audit is incomplete.
+    rows = [{"wallet": "0xA", "rank": 1, "flagged_by": ["1b"]}]
+    report = audit.run_audit(rows, {}, review_fn=lambda d, model=None: RATE_LIMITED,
+                             model="m")
+    assert report[0]["rate_limited"] is True
+    assert report[0]["verdict"] is None            # sentinel not treated as a verdict
 
 
 def test_run_audit_dry_run_skips_llm():

@@ -51,7 +51,7 @@ RATE_LIMITED = object()
 # the parsed envelope, so wording drift in any one field still trips detection.
 _RATE_LIMIT_MARKERS = (
     "spend limit", "usage limit", "rate limit",
-    "claude.ai/settings/usage", "quota",
+    "claude.ai/settings/usage",
 )
 
 
@@ -229,8 +229,14 @@ def _claude_cli_runner(prompt: str, *, model: str, timeout_s: int) -> dict | Non
     try:
         envelope = json.loads(proc.stdout)
     except json.JSONDecodeError:
-        # Non-JSON on a zero exit (e.g. a plain limit notice) — still catch a limit.
-        return RATE_LIMITED if _looks_rate_limited(proc.stdout, proc.stderr) else None
+        # Non-JSON on a zero exit (e.g. a plain limit notice) — still catch a limit,
+        # else warn (don't silently swallow a garbage CLI response like the old
+        # unguarded json.loads did — the operator needs a diagnostic in bot.log).
+        if _looks_rate_limited(proc.stdout, proc.stderr):
+            return RATE_LIMITED
+        logger.warning("[LLM-GATE] claude -p emitted non-JSON stdout: %s",
+                       (proc.stdout or "")[:200])
+        return None
     if envelope.get("is_error") or envelope.get("subtype") != "success":
         logger.warning("[LLM-GATE] claude -p returned error envelope: %s",
                        str(envelope.get("subtype")))

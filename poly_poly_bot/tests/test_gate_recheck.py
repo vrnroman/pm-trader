@@ -152,6 +152,78 @@ def test_drain_keeps_when_still_rate_limited(tmp_path):
     assert "0xlim" in {e["wallet"] for e in gate_recheck_queue.pending(r.gate_recheck_queue_path)}
 
 
+def test_drain_keeps_parked_on_transient_failure(tmp_path):
+    # A re-check that fails NON-rate-limited (e.g. a timeout -> None) must NOT
+    # dequeue the wallet while it stays admitted — that would be fail-open-and-
+    # forget. It stays parked for the next sweep.
+    seq = [{"0xk": _ev("0xk")},
+           {"0xk": _ev("0xk"), "0xlim": _ev("0xlim")},
+           {"0xk": _ev("0xk"), "0xlim": _ev("0xlim")}]
+    state = {"phase": 0}
+
+    def review(dossier, model=None):
+        if dossier["wallet"] != "0xlim":
+            return LLMVerdict("follow", "low", True, 0.7, "ok")
+        state["phase"] += 1
+        return RATE_LIMITED if state["phase"] == 1 else None   # sweep-3 drain: None
+
+    r, _ = _runner(tmp_path, seq=seq, review_fn=review)
+    r.run_once(); r.run_once()
+    result = r.run_once()        # drain re-check returns None -> keep parked
+    assert any(e.wallet == "0xlim" for e in result.watchlist)     # NOT lost
+    assert "0xlim" in {e["wallet"] for e in gate_recheck_queue.pending(r.gate_recheck_queue_path)}
+
+
+def test_recheck_skip_ping_is_html_escaped(tmp_path):
+    # Claude reasoning with HTML metacharacters must be escaped or Telegram 400s
+    # and the removal alert is silently dropped.
+    seq = [{"0xk": _ev("0xk")},
+           {"0xk": _ev("0xk"), "0xlim": _ev("0xlim")},
+           {"0xk": _ev("0xk"), "0xlim": _ev("0xlim")}]
+    state = {"phase": 0}
+
+    def review(dossier, model=None):
+        if dossier["wallet"] != "0xlim":
+            return LLMVerdict("follow", "low", True, 0.7, "ok")
+        state["phase"] += 1
+        return RATE_LIMITED if state["phase"] == 1 else LLMVerdict(
+            "skip", "high", False, 0.9, "win rate < 50% & ROI > 0")
+
+    r, sent = _runner(tmp_path, seq=seq, review_fn=review)
+    r.run_once(); r.run_once(); r.run_once()
+    ping = next(m for m in sent if "Deferred gate re-check" in m)
+    assert "&lt;" in ping and "&gt;" in ping and "&amp;" in ping   # escaped
+    assert "< 50%" not in ping                                     # not raw
+
+
+def test_gate_and_drain_share_one_budget(tmp_path):
+    # top_n=3: a recovery sweep that gates 2 new wallets AND has 3 parked must make
+    # at most top_n LLM calls total (2 gate + 1 drain), not 2 + 3.
+    par = {f"0xp{i}": _ev(f"0xp{i}") for i in range(3)}
+    new = {f"0xn{i}": _ev(f"0xn{i}") for i in range(2)}
+    seq = [{"0xk": _ev("0xk")},
+           {"0xk": _ev("0xk"), **par},
+           {"0xk": _ev("0xk"), **par, **new}]
+    calls = {"n": 0}
+
+    def review(dossier, model=None):
+        calls["n"] += 1
+        return RATE_LIMITED if dossier["wallet"].startswith("0xp") else LLMVerdict(
+            "follow", "low", True, 0.7, "ok")
+
+    r = DiscoveryRunner(
+        config=CFG, watchlist_path=str(tmp_path / "wl.json"),
+        state_path=str(tmp_path / "state.json"),
+        evaluate=lambda config, **kw: seq[min(_seq_i(calls, seq), len(seq) - 1)],
+        llm_review=review, llm_review_enabled=True, llm_review_top_n=3, now=lambda: 100.0)
+    gate_recheck_queue.clear_cache()
+    r.run_once()               # init
+    r.run_once()               # sweep 2: 3 parked (gate budget spent), no drain
+    calls["n"] = 0
+    r.run_once()               # sweep 3: 2 new gated + shared budget 1 for the drain
+    assert calls["n"] == 3     # NOT 5
+
+
 def test_drain_dequeues_wallet_that_decayed_off(tmp_path):
     # 0xlim is queued, then never appears again -> decays off -> just dequeued.
     seq = [{"0xk": _ev("0xk")},

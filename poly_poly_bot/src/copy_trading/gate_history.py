@@ -53,11 +53,20 @@ def load(path: str | None, limit: int | None = None) -> list[dict]:
 
 def summarize(rows: list[dict]) -> dict:
     """Aggregate rows into admit/reject totals, per-theory admit/reject counts,
-    and the most recent rejection reasons."""
-    admitted = [r for r in rows if r.get("admitted")]
-    rejected = [r for r in rows if not r.get("admitted")]
+    and the most recent rejection reasons.
+
+    A ``requeued`` row is a *provisional* deferral (claude -p was rate-limited when
+    the wallet qualified); its real disposition is the later re-check row. Those
+    rows are excluded from the admit/reject counts — otherwise a deferred wallet
+    would be double-counted as both an admit (the provisional row) and a reject
+    (the re-check) and skew the accept rate + any gate calibration. They're
+    surfaced separately as ``deferred``."""
+    deferred = [r for r in rows if r.get("requeued")]
+    decided = [r for r in rows if not r.get("requeued")]
+    admitted = [r for r in decided if r.get("admitted")]
+    rejected = [r for r in decided if not r.get("admitted")]
     per_theory: dict[str, dict[str, int]] = defaultdict(lambda: {"admit": 0, "reject": 0})
-    for r in rows:
+    for r in decided:
         key = "admit" if r.get("admitted") else "reject"
         for t in r.get("theories", []) or []:
             per_theory[t][key] += 1
@@ -67,9 +76,10 @@ def summarize(rows: list[dict]) -> dict:
         for r in rejected
     ][-5:]
     return {
-        "total": len(rows),
+        "total": len(decided),
         "admitted": len(admitted),
         "rejected": len(rejected),
+        "deferred": len(deferred),
         "per_theory": dict(per_theory),
         "recent_rejections": recent_rejections,
     }

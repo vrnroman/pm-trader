@@ -33,7 +33,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.config import CONFIG
 from src.copy_trading.discovery_runner import _dossier_from_eval
-from src.copy_trading.llm_review import review_wallet
+from src.copy_trading.llm_review import RATE_LIMITED, review_wallet
 
 # The Eval fields _dossier_from_eval reads; anything absent from a watchlist row
 # defaults so build_dossier's defensive getattr simply omits it.
@@ -91,12 +91,15 @@ def run_audit(rows, paper, *, review_fn, model, dry_run=False, limit=None):
             break
         wallet = row.get("wallet", "")
         dossier = _dossier_from_eval(eval_like_from_row(row))
-        verdict = None if dry_run else review_fn(dossier, model=model)
+        raw = None if dry_run else review_fn(dossier, model=model)
+        rate_limited = raw is RATE_LIMITED
+        verdict = None if rate_limited else raw     # sentinel isn't a verdict
         pp = paper.get((wallet or "").lower(), {})
         report.append({
             "wallet": wallet,
             "rank": row.get("rank"),
             "flagged_by": list(row.get("flagged_by") or []),
+            "rate_limited": rate_limited,
             "verdict": getattr(verdict, "verdict", None),
             "confidence": getattr(verdict, "confidence", None),
             "copyable": getattr(verdict, "copyable", None),
@@ -119,9 +122,11 @@ def print_report(report, dry_run=False):
     print(header)
     print("-" * len(header))
     skips = []
+    rate_limited = [r for r in report if r.get("rate_limited")]
     for r in report:
         w = (r["wallet"] or "")[:12]
-        verdict = r["verdict"] or ("(dry)" if dry_run else "?")
+        verdict = r["verdict"] or ("(dry)" if dry_run else
+                                   ("LIMIT" if r.get("rate_limited") else "?"))
         conf = f"{r['confidence']:.0%}" if isinstance(r["confidence"], (int, float)) else "—"
         theories = ",".join(r["flagged_by"])
         tail = theories if dry_run else f"{theories}  {(r['reasoning'] or '')[:70]}"
@@ -140,6 +145,13 @@ def print_report(report, dry_run=False):
             print(f"  {r['wallet']}  ({','.join(r['flagged_by'])}){flag}")
     else:
         print("\nNo would-skip wallets." if not dry_run else "\n(dry run — no verdicts)")
+
+    if rate_limited:
+        print(f"\n⚠️  INCOMPLETE: {len(rate_limited)} wallet(s) could not be checked "
+              "(claude -p spend/rate-limited). Re-run this audit once the "
+              "subscription restores — these were NOT vetted:")
+        for r in rate_limited:
+            print(f"  {r['wallet']}  ({','.join(r['flagged_by'])})")
 
 
 def main(argv=None):

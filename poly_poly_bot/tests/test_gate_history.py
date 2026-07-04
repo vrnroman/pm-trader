@@ -54,6 +54,21 @@ def test_summarize_counts_and_per_theory():
     assert s["recent_rejections"][-1]["reasoning"] == "negative capture"
 
 
+def test_summarize_excludes_requeued_provisional_rows():
+    # a deferred wallet has a provisional row (requeued, admitted) AND a later
+    # re-check row (admitted=False). It must count ONCE (as the re-check), not as
+    # both an admit and a reject.
+    rows = [
+        {"wallet": "0xd", "admitted": True, "requeued": True, "theories": ["1e"]},   # provisional
+        {"wallet": "0xd", "admitted": False, "recheck": True, "theories": ["1e"]},   # real
+        {"wallet": "0xa", "admitted": True, "theories": ["1b"]},
+    ]
+    s = gate_history.summarize(rows)
+    assert s["total"] == 2 and s["admitted"] == 1 and s["rejected"] == 1
+    assert s["deferred"] == 1
+    assert s["per_theory"]["1e"] == {"admit": 0, "reject": 1}   # not admit:1,reject:1
+
+
 # --- the discovery gate actually writes history (end-to-end via run_once) ---- #
 
 def test_llm_gate_records_each_decision(tmp_path):

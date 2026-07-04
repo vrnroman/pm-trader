@@ -303,15 +303,21 @@ class DiscoveryRunner:
         parked_before = {e.get("wallet") for e in
                          gate_recheck_queue.pending(self.gate_recheck_queue_path)}
 
-        verdicts, holdouts = (({}, set()) if result.first_init
-                              else self._llm_gate(result))
+        verdicts, holdouts, gate_calls = (({}, set(), 0) if result.first_init
+                                          else self._llm_gate(result))
 
         # Re-run any gate checks that were deferred because claude -p was
         # rate/spend-limited on an earlier sweep. Must run AFTER the gate and
         # BEFORE the watchlist/state writes below, so a now-"skip" removes the
-        # provisional wallet from what gets persisted this sweep.
+        # provisional wallet from what gets persisted this sweep. Drain only
+        # wallets parked on an earlier sweep AND not re-gated this sweep (a
+        # decay-then-requalify wallet the gate just handled), and share the gate's
+        # per-sweep LLM budget so a recovery sweep never exceeds llm_review_top_n.
+        gated_now = {e.wallet for e in result.newly_qualified}
         try:
-            self._drain_gate_queue(result, parked_before)
+            self._drain_gate_queue(
+                result, only_wallets=(parked_before - gated_now),
+                budget=self.llm_review_top_n - gate_calls)
         except Exception:  # a broken re-check must never break the sweep
             logger.warning("[DISCOVERY] gate re-check drain failed; continuing", exc_info=True)
 
@@ -492,11 +498,12 @@ class DiscoveryRunner:
         holdout-admitted despite a skip. Never raises into the sweep loop.
         """
         if not self.llm_review_enabled or not result.newly_qualified:
-            return {}, set()
+            return {}, set(), 0
         verdicts: dict = {}
         rejected: set = set()
         holdout_wallets: set = set()
         holdouts = 0
+        calls = 0                 # claude -p calls made (shared budget with the drain)
         for i, e in enumerate(result.newly_qualified):
             if i >= self.llm_review_top_n:
                 logger.warning("[DISCOVERY] LLM gate cap (%d) reached — admitting %s ungated",
@@ -508,6 +515,7 @@ class DiscoveryRunner:
                 v = self._llm_review(dossier, model=self.llm_model)
             except Exception:  # pragma: no cover - belt-and-suspenders
                 v = None
+            calls += 1
             if v is RATE_LIMITED:
                 # Spend/rate-limited: don't lose the wallet. Admit it provisionally
                 # (paper-only, reversible) AND park the check so it's redone once the
@@ -551,7 +559,7 @@ class DiscoveryRunner:
             self._drop_from_result(result, rejected)
             logger.info("[DISCOVERY] LLM gate dropped %d/%d new wallet(s) before watchlist add",
                         len(rejected), len(result.newly_qualified) + len(rejected))
-        return verdicts, holdout_wallets
+        return verdicts, holdout_wallets, calls
 
     def _record_gate(self, e, verdict: str, *, admitted: bool, holdout: bool = False,
                      requeued: bool = False, confidence: float = 0.0,
@@ -586,20 +594,27 @@ class DiscoveryRunner:
             theories=list(e.flagged_by), had_leadlag=e.n > 0, copy_n=e.copy_n,
             now=self._now())
 
-    def _drain_gate_queue(self, result, only_wallets=None) -> None:
+    def _drain_gate_queue(self, result, only_wallets=None, budget=None) -> None:
         """Re-run deferred (rate-limited) gate checks against the current sweep.
 
         For each parked wallet that is still on the watchlist, re-run the check on
-        its stored dossier. A real ``skip`` removes the provisionally-admitted
-        wallet from the watchlist + state now (and pings); ``follow``/``watch``
-        confirms it; still rate-limited keeps it parked; a wallet that already
-        decayed off the watchlist is simply dequeued. ``only_wallets`` (when given)
-        restricts the drain to wallets parked on an EARLIER sweep, so a wallet this
-        sweep just parked isn't re-checked immediately. Bounded by
-        ``llm_review_top_n`` re-checks per sweep so a restored subscription doesn't
-        fire the whole backlog at once (leftovers wait for the next sweep). Never
-        raises."""
+        its stored dossier. Only a REAL verdict resolves the wallet: a ``skip``
+        removes the provisionally-admitted wallet from the watchlist + state now
+        (and pings); ``follow``/``watch`` confirms it. Anything that is NOT a real
+        verdict — still rate-limited, a timeout, or any transient re-check failure —
+        keeps the wallet parked for the next sweep, so a deferred wallet is never
+        dequeued-and-forgotten while still lacking a real decision (that would be
+        the fail-open-and-forget this whole feature removes). A wallet that decayed
+        off the watchlist is dequeued. ``only_wallets`` (when given) restricts the
+        drain to wallets parked on an EARLIER sweep and not re-gated this sweep.
+        ``budget`` caps the claude -p re-checks this sweep — SHARED with the gate's
+        own per-sweep budget so a recovery sweep never exceeds ``llm_review_top_n``
+        total LLM calls; leftovers wait for the next sweep. Never raises."""
         if not self.llm_review_enabled or not self.gate_recheck_queue_path:
+            return
+        if budget is None:
+            budget = self.llm_review_top_n
+        if budget <= 0:
             return
         entries = gate_recheck_queue.pending(self.gate_recheck_queue_path)
         if not entries:
@@ -613,21 +628,24 @@ class DiscoveryRunner:
             if not wallet:
                 continue
             if only_wallets is not None and wallet not in only_wallets:
-                continue                      # parked THIS sweep — wait for the next
+                continue                      # parked/gated THIS sweep — wait
             if wallet not in on_wl:
                 resolved.add(wallet)          # decayed off — nothing to re-check
                 continue
-            if checked >= self.llm_review_top_n:
-                break                          # cap this sweep; leave the rest parked
+            if checked >= budget:
+                break                          # shared cap; leave the rest parked
             checked += 1
             try:
                 v = self._llm_review(entry.get("dossier") or {}, model=self.llm_model)
             except Exception:  # pragma: no cover - defensive
                 v = None
-            if v is RATE_LIMITED:
-                continue                       # still limited — keep parked
-            resolved.add(wallet)               # got a resolution (verdict or gave-up)
             verdict = getattr(v, "verdict", None)
+            if verdict is None:
+                # Still rate-limited OR a transient re-check failure (timeout/None):
+                # keep it parked and try again next sweep. NEVER dequeue a wallet
+                # that still has no real decision.
+                continue
+            resolved.add(wallet)               # a real verdict — resolve it
             self._record_recheck(entry, verdict)
             if verdict == "skip":
                 rejected.add(wallet)
@@ -635,8 +653,9 @@ class DiscoveryRunner:
                             wallet, getattr(v, "reasoning", ""))
                 self._send(
                     "🚫 <b>Deferred gate re-check</b> — Claude now says <b>skip</b>; "
-                    f"removed the provisionally-admitted wallet\n<code>{wallet}</code>\n"
-                    f"<i>{getattr(v, 'reasoning', '')}</i>")
+                    f"removed the provisionally-admitted wallet\n"
+                    f"<code>{html.escape(wallet)}</code>\n"
+                    f"<i>{html.escape(getattr(v, 'reasoning', '') or '')}</i>")
         if rejected:
             self._drop_from_result(result, rejected)
             logger.info("[DISCOVERY] deferred re-check removed %d provisional wallet(s)",
