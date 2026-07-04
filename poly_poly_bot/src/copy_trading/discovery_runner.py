@@ -37,10 +37,12 @@ from src.copy_trading.discovery import (
     watchlist_to_targets,
 )
 from src.copy_trading import gate_history
+from src.copy_trading import gate_recheck_queue
 from src.copy_trading import late_bet_queue
 from src.copy_trading.discovery_data import evaluate_sweep, fetch_activity
 from src.copy_trading.entry_profile import is_copyable_entry
-from src.copy_trading.llm_review import DEFAULT_MODEL, build_dossier, review_wallet
+from src.copy_trading.llm_review import (
+    DEFAULT_MODEL, RATE_LIMITED, build_dossier, review_wallet)
 from src.copy_trading.outcome_names import DEFAULT_RESOLVER
 from src.copy_trading.theories import REGISTRY as THEORY_REGISTRY
 from src.copy_trading.trader_scoring import classify_market
@@ -218,6 +220,11 @@ class DiscoveryRunner:
         self.gate_history_path = (
             os.path.join(os.path.dirname(state_path), "gate-history.jsonl")
             if state_path else None)
+        # Restart-surviving queue of wallets whose gate check was deferred because
+        # claude -p was spend/rate-limited (drained each sweep once the limit clears).
+        self.gate_recheck_queue_path = (
+            os.path.join(os.path.dirname(state_path), "gate-recheck-queue.json")
+            if state_path else None)
         self._consensus_fetch_buys_fn = consensus_fetch_buys or self._live_consensus_buys
         self._consensus_funder_map_fn = consensus_funder_map or self._live_funder_map
         self._consensus_resolver = consensus_resolver or DEFAULT_RESOLVER
@@ -288,8 +295,25 @@ class DiscoveryRunner:
         # vetted), and a "skip" verdict drops the wallet from the watchlist and
         # the persisted state before either is written below. Fail-open: any LLM
         # failure admits the wallet. Skipped on the first-init seed.
+        # Snapshot who was parked BEFORE this sweep's gate ran, so the drain below
+        # only re-checks wallets deferred on an EARLIER sweep — not the ones this
+        # sweep's gate is about to park (re-checking those immediately would just
+        # burn a second rate-limited call for no gain; the limit didn't change
+        # mid-sweep).
+        parked_before = {e.get("wallet") for e in
+                         gate_recheck_queue.pending(self.gate_recheck_queue_path)}
+
         verdicts, holdouts = (({}, set()) if result.first_init
                               else self._llm_gate(result))
+
+        # Re-run any gate checks that were deferred because claude -p was
+        # rate/spend-limited on an earlier sweep. Must run AFTER the gate and
+        # BEFORE the watchlist/state writes below, so a now-"skip" removes the
+        # provisional wallet from what gets persisted this sweep.
+        try:
+            self._drain_gate_queue(result, parked_before)
+        except Exception:  # a broken re-check must never break the sweep
+            logger.warning("[DISCOVERY] gate re-check drain failed; continuing", exc_info=True)
 
         # auto-paper: rewrite the watchlist the harness consumes (post-gate)
         _atomic_write_json(self.watchlist_path,
@@ -479,10 +503,20 @@ class DiscoveryRunner:
                                self.llm_review_top_n, e.wallet)
                 self._record_gate(e, "admit-cap", admitted=True)
                 continue
+            dossier = _dossier_from_eval(e)
             try:
-                v = self._llm_review(_dossier_from_eval(e), model=self.llm_model)
+                v = self._llm_review(dossier, model=self.llm_model)
             except Exception:  # pragma: no cover - belt-and-suspenders
                 v = None
+            if v is RATE_LIMITED:
+                # Spend/rate-limited: don't lose the wallet. Admit it provisionally
+                # (paper-only, reversible) AND park the check so it's redone once the
+                # limit clears — instead of fail-open-and-forget (permanently ungated).
+                self._enqueue_recheck(e, dossier)
+                self._record_gate(e, "skip-deferred", admitted=True, requeued=True)
+                logger.info("[DISCOVERY] LLM gate rate-limited for %s — admitted "
+                            "provisionally, check queued for re-run", e.wallet)
+                continue
             if v is None:  # fail-open: a broken gate must not freeze discovery
                 logger.warning("[DISCOVERY] LLM gate unavailable for %s — admitting (fail-open)",
                                e.wallet)
@@ -520,26 +554,112 @@ class DiscoveryRunner:
         return verdicts, holdout_wallets
 
     def _record_gate(self, e, verdict: str, *, admitted: bool, holdout: bool = False,
-                     confidence: float = 0.0, reasoning: str = "") -> None:
+                     requeued: bool = False, confidence: float = 0.0,
+                     reasoning: str = "") -> None:
         """Append one gate decision to the history log (queryable via /gate).
 
         Records WHY the wallet qualified (its theories) and whether lead-lag was
         even measured, so the accept/reject mix is attributable per theory. A
         ``holdout`` row is a would-be-skip admitted anyway to measure the
-        counterfactual; the ``confidence_band`` lets a later calibration slice
-        outcomes by how sure the gate was."""
+        counterfactual; a ``requeued`` row is a provisional admit whose check was
+        deferred (rate-limited) and parked for re-run; the ``confidence_band`` lets
+        a later calibration slice outcomes by how sure the gate was."""
         gate_history.append(self.gate_history_path, {
             "ts": self._now(),
             "wallet": e.wallet,
             "verdict": verdict,
             "admitted": admitted,
             "holdout": holdout,
+            "requeued": requeued,
             "confidence": round(confidence, 3),
             "confidence_band": _confidence_band(confidence),
             "theories": list(e.flagged_by),
             "had_leadlag": e.n > 0,
             "copy_n": e.copy_n,
             "reasoning": reasoning,
+        })
+
+    def _enqueue_recheck(self, e, dossier: dict) -> None:
+        """Park a rate-limited wallet's gate check for a later sweep to re-run."""
+        gate_recheck_queue.enqueue(
+            self.gate_recheck_queue_path, e.wallet, dossier,
+            theories=list(e.flagged_by), had_leadlag=e.n > 0, copy_n=e.copy_n,
+            now=self._now())
+
+    def _drain_gate_queue(self, result, only_wallets=None) -> None:
+        """Re-run deferred (rate-limited) gate checks against the current sweep.
+
+        For each parked wallet that is still on the watchlist, re-run the check on
+        its stored dossier. A real ``skip`` removes the provisionally-admitted
+        wallet from the watchlist + state now (and pings); ``follow``/``watch``
+        confirms it; still rate-limited keeps it parked; a wallet that already
+        decayed off the watchlist is simply dequeued. ``only_wallets`` (when given)
+        restricts the drain to wallets parked on an EARLIER sweep, so a wallet this
+        sweep just parked isn't re-checked immediately. Bounded by
+        ``llm_review_top_n`` re-checks per sweep so a restored subscription doesn't
+        fire the whole backlog at once (leftovers wait for the next sweep). Never
+        raises."""
+        if not self.llm_review_enabled or not self.gate_recheck_queue_path:
+            return
+        entries = gate_recheck_queue.pending(self.gate_recheck_queue_path)
+        if not entries:
+            return
+        on_wl = {e.wallet for e in result.watchlist}
+        resolved: set = set()      # dequeue (re-checked or gone)
+        rejected: set = set()      # remove from watchlist (deferred check said skip)
+        checked = 0
+        for entry in entries:
+            wallet = entry.get("wallet")
+            if not wallet:
+                continue
+            if only_wallets is not None and wallet not in only_wallets:
+                continue                      # parked THIS sweep — wait for the next
+            if wallet not in on_wl:
+                resolved.add(wallet)          # decayed off — nothing to re-check
+                continue
+            if checked >= self.llm_review_top_n:
+                break                          # cap this sweep; leave the rest parked
+            checked += 1
+            try:
+                v = self._llm_review(entry.get("dossier") or {}, model=self.llm_model)
+            except Exception:  # pragma: no cover - defensive
+                v = None
+            if v is RATE_LIMITED:
+                continue                       # still limited — keep parked
+            resolved.add(wallet)               # got a resolution (verdict or gave-up)
+            verdict = getattr(v, "verdict", None)
+            self._record_recheck(entry, verdict)
+            if verdict == "skip":
+                rejected.add(wallet)
+                logger.info("[DISCOVERY] deferred gate re-check REJECTED %s: %s",
+                            wallet, getattr(v, "reasoning", ""))
+                self._send(
+                    "🚫 <b>Deferred gate re-check</b> — Claude now says <b>skip</b>; "
+                    f"removed the provisionally-admitted wallet\n<code>{wallet}</code>\n"
+                    f"<i>{getattr(v, 'reasoning', '')}</i>")
+        if rejected:
+            self._drop_from_result(result, rejected)
+            logger.info("[DISCOVERY] deferred re-check removed %d provisional wallet(s)",
+                        len(rejected))
+        if resolved:
+            gate_recheck_queue.remove(self.gate_recheck_queue_path, resolved)
+
+    def _record_recheck(self, entry: dict, verdict) -> None:
+        """Log a deferred-check resolution to gate-history (from the stored entry,
+        since the sweep's Eval for this retained wallet may differ)."""
+        admitted = verdict != "skip"
+        gate_history.append(self.gate_history_path, {
+            "ts": self._now(),
+            "wallet": entry.get("wallet"),
+            "verdict": (verdict or "admit-recheck-unavailable"),
+            "admitted": admitted,
+            "holdout": False,
+            "requeued": False,
+            "recheck": True,
+            "theories": list(entry.get("theories") or []),
+            "had_leadlag": bool(entry.get("had_leadlag")),
+            "copy_n": entry.get("copy_n", 0),
+            "reasoning": "deferred gate check re-run after rate limit",
         })
 
     @staticmethod

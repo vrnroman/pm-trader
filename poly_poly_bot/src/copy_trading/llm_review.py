@@ -37,6 +37,28 @@ logger = logging.getLogger("poly_poly_bot")
 DEFAULT_MODEL = "claude-opus-4-8"
 DEFAULT_TIMEOUT_S = 180
 
+# Sentinel distinct from ``None``: the ``claude -p`` call could not run because the
+# subscription is spend/rate-limited (a *transient*, retriable condition), not a
+# generic failure. Callers treat it specially — defer the wallet's gate check to a
+# restart-surviving queue and re-run it once the limit clears — rather than
+# fail-open-and-forget. Any caller that doesn't know about it simply sees a
+# non-verdict (like ``None``), so it degrades to today's safe behaviour.
+RATE_LIMITED = object()
+
+# Markers that identify a spend/usage/rate-limit response (captured from a real
+# `claude -p` limit reply: "You've hit your monthly spend limit · raise it at
+# claude.ai/settings/usage"). Matched case-insensitively across stderr + stdout +
+# the parsed envelope, so wording drift in any one field still trips detection.
+_RATE_LIMIT_MARKERS = (
+    "spend limit", "usage limit", "rate limit",
+    "claude.ai/settings/usage", "quota",
+)
+
+
+def _looks_rate_limited(*texts: str | None) -> bool:
+    blob = " ".join(t for t in texts if t).lower()
+    return any(m in blob for m in _RATE_LIMIT_MARKERS)
+
 _SYSTEM = (
     "You are a quantitative analyst vetting Polymarket wallets for a paper-trading "
     "copy bot. You are given a dossier of a wallet that already passed statistical "
@@ -197,11 +219,25 @@ def _claude_cli_runner(prompt: str, *, model: str, timeout_s: int) -> dict | Non
     if proc.returncode != 0:
         logger.warning("[LLM-GATE] claude -p exit %s: %s",
                        proc.returncode, (proc.stderr or "")[:300])
+        # Distinguish a spend/rate limit (retriable → defer the wallet) from a
+        # generic failure (fail-open). Check stderr AND stdout — the limit notice
+        # may land on either.
+        if _looks_rate_limited(proc.stderr, proc.stdout):
+            logger.warning("[LLM-GATE] claude -p is rate/spend-limited — deferring")
+            return RATE_LIMITED
         return None
-    envelope = json.loads(proc.stdout)
+    try:
+        envelope = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        # Non-JSON on a zero exit (e.g. a plain limit notice) — still catch a limit.
+        return RATE_LIMITED if _looks_rate_limited(proc.stdout, proc.stderr) else None
     if envelope.get("is_error") or envelope.get("subtype") != "success":
         logger.warning("[LLM-GATE] claude -p returned error envelope: %s",
                        str(envelope.get("subtype")))
+        # The limit may surface as an error envelope; scan the whole envelope.
+        if _looks_rate_limited(json.dumps(envelope), proc.stderr):
+            logger.warning("[LLM-GATE] claude -p error envelope is a rate/spend limit — deferring")
+            return RATE_LIMITED
         return None
     return envelope
 
@@ -262,6 +298,14 @@ def review_wallet(
     except Exception:  # never let the gate call break the sweep
         logger.warning("[LLM-GATE] failed for %s", wallet, exc_info=True)
     end = time.time()
+
+    # Rate/spend-limited: short-circuit BEFORE normalization (the sentinel is not a
+    # dict/str, so it would otherwise fall through to a plain None and lose the
+    # retriable signal). The caller defers this wallet to the re-check queue.
+    if res is RATE_LIMITED:
+        _record(dossier, wallet, model, prompt, None, None, None, start, end,
+                "rate-limited")
+        return RATE_LIMITED
 
     # The CLI runner returns the full envelope; an injected test runner may
     # return the result text directly. Normalize both.
