@@ -22,6 +22,3 @@ credentials/
 # Personal notes / audits — this repo is PUBLIC, keep these local only
 .claude/
 SECURITY_AUDIT.md
-new_tp_strategy.md
-rapidapi2.png
-claude_code_prompt_tennis_streaming*.md

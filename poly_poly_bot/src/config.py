@@ -1,8 +1,4 @@
-"""Unified configuration for the copy-trading bot (Strategy #1).
-
-The Weather (#2) and Tennis Arb (#3) strategies were decommissioned on
-2026-06-17; see DECOMMISSIONED.md to restore them from git history.
-"""
+"""Unified configuration for the copy-trading bot (Strategy #1)."""
 
 from __future__ import annotations
 import os

@@ -8,9 +8,6 @@ Commands:
   /setkey            — Rotate/clear the in-memory private key
   /shutdown          — Graceful shutdown (Docker restarts the container)
   /help              — Show available commands
-
-The Weather (#2) and Tennis Arb (#3) strategies were decommissioned on
-2026-06-17; see DECOMMISSIONED.md to restore them from git history.
 """
 
 import os

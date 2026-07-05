@@ -9,9 +9,6 @@ Manages:
 
 Usage:
   python main.py              # Run with defaults from .env
-
-Note: the Weather (#2) and Tennis Arb (#3) strategies were decommissioned on
-2026-06-17. See DECOMMISSIONED.md for how to restore them from git history.
 """
 
 import asyncio

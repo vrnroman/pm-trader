@@ -2,10 +2,6 @@
 
 Polymarket copy-trading bot (Strategy #1), running as a single Python process.
 
-> **Decommissioned strategies:** Weather Betting (#2) and Tennis Arbitrage (#3)
-> were removed on 2026-06-17. See [DECOMMISSIONED.md](DECOMMISSIONED.md) for how
-> to restore them from git history.
-
 ## Overview
 
 | Strategy | Description | Signal Source |
