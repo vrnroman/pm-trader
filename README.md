@@ -24,8 +24,8 @@ Each strategy runs independently. Enable any combination via `.env`.
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/vrnroman/Top-pm-traders.git
-cd Top-pm-traders/poly_poly_bot
+git clone https://github.com/vrnroman/pm-trader.git
+cd pm-trader/poly_poly_bot
 
 # 2. Create and fill in your environment file
 cp .env.example .env
