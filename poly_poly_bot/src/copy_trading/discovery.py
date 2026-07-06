@@ -79,8 +79,21 @@ class DiscoveryConfig:
     consensus_min_usd: float = 500.0
     consensus_cooldown_s: float = 43200.0    # 12h before a cell re-pings (unless it grows)
     # entry-discipline gate: reject wallets whose buy $ is tail-dominated
-    # (settlement-lag scooping near $1 — un-copyable). Lenient by default.
+    # (settlement-lag scooping near $1 — un-copyable). Lenient by default;
+    # production tightens it via config (WALLET_DISCOVERY_MAX_TAIL_RATIO).
     max_tail_ratio: float = 0.5
+    # Money-curve gates (RCA 2026-07): the legacy t-stat>=10 bar selected FOR
+    # near-$1 scoopers — near-zero per-trade variance aces the t-stat, but the
+    # dollar curve is a loser (huge drawdown, negative Sharpe, net loss). These
+    # reject on the SAME money-curve signals the LLM gate was rejecting on, so the
+    # cull happens upstream, cheaply, before an Opus call or a fail-open admit.
+    # All default to OFF here (inf / 1.0) so a bare DiscoveryConfig() is byte-for-
+    # byte the legacy funnel; production turns them on via config at conservative
+    # thresholds. Both curve gates require >= min_curve_n resolved closed positions
+    # first, so a thin, noisy book is never rejected on curve shape alone.
+    max_curve_drawdown: float = float("inf")  # skip if curve_drawdown exceeds this (fraction; 1.5 = 150%)
+    max_hit_rate: float = 1.0                 # active only when < 1.0: skip a high-hit wallet with a losing/spiky curve
+    min_curve_n: int = 0                      # evidence floor (closed positions) before the two curve gates apply
     # independent strategy theories (1a..1j) that can qualify a wallet (OR'd with
     # the legacy capture+tstat gate). All ten run by default — discovery is
     # paper-only, so every theory earns or fails on measured paper PnL before any
@@ -132,6 +145,12 @@ class Eval:
     curve_sharpe: float = 0.0
     curve_drawdown: float = 0.0
     net_pnl: float = 0.0
+    # closed-position skill stats (from trader_scoring metrics), distinct from the
+    # lead-lag `hit_rate`/`n` above. `closed_hit_rate` is the "98% hit" scooper
+    # signal; `n_closed` is the evidence floor guarding the drawdown/hit gates so a
+    # thin book can't be rejected on a noisy curve.
+    closed_hit_rate: float = 0.0
+    n_closed: int = 0
     # copy-replay (copy this wallet's copyable BUYs, hold to resolution) — the
     # selection signal that measures the SAME action the live harness takes.
     # exit_roi/exit_n are the two-horizon diagnostic (round-trip / exit-follow).
@@ -268,6 +287,16 @@ def run_discovery_cycle(
             continue  # auto-demoted (proven-negative copy ROI) — in cooldown, skip
         if e.tail_ratio > cfg.max_tail_ratio:
             continue  # tail-dominated buy flow — un-copyable, skip regardless of theory
+        # money-curve gates (RCA fix): reject the scooper anti-pattern the legacy
+        # t-stat bar was letting through. Guarded by min_curve_n so a thin book is
+        # never rejected on a noisy curve (insufficient evidence -> keep accruing).
+        # Both are no-ops at the legacy defaults (drawdown=inf, hit=1.0).
+        if e.n_closed >= cfg.min_curve_n:
+            if e.curve_drawdown > cfg.max_curve_drawdown:
+                continue  # catastrophic dollar drawdown — a copier eats the tail loss
+            if (cfg.max_hit_rate < 1.0 and e.closed_hit_rate >= cfg.max_hit_rate
+                    and (e.net_pnl <= 0.0 or e.curve_sharpe <= 0.0)):
+                continue  # near-perfect hit rate on a losing/spiky curve = settlement-lag scooper
         # copy-replay gate: drop wallets PROVEN to lose under our actual copy
         # action — enough resolved replayed copies AND a mean copy-and-hold
         # ROI/$ below the bar — no matter which theory flagged them. Wallets with

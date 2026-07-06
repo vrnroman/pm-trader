@@ -316,8 +316,22 @@ class Config:
     # wallets first. Set the gate false to fall back to the legacy theory rank.
     wallet_discovery_copy_replay_gate: bool = _opt_bool("WALLET_DISCOVERY_COPY_REPLAY_GATE", True)
     wallet_discovery_min_copy_replay_n: int = _opt_int("WALLET_DISCOVERY_MIN_COPY_REPLAY_N", 12)
-    wallet_discovery_min_copy_replay_roi: float = _opt_float("WALLET_DISCOVERY_MIN_COPY_REPLAY_ROI", 0.0)
+    # Copy-and-hold ROI/$ bar to qualify (proven-positive) / not be dropped
+    # (proven-negative). Raised 0.0 -> +0.02 (RCA 2026-07) so replay ROI is a real
+    # cost-covering bar, not just "not a net-loser": a wallet at [0, 0.02) copy ROI
+    # is now dropped rather than ranked first. Independent of the real-money promote
+    # floor (copy_promote_min_roi=0.10) — this gates paper *discovery* only.
+    wallet_discovery_min_copy_replay_roi: float = _opt_float("WALLET_DISCOVERY_MIN_COPY_REPLAY_ROI", 0.02)
     wallet_discovery_fade_roi: float = _opt_float("WALLET_DISCOVERY_FADE_ROI", -0.10)
+    # Money-curve gates (RCA 2026-07): reject the near-$1 settlement-lag scooper
+    # the legacy t-stat>=10 bar was admitting. Shipped ON at conservative
+    # thresholds; each is a reversible env override (set drawdown huge + hit 1.0 to
+    # disable). Both curve gates require >= MIN_CURVE_N resolved closed positions
+    # first so a thin book is not rejected on a noisy curve.
+    wallet_discovery_max_tail_ratio: float = _opt_float("WALLET_DISCOVERY_MAX_TAIL_RATIO", 0.4)
+    wallet_discovery_max_curve_drawdown: float = _opt_float("WALLET_DISCOVERY_MAX_CURVE_DRAWDOWN", 1.5)
+    wallet_discovery_max_hit_rate: float = _opt_float("WALLET_DISCOVERY_MAX_HIT_RATE", 0.95)
+    wallet_discovery_min_curve_n: int = _opt_int("WALLET_DISCOVERY_MIN_CURVE_N", 20)
     # Consensus-of-sharps signal (signal-only, no capital). When >= N independent
     # copy-validated wallets BUY the same (market, outcome) within the window, the
     # discovery sweep emits a Telegram signal (no fill -> no slippage). On by

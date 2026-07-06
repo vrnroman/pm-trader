@@ -52,6 +52,83 @@ def test_tail_gate_threshold_configurable():
     assert strict.watchlist == []
 
 
+# --- money-curve gates (RCA 2026-07 scooper fix) --------------------------- #
+
+# ship-config: the money-curve gates ON at the conservative production thresholds.
+SHIP = DiscoveryConfig(
+    min_capture_cents=1.5, min_tstat=10.0, drop_capture_cents=1.0,
+    watchlist_cap=5, auto_remove=True,
+    max_tail_ratio=0.4, max_curve_drawdown=1.5, max_hit_rate=0.95, min_curve_n=20,
+)
+
+
+def _scooper_dd(w="0xDD"):
+    # flashy stats (t-stat 25, 98% hit) but a catastrophic dollar curve — the
+    # exact near-$1 settlement-lag scooper the LLM kept rejecting.
+    return Eval(wallet=w, capture_cents=2.0, tstat=25.0, n=30, n_closed=100,
+                curve_drawdown=1.87, curve_sharpe=-0.3, net_pnl=-3000.0,
+                closed_hit_rate=0.98)
+
+
+def _good_highvar(w="0xGV"):
+    # the population we WANT: real risk, ~62% hit, positive money curve, modest DD.
+    return Eval(wallet=w, capture_cents=2.0, tstat=12.0, n=30, n_closed=100,
+                curve_drawdown=0.6, curve_sharpe=0.8, net_pnl=5000.0,
+                closed_hit_rate=0.62)
+
+
+def test_backward_safe_scooper_admitted_at_legacy_values():
+    # C1: at legacy knob values (CFG leaves the new gates OFF) the scooper still
+    # qualifies exactly as before — the new gates are pure no-ops until turned on.
+    r = run_discovery_cycle({"0xDD": _scooper_dd()}, DiscoveryState(), CFG)
+    assert [e.wallet for e in r.watchlist] == ["0xDD"]
+
+
+def test_drawdown_ceiling_rejects_scooper():
+    r = run_discovery_cycle({"0xDD": _scooper_dd()}, DiscoveryState(), SHIP)
+    assert r.watchlist == []
+
+
+def test_hit_suspicion_rejects_high_hit_loser_but_not_winner():
+    # high hit + losing/spiky curve -> scooper -> rejected; high hit + WINNING
+    # curve -> genuine winner -> admitted (the AND guards the false positive).
+    loser = Eval(wallet="0xHL", capture_cents=2.0, tstat=25.0, n=30, n_closed=100,
+                 curve_drawdown=0.5, curve_sharpe=-0.1, net_pnl=-500.0,
+                 closed_hit_rate=0.99)
+    winner = Eval(wallet="0xHW", capture_cents=2.0, tstat=25.0, n=30, n_closed=100,
+                  curve_drawdown=0.3, curve_sharpe=1.2, net_pnl=5000.0,
+                  closed_hit_rate=0.98)
+    r = run_discovery_cycle({"0xHL": loser, "0xHW": winner}, DiscoveryState(), SHIP)
+    assert [e.wallet for e in r.watchlist] == ["0xHW"]
+
+
+def test_good_high_variance_wallet_not_rejected():
+    # the FP guard the RCA left unmeasured: a genuinely-good higher-variance
+    # informed trader must survive every new gate.
+    r = run_discovery_cycle({"0xGV": _good_highvar()}, DiscoveryState(), SHIP)
+    assert [e.wallet for e in r.watchlist] == ["0xGV"]
+
+
+def test_curve_gates_skip_thin_book_insufficient_evidence():
+    # n_closed below min_curve_n -> the drawdown/hit gates DON'T fire (a thin,
+    # noisy book is never rejected on curve shape; it keeps accruing evidence).
+    thin = Eval(wallet="0xTH", capture_cents=2.0, tstat=25.0, n=30, n_closed=5,
+                curve_drawdown=3.0, curve_sharpe=-0.5, net_pnl=-100.0,
+                closed_hit_rate=0.99)
+    r = run_discovery_cycle({"0xTH": thin}, DiscoveryState(), SHIP)
+    assert [e.wallet for e in r.watchlist] == ["0xTH"]
+
+
+def test_discovery_replay_roi_independent_of_promote_floor():
+    # C3: the discovery copy-replay bar (+0.02, paper) must never be the
+    # real-money promote floor (+0.10). Distinct config knobs, distinct code paths.
+    from src.config import CONFIG
+    assert CONFIG.wallet_discovery_min_copy_replay_roi == 0.02
+    assert CONFIG.copy_promote_min_roi == 0.10
+    assert (CONFIG.wallet_discovery_min_copy_replay_roi
+            != CONFIG.copy_promote_min_roi)
+
+
 def test_theory_flag_qualifies_via_or_path():
     # below the legacy capture/t-stat gate, but an independent theory flagged it
     e = Eval(wallet="0xF", capture_cents=0.0, tstat=2.0,

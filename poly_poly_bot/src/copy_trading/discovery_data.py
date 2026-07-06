@@ -559,6 +559,8 @@ def evaluate_sweep(
             capture_cents=capture, lead_cents=lead, hit_rate=hit, n=n_cap,
             tail_ratio=ep.tail_ratio, copyable_ratio=ep.copyable_ratio,
             curve_sharpe=cm.sharpe, curve_drawdown=cm.max_drawdown_frac, net_pnl=cm.net_pnl,
+            closed_hit_rate=(getattr(m, "hit_rate", 0.0) if m else 0.0),
+            n_closed=(getattr(m, "n_closed", 0) if m else 0),
             copy_roi=crs.mean_roi, copy_tstat=crs.tstat, copy_n=crs.n,
             copy_hit=crs.hit_rate, exit_roi=crs.exit_mean_roi, exit_n=crs.exit_n, fade=fade,
             approved_categories=approved_cats, category_edges=cat_edge_rows,
