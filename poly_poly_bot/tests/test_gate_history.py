@@ -69,6 +69,27 @@ def test_summarize_excludes_requeued_provisional_rows():
     assert s["per_theory"]["1e"] == {"admit": 0, "reject": 1}   # not admit:1,reject:1
 
 
+def test_summarize_splits_vetted_vs_unvetted_admits():
+    # "admitted" must not conflate a real Claude verdict (follow/watch) with
+    # ungated fail-open / over-cap / recheck-unavailable admits that nothing judged.
+    rows = [
+        {"wallet": "0x1", "admitted": True, "verdict": "follow"},           # vetted
+        {"wallet": "0x2", "admitted": True, "verdict": "watch"},            # vetted
+        {"wallet": "0x3", "admitted": True, "verdict": "admit-fail-open"},  # unvetted
+        {"wallet": "0x4", "admitted": True, "verdict": "admit-cap"},        # unvetted
+        {"wallet": "0x5", "admitted": True},                                # no verdict -> unvetted
+        {"wallet": "0x6", "admitted": False, "verdict": "skip"},            # reject
+    ]
+    s = gate_history.summarize(rows)
+    assert s["admitted"] == 5
+    assert s["admitted_vetted"] == 2
+    assert s["admitted_unvetted"] == 3
+    assert s["unvetted_by_reason"]["admit-fail-open"] == 1
+    assert s["unvetted_by_reason"]["admit-cap"] == 1
+    assert s["unvetted_by_reason"]["unknown"] == 1
+    assert s["rejected"] == 1
+
+
 # --- the discovery gate actually writes history (end-to-end via run_once) ---- #
 
 def test_llm_gate_records_each_decision(tmp_path):

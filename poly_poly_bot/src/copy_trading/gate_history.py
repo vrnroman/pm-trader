@@ -75,9 +75,23 @@ def summarize(rows: list[dict]) -> dict:
          "confidence": r.get("confidence")}
         for r in rejected
     ][-5:]
+    # Vetted vs never-vetted admits: "admitted" conflates a real Claude verdict
+    # (follow/watch) with fail-open / over-cap / recheck-unavailable admits that
+    # nothing actually judged. Split them so the accept mix doesn't read as "all
+    # vetted" when a slice was ungated. A row's ``verdict`` string carries the
+    # disposition (set by discovery_runner): only follow/watch are true vettings.
+    _VETTED_VERDICTS = ("follow", "watch")
+    admitted_vetted = [r for r in admitted if r.get("verdict") in _VETTED_VERDICTS]
+    admitted_unvetted = [r for r in admitted if r.get("verdict") not in _VETTED_VERDICTS]
+    unvetted_by_reason: dict[str, int] = defaultdict(int)
+    for r in admitted_unvetted:
+        unvetted_by_reason[r.get("verdict") or "unknown"] += 1
     return {
         "total": len(decided),
         "admitted": len(admitted),
+        "admitted_vetted": len(admitted_vetted),
+        "admitted_unvetted": len(admitted_unvetted),
+        "unvetted_by_reason": dict(unvetted_by_reason),
         "rejected": len(rejected),
         "deferred": len(deferred),
         "per_theory": dict(per_theory),
