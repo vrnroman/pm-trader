@@ -63,6 +63,28 @@ def group_settled_by_wallet(paper_positions) -> dict[str, list]:
     return by_wallet
 
 
+def _probation_eligible(
+    stats, replay: dict | None, *,
+    min_settled: int, min_replay_n: int, min_replay_roi: float, min_replay_tstat: float,
+) -> bool:
+    """A wallet that fails the full promote floor but has STRONG own-history
+    copy-and-hold replay (already computed by discovery) AND a small forward-paper
+    sample that agrees. This ONLY lowers the offer bar — the real-money /golive
+    gate is untouched (still 30 settled + full floor), so probation never weakens
+    what real capital must clear. Requiring a strong copy-replay edge is itself the
+    anti-scooper guard: the replay measures the copyable-band hold-to-resolution
+    action, exactly what a scooper's near-$1 book fails."""
+    if not replay:
+        return False
+    own_strong = (int(replay.get("copy_n", 0)) >= min_replay_n
+                  and float(replay.get("copy_roi", 0.0)) >= min_replay_roi
+                  and float(replay.get("copy_tstat", 0.0)) >= min_replay_tstat)
+    fwd_agrees = (stats.n_closed >= min_settled and stats.roi is not None
+                  and stats.roi >= 0.0
+                  and (stats.second_half_roi is None or stats.second_half_roi >= 0.0))
+    return own_strong and fwd_agrees
+
+
 def evaluate_governance(
     positions_by_wallet: dict[str, list],
     *,
@@ -81,6 +103,12 @@ def evaluate_governance(
     demote_max_wilson: float,
     now: float,
     cooldown_s: float,
+    replay_by_wallet: dict | None = None,
+    probation_enabled: bool = False,
+    probation_min_settled: int = 5,
+    probation_min_replay_n: int = 20,
+    probation_min_replay_roi: float = 0.05,
+    probation_min_replay_tstat: float = 2.0,
 ) -> tuple[list[dict], list[dict], list[dict]]:
     """Decide promote-offers, demotions, and holds from per-wallet settled P&L.
 
@@ -129,11 +157,29 @@ def evaluate_governance(
             min_conditions=promote_min_conditions,
             min_categories=promote_min_categories)
         theories = _theories_from_positions(positions)
+        replay = (replay_by_wallet or {}).get(key)
         if floor.passed:
             offers.append({
                 "wallet": wallet, "n_closed": stats.n_closed, "roi": stats.roi,
                 "net_pnl": stats.net_pnl, "stats": stats, "theories": theories,
                 "warnings": floor.warnings,
+            })
+        elif probation_enabled and _probation_eligible(
+                stats, replay, min_settled=probation_min_settled,
+                min_replay_n=probation_min_replay_n,
+                min_replay_roi=probation_min_replay_roi,
+                min_replay_tstat=probation_min_replay_tstat):
+            # Fast-track: strong own-history replay + a small agreeing forward
+            # sample -> an EARLY offer tagged "probation" (tap-to-accept only, never
+            # auto-accepted; real money still needs manual /golive + /live CONFIRM).
+            offers.append({
+                "wallet": wallet, "n_closed": stats.n_closed, "roi": stats.roi,
+                "net_pnl": stats.net_pnl, "stats": stats, "theories": theories,
+                "warnings": floor.reasons,   # surface WHY the full floor was skipped
+                "tier": "probation", "probation": True,
+                "replay": {"copy_n": int((replay or {}).get("copy_n", 0)),
+                           "copy_roi": float((replay or {}).get("copy_roi", 0.0)),
+                           "copy_tstat": float((replay or {}).get("copy_tstat", 0.0))},
             })
         elif stats.n_closed >= promote_min_n and stats.roi is not None \
                 and stats.roi >= promote_min_roi:
@@ -145,6 +191,50 @@ def evaluate_governance(
             })
 
     return offers, demotions, held
+
+
+def find_retirements(
+    positions_by_wallet: dict[str, list],
+    *,
+    now: float,
+    min_n: int,
+    dead_band_low: float,
+    dead_band_high: float,
+    max_window_s: float,
+    promoted: set,
+    blacklist: set,
+    offered: set,
+    retired: set,
+) -> list[dict]:
+    """Wallets to NEUTRALLY retire (time-box the dead-band). A wallet that has
+    enough settled copies, sits in the inconclusive band (``dead_band_low <
+    roi < dead_band_high`` — neither promotable nor demotable), and has been
+    observed longer than ``max_window_s`` (by its oldest copy) is stuck: it is
+    removed so it stops squatting a watchlist slot, but it is NOT a proven loser,
+    so this is distinct from a demotion and it stays re-discoverable. Pure."""
+    out: list[dict] = []
+    for key, positions in positions_by_wallet.items():
+        if not key.startswith("0x"):
+            continue
+        if key in promoted or key in blacklist or key in offered or key in retired:
+            continue
+        wallet = next((getattr(p, "target", None) for p in positions
+                       if getattr(p, "target", None)), key)
+        stats = promotion_gate.compute_stats(wallet, positions)
+        if stats.n_closed < min_n or stats.roi is None:
+            continue
+        if not (dead_band_low < stats.roi < dead_band_high):
+            continue
+        oldest = min((float(getattr(p, "opened_ts", 0.0) or 0.0) for p in positions),
+                     default=now)
+        age_s = now - oldest
+        if age_s < max_window_s:
+            continue
+        out.append({
+            "wallet": wallet, "n_closed": stats.n_closed, "roi": stats.roi,
+            "net_pnl": stats.net_pnl, "age_days": round(age_s / 86400.0, 1),
+        })
+    return out
 
 
 def _log_history(history_path: Optional[str], row: dict) -> None:
@@ -172,6 +262,16 @@ def run_governance_cycle(
     review_fn: Optional[Callable[[dict], object]] = None,
     llm_model: Optional[str] = None,
     history_path: Optional[str] = None,
+    replay_by_wallet: dict | None = None,
+    probation_enabled: bool = False,
+    probation_min_settled: int = 5,
+    probation_min_replay_n: int = 20,
+    probation_min_replay_roi: float = 0.05,
+    probation_min_replay_tstat: float = 2.0,
+    time_box_enabled: bool = False,
+    time_box_window_s: float = 45 * 86400.0,
+    retire_cooldown_s: float = 45 * 86400.0,
+    send_retirement: Optional[Callable[[dict], None]] = None,
 ) -> tuple[list[dict], list[dict]]:
     """Group the settled ledger, evaluate the gate, then persist + notify.
 
@@ -203,24 +303,32 @@ def run_governance_cycle(
         demote_min_n=demote_min_n, demote_max_roi=demote_max_roi,
         demote_min_abs_loss=demote_min_abs_loss, demote_max_wilson=demote_max_wilson,
         now=now, cooldown_s=cooldown_s,
+        replay_by_wallet=replay_by_wallet, probation_enabled=probation_enabled,
+        probation_min_settled=probation_min_settled,
+        probation_min_replay_n=probation_min_replay_n,
+        probation_min_replay_roi=probation_min_replay_roi,
+        probation_min_replay_tstat=probation_min_replay_tstat,
     )
 
     sent: list[dict] = []
     for o in offers:
         stats = o.get("stats")
+        # A probation offer carries its own tier so it never sizes as a fully-vetted
+        # promotion; a normal offer falls back to the default tier.
+        o_tier = o.get("tier") or default_tier
         verdict = None
         if review_fn is not None:
             try:
                 from src.copy_trading.llm_review import build_promotion_dossier
                 dossier = build_promotion_dossier(
                     o["wallet"], stats=stats, theories=o.get("theories"),
-                    floor_warnings=o.get("warnings"), tier=default_tier)
+                    floor_warnings=o.get("warnings"), tier=o_tier)
                 verdict = review_fn(dossier) if llm_model is None else review_fn(dossier, model=llm_model)
             except Exception:  # advisory only — a broken review never blocks the offer
                 logger.warning("[PROMOTE-GATE] LLM review errored for %s (offering anyway)",
                                o["wallet"], exc_info=True)
                 verdict = None
-        o = {**o, "tier": default_tier, "llm": verdict,
+        o = {**o, "tier": o_tier, "llm": verdict,
              "llm_attempted": review_fn is not None}
         if send_offer(o):
             promotion_state.record_offer(
@@ -229,7 +337,7 @@ def run_governance_cycle(
             _log_history(history_path, {
                 "ts": now, "event": "offer", "wallet": o["wallet"],
                 "n_closed": o["n_closed"], "roi": round(float(o["roi"] or 0.0), 4),
-                "net_pnl": o["net_pnl"], "tier": default_tier,
+                "net_pnl": o["net_pnl"], "tier": o_tier, "probation": o.get("probation", False),
                 "roi_tstat": getattr(stats, "roi_tstat", None),
                 "second_half_roi": getattr(stats, "second_half_roi", None),
                 "distinct_conditions": getattr(stats, "distinct_conditions", None),
@@ -276,5 +384,33 @@ def run_governance_cycle(
         logger.info("[PROMOTE-GATE] holding %s (n=%d roi=%+.0f%%): %s",
                     h["wallet"], h["n_closed"], (h["roi"] or 0.0) * 100,
                     "; ".join(h.get("reasons", [])))
+
+    # Time-box the dead-band: neutrally retire wallets stuck inconclusive past the
+    # observation window so they stop squatting a slot (re-discoverable, NOT
+    # blacklisted). Off by default; the dead-band is (demote line, promote line).
+    if time_box_enabled:
+        retired_now = promotion_state.active_retired(now)
+        for r in find_retirements(
+                positions_by_wallet, now=now, min_n=demote_min_n,
+                dead_band_low=demote_max_roi, dead_band_high=promote_min_roi,
+                max_window_s=time_box_window_s, promoted=promoted,
+                blacklist=blacklist, offered=offered_active, retired=retired_now):
+            promotion_state.add_retired(
+                r["wallet"], until=now + retire_cooldown_s, reason="time-box: dead-band",
+                n_closed=r["n_closed"], roi=r["roi"] or 0.0, now=now)
+            _log_history(history_path, {
+                "ts": now, "event": "retire", "wallet": r["wallet"],
+                "n_closed": r["n_closed"], "roi": round(float(r["roi"] or 0.0), 4),
+                "net_pnl": r["net_pnl"], "age_days": r["age_days"],
+                "reason": "time-box: inconclusive past window",
+            })
+            if send_retirement is not None:
+                try:
+                    send_retirement(r)
+                except Exception:  # pragma: no cover — a notice must not break the loop
+                    pass
+            logger.info("[PROMOTE-GATE] retiring %s (n=%d roi=%+.0f%% age=%.0fd): "
+                        "dead-band past window, re-discoverable",
+                        r["wallet"], r["n_closed"], (r["roi"] or 0.0) * 100, r["age_days"])
 
     return sent, applied

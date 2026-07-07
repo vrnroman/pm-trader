@@ -62,6 +62,10 @@ def offers_path() -> str:
     return _data_path("PROMOTION_OFFERS_STORE", "promotion_offers.json")
 
 
+def retired_path() -> str:
+    return _data_path("COPY_RETIRED_STORE", "copy_retired.json")
+
+
 # --------------------------------------------------------------------------- #
 # Low-level cached read / atomic write
 # --------------------------------------------------------------------------- #
@@ -213,6 +217,55 @@ def add_blacklist(wallet: str, *, until: float, reason: str = "",
         data = dict(_read(blacklist_path()))
         data[wallet.lower()] = rec
         _write(blacklist_path(), data)
+    return rec
+
+
+# --------------------------------------------------------------------------- #
+# Retired wallets — NEUTRAL time-box removal (distinct from the punitive
+# blacklist). A wallet stuck in the dead-band (never promotable, never demotable)
+# past the observation window is retired: removed from the watchlist so it stops
+# squatting a slot, but with NO proven-loser judgment — it is re-discoverable once
+# the window lapses. Kept in its own store so its inconclusive status is never
+# confused with an auto-demote.
+# --------------------------------------------------------------------------- #
+
+def retired_map() -> dict:
+    """Lowercased-wallet -> record ({wallet, until, reason, ts, n_closed, roi})."""
+    return _read(retired_path())
+
+
+def active_retired(now: Optional[float] = None) -> set[str]:
+    """Lowercased set of wallets currently within their retire window (excluded
+    from discovery so they don't re-add, re-discoverable once it lapses)."""
+    now = now if now is not None else time.time()
+    out: set[str] = set()
+    for w, rec in retired_map().items():
+        until = float(rec.get("until") or 0.0)
+        if until <= 0.0 or now < until:
+            out.add(w)
+    return out
+
+
+def add_retired(wallet: str, *, until: float, reason: str = "",
+                n_closed: int = 0, roi: float = 0.0,
+                now: Optional[float] = None) -> dict:
+    """Retire a wallet until ``until`` (unix secs; <=0 = permanent). Neutral: this
+    is an inconclusive time-box, NOT a demotion — do not use for proven losers."""
+    wallet = (wallet or "").strip()
+    if not wallet:
+        raise ValueError("empty wallet")
+    rec = {
+        "wallet": wallet,
+        "until": float(until),
+        "reason": reason,
+        "ts": now if now is not None else time.time(),
+        "n_closed": int(n_closed),
+        "roi": round(float(roi), 4),
+    }
+    with _LOCK:
+        data = dict(_read(retired_path()))
+        data[wallet.lower()] = rec
+        _write(retired_path(), data)
     return rec
 
 

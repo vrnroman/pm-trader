@@ -67,6 +67,24 @@ def _copy_paper_loop():
     _promo_history = os.path.join(
         os.path.dirname(CONFIG.wallet_discovery_state), "promotion-gate-history.jsonl")
 
+    def _load_replay_by_wallet():
+        """Per-wallet own-history copy-replay stats from the discovery watchlist,
+        for the probation fast-track. Defensive: {} on any read/parse failure."""
+        try:
+            import json
+            with open(CONFIG.copy_paper_watchlist, encoding="utf-8") as f:
+                data = json.load(f)
+            out = {}
+            for row in (data.get("targets") or []):
+                w = (row.get("wallet") or "").lower()
+                if w:
+                    out[w] = {"copy_roi": row.get("copy_roi", 0.0),
+                              "copy_n": row.get("copy_n", 0),
+                              "copy_tstat": row.get("copy_tstat", 0.0)}
+            return out
+        except (OSError, ValueError):
+            return {}
+
     def _governance(ledger):
         """Auto promote-offer / demote off the System-B paper ledger each cycle."""
         if not CONFIG.copy_governance_enabled:
@@ -99,6 +117,23 @@ def _copy_paper_loop():
                     f"(≤ {CONFIG.copy_demote_max_roi * 100:+.0f}%). "
                     f"Dropped from the watchlist for "
                     f"{CONFIG.copy_demote_cooldown_days:.0f}d."),
+                # probation fast-track (rec 2a): strong own-history replay + a small
+                # agreeing forward sample -> an early "probation"-tier offer.
+                replay_by_wallet=_load_replay_by_wallet(),
+                probation_enabled=CONFIG.copy_probation_enabled,
+                probation_min_settled=CONFIG.copy_probation_min_settled,
+                probation_min_replay_n=CONFIG.copy_probation_min_replay_n,
+                probation_min_replay_roi=CONFIG.copy_probation_min_replay_roi,
+                probation_min_replay_tstat=CONFIG.copy_probation_min_replay_tstat,
+                # dead-band time-box (rec 2b): neutrally retire stuck wallets.
+                time_box_enabled=CONFIG.copy_time_box_enabled,
+                time_box_window_s=CONFIG.copy_time_box_window_days * 86400.0,
+                retire_cooldown_s=CONFIG.copy_retire_cooldown_days * 86400.0,
+                send_retirement=lambda r: telegram_bot.send_message(
+                    f"🗄️ <b>Retired (inconclusive)</b> <code>{r['wallet']}</code> — "
+                    f"{r['n_closed']} settled, ROI {r['roi'] * 100:+.0f}%, "
+                    f"{r['age_days']:.0f}d on paper with no verdict. Removed from the "
+                    f"watchlist (re-discoverable), not blacklisted."),
             )
         except Exception as e:
             logger.warning(f"[COPY-PAPER] governance cycle failed: {e}")

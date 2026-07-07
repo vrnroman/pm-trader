@@ -7,7 +7,8 @@ import pytest
 from src.copy_trading import gate_history, promotion_state as ps
 from src.copy_trading.copy_paper import PaperPosition
 from src.copy_trading.governance import (
-    evaluate_governance, group_settled_by_wallet, run_governance_cycle)
+    evaluate_governance, find_retirements, group_settled_by_wallet,
+    run_governance_cycle)
 
 WIN = "0x" + "a" * 40
 LOSE = "0x" + "b" * 40
@@ -111,19 +112,20 @@ def stores(tmp_path, monkeypatch):
     monkeypatch.setenv("PROMOTED_WALLETS_STORE", str(tmp_path / "promoted.json"))
     monkeypatch.setenv("COPY_BLACKLIST_STORE", str(tmp_path / "blacklist.json"))
     monkeypatch.setenv("PROMOTION_OFFERS_STORE", str(tmp_path / "offers.json"))
+    monkeypatch.setenv("COPY_RETIRED_STORE", str(tmp_path / "retired.json"))
     ps.clear_cache()
     yield
     ps.clear_cache()
 
 
-def _run(positions, sent, *, tmp_path, now=1000.0, send_ok=True, review_fn=None):
+def _run(positions, sent, *, tmp_path, now=1000.0, send_ok=True, review_fn=None, **extra):
     return run_governance_cycle(
         positions, now=now, cooldown_s=86400.0, default_tier="1b",
         send_offer=lambda o: (sent.append(o) or send_ok),
         send_demotion=lambda d: sent.append(("demote", d)),
         review_fn=review_fn,
         history_path=str(tmp_path / "promotion-gate-history.jsonl"),
-        **FLOORS)
+        **FLOORS, **extra)
 
 
 def test_cycle_offers_once_and_records(stores, tmp_path):
@@ -193,3 +195,94 @@ def test_cycle_records_held_once(stores, tmp_path):
     _run(concentrated, sent, tmp_path=tmp_path)
     rows2 = gate_history.load(str(tmp_path / "promotion-gate-history.jsonl"))
     assert len([r for r in rows2 if r.get("event") == "held"]) == 1
+
+
+# --------------------------------------------------------------------------- #
+# Probation fast-track (rec 2a) — own-history replay lowers the OFFER bar only
+# --------------------------------------------------------------------------- #
+
+STRONG_REPLAY = {"copy_n": 30, "copy_roi": 0.08, "copy_tstat": 3.0}
+
+
+def _below_floor(target=WIN, n=6, pnl=0.3):
+    # modest +ROI over only 6 settled copies — below the 15-settled promote floor,
+    # so ONLY a probation fast-track can produce an offer.
+    return [pos(target, i, pnl=pnl) for i in range(n)]
+
+
+def test_probation_fires_on_strong_replay_plus_agreeing_forward():
+    offers, dem, held = _ev(
+        _below_floor(), probation_enabled=True,
+        replay_by_wallet={WIN.lower(): STRONG_REPLAY})
+    assert [o["wallet"] for o in offers] == [WIN]
+    assert offers[0]["tier"] == "probation" and offers[0]["probation"] is True
+
+
+def test_probation_off_by_default_leaves_sub_floor_wallet_unoffered():
+    offers, dem, held = _ev(_below_floor(),
+                            replay_by_wallet={WIN.lower(): STRONG_REPLAY})
+    assert offers == []   # floor fails (n<15) and probation is off -> no offer
+
+
+def test_probation_requires_strong_own_history():
+    weak = {"copy_n": 5, "copy_roi": 0.08, "copy_tstat": 3.0}   # too few replay copies
+    offers, *_ = _ev(_below_floor(), probation_enabled=True,
+                     replay_by_wallet={WIN.lower(): weak})
+    assert offers == []
+
+
+def test_probation_requires_agreeing_forward_sample():
+    # strong own-history but the forward paper sample is net-negative -> no fast-track
+    losing_fwd = [pos(WIN, i, pnl=-0.3) for i in range(6)]
+    offers, *_ = _ev(losing_fwd, probation_enabled=True,
+                     replay_by_wallet={WIN.lower(): STRONG_REPLAY})
+    assert offers == []
+
+
+# --------------------------------------------------------------------------- #
+# Dead-band time-box (rec 2b) — neutral removal, re-discoverable, not blacklist
+# --------------------------------------------------------------------------- #
+
+def _find(positions, *, now, window, **over):
+    kw = dict(now=now, min_n=15, dead_band_low=-0.05, dead_band_high=0.10,
+              max_window_s=window, promoted=set(), blacklist=set(),
+              offered=set(), retired=set())
+    kw.update(over)
+    return find_retirements(group_settled_by_wallet(positions), **kw)
+
+
+def test_time_box_retires_stale_dead_band_wallet():
+    # 15 settled, ROI +3% (dead-band), oldest copy opened_ts=0, now far past window
+    r = _find([pos(WIN, i, pnl=0.3) for i in range(15)], now=100000.0, window=1000.0)
+    assert [x["wallet"] for x in r] == [WIN]
+
+
+def test_time_box_skips_wallet_still_inside_window():
+    r = _find([pos(WIN, i, pnl=0.3) for i in range(15)], now=500.0, window=1000.0)
+    assert r == []   # oldest opened_ts=0, age 500 < window 1000 -> keep observing
+
+
+def test_time_box_skips_promotable_or_demotable_wallet():
+    # ROI +50% is above the dead-band (promotable) -> never retired
+    r = _find([pos(WIN, i, pnl=5.0) for i in range(15)], now=100000.0, window=1000.0)
+    assert r == []
+
+
+def test_time_box_excludes_already_retired():
+    r = _find([pos(WIN, i, pnl=0.3) for i in range(15)], now=100000.0, window=1000.0,
+              retired={WIN.lower()})
+    assert r == []
+
+
+def test_cycle_time_box_retires_and_makes_rediscoverable(stores, tmp_path):
+    sent = []
+    positions = [pos(WIN, i, pnl=0.3) for i in range(15)]   # dead-band, old
+    _run(positions, sent, tmp_path=tmp_path, now=100000.0,
+         time_box_enabled=True, time_box_window_s=1000.0, retire_cooldown_s=1000.0,
+         send_retirement=lambda r: sent.append(("retire", r)))
+    assert WIN.lower() in ps.active_retired(100000.0)
+    assert any(isinstance(s, tuple) and s[0] == "retire" for s in sent)  # notice fired
+    rows = gate_history.load(str(tmp_path / "promotion-gate-history.jsonl"))
+    assert any(r.get("event") == "retire" and r["wallet"] == WIN for r in rows)
+    # re-discoverable once the window lapses
+    assert WIN.lower() not in ps.active_retired(100000.0 + 2000.0)

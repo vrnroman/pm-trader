@@ -284,6 +284,26 @@ class Config:
     copy_golive_min_settled: int = _opt_int("COPY_GOLIVE_MIN_SETTLED", 30)
     copy_golive_max_idle_days: float = _opt_float("COPY_GOLIVE_MAX_IDLE_DAYS", 14.0)
     copy_golive_min_roi: float = _opt_float("COPY_GOLIVE_MIN_ROI", 0.0)
+    # --- Probation fast-track (RCA 2026-07, rec 2a) ---
+    # A wallet with STRONG own-history copy-and-hold replay (already computed by
+    # discovery) AND a small AGREEING forward-paper sample gets an EARLY promote
+    # offer at a lower settled bar, tagged tier "probation". This only lowers the
+    # OFFER bar — the /golive real-money gate above is untouched, so probation never
+    # weakens what real capital must clear. Tap-to-accept only, never auto-accepted.
+    copy_probation_enabled: bool = _opt_bool("COPY_PROBATION_ENABLED", True)
+    copy_probation_min_settled: int = _opt_int("COPY_PROBATION_MIN_SETTLED", 5)
+    copy_probation_min_replay_n: int = _opt_int("COPY_PROBATION_MIN_REPLAY_N", 20)
+    copy_probation_min_replay_roi: float = _opt_float("COPY_PROBATION_MIN_REPLAY_ROI", 0.05)
+    copy_probation_min_replay_tstat: float = _opt_float("COPY_PROBATION_MIN_REPLAY_TSTAT", 2.0)
+    # --- Dead-band time-box (RCA 2026-07, rec 2b) ---
+    # A wallet stuck inconclusive (enough settled copies, ROI between the demote and
+    # promote lines, never promotable nor demotable) past the observation window is
+    # NEUTRALLY retired: removed from the watchlist so it stops squatting a slot, but
+    # NOT blacklisted (it isn't a proven loser) — re-discoverable once the retire
+    # window lapses. Distinct from the punitive auto-demote.
+    copy_time_box_enabled: bool = _opt_bool("COPY_TIME_BOX_ENABLED", True)
+    copy_time_box_window_days: float = _opt_float("COPY_TIME_BOX_WINDOW_DAYS", 45.0)
+    copy_retire_cooldown_days: float = _opt_float("COPY_RETIRE_COOLDOWN_DAYS", 45.0)
 
     # --- Wallet discovery (continuously hunts copyable wallets -> paper) ---
     # Runs the discovery funnel on a schedule; pings Telegram on each new

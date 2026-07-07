@@ -286,8 +286,11 @@ class DiscoveryRunner:
             except Exception:  # pragma: no cover - never break the sweep
                 logger.warning("[DISCOVERY] failed to clear late-bet seeds", exc_info=True)
         # Exclude auto-demoted wallets (proven-negative copy ROI in their cooldown)
-        # so a bad wallet can't re-qualify and squat a watchlist slot.
-        blacklisted = promotion_state.active_blacklist(self._now())
+        # so a bad wallet can't re-qualify and squat a watchlist slot. Also exclude
+        # time-box-retired wallets (inconclusive dead-band, neutrally removed and
+        # re-discoverable once the retire window lapses) for the same slot reason.
+        _now = self._now()
+        blacklisted = promotion_state.active_blacklist(_now) | promotion_state.active_retired(_now)
         result = run_discovery_cycle(evaluated, prev, self.cfg, blacklisted=blacklisted)
 
         # Claude gate — the FINAL admission check, after the statistical funnel.
