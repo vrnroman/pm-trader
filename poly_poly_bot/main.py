@@ -82,7 +82,12 @@ def _copy_paper_loop():
                               "copy_n": row.get("copy_n", 0),
                               "copy_tstat": row.get("copy_tstat", 0.0)}
             return out
-        except (OSError, ValueError):
+        except Exception as e:
+            # Fail safe to "no fast-track this cycle" on a missing/corrupt/wrong-shape
+            # watchlist — but NOT silently: a persistent parse failure would disable
+            # the probation path invisibly, so log it (RCA-visible) rather than swallow.
+            logger.debug(f"[PROMOTE-GATE] fast-track replay read failed ({e}) — "
+                         f"no probation this cycle")
             return {}
 
     def _governance(ledger):
