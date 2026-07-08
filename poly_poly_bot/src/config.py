@@ -212,6 +212,20 @@ class Config:
     copy_paper_first_entry_only: bool = _opt_bool("COPY_PAPER_FIRST_ENTRY_ONLY", True)
     copy_paper_max_per_wallet_day: int = _opt_int("COPY_PAPER_MAX_PER_WALLET_DAY", 3)
     copy_paper_max_per_category_day: int = _opt_int("COPY_PAPER_MAX_PER_CATEGORY_DAY", 8)
+    # Evidence-throughput levers (starvation RCA 2026-07): the slate caps above
+    # are sized for a real-money book's correlation risk, but paper carries no
+    # capital — so they were throttling promotion-evidence accrual (92.6% of all
+    # copy attempts died on slate-cap while cold wallets sat at 0 copies).
+    # PRIORITY processes each cycle coldest-wallet-first (same caps, same total
+    # exposure — just routed to wallets that still need evidence). RELIEF lets a
+    # wallet under the evidence floor exceed the CATEGORY cap up to the relief
+    # ceiling; such fills are stamped over_real_cap in the ledger so promotion
+    # review can audit them. Per-wallet cap always binds. RELIEF_EVIDENCE_N=0
+    # disables relief; PRIORITY=false restores feed order.
+    copy_paper_starved_priority: bool = _opt_bool("COPY_PAPER_STARVED_PRIORITY", True)
+    copy_paper_relief_evidence_n: int = _opt_int("COPY_PAPER_RELIEF_EVIDENCE_N", 15)
+    copy_paper_relief_max_per_category_day: int = _opt_int(
+        "COPY_PAPER_RELIEF_MAX_PER_CATEGORY_DAY", 24)
     # Winning-markets-only gate (item A) + conviction sizing (item C). The
     # lag-sweep kill-test (backtest/copy_lag_backtest.py) proved copy-and-hold is
     # −EV in aggregate at ANY lag, but the loss is categorical, so the engine
@@ -352,6 +366,24 @@ class Config:
     wallet_discovery_max_curve_drawdown: float = _opt_float("WALLET_DISCOVERY_MAX_CURVE_DRAWDOWN", 1.5)
     wallet_discovery_max_hit_rate: float = _opt_float("WALLET_DISCOVERY_MAX_HIT_RATE", 0.95)
     wallet_discovery_min_curve_n: int = _opt_int("WALLET_DISCOVERY_MIN_CURVE_N", 20)
+    # Paper-evidence retention override (starvation RCA 2026-07): wallets whose
+    # REALIZED paper-copy record clears these floors are force-included in the
+    # sweep and qualify while swept, bypassing the PREDICTIVE own-history gates
+    # (tail/drawdown/hit/category) — retention was blind to paper results, so the
+    # best earners (+80% ROI on settled copies) decayed off mid-accrual and the
+    # promotion funnel starved. Proven-NEGATIVE signals still bind (auto-demote
+    # blacklist, replay proven-negative), status is recomputed from the ledger
+    # every sweep (never sticky), and re-entries still face the Claude gate WITH
+    # their realized record in the dossier. Shipped ON (paper-side, reversible);
+    # set PAPER_PROVEN_RETENTION_ENABLED=false to restore legacy behaviour.
+    paper_proven_retention_enabled: bool = _opt_bool("PAPER_PROVEN_RETENTION_ENABLED", True)
+    paper_proven_min_n: int = _opt_int("PAPER_PROVEN_MIN_N", 5)
+    paper_proven_min_roi: float = _opt_float("PAPER_PROVEN_MIN_ROI", 0.0)
+    # Dead-funnel alarm (starvation RCA 2026-07): WARN + one Telegram ping per
+    # window when the paper harness has opened NOTHING for this many hours while
+    # the watchlist is non-empty — a silent stall stops promotion evidence from
+    # accruing, which is how the funnel starved invisibly. 0 disables.
+    copy_paper_stall_alarm_hours: float = _opt_float("COPY_PAPER_STALL_ALARM_HOURS", 24.0)
     # Consensus-of-sharps signal (signal-only, no capital). When >= N independent
     # copy-validated wallets BUY the same (market, outcome) within the window, the
     # discovery sweep emits a Telegram signal (no fill -> no slippage). On by

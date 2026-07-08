@@ -18,6 +18,7 @@ real capital only once its *copied* PnL is positive in this ledger.
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import time
@@ -134,6 +135,11 @@ class PaperPosition:
     ideal_pnl: float = 0.0  # PnL had we filled at their_price (drag-free)
     closed_ts: float = 0.0
     exited_early: bool = False  # closed by mirroring the target's SELL, not resolution
+    # Opened only thanks to the starved-wallet cap relief — a REAL-money book at
+    # the normal category cap would have skipped this fill. Stamped so promotion
+    # review can audit how much of a wallet's paper evidence came in over the
+    # real cap. Default-safe: old ledger rows load as False.
+    over_real_cap: bool = False
 
     def realize(self, won: bool, now: Optional[float] = None) -> None:
         payout = self.shares if won else 0.0
@@ -185,20 +191,31 @@ class PaperCopyLedger:
     def _load(self) -> None:
         if not os.path.exists(self.path):
             return
+        # Tolerate unknown keys so a ledger written by a NEWER build (extra
+        # fields) still loads after a rollback — a schema addition must never
+        # brick the harness on the way back down.
+        fields = {f.name for f in dataclasses.fields(PaperPosition)}
         with open(self.path) as f:
             for line in f:
                 line = line.strip()
                 if not line:
                     continue
                 d = json.loads(line)
-                self.positions[d["copy_id"]] = PaperPosition(**d)
+                self.positions[d["copy_id"]] = PaperPosition(
+                    **{k: v for k, v in d.items() if k in fields})
 
     def _persist(self) -> None:
         os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
         tmp = self.path + ".tmp"
         with open(tmp, "w") as f:
             for p in self.positions.values():
-                f.write(json.dumps(asdict(p)) + "\n")
+                d = asdict(p)
+                # Write over_real_cap only when set: rows stay byte-identical to
+                # the legacy schema unless cap relief actually fired, so a
+                # rollback to a strict-loader build doesn't brick on the ledger.
+                if not d.get("over_real_cap"):
+                    d.pop("over_real_cap", None)
+                f.write(json.dumps(d) + "\n")
         os.replace(tmp, self.path)
 
     def has(self, copy_id: str) -> bool:
@@ -310,6 +327,22 @@ class CopyPaperEngine:
         conviction_base_usd: Optional[float] = None,
         conviction_min: float = 0.25,
         conviction_max: float = 2.0,
+        # --- evidence-throughput levers (starvation RCA 2026-07; both default-OFF
+        # so the bare engine is unchanged) ---
+        # starved-wallet slate priority: process this cycle's detected BUYs
+        # coldest-wallet-first (fewest ledger copies), so wallets that still need
+        # promotion evidence claim the shared daily caps before wallets that
+        # already have plenty. Same caps, same total exposure — just routed.
+        starved_priority: bool = False,
+        # paper-only cap relief: a wallet with fewer than relief_evidence_n
+        # copies (settled + in-flight) may exceed the per-CATEGORY daily cap up
+        # to relief_max_per_category_day. The per-wallet cap still binds, and a
+        # position admitted past the real cap is stamped over_real_cap=True so
+        # promotion review can audit relief-fed evidence. Paper carries no
+        # capital risk — the category cap models real-money correlation limits,
+        # which shouldn't throttle evidence accrual. None = off.
+        relief_evidence_n: Optional[int] = None,
+        relief_max_per_category_day: Optional[int] = None,
     ):
         self.ledger = ledger
         self.detector = detector
@@ -339,6 +372,9 @@ class CopyPaperEngine:
         self.conviction_base_usd = conviction_base_usd
         self.conviction_min = conviction_min
         self.conviction_max = conviction_max
+        self.starved_priority = starved_priority
+        self.relief_evidence_n = relief_evidence_n
+        self.relief_max_per_category_day = relief_max_per_category_day
 
     def _copy_size(self, target: str, their_usd: float) -> float:
         """USD to deploy on a copy. Conviction-sized (target's bet vs its own
@@ -367,7 +403,21 @@ class CopyPaperEngine:
                 wallet_day[p.target] = wallet_day.get(p.target, 0) + 1
                 cat_day[p.category] = cat_day.get(p.category, 0) + 1
 
-        for tr in self.detector():
+        # per-target ledger copy counts (settled + in-flight), for the two
+        # evidence-throughput levers below. In-flight copies count as evidence:
+        # they WILL settle, so a cold wallet with 12 opens isn't "starved".
+        evidence_n: dict[str, int] = {}
+        if self.starved_priority or self.relief_evidence_n is not None:
+            for p in self.ledger.positions.values():
+                evidence_n[p.target] = evidence_n.get(p.target, 0) + 1
+
+        trades = list(self.detector())
+        if self.starved_priority:
+            # coldest wallet first — stable sort keeps each wallet's own trades
+            # in feed (chronological) order, so only cross-wallet priority moves.
+            trades.sort(key=lambda tr: evidence_n.get(tr.get("target"), 0))
+
+        for tr in trades:
             s.detected += 1
             cid = tr["copy_id"]
             if self.ledger.has(cid):
@@ -407,10 +457,21 @@ class CopyPaperEngine:
                     and wallet_day.get(target, 0) >= self.max_copies_per_wallet_day):
                 s.skipped_slate_cap += 1
                 continue
+            over_real_cap = False
             if (self.max_copies_per_category_day is not None
                     and cat_day.get(category, 0) >= self.max_copies_per_category_day):
-                s.skipped_slate_cap += 1
-                continue
+                # starved-wallet relief: a wallet still under the evidence floor
+                # may exceed the (real-money-shaped) category cap, up to the
+                # relief ceiling. The fill is stamped over_real_cap so promotion
+                # review can see which evidence a real book wouldn't have.
+                starved = (self.relief_evidence_n is not None
+                           and evidence_n.get(target, 0) < self.relief_evidence_n)
+                relief_ok = (self.relief_max_per_category_day is not None
+                             and cat_day.get(category, 0) < self.relief_max_per_category_day)
+                if not (starved and relief_ok):
+                    s.skipped_slate_cap += 1
+                    continue
+                over_real_cap = True
             copy_usd = self._copy_size(target, tr.get("their_usd", 0) or 0.0)
             fill = simulate_copy_fill(
                 tr["their_price"], self.book_fetcher(tr["token_id"]),
@@ -434,11 +495,13 @@ class CopyPaperEngine:
                 horizon_days=float(horizon) if horizon is not None else 0.0,
                 entry_price=fill.avg_price, shares=fill.shares, spent=fill.spent,
                 drag_bps=fill.drag_bps, opened_ts=now,
+                over_real_cap=over_real_cap,
             ))
             s.opened += 1
             entered_tokens.add((target, token))
             wallet_day[target] = wallet_day.get(target, 0) + 1
             cat_day[category] = cat_day.get(category, 0) + 1
+            evidence_n[target] = evidence_n.get(target, 0) + 1
 
         # exit-following: if the target sold something we hold, sell too (at our
         # achievable bid), before falling through to the resolution path.

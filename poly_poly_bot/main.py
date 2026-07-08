@@ -143,6 +143,41 @@ def _copy_paper_loop():
         except Exception as e:
             logger.warning(f"[COPY-PAPER] governance cycle failed: {e}")
 
+    # Dead-funnel alarm (starvation RCA 2026-07): paper opens/day fell 12→0 and
+    # nothing said so — promotion evidence only accrues while copies open, so a
+    # silent stall re-starves the funnel invisibly. Baseline falls back to boot
+    # time on an empty ledger so a fresh install doesn't alarm instantly; alerts
+    # re-arm every alarm window (daily heartbeat, not a one-shot), and any new
+    # open resets the clock via the ledger itself (restart-proof).
+    _stall = {"last_alert": 0.0, "boot": time.time()}
+
+    def _stall_check(ledger):
+        hours = CONFIG.copy_paper_stall_alarm_hours
+        if hours <= 0:
+            return
+        now = time.time()
+        last_open = max((getattr(p, "opened_ts", 0.0) or 0.0
+                         for p in ledger.positions.values()), default=0.0)
+        baseline = max(last_open, _stall["boot"])
+        if now - baseline < hours * 3600.0:
+            return
+        if now - _stall["last_alert"] < hours * 3600.0:
+            return  # already alerted this window
+        n_watch = len(runner.wallets())
+        if n_watch == 0:
+            return  # empty watchlist is its own (already-logged) condition
+        _stall["last_alert"] = now
+        stalled_h = (now - baseline) / 3600.0
+        logger.warning(
+            f"[COPY-PAPER] FUNNEL STALLED — no paper opens in {stalled_h:.0f}h "
+            f"with {n_watch} wallets on the watchlist; promotion evidence is "
+            f"not accruing")
+        telegram_bot.send_message(
+            f"🚱 <b>Copy funnel stalled</b> — no paper copies opened in "
+            f"{stalled_h:.0f}h with {n_watch} wallets watched. Evidence toward "
+            f"promotion is not accruing; check the watchlist's trade activity "
+            f"and the guardrail-skip mix.")
+
     def _on_cycle(summary, ledger):
         if summary.opened or summary.resolved:
             logger.info(
@@ -165,6 +200,10 @@ def _copy_paper_loop():
                 format_resolution_telegram(summary.resolved_positions, report(ledger),
                                            resolver=DEFAULT_RESOLVER)
             )
+        try:
+            _stall_check(ledger)
+        except Exception as e:  # the alarm must never break the copy cycle
+            logger.debug(f"[COPY-PAPER] stall check failed ({e})")
         _governance(ledger)
 
     # A cap <= 0 disables that guardrail (engine treats None as off).
@@ -201,6 +240,12 @@ def _copy_paper_loop():
         first_entry_only=CONFIG.copy_paper_first_entry_only,
         max_copies_per_wallet_day=_cap(CONFIG.copy_paper_max_per_wallet_day),
         max_copies_per_category_day=_cap(CONFIG.copy_paper_max_per_category_day),
+        # evidence-throughput levers (starvation RCA): route the daily caps to
+        # the coldest wallets + paper-only category-cap relief under the
+        # evidence floor (fills stamped over_real_cap for promotion audit).
+        starved_priority=CONFIG.copy_paper_starved_priority,
+        relief_evidence_n=_cap(CONFIG.copy_paper_relief_evidence_n),
+        relief_max_per_category_day=_cap(CONFIG.copy_paper_relief_max_per_category_day),
         # winning-markets-only gate (item A) + conviction sizing (item C)
         category_gate=CONFIG.copy_paper_category_gate,
         conviction_base_usd=(CONFIG.copy_paper_conviction_base_usd
@@ -343,6 +388,11 @@ def _discovery_loop():
         llm_model=CONFIG.wallet_discovery_llm_model,
         holdout_frac=CONFIG.gate_holdout_frac,
         holdout_max_per_sweep=CONFIG.gate_holdout_max_per_sweep,
+        # Paper-evidence retention override (starvation RCA): None disables.
+        paper_ledger_path=(CONFIG.copy_paper_ledger
+                           if CONFIG.paper_proven_retention_enabled else None),
+        paper_proven_min_n=CONFIG.paper_proven_min_n,
+        paper_proven_min_roi=CONFIG.paper_proven_min_roi,
     )
     runner.run_forever(_shutdown_event)
 

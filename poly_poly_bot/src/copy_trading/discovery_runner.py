@@ -25,6 +25,7 @@ from typing import Callable, Optional
 
 from types import SimpleNamespace
 
+from src.copy_trading import governance
 from src.copy_trading import promotion_state
 from src.copy_trading.consensus import run_consensus_scan
 from src.copy_trading.copy_replay import proven_positive
@@ -141,7 +142,7 @@ def _theory_brief(flagged_by) -> list[dict]:
     return out
 
 
-def _dossier_from_eval(e: Eval) -> dict:
+def _dossier_from_eval(e: Eval, paper_record: Optional[dict] = None) -> dict:
     """Map a sweep Eval into the llm_review dossier shape.
 
     The lead-lag ``copyability`` block is included ONLY when it was actually
@@ -151,6 +152,8 @@ def _dossier_from_eval(e: Eval) -> dict:
     + skill + curve, rather than reading a row of zeros as a disqualifying
     artifact. A *measured* wallet with negative capture (``e.n > 0``) keeps its
     block and stays fully skippable — the settlement-lag scoopers still get cut.
+    ``paper_record`` (paper-proven re-entries only) adds the REALIZED forward
+    paper record so the gate can weigh what actually happened when we copied.
     """
     return build_dossier(
         e.wallet,
@@ -163,6 +166,7 @@ def _dossier_from_eval(e: Eval) -> dict:
                               copyable_ratio=e.copyable_ratio),
         curve=SimpleNamespace(net_pnl=e.net_pnl, max_drawdown_frac=e.curve_drawdown,
                               up_ratio=None, sharpe=e.curve_sharpe),
+        paper_record=paper_record,
     )
 
 
@@ -183,6 +187,14 @@ class DiscoveryRunner:
         llm_model: str = DEFAULT_MODEL,
         holdout_frac: float = 0.0,
         holdout_max_per_sweep: int = 2,
+        # Paper-evidence retention override (2026-07 starvation RCA): when a
+        # ledger path is given, wallets whose REALIZED paper record clears the
+        # floors are force-included in the sweep and qualify while swept —
+        # retention was blind to paper results, so the best earners decayed off
+        # mid-accrual. None disables the override entirely (legacy behaviour).
+        paper_ledger_path: Optional[str] = None,
+        paper_proven_min_n: int = 5,
+        paper_proven_min_roi: float = 0.0,
         consensus_fired_path: Optional[str] = None,
         # injectable for tests
         evaluate: Callable[..., dict[str, Eval]] = evaluate_sweep,
@@ -206,6 +218,9 @@ class DiscoveryRunner:
         self.llm_model = llm_model
         self.holdout_frac = holdout_frac
         self.holdout_max_per_sweep = holdout_max_per_sweep
+        self.paper_ledger_path = paper_ledger_path
+        self.paper_proven_min_n = paper_proven_min_n
+        self.paper_proven_min_roi = paper_proven_min_roi
         self._evaluate = evaluate
         self._llm_review = llm_review
         self._now = now
@@ -265,6 +280,35 @@ class DiscoveryRunner:
             logger.warning("[DISCOVERY] late-bet seed processing failed", exc_info=True)
             return []
 
+    def _paper_proven(self) -> dict[str, dict]:
+        """Wallets with a positive REALIZED paper record (wallet(lower) -> stats),
+        recomputed from the ledger every sweep — never sticky. Excludes wallets
+        whose most recent gate decision was a real (non-holdout) skip made WITH
+        this exact paper record: a rejected wallet accrues no new copies, so its
+        frozen record would otherwise re-qualify it and burn a gate slot every
+        sweep. New settled evidence (n_closed changed) re-opens the question."""
+        if not self.paper_ledger_path:
+            return {}
+        proven = governance.paper_proven_wallets(
+            self.paper_ledger_path, min_n=self.paper_proven_min_n,
+            min_roi=self.paper_proven_min_roi)
+        if not proven:
+            return {}
+        last_row: dict[str, dict] = {}
+        for row in gate_history.load(self.gate_history_path):
+            w = (row.get("wallet") or "").lower()
+            if w:
+                last_row[w] = row
+        out: dict[str, dict] = {}
+        for w, rec in proven.items():
+            row = last_row.get(w)
+            if (row is not None and row.get("verdict") == "skip"
+                    and not row.get("admitted") and row.get("paper_proven")
+                    and row.get("paper_n") == rec["n_closed"]):
+                continue  # the gate already judged exactly this record — hold
+            out[w] = rec
+        return out
+
     # ── one sweep ──
     def run_once(self, stop: Optional[threading.Event] = None) -> "CycleResultLike":
         prev = self._load_state()
@@ -272,8 +316,13 @@ class DiscoveryRunner:
         # resolution-validated winners in this sweep so they get the full eval
         # funnel (score + Claude gate) before they can reach the paper watchlist.
         seeds = self._late_bet_seeds()
+        # Paper-evidence override (A): force-include wallets with a positive
+        # realized paper record so a decayed-off earner is re-swept and can
+        # re-enter — the sweep, not this cache, decides (blacklist and the
+        # replay proven-negative gate still bind inside the cycle).
+        proven = self._paper_proven()
         evaluated = self._evaluate(
-            self.cfg, must_include=set(prev.on_watchlist) | set(seeds),
+            self.cfg, must_include=set(prev.on_watchlist) | set(seeds) | set(proven),
             cache_dir=self.cache_dir, activity_ttl_s=self.activity_ttl_s, stop=stop,
         )
         if not evaluated:
@@ -291,7 +340,9 @@ class DiscoveryRunner:
         # re-discoverable once the retire window lapses) for the same slot reason.
         _now = self._now()
         blacklisted = promotion_state.active_blacklist(_now) | promotion_state.active_retired(_now)
-        result = run_discovery_cycle(evaluated, prev, self.cfg, blacklisted=blacklisted)
+        result = run_discovery_cycle(evaluated, prev, self.cfg,
+                                     blacklisted=blacklisted,
+                                     paper_proven=set(proven))
 
         # Claude gate — the FINAL admission check, after the statistical funnel.
         # Runs only on *newly* qualified wallets (retained ones were already
@@ -307,7 +358,7 @@ class DiscoveryRunner:
                          gate_recheck_queue.pending(self.gate_recheck_queue_path)}
 
         verdicts, holdouts, gate_calls = (({}, set(), 0) if result.first_init
-                                          else self._llm_gate(result))
+                                          else self._llm_gate(result, proven))
 
         # Re-run any gate checks that were deferred because claude -p was
         # rate/spend-limited on an earlier sweep. Must run AFTER the gate and
@@ -363,6 +414,11 @@ class DiscoveryRunner:
                 if e.wallet.lower() in seed_set:
                     msg = ("🎯 <b>Late-bet lead validated</b> — won its "
                            "near-resolution bet, then cleared eval\n" + msg)
+                if e.wallet.lower() in proven:
+                    rec = proven[e.wallet.lower()]
+                    msg = ("📈 <b>Paper-proven re-acquired</b> — realized paper "
+                           f"record {rec['n_closed']} settled, ROI "
+                           f"{rec['roi'] * 100:+.1f}% (${rec['net_pnl']:+.2f})\n" + msg)
                 self._send(msg)
 
         logger.info(
@@ -370,8 +426,26 @@ class DiscoveryRunner:
             len(evaluated), len(result.watchlist), len(result.newly_qualified),
             len(result.removed), len(result.watchlist),
         )
+        if result.paper_proven:
+            logger.info("[DISCOVERY] paper-proven (realized-ledger override): %s",
+                        ", ".join(result.paper_proven))
         if result.removed:
             logger.info("[DISCOVERY] decayed off paper: %s", ", ".join(result.removed))
+        # Gate autopsy — every cull attributable (the RCA curve gates used to be
+        # silent, which made "did the 1.5 ceiling over-cull?" unanswerable). One
+        # line per REMOVED wallet (was on paper, dropped this sweep — the ones
+        # that matter), plus an aggregate reason histogram over the whole sweep.
+        for w in result.removed:
+            logger.info("[DISCOVERY] cull: %s — %s", w,
+                        result.culled.get(w, "unattributed"))
+        if result.culled:
+            gate_counts: dict[str, int] = {}
+            for reason in result.culled.values():
+                key = reason.split(" (", 1)[0].split(" —", 1)[0]
+                gate_counts[key] = gate_counts.get(key, 0) + 1
+            logger.info("[DISCOVERY] cull histogram: %s",
+                        ", ".join(f"{k}={n}" for k, n in
+                                  sorted(gate_counts.items(), key=lambda kv: -kv[1])))
 
         # consensus-of-sharps signal (signal-only) over the copy-validated wallets
         try:
@@ -486,7 +560,7 @@ class DiscoveryRunner:
         )
         self._save_consensus_fired(fired)
 
-    def _llm_gate(self, result) -> tuple[dict, set]:
+    def _llm_gate(self, result, proven: Optional[dict] = None) -> tuple[dict, set]:
         """Claude admission gate over this sweep's NEW qualifiers (mutates result).
 
         For each newly-qualified wallet (already ordered by strength), ask Claude
@@ -496,24 +570,32 @@ class DiscoveryRunner:
         ``None`` verdict (LLM disabled, unavailable, or errored) admits the
         wallet. Bounded by ``llm_review_top_n`` per sweep — any new wallets past
         the cap are admitted ungated (with a warning) so a flood can't stall the
-        loop. Returns ``(verdicts, holdout_wallets)``: wallet -> LLMVerdict for the
+        loop. ``proven`` (wallet(lower) -> realized paper stats) annotates a
+        paper-proven re-entry's dossier with the REALIZED copy record, so the
+        gate judges the actual outcome of copying the wallet rather than
+        re-rejecting on the same own-history stats it saw last time; a skip on
+        one of these is logged as a distinct paper-proven-rejected event so the
+        evidence conflict is visible instead of eaten. Returns
+        ``(verdicts, holdout_wallets)``: wallet -> LLMVerdict for the
         reviewed wallets (annotates the Telegram pings), and the set of wallets
         holdout-admitted despite a skip. Never raises into the sweep loop.
         """
         if not self.llm_review_enabled or not result.newly_qualified:
             return {}, set(), 0
+        proven = proven or {}
         verdicts: dict = {}
         rejected: set = set()
         holdout_wallets: set = set()
         holdouts = 0
         calls = 0                 # claude -p calls made (shared budget with the drain)
         for i, e in enumerate(result.newly_qualified):
+            paper_rec = proven.get(e.wallet.lower())
             if i >= self.llm_review_top_n:
                 logger.warning("[DISCOVERY] LLM gate cap (%d) reached — admitting %s ungated",
                                self.llm_review_top_n, e.wallet)
-                self._record_gate(e, "admit-cap", admitted=True)
+                self._record_gate(e, "admit-cap", admitted=True, paper_record=paper_rec)
                 continue
-            dossier = _dossier_from_eval(e)
+            dossier = _dossier_from_eval(e, paper_record=paper_rec)
             try:
                 v = self._llm_review(dossier, model=self.llm_model)
             except Exception:  # pragma: no cover - belt-and-suspenders
@@ -524,14 +606,15 @@ class DiscoveryRunner:
                 # (paper-only, reversible) AND park the check so it's redone once the
                 # limit clears — instead of fail-open-and-forget (permanently ungated).
                 self._enqueue_recheck(e, dossier)
-                self._record_gate(e, "skip-deferred", admitted=True, requeued=True)
+                self._record_gate(e, "skip-deferred", admitted=True, requeued=True,
+                                  paper_record=paper_rec)
                 logger.info("[DISCOVERY] LLM gate rate-limited for %s — admitted "
                             "provisionally, check queued for re-run", e.wallet)
                 continue
             if v is None:  # fail-open: a broken gate must not freeze discovery
                 logger.warning("[DISCOVERY] LLM gate unavailable for %s — admitting (fail-open)",
                                e.wallet)
-                self._record_gate(e, "admit-fail-open", admitted=True)
+                self._record_gate(e, "admit-fail-open", admitted=True, paper_record=paper_rec)
                 continue
             verdicts[e.wallet] = v
             if v.verdict == "skip":
@@ -545,19 +628,31 @@ class DiscoveryRunner:
                     holdouts += 1
                     holdout_wallets.add(e.wallet)
                     self._record_gate(e, v.verdict, admitted=True, holdout=True,
-                                      confidence=v.confidence, reasoning=v.reasoning)
+                                      confidence=v.confidence, reasoning=v.reasoning,
+                                      paper_record=paper_rec)
                     logger.info("[DISCOVERY] LLM gate HOLDOUT-admitted %s (would skip, "
                                 "conf %.0f%%): measuring counterfactual",
                                 e.wallet, v.confidence * 100)
                     continue
                 self._record_gate(e, v.verdict, admitted=False,
-                                  confidence=v.confidence, reasoning=v.reasoning)
+                                  confidence=v.confidence, reasoning=v.reasoning,
+                                  paper_record=paper_rec)
                 rejected.add(e.wallet)
-                logger.info("[DISCOVERY] LLM gate REJECTED %s (conf %.0f%%): %s",
-                            e.wallet, v.confidence * 100, v.reasoning)
+                if paper_rec:
+                    # Evidence conflict: realized paper says copy, the gate says
+                    # skip. Distinct marker so the autopsy/digest can surface it.
+                    logger.info(
+                        "[DISCOVERY] LLM gate REJECTED paper-proven %s (paper "
+                        "n=%d roi %+.1f%%, conf %.0f%%): %s", e.wallet,
+                        paper_rec["n_closed"], paper_rec["roi"] * 100,
+                        v.confidence * 100, v.reasoning)
+                else:
+                    logger.info("[DISCOVERY] LLM gate REJECTED %s (conf %.0f%%): %s",
+                                e.wallet, v.confidence * 100, v.reasoning)
             else:
                 self._record_gate(e, v.verdict, admitted=True,
-                                  confidence=v.confidence, reasoning=v.reasoning)
+                                  confidence=v.confidence, reasoning=v.reasoning,
+                                  paper_record=paper_rec)
         if rejected:
             self._drop_from_result(result, rejected)
             logger.info("[DISCOVERY] LLM gate dropped %d/%d new wallet(s) before watchlist add",
@@ -566,7 +661,7 @@ class DiscoveryRunner:
 
     def _record_gate(self, e, verdict: str, *, admitted: bool, holdout: bool = False,
                      requeued: bool = False, confidence: float = 0.0,
-                     reasoning: str = "") -> None:
+                     reasoning: str = "", paper_record: Optional[dict] = None) -> None:
         """Append one gate decision to the history log (queryable via /gate).
 
         Records WHY the wallet qualified (its theories) and whether lead-lag was
@@ -574,8 +669,11 @@ class DiscoveryRunner:
         ``holdout`` row is a would-be-skip admitted anyway to measure the
         counterfactual; a ``requeued`` row is a provisional admit whose check was
         deferred (rate-limited) and parked for re-run; the ``confidence_band`` lets
-        a later calibration slice outcomes by how sure the gate was."""
-        gate_history.append(self.gate_history_path, {
+        a later calibration slice outcomes by how sure the gate was. A
+        ``paper_proven`` row was gated WITH its realized paper record in the
+        dossier; ``paper_n`` pins which record was judged, so the wallet is only
+        re-gated once NEW settled evidence exists (see ``_paper_proven``)."""
+        row = {
             "ts": self._now(),
             "wallet": e.wallet,
             "verdict": verdict,
@@ -588,7 +686,12 @@ class DiscoveryRunner:
             "had_leadlag": e.n > 0,
             "copy_n": e.copy_n,
             "reasoning": reasoning,
-        })
+        }
+        if paper_record:
+            row["paper_proven"] = True
+            row["paper_n"] = paper_record.get("n_closed")
+            row["paper_roi"] = paper_record.get("roi")
+        gate_history.append(self.gate_history_path, row)
 
     def _enqueue_recheck(self, e, dossier: dict) -> None:
         """Park a rate-limited wallet's gate check for a later sweep to re-run."""

@@ -63,6 +63,57 @@ def group_settled_by_wallet(paper_positions) -> dict[str, list]:
     return by_wallet
 
 
+def paper_proven_wallets(
+    ledger_path: str, *, min_n: int, min_roi: float,
+) -> dict[str, dict]:
+    """Wallets whose REALIZED paper-copy record is positive: >= ``min_n`` settled
+    non-dust copies at ROI > ``min_roi``. Feeds the discovery sweep's
+    paper-evidence retention override (2026-07 starvation RCA: retention was
+    blind to paper results, so the best earners decayed off mid-accrual and the
+    promotion funnel starved). Recomputed from the ledger file every call —
+    status is never sticky, so it lapses the moment the record stops clearing
+    the bar. Reads the JSONL defensively and fails safe to {} (no override this
+    sweep) on a missing/corrupt/wrong-shape ledger — but logs the failure so a
+    persistent parse error can't disable the path invisibly. Uses the same
+    settled/dust semantics as the promotion gate (``group_settled_by_wallet`` +
+    ``compute_stats``) so "proven" means the same thing on both sides.
+    """
+    import json
+    from types import SimpleNamespace
+
+    try:
+        rows: list = []
+        with open(ledger_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    d = json.loads(line)
+                except ValueError:
+                    continue  # one torn/garbage line must not void the ledger
+                if isinstance(d, dict):
+                    rows.append(SimpleNamespace(**d))
+        out: dict[str, dict] = {}
+        for wallet, positions in group_settled_by_wallet(rows).items():
+            stats = promotion_gate.compute_stats(wallet, positions)
+            if (stats.n_closed >= min_n and stats.roi is not None
+                    and stats.roi > min_roi):
+                out[wallet] = {
+                    "n_closed": stats.n_closed,
+                    "roi": round(stats.roi, 4),
+                    "net_pnl": round(stats.net_pnl, 2),
+                    "wins": stats.wins,
+                }
+        return out
+    except FileNotFoundError:
+        return {}  # no paper history yet — nothing to prove
+    except Exception as e:
+        logger.debug("[DISCOVERY] paper-proven ledger read failed (%s) — "
+                     "no paper-evidence override this sweep", e)
+        return {}
+
+
 def _probation_eligible(
     stats, replay: dict | None, *,
     min_settled: int, min_replay_n: int, min_replay_roi: float, min_replay_tstat: float,

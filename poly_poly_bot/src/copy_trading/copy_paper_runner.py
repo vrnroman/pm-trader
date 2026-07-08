@@ -60,6 +60,11 @@ class CopyPaperRunner:
         conviction_base_usd: Optional[float] = None,
         conviction_min: float = 0.25,
         conviction_max: float = 2.0,
+        # evidence-throughput levers (starvation RCA 2026-07; forwarded to the
+        # engine, both default-off — see CopyPaperEngine for semantics)
+        starved_priority: bool = False,
+        relief_evidence_n: Optional[int] = None,
+        relief_max_per_category_day: Optional[int] = None,
         # --- bet-horizon routing (Strategy 1 near-term vs 4 long-horizon) ---
         # When set, every detected BUY is routed by its market's resolution date.
         # The near-term book passes ``max_horizon_days`` (skip far-future bets);
@@ -98,6 +103,9 @@ class CopyPaperRunner:
         self.conviction_base_usd = conviction_base_usd
         self.conviction_min = conviction_min
         self.conviction_max = conviction_max
+        self.starved_priority = starved_priority
+        self.relief_evidence_n = relief_evidence_n
+        self.relief_max_per_category_day = relief_max_per_category_day
         self.min_horizon_days = min_horizon_days
         self.max_horizon_days = max_horizon_days
         self.strategy = strategy
@@ -193,6 +201,9 @@ class CopyPaperRunner:
             conviction_base_usd=self.conviction_base_usd,
             conviction_min=self.conviction_min,
             conviction_max=self.conviction_max,
+            starved_priority=self.starved_priority,
+            relief_evidence_n=self.relief_evidence_n,
+            relief_max_per_category_day=self.relief_max_per_category_day,
         )
         summary = engine.run_cycle()
         if self._on_cycle:

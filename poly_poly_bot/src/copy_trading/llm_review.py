@@ -124,6 +124,7 @@ def build_dossier(
     why_flagged: str | None = None,                 # human-readable "why follow"
     portfolio_value: float | None = None,
     recent_bets: list[dict] | None = None,
+    paper_record: dict | None = None,   # REALIZED paper-copy record (n_closed, roi, net_pnl, wins)
 ) -> dict:
     """Assemble the compact, JSON-serializable dossier for one wallet.
 
@@ -163,6 +164,18 @@ def build_dossier(
             "n_resolved": g(copy_replay, "copy_n"),
             "hit_rate": _round(g(copy_replay, "copy_hit")),
             "exit_follow_roi": _round(g(copy_replay, "exit_roi")),
+        }
+    if paper_record and (paper_record.get("n_closed") or 0) > 0:
+        # REALIZED forward paper record — what actually happened when the live
+        # harness copied this wallet (fill sim + slippage + resolution), as
+        # opposed to the copy_replay backtest above. Present on paper-proven
+        # re-entries so the gate weighs the measured outcome, not just the
+        # own-history stats it may have already rejected once.
+        d["paper_record_realized"] = {
+            "n_settled": paper_record.get("n_closed"),
+            "roi": _round(paper_record.get("roi")),
+            "net_pnl_usd": _round(paper_record.get("net_pnl"), 2),
+            "wins": paper_record.get("wins"),
         }
     if entry is not None:
         d["entry_profile"] = {

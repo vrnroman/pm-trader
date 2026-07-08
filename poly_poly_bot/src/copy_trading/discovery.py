@@ -222,6 +222,16 @@ class CycleResult:
     # empty unless DiscoveryConfig.s4_enabled and the sweep classified any wallet
     # as long-horizon. Kept out of `watchlist` so they never feed the paper copier.
     long_horizon: list[Eval] = field(default_factory=list)
+    # Gate autopsy: wallet -> which gate culled it this sweep, with the metric
+    # values that tripped it. The RCA drawdown/hit gates used to cull with a bare
+    # `continue`, which made "did the 1.5 ceiling over-cull?" unanswerable from
+    # logs — every removal is now attributable. Only wallets that were culled by
+    # an explicit gate appear here; a wallet that simply failed to (re)enter shows
+    # up in `removed` without an entry, which reads as plain decay.
+    culled: dict[str, str] = field(default_factory=dict)
+    # Wallets on the new watchlist that qualified through the paper-evidence
+    # override (realized paper P&L, recomputed from the ledger every sweep).
+    paper_proven: list[str] = field(default_factory=list)
 
 
 def _meta(e: Eval) -> dict:
@@ -251,7 +261,7 @@ def _meta(e: Eval) -> dict:
 
 def run_discovery_cycle(
     evaluated: dict[str, Eval], prev: DiscoveryState, cfg: DiscoveryConfig,
-    blacklisted: set | None = None,
+    blacklisted: set | None = None, paper_proven: set | None = None,
 ) -> CycleResult:
     """Decide the new paper watchlist from this sweep's evaluations.
 
@@ -260,10 +270,20 @@ def run_discovery_cycle(
     can be measured). ``blacklisted`` (lowercased addresses) is the set of
     auto-demoted wallets in their cooldown window — they're excluded so a wallet
     proven to lose under our copy action can't immediately re-qualify and squat a
-    slot. Returns the capped, ordered watchlist plus the notify/remove deltas.
+    slot. ``paper_proven`` (lowercased addresses) is the set of wallets whose
+    REALIZED paper-copy record is positive (recomputed from the ledger every
+    sweep, never sticky): they bypass the predictive own-history gates
+    (tail/drawdown/hit/category) and qualify while swept — the 2026-07 starvation
+    RCA found retention was blind to paper evidence, so the best earners decayed
+    off mid-accrual on the same own-history stats the money-curve RCA proved
+    unreliable. Proven-NEGATIVE signals still bind: the blacklist and the
+    copy-replay proven-negative gate drop a paper-proven wallet like any other
+    (evidence must cut both ways or the override becomes a fail-open backdoor).
+    Returns the capped, ordered watchlist plus the notify/remove deltas.
     """
     prev_on = set(prev.on_watchlist)
     blacklisted = blacklisted or set()
+    paper_proven = paper_proven or set()
 
     # Strategy 4: collect wallets with a real long-horizon book into a SEPARATE
     # long-horizon track — but DO NOT remove them from the copy funnel. A wallet
@@ -282,30 +302,57 @@ def run_discovery_cycle(
         long_horizon_evals = long_horizon_evals[: cfg.long_horizon_cap]
 
     qualified: dict[str, Eval] = {}
+    proven_here: set[str] = set()
+    culled: dict[str, str] = {}
     for w, e in evaluated.items():
         if w.lower() in blacklisted:
-            continue  # auto-demoted (proven-negative copy ROI) — in cooldown, skip
+            # auto-demoted (proven-negative copy ROI) — in cooldown, skip. Binds
+            # even for paper-proven wallets: proven-negative beats proven-positive.
+            culled[w] = "blacklist (auto-demote cooldown)"
+            continue
+        # copy-replay gate: drop wallets PROVEN to lose under our actual copy
+        # action — enough resolved replayed copies AND a mean copy-and-hold
+        # ROI/$ below the bar — no matter which theory flagged them. Wallets with
+        # too little replay data are NOT dropped (insufficient evidence); they
+        # just rank below copy-validated ones in the cap. Runs BEFORE the
+        # paper-proven override — a proven-negative signal always binds.
+        if cfg.copy_replay_gate and proven_negative(
+                e.copy_n, e.copy_roi,
+                min_n=cfg.min_copy_replay_n, min_roi=cfg.min_copy_replay_roi):
+            culled[w] = (f"replay-proven-negative (copy_roi {e.copy_roi:+.3f} "
+                         f"< {cfg.min_copy_replay_roi:+.3f} @ n={e.copy_n})")
+            continue
+        # paper-evidence override: a wallet whose REALIZED paper record is
+        # positive qualifies while swept, bypassing the predictive gates below —
+        # realized P&L is the territory those gates only map. Status is
+        # recomputed from the ledger every sweep, so it lapses the moment the
+        # record goes negative (then the normal gates — or the auto-demote
+        # blacklist — take over).
+        if w.lower() in paper_proven:
+            proven_here.add(w)
+            qualified[w] = e
+            continue
         if e.tail_ratio > cfg.max_tail_ratio:
-            continue  # tail-dominated buy flow — un-copyable, skip regardless of theory
+            # tail-dominated buy flow — un-copyable, skip regardless of theory
+            culled[w] = f"tail-ratio ({e.tail_ratio:.3f} > {cfg.max_tail_ratio:.3f})"
+            continue
         # money-curve gates (RCA fix): reject the scooper anti-pattern the legacy
         # t-stat bar was letting through. Guarded by min_curve_n so a thin book is
         # never rejected on a noisy curve (insufficient evidence -> keep accruing).
         # Both are no-ops at the legacy defaults (drawdown=inf, hit=1.0).
         if e.n_closed >= cfg.min_curve_n:
             if e.curve_drawdown > cfg.max_curve_drawdown:
-                continue  # catastrophic dollar drawdown — a copier eats the tail loss
+                # catastrophic dollar drawdown — a copier eats the tail loss
+                culled[w] = (f"curve-drawdown ({e.curve_drawdown:.2f} > "
+                             f"{cfg.max_curve_drawdown:.2f} @ n_closed={e.n_closed})")
+                continue
             if (cfg.max_hit_rate < 1.0 and e.closed_hit_rate >= cfg.max_hit_rate
                     and (e.net_pnl <= 0.0 or e.curve_sharpe <= 0.0)):
-                continue  # near-perfect hit rate on a losing/spiky curve = settlement-lag scooper
-        # copy-replay gate: drop wallets PROVEN to lose under our actual copy
-        # action — enough resolved replayed copies AND a mean copy-and-hold
-        # ROI/$ below the bar — no matter which theory flagged them. Wallets with
-        # too little replay data are NOT dropped (insufficient evidence); they
-        # just rank below copy-validated ones in the cap.
-        if cfg.copy_replay_gate and proven_negative(
-                e.copy_n, e.copy_roi,
-                min_n=cfg.min_copy_replay_n, min_roi=cfg.min_copy_replay_roi):
-            continue
+                # near-perfect hit rate on a losing/spiky curve = settlement-lag scooper
+                culled[w] = (f"hit-rate-scooper (hit {e.closed_hit_rate:.2f} >= "
+                             f"{cfg.max_hit_rate:.2f}, net {e.net_pnl:+.0f}, "
+                             f"sharpe {e.curve_sharpe:+.2f})")
+                continue
         # winning-markets-only gate (item A): drop a wallet with NO market category
         # whose copy-and-hold edge clears real-money cost — there's nowhere we can
         # profitably copy it. Scoped to PER-CATEGORY evidence: only drop once some
@@ -316,6 +363,7 @@ def run_discovery_cycle(
         max_category_n = max((n for _c, n, _net, _ok in e.category_edges), default=0)
         if (cfg.category_select and cfg.require_approved_category
                 and max_category_n >= cfg.min_category_n and not e.approved_categories):
+            culled[w] = f"no-winning-category (max category n={max_category_n})"
             continue
         flagged = bool(e.flagged_by)
         # legacy lead-lag gate (== theory 1c) OR any independent theory fired
@@ -338,12 +386,33 @@ def run_discovery_cycle(
     # represented rather than buried by the lead-lag-only signal. When no wallet
     # has replay data this reduces exactly to the legacy (flag-count, capture)
     # ranking, so behaviour is unchanged until copy-replay data accrues.
-    ranked = sorted(qualified.values(), key=lambda e: _rank_key(cfg, e), reverse=True)
+    # Paper-proven wallets rank FIRST: their zeroed own-history stats would
+    # otherwise put them dead-last, so under cap pressure the override would
+    # rank out exactly the wallets it exists to keep (realized evidence beats
+    # every predictive signal below). No-op when paper_proven is empty, so the
+    # legacy ordering is untouched.
+    ranked = sorted(
+        qualified.values(),
+        key=lambda e: (1 if e.wallet.lower() in paper_proven else 0,
+                       *_rank_key(cfg, e)),
+        reverse=True)
     watchlist = ranked[: cfg.watchlist_cap]
     on_now = {e.wallet for e in watchlist}
 
     newly_qualified = [e for e in watchlist if e.wallet not in prev_on]
     removed = sorted(prev_on - on_now)
+
+    # autopsy for removals that no explicit gate explains: ranked out of the cap,
+    # never swept this cycle, or plain decay (failed to re-enter/retain).
+    for w in removed:
+        if w in culled:
+            continue
+        if w in qualified:
+            culled[w] = f"ranked-out (cap {cfg.watchlist_cap})"
+        elif w not in evaluated:
+            culled[w] = "not-swept (no evaluation this cycle)"
+        else:
+            culled[w] = "decayed (no theory flag, capture/t-stat below retention)"
 
     new_state = DiscoveryState(
         on_watchlist={e.wallet: _meta(e) for e in watchlist},
@@ -357,6 +426,8 @@ def run_discovery_cycle(
         removed=removed,
         first_init=not prev.initialized,
         long_horizon=long_horizon_evals,
+        culled=culled,
+        paper_proven=sorted(w for w in proven_here if w in on_now),
     )
 
 

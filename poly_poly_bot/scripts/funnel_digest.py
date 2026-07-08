@@ -105,10 +105,37 @@ def digest(patterns: list[str]) -> dict:
     dropped: list[tuple] = []
     seen: set = set()
 
+    culled: dict[str, str] = {}
+    cull_hist: dict[str, int] = {}
+    paper_proven: set = set()
+    pp_rejected: dict[str, str] = {}
+
     for ln in _iter_lines(patterns):
         m = re.search(r"swept=(\d+) qualified=(\d+) new=(\d+) removed=(\d+) watchlist=(\d+)", ln)
         if m:
             sweeps.append(tuple(int(x) for x in m.groups()))
+            continue
+        # gate autopsy (2026-07): every removal now logs an attributable reason —
+        # "[DISCOVERY] cull: 0x… — curve-drawdown (2.31 > 1.50 @ n_closed=44)"
+        m = re.search(r"\[DISCOVERY\] cull: (0x[0-9a-fA-F]+) [—-] (.+)$", ln)
+        if m:
+            w = m.group(1).lower()
+            reason = m.group(2).strip()
+            key = ("c", ln[:19], w)
+            if key not in seen:
+                seen.add(key)
+                culled[w] = reason
+                gate = reason.split(" (", 1)[0]
+                cull_hist[gate] = cull_hist.get(gate, 0) + 1
+            continue
+        m = re.search(r"paper-proven \(realized-ledger override\): (.+)$", ln)
+        if m:
+            paper_proven.update(w.strip().lower()
+                                for w in m.group(1).split(",") if w.strip())
+            continue
+        m = re.search(r"LLM gate REJECTED paper-proven (0x[0-9a-fA-F]+) \((.+?)\): (.+)$", ln)
+        if m:
+            pp_rejected[m.group(1).lower()] = f"{m.group(2)} | {m.group(3).strip()}"
             continue
         mg = re.search(r"guardrail skips: (.+)$", ln)
         if mg:
@@ -148,13 +175,15 @@ def digest(patterns: list[str]) -> dict:
             dropped.append((int(m.group(1)), int(m.group(2))))
 
     uniq_sweeps = list(dict.fromkeys(sweeps))
-    all_rejected = {**deferred_reject, **rejected}
+    all_rejected = {**deferred_reject, **rejected, **pp_rejected}
     metrics = {w: _extract_metrics(r) for w, r in all_rejected.items()}
     return {
         "sweeps": uniq_sweeps, "guard": guard, "opened": opened,
         "rejected": rejected, "deferred_reject": deferred_reject,
         "failopen": failopen, "rate_limited": rate_limited, "dropped": dropped,
         "all_rejected": all_rejected, "metrics": metrics,
+        "culled": culled, "cull_hist": cull_hist,
+        "paper_proven": paper_proven, "pp_rejected": pp_rejected,
     }
 
 
@@ -180,6 +209,17 @@ def _print_report(d: dict) -> None:
             tot_new, len(sweeps), tot_new / len(sweeps)))
         print("  removed       : %d" % sum(s[3] for s in sweeps))
         print("  watchlist size: min %d  max %d" % (min(wls), max(wls)))
+
+    if d.get("cull_hist") or d.get("paper_proven"):
+        print("\n[1b] CULL AUTOPSY + PAPER-PROVEN  (post 2026-07 instrumentation)")
+        for gate, c in sorted(d["cull_hist"].items(), key=lambda kv: -kv[1]):
+            print("  cull %-28s %3d" % (gate, c))
+        if d["paper_proven"]:
+            print("  paper-proven on watchlist   : %d  (%s)" % (
+                len(d["paper_proven"]),
+                ", ".join(sorted(w[:10] + "…" for w in d["paper_proven"]))))
+        for w, why in sorted(d.get("pp_rejected", {}).items()):
+            print("  ⚠ gate REJECTED paper-proven %s — %s" % (w[:10] + "…", why[:90]))
 
     print("\n[2] PAPER-HARNESS GUARDRAIL SKIPS  (deduped)")
     gtot = sum(guard.values())
