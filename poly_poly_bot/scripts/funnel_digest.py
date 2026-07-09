@@ -109,6 +109,7 @@ def digest(patterns: list[str]) -> dict:
     cull_hist: dict[str, int] = {}
     paper_proven: set = set()
     pp_rejected: dict[str, str] = {}
+    pp_reacquire_failed: dict[str, str] = {}
 
     for ln in _iter_lines(patterns):
         m = re.search(r"swept=(\d+) qualified=(\d+) new=(\d+) removed=(\d+) watchlist=(\d+)", ln)
@@ -136,6 +137,12 @@ def digest(patterns: list[str]) -> dict:
         m = re.search(r"LLM gate REJECTED paper-proven (0x[0-9a-fA-F]+) \((.+?)\): (.+)$", ln)
         if m:
             pp_rejected[m.group(1).lower()] = f"{m.group(2)} | {m.group(3).strip()}"
+            continue
+        # "[DISCOVERY] paper-proven reacquire FAILED: 0x… — replay-proven-negative (…)
+        #  (realized: 7 settled, ROI +80.5%, $+246.24)"
+        m = re.search(r"paper-proven reacquire FAILED: (0x[0-9a-fA-F]+) [—-] (.+)$", ln)
+        if m:
+            pp_reacquire_failed[m.group(1).lower()] = m.group(2).strip()
             continue
         mg = re.search(r"guardrail skips: (.+)$", ln)
         if mg:
@@ -184,6 +191,7 @@ def digest(patterns: list[str]) -> dict:
         "all_rejected": all_rejected, "metrics": metrics,
         "culled": culled, "cull_hist": cull_hist,
         "paper_proven": paper_proven, "pp_rejected": pp_rejected,
+        "pp_reacquire_failed": pp_reacquire_failed,
     }
 
 
@@ -220,6 +228,8 @@ def _print_report(d: dict) -> None:
                 ", ".join(sorted(w[:10] + "…" for w in d["paper_proven"]))))
         for w, why in sorted(d.get("pp_rejected", {}).items()):
             print("  ⚠ gate REJECTED paper-proven %s — %s" % (w[:10] + "…", why[:90]))
+        for w, why in sorted(d.get("pp_reacquire_failed", {}).items()):
+            print("  ⚠ reacquire FAILED paper-proven %s — %s" % (w[:10] + "…", why[:120]))
 
     print("\n[2] PAPER-HARNESS GUARDRAIL SKIPS  (deduped)")
     gtot = sum(guard.values())

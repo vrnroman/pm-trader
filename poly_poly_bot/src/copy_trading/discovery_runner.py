@@ -438,6 +438,20 @@ class DiscoveryRunner:
         for w in result.removed:
             logger.info("[DISCOVERY] cull: %s — %s", w,
                         result.culled.get(w, "unattributed"))
+        # Failed reacquires get the same autopsy: a paper-proven wallet that was
+        # force-included but didn't make the watchlist used to vanish silently
+        # (only REMOVED wallets were attributed), so "which gate outvoted the
+        # realized record?" was unanswerable from the logs.
+        on_now_l = {e.wallet.lower() for e in result.watchlist}
+        culled_l = {k.lower(): v for k, v in result.culled.items()}
+        for w, rec in proven.items():
+            if w in on_now_l:
+                continue
+            logger.info(
+                "[DISCOVERY] paper-proven reacquire FAILED: %s — %s "
+                "(realized: %d settled, ROI %+.1f%%, $%+.2f)",
+                w, culled_l.get(w, "unattributed (ranked out of cap or not evaluated)"),
+                rec["n_closed"], rec["roi"] * 100, rec["net_pnl"])
         if result.culled:
             gate_counts: dict[str, int] = {}
             for reason in result.culled.values():

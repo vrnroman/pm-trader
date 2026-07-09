@@ -322,6 +322,56 @@ def test_gate_skip_suppresses_regate_until_new_evidence(tmp_path):
     assert set(r._paper_proven()) == {"0xp"}
 
 
+def test_failed_reacquire_is_attributed_in_logs(tmp_path, caplog):
+    # A paper-proven wallet culled in-cycle (replay-proven-negative outvotes the
+    # realized record) must leave an attributable autopsy line — before this,
+    # only REMOVED-from-watchlist wallets were attributed, so a failed reacquire
+    # vanished silently (2026-07-09: two +ROI earners, no trace in the logs).
+    import logging
+
+    cfg = DiscoveryConfig(
+        min_capture_cents=1.5, min_tstat=10.0, drop_capture_cents=1.0,
+        watchlist_cap=5, copy_replay_gate=True, min_copy_replay_n=10,
+        min_copy_replay_roi=0.02,
+    )
+    rows = [_ledger_row("0xp", 10.0, token_id=f"p{i}") for i in range(5)]
+    loser = _ev("0xp", copy_n=50, copy_roi=-0.10)
+    r = DiscoveryRunner(
+        config=cfg,
+        watchlist_path=str(tmp_path / "copy_watchlist.json"),
+        state_path=str(tmp_path / "discovery_state.json"),
+        notify=lambda _m: None,
+        evaluate=lambda *_a, **_k: {"0xa": _ev("0xa"), "0xp": loser},
+        now=lambda: 1000.0,
+        paper_ledger_path=_write_ledger(tmp_path, rows),
+        paper_proven_min_n=5,
+        paper_proven_min_roi=0.0,
+    )
+    with caplog.at_level(logging.INFO, logger="poly_poly_bot"):
+        r.run_once()
+    lines = [rec.getMessage() for rec in caplog.records
+             if "paper-proven reacquire FAILED" in rec.getMessage()]
+    assert len(lines) == 1
+    assert "0xp" in lines[0]
+    assert "replay-proven-negative" in lines[0]
+    assert "5 settled" in lines[0]
+    # the wallet that made the watchlist is not flagged
+    assert "0xa" not in lines[0]
+
+
+def test_successful_reacquire_logs_no_failure(tmp_path, caplog):
+    import logging
+
+    rows = [_ledger_row("0xp", 10.0, token_id=f"p{i}") for i in range(5)]
+    sink: list[str] = []
+    r, _ = _runner(tmp_path, [{"0xa": _ev("0xa"), "0xp": _decayed("0xp")}],
+                   sink, ledger_rows=rows)
+    with caplog.at_level(logging.INFO, logger="poly_poly_bot"):
+        r.run_once()
+    assert not any("paper-proven reacquire FAILED" in rec.getMessage()
+                   for rec in caplog.records)
+
+
 # --------------------------------------------------------------------------- #
 # dossier: the realized paper record block
 # --------------------------------------------------------------------------- #

@@ -17,6 +17,9 @@ def test_digest_parses_autopsy_and_paper_proven_lines(tmp_path):
         "— decayed (no theory flag, capture/t-stat below retention)",
         "2026-07-09 12:00:03 INFO  [DISCOVERY] LLM gate REJECTED paper-proven "
         "0xaaa1111111111111111111111111111111111111 (paper n=5 roi +12.0%, conf 70%): thin sample",
+        "2026-07-09 12:00:04 INFO  [DISCOVERY] paper-proven reacquire FAILED: "
+        "0xeee5555555555555555555555555555555555555 — replay-proven-negative "
+        "(copy_roi -0.058 < +0.020 @ n=112) (realized: 7 settled, ROI +80.5%, $+246.24)",
     ]) + "\n")
     d = digest([str(tmp_path)])
     assert d["sweeps"] == [(40, 20, 2, 2, 20)]
@@ -28,3 +31,5 @@ def test_digest_parses_autopsy_and_paper_proven_lines(tmp_path):
     w = "0xaaa1111111111111111111111111111111111111"
     assert w in d["pp_rejected"]
     assert w in d["all_rejected"]           # counts into the reject taxonomy too
+    wf = "0xeee5555555555555555555555555555555555555"
+    assert d["pp_reacquire_failed"][wf].startswith("replay-proven-negative")
