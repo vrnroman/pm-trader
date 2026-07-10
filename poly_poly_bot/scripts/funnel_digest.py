@@ -111,6 +111,12 @@ def digest(patterns: list[str]) -> dict:
     pp_rejected: dict[str, str] = {}
     pp_reacquire_failed: dict[str, str] = {}
 
+    # strategy B (the borrowed-clock instant-copy book, 2026-07 A-vs-B race)
+    guard_b = {g: 0 for g in GUARDS}
+    opened_b = 0
+    cap_binds_b: dict[str, int] = {}      # "0x12345678… (wallet-day)" -> count
+    cross_routed: dict[str, str] = {}     # wallet -> why
+
     for ln in _iter_lines(patterns):
         m = re.search(r"swept=(\d+) qualified=(\d+) new=(\d+) removed=(\d+) watchlist=(\d+)", ln)
         if m:
@@ -144,22 +150,44 @@ def digest(patterns: list[str]) -> dict:
         if m:
             pp_reacquire_failed[m.group(1).lower()] = m.group(2).strip()
             continue
+        # strategy-B lines FIRST — the generic "guardrail skips" pattern below
+        # would otherwise swallow them into A's counters.
+        is_b = "[COPY-PAPER-B]" in ln
         mg = re.search(r"guardrail skips: (.+)$", ln)
         if mg:
-            key = ("g", ln[:19], mg.group(1).strip())
+            key = ("gb" if is_b else "g", ln[:19], mg.group(1).strip())
             if key not in seen:
                 seen.add(key)
+                tgt = guard_b if is_b else guard
                 for g in GUARDS:
                     mm = re.search(rf"{g}=(\d+)", mg.group(1))
                     if mm:
-                        guard[g] += int(mm.group(1))
+                        tgt[g] += int(mm.group(1))
             continue
-        mo = re.search(r"\[COPY-PAPER\] opened=(\d+) resolved=\d+ open=\d+ closed=\d+", ln)
+        m = re.search(r"\[COPY-PAPER-B\] cap-bind: (.+)$", ln)
+        if m:
+            key = ("cb", ln[:19], m.group(1).strip())
+            if key not in seen:
+                seen.add(key)
+                for part in m.group(1).split(","):
+                    mm = re.search(r"(0x[0-9a-fA-F]+)…?×(\d+) \((\S+)\)", part.strip())
+                    if mm:
+                        k = f"{mm.group(1)} ({mm.group(3)})"
+                        cap_binds_b[k] = cap_binds_b.get(k, 0) + int(mm.group(2))
+            continue
+        m = re.search(r"cross-routed (0x[0-9a-fA-F]+) to strategy B \((.+)\)$", ln)
+        if m:
+            cross_routed[m.group(1).lower()] = m.group(2).strip()
+            continue
+        mo = re.search(r"\[COPY-PAPER(-B)?\] opened=(\d+) resolved=\d+ open=\d+ closed=\d+", ln)
         if mo:
             key = ("o", ln[:19], mo.group(0))
             if key not in seen:
                 seen.add(key)
-                opened += int(mo.group(1))
+                if mo.group(1):
+                    opened_b += int(mo.group(2))
+                else:
+                    opened += int(mo.group(2))
             continue
         m = re.search(r"LLM gate REJECTED (0x[0-9a-fA-F]+)(?: \(conf \d+%\))?: (.+)$", ln)
         if m:
@@ -192,6 +220,8 @@ def digest(patterns: list[str]) -> dict:
         "culled": culled, "cull_hist": cull_hist,
         "paper_proven": paper_proven, "pp_rejected": pp_rejected,
         "pp_reacquire_failed": pp_reacquire_failed,
+        "guard_b": guard_b, "opened_b": opened_b,
+        "cap_binds_b": cap_binds_b, "cross_routed": cross_routed,
     }
 
 
@@ -236,6 +266,19 @@ def _print_report(d: dict) -> None:
     for g, v in sorted(guard.items(), key=lambda kv: -kv[1]):
         print("  %-14s %8d  (%.1f%%)" % (g, v, 100 * v / gtot if gtot else 0))
     print("  %-14s %8d   positions opened: %d" % ("TOTAL", gtot, d["opened"]))
+
+    if d.get("opened_b") or any(d.get("guard_b", {}).values()) or d.get("cross_routed"):
+        print("\n[2b] STRATEGY-B BOOK  (borrowed-clock instant-copy — A-vs-B race)")
+        gb = d.get("guard_b", {})
+        gbtot = sum(gb.values())
+        for g, v in sorted(gb.items(), key=lambda kv: -kv[1]):
+            if v:
+                print("  %-14s %8d  (%.1f%%)" % (g, v, 100 * v / gbtot if gbtot else 0))
+        print("  %-14s %8d   B positions opened: %d" % ("TOTAL", gbtot, d.get("opened_b", 0)))
+        for k, n in sorted(d.get("cap_binds_b", {}).items(), key=lambda kv: -kv[1]):
+            print("  ⚠ cap-bind %-28s ×%d  — a binding B cap re-creates A's censoring" % (k, n))
+        for w, why in sorted(d.get("cross_routed", {}).items()):
+            print("  → cross-routed %s — %s" % (w[:10] + "…", why[:80]))
 
     print("\n[3] LLM GATE OUTCOMES  (distinct wallets)")
     print("  REJECTED (skip)            : %d" % len(d["rejected"]))

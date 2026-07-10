@@ -380,6 +380,19 @@ def _compute_unified():
             s4_positions = []
         b_wallets = b_wallets + u.aggregate_strategy4(s4_positions)
 
+    # Strategy B — the borrowed-clock instant-copy book (2026-07 A-vs-B race).
+    # Its own ledger, grouped under the single "B-instant" track. Open copies are
+    # marked on-read exactly like the near-term book's above.
+    if CONFIG.copy_paper_b_enabled:
+        try:
+            b_ledger = PaperCopyLedger(CONFIG.copy_paper_b_ledger)
+            b_positions = list(b_ledger.positions.values())
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"strategy-B paper ledger load failed: {e}")
+            b_positions = []
+        _mark_open_paper(b_positions, _fetch_midpoint)
+        b_wallets = b_wallets + u.aggregate_paper_b(b_positions)
+
     unified = u.build_unified(a_wallets, b_wallets)
     return unified, a_wallets, b_wallets, n_unpriced
 

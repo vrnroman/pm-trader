@@ -45,6 +45,10 @@ UNTAGGED_B = "untagged-B"
 # The long-horizon paper book is one track (not split by discovery theory). Like
 # the near-term copier, its open positions are marked to market when priced.
 STRATEGY4_LABEL = "S4"
+# The borrowed-clock (instant-copy) paper book — strategy B of the 2026-07
+# A-vs-B race. One track label (like S4), not per-theory: the race compares
+# BOOKS, and its per-wallet split lives in scripts/strategy_compare.py.
+PAPER_B_LABEL = "B-instant"
 
 # Resolved-sample maturity bands — "is there enough *settled* paper data to
 # judge this wallet/theory yet?" A freshly-enabled theory (1a/1e/1j) looks like
@@ -366,6 +370,43 @@ def aggregate_strategy4(s4_positions: list[PaperPosition]) -> list[WalletPnl]:
                 wp.cost_basis += p.spent
                 wp.n_open_marked += 1
         _add_label(wp, STRATEGY4_LABEL)
+    _round(acc.values())
+    return list(acc.values())
+
+
+def aggregate_paper_b(b_positions: list[PaperPosition]) -> list[WalletPnl]:
+    """Per-wallet P&L for the strategy-B (borrowed-clock instant-copy) book.
+
+    Same shape as ``aggregate_strategy4``: every wallet groups under the single
+    ``B-instant`` track so /pnl shows the race's B book as one line-item family
+    next to the near-term copier's per-theory tracks. Near-term-book opens carry
+    no mark (marked on-read by /pnl), so unmarked opens count position/cost only.
+    """
+    acc: dict[str, WalletPnl] = {}
+    for p in b_positions:
+        if is_dust_fill(p):
+            continue
+        wallet = (p.target or "").lower() or _UNKNOWN_WALLET
+        wp = acc.get(wallet)
+        if wp is None:
+            wp = WalletPnl(wallet=wallet, system="B")
+            acc[wallet] = wp
+        if p.closed:
+            wp.realized_pnl += p.pnl
+            wp.cost_basis += p.spent       # realized capital feeds ROI
+            wp.n_closed += 1
+            if p.won:
+                wp.wins += 1
+            else:
+                wp.losses += 1
+        else:
+            wp.open_cost += p.spent
+            wp.n_open += 1
+            if p.mark_price > 0:           # a marked open contributes to ROI
+                wp.unrealized_pnl += p.unrealized_pnl
+                wp.cost_basis += p.spent
+                wp.n_open_marked += 1
+        _add_label(wp, PAPER_B_LABEL)
     _round(acc.values())
     return list(acc.values())
 
