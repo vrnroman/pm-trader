@@ -323,6 +323,10 @@ def run_governance_cycle(
     time_box_window_s: float = 45 * 86400.0,
     retire_cooldown_s: float = 45 * 86400.0,
     send_retirement: Optional[Callable[[dict], None]] = None,
+    # per-strategy state scope: "" = the legacy strategy-A stores, "b" = the
+    # strategy-B stores (see promotion_state._scoped). One governance code path,
+    # two fully independent promoted/blacklist/offers/retired state families.
+    state_scope: str = "",
 ) -> tuple[list[dict], list[dict]]:
     """Group the settled ledger, evaluate the gate, then persist + notify.
 
@@ -334,9 +338,9 @@ def run_governance_cycle(
     ``history_path`` (promotion-gate-history) for ``/gate``. Returns
     ``(offers_sent, demotions_applied)``."""
     positions_by_wallet = group_settled_by_wallet(paper_positions)
-    promoted = promotion_state.promoted_set()
-    blacklist = promotion_state.active_blacklist(now)
-    offers_map = promotion_state.offers_map()
+    promoted = promotion_state.promoted_set(state_scope)
+    blacklist = promotion_state.active_blacklist(now, scope=state_scope)
+    offers_map = promotion_state.offers_map(state_scope)
     # An active offer (offered/accepted/dismissed) suppresses re-offering; a prior
     # "held" record suppresses re-logging the hold but still lets a later pass fire.
     offered_active = {w for w, r in offers_map.items()
@@ -384,7 +388,7 @@ def run_governance_cycle(
         if send_offer(o):
             promotion_state.record_offer(
                 o["wallet"], status="offered",
-                n_closed=o["n_closed"], roi=o["roi"], now=now)
+                n_closed=o["n_closed"], roi=o["roi"], now=now, scope=state_scope)
             _log_history(history_path, {
                 "ts": now, "event": "offer", "wallet": o["wallet"],
                 "n_closed": o["n_closed"], "roi": round(float(o["roi"] or 0.0), 4),
@@ -405,7 +409,7 @@ def run_governance_cycle(
     for d in demotions:
         promotion_state.add_blacklist(
             d["wallet"], until=d["until"], reason="auto-demote",
-            n_closed=d["n_closed"], roi=d["roi"] or 0.0, now=now)
+            n_closed=d["n_closed"], roi=d["roi"] or 0.0, now=now, scope=state_scope)
         _log_history(history_path, {
             "ts": now, "event": "demote", "wallet": d["wallet"],
             "n_closed": d["n_closed"], "roi": round(float(d["roi"] or 0.0), 4),
@@ -425,7 +429,8 @@ def run_governance_cycle(
         if key in held_seen:
             continue
         promotion_state.record_offer(
-            h["wallet"], status="held", n_closed=h["n_closed"], roi=h["roi"] or 0.0, now=now)
+            h["wallet"], status="held", n_closed=h["n_closed"], roi=h["roi"] or 0.0,
+            now=now, scope=state_scope)
         _log_history(history_path, {
             "ts": now, "event": "held", "wallet": h["wallet"],
             "n_closed": h["n_closed"], "roi": round(float(h["roi"] or 0.0), 4),
@@ -440,7 +445,7 @@ def run_governance_cycle(
     # observation window so they stop squatting a slot (re-discoverable, NOT
     # blacklisted). Off by default; the dead-band is (demote line, promote line).
     if time_box_enabled:
-        retired_now = promotion_state.active_retired(now)
+        retired_now = promotion_state.active_retired(now, scope=state_scope)
         for r in find_retirements(
                 positions_by_wallet, now=now, min_n=demote_min_n,
                 dead_band_low=demote_max_roi, dead_band_high=promote_min_roi,
@@ -448,7 +453,7 @@ def run_governance_cycle(
                 blacklist=blacklist, offered=offered_active, retired=retired_now):
             promotion_state.add_retired(
                 r["wallet"], until=now + retire_cooldown_s, reason="time-box: dead-band",
-                n_closed=r["n_closed"], roi=r["roi"] or 0.0, now=now)
+                n_closed=r["n_closed"], roi=r["roi"] or 0.0, now=now, scope=state_scope)
             _log_history(history_path, {
                 "ts": now, "event": "retire", "wallet": r["wallet"],
                 "n_closed": r["n_closed"], "roi": round(float(r["roi"] or 0.0), 4),

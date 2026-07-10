@@ -45,25 +45,39 @@ _CACHE: dict[str, tuple[float, dict]] = {}
 # Paths
 # --------------------------------------------------------------------------- #
 
-def _data_path(env_key: str, filename: str) -> str:
+def _scoped(path: str, scope: str) -> str:
+    """Insert ``_{scope}`` before the extension: per-strategy state stores.
+
+    Scope "" is the legacy (strategy A) store — byte-identical paths, so
+    every existing call site is unchanged. Scope "b" gives strategy B its own
+    promoted/blacklist/offers/retired files: the two books' governance must
+    never share state (a wallet demoted under one fill regime may be the
+    other regime's edge — the whole point of the A-vs-B race)."""
+    if not scope:
+        return path
+    stem, ext = os.path.splitext(path)
+    return f"{stem}_{scope}{ext}"
+
+
+def _data_path(env_key: str, filename: str, scope: str = "") -> str:
     override = os.environ.get(env_key, "").strip()
-    return override or os.path.join(CONFIG.data_dir, filename)
+    return _scoped(override or os.path.join(CONFIG.data_dir, filename), scope)
 
 
-def promoted_path() -> str:
-    return _data_path("PROMOTED_WALLETS_STORE", "promoted_wallets.json")
+def promoted_path(scope: str = "") -> str:
+    return _data_path("PROMOTED_WALLETS_STORE", "promoted_wallets.json", scope)
 
 
-def blacklist_path() -> str:
-    return _data_path("COPY_BLACKLIST_STORE", "copy_blacklist.json")
+def blacklist_path(scope: str = "") -> str:
+    return _data_path("COPY_BLACKLIST_STORE", "copy_blacklist.json", scope)
 
 
-def offers_path() -> str:
-    return _data_path("PROMOTION_OFFERS_STORE", "promotion_offers.json")
+def offers_path(scope: str = "") -> str:
+    return _data_path("PROMOTION_OFFERS_STORE", "promotion_offers.json", scope)
 
 
-def retired_path() -> str:
-    return _data_path("COPY_RETIRED_STORE", "copy_retired.json")
+def retired_path(scope: str = "") -> str:
+    return _data_path("COPY_RETIRED_STORE", "copy_retired.json", scope)
 
 
 # --------------------------------------------------------------------------- #
@@ -112,29 +126,29 @@ def clear_cache() -> None:
 # Promoted wallets
 # --------------------------------------------------------------------------- #
 
-def promoted_map() -> dict:
+def promoted_map(scope: str = "") -> dict:
     """Lowercased-wallet -> record ({wallet, tier, ts, source})."""
-    return _read(promoted_path())
+    return _read(promoted_path(scope))
 
 
-def promoted_wallets() -> list[str]:
+def promoted_wallets(scope: str = "") -> list[str]:
     """Original-case addresses of all promoted wallets (for detection/fetch)."""
-    return [rec.get("wallet") or w for w, rec in promoted_map().items()]
+    return [rec.get("wallet") or w for w, rec in promoted_map(scope).items()]
 
 
-def promoted_set() -> set[str]:
+def promoted_set(scope: str = "") -> set[str]:
     """Lowercased set of promoted wallets (membership tests)."""
-    return set(promoted_map().keys())
+    return set(promoted_map(scope).keys())
 
 
-def promoted_tier_of(wallet: str) -> Optional[str]:
+def promoted_tier_of(wallet: str, scope: str = "") -> Optional[str]:
     """The tier a wallet was promoted into, or None if not promoted."""
-    rec = promoted_map().get((wallet or "").lower())
+    rec = promoted_map(scope).get((wallet or "").lower())
     return rec.get("tier") if rec else None
 
 
 def add_promoted(wallet: str, tier: str = "1b", source: str = "telegram",
-                 now: Optional[float] = None) -> dict:
+                 now: Optional[float] = None, scope: str = "") -> dict:
     """Promote a wallet into a System-A tier at runtime. Idempotent (re-promoting
     updates the tier/timestamp). Returns the stored record. Tier is validated."""
     wallet = (wallet or "").strip()
@@ -150,21 +164,21 @@ def add_promoted(wallet: str, tier: str = "1b", source: str = "telegram",
         "source": source,
     }
     with _LOCK:
-        data = dict(_read(promoted_path()))
+        data = dict(_read(promoted_path(scope)))
         data[wallet.lower()] = rec
-        _write(promoted_path(), data)
+        _write(promoted_path(scope), data)
     return rec
 
 
-def remove_promoted(wallet: str) -> bool:
+def remove_promoted(wallet: str, scope: str = "") -> bool:
     """Drop a wallet from the promoted store. Returns True if it was present."""
     key = (wallet or "").lower()
     with _LOCK:
-        data = dict(_read(promoted_path()))
+        data = dict(_read(promoted_path(scope)))
         if key not in data:
             return False
         del data[key]
-        _write(promoted_path(), data)
+        _write(promoted_path(scope), data)
     return True
 
 
@@ -172,14 +186,15 @@ def remove_promoted(wallet: str) -> bool:
 # Blacklist (auto-demoted wallets)
 # --------------------------------------------------------------------------- #
 
-def blacklist_map() -> dict:
+def blacklist_map(scope: str = "") -> dict:
     """Lowercased-wallet -> record ({wallet, until, reason, ts, n_closed, roi})."""
-    return _read(blacklist_path())
+    return _read(blacklist_path(scope))
 
 
-def is_blacklisted(wallet: str, now: Optional[float] = None) -> bool:
+def is_blacklisted(wallet: str, now: Optional[float] = None,
+                   scope: str = "") -> bool:
     """True if the wallet is under an active (non-expired) demotion cooldown."""
-    rec = blacklist_map().get((wallet or "").lower())
+    rec = blacklist_map(scope).get((wallet or "").lower())
     if not rec:
         return False
     now = now if now is not None else time.time()
@@ -187,11 +202,11 @@ def is_blacklisted(wallet: str, now: Optional[float] = None) -> bool:
     return until <= 0.0 or now < until   # until<=0 means permanent
 
 
-def active_blacklist(now: Optional[float] = None) -> set[str]:
+def active_blacklist(now: Optional[float] = None, scope: str = "") -> set[str]:
     """Lowercased set of wallets currently within their demotion cooldown."""
     now = now if now is not None else time.time()
     out: set[str] = set()
-    for w, rec in blacklist_map().items():
+    for w, rec in blacklist_map(scope).items():
         until = float(rec.get("until") or 0.0)
         if until <= 0.0 or now < until:
             out.add(w)
@@ -200,7 +215,7 @@ def active_blacklist(now: Optional[float] = None) -> set[str]:
 
 def add_blacklist(wallet: str, *, until: float, reason: str = "",
                   n_closed: int = 0, roi: float = 0.0,
-                  now: Optional[float] = None) -> dict:
+                  now: Optional[float] = None, scope: str = "") -> dict:
     """Blacklist a wallet until ``until`` (unix secs; <=0 = permanent)."""
     wallet = (wallet or "").strip()
     if not wallet:
@@ -214,9 +229,9 @@ def add_blacklist(wallet: str, *, until: float, reason: str = "",
         "roi": round(float(roi), 4),
     }
     with _LOCK:
-        data = dict(_read(blacklist_path()))
+        data = dict(_read(blacklist_path(scope)))
         data[wallet.lower()] = rec
-        _write(blacklist_path(), data)
+        _write(blacklist_path(scope), data)
     return rec
 
 
@@ -229,17 +244,17 @@ def add_blacklist(wallet: str, *, until: float, reason: str = "",
 # confused with an auto-demote.
 # --------------------------------------------------------------------------- #
 
-def retired_map() -> dict:
+def retired_map(scope: str = "") -> dict:
     """Lowercased-wallet -> record ({wallet, until, reason, ts, n_closed, roi})."""
-    return _read(retired_path())
+    return _read(retired_path(scope))
 
 
-def active_retired(now: Optional[float] = None) -> set[str]:
+def active_retired(now: Optional[float] = None, scope: str = "") -> set[str]:
     """Lowercased set of wallets currently within their retire window (excluded
     from discovery so they don't re-add, re-discoverable once it lapses)."""
     now = now if now is not None else time.time()
     out: set[str] = set()
-    for w, rec in retired_map().items():
+    for w, rec in retired_map(scope).items():
         until = float(rec.get("until") or 0.0)
         if until <= 0.0 or now < until:
             out.add(w)
@@ -248,7 +263,7 @@ def active_retired(now: Optional[float] = None) -> set[str]:
 
 def add_retired(wallet: str, *, until: float, reason: str = "",
                 n_closed: int = 0, roi: float = 0.0,
-                now: Optional[float] = None) -> dict:
+                now: Optional[float] = None, scope: str = "") -> dict:
     """Retire a wallet until ``until`` (unix secs; <=0 = permanent). Neutral: this
     is an inconclusive time-box, NOT a demotion — do not use for proven losers."""
     wallet = (wallet or "").strip()
@@ -263,9 +278,9 @@ def add_retired(wallet: str, *, until: float, reason: str = "",
         "roi": round(float(roi), 4),
     }
     with _LOCK:
-        data = dict(_read(retired_path()))
+        data = dict(_read(retired_path(scope)))
         data[wallet.lower()] = rec
-        _write(retired_path(), data)
+        _write(retired_path(scope), data)
     return rec
 
 
@@ -273,13 +288,13 @@ def add_retired(wallet: str, *, until: float, reason: str = "",
 # Promotion offers (dedupe so a wallet is offered once)
 # --------------------------------------------------------------------------- #
 
-def offers_map() -> dict:
+def offers_map(scope: str = "") -> dict:
     """Lowercased-wallet -> offer record ({wallet, status, ts, n_closed, roi})."""
-    return _read(offers_path())
+    return _read(offers_path(scope))
 
 
 def record_offer(wallet: str, *, status: str, n_closed: int = 0, roi: float = 0.0,
-                 now: Optional[float] = None) -> dict:
+                 now: Optional[float] = None, scope: str = "") -> dict:
     """Persist an offer's state ('offered' | 'accepted' | 'dismissed')."""
     wallet = (wallet or "").strip()
     rec = {
@@ -290,12 +305,12 @@ def record_offer(wallet: str, *, status: str, n_closed: int = 0, roi: float = 0.
         "roi": round(float(roi), 4),
     }
     with _LOCK:
-        data = dict(_read(offers_path()))
+        data = dict(_read(offers_path(scope)))
         data[wallet.lower()] = rec
-        _write(offers_path(), data)
+        _write(offers_path(scope), data)
     return rec
 
 
-def offer_status(wallet: str) -> Optional[str]:
-    rec = offers_map().get((wallet or "").lower())
+def offer_status(wallet: str, scope: str = "") -> Optional[str]:
+    rec = offers_map(scope).get((wallet or "").lower())
     return rec.get("status") if rec else None
