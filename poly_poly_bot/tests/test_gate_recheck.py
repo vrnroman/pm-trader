@@ -246,21 +246,33 @@ def test_drain_dequeues_wallet_that_decayed_off(tmp_path):
 def test_unevaluated_wallet_is_carried_and_stays_queued(tmp_path):
     # Interrupted-sweep semantics (2026-07-10): a queued wallet that was NOT
     # evaluated this sweep is carried on the watchlist and its re-check stays
-    # owed — absence is not evidence of decay.
+    # owed — absence is not evidence of decay. The drain must not even TOUCH a
+    # carried wallet (verifier round-6: a real "skip" verdict resolving here
+    # would drop it from state while the carry branch re-appends its file row —
+    # file/state divergence, and the harness copies a gate-rejected wallet).
     seq = [{"0xk": _ev("0xk")},
            {"0xk": _ev("0xk"), "0xlim": _ev("0xlim")},
            {"0xk": _ev("0xk")}]                 # 0xlim not swept -> carried
+    lim_rechecks = {"n": 0}
 
     def review(dossier, model=None):
-        return RATE_LIMITED if dossier["wallet"] == "0xlim" else LLMVerdict(
-            "follow", "low", True, 0.7, "ok")
+        if dossier["wallet"] == "0xlim":
+            lim_rechecks["n"] += 1
+            # first call: the gate parks it; any LATER call would be the drain —
+            # answer with a hard skip to prove a carried wallet is never asked.
+            if lim_rechecks["n"] == 1:
+                return RATE_LIMITED
+            return LLMVerdict("skip", "high", False, 0.9, "hard reject")
+        return LLMVerdict("follow", "low", True, 0.7, "ok")
 
     r, _ = _runner(tmp_path, seq=seq, review_fn=review)
     r.run_once(); r.run_once(); r.run_once()
-    assert not q_empty(r)
+    assert lim_rechecks["n"] == 1               # drain never re-checked it while carried
+    assert not q_empty(r)                       # the re-check stays owed
     import json
     wl = {t["wallet"] for t in json.load(open(tmp_path / "wl.json"))["targets"]}
-    assert "0xlim" in wl
+    assert "0xlim" in wl                        # file and state agree
+    assert "0xlim" in r._load_state().on_watchlist
 
 
 def test_wallet_parked_this_sweep_is_not_rechecked_immediately(tmp_path):

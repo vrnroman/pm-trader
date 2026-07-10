@@ -778,9 +778,13 @@ class DiscoveryRunner:
         if not entries:
             return
         # Carried wallets (not evaluated this cycle — interrupted sweep) are
-        # still ON the list: their owed re-check stays parked, it is neither
-        # "decayed off" nor re-checkable against fresh stats this sweep.
+        # still ON the list, but NOTHING acts on them this sweep: their owed
+        # re-check stays parked (skipped below, not dequeued), because resolving
+        # a re-check here could drop the wallet from state while the carry
+        # branch re-appends its file row — file/state divergence (verifier
+        # round-6 catch). The re-check runs on the next full sweep instead.
         on_wl = {e.wallet for e in result.watchlist} | set(result.carried)
+        carried_set = set(result.carried)
         resolved: set = set()      # dequeue (re-checked or gone)
         rejected: set = set()      # remove from watchlist (deferred check said skip)
         checked = 0
@@ -790,6 +794,8 @@ class DiscoveryRunner:
                 continue
             if only_wallets is not None and wallet not in only_wallets:
                 continue                      # parked/gated THIS sweep — wait
+            if wallet in carried_set:
+                continue                      # carried — stays parked, untouched
             if wallet not in on_wl:
                 resolved.add(wallet)          # decayed off — nothing to re-check
                 continue
