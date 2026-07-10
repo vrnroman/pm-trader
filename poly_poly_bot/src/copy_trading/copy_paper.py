@@ -270,6 +270,12 @@ class CycleSummary:
     # the positions that resolved *this* cycle, so callers can name them in a
     # notification instead of only reporting cumulative ledger aggregates.
     resolved_positions: list["PaperPosition"] = field(default_factory=list)
+    # every slate-cap bind this cycle as (target, category, "wallet-day" |
+    # "category-day") — the aggregate skipped_slate_cap says HOW OFTEN the cap
+    # bound, this says WHO it bound, so a book whose thesis is take-everything
+    # (strategy B) can autopsy whether its caps are re-creating the censoring
+    # it exists to remove.
+    slate_cap_binds: list = field(default_factory=list)
 
 
 class CopyPaperEngine:
@@ -297,6 +303,15 @@ class CopyPaperEngine:
         # category, so one correlated same-day slate can't dominate (None = off).
         max_copies_per_wallet_day: Optional[int] = None,
         max_copies_per_category_day: Optional[int] = None,
+        # --- borrowed-clock fill (strategy B) ---
+        # When set, fill every admitted copy AT THE TARGET'S OWN PRICE plus this
+        # many bps, without walking the live book: the instant-copy paper book.
+        # Detection may still lag minutes (data-api indexer), but the recorded
+        # economics are those of a copier that acted within seconds — which is
+        # exactly the evidence the promotion gate needs for that strategy, and
+        # the same fill regime the A-vs-B counterfactual estimate used. None
+        # (default) keeps the live-book walk, so the bare engine is unchanged.
+        fill_at_their_price_bps: Optional[int] = None,
         # --- bet-horizon routing (Strategy 1 vs 4) ---
         # Only act on a detected BUY whose horizon (market endDate − now, in days,
         # carried on the trade as ``horizon_days``) is in this book's band. The
@@ -363,6 +378,7 @@ class CopyPaperEngine:
         self.first_entry_only = first_entry_only
         self.max_copies_per_wallet_day = max_copies_per_wallet_day
         self.max_copies_per_category_day = max_copies_per_category_day
+        self.fill_at_their_price_bps = fill_at_their_price_bps
         self.allowed_categories = (
             {k.lower(): set(v) for k, v in allowed_categories.items()}
             if allowed_categories is not None else None)
@@ -456,6 +472,7 @@ class CopyPaperEngine:
             if (self.max_copies_per_wallet_day is not None
                     and wallet_day.get(target, 0) >= self.max_copies_per_wallet_day):
                 s.skipped_slate_cap += 1
+                s.slate_cap_binds.append((target, category, "wallet-day"))
                 continue
             over_real_cap = False
             if (self.max_copies_per_category_day is not None
@@ -470,13 +487,23 @@ class CopyPaperEngine:
                              and cat_day.get(category, 0) < self.relief_max_per_category_day)
                 if not (starved and relief_ok):
                     s.skipped_slate_cap += 1
+                    s.slate_cap_binds.append((target, category, "category-day"))
                     continue
                 over_real_cap = True
             copy_usd = self._copy_size(target, tr.get("their_usd", 0) or 0.0)
-            fill = simulate_copy_fill(
-                tr["their_price"], self.book_fetcher(tr["token_id"]),
-                copy_usd, max_slippage_bps=self.max_slippage_bps,
-            )
+            if self.fill_at_their_price_bps is not None:
+                # borrowed-clock fill: at their price + fixed drag, no book walk
+                price = min(
+                    tr["their_price"] * (1 + self.fill_at_their_price_bps / 10000.0),
+                    0.999)
+                fill = FillSim(avg_price=price, spent=copy_usd,
+                               shares=copy_usd / price,
+                               drag_bps=self.fill_at_their_price_bps)
+            else:
+                fill = simulate_copy_fill(
+                    tr["their_price"], self.book_fetcher(tr["token_id"]),
+                    copy_usd, max_slippage_bps=self.max_slippage_bps,
+                )
             if fill.shares <= 0:
                 s.skipped_unfilled += 1
                 continue

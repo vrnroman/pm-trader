@@ -77,6 +77,14 @@ class CopyPaperRunner:
         mark_fetcher: Optional[Callable[[str], Optional[float]]] = None,
         strategy: str = "1",
         extra_watchlist_paths: Optional[list[str]] = None,
+        # borrowed-clock fill (strategy B) — forwarded to the engine; None keeps
+        # the live-book walk (see CopyPaperEngine.fill_at_their_price_bps).
+        fill_at_their_price_bps: Optional[int] = None,
+        # which auto-demote blacklist binds this book. Default (None) reads the
+        # legacy global store; a per-strategy book passes its own scoped reader
+        # so strategy A's demotions never filter strategy B's watchlist (a wallet
+        # demoted under one fill regime may be the other regime's edge).
+        blacklist_provider: Optional[Callable[[], set]] = None,
         # injectable dependencies (defaults are the live ones)
         detector_factory: Optional[Callable[..., Callable]] = None,
         book_fetcher: Optional[Callable[[str], list[tuple[float, float]]]] = None,
@@ -109,6 +117,8 @@ class CopyPaperRunner:
         self.min_horizon_days = min_horizon_days
         self.max_horizon_days = max_horizon_days
         self.strategy = strategy
+        self.fill_at_their_price_bps = fill_at_their_price_bps
+        self._blacklist_provider = blacklist_provider
         self._mark_fetcher = mark_fetcher
         self._extra_watchlist_paths = list(extra_watchlist_paths or [])
         self._detector_factory = detector_factory or make_detector
@@ -134,7 +144,8 @@ class CopyPaperRunner:
         # (proven-negative copy ROI) are dropped here so a demotion stops the copy
         # immediately, without waiting for the next discovery sweep to rewrite the
         # file. Empty blacklist (the default) -> no-op.
-        blacklisted = promotion_state.active_blacklist()
+        blacklisted = (self._blacklist_provider() if self._blacklist_provider
+                       else promotion_state.active_blacklist())
         seen: set[str] = set()
         out: list[str] = []
         for path in [self.watchlist_path or ""] + self._extra_watchlist_paths:
@@ -189,7 +200,13 @@ class CopyPaperRunner:
             self.ledger, detector=detector, book_fetcher=self._book_fetcher,
             resolver=self._resolver, copy_pct=self.copy_pct,
             max_copy_usd=self.max_copy_usd, max_slippage_bps=self.max_slippage_bps,
-            exit_detector=exit_detector, bid_fetcher=self._bid_fetcher,
+            exit_detector=exit_detector,
+            # borrowed-clock book: entries fill at the target's price, so exits
+            # mirror at the target's exit price too (no bid-book walk) — one
+            # regime end to end, matching the counterfactual estimate.
+            bid_fetcher=(None if self.fill_at_their_price_bps is not None
+                         else self._bid_fetcher),
+            fill_at_their_price_bps=self.fill_at_their_price_bps,
             fill_gate_bps=self.fill_gate_bps, first_entry_only=self.first_entry_only,
             max_copies_per_wallet_day=self.max_copies_per_wallet_day,
             max_copies_per_category_day=self.max_copies_per_category_day,
