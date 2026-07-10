@@ -195,6 +195,12 @@ class DiscoveryRunner:
         paper_ledger_path: Optional[str] = None,
         paper_proven_min_n: int = 5,
         paper_proven_min_roi: float = 0.0,
+        # Cross-strategy routing hook (A-vs-B race, 2026-07): called once per
+        # wallet REMOVED from the watchlist this sweep — governance demotes,
+        # discovery culls, and retention drops all land here — with
+        # (wallet, eval_or_None) so strategy B can claim the B-fit ones. A
+        # failing hook must never break the sweep (guarded at the call site).
+        on_removed: Optional[Callable[[str, Optional[Eval]], None]] = None,
         consensus_fired_path: Optional[str] = None,
         # injectable for tests
         evaluate: Callable[..., dict[str, Eval]] = evaluate_sweep,
@@ -221,6 +227,7 @@ class DiscoveryRunner:
         self.paper_ledger_path = paper_ledger_path
         self.paper_proven_min_n = paper_proven_min_n
         self.paper_proven_min_roi = paper_proven_min_roi
+        self._on_removed = on_removed
         self._evaluate = evaluate
         self._llm_review = llm_review
         self._now = now
@@ -438,6 +445,18 @@ class DiscoveryRunner:
         for w in result.removed:
             logger.info("[DISCOVERY] cull: %s — %s", w,
                         result.culled.get(w, "unattributed"))
+        # Cross-strategy routing (A-vs-B race): every wallet that left the
+        # watchlist this sweep — cull, retention drop, demote-driven exclusion —
+        # is offered to strategy B, whose fill regime may be exactly where this
+        # wallet's edge lives. The hook does its own B-fit gating; a hook
+        # failure must never break the sweep.
+        if self._on_removed is not None:
+            for w in result.removed:
+                try:
+                    self._on_removed(w, evaluated.get(w))
+                except Exception:  # pragma: no cover - defensive
+                    logger.warning("[DISCOVERY] on_removed hook failed for %s",
+                                   w, exc_info=True)
         # Failed reacquires get the same autopsy: a paper-proven wallet that was
         # force-included but didn't make the watchlist used to vanish silently
         # (only REMOVED wallets were attributed), so "which gate outvoted the
