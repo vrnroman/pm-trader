@@ -267,7 +267,8 @@ def _print_report(d: dict) -> None:
         print("  %-14s %8d  (%.1f%%)" % (g, v, 100 * v / gtot if gtot else 0))
     print("  %-14s %8d   positions opened: %d" % ("TOTAL", gtot, d["opened"]))
 
-    if d.get("opened_b") or any(d.get("guard_b", {}).values()) or d.get("cross_routed"):
+    if (d.get("opened_b") or any(d.get("guard_b", {}).values())
+            or d.get("cross_routed") or d.get("cap_binds_b")):
         print("\n[2b] STRATEGY-B BOOK  (borrowed-clock instant-copy — A-vs-B race)")
         gb = d.get("guard_b", {})
         gbtot = sum(gb.values())
@@ -275,8 +276,11 @@ def _print_report(d: dict) -> None:
             if v:
                 print("  %-14s %8d  (%.1f%%)" % (g, v, 100 * v / gbtot if gbtot else 0))
         print("  %-14s %8d   B positions opened: %d" % ("TOTAL", gbtot, d.get("opened_b", 0)))
-        for k, n in sorted(d.get("cap_binds_b", {}).items(), key=lambda kv: -kv[1]):
-            print("  ⚠ cap-bind %-28s ×%d  — a binding B cap re-creates A's censoring" % (k, n))
+        # NB: loop vars must not shadow `n` (the [4] rejected-wallet count above)
+        for bind_key, bind_n in sorted(d.get("cap_binds_b", {}).items(),
+                                       key=lambda kv: -kv[1]):
+            print("  ⚠ cap-bind %-28s ×%d  — a binding B cap re-creates A's censoring"
+                  % (bind_key, bind_n))
         for w, why in sorted(d.get("cross_routed", {}).items()):
             print("  → cross-routed %s — %s" % (w[:10] + "…", why[:80]))
 

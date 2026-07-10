@@ -70,6 +70,20 @@ def test_borrowed_clock_price_capped_below_one():
         assert led.open_positions()[0].entry_price <= 0.999
 
 
+def test_borrowed_clock_zero_price_row_skipped_not_crash():
+    # belt-and-braces: a malformed feed row (their_price=0) must be skipped as
+    # unfilled, never zero-divide the cycle.
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        eng = CopyPaperEngine(
+            led, detector=lambda: [_trade("t1", "TOK", their_price=0.0)],
+            book_fetcher=lambda t: [], resolver=lambda c: None,
+            fill_at_their_price_bps=100,
+        )
+        s = eng.run_cycle(now=1)
+        assert s.opened == 0 and s.skipped_unfilled == 1
+
+
 def test_default_engine_unchanged_walks_the_book():
     # No fill_at_their_price_bps -> legacy behaviour: the live book decides.
     with tempfile.TemporaryDirectory() as d:

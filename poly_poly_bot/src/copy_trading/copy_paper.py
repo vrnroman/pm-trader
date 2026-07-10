@@ -492,7 +492,12 @@ class CopyPaperEngine:
                 over_real_cap = True
             copy_usd = self._copy_size(target, tr.get("their_usd", 0) or 0.0)
             if self.fill_at_their_price_bps is not None:
-                # borrowed-clock fill: at their price + fixed drag, no book walk
+                # borrowed-clock fill: at their price + fixed drag, no book walk.
+                # Detectors already band price to [0.05, 0.95]; the <=0 guard is
+                # belt-and-braces so a malformed feed row can't zero-divide.
+                if tr["their_price"] <= 0:
+                    s.skipped_unfilled += 1
+                    continue
                 price = min(
                     tr["their_price"] * (1 + self.fill_at_their_price_bps / 10000.0),
                     0.999)

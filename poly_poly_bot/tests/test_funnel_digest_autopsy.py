@@ -56,3 +56,23 @@ def test_digest_separates_strategy_b_counters(tmp_path):
     assert d["cap_binds_b"] == {"0x161a7f66 (wallet-day)": 9}
     w = "0x161a7f666ca49d592848cf415b42f49a84714103"
     assert d["cross_routed"][w].startswith("replay-fit")
+
+
+def test_print_report_cap_bind_loop_does_not_shadow_reject_count(tmp_path, capsys):
+    # Regression (verifier, 2026-07-10): the [2b] cap-bind print loop used
+    # `for k, n in …`, shadowing `n = len(all_rejected)` so section [4]'s
+    # rejected-wallet count silently became the last cap-bind count.
+    from scripts.funnel_digest import _print_report
+    log = tmp_path / "bot-2026-07-11.log"
+    log.write_text("\n".join([
+        "2026-07-11 12:00:00 INFO  [DISCOVERY] LLM gate REJECTED "
+        "0xaaa1111111111111111111111111111111111111 (conf 80%): pure scooper",
+        "2026-07-11 12:00:01 INFO  [DISCOVERY] LLM gate REJECTED "
+        "0xbbb2222222222222222222222222222222222222 (conf 70%): drawdown",
+        "2026-07-11 12:01:02 INFO  [COPY-PAPER-B] cap-bind: 0x161a7f66…×9 (wallet-day)",
+    ]) + "\n")
+    d = digest([str(tmp_path)])
+    _print_report(d)
+    out = capsys.readouterr().out
+    assert "distinct rejected wallets: 2" in out          # not 9 (the cap-bind count)
+    assert "cap-bind" in out
