@@ -225,10 +225,14 @@ def test_gate_and_drain_share_one_budget(tmp_path):
 
 
 def test_drain_dequeues_wallet_that_decayed_off(tmp_path):
-    # 0xlim is queued, then never appears again -> decays off -> just dequeued.
+    # 0xlim is queued, then EVALUATED as decayed -> removed -> dequeued. (A
+    # sweep that simply never evaluated it CARRIES it instead — see below —
+    # so the dequeue needs a real, evaluated decay, not mere absence.)
+    decayed = Eval(wallet="0xlim", capture_cents=0.0, lead_cents=0.0,
+                   hit_rate=0.0, n=0, roi=0.0, tstat=0.0)
     seq = [{"0xk": _ev("0xk")},
            {"0xk": _ev("0xk"), "0xlim": _ev("0xlim")},
-           {"0xk": _ev("0xk")}]                 # 0xlim gone (auto_remove drops it)
+           {"0xk": _ev("0xk"), "0xlim": decayed}]   # evaluated + decayed -> drop
 
     def review(dossier, model=None):
         return RATE_LIMITED if dossier["wallet"] == "0xlim" else LLMVerdict(
@@ -237,6 +241,26 @@ def test_drain_dequeues_wallet_that_decayed_off(tmp_path):
     r, _ = _runner(tmp_path, seq=seq, review_fn=review)
     r.run_once(); r.run_once(); r.run_once()
     assert q_empty(r)
+
+
+def test_unevaluated_wallet_is_carried_and_stays_queued(tmp_path):
+    # Interrupted-sweep semantics (2026-07-10): a queued wallet that was NOT
+    # evaluated this sweep is carried on the watchlist and its re-check stays
+    # owed — absence is not evidence of decay.
+    seq = [{"0xk": _ev("0xk")},
+           {"0xk": _ev("0xk"), "0xlim": _ev("0xlim")},
+           {"0xk": _ev("0xk")}]                 # 0xlim not swept -> carried
+
+    def review(dossier, model=None):
+        return RATE_LIMITED if dossier["wallet"] == "0xlim" else LLMVerdict(
+            "follow", "low", True, 0.7, "ok")
+
+    r, _ = _runner(tmp_path, seq=seq, review_fn=review)
+    r.run_once(); r.run_once(); r.run_once()
+    assert not q_empty(r)
+    import json
+    wl = {t["wallet"] for t in json.load(open(tmp_path / "wl.json"))["targets"]}
+    assert "0xlim" in wl
 
 
 def test_wallet_parked_this_sweep_is_not_rechecked_immediately(tmp_path):

@@ -382,9 +382,27 @@ class DiscoveryRunner:
         except Exception:  # a broken re-check must never break the sweep
             logger.warning("[DISCOVERY] gate re-check drain failed; continuing", exc_info=True)
 
-        # auto-paper: rewrite the watchlist the harness consumes (post-gate)
-        _atomic_write_json(self.watchlist_path,
-                           watchlist_to_targets(result.watchlist, self.cfg))
+        # auto-paper: rewrite the watchlist the harness consumes (post-gate).
+        # Carried wallets (on the list but not evaluated this cycle — an
+        # interrupted sweep) keep their PREVIOUS file rows byte-for-byte, so the
+        # paper harness's category gate / conviction sizing / replay stats for
+        # them survive a deploy landing mid-sweep.
+        doc = watchlist_to_targets(result.watchlist, self.cfg)
+        if result.carried:
+            try:
+                with open(self.watchlist_path, encoding="utf-8") as f:
+                    prev_rows = {(t.get("wallet") or "").lower(): t
+                                 for t in (json.load(f).get("targets") or [])}
+            except (OSError, ValueError):
+                prev_rows = {}
+            have = {(t.get("wallet") or "").lower() for t in doc["targets"]}
+            for w in result.carried:
+                row = prev_rows.get(w.lower())
+                if row is not None and w.lower() not in have:
+                    doc["targets"].append(row)
+            logger.info("[DISCOVERY] carry-over (not swept this cycle, kept): %s",
+                        ", ".join(result.carried))
+        _atomic_write_json(self.watchlist_path, doc)
 
         # Strategy 4: write the long-horizon wallets to their own file (a separate
         # track — never fed to the paper copier). Snapshot the current sweep so
@@ -461,7 +479,8 @@ class DiscoveryRunner:
         # force-included but didn't make the watchlist used to vanish silently
         # (only REMOVED wallets were attributed), so "which gate outvoted the
         # realized record?" was unanswerable from the logs.
-        on_now_l = {e.wallet.lower() for e in result.watchlist}
+        on_now_l = ({e.wallet.lower() for e in result.watchlist}
+                    | {w.lower() for w in result.carried})
         culled_l = {k.lower(): v for k, v in result.culled.items()}
         for w, rec in proven.items():
             if w in on_now_l:
@@ -758,7 +777,10 @@ class DiscoveryRunner:
         entries = gate_recheck_queue.pending(self.gate_recheck_queue_path)
         if not entries:
             return
-        on_wl = {e.wallet for e in result.watchlist}
+        # Carried wallets (not evaluated this cycle — interrupted sweep) are
+        # still ON the list: their owed re-check stays parked, it is neither
+        # "decayed off" nor re-checkable against fresh stats this sweep.
+        on_wl = {e.wallet for e in result.watchlist} | set(result.carried)
         resolved: set = set()      # dequeue (re-checked or gone)
         rejected: set = set()      # remove from watchlist (deferred check said skip)
         checked = 0

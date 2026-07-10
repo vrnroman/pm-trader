@@ -232,6 +232,11 @@ class CycleResult:
     # Wallets on the new watchlist that qualified through the paper-evidence
     # override (realized paper P&L, recomputed from the ledger every sweep).
     paper_proven: list[str] = field(default_factory=list)
+    # Previously-on wallets NOT evaluated this cycle (interrupted/truncated
+    # sweep) — kept on the watchlist untouched, never auto-removed. The runner
+    # preserves their previous watchlist-file rows; the next sweep force-
+    # evaluates them (must_include), so a real decay is deferred one cycle.
+    carried: list[str] = field(default_factory=list)
 
 
 def _meta(e: Eval) -> dict:
@@ -402,6 +407,19 @@ def run_discovery_cycle(
     newly_qualified = [e for e in watchlist if e.wallet not in prev_on]
     removed = sorted(prev_on - on_now)
 
+    # An interrupted sweep must never remove what it never looked at: a
+    # previously-on wallet with NO evaluation this cycle (deploy restart landing
+    # mid-sweep, fetch failure) is CARRIED — kept on the watchlist with its
+    # previous stats — not culled. "Not-swept" used to count as a removal, so a
+    # deploy landing mid-sweep could drop a third of the book on timing alone
+    # (2026-07-10: 25 -> 18 on a restart), contaminating any comparison that
+    # depends on watchlist continuity (the A-vs-B race verdict). Carried wallets
+    # are force-evaluated next sweep (must_include), so a real decay is only
+    # deferred one cycle, never hidden.
+    carried = sorted(w for w in removed if w not in evaluated)
+    if carried:
+        removed = [w for w in removed if w in evaluated]
+
     # autopsy for removals that no explicit gate explains: ranked out of the cap,
     # never swept this cycle, or plain decay (failed to re-enter/retain).
     for w in removed:
@@ -414,8 +432,12 @@ def run_discovery_cycle(
         else:
             culled[w] = "decayed (no theory flag, capture/t-stat below retention)"
 
+    on_watch_meta = {e.wallet: _meta(e) for e in watchlist}
+    prev_meta = prev.on_watchlist if isinstance(prev.on_watchlist, dict) else {}
+    for w in carried:
+        on_watch_meta.setdefault(w, prev_meta.get(w) or {})
     new_state = DiscoveryState(
-        on_watchlist={e.wallet: _meta(e) for e in watchlist},
+        on_watchlist=on_watch_meta,
         last_run=prev.last_run,  # runner stamps the real time
         initialized=True,
     )
@@ -428,6 +450,7 @@ def run_discovery_cycle(
         long_horizon=long_horizon_evals,
         culled=culled,
         paper_proven=sorted(w for w in proven_here if w in on_now),
+        carried=carried,
     )
 
 

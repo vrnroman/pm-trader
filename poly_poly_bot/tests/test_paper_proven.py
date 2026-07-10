@@ -165,11 +165,21 @@ def test_removed_wallet_without_gate_hit_reads_as_decay():
     assert "decayed" in s2.culled["0xa"]
 
 
-def test_removed_wallet_not_swept_is_attributed():
+def test_not_swept_wallet_is_carried_not_removed():
+    # An interrupted sweep must never auto-remove what it never evaluated
+    # (2026-07-10: a deploy landing mid-sweep dropped 25 -> 18 on timing alone).
     s1 = run_discovery_cycle({"0xa": _ev("0xa")}, DiscoveryState(), CFG)
     s2 = run_discovery_cycle({"0xb": _ev("0xb")}, s1.new_state, CFG)
-    assert s2.removed == ["0xa"]
-    assert "not-swept" in s2.culled["0xa"]
+    assert s2.removed == []
+    assert s2.carried == ["0xa"]
+    assert "0xa" in s2.new_state.on_watchlist
+    assert "0xa" not in s2.culled
+    # the carried wallet keeps its previous state meta (stats survive)
+    assert s2.new_state.on_watchlist["0xa"] == s1.new_state.on_watchlist["0xa"]
+    # a wallet that WAS evaluated and decayed is still removed as before
+    s3 = run_discovery_cycle(
+        {"0xa": _decayed("0xa"), "0xb": _ev("0xb")}, s2.new_state, CFG)
+    assert s3.removed == ["0xa"] and s3.carried == []
 
 
 # --------------------------------------------------------------------------- #

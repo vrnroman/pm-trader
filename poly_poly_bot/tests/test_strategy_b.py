@@ -286,6 +286,46 @@ def test_discovery_on_removed_hook_fires_per_removed_wallet(tmp_path):
     assert calls[0][1] is not None and calls[0][1].copy_roi == 0.08
 
 
+def test_runner_preserves_carried_wallet_file_rows_and_skips_hooks(tmp_path):
+    # Truncated sweep at the runner level: the unevaluated wallet's previous
+    # watchlist-file row survives byte-for-byte, and neither the on_removed
+    # cross-route hook nor a removal fires for it.
+    from src.copy_trading.discovery import DiscoveryConfig, Eval
+    from src.copy_trading.discovery_runner import DiscoveryRunner
+    cfg = DiscoveryConfig(min_capture_cents=1.5, min_tstat=10.0,
+                          drop_capture_cents=1.0, watchlist_cap=5,
+                          auto_remove=True)
+    hook_calls = []
+    evals = [{"0xa": Eval(wallet="0xa", capture_cents=2.0, tstat=12.0, roi=0.5,
+                          hit_rate=0.6, n=20),
+              "0xc": Eval(wallet="0xc", capture_cents=2.0, tstat=12.0, roi=0.4,
+                          hit_rate=0.6, n=20)},
+             # truncated sweep: 0xa and 0xc never evaluated, only 0xb fresh
+             {"0xb": Eval(wallet="0xb", capture_cents=2.0, tstat=12.0, roi=0.3,
+                          hit_rate=0.6, n=20)}]
+    step = {"i": 0}
+
+    def fake_eval(*_a, **_k):
+        d = evals[step["i"]]
+        step["i"] = min(step["i"] + 1, len(evals) - 1)
+        return d
+
+    r = DiscoveryRunner(
+        config=cfg, watchlist_path=str(tmp_path / "wl.json"),
+        state_path=str(tmp_path / "state.json"), notify=lambda _m: None,
+        evaluate=fake_eval, now=lambda: 1000.0,
+        on_removed=lambda w, ev: hook_calls.append(w),
+    )
+    r.run_once()
+    wl1 = {t["wallet"]: t for t in json.load(open(tmp_path / "wl.json"))["targets"]}
+    assert set(wl1) == {"0xa", "0xc"}
+    r.run_once()   # truncated
+    wl2 = {t["wallet"]: t for t in json.load(open(tmp_path / "wl.json"))["targets"]}
+    assert set(wl2) == {"0xa", "0xb", "0xc"}      # carried rows preserved
+    assert wl2["0xa"] == wl1["0xa"]               # byte-identical previous row
+    assert hook_calls == []                        # no cross-route on carried
+
+
 # --------------------------------------------------------------------------- #
 # per-strategy promotion state (scope="b")
 # --------------------------------------------------------------------------- #
