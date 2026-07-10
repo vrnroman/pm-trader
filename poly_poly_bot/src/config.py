@@ -239,6 +239,49 @@ class Config:
     copy_paper_conviction_min: float = _opt_float("COPY_PAPER_CONVICTION_MIN", 0.25)
     copy_paper_conviction_max: float = _opt_float("COPY_PAPER_CONVICTION_MAX", 2.0)
 
+    # --- Strategy B: the borrowed-clock (instant-copy) paper book ---
+    # A SECOND paper book racing the one above (the 2026-07 A-vs-B experiment).
+    # Same feed detection, same sizing, same promotion floors — one variable
+    # changes: fills are recorded at the TARGET'S OWN price (+slippage bps)
+    # instead of the live book minutes later, and there is no fill-gate censoring
+    # (the counterfactual showed A's fill-gate admits only trades the market
+    # moved against). Own ledger, own promotion/blacklist/offers stores
+    # (scope "b"), own caps. A's demotions never filter B and vice versa.
+    copy_paper_b_enabled: bool = _opt_bool("COPY_PAPER_B_ENABLED", True)
+    copy_paper_b_ledger: str = _optional(
+        "COPY_PAPER_B_LEDGER",
+        str(Path(__file__).resolve().parent.parent / "data" / "copy_paper_ledger_b.jsonl"))
+    copy_paper_b_slippage_bps: int = _opt_int("COPY_PAPER_B_SLIPPAGE_BPS", 100)
+    # B's slate caps: looser than A's 3/8 because take-all IS the B thesis (the
+    # counterfactual: capped B re-runs A's +6% regime; uncapped B is the +8%
+    # regime whose gains concentrate in high-frequency wallets). Not unlimited —
+    # a degenerate flood is still bounded. Cap binds are logged per wallet.
+    copy_paper_b_max_per_wallet_day: int = _opt_int("COPY_PAPER_B_MAX_PER_WALLET_DAY", 25)
+    copy_paper_b_max_per_category_day: int = _opt_int(
+        "COPY_PAPER_B_MAX_PER_CATEGORY_DAY", 75)
+    # Extra wallets only B watches (beyond the shared discovery watchlist):
+    # cross-routed A-demotions that are B-fit, plus the initial seed below.
+    copy_paper_b_extra_watchlist: str = _optional(
+        "COPY_PAPER_B_EXTRA_WATCHLIST",
+        str(Path(__file__).resolve().parent.parent / "data" / "copy_watchlist_b_extra.json"))
+    # Seeded into the extras file at first startup (comma-separated addresses).
+    # Default: 0x161a… — auto-demoted from A (-21% realized under lagged fills)
+    # but +9.1% over 99 trades under B's instant-copy counterfactual; the owner's
+    # "demoted wallets which are good for the other strategy" case.
+    copy_paper_b_seed_wallets: str = _optional(
+        "COPY_PAPER_B_SEED_WALLETS",
+        "0x161a7f666ca49d592848cf415b42f49a84714103")
+    # Cross-route: when a wallet leaves A's ecosystem (governance demote,
+    # discovery cull, retention drop), add it to B's extras if its replay or
+    # B-ledger record clears the B-fit bar (replay n>=min_n & roi>=min_roi, or
+    # B-ledger n>=5 & roi>0). Provenance-stamped; B's own blacklist still binds.
+    copy_paper_b_cross_route: bool = _opt_bool("COPY_PAPER_B_CROSS_ROUTE", True)
+    # A-vs-B race reporter: a daily snapshot at a KNOWN time (the owner's
+    # scheduler principle: schedule the moment, never poll), and the verdict
+    # memo once the era is this many days old. The era starts at B's first open.
+    ab_race_daily_utc_hour: int = _opt_int("AB_RACE_DAILY_UTC_HOUR", 8)
+    ab_race_verdict_days: float = _opt_float("AB_RACE_VERDICT_DAYS", 7.0)
+
     # --- Auto promote / demote governance (paper measurement -> action) ---
     # A background pass over the System-B paper ledger each copy cycle:
     #   * PROMOTE-offer a wallet once it has >= copy_promote_min_settled resolved

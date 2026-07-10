@@ -90,6 +90,20 @@ def _copy_paper_loop():
                          f"no probation this cycle")
             return {}
 
+    def _send_demotion_a(d):
+        telegram_bot.send_message(
+            f"⛔ <b>Auto-demoted</b> <code>{d['wallet']}</code> — "
+            f"{d['n_closed']} settled copies, ROI {d['roi'] * 100:+.0f}% "
+            f"(≤ {CONFIG.copy_demote_max_roi * 100:+.0f}%). "
+            f"Dropped from the watchlist for "
+            f"{CONFIG.copy_demote_cooldown_days:.0f}d.")
+        # A-vs-B race: a wallet A just proved-negative under LAGGED fills may be
+        # strategy B's edge under instant fills (0x161a: -21% A / +9% B replay).
+        # Offer it to B before it vanishes from the shared watchlist.
+        _cross_route_a_exit(
+            d["wallet"],
+            reason=f"A auto-demote (ROI {d['roi'] * 100:+.0f}% @ n={d['n_closed']})")
+
     def _governance(ledger):
         """Auto promote-offer / demote off the System-B paper ledger each cycle."""
         if not CONFIG.copy_governance_enabled:
@@ -116,12 +130,7 @@ def _copy_paper_loop():
                 send_offer=lambda o: telegram_bot.send_promotion_offer(
                     o["wallet"], o["n_closed"], o["roi"], o["net_pnl"],
                     o.get("tier", "1b"), extras=o),
-                send_demotion=lambda d: telegram_bot.send_message(
-                    f"⛔ <b>Auto-demoted</b> <code>{d['wallet']}</code> — "
-                    f"{d['n_closed']} settled copies, ROI {d['roi'] * 100:+.0f}% "
-                    f"(≤ {CONFIG.copy_demote_max_roi * 100:+.0f}%). "
-                    f"Dropped from the watchlist for "
-                    f"{CONFIG.copy_demote_cooldown_days:.0f}d."),
+                send_demotion=_send_demotion_a,
                 # probation fast-track (rec 2a): strong own-history replay + a small
                 # agreeing forward sample -> an early "probation"-tier offer.
                 replay_by_wallet=_load_replay_by_wallet(),
@@ -331,6 +340,359 @@ def _s4_paper_loop():
     runner.run_forever(_shutdown_event)
 
 
+def _cross_route_a_exit(wallet: str, ev=None, reason: str = "") -> None:
+    """Offer a wallet leaving strategy A's ecosystem to strategy B (A-vs-B race).
+
+    Called from two exits: a governance auto-demote (no Eval — replay stats are
+    read from the wallet's still-present watchlist row) and a discovery-sweep
+    removal (the sweep's Eval carries fresh replay stats). The router does the
+    B-fit gating; this wrapper only gathers stats and must never raise into the
+    calling loop."""
+    if not (CONFIG.copy_paper_b_enabled and CONFIG.copy_paper_b_cross_route):
+        return
+    try:
+        import json as _json
+
+        from src.copy_trading import cross_route
+
+        replay_n, replay_roi, entry = 0, 0.0, None
+        if ev is not None:
+            replay_n = int(getattr(ev, "copy_n", 0) or 0)
+            replay_roi = float(getattr(ev, "copy_roi", 0.0) or 0.0)
+            entry = {
+                "approved_categories": list(getattr(ev, "approved_categories", ()) or ()),
+                "median_usd": getattr(ev, "median_usd", 0.0),
+                "flagged_by": list(getattr(ev, "flagged_by", ()) or ()),
+            }
+        else:
+            try:
+                with open(CONFIG.copy_paper_watchlist, encoding="utf-8") as f:
+                    for row in (_json.load(f).get("targets") or []):
+                        if (row.get("wallet") or "").lower() == wallet.lower():
+                            replay_n = int(row.get("copy_n", 0) or 0)
+                            replay_roi = float(row.get("copy_roi", 0.0) or 0.0)
+                            entry = row
+                            break
+            except (OSError, ValueError):
+                pass  # no watchlist row — the router still checks B's own record
+        routed, why = cross_route.route_to_b(
+            wallet, extras_path=CONFIG.copy_paper_b_extra_watchlist,
+            b_ledger_path=CONFIG.copy_paper_b_ledger, reason=reason,
+            replay_n=replay_n, replay_roi=replay_roi,
+            min_replay_n=CONFIG.wallet_discovery_min_copy_replay_n,
+            min_replay_roi=CONFIG.wallet_discovery_min_copy_replay_roi,
+            watchlist_entry=entry)
+        if routed:
+            telegram_bot.send_message(
+                f"🅱️ <b>Cross-routed to strategy B</b> <code>{wallet}</code>\n"
+                f"Left A ({reason}); B-fit: {why} "
+                f"(replay {replay_roi * 100:+.1f}% @ n={replay_n}). "
+                f"B keeps copying it at the target's own price.")
+    except Exception as e:  # a routing failure must never break governance/discovery
+        logger.warning(f"[COPY-PAPER-B] cross-route failed for {wallet}: {e}")
+
+
+def _copy_paper_b_loop():
+    """Strategy B: the borrowed-clock (instant-copy) paper book — A-vs-B race.
+
+    Same feed detection and sizing as strategy A, ONE variable changed: every
+    admitted copy fills at the TARGET'S OWN price (+COPY_PAPER_B_SLIPPAGE_BPS),
+    with no fill-gate censoring and looser slate caps — the evidence a 2-3s
+    copier would accrue, recorded without needing the on-chain feed. Own ledger,
+    own promotion/blacklist stores (scope "b"), same promotion floors as A so
+    the week's promotion counts compare one variable. NO real orders ever.
+    """
+    import time
+    from collections import Counter
+
+    from src.copy_trading import cross_route, governance, promotion_state
+    from src.copy_trading.copy_paper import format_resolution_telegram, report
+    from src.copy_trading.copy_paper_live import (
+        TradeFeed, make_feed_detector, make_feed_exit_detector)
+    from src.copy_trading.copy_paper_runner import CopyPaperRunner
+    from src.copy_trading.outcome_names import DEFAULT_RESOLVER
+
+    # One-time seed of the extras watchlist (A-demoted wallets that are B-fit).
+    try:
+        cross_route.seed_extras(CONFIG.copy_paper_b_extra_watchlist,
+                                CONFIG.copy_paper_b_seed_wallets)
+    except Exception as e:  # pragma: no cover - seeding must never kill the book
+        logger.warning(f"[COPY-PAPER-B] extras seeding failed: {e}")
+
+    _promo_review = None
+    if CONFIG.copy_promote_llm_review:
+        from src.copy_trading.llm_review import review_promotion as _promo_review
+    _promo_history_b = os.path.join(
+        os.path.dirname(CONFIG.wallet_discovery_state),
+        "promotion-gate-history_b.jsonl")
+
+    def _load_replay_by_wallet():
+        """Same probation fast-track input as strategy A: replay stats from the
+        shared discovery watchlist (B's extras wallets are simply absent -> no
+        probation lane for them). Defensive {} on any failure."""
+        try:
+            import json
+            with open(CONFIG.copy_paper_watchlist, encoding="utf-8") as f:
+                data = json.load(f)
+            out = {}
+            for row in (data.get("targets") or []):
+                w = (row.get("wallet") or "").lower()
+                if w:
+                    out[w] = {"copy_roi": row.get("copy_roi", 0.0),
+                              "copy_n": row.get("copy_n", 0),
+                              "copy_tstat": row.get("copy_tstat", 0.0)}
+            return out
+        except Exception as e:
+            logger.debug(f"[PROMOTE-GATE-B] fast-track replay read failed ({e})")
+            return {}
+
+    def _send_offer_b(o) -> bool:
+        # Plain tagged message — deliberately NO accept button: strategy B has
+        # no live execution path yet (the on-chain feed is not wired), so an
+        # accept must not be able to write into A's promoted store or the
+        # fast-track path. Recorded in B's own offers store on delivery.
+        tier = f" · tier {o.get('tier')}" if o.get("probation") else ""
+        return telegram_bot.send_message(
+            f"🅱️ <b>Strategy-B promote signal</b> <code>{o['wallet']}</code>\n"
+            f"{o['n_closed']} settled instant-copies, ROI {o['roi'] * 100:+.0f}%, "
+            f"${o['net_pnl']:+.0f}{tier}\n"
+            f"Paper-only: B has no live execution until the on-chain feed ships. "
+            f"No accept button by design.")
+
+    def _governance_b(ledger):
+        """B's auto promote-signal / demote off its own ledger, scope-\"b\" state."""
+        if not CONFIG.copy_governance_enabled:
+            return
+        try:
+            governance.run_governance_cycle(
+                ledger.positions.values(),
+                now=time.time(),
+                promote_min_n=CONFIG.copy_promote_min_settled,
+                promote_min_roi=CONFIG.copy_promote_min_roi,
+                promote_min_tstat=CONFIG.copy_promote_min_tstat,
+                promote_min_second_half_roi=CONFIG.copy_promote_min_second_half_roi,
+                promote_min_conditions=CONFIG.copy_promote_min_conditions,
+                promote_min_categories=CONFIG.copy_promote_min_categories,
+                demote_min_n=CONFIG.copy_demote_min_settled,
+                demote_max_roi=CONFIG.copy_demote_max_roi,
+                demote_min_abs_loss=CONFIG.copy_demote_min_abs_loss,
+                demote_max_wilson=CONFIG.copy_demote_max_wilson,
+                cooldown_s=CONFIG.copy_demote_cooldown_days * 86400.0,
+                default_tier=CONFIG.promote_default_tier,
+                review_fn=_promo_review,
+                llm_model=CONFIG.wallet_discovery_llm_model,
+                history_path=_promo_history_b,
+                state_scope="b",
+                send_offer=_send_offer_b,
+                send_demotion=lambda d: telegram_bot.send_message(
+                    f"🅱️⛔ <b>B auto-demoted</b> <code>{d['wallet']}</code> — "
+                    f"{d['n_closed']} settled instant-copies, ROI "
+                    f"{d['roi'] * 100:+.0f}%. Dropped from B's book for "
+                    f"{CONFIG.copy_demote_cooldown_days:.0f}d (A unaffected)."),
+                replay_by_wallet=_load_replay_by_wallet(),
+                probation_enabled=CONFIG.copy_probation_enabled,
+                probation_min_settled=CONFIG.copy_probation_min_settled,
+                probation_min_replay_n=CONFIG.copy_probation_min_replay_n,
+                probation_min_replay_roi=CONFIG.copy_probation_min_replay_roi,
+                probation_min_replay_tstat=CONFIG.copy_probation_min_replay_tstat,
+                time_box_enabled=CONFIG.copy_time_box_enabled,
+                time_box_window_s=CONFIG.copy_time_box_window_days * 86400.0,
+                retire_cooldown_s=CONFIG.copy_retire_cooldown_days * 86400.0,
+                send_retirement=lambda r: telegram_bot.send_message(
+                    f"🅱️🗄️ <b>B retired (inconclusive)</b> <code>{r['wallet']}</code> — "
+                    f"{r['n_closed']} settled, ROI {r['roi'] * 100:+.0f}%, "
+                    f"{r['age_days']:.0f}d with no verdict. Removed from B "
+                    f"(re-discoverable), not blacklisted."),
+            )
+        except Exception as e:
+            logger.warning(f"[COPY-PAPER-B] governance cycle failed: {e}")
+
+    _stall = {"last_alert": 0.0, "boot": time.time()}
+
+    def _stall_check(ledger):
+        hours = CONFIG.copy_paper_stall_alarm_hours
+        if hours <= 0:
+            return
+        now = time.time()
+        last_open = max((getattr(p, "opened_ts", 0.0) or 0.0
+                         for p in ledger.positions.values()), default=0.0)
+        baseline = max(last_open, _stall["boot"])
+        if now - baseline < hours * 3600.0:
+            return
+        if now - _stall["last_alert"] < hours * 3600.0:
+            return
+        n_watch = len(runner.wallets())
+        if n_watch == 0:
+            return
+        _stall["last_alert"] = now
+        stalled_h = (now - baseline) / 3600.0
+        logger.warning(
+            f"[COPY-PAPER-B] FUNNEL STALLED — no B opens in {stalled_h:.0f}h "
+            f"with {n_watch} wallets watched; the A-vs-B race is not accruing "
+            f"B evidence (verdict window at risk)")
+        telegram_bot.send_message(
+            f"🅱️🚱 <b>Strategy-B funnel stalled</b> — no instant-copies opened "
+            f"in {stalled_h:.0f}h with {n_watch} wallets watched. The A-vs-B "
+            f"comparison window is compromised while B starves.")
+
+    def _cap(v):
+        return v if v and v > 0 else None
+
+    def _on_cycle(summary, ledger):
+        if summary.opened or summary.resolved:
+            logger.info(
+                f"[COPY-PAPER-B] opened={summary.opened} resolved={summary.resolved} "
+                f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
+            )
+        skips = (summary.skipped_fill_gate + summary.skipped_not_first_entry
+                 + summary.skipped_slate_cap + summary.skipped_category_gate)
+        if skips:
+            logger.info(
+                f"[COPY-PAPER-B] guardrail skips: fill-gate={summary.skipped_fill_gate} "
+                f"first-entry={summary.skipped_not_first_entry} "
+                f"slate-cap={summary.skipped_slate_cap} "
+                f"category-gate={summary.skipped_category_gate}"
+            )
+        if summary.slate_cap_binds:
+            # cap-bind autopsy (manager amendment): WHO the cap bound, per kind —
+            # if B's caps bind non-degenerately they re-create A's censoring and
+            # the race is contaminated; this line is how that gets caught in 48h.
+            binds = Counter((t, kind) for t, _cat, kind in summary.slate_cap_binds)
+            detail = ", ".join(f"{w[:8]}…×{n} ({kind})"
+                               for (w, kind), n in binds.most_common())
+            logger.info(f"[COPY-PAPER-B] cap-bind: {detail}")
+        if summary.resolved:
+            telegram_bot.send_message(
+                "🅱️ " + format_resolution_telegram(
+                    summary.resolved_positions, report(ledger),
+                    resolver=DEFAULT_RESOLVER))
+        try:
+            _stall_check(ledger)
+        except Exception as e:
+            logger.debug(f"[COPY-PAPER-B] stall check failed ({e})")
+        _governance_b(ledger)
+
+    detector_factory = None
+    exit_detector_factory = None
+    if CONFIG.copy_paper_feed_detection:
+        _feed = TradeFeed()   # B's own feed poll — no cross-thread cache sharing
+        _feed_min = CONFIG.copy_paper_feed_min_usd
+
+        def detector_factory(wallets, max_age_s, min_usd, flagged_by_map=None, **kw):
+            return make_feed_detector(wallets, max_age_s, min_usd, flagged_by_map,
+                                      feed=_feed, feed_min_usd=_feed_min, **kw)
+
+        def exit_detector_factory(wallets, max_age_s):
+            return make_feed_exit_detector(wallets, max_age_s,
+                                           feed=_feed, feed_min_usd=_feed_min)
+
+    runner = CopyPaperRunner(
+        ledger_path=CONFIG.copy_paper_b_ledger,
+        watchlist_path=CONFIG.copy_paper_watchlist,
+        extra_watchlist_paths=[CONFIG.copy_paper_b_extra_watchlist],
+        max_copy_usd=CONFIG.copy_paper_max_usd,
+        copy_pct=CONFIG.copy_paper_copy_pct,
+        max_slippage_bps=CONFIG.copy_paper_max_slippage_bps,
+        max_age_s=CONFIG.copy_paper_max_age_s,
+        min_usd=CONFIG.copy_paper_min_usd,
+        cycle_interval_s=CONFIG.copy_paper_interval_s,
+        # B's thesis: NO fill-gate censoring; fills at the target's own price.
+        fill_gate_bps=None,
+        fill_at_their_price_bps=CONFIG.copy_paper_b_slippage_bps,
+        first_entry_only=CONFIG.copy_paper_first_entry_only,
+        max_copies_per_wallet_day=_cap(CONFIG.copy_paper_b_max_per_wallet_day),
+        max_copies_per_category_day=_cap(CONFIG.copy_paper_b_max_per_category_day),
+        starved_priority=CONFIG.copy_paper_starved_priority,
+        relief_evidence_n=None,   # caps already sized for take-all; no relief lane
+        relief_max_per_category_day=None,
+        category_gate=CONFIG.copy_paper_category_gate,
+        conviction_base_usd=(CONFIG.copy_paper_conviction_base_usd
+                             if CONFIG.copy_paper_conviction_base_usd > 0 else None),
+        conviction_min=CONFIG.copy_paper_conviction_min,
+        conviction_max=CONFIG.copy_paper_conviction_max,
+        max_horizon_days=(CONFIG.strategy_4_long_horizon_days
+                          if CONFIG.strategy_4_enabled else None),
+        # B's OWN blacklist — never A's. A-demoted wallets are B's thesis edge.
+        blacklist_provider=lambda: promotion_state.active_blacklist(scope="b"),
+        strategy="B",
+        detector_factory=detector_factory,
+        exit_detector_factory=exit_detector_factory,
+        on_cycle=_on_cycle,
+    )
+    n = len(runner.wallets())
+    logger.info(
+        f"Strategy-B paper book started (wallets={n}, "
+        f"interval={CONFIG.copy_paper_interval_s}s, fill=their-price"
+        f"+{CONFIG.copy_paper_b_slippage_bps}bps, caps "
+        f"{CONFIG.copy_paper_b_max_per_wallet_day}/wallet-day "
+        f"{CONFIG.copy_paper_b_max_per_category_day}/category-day, "
+        f"PREVIEW measurement only)"
+    )
+    runner.run_forever(_shutdown_event)
+
+
+def _ab_race_reporter_loop():
+    """A-vs-B race reporter: daily snapshot + day-7 verdict memo, on a clock.
+
+    Fires at AB_RACE_DAILY_UTC_HOUR every day (a known time, scheduled — never
+    polled) with the compact race snapshot, and sends the full verdict memo once
+    the era (B's first open) is AB_RACE_VERDICT_DAYS old. Verdict-once semantics
+    survive restarts via a small state file. The memo self-invalidates when
+    either book sat starved 48h+ (a lopsided week must not sound confident).
+    """
+    import json
+    import time
+    from datetime import datetime, timedelta, timezone
+
+    from src.copy_trading.strategy_compare import (
+        compare, format_snapshot, format_verdict)
+
+    state_path = os.path.join(CONFIG.data_dir, "ab_race_state.json")
+
+    def _load_state() -> dict:
+        try:
+            with open(state_path, encoding="utf-8") as f:
+                return json.load(f)
+        except (OSError, ValueError):
+            return {}
+
+    def _save_state(st: dict) -> None:
+        try:
+            tmp = state_path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(st, f)
+            os.replace(tmp, state_path)
+        except OSError as e:
+            logger.warning(f"[AB-RACE] state save failed: {e}")
+
+    while not _shutdown_event.is_set():
+        # sleep to the NEXT daily fire time (known time, one wake per day)
+        now_dt = datetime.now(timezone.utc)
+        fire = now_dt.replace(hour=CONFIG.ab_race_daily_utc_hour, minute=0,
+                              second=0, microsecond=0)
+        if fire <= now_dt:
+            fire += timedelta(days=1)
+        if _shutdown_event.wait((fire - now_dt).total_seconds()):
+            return
+        try:
+            cmp_ = compare(CONFIG.copy_paper_ledger, CONFIG.copy_paper_b_ledger,
+                           b_slippage_bps=CONFIG.copy_paper_b_slippage_bps)
+            telegram_bot.send_message(format_snapshot(cmp_))
+            st = _load_state()
+            era = cmp_.get("era_start")
+            if (era and not st.get("verdict_sent")
+                    and time.time() - era >= CONFIG.ab_race_verdict_days * 86400.0):
+                sent = telegram_bot.send_message(
+                    "🏁 <b>A-vs-B verdict memo</b>\n<pre>"
+                    + format_verdict(cmp_) + "</pre>")
+                if sent:
+                    st["verdict_sent"] = True
+                    st["verdict_ts"] = time.time()
+                    _save_state(st)
+        except Exception as e:  # the reporter must never die — next fire retries
+            logger.warning(f"[AB-RACE] daily report failed: {e}")
+
+
 def _discovery_loop():
     """Continuously hunt for copyable wallets and feed them to the paper harness.
 
@@ -393,6 +755,14 @@ def _discovery_loop():
                            if CONFIG.paper_proven_retention_enabled else None),
         paper_proven_min_n=CONFIG.paper_proven_min_n,
         paper_proven_min_roi=CONFIG.paper_proven_min_roi,
+        # A-vs-B race: every wallet removed from the watchlist this sweep (cull,
+        # retention drop, demote exclusion) is offered to strategy B with its
+        # fresh replay stats — B-fit gating happens inside the router.
+        on_removed=(
+            (lambda w, ev: _cross_route_a_exit(
+                w, ev, reason="removed from A watchlist (sweep)"))
+            if CONFIG.copy_paper_b_enabled and CONFIG.copy_paper_b_cross_route
+            else None),
     )
     runner.run_forever(_shutdown_event)
 
@@ -481,6 +851,24 @@ async def main():
             )
             s4_paper_thread.start()
             logger.info("S4 long-horizon paper book thread started")
+
+        # Strategy B: the borrowed-clock (instant-copy) paper book races the
+        # near-term copier above — same measurement-only guarantee, own ledger
+        # and governance state. Gated on both books being enabled.
+        if CONFIG.copy_paper_b_enabled:
+            b_paper_thread = threading.Thread(
+                target=_copy_paper_b_loop, daemon=True, name="copy-paper-b"
+            )
+            b_paper_thread.start()
+            logger.info("Strategy-B paper book thread started")
+
+            ab_reporter_thread = threading.Thread(
+                target=_ab_race_reporter_loop, daemon=True, name="ab-race-reporter"
+            )
+            ab_reporter_thread.start()
+            logger.info("A-vs-B race reporter thread started "
+                        f"(daily {CONFIG.ab_race_daily_utc_hour:02d}:00 UTC, "
+                        f"verdict at day {CONFIG.ab_race_verdict_days:.0f})")
     else:
         logger.info("Copy-paper harness disabled (set COPY_PAPER_ENABLED=true)")
 
