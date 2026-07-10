@@ -33,3 +33,26 @@ def test_digest_parses_autopsy_and_paper_proven_lines(tmp_path):
     assert w in d["all_rejected"]           # counts into the reject taxonomy too
     wf = "0xeee5555555555555555555555555555555555555"
     assert d["pp_reacquire_failed"][wf].startswith("replay-proven-negative")
+
+
+def test_digest_separates_strategy_b_counters(tmp_path):
+    log = tmp_path / "bot-2026-07-11.log"
+    log.write_text("\n".join([
+        "2026-07-11 12:00:00 INFO  [COPY-PAPER] opened=2 resolved=1 open=3 closed=10",
+        "2026-07-11 12:00:01 INFO  [COPY-PAPER] guardrail skips: fill-gate=5 "
+        "first-entry=1 slate-cap=2 category-gate=3",
+        "2026-07-11 12:01:00 INFO  [COPY-PAPER-B] opened=7 resolved=0 open=7 closed=0",
+        "2026-07-11 12:01:01 INFO  [COPY-PAPER-B] guardrail skips: fill-gate=0 "
+        "first-entry=4 slate-cap=9 category-gate=1",
+        "2026-07-11 12:01:02 INFO  [COPY-PAPER-B] cap-bind: 0x161a7f66…×9 (wallet-day)",
+        "2026-07-11 12:02:00 INFO  [COPY-PAPER-B] cross-routed "
+        "0x161a7f666ca49d592848cf415b42f49a84714103 to strategy B "
+        "(replay-fit; A auto-demote (ROI -21% @ n=15))",
+    ]) + "\n")
+    d = digest([str(tmp_path)])
+    assert d["opened"] == 2 and d["opened_b"] == 7
+    assert d["guard"]["fill-gate"] == 5 and d["guard"]["slate-cap"] == 2
+    assert d["guard_b"]["slate-cap"] == 9 and d["guard_b"]["fill-gate"] == 0
+    assert d["cap_binds_b"] == {"0x161a7f66 (wallet-day)": 9}
+    w = "0x161a7f666ca49d592848cf415b42f49a84714103"
+    assert d["cross_routed"][w].startswith("replay-fit")
