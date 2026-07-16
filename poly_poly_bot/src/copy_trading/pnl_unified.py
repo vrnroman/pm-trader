@@ -42,6 +42,14 @@ from src.copy_trading.pnl import OpenPositionPnl
 _UNKNOWN_WALLET = "(unknown)"
 UNTAGGED_A = "untagged-A"
 UNTAGGED_B = "untagged-B"
+# System-A rows with NO attribution at all (no tier, no followed wallet) are
+# pre-schema debris — e.g. the 2026-07-11 preview-realization sweep that booked
+# 61 dead MAY-era positions (-$575) in one burst once the closed=true Gamma fix
+# un-starved the resolver. They are real history (never deleted) but they are
+# not a result of any current strategy, so they get their own track and /pnl
+# can show "current strategies" and "legacy backlog" as separate numbers
+# instead of one misleading net.
+LEGACY_A = "legacy-A"
 # The long-horizon paper book is one track (not split by discovery theory). Like
 # the near-term copier, its open positions are marked to market when priced.
 STRATEGY4_LABEL = "S4"
@@ -237,8 +245,12 @@ def aggregate_system_a(
             acc[key] = wp
         return wp
 
-    def _label(tier: str) -> str:
-        return f"A:{tier}" if tier else UNTAGGED_A
+    def _label(tier: str, wallet: str) -> str:
+        if tier:
+            return f"A:{tier}"
+        # no tier AND no followed wallet = pre-attribution-schema row (legacy
+        # backlog); no tier but a known wallet = merely untagged.
+        return UNTAGGED_A if wallet else LEGACY_A
 
     def _resolve_tier(stamped: str, wallet: str) -> str:
         if stamped:
@@ -261,7 +273,7 @@ def aggregate_system_a(
             wp.wins += 1
         elif won is False or (won is None and pnl < 0):
             wp.losses += 1
-        _add_label(wp, _label(tier))
+        _add_label(wp, _label(tier, wallet))
 
     for p in open_positions:
         wallet = (p.trader_address or "").lower()
@@ -272,7 +284,7 @@ def aggregate_system_a(
         if p.unrealized_pnl is not None:
             wp.unrealized_pnl += p.unrealized_pnl
             wp.cost_basis += p.cost        # only priced (measured) open cost feeds ROI
-        _add_label(wp, _label(tier))
+        _add_label(wp, _label(tier, wallet))
 
     _round(acc.values())
     return list(acc.values())
@@ -428,7 +440,9 @@ def build_unified(a_wallets: list[WalletPnl], b_wallets: list[WalletPnl]) -> Uni
         for lbl in wp.strategies:
             sp = strat.get(lbl)
             if sp is None:
-                sp = StrategyPnl(label=lbl, system=("A" if lbl.startswith("A:") or lbl == UNTAGGED_A else "B"))
+                sp = StrategyPnl(label=lbl, system=(
+                    "A" if lbl.startswith("A:") or lbl in (UNTAGGED_A, LEGACY_A)
+                    else "B"))
                 strat[lbl] = sp
             sp._add(wp)
 
@@ -531,12 +545,15 @@ def _round(wps) -> None:
 
 
 def _label_sort_key(label: str):
-    """Order: System A strategies, then System B, then untagged buckets last.
+    """Order: System A strategies, then System B, then untagged buckets, with
+    the legacy backlog dead last (it is history, not a live strategy).
 
     Within a system, natural theory order (1a, 1b, ... 1j)."""
     if label == UNTAGGED_A:
         return (2, "")
     if label == UNTAGGED_B:
         return (3, "")
+    if label == LEGACY_A:
+        return (4, "")
     system, _, name = label.partition(":")
     return (0 if system == "A" else 1, name)

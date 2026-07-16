@@ -107,11 +107,13 @@ def test_cli_runner_none_when_cli_absent(monkeypatch):
     assert lr._claude_cli_runner("p", model="m", timeout_s=5) is None
 
 
-def test_cli_runner_none_on_nonzero_exit(monkeypatch):
+def test_cli_runner_defers_on_persistent_nonzero_exit(monkeypatch):
+    # 2026-07-16 RCA: was fail-open (None). Now: one retry, then defer to the
+    # re-check queue via the retriable sentinel — never silently admit unvetted.
     monkeypatch.setattr(lr.shutil, "which", lambda _: "/usr/bin/claude")
     monkeypatch.setattr(lr.subprocess, "run", lambda cmd, **kw: SimpleNamespace(
         returncode=1, stdout="", stderr="not authenticated"))
-    assert lr._claude_cli_runner("p", model="m", timeout_s=5) is None
+    assert lr._claude_cli_runner("p", model="m", timeout_s=5) is lr.RATE_LIMITED
 
 
 def test_cli_runner_none_on_error_envelope(monkeypatch):

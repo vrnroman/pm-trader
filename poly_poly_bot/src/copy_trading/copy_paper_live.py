@@ -59,25 +59,34 @@ def make_detector(
 
     def detect() -> list[dict]:
         out = []
+        stats = detect.stats = {"rows": 0, "not_buy": 0, "stale": 0,
+                                "price_band": 0, "below_min_usd": 0,
+                                "missing_ids": 0, "emitted": 0}
         cutoff = time.time() - max_age_s
         for w in wallets:
             acts = _get(DATA, "/activity", user=w, limit=30) or []
             for a in acts:
+                stats["rows"] += 1
                 if a.get("type") != "TRADE" or a.get("side") != "BUY":
+                    stats["not_buy"] += 1
                     continue
                 if float(a.get("timestamp") or 0) < cutoff:
+                    stats["stale"] += 1
                     continue
                 price = float(a.get("price") or 0)
                 if not (0.05 <= price <= 0.95):
+                    stats["price_band"] += 1
                     continue
                 usd = float(a.get("usdcSize") or 0)
                 if usd <= 0:
                     usd = float(a.get("size") or 0) * price
                 if usd < min_usd:
+                    stats["below_min_usd"] += 1
                     continue
                 tx = a.get("transactionHash") or ""
                 token = a.get("asset") or ""
                 if not tx or not token:
+                    stats["missing_ids"] += 1
                     continue
                 title = a.get("title", "") or ""
                 condition_id = a.get("conditionId", "")
@@ -102,8 +111,10 @@ def make_detector(
                     "their_price": price,
                     "their_usd": usd,
                 })
+                stats["emitted"] += 1
         return out
 
+    detect.stats = {}
     return detect
 
 
@@ -252,24 +263,37 @@ def make_feed_detector(
 
     def detect() -> list[dict]:
         out = []
+        # watched-wallet detection-funnel stats — the starvation autopsy. Only
+        # rows that already passed the watched filter are counted, so a busy
+        # global feed can't drown the signal ("our wallets trade but nothing
+        # opens" must be attributable to a reason, 2026-07 A-book stall RCA).
+        stats = detect.stats = {"rows": 0, "not_buy": 0, "stale": 0,
+                                "price_band": 0, "below_min_usd": 0,
+                                "missing_ids": 0, "emitted": 0}
         cutoff = time.time() - max_age_s
         for t in feed.recent(floor, max_age_s):
             w = t.get("proxyWallet") or t.get("user") or ""
             if w.lower() not in watched:
                 continue
+            stats["rows"] += 1
             if str(t.get("side") or "").upper() != "BUY":
+                stats["not_buy"] += 1
                 continue
             if float(t.get("timestamp") or 0) < cutoff:
+                stats["stale"] += 1
                 continue
             price = float(t.get("price") or 0)
             if not (0.05 <= price <= 0.95):
+                stats["price_band"] += 1
                 continue
             usd = float(t.get("usdcSize") or 0) or float(t.get("size") or 0) * price
             if usd < min_usd:
+                stats["below_min_usd"] += 1
                 continue
             tx = t.get("transactionHash") or ""
             token = t.get("asset") or ""
             if not tx or not token:
+                stats["missing_ids"] += 1
                 continue
             title = t.get("title", "") or ""
             condition_id = t.get("conditionId", "") or ""
@@ -290,8 +314,10 @@ def make_feed_detector(
                 "their_price": price,
                 "their_usd": usd,
             })
+            stats["emitted"] += 1
         return out
 
+    detect.stats = {}
     return detect
 
 

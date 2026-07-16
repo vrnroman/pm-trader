@@ -217,28 +217,53 @@ def _claude_cli_runner(prompt: str, *, model: str, timeout_s: int) -> dict | Non
     plus usage/cost/latency) and runs in a throwaway temp dir so it never loads
     the bot's own project context (CLAUDE.md, tools). Auth comes from the
     inherited environment (``CLAUDE_CODE_OAUTH_TOKEN``). Returns the parsed
-    envelope dict, or ``None`` on any non-success.
+    envelope dict; ``RATE_LIMITED`` (defer to the re-check queue) when the CLI
+    is limited or keeps failing; ``None`` only for un-retriable non-success
+    (CLI missing, bad envelope).
     """
     exe = shutil.which("claude")
     if not exe:
         logger.warning("[LLM-GATE] `claude` CLI not found on PATH — skipping (fail-open)")
         return None
     cmd = [exe, "-p", prompt, "--output-format", "json", "--model", model]
-    with tempfile.TemporaryDirectory(prefix="llm-gate-") as cwd:
-        proc = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=timeout_s,
-            cwd=cwd, env=os.environ.copy(),
-        )
-    if proc.returncode != 0:
-        logger.warning("[LLM-GATE] claude -p exit %s: %s",
-                       proc.returncode, (proc.stderr or "")[:300])
-        # Distinguish a spend/rate limit (retriable → defer the wallet) from a
-        # generic failure (fail-open). Check stderr AND stdout — the limit notice
-        # may land on either.
+    # One bounded retry on a generic CLI failure (nonzero exit / timeout / exec
+    # error), then DEFER via the retriable sentinel instead of failing open —
+    # prod showed intermittent bare `exit 1` at sweep time (6× 2026-07-11..14),
+    # and every one silently admitted an unvetted wallet. A transient hiccup
+    # now costs one retry; a persistent one parks the wallet for the next
+    # sweep's re-check, exactly like a rate limit. Fail-open remains only for
+    # the truly un-retriable case (CLI missing above).
+    proc = None
+    for attempt in (1, 2):
+        try:
+            with tempfile.TemporaryDirectory(prefix="llm-gate-") as cwd:
+                proc = subprocess.run(
+                    cmd, capture_output=True, text=True, timeout=timeout_s,
+                    cwd=cwd, env=os.environ.copy(),
+                )
+        except (subprocess.TimeoutExpired, OSError) as e:
+            logger.warning("[LLM-GATE] claude -p attempt %d/2 failed to run: %r",
+                           attempt, e)
+            proc = None
+            continue
+        if proc.returncode == 0:
+            break
+        # capture BOTH streams — the prod failures logged an empty stderr, so
+        # stderr alone is a dead end for diagnosis.
+        logger.warning(
+            "[LLM-GATE] claude -p exit %s (attempt %d/2) stderr: %s | stdout: %s",
+            proc.returncode, attempt,
+            (proc.stderr or "")[:300] or "<empty>",
+            (proc.stdout or "")[:300] or "<empty>")
+        # A spend/rate limit is not worth a same-sweep retry — defer now.
         if _looks_rate_limited(proc.stderr, proc.stdout):
             logger.warning("[LLM-GATE] claude -p is rate/spend-limited — deferring")
             return RATE_LIMITED
-        return None
+    if proc is None or proc.returncode != 0:
+        logger.warning(
+            "[LLM-GATE] claude -p failed twice — deferring wallet to re-check "
+            "queue (was fail-open before 2026-07-16)")
+        return RATE_LIMITED
     try:
         envelope = json.loads(proc.stdout)
     except json.JSONDecodeError:

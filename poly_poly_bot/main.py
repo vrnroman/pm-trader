@@ -194,7 +194,8 @@ def _copy_paper_loop():
                 f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
             )
         skips = (summary.skipped_fill_gate + summary.skipped_not_first_entry
-                 + summary.skipped_slate_cap + summary.skipped_category_gate)
+                 + summary.skipped_slate_cap + summary.skipped_category_gate
+                 + summary.skipped_event_cap)
         if skips:
             logger.info(
                 f"[COPY-PAPER] guardrail skips: fill-gate={summary.skipped_fill_gate} "
@@ -202,7 +203,21 @@ def _copy_paper_loop():
                 f"slate-cap={summary.skipped_slate_cap} "
                 # the winning-markets gate is default-ON and the biggest behaviour
                 # change — log it so a quieted book always shows a reason.
-                f"category-gate={summary.skipped_category_gate}"
+                f"category-gate={summary.skipped_category_gate} "
+                f"event-cap={summary.skipped_event_cap}"
+            )
+        # starvation autopsy: rows the DETECTOR dropped before the engine saw
+        # them (the 2026-07 A-book stall was invisible at guardrail level —
+        # watched wallets traded, yet nothing reached the engine).
+        rej = summary.detector_rejects
+        if rej and (rej.get("rows", 0) - rej.get("emitted", 0)) > 0:
+            logger.info(
+                f"[COPY-PAPER] detection rejects: rows={rej.get('rows', 0)} "
+                f"not-buy={rej.get('not_buy', 0)} stale={rej.get('stale', 0)} "
+                f"price-band={rej.get('price_band', 0)} "
+                f"min-usd={rej.get('below_min_usd', 0)} "
+                f"missing-ids={rej.get('missing_ids', 0)} "
+                f"emitted={rej.get('emitted', 0)}"
             )
         if summary.resolved:
             telegram_bot.send_message(
@@ -249,6 +264,12 @@ def _copy_paper_loop():
         first_entry_only=CONFIG.copy_paper_first_entry_only,
         max_copies_per_wallet_day=_cap(CONFIG.copy_paper_max_per_wallet_day),
         max_copies_per_category_day=_cap(CONFIG.copy_paper_max_per_category_day),
+        # per-(wallet, event) correlated-slate cap + downward-only stake tiering
+        # for low-confidence admits (2026-07 race RCA).
+        max_copies_per_wallet_event=_cap(CONFIG.copy_paper_max_per_wallet_event),
+        low_conf_stake_frac=CONFIG.copy_paper_low_conf_stake_frac,
+        low_conf_until_n=CONFIG.copy_paper_low_conf_until_n,
+        gate_history_path=os.path.join(CONFIG.data_dir, "gate-history.jsonl"),
         # evidence-throughput levers (starvation RCA): route the daily caps to
         # the coldest wallets + paper-only category-cap relief under the
         # evidence floor (fills stamped over_real_cap for promotion audit).
@@ -545,13 +566,25 @@ def _copy_paper_b_loop():
                 f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
             )
         skips = (summary.skipped_fill_gate + summary.skipped_not_first_entry
-                 + summary.skipped_slate_cap + summary.skipped_category_gate)
+                 + summary.skipped_slate_cap + summary.skipped_category_gate
+                 + summary.skipped_event_cap)
         if skips:
             logger.info(
                 f"[COPY-PAPER-B] guardrail skips: fill-gate={summary.skipped_fill_gate} "
                 f"first-entry={summary.skipped_not_first_entry} "
                 f"slate-cap={summary.skipped_slate_cap} "
-                f"category-gate={summary.skipped_category_gate}"
+                f"category-gate={summary.skipped_category_gate} "
+                f"event-cap={summary.skipped_event_cap}"
+            )
+        rej = summary.detector_rejects
+        if rej and (rej.get("rows", 0) - rej.get("emitted", 0)) > 0:
+            logger.info(
+                f"[COPY-PAPER-B] detection rejects: rows={rej.get('rows', 0)} "
+                f"not-buy={rej.get('not_buy', 0)} stale={rej.get('stale', 0)} "
+                f"price-band={rej.get('price_band', 0)} "
+                f"min-usd={rej.get('below_min_usd', 0)} "
+                f"missing-ids={rej.get('missing_ids', 0)} "
+                f"emitted={rej.get('emitted', 0)}"
             )
         if summary.slate_cap_binds:
             # cap-bind autopsy (manager amendment): WHO the cap bound, per kind —
@@ -602,6 +635,12 @@ def _copy_paper_b_loop():
         first_entry_only=CONFIG.copy_paper_first_entry_only,
         max_copies_per_wallet_day=_cap(CONFIG.copy_paper_b_max_per_wallet_day),
         max_copies_per_category_day=_cap(CONFIG.copy_paper_b_max_per_category_day),
+        # same event cap + stake tiering as A (identical across books, so the
+        # race variable stays lagged-vs-instant).
+        max_copies_per_wallet_event=_cap(CONFIG.copy_paper_b_max_per_wallet_event),
+        low_conf_stake_frac=CONFIG.copy_paper_low_conf_stake_frac,
+        low_conf_until_n=CONFIG.copy_paper_low_conf_until_n,
+        gate_history_path=os.path.join(CONFIG.data_dir, "gate-history.jsonl"),
         starved_priority=CONFIG.copy_paper_starved_priority,
         relief_evidence_n=None,   # caps already sized for take-all; no relief lane
         relief_max_per_category_day=None,
@@ -677,7 +716,12 @@ def _ab_race_reporter_loop():
         try:
             cmp_ = compare(CONFIG.copy_paper_ledger, CONFIG.copy_paper_b_ledger,
                            b_slippage_bps=CONFIG.copy_paper_b_slippage_bps)
-            telegram_bot.send_message(format_snapshot(cmp_))
+            sent_snap = telegram_bot.send_message(format_snapshot(cmp_))
+            # Log every reporter post — Telegram is the only other trace, and an
+            # unauditable daily job reads as "never ran" from the logs.
+            logger.info(
+                f"[AB-RACE] daily snapshot {'sent' if sent_snap else 'SEND FAILED'} "
+                f"(era_day={cmp_.get('era_days', 0):.1f})")
             st = _load_state()
             era = cmp_.get("era_start")
             if (era and not st.get("verdict_sent")
@@ -685,6 +729,9 @@ def _ab_race_reporter_loop():
                 sent = telegram_bot.send_message(
                     "🏁 <b>A-vs-B verdict memo</b>\n<pre>"
                     + format_verdict(cmp_) + "</pre>")
+                logger.info(
+                    f"[AB-RACE] day-7 verdict memo "
+                    f"{'sent' if sent else 'SEND FAILED (will retry next fire)'}")
                 if sent:
                     st["verdict_sent"] = True
                     st["verdict_ts"] = time.time()

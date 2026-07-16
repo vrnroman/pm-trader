@@ -260,6 +260,8 @@ class CycleSummary:
     skipped_fill_gate: int = 0          # our fill would chase too far above their price
     skipped_not_first_entry: int = 0    # averaging-down / re-entry into a copied market
     skipped_slate_cap: int = 0          # per-(wallet|category)-day concentration cap hit
+    skipped_event_cap: int = 0          # per-(wallet,event) concurrent-exposure cap hit
+    skipped_already_copied: int = 0     # copy_id already in the ledger (feed re-emit)
     skipped_category_gate: int = 0      # market category not in this wallet's approved
                                         # "winning markets" set (copy-and-hold edge gate)
     skipped_horizon: int = 0            # bet's resolution date is on the wrong side of the
@@ -270,6 +272,12 @@ class CycleSummary:
     # the positions that resolved *this* cycle, so callers can name them in a
     # notification instead of only reporting cumulative ledger aggregates.
     resolved_positions: list["PaperPosition"] = field(default_factory=list)
+    # detection-funnel rejects for this cycle (filled by the runner from the
+    # detector's own stats, when the detector exposes them): reason -> count of
+    # watched-wallet feed rows dropped BEFORE the engine ever saw them. This is
+    # the starvation autopsy — "wallets trade but nothing opens" is invisible
+    # without it (2026-07 A-book stall RCA).
+    detector_rejects: dict = field(default_factory=dict)
     # every slate-cap bind this cycle as (target, category, "wallet-day" |
     # "category-day") — the aggregate skipped_slate_cap says HOW OFTEN the cap
     # bound, this says WHO it bound, so a book whose thesis is take-everything
@@ -303,6 +311,14 @@ class CopyPaperEngine:
         # category, so one correlated same-day slate can't dominate (None = off).
         max_copies_per_wallet_day: Optional[int] = None,
         max_copies_per_category_day: Optional[int] = None,
+        # per-(wallet, event) concurrent-exposure cap: at most this many OPEN
+        # copies of one wallet inside one underlying event (same match/fixture,
+        # keyed by the trade's event slug). The day-caps above don't see this —
+        # 3 props on ONE game pass a 3/wallet-day cap yet win or lose together
+        # (0xa6fa lost $345 exactly this way, 2026-07 race RCA). A position that
+        # resolves frees its slot; an empty slug is uncapped (can't group).
+        # None = off, engine unchanged.
+        max_copies_per_wallet_event: Optional[int] = None,
         # --- borrowed-clock fill (strategy B) ---
         # When set, fill every admitted copy AT THE TARGET'S OWN PRICE plus this
         # many bps, without walking the live book: the instant-copy paper book.
@@ -342,6 +358,12 @@ class CopyPaperEngine:
         conviction_base_usd: Optional[float] = None,
         conviction_min: float = 0.25,
         conviction_max: float = 2.0,
+        # --- confidence-tiered stake (downward only; 2026-07 race RCA) ---
+        # lowercased wallet -> stake multiplier in (0, 1]. A wallet the LLM gate
+        # admitted on thin/low-confidence evidence starts at a fraction of the
+        # normal size until its own settled record accrues; the multiplier NEVER
+        # exceeds 1.0 (clamped), so this can only shrink exposure. None = off.
+        stake_frac: Optional[dict[str, float]] = None,
         # --- evidence-throughput levers (starvation RCA 2026-07; both default-OFF
         # so the bare engine is unchanged) ---
         # starved-wallet slate priority: process this cycle's detected BUYs
@@ -378,6 +400,7 @@ class CopyPaperEngine:
         self.first_entry_only = first_entry_only
         self.max_copies_per_wallet_day = max_copies_per_wallet_day
         self.max_copies_per_category_day = max_copies_per_category_day
+        self.max_copies_per_wallet_event = max_copies_per_wallet_event
         self.fill_at_their_price_bps = fill_at_their_price_bps
         self.allowed_categories = (
             {k.lower(): set(v) for k, v in allowed_categories.items()}
@@ -388,21 +411,31 @@ class CopyPaperEngine:
         self.conviction_base_usd = conviction_base_usd
         self.conviction_min = conviction_min
         self.conviction_max = conviction_max
+        self.stake_frac = (
+            {k.lower(): min(1.0, float(v)) for k, v in stake_frac.items()
+             if float(v) > 0}
+            if stake_frac is not None else None)
         self.starved_priority = starved_priority
         self.relief_evidence_n = relief_evidence_n
         self.relief_max_per_category_day = relief_max_per_category_day
 
     def _copy_size(self, target: str, their_usd: float) -> float:
         """USD to deploy on a copy. Conviction-sized (target's bet vs its own
-        median, winsorized) when configured, else the legacy proportional cap."""
+        median, winsorized) when configured, else the legacy proportional cap.
+        A ``stake_frac`` entry for the wallet then scales the result DOWN (thin/
+        low-confidence admits start small until their own record accrues)."""
         if self.wallet_median_usd is not None and self.conviction_base_usd:
             med = self.wallet_median_usd.get((target or "").lower(), 0.0)
             mult = 1.0
             if med > 0:
                 mult = max(self.conviction_min,
                            min(self.conviction_max, their_usd / med))
-            return min(self.max_copy_usd, self.conviction_base_usd * mult)
-        return min(self.max_copy_usd, their_usd * self.copy_pct)
+            usd = min(self.max_copy_usd, self.conviction_base_usd * mult)
+        else:
+            usd = min(self.max_copy_usd, their_usd * self.copy_pct)
+        if self.stake_frac is not None:
+            usd *= self.stake_frac.get((target or "").lower(), 1.0)
+        return usd
 
     def run_cycle(self, now: Optional[float] = None) -> CycleSummary:
         now = now if now is not None else time.time()
@@ -418,6 +451,15 @@ class CopyPaperEngine:
             if int((p.opened_ts or 0) // 86400) == day:
                 wallet_day[p.target] = wallet_day.get(p.target, 0) + 1
                 cat_day[p.category] = cat_day.get(p.category, 0) + 1
+        # per-(wallet, event) concurrent exposure, seeded from OPEN positions
+        # only — a resolved copy frees its event slot (the cap limits correlated
+        # simultaneous exposure, not lifetime participation in an event).
+        event_open: dict[tuple[str, str], int] = {}
+        if self.max_copies_per_wallet_event is not None:
+            for p in self.ledger.open_positions():
+                if p.slug:
+                    k = ((p.target or "").lower(), p.slug)
+                    event_open[k] = event_open.get(k, 0) + 1
 
         # per-target ledger copy counts (settled + in-flight), for the two
         # evidence-throughput levers below. In-flight copies count as evidence:
@@ -437,6 +479,7 @@ class CopyPaperEngine:
             s.detected += 1
             cid = tr["copy_id"]
             if self.ledger.has(cid):
+                s.skipped_already_copied += 1
                 continue
             # bet-horizon routing: each book takes only bets resolving on its side
             # of the cut. An undated bet (horizon None) is treated as near-term —
@@ -490,6 +533,16 @@ class CopyPaperEngine:
                     s.slate_cap_binds.append((target, category, "category-day"))
                     continue
                 over_real_cap = True
+            # per-(wallet, event) cap: don't stack correlated props on one
+            # match — they settle together, so N positions carry ~1 position's
+            # worth of independent information at N positions' worth of risk.
+            slug = tr.get("slug") or ""
+            if (self.max_copies_per_wallet_event is not None and slug
+                    and event_open.get(((target or "").lower(), slug), 0)
+                    >= self.max_copies_per_wallet_event):
+                s.skipped_event_cap += 1
+                s.slate_cap_binds.append((target, category, "wallet-event"))
+                continue
             copy_usd = self._copy_size(target, tr.get("their_usd", 0) or 0.0)
             if self.fill_at_their_price_bps is not None:
                 # borrowed-clock fill: at their price + fixed drag, no book walk.
@@ -534,6 +587,9 @@ class CopyPaperEngine:
             wallet_day[target] = wallet_day.get(target, 0) + 1
             cat_day[category] = cat_day.get(category, 0) + 1
             evidence_n[target] = evidence_n.get(target, 0) + 1
+            if slug:
+                ek = ((target or "").lower(), slug)
+                event_open[ek] = event_open.get(ek, 0) + 1
 
         # exit-following: if the target sold something we hold, sell too (at our
         # achievable bid), before falling through to the resolution path.

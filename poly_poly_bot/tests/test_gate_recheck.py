@@ -48,12 +48,15 @@ def test_cli_runner_returns_sentinel_on_error_envelope(monkeypatch):
     assert llm_review._claude_cli_runner("p", model="m", timeout_s=1) is RATE_LIMITED
 
 
-def test_cli_runner_generic_failure_is_none(monkeypatch):
+def test_cli_runner_generic_failure_defers(monkeypatch):
+    # 2026-07-16 RCA: a persistent generic CLI failure used to fail OPEN
+    # (return None -> admit unvetted). It now retries once, then DEFERS via
+    # the retriable sentinel so the wallet lands in this re-check queue.
     def fake_run(cmd, **kw):
         return SimpleNamespace(returncode=1, stdout="", stderr="segfault")
     monkeypatch.setattr(llm_review.shutil, "which", lambda _: "/usr/bin/claude")
     monkeypatch.setattr(llm_review.subprocess, "run", fake_run)
-    assert llm_review._claude_cli_runner("p", model="m", timeout_s=1) is None
+    assert llm_review._claude_cli_runner("p", model="m", timeout_s=1) is RATE_LIMITED
 
 
 def test_review_wallet_passes_sentinel_through():

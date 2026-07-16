@@ -51,6 +51,25 @@ def load(path: str | None, limit: int | None = None) -> list[dict]:
     return rows[-limit:] if limit else rows
 
 
+def latest_band_by_wallet(rows: list[dict]) -> dict[str, str]:
+    """Lowercased wallet -> confidence band of its most recent DECIDED gate row.
+
+    Requeued rows (provisional deferrals) are skipped — the wallet's real band
+    is whatever the later re-check decided. Rows without a band (pre-band
+    history) are skipped too, so absence means "no band known", never "low".
+    Feeds the downward-only confidence-tiered stake (2026-07 race RCA: a
+    band=low n=6 admit was staked like a proven wallet and lost $345)."""
+    out: dict[str, str] = {}
+    for r in rows:                      # oldest -> newest, so last write wins
+        if r.get("requeued"):
+            continue
+        wallet = (r.get("wallet") or "").lower()
+        band = r.get("confidence_band")
+        if wallet and band:
+            out[wallet] = str(band)
+    return out
+
+
 def summarize(rows: list[dict]) -> dict:
     """Aggregate rows into admit/reject totals, per-theory admit/reject counts,
     and the most recent rejection reasons.

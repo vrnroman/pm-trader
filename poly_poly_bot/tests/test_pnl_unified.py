@@ -7,6 +7,7 @@ import pytest
 from src.copy_trading.copy_paper import PaperPosition
 from src.copy_trading.pnl import OpenPositionPnl
 from src.copy_trading.pnl_unified import (
+    LEGACY_A,
     MATURITY_READY,
     STRATEGY4_LABEL,
     UNTAGGED_A,
@@ -69,15 +70,17 @@ def test_system_a_groups_realized_by_stamped_tier_and_wallet():
     assert by_addr["0xbbb"].strategies == ("A:1b",)
 
 
-def test_system_a_falls_back_to_tier_of_then_untagged():
+def test_system_a_falls_back_to_tier_of_then_legacy():
     rows = [
         {"trader_address": "0xCcc", "pnl": 5.0, "cost_basis": 10.0, "won": True},   # no tier -> fallback
-        {"trader_address": "", "pnl": 2.0, "cost_basis": 5.0, "won": True},          # no wallet -> untagged
+        {"trader_address": "", "pnl": 2.0, "cost_basis": 5.0, "won": True},          # no attribution at all -> legacy
     ]
     wallets = aggregate_system_a(rows, [], tier_of=lambda a: "1c" if a == "0xccc" else None)
     by_addr = {w.wallet: w for w in wallets}
     assert by_addr["0xccc"].strategies == ("A:1c",)
-    assert UNTAGGED_A in by_addr["(unknown)"].strategies
+    # 2026-07-16: rows with NO tier and NO wallet are pre-schema debris and get
+    # their own legacy track so /pnl can split them from live-strategy results.
+    assert LEGACY_A in by_addr["(unknown)"].strategies
 
 
 def test_system_a_open_positions_add_unrealized_and_cost():

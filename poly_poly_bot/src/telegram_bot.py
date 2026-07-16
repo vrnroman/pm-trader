@@ -418,6 +418,16 @@ def _handle_pnl():
     lines.append(f"  Realized:    <b>${unified.total_realized:+.2f}</b>")
     lines.append(f"  Unrealized:  <b>${unified.total_unrealized:+.2f}</b>")
     lines.append(f"  Net:         <b>${unified.total_net:+.2f}</b>")
+    # Decompose the net when a legacy backlog exists: unattributed pre-schema
+    # rows (e.g. the 2026-07-11 sweep of dead MAY-era preview positions) are
+    # real history but not a current-strategy result — without this split the
+    # headline reads as "the strategies are losing" when they are not.
+    legacy_net = sum(sp.net_pnl for sp in unified.strategies
+                     if sp.label == u.LEGACY_A)
+    if legacy_net:
+        lines.append(
+            f"  ↳ current strategies: <b>${unified.total_net - legacy_net:+.2f}</b>"
+            f" · legacy backlog: ${legacy_net:+.2f}")
     lines.append(f"  Open bets:   <b>{total_open}</b>")
     if total_closed:
         hit = wins / total_closed if total_closed else 0.0

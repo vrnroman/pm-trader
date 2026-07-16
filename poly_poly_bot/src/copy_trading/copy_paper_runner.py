@@ -49,6 +49,18 @@ class CopyPaperRunner:
         first_entry_only: bool = False,
         max_copies_per_wallet_day: Optional[int] = None,
         max_copies_per_category_day: Optional[int] = None,
+        # per-(wallet, event) concurrent-exposure cap (see CopyPaperEngine —
+        # correlated same-match props settle together; None = off).
+        max_copies_per_wallet_event: Optional[int] = None,
+        # --- confidence-tiered stake (downward only) ---
+        # A wallet whose LATEST LLM-gate row has confidence_band == "low" is
+        # staked at ``low_conf_stake_frac`` of normal until it has
+        # ``low_conf_until_n`` settled copies in THIS book's ledger. Reads
+        # ``gate_history_path`` each cycle (same reload-without-restart contract
+        # as the watchlist). Fraction None/<=0/>=1 = off.
+        low_conf_stake_frac: Optional[float] = None,
+        low_conf_until_n: int = 5,
+        gate_history_path: Optional[str] = None,
         # --- winning-markets-only gate (item A) + conviction sizing (item C) ---
         # When ``category_gate`` is on, copy a wallet's BUY only in the categories
         # the watchlist marks approved for it (its copy-and-hold edge cleared
@@ -107,6 +119,12 @@ class CopyPaperRunner:
         self.first_entry_only = first_entry_only
         self.max_copies_per_wallet_day = max_copies_per_wallet_day
         self.max_copies_per_category_day = max_copies_per_category_day
+        self.max_copies_per_wallet_event = max_copies_per_wallet_event
+        self.low_conf_stake_frac = (
+            low_conf_stake_frac
+            if low_conf_stake_frac and 0.0 < low_conf_stake_frac < 1.0 else None)
+        self.low_conf_until_n = low_conf_until_n
+        self.gate_history_path = gate_history_path
         self.category_gate = category_gate
         self.conviction_base_usd = conviction_base_usd
         self.conviction_min = conviction_min
@@ -169,6 +187,26 @@ class CopyPaperRunner:
                 out.setdefault(w, fb)
         return out
 
+    def _stake_frac_map(self) -> Optional[dict]:
+        """Lowercased wallet -> stake multiplier (<1.0) for wallets whose latest
+        LLM-gate verdict carried a "low" confidence band and whose own settled
+        record in this ledger is still under ``low_conf_until_n``. Downward only;
+        None when the feature is off or nothing qualifies."""
+        if self.low_conf_stake_frac is None or not self.gate_history_path:
+            return None
+        from src.copy_trading import gate_history
+        bands = gate_history.latest_band_by_wallet(
+            gate_history.load(self.gate_history_path))
+        if not bands:
+            return None
+        settled: dict[str, int] = {}
+        for p in self.ledger.closed_positions():
+            k = (p.target or "").lower()
+            settled[k] = settled.get(k, 0) + 1
+        out = {w: self.low_conf_stake_frac for w, band in bands.items()
+               if band == "low" and settled.get(w, 0) < self.low_conf_until_n}
+        return out or None
+
     def run_once(self) -> CycleSummary:
         wallets = self.wallets()
         if not wallets:
@@ -210,6 +248,8 @@ class CopyPaperRunner:
             fill_gate_bps=self.fill_gate_bps, first_entry_only=self.first_entry_only,
             max_copies_per_wallet_day=self.max_copies_per_wallet_day,
             max_copies_per_category_day=self.max_copies_per_category_day,
+            max_copies_per_wallet_event=self.max_copies_per_wallet_event,
+            stake_frac=self._stake_frac_map(),
             min_horizon_days=self.min_horizon_days,
             max_horizon_days=self.max_horizon_days,
             mark_fetcher=self._mark_fetcher, strategy=self.strategy,
@@ -223,6 +263,9 @@ class CopyPaperRunner:
             relief_max_per_category_day=self.relief_max_per_category_day,
         )
         summary = engine.run_cycle()
+        # starvation autopsy: surface the detector's own reject mix (rows the
+        # engine never saw) alongside the engine's guardrail skips.
+        summary.detector_rejects = dict(getattr(detector, "stats", None) or {})
         if self._on_cycle:
             self._on_cycle(summary, self.ledger)
         return summary

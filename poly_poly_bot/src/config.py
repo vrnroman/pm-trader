@@ -212,6 +212,19 @@ class Config:
     copy_paper_first_entry_only: bool = _opt_bool("COPY_PAPER_FIRST_ENTRY_ONLY", True)
     copy_paper_max_per_wallet_day: int = _opt_int("COPY_PAPER_MAX_PER_WALLET_DAY", 3)
     copy_paper_max_per_category_day: int = _opt_int("COPY_PAPER_MAX_PER_CATEGORY_DAY", 8)
+    # per-(wallet, event) concurrent-exposure cap (2026-07 race RCA: 0xa6fa lost
+    # $345 on 3-4 same-match props that individually passed the day caps but
+    # settled together). At most N OPEN copies of one wallet inside one event
+    # (keyed by event slug); a resolution frees the slot. <=0 disables.
+    copy_paper_max_per_wallet_event: int = _opt_int(
+        "COPY_PAPER_MAX_PER_WALLET_EVENT", 1)
+    # confidence-tiered stake, DOWNWARD only (same RCA: a band=low n=6 admit was
+    # staked like a proven wallet): a wallet whose latest LLM-gate row says
+    # confidence_band=low is staked at this fraction of normal until it has
+    # low_conf_until_n settled copies in the book. Off when <=0 or >=1.
+    copy_paper_low_conf_stake_frac: float = _opt_float(
+        "COPY_PAPER_LOW_CONF_STAKE_FRAC", 0.5)
+    copy_paper_low_conf_until_n: int = _opt_int("COPY_PAPER_LOW_CONF_UNTIL_N", 5)
     # Evidence-throughput levers (starvation RCA 2026-07): the slate caps above
     # are sized for a real-money book's correlation risk, but paper carries no
     # capital — so they were throttling promotion-evidence accrual (92.6% of all
@@ -257,6 +270,10 @@ class Config:
     # regime whose gains concentrate in high-frequency wallets). Not unlimited —
     # a degenerate flood is still bounded. Cap binds are logged per wallet.
     copy_paper_b_max_per_wallet_day: int = _opt_int("COPY_PAPER_B_MAX_PER_WALLET_DAY", 25)
+    # B's per-(wallet, event) cap — same default as A's so the race variable
+    # stays lagged-vs-instant, not capped-vs-uncapped. <=0 disables.
+    copy_paper_b_max_per_wallet_event: int = _opt_int(
+        "COPY_PAPER_B_MAX_PER_WALLET_EVENT", 1)
     copy_paper_b_max_per_category_day: int = _opt_int(
         "COPY_PAPER_B_MAX_PER_CATEGORY_DAY", 75)
     # Extra wallets only B watches (beyond the shared discovery watchlist):
