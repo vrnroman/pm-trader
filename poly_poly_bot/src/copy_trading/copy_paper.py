@@ -113,6 +113,11 @@ class PaperPosition:
     # ledger lines that predate these keys still load):
     title: str = ""         # market question, e.g. "Will BTC hit $100k in 2025?"
     slug: str = ""          # PM event slug -> polymarket.com/event/<slug>
+    # Grouping key for the per-(wallet, event) cap: the feed's eventSlug ONLY —
+    # never the market-slug fallback that `slug` may hold (market slugs are
+    # unique per market, so they'd give correlated same-event props
+    # falsely-distinct keys). Empty = ungroupable. Default-safe for old rows.
+    event_key: str = ""
     # Discovery strategy theories that flagged the target wallet (e.g. ("1b","1f")),
     # stamped at open so per-strategy P&L attribution is stable even as the
     # watchlist re-flags the wallet later. Default-safe: old ledger lines load as ().
@@ -262,6 +267,9 @@ class CycleSummary:
     skipped_slate_cap: int = 0          # per-(wallet|category)-day concentration cap hit
     skipped_event_cap: int = 0          # per-(wallet,event) concurrent-exposure cap hit
     skipped_already_copied: int = 0     # copy_id already in the ledger (feed re-emit)
+    opened_unkeyed_event: int = 0       # opened WITHOUT an event key while the event
+                                        # cap is on (feed row had no eventSlug — the
+                                        # cap could not group it; visible, not silent)
     skipped_category_gate: int = 0      # market category not in this wallet's approved
                                         # "winning markets" set (copy-and-hold edge gate)
     skipped_horizon: int = 0            # bet's resolution date is on the wrong side of the
@@ -454,11 +462,15 @@ class CopyPaperEngine:
         # per-(wallet, event) concurrent exposure, seeded from OPEN positions
         # only — a resolved copy frees its event slot (the cap limits correlated
         # simultaneous exposure, not lifetime participation in an event).
+        # Rows opened before event_key existed seed with their slug — for those
+        # rows slug was usually the true eventSlug, and a stale market-slug
+        # value simply never collides (no cap, same as before the field).
         event_open: dict[tuple[str, str], int] = {}
         if self.max_copies_per_wallet_event is not None:
             for p in self.ledger.open_positions():
-                if p.slug:
-                    k = ((p.target or "").lower(), p.slug)
+                key = getattr(p, "event_key", "") or p.slug
+                if key:
+                    k = ((p.target or "").lower(), key)
                     event_open[k] = event_open.get(k, 0) + 1
 
         # per-target ledger copy counts (settled + in-flight), for the two
@@ -536,13 +548,17 @@ class CopyPaperEngine:
             # per-(wallet, event) cap: don't stack correlated props on one
             # match — they settle together, so N positions carry ~1 position's
             # worth of independent information at N positions' worth of risk.
-            slug = tr.get("slug") or ""
-            if (self.max_copies_per_wallet_event is not None and slug
-                    and event_open.get(((target or "").lower(), slug), 0)
-                    >= self.max_copies_per_wallet_event):
-                s.skipped_event_cap += 1
-                s.slate_cap_binds.append((target, category, "wallet-event"))
-                continue
+            # Keyed on event_key (eventSlug only). A trade with no event key
+            # can't be grouped — it opens uncapped but is COUNTED, so a feed
+            # that stops sending eventSlug shows up in the cycle log instead of
+            # silently disabling the guard.
+            event_key = tr.get("event_key") or ""
+            if self.max_copies_per_wallet_event is not None and event_key:
+                if (event_open.get(((target or "").lower(), event_key), 0)
+                        >= self.max_copies_per_wallet_event):
+                    s.skipped_event_cap += 1
+                    s.slate_cap_binds.append((target, category, "wallet-event"))
+                    continue
             copy_usd = self._copy_size(target, tr.get("their_usd", 0) or 0.0)
             if self.fill_at_their_price_bps is not None:
                 # borrowed-clock fill: at their price + fixed drag, no book walk.
@@ -575,6 +591,7 @@ class CopyPaperEngine:
                 token_id=token, outcome_index=int(tr["outcome_index"]),
                 category=category, their_price=tr["their_price"],
                 title=tr.get("title", ""), slug=tr.get("slug", ""),
+                event_key=event_key,
                 flagged_by=tuple(tr.get("flagged_by", ())),
                 strategy=self.strategy,
                 horizon_days=float(horizon) if horizon is not None else 0.0,
@@ -587,9 +604,11 @@ class CopyPaperEngine:
             wallet_day[target] = wallet_day.get(target, 0) + 1
             cat_day[category] = cat_day.get(category, 0) + 1
             evidence_n[target] = evidence_n.get(target, 0) + 1
-            if slug:
-                ek = ((target or "").lower(), slug)
+            if event_key:
+                ek = ((target or "").lower(), event_key)
                 event_open[ek] = event_open.get(ek, 0) + 1
+            elif self.max_copies_per_wallet_event is not None:
+                s.opened_unkeyed_event += 1
 
         # exit-following: if the target sold something we hold, sell too (at our
         # achievable bid), before falling through to the resolution path.

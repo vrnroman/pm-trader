@@ -17,7 +17,7 @@ import sys
 import signal
 import logging
 import threading
-from datetime import datetime
+from pathlib import Path
 
 # Add parent to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -42,6 +42,40 @@ def refresh_clob_client() -> None:
 
     reset_clob_client()
     create_clob_client()  # may be None if key was cleared
+
+
+def _log_copy_cycle_diagnostics(tag: str, summary) -> None:
+    """One line of guardrail skips + one of detection-funnel rejects per cycle
+    (only when nonzero) — shared by the A and B paper loops so the two books
+    always report identically."""
+    skips = (summary.skipped_fill_gate + summary.skipped_not_first_entry
+             + summary.skipped_slate_cap + summary.skipped_category_gate
+             + summary.skipped_event_cap)
+    if skips:
+        logger.info(
+            f"[{tag}] guardrail skips: fill-gate={summary.skipped_fill_gate} "
+            f"first-entry={summary.skipped_not_first_entry} "
+            f"slate-cap={summary.skipped_slate_cap} "
+            # the winning-markets gate is default-ON and the biggest behaviour
+            # change — log it so a quieted book always shows a reason.
+            f"category-gate={summary.skipped_category_gate} "
+            f"event-cap={summary.skipped_event_cap} "
+            f"already-copied={summary.skipped_already_copied}"
+        )
+    if summary.opened_unkeyed_event:
+        # the event cap could not group these opens (feed row had no eventSlug)
+        logger.info(f"[{tag}] event-cap: {summary.opened_unkeyed_event} open(s) "
+                    f"had no event key (ungroupable, admitted uncapped)")
+    # starvation autopsy: rows the DETECTOR dropped before the engine saw them
+    # (the 2026-07 A-book stall was invisible at guardrail level — watched
+    # wallets traded, yet nothing reached the engine).
+    rej = summary.detector_rejects
+    if rej and (rej.get("rows", 0) - rej.get("emitted", 0)) > 0:
+        detail = " ".join(
+            f"{k.replace('_', '-')}={rej.get(k, 0)}"
+            for k in ("rows", "not_buy", "stale", "price_band",
+                      "below_min_usd", "missing_ids", "emitted"))
+        logger.info(f"[{tag}] detection rejects: {detail}")
 
 
 def _copy_paper_loop():
@@ -193,32 +227,7 @@ def _copy_paper_loop():
                 f"[COPY-PAPER] opened={summary.opened} resolved={summary.resolved} "
                 f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
             )
-        skips = (summary.skipped_fill_gate + summary.skipped_not_first_entry
-                 + summary.skipped_slate_cap + summary.skipped_category_gate
-                 + summary.skipped_event_cap)
-        if skips:
-            logger.info(
-                f"[COPY-PAPER] guardrail skips: fill-gate={summary.skipped_fill_gate} "
-                f"first-entry={summary.skipped_not_first_entry} "
-                f"slate-cap={summary.skipped_slate_cap} "
-                # the winning-markets gate is default-ON and the biggest behaviour
-                # change — log it so a quieted book always shows a reason.
-                f"category-gate={summary.skipped_category_gate} "
-                f"event-cap={summary.skipped_event_cap}"
-            )
-        # starvation autopsy: rows the DETECTOR dropped before the engine saw
-        # them (the 2026-07 A-book stall was invisible at guardrail level —
-        # watched wallets traded, yet nothing reached the engine).
-        rej = summary.detector_rejects
-        if rej and (rej.get("rows", 0) - rej.get("emitted", 0)) > 0:
-            logger.info(
-                f"[COPY-PAPER] detection rejects: rows={rej.get('rows', 0)} "
-                f"not-buy={rej.get('not_buy', 0)} stale={rej.get('stale', 0)} "
-                f"price-band={rej.get('price_band', 0)} "
-                f"min-usd={rej.get('below_min_usd', 0)} "
-                f"missing-ids={rej.get('missing_ids', 0)} "
-                f"emitted={rej.get('emitted', 0)}"
-            )
+        _log_copy_cycle_diagnostics("COPY-PAPER", summary)
         if summary.resolved:
             telegram_bot.send_message(
                 format_resolution_telegram(summary.resolved_positions, report(ledger),
@@ -269,7 +278,12 @@ def _copy_paper_loop():
         max_copies_per_wallet_event=_cap(CONFIG.copy_paper_max_per_wallet_event),
         low_conf_stake_frac=CONFIG.copy_paper_low_conf_stake_frac,
         low_conf_until_n=CONFIG.copy_paper_low_conf_until_n,
-        gate_history_path=os.path.join(CONFIG.data_dir, "gate-history.jsonl"),
+        gate_history_path=os.path.join(
+            # SAME derivation as the writer (discovery_runner puts gate-history
+            # beside the discovery state file) — deriving from data_dir instead
+            # would silently read a never-written path if the state file is
+            # relocated, disabling the stake tiering with no warning.
+            os.path.dirname(CONFIG.wallet_discovery_state), "gate-history.jsonl"),
         # evidence-throughput levers (starvation RCA): route the daily caps to
         # the coldest wallets + paper-only category-cap relief under the
         # evidence floor (fills stamped over_real_cap for promotion audit).
@@ -565,27 +579,7 @@ def _copy_paper_b_loop():
                 f"[COPY-PAPER-B] opened={summary.opened} resolved={summary.resolved} "
                 f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
             )
-        skips = (summary.skipped_fill_gate + summary.skipped_not_first_entry
-                 + summary.skipped_slate_cap + summary.skipped_category_gate
-                 + summary.skipped_event_cap)
-        if skips:
-            logger.info(
-                f"[COPY-PAPER-B] guardrail skips: fill-gate={summary.skipped_fill_gate} "
-                f"first-entry={summary.skipped_not_first_entry} "
-                f"slate-cap={summary.skipped_slate_cap} "
-                f"category-gate={summary.skipped_category_gate} "
-                f"event-cap={summary.skipped_event_cap}"
-            )
-        rej = summary.detector_rejects
-        if rej and (rej.get("rows", 0) - rej.get("emitted", 0)) > 0:
-            logger.info(
-                f"[COPY-PAPER-B] detection rejects: rows={rej.get('rows', 0)} "
-                f"not-buy={rej.get('not_buy', 0)} stale={rej.get('stale', 0)} "
-                f"price-band={rej.get('price_band', 0)} "
-                f"min-usd={rej.get('below_min_usd', 0)} "
-                f"missing-ids={rej.get('missing_ids', 0)} "
-                f"emitted={rej.get('emitted', 0)}"
-            )
+        _log_copy_cycle_diagnostics("COPY-PAPER-B", summary)
         if summary.slate_cap_binds:
             # cap-bind autopsy (manager amendment): WHO the cap bound, per kind —
             # if B's caps bind non-degenerately they re-create A's censoring and
@@ -640,7 +634,12 @@ def _copy_paper_b_loop():
         max_copies_per_wallet_event=_cap(CONFIG.copy_paper_b_max_per_wallet_event),
         low_conf_stake_frac=CONFIG.copy_paper_low_conf_stake_frac,
         low_conf_until_n=CONFIG.copy_paper_low_conf_until_n,
-        gate_history_path=os.path.join(CONFIG.data_dir, "gate-history.jsonl"),
+        gate_history_path=os.path.join(
+            # SAME derivation as the writer (discovery_runner puts gate-history
+            # beside the discovery state file) — deriving from data_dir instead
+            # would silently read a never-written path if the state file is
+            # relocated, disabling the stake tiering with no warning.
+            os.path.dirname(CONFIG.wallet_discovery_state), "gate-history.jsonl"),
         starved_priority=CONFIG.copy_paper_starved_priority,
         relief_evidence_n=None,   # caps already sized for take-all; no relief lane
         relief_max_per_category_day=None,
@@ -817,10 +816,19 @@ def _discovery_loop():
 # -- Main --
 
 def _setup_logging():
-    """Configure logging to console and file."""
+    """Configure logging to console and file.
+
+    The file handler must ROLL at UTC midnight: the old plain FileHandler
+    baked the start date into the filename once, so a long container run
+    appended everything (incl. all WARNINGs and urllib3 DEBUG) to the boot
+    day's file — bot-2026-07-10.log grew to 99MB over six days while the
+    per-day files stayed near-empty, and the 07-15 FUNNEL-STALLED warning
+    "lived in" the 07-10 file (2026-07-16 RCA). Reuse the same rolling
+    handler the BotLogger files use.
+    """
+    from src.logger import _DailyRotatingFileHandler
+
     os.makedirs(CONFIG.logs_dir, exist_ok=True)
-    log_file = os.path.join(CONFIG.logs_dir,
-                             f"bot-{datetime.now().strftime('%Y-%m-%d')}.log")
 
     fmt = logging.Formatter(
         "%(asctime)s [%(name)s] %(levelname)s: %(message)s",
@@ -832,10 +840,17 @@ def _setup_logging():
     ch.setFormatter(fmt)
     ch.setLevel(logging.INFO)
 
-    # File handler
-    fh = logging.FileHandler(log_file)
+    # File handler — rolls to bot-<new-date>.log when the UTC date changes.
+    # It shares that file with BotLogger's ops handler, and the app logger
+    # ("poly_poly_bot") PROPAGATES to root — without the filter below every
+    # app record would be written twice to the same file by two unsynchronized
+    # handlers. Root keeps only third-party records (urllib3, web3, ...);
+    # BotLogger already files the app's own records (bot- ops, signals- WARN+).
+    fh = _DailyRotatingFileHandler(Path(CONFIG.logs_dir), "bot")
     fh.setFormatter(fmt)
     fh.setLevel(logging.DEBUG)
+    fh.addFilter(lambda rec: not (rec.name == "poly_poly_bot"
+                                  or rec.name.startswith("poly_poly_bot.")))
 
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)

@@ -50,6 +50,12 @@ from src.copy_trading.trader_scoring import classify_market
 
 logger = logging.getLogger("poly_poly_bot")
 
+# A deferred gate re-check that keeps failing is retried at most this many
+# sweeps before it resolves as a VISIBLE unvetted admit (bounded fail-open):
+# each parked wallet costs a `claude -p` call (x2 attempts, up to timeout_s)
+# per sweep, so an unbounded retry loop silently burns the whole gate budget.
+RECHECK_MAX_ATTEMPTS = 3
+
 
 def _release_freed_memory() -> None:
     """Hand the sweep's freed heap back to the OS.
@@ -809,11 +815,26 @@ class DiscoveryRunner:
             verdict = getattr(v, "verdict", None)
             if verdict is None:
                 # Still rate-limited OR a transient re-check failure (timeout/None):
-                # keep it parked and try again next sweep. NEVER dequeue a wallet
-                # that still has no real decision.
+                # keep it parked and try again next sweep — but BOUNDED. A wallet
+                # whose re-check has now failed RECHECK_MAX_ATTEMPTS sweeps in a
+                # row is resolved as a LOUD unvetted admit (the old fail-open, but
+                # visible: it lands in gate-history as admit-recheck-unavailable,
+                # which /gate and the funnel digest count as unvetted) instead of
+                # burning llm_review_top_n x 2 x timeout_s per sweep forever
+                # (2026-07-16 review catch).
+                attempts = gate_recheck_queue.bump_attempts(
+                    self.gate_recheck_queue_path, wallet)
+                if attempts < RECHECK_MAX_ATTEMPTS:
+                    continue
+                logger.warning(
+                    "[DISCOVERY] deferred gate re-check for %s failed %d sweeps "
+                    "in a row — admitting UNVETTED (visible fail-open), dequeuing",
+                    wallet, attempts)
+                resolved.add(wallet)
+                self._record_recheck(entry, None)
                 continue
             resolved.add(wallet)               # a real verdict — resolve it
-            self._record_recheck(entry, verdict)
+            self._record_recheck(entry, v)
             if verdict == "skip":
                 rejected.add(wallet)
                 logger.info("[DISCOVERY] deferred gate re-check REJECTED %s: %s",
@@ -830,9 +851,16 @@ class DiscoveryRunner:
         if resolved:
             gate_recheck_queue.remove(self.gate_recheck_queue_path, resolved)
 
-    def _record_recheck(self, entry: dict, verdict) -> None:
+    def _record_recheck(self, entry: dict, v) -> None:
         """Log a deferred-check resolution to gate-history (from the stored entry,
-        since the sweep's Eval for this retained wallet may differ)."""
+        since the sweep's Eval for this retained wallet may differ).
+
+        Carries the re-check verdict's confidence + band: the deciding row for a
+        deferred wallet is THIS one, and the confidence-tiered stake reads the
+        band off the latest vetted row — omitting it here made the stake tiering
+        silently never apply to any deferred wallet (2026-07-16 review catch)."""
+        verdict = getattr(v, "verdict", None) if v is not None else v
+        confidence = float(getattr(v, "confidence", 0.0) or 0.0)
         admitted = verdict != "skip"
         gate_history.append(self.gate_history_path, {
             "ts": self._now(),
@@ -842,10 +870,13 @@ class DiscoveryRunner:
             "holdout": False,
             "requeued": False,
             "recheck": True,
+            "confidence": confidence,
+            "confidence_band": _confidence_band(confidence),
             "theories": list(entry.get("theories") or []),
             "had_leadlag": bool(entry.get("had_leadlag")),
             "copy_n": entry.get("copy_n", 0),
-            "reasoning": "deferred gate check re-run after rate limit",
+            "reasoning": getattr(v, "reasoning", "") or
+                         "deferred gate check re-run after rate limit",
         })
 
     @staticmethod

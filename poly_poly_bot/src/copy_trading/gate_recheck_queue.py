@@ -105,6 +105,27 @@ def pending(path: Optional[str]) -> list[dict]:
     return list(_read(path)["pending"].values())
 
 
+def bump_attempts(path: Optional[str], wallet: str) -> int:
+    """Increment and return the entry's failed-re-check attempt count.
+
+    Lets the drain loop bound how many sweeps a still-failing re-check may
+    burn before it resolves as a visible unvetted admit (a parked wallet used
+    to retry forever). Returns 0 for a missing path/entry. Never raises."""
+    if not path or not wallet:
+        return 0
+    try:
+        with _LOCK:
+            data = _read(path)
+            entry = data["pending"].get(wallet.lower())
+            if entry is None:
+                return 0
+            entry["attempts"] = int(entry.get("attempts", 0) or 0) + 1
+            _write(path, data)
+            return entry["attempts"]
+    except OSError:
+        return 0
+
+
 def remove(path: Optional[str], wallets) -> None:
     """Drop entries for the given wallets (after they've been re-checked)."""
     if not path:

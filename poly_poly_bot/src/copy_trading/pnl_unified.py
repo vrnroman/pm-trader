@@ -40,16 +40,23 @@ from src.copy_trading.copy_paper import PaperPosition, is_dust_fill
 from src.copy_trading.pnl import OpenPositionPnl
 
 _UNKNOWN_WALLET = "(unknown)"
+_LEGACY_WALLET = "(legacy)"
 UNTAGGED_A = "untagged-A"
 UNTAGGED_B = "untagged-B"
-# System-A rows with NO attribution at all (no tier, no followed wallet) are
-# pre-schema debris — e.g. the 2026-07-11 preview-realization sweep that booked
-# 61 dead MAY-era positions (-$575) in one burst once the closed=true Gamma fix
-# un-starved the resolver. They are real history (never deleted) but they are
-# not a result of any current strategy, so they get their own track and /pnl
-# can show "current strategies" and "legacy backlog" as separate numbers
-# instead of one misleading net.
+# System-A rows with NO attribution at all (no tier, no followed wallet) AND
+# written before the cutoff below are pre-schema debris — the 2026-07-11
+# preview-realization sweep that booked 61 dead Apr/May-era positions (-$575)
+# in one burst once the closed=true Gamma fix un-starved the resolver. They are
+# real history (never deleted) but not a result of any current strategy, so
+# they get their own track and /pnl can show "current strategies" and "legacy
+# backlog" as separate numbers instead of one misleading net.
 LEGACY_A = "legacy-A"
+# The cutoff is TIME-bounded on purpose: preview_resolver/auto_redeemer can
+# still write rows whose trader_address falls back to "" today, and an
+# attribution-only rule would misfile those LIVE losses as dead backlog
+# (2026-07-16 review catch). Anything unattributed after this date is
+# reported as current (untagged-A), where it is visible and investigable.
+LEGACY_CUTOFF_ISO = "2026-07-12"
 # The long-horizon paper book is one track (not split by discovery theory). Like
 # the near-term copier, its open positions are marked to market when priced.
 STRATEGY4_LABEL = "S4"
@@ -237,20 +244,31 @@ def aggregate_system_a(
     """
     acc: dict[str, WalletPnl] = {}
 
-    def _wp(wallet: str) -> WalletPnl:
-        key = wallet or _UNKNOWN_WALLET
+    def _wp(wallet: str, label: str) -> WalletPnl:
+        # Legacy rows get their OWN accumulator key: a WalletPnl is added
+        # whole to every label it carries (StrategyPnl._add), so letting the
+        # empty-wallet key accrue BOTH legacy and tier-stamped rows would make
+        # the legacy track over-claim tier rows (and the /pnl "current
+        # strategies" line over-subtract). Keeping the keys disjoint makes the
+        # legacy split exact by construction.
+        key = _LEGACY_WALLET if label == LEGACY_A else (wallet or _UNKNOWN_WALLET)
         wp = acc.get(key)
         if wp is None:
             wp = WalletPnl(wallet=key, system="A")
             acc[key] = wp
         return wp
 
-    def _label(tier: str, wallet: str) -> str:
+    def _label(tier: str, wallet: str, ts_iso: str = "") -> str:
         if tier:
             return f"A:{tier}"
-        # no tier AND no followed wallet = pre-attribution-schema row (legacy
-        # backlog); no tier but a known wallet = merely untagged.
-        return UNTAGGED_A if wallet else LEGACY_A
+        # Legacy = no tier AND no followed wallet AND written before the
+        # cutoff (the pre-attribution-schema backlog). An unattributed row
+        # from AFTER the cutoff is a live result that lost its attribution —
+        # it must stay visible under "current" (untagged), never be filed as
+        # dead backlog.
+        if not wallet and ts_iso and ts_iso[:10] < LEGACY_CUTOFF_ISO:
+            return LEGACY_A
+        return UNTAGGED_A
 
     def _resolve_tier(stamped: str, wallet: str) -> str:
         if stamped:
@@ -262,7 +280,8 @@ def aggregate_system_a(
     for r in realized_rows:
         wallet = (r.get("trader_address") or "").lower()
         tier = _resolve_tier(r.get("tier") or "", wallet)
-        wp = _wp(wallet)
+        label = _label(tier, wallet, str(r.get("timestamp") or ""))
+        wp = _wp(wallet, label)
         pnl = float(r.get("pnl", 0.0) or 0.0)
         cost = float(r.get("cost_basis", 0.0) or 0.0)
         wp.realized_pnl += pnl
@@ -273,18 +292,19 @@ def aggregate_system_a(
             wp.wins += 1
         elif won is False or (won is None and pnl < 0):
             wp.losses += 1
-        _add_label(wp, _label(tier, wallet))
+        _add_label(wp, label)
 
     for p in open_positions:
         wallet = (p.trader_address or "").lower()
         tier = _resolve_tier(p.tier or "", wallet)
-        wp = _wp(wallet)
+        label = _label(tier, wallet)
+        wp = _wp(wallet, label)
         wp.open_cost += p.cost
         wp.n_open += 1
         if p.unrealized_pnl is not None:
             wp.unrealized_pnl += p.unrealized_pnl
             wp.cost_basis += p.cost        # only priced (measured) open cost feeds ROI
-        _add_label(wp, _label(tier, wallet))
+        _add_label(wp, label)
 
     _round(acc.values())
     return list(acc.values())

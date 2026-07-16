@@ -187,6 +187,25 @@ class CopyPaperRunner:
                 out.setdefault(w, fb)
         return out
 
+    def _load_bands(self) -> dict:
+        """Latest vetted confidence band per wallet, mtime-cached — the gate
+        history is append-only and the runner cycles every ~60s, so re-parsing
+        the whole file each cycle (in BOTH books) is waste."""
+        import os as _os
+
+        from src.copy_trading import gate_history
+        try:
+            mtime = _os.path.getmtime(self.gate_history_path)
+        except OSError:
+            return {}
+        cached = getattr(self, "_bands_cache", None)
+        if cached is not None and cached[0] == mtime:
+            return cached[1]
+        bands = gate_history.latest_band_by_wallet(
+            gate_history.load(self.gate_history_path))
+        self._bands_cache = (mtime, bands)
+        return bands
+
     def _stake_frac_map(self) -> Optional[dict]:
         """Lowercased wallet -> stake multiplier (<1.0) for wallets whose latest
         LLM-gate verdict carried a "low" confidence band and whose own settled
@@ -194,9 +213,7 @@ class CopyPaperRunner:
         None when the feature is off or nothing qualifies."""
         if self.low_conf_stake_frac is None or not self.gate_history_path:
             return None
-        from src.copy_trading import gate_history
-        bands = gate_history.latest_band_by_wallet(
-            gate_history.load(self.gate_history_path))
+        bands = self._load_bands()
         if not bands:
             return None
         settled: dict[str, int] = {}

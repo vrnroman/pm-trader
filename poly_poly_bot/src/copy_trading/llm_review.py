@@ -502,6 +502,14 @@ def review_promotion(
         logger.warning("[PROMOTE-GATE] LLM review failed for %s", wallet, exc_info=True)
     end = time.time()
 
+    # Rate/spend-limited or persistently-failing CLI: the runner returns the
+    # RATE_LIMITED sentinel (not a dict/str). Record it as what it is — without
+    # this check it would fall through and be mislabeled "unparseable verdict".
+    if res is RATE_LIMITED:
+        _record_promotion(dossier, wallet, model, prompt, None, None, None,
+                          start, end, "rate-limited")
+        return None
+
     envelope = res if isinstance(res, dict) else None
     text = envelope.get("result") if envelope else (res if isinstance(res, str) else None)
     data = _parse_verdict(text) if text else None

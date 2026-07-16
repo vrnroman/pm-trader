@@ -35,11 +35,12 @@ from src.copy_trading.pnl_unified import (
 )
 
 
-def _trade(copy_id, token, target="0xT", slug="event-1", their_price=0.50,
-           their_usd=1000, category="sports"):
+def _trade(copy_id, token, target="0xT", slug="event-1", event_key="event-1",
+           their_price=0.50, their_usd=1000, category="sports"):
     return dict(copy_id=copy_id, target=target, condition_id=f"c-{token}",
                 token_id=token, outcome_index=0, category=category,
-                their_price=their_price, their_usd=their_usd, slug=slug)
+                their_price=their_price, their_usd=their_usd, slug=slug,
+                event_key=event_key)
 
 
 def _engine(led, feed, **kw):
@@ -56,8 +57,8 @@ def _engine(led, feed, **kw):
 def test_event_cap_blocks_second_prop_on_same_event():
     with tempfile.TemporaryDirectory() as d:
         led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
-        feed = [_trade("t1", "T1", slug="fra-esp"),
-                _trade("t2", "T2", slug="fra-esp")]   # second prop, same match
+        feed = [_trade("t1", "T1", event_key="fra-esp"),
+                _trade("t2", "T2", event_key="fra-esp")]   # second prop, same match
         s = _engine(led, feed, max_copies_per_wallet_event=1).run_cycle(now=1e9)
         assert s.opened == 1
         assert s.skipped_event_cap == 1
@@ -67,8 +68,8 @@ def test_event_cap_blocks_second_prop_on_same_event():
 def test_event_cap_allows_distinct_events():
     with tempfile.TemporaryDirectory() as d:
         led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
-        feed = [_trade("t1", "T1", slug="fra-esp"),
-                _trade("t2", "T2", slug="eng-arg")]
+        feed = [_trade("t1", "T1", event_key="fra-esp"),
+                _trade("t2", "T2", event_key="eng-arg")]
         s = _engine(led, feed, max_copies_per_wallet_event=1).run_cycle(now=1e9)
         assert s.opened == 2 and s.skipped_event_cap == 0
 
@@ -76,8 +77,8 @@ def test_event_cap_allows_distinct_events():
 def test_event_cap_is_per_wallet():
     with tempfile.TemporaryDirectory() as d:
         led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
-        feed = [_trade("t1", "T1", target="0xA", slug="fra-esp"),
-                _trade("t2", "T2", target="0xB", slug="fra-esp")]
+        feed = [_trade("t1", "T1", target="0xA", event_key="fra-esp"),
+                _trade("t2", "T2", target="0xB", event_key="fra-esp")]
         s = _engine(led, feed, max_copies_per_wallet_event=1).run_cycle(now=1e9)
         assert s.opened == 2 and s.skipped_event_cap == 0
 
@@ -89,8 +90,8 @@ def test_event_cap_seeded_from_open_ledger_positions():
             copy_id="old", target="0xT", condition_id="c0", token_id="T0",
             outcome_index=0, category="sports", their_price=0.5,
             entry_price=0.5, shares=10, spent=5.0, drag_bps=0,
-            opened_ts=1.0, slug="fra-esp"))
-        s = _engine(led, [_trade("t1", "T1", slug="fra-esp")],
+            opened_ts=1.0, slug="fra-esp", event_key="fra-esp"))
+        s = _engine(led, [_trade("t1", "T1", event_key="fra-esp")],
                     max_copies_per_wallet_event=1).run_cycle(now=1e9)
         assert s.opened == 0 and s.skipped_event_cap == 1
 
@@ -102,27 +103,46 @@ def test_event_cap_slot_freed_after_resolution():
             copy_id="old", target="0xT", condition_id="c0", token_id="T0",
             outcome_index=0, category="sports", their_price=0.5,
             entry_price=0.5, shares=10, spent=5.0, drag_bps=0,
-            opened_ts=1.0, slug="fra-esp", closed=True, won=True, pnl=1.0,
-            closed_ts=2.0))
-        s = _engine(led, [_trade("t1", "T1", slug="fra-esp")],
+            opened_ts=1.0, slug="fra-esp", event_key="fra-esp", closed=True,
+            won=True, pnl=1.0, closed_ts=2.0))
+        s = _engine(led, [_trade("t1", "T1", event_key="fra-esp")],
                     max_copies_per_wallet_event=1).run_cycle(now=1e9)
         assert s.opened == 1 and s.skipped_event_cap == 0
 
 
-def test_event_cap_ignores_empty_slug_and_off_by_default():
+def test_event_cap_ignores_missing_event_key_but_counts_it():
     with tempfile.TemporaryDirectory() as d:
         led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
-        # empty slug: can't group -> uncapped even with the cap on
-        feed = [_trade("t1", "T1", slug=""), _trade("t2", "T2", slug="")]
+        # no eventSlug: market slug must NOT be used as a grouping fallback
+        # (falsely-distinct keys) — the opens are admitted uncapped and COUNTED
+        feed = [_trade("t1", "T1", slug="mkt-1", event_key=""),
+                _trade("t2", "T2", slug="mkt-2", event_key="")]
         s = _engine(led, feed, max_copies_per_wallet_event=1).run_cycle(now=1e9)
         assert s.opened == 2 and s.skipped_event_cap == 0
+        assert s.opened_unkeyed_event == 2
     with tempfile.TemporaryDirectory() as d:
         led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
         # cap off (None, the default): same-event stacking allowed (legacy)
-        feed = [_trade("t1", "T1", slug="fra-esp"),
-                _trade("t2", "T2", slug="fra-esp")]
+        feed = [_trade("t1", "T1", event_key="fra-esp"),
+                _trade("t2", "T2", event_key="fra-esp")]
         s = _engine(led, feed).run_cycle(now=1e9)
         assert s.opened == 2 and s.skipped_event_cap == 0
+        assert s.opened_unkeyed_event == 0
+
+
+def test_event_cap_seeds_from_pre_field_rows_via_slug():
+    # Rows opened before event_key existed carry only `slug` (usually the true
+    # eventSlug) — seeding falls back to it so existing open exposure still caps.
+    with tempfile.TemporaryDirectory() as d:
+        led = PaperCopyLedger(os.path.join(d, "l.jsonl"))
+        led.add(PaperPosition(
+            copy_id="old", target="0xT", condition_id="c0", token_id="T0",
+            outcome_index=0, category="sports", their_price=0.5,
+            entry_price=0.5, shares=10, spent=5.0, drag_bps=0,
+            opened_ts=1.0, slug="fra-esp"))          # no event_key (old row)
+        s = _engine(led, [_trade("t1", "T1", event_key="fra-esp")],
+                    max_copies_per_wallet_event=1).run_cycle(now=1e9)
+        assert s.opened == 0 and s.skipped_event_cap == 1
 
 
 # --------------------------------------------------------------------------- #
@@ -167,12 +187,17 @@ def test_already_copied_feed_reemit_is_counted():
 # gate-history band lookup (feeds the runner's stake map)
 # --------------------------------------------------------------------------- #
 
-def test_latest_band_by_wallet_last_decided_row_wins():
+def test_latest_band_by_wallet_last_vetted_row_wins():
     rows = [
-        {"wallet": "0xA", "confidence_band": "low"},
-        {"wallet": "0xA", "confidence_band": "high"},          # newer -> wins
-        {"wallet": "0xB", "confidence_band": "low", "requeued": True},  # provisional
-        {"wallet": "0xC"},                                     # pre-band row
+        {"wallet": "0xA", "verdict": "watch", "confidence_band": "low"},
+        {"wallet": "0xA", "verdict": "follow", "confidence_band": "high"},  # newer -> wins
+        {"wallet": "0xB", "verdict": "watch", "confidence_band": "low",
+         "requeued": True},                                    # provisional
+        {"wallet": "0xC", "verdict": "watch"},                 # pre-band row
+        # never actually judged: band was stamped from confidence=0.0 -> "low",
+        # but no model verdict exists; must NOT halve this wallet's stake
+        {"wallet": "0xD", "verdict": "admit-fail-open", "confidence_band": "low"},
+        {"wallet": "0xE", "verdict": "admit-cap", "confidence_band": "low"},
     ]
     bands = latest_band_by_wallet(rows)
     assert bands == {"0xa": "high"}
@@ -183,9 +208,9 @@ def test_runner_stake_map_respects_band_and_settled_floor():
     with tempfile.TemporaryDirectory() as d:
         gh = os.path.join(d, "gate-history.jsonl")
         with open(gh, "w") as f:
-            f.write('{"wallet": "0xLow", "confidence_band": "low"}\n')
-            f.write('{"wallet": "0xProven", "confidence_band": "low"}\n')
-            f.write('{"wallet": "0xHigh", "confidence_band": "high"}\n')
+            f.write('{"wallet": "0xLow", "verdict": "watch", "confidence_band": "low"}\n')
+            f.write('{"wallet": "0xProven", "verdict": "watch", "confidence_band": "low"}\n')
+            f.write('{"wallet": "0xHigh", "verdict": "follow", "confidence_band": "high"}\n')
         runner = CopyPaperRunner(
             ledger_path=os.path.join(d, "l.jsonl"), wallets=["0xLow"],
             low_conf_stake_frac=0.5, low_conf_until_n=2, gate_history_path=gh)
@@ -337,9 +362,10 @@ def test_cli_runner_rate_limit_short_circuits_without_retry(monkeypatch):
 # legacy-A P&L segregation
 # --------------------------------------------------------------------------- #
 
-def _row(pnl, cost, tier="", trader="", won=False):
+def _row(pnl, cost, tier="", trader="", won=False,
+         ts="2026-07-11T23:05:39+00:00"):
     return {"pnl": pnl, "cost_basis": cost, "tier": tier,
-            "trader_address": trader, "won": won}
+            "trader_address": trader, "won": won, "timestamp": ts}
 
 
 def test_unattributed_rows_land_in_legacy_track():
@@ -369,3 +395,104 @@ def test_legacy_track_sorts_last_and_totals_reconcile():
     assert unified.strategies[-1].label == LEGACY_A
     assert unified.strategies[-1].system == "A"
     assert abs(unified.total_realized - (-565.0)) < 1e-6   # nothing dropped
+
+
+def test_legacy_split_exact_when_empty_wallet_mixes_legacy_and_tiered():
+    # Regression (verifier round-3 catch): StrategyPnl._add adds a WalletPnl
+    # whole to EVERY label it carries. If the empty-wallet accumulator held
+    # both a legacy row and a tier-stamped row, the legacy track would claim
+    # the tier row too and /pnl's "current strategies" line would
+    # over-subtract. Legacy rows therefore accumulate under their own
+    # "(legacy)" key — the split must equal the legacy rows exactly.
+    wallets = aggregate_system_a(
+        [_row(-575.0, 575.0),                       # legacy: no tier, no wallet
+         _row(30.0, 60.0, tier="1a", won=True)],    # tier-stamped, EMPTY wallet
+        open_positions=[])
+    unified = build_unified(wallets, [])
+    legacy = [sp for sp in unified.strategies if sp.label == LEGACY_A]
+    assert len(legacy) == 1
+    assert legacy[0].realized_pnl == -575.0          # exactly the legacy row
+    assert legacy[0].n_closed == 1
+    tier = [sp for sp in unified.strategies if sp.label == "A:1a"]
+    assert tier[0].realized_pnl == 30.0
+    assert abs(unified.total_realized - (-545.0)) < 1e-6
+
+
+def test_unattributed_row_after_cutoff_stays_current_not_legacy():
+    # A row that loses attribution TODAY is a live result, not dead backlog:
+    # preview_resolver/auto_redeemer can still write trader_address="" rows.
+    wallets = aggregate_system_a(
+        [_row(-40.0, 40.0, ts="2026-08-01T10:00:00+00:00")], open_positions=[])
+    labels = {lbl for w in wallets for lbl in w.strategies}
+    assert labels == {UNTAGGED_A}
+
+
+def test_review_promotion_records_rate_limited_sentinel():
+    from src.copy_trading import llm_review
+
+    recorded = {}
+
+    def fake_record(dossier, wallet, model, prompt, text, envelope, verdict,
+                    start, end, error):
+        recorded["error"] = error
+
+    orig = llm_review._record_promotion
+    llm_review._record_promotion = fake_record
+    try:
+        v = llm_review.review_promotion(
+            {"wallet": "0xW"}, runner=lambda *a, **k: llm_review.RATE_LIMITED)
+    finally:
+        llm_review._record_promotion = orig
+    assert v is None
+    assert recorded["error"] == "rate-limited"    # not "unparseable verdict"
+
+
+def test_recheck_queue_bump_attempts_counts_and_survives():
+    from src.copy_trading import gate_recheck_queue as q
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "recheck.json")
+        q.enqueue(path, "0xW", {"wallet": "0xW"})
+        assert q.bump_attempts(path, "0xW") == 1
+        assert q.bump_attempts(path, "0xW") == 2
+        q.clear_cache() if hasattr(q, "clear_cache") else None
+        assert q.bump_attempts(path, "0xW") == 3
+        assert q.bump_attempts(path, "0xMissing") == 0
+
+
+def test_root_logging_uses_daily_rotating_handler(tmp_path, monkeypatch):
+    # Regression (2026-07-16 RCA): the root file handler baked the boot date
+    # into the filename once, so a long container run pinned six days of
+    # WARNINGs + urllib3 DEBUG into bot-<boot-date>.log (99MB). The root
+    # handler must now be the same UTC-midnight-rolling handler the BotLogger
+    # files use.
+    import logging as _logging
+
+    import main as bot_main
+    from src.logger import _DailyRotatingFileHandler
+
+    monkeypatch.setattr(bot_main.CONFIG, "logs_dir", str(tmp_path))
+    root = _logging.getLogger()
+    before = list(root.handlers)
+    try:
+        bot_main._setup_logging()
+        added = [h for h in root.handlers if h not in before]
+        file_handlers = [h for h in added
+                         if isinstance(h, _logging.FileHandler)]
+        assert file_handlers, "no file handler installed"
+        assert all(isinstance(h, _DailyRotatingFileHandler)
+                   for h in file_handlers)
+        # the root file handler must EXCLUDE the app's own records — BotLogger
+        # already files those; without the filter every app record would be
+        # double-written to the same bot-<date>.log by two handlers.
+        fh = file_handlers[0]
+        app_rec = _logging.LogRecord("poly_poly_bot", _logging.INFO, "f", 1,
+                                     "m", None, None)
+        lib_rec = _logging.LogRecord("urllib3.connectionpool", _logging.DEBUG,
+                                     "f", 1, "m", None, None)
+        assert not fh.filter(app_rec)
+        assert fh.filter(lib_rec)
+    finally:
+        for h in root.handlers[:]:
+            if h not in before:
+                root.removeHandler(h)
+                h.close()

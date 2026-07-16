@@ -51,17 +51,28 @@ def load(path: str | None, limit: int | None = None) -> list[dict]:
     return rows[-limit:] if limit else rows
 
 
-def latest_band_by_wallet(rows: list[dict]) -> dict[str, str]:
-    """Lowercased wallet -> confidence band of its most recent DECIDED gate row.
+# Verdict strings that mean Claude actually judged the wallet. Everything else
+# ("admit-cap", "admit-fail-open", "skip-deferred", "admit-recheck-unavailable")
+# is an admission-path disposition where NO model verdict exists — those rows
+# still carry a confidence_band field (stamped from confidence=0.0 -> "low"),
+# which must never be read as a real low-confidence judgment.
+VETTED_VERDICTS = ("follow", "watch")
 
-    Requeued rows (provisional deferrals) are skipped — the wallet's real band
-    is whatever the later re-check decided. Rows without a band (pre-band
-    history) are skipped too, so absence means "no band known", never "low".
-    Feeds the downward-only confidence-tiered stake (2026-07 race RCA: a
-    band=low n=6 admit was staked like a proven wallet and lost $345)."""
+
+def latest_band_by_wallet(rows: list[dict]) -> dict[str, str]:
+    """Lowercased wallet -> confidence band of its most recent VETTED gate row.
+
+    Only rows whose verdict is a true Claude judgment (``follow``/``watch``,
+    incl. re-check resolutions) count. Requeued rows (provisional deferrals),
+    never-vetted admits (fail-open / over-cap), and rows without a band are all
+    skipped — absence means "no judgment known", never "low". Feeds the
+    downward-only confidence-tiered stake (2026-07 race RCA: a band=low n=6
+    admit was staked like a proven wallet and lost $345)."""
     out: dict[str, str] = {}
     for r in rows:                      # oldest -> newest, so last write wins
         if r.get("requeued"):
+            continue
+        if r.get("verdict") not in VETTED_VERDICTS:
             continue
         wallet = (r.get("wallet") or "").lower()
         band = r.get("confidence_band")
@@ -99,9 +110,8 @@ def summarize(rows: list[dict]) -> dict:
     # nothing actually judged. Split them so the accept mix doesn't read as "all
     # vetted" when a slice was ungated. A row's ``verdict`` string carries the
     # disposition (set by discovery_runner): only follow/watch are true vettings.
-    _VETTED_VERDICTS = ("follow", "watch")
-    admitted_vetted = [r for r in admitted if r.get("verdict") in _VETTED_VERDICTS]
-    admitted_unvetted = [r for r in admitted if r.get("verdict") not in _VETTED_VERDICTS]
+    admitted_vetted = [r for r in admitted if r.get("verdict") in VETTED_VERDICTS]
+    admitted_unvetted = [r for r in admitted if r.get("verdict") not in VETTED_VERDICTS]
     unvetted_by_reason: dict[str, int] = defaultdict(int)
     for r in admitted_unvetted:
         unvetted_by_reason[r.get("verdict") or "unknown"] += 1

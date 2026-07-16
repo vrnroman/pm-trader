@@ -36,6 +36,16 @@ def _get(base: str, path: str, **params):
     return None
 
 
+# Detection-funnel reject counters (the starvation autopsy). One canonical key
+# set, shared by both detector flavors and by main.py's cycle log line.
+REJECT_STAT_KEYS = ("rows", "not_buy", "stale", "price_band",
+                    "below_min_usd", "missing_ids", "emitted")
+
+
+def _blank_reject_stats() -> dict:
+    return {k: 0 for k in REJECT_STAT_KEYS}
+
+
 def make_detector(
     wallets: list[str],
     max_age_s: float,
@@ -59,9 +69,7 @@ def make_detector(
 
     def detect() -> list[dict]:
         out = []
-        stats = detect.stats = {"rows": 0, "not_buy": 0, "stale": 0,
-                                "price_band": 0, "below_min_usd": 0,
-                                "missing_ids": 0, "emitted": 0}
+        stats = detect.stats = _blank_reject_stats()
         cutoff = time.time() - max_age_s
         for w in wallets:
             acts = _get(DATA, "/activity", user=w, limit=30) or []
@@ -104,6 +112,13 @@ def make_detector(
                     # event slug drives the polymarket.com/event/<slug> link;
                     # data-api uses eventSlug, falling back to the market slug.
                     "slug": a.get("eventSlug") or a.get("slug") or "",
+                    # event_key groups same-event markets for the per-(wallet,
+                    # event) cap — eventSlug ONLY, no market-slug fallback: a
+                    # market slug is unique per market, so falling back would
+                    # give correlated props falsely-distinct keys and the cap
+                    # would "pass" without grouping anything (2026-07-16 review
+                    # catch). Empty = ungroupable, engine counts it visibly.
+                    "event_key": a.get("eventSlug") or "",
                     "flagged_by": tuple(fb.get(w.lower(), ())),
                     # days until the bet's market resolves (None if unknown) —
                     # routes the bet between the near-term and long-horizon books.
@@ -267,9 +282,7 @@ def make_feed_detector(
         # rows that already passed the watched filter are counted, so a busy
         # global feed can't drown the signal ("our wallets trade but nothing
         # opens" must be attributable to a reason, 2026-07 A-book stall RCA).
-        stats = detect.stats = {"rows": 0, "not_buy": 0, "stale": 0,
-                                "price_band": 0, "below_min_usd": 0,
-                                "missing_ids": 0, "emitted": 0}
+        stats = detect.stats = _blank_reject_stats()
         cutoff = time.time() - max_age_s
         for t in feed.recent(floor, max_age_s):
             w = t.get("proxyWallet") or t.get("user") or ""
@@ -309,6 +322,8 @@ def make_feed_detector(
                 "category": classify_market(title),
                 "title": title,
                 "slug": t.get("eventSlug") or t.get("slug") or "",
+                # eventSlug ONLY (no market-slug fallback) — see make_detector.
+                "event_key": t.get("eventSlug") or "",
                 "flagged_by": tuple(fb.get(w.lower(), ())),
                 "horizon_days": horizon_days,
                 "their_price": price,
