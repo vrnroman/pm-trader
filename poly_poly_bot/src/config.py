@@ -182,7 +182,13 @@ class Config:
     # money, and the live detection lag was a 2h p75 / 6h max under the old cap.
     # Cut to 1h: still generous for a 120s poll, without the multi-hour stale tail.
     copy_paper_max_age_s: float = _opt_float("COPY_PAPER_MAX_AGE_S", 3600.0)
-    copy_paper_min_usd: float = _opt_float("COPY_PAPER_MIN_USD", 500.0)
+    # Owner ruling 2026-07-16: 500 starved the A book of evidence — the new
+    # detection-rejects histogram showed watchlist wallets betting below the
+    # floor while A sat at zero opens for 48h+ (the voided race week). Lowered
+    # to 300 for BOTH books (shared knob, so the A-vs-B race variable stays
+    # lagged-vs-instant). The feed floor (COPY_PAPER_FEED_MIN_USD=100) already
+    # sits below, so detection needs no change.
+    copy_paper_min_usd: float = _opt_float("COPY_PAPER_MIN_USD", 300.0)
     # Poll cadence for the near-term copier. Dropped 120s -> 60s now that
     # detection runs off the shared global /trades feed (fixed cost regardless of
     # how many wallets are watched — see copy_paper_feed_detection), so we can
