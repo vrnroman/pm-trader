@@ -1074,12 +1074,7 @@ def _handle_golive(text: str) -> None:
 
     settled, last_ts = _wallet_ledger_view(wallet)
     stats = promotion_gate.compute_stats(wallet, settled)
-    floor_kwargs = dict(
-        min_n=CONFIG.copy_promote_min_settled, min_roi=CONFIG.copy_promote_min_roi,
-        min_tstat=CONFIG.copy_promote_min_tstat,
-        min_second_half_roi=CONFIG.copy_promote_min_second_half_roi,
-        min_conditions=CONFIG.copy_promote_min_conditions,
-        min_categories=CONFIG.copy_promote_min_categories)
+    floor_kwargs = promotion_gate.floor_kwargs_from(CONFIG)
     ready, checks = promotion_gate.golive_check(
         stats, last_trade_ts=last_ts, now=_time.time(),
         min_settled=CONFIG.copy_golive_min_settled,

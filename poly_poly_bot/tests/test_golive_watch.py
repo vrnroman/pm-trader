@@ -115,10 +115,12 @@ def test_only_promoted_wallets_watched_and_pruned():
         run_golive_watch(book, promoted=["0xW"], state_path=state,
                          send=send, now=NOW, **GATE)
         assert list(json.load(open(state)).keys()) == ["0xw"]
-        # wallet demoted out of promoted -> its state entry is pruned
-        run_golive_watch(book, promoted=[], state_path=state,
+        # 0xW demoted while ANOTHER wallet stays promoted -> its entry is
+        # pruned (an all-empty promoted read keeps state — see the transient
+        # wipe test)
+        run_golive_watch(book, promoted=["0xOther"], state_path=state,
                          send=send, now=NOW + 60, **GATE)
-        assert json.load(open(state)) == {}
+        assert "0xw" not in json.load(open(state))
         assert len(send.sent) == 1            # no alert for the pruning
 
 
@@ -131,3 +133,60 @@ def test_corrupt_state_file_recovers():
         t = run_golive_watch(_ready_book(), promoted=["0xW"],
                              state_path=state, send=send, now=NOW, **GATE)
         assert t == [("0xw", True)]           # treated as first sight
+
+
+def test_non_dict_state_value_recovers_without_raising():
+    # {"0xw": true} parses as valid JSON but used to AttributeError every
+    # cycle and never self-heal (2026-07-17 review catch).
+    with tempfile.TemporaryDirectory() as d:
+        state = os.path.join(d, "watch.json")
+        with open(state, "w") as f:
+            json.dump({"0xw": True}, f)
+        send = SendSpy()
+        t = run_golive_watch(_ready_book(), promoted=["0xW"],
+                             state_path=state, send=send, now=NOW, **GATE)
+        assert t == [("0xw", True)]           # entry dropped -> first sight
+        assert json.load(open(state))["0xw"]["ready"] is True
+
+
+def test_floor_decay_drop_back_message_is_html_safe():
+    # The floor's reason strings carry a literal '<' ("copy ROI ... < floor
+    # ...") — the drop-back alert must escape it or Telegram 400s the send
+    # and the safety alert retries forever (2026-07-17 review catch).
+    with tempfile.TemporaryDirectory() as d:
+        state = os.path.join(d, "watch.json")
+        send = SendSpy()
+        run_golive_watch(_ready_book(), promoted=["0xW"], state_path=state,
+                         send=send, now=NOW, **GATE)
+        # same wallet decays: new settled losers pull ROI under the +5% floor
+        # while activity stays fresh (so ONLY floor checks fail, whose details
+        # contain '<')
+        decayed = _ready_book() + [
+            _pos(100 + i, won=False, opened=NOW + 60) for i in range(6)]
+        t2 = run_golive_watch(decayed, promoted=["0xW"], state_path=state,
+                              send=send, now=NOW + 3600, **GATE)
+        assert t2 == [("0xw", False)]
+        body = send.sent[-1]
+        assert "No longer go-live ready" in body
+        assert "&lt;" in body                 # escaped ...
+        import re
+        assert not re.search(r"<(?!/?(b|code|i|pre)>)", body)  # ... no raw '<'
+
+
+def test_transient_empty_promoted_read_does_not_wipe_state():
+    # promoted_wallets() degrades to [] on a missing/corrupt store read; that
+    # transient must not wipe the edge state (a wipe re-fires duplicate READY
+    # alerts on the next good read — 2026-07-17 review catch).
+    with tempfile.TemporaryDirectory() as d:
+        state = os.path.join(d, "watch.json")
+        send = SendSpy()
+        run_golive_watch(_ready_book(), promoted=["0xW"], state_path=state,
+                         send=send, now=NOW, **GATE)
+        assert len(send.sent) == 1
+        run_golive_watch(_ready_book(), promoted=[], state_path=state,
+                         send=send, now=NOW + 60, **GATE)
+        assert json.load(open(state))["0xw"]["ready"] is True   # kept
+        # store reads fine again: same READY state -> NO duplicate alert
+        t3 = run_golive_watch(_ready_book(), promoted=["0xW"], state_path=state,
+                              send=send, now=NOW + 120, **GATE)
+        assert t3 == [] and len(send.sent) == 1

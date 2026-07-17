@@ -221,6 +221,19 @@ def evaluate_floor(
 # /golive pre-flip gate — re-check a promoted wallet live before real money
 # --------------------------------------------------------------------------- #
 
+def floor_kwargs_from(cfg) -> dict:
+    """The promotion-floor kwargs from a CONFIG-like object — ONE derivation
+    shared by the manual ``/golive`` handler and the automatic go-live watch,
+    so the two gates can never drift apart (2026-07-17 review catch)."""
+    return dict(
+        min_n=cfg.copy_promote_min_settled,
+        min_roi=cfg.copy_promote_min_roi,
+        min_tstat=cfg.copy_promote_min_tstat,
+        min_second_half_roi=cfg.copy_promote_min_second_half_roi,
+        min_conditions=cfg.copy_promote_min_conditions,
+        min_categories=cfg.copy_promote_min_categories)
+
+
 def golive_check(
     stats: PromotionStats,
     *,

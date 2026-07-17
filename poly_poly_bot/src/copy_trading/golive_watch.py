@@ -19,6 +19,7 @@ ledger, the promoted set, thresholds from CONFIG, and the Telegram sender.
 
 from __future__ import annotations
 
+import html
 import json
 import os
 import time
@@ -33,7 +34,12 @@ def _read_state(path: str) -> dict:
     try:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
-        return data if isinstance(data, dict) else {}
+        if not isinstance(data, dict):
+            return {}
+        # drop non-dict VALUES too — a hand-edited/partially-written entry
+        # would otherwise AttributeError every cycle and (since state is only
+        # rewritten on change) never self-heal (2026-07-17 review catch).
+        return {k: v for k, v in data.items() if isinstance(v, dict)}
     except (OSError, ValueError):
         return {}
 
@@ -88,21 +94,27 @@ def evaluate_promoted(
 
 
 def _ready_message(wallet: str, stats, min_settled: int) -> str:
+    w = html.escape(wallet)
     return (
-        f"🟢 <b>GO-LIVE READY</b> — <code>{wallet}</code>\n"
+        f"🟢 <b>GO-LIVE READY</b> — <code>{w}</code>\n"
         f"{stats.n_closed} settled (≥{min_settled}) · "
         f"ROI {(stats.roi or 0) * 100:+.0f}% · ${stats.net_pnl:+.0f} paper · "
         f"floor holds · recently active\n"
-        f"Confirm with <code>/golive {wallet}</code>. Real money still needs "
+        f"Confirm with <code>/golive {w}</code>. Real money still needs "
         f"the manual <code>PREVIEW_MODE</code> flip — nothing was changed."
     )
 
 
 def _unready_message(wallet: str, checks) -> str:
-    fails = "; ".join(f"{label} ({detail})" for label, ok, detail in checks
-                      if not ok) or "unknown"
+    # The gate's reason strings carry literal '<' ("copy ROI +3% < floor
+    # +5%") — unescaped they 400 the parse_mode=HTML send, and the retry
+    # loop would fail identically forever, losing exactly the decay alert
+    # this exists for (2026-07-17 review catch).
+    fails = html.escape("; ".join(
+        f"{label} ({detail})" for label, ok, detail in checks if not ok)
+        or "unknown")
     return (
-        f"⏸ <b>No longer go-live ready</b> — <code>{wallet}</code>\n"
+        f"⏸ <b>No longer go-live ready</b> — <code>{html.escape(wallet)}</code>\n"
         f"Slipped on: {fails}. Alert re-arms if it crosses the bar again."
     )
 
@@ -127,9 +139,15 @@ def run_golive_watch(
         floor_kwargs=floor_kwargs)
     state = _read_state(state_path)
     # prune wallets no longer promoted so the state file can't grow stale keys
-    pruned = {k: v for k, v in state.items() if k in results}
-    changed = pruned != state
-    state = pruned
+    # — but ONLY when the promoted store actually returned wallets: its reader
+    # degrades to {} on a missing/corrupt file, and pruning on that transient
+    # would wipe the edge state and re-fire duplicate READY alerts once the
+    # store reads fine again (2026-07-17 review catch).
+    changed = False
+    if results:
+        pruned = {k: v for k, v in state.items() if k in results}
+        changed = pruned != state
+        state = pruned
     transitions: list[tuple[str, bool]] = []
     for w, (ready, stats, checks) in sorted(results.items()):
         prev = (state.get(w) or {}).get("ready")
