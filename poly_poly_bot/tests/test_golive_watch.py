@@ -1,0 +1,133 @@
+"""Edge-triggered go-live readiness alerts (owner ask 2026-07-17)."""
+
+from __future__ import annotations
+
+import json
+import os
+import tempfile
+
+from src.copy_trading.copy_paper import PaperPosition
+from src.copy_trading.golive_watch import run_golive_watch
+
+# Small thresholds so fixtures stay compact — the gate math itself is covered
+# by test_golive_gate.py; this file tests the WATCH semantics (edge-trigger,
+# persistence, retry-on-send-failure).
+GATE = dict(min_settled=3, max_idle_days=14.0, min_roi=0.0,
+            floor_kwargs=dict(min_n=2, min_roi=0.05, min_tstat=-10.0,
+                              min_second_half_roi=-1.0, min_conditions=1,
+                              min_categories=1))
+NOW = 1_000_000.0
+
+
+def _pos(i, target="0xW", won=True, spent=10.0, pnl=None, opened=NOW - 3600,
+         closed=True):
+    if pnl is None:
+        pnl = 2.0 if won else -spent
+    return PaperPosition(
+        copy_id=f"c{i}", target=target, condition_id=f"cond{i}",
+        token_id=f"T{i}", outcome_index=0, category="sports",
+        their_price=0.5, entry_price=0.5, shares=spent / 0.5, spent=spent,
+        drag_bps=0, opened_ts=opened, closed=closed, won=won, pnl=pnl,
+        closed_ts=opened + 60 if closed else 0.0)
+
+
+def _ready_book(n=4):
+    """n settled winners -> ROI +20%, passes the small GATE above."""
+    return [_pos(i) for i in range(n)]
+
+
+class SendSpy:
+    def __init__(self, ok=True):
+        self.ok = ok
+        self.sent = []
+
+    def __call__(self, msg):
+        self.sent.append(msg)
+        return self.ok
+
+
+def test_crossing_alerts_once_and_persists():
+    with tempfile.TemporaryDirectory() as d:
+        state = os.path.join(d, "watch.json")
+        send = SendSpy()
+        t1 = run_golive_watch(_ready_book(), promoted=["0xW"],
+                              state_path=state, send=send, now=NOW, **GATE)
+        assert t1 == [("0xw", True)]
+        assert len(send.sent) == 1 and "GO-LIVE READY" in send.sent[0]
+        assert "/golive 0xw" in send.sent[0]
+        # second pass, same state: no repeat
+        t2 = run_golive_watch(_ready_book(), promoted=["0xW"],
+                              state_path=state, send=send, now=NOW + 60, **GATE)
+        assert t2 == [] and len(send.sent) == 1
+        assert json.load(open(state))["0xw"]["ready"] is True
+
+
+def test_first_sight_not_ready_is_silent():
+    with tempfile.TemporaryDirectory() as d:
+        state = os.path.join(d, "watch.json")
+        send = SendSpy()
+        t = run_golive_watch(_ready_book(n=1), promoted=["0xW"],
+                             state_path=state, send=send, now=NOW, **GATE)
+        assert t == [] and send.sent == []
+        assert json.load(open(state))["0xw"]["ready"] is False
+
+
+def test_drop_back_alerts_and_rearms():
+    with tempfile.TemporaryDirectory() as d:
+        state = os.path.join(d, "watch.json")
+        send = SendSpy()
+        run_golive_watch(_ready_book(), promoted=["0xW"], state_path=state,
+                         send=send, now=NOW, **GATE)
+        # wallet goes idle past max_idle_days -> not ready anymore
+        later = NOW + 20 * 86400
+        t2 = run_golive_watch(_ready_book(), promoted=["0xW"],
+                              state_path=state, send=send, now=later, **GATE)
+        assert t2 == [("0xw", False)]
+        assert "No longer go-live ready" in send.sent[-1]
+        # fresh activity again -> re-crosses -> re-alerts
+        fresh = _ready_book() + [_pos(99, opened=later - 60)]
+        t3 = run_golive_watch(fresh, promoted=["0xW"], state_path=state,
+                              send=send, now=later + 3600, **GATE)
+        assert t3 == [("0xw", True)]
+        assert len(send.sent) == 3
+
+
+def test_send_failure_leaves_state_for_retry():
+    with tempfile.TemporaryDirectory() as d:
+        state = os.path.join(d, "watch.json")
+        failing = SendSpy(ok=False)
+        t1 = run_golive_watch(_ready_book(), promoted=["0xW"],
+                              state_path=state, send=failing, now=NOW, **GATE)
+        assert t1 == []                       # nothing recorded as alerted
+        assert (json.load(open(state)) if os.path.exists(state) else {}).get(
+            "0xw") is None
+        ok = SendSpy()
+        t2 = run_golive_watch(_ready_book(), promoted=["0xW"],
+                              state_path=state, send=ok, now=NOW + 60, **GATE)
+        assert t2 == [("0xw", True)]          # retried and delivered
+
+
+def test_only_promoted_wallets_watched_and_pruned():
+    with tempfile.TemporaryDirectory() as d:
+        state = os.path.join(d, "watch.json")
+        send = SendSpy()
+        book = _ready_book() + [_pos(50, target="0xOther")]
+        run_golive_watch(book, promoted=["0xW"], state_path=state,
+                         send=send, now=NOW, **GATE)
+        assert list(json.load(open(state)).keys()) == ["0xw"]
+        # wallet demoted out of promoted -> its state entry is pruned
+        run_golive_watch(book, promoted=[], state_path=state,
+                         send=send, now=NOW + 60, **GATE)
+        assert json.load(open(state)) == {}
+        assert len(send.sent) == 1            # no alert for the pruning
+
+
+def test_corrupt_state_file_recovers():
+    with tempfile.TemporaryDirectory() as d:
+        state = os.path.join(d, "watch.json")
+        with open(state, "w") as f:
+            f.write("{not json")
+        send = SendSpy()
+        t = run_golive_watch(_ready_book(), promoted=["0xW"],
+                             state_path=state, send=send, now=NOW, **GATE)
+        assert t == [("0xw", True)]           # treated as first sight

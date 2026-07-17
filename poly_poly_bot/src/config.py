@@ -364,6 +364,10 @@ class Config:
     copy_golive_min_settled: int = _opt_int("COPY_GOLIVE_MIN_SETTLED", 30)
     copy_golive_max_idle_days: float = _opt_float("COPY_GOLIVE_MAX_IDLE_DAYS", 14.0)
     copy_golive_min_roi: float = _opt_float("COPY_GOLIVE_MIN_ROI", 0.0)
+    # Edge-triggered Telegram ping when a promoted wallet crosses (or drops
+    # back off) the full /golive bar, so readiness never has to be polled by
+    # hand (owner ask 2026-07-17). Advisory only — never flips anything.
+    copy_golive_alert_enabled: bool = _opt_bool("COPY_GOLIVE_ALERT_ENABLED", True)
     # --- Probation fast-track (RCA 2026-07, rec 2a) ---
     # A wallet with STRONG own-history copy-and-hold replay (already computed by
     # discovery) AND a small AGREEING forward-paper sample gets an EARLY promote

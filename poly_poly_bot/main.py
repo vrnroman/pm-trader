@@ -221,6 +221,32 @@ def _copy_paper_loop():
             f"promotion is not accruing; check the watchlist's trade activity "
             f"and the guardrail-skip mix.")
 
+    def _golive_watch(ledger):
+        """Edge-triggered GO-LIVE READY / dropped-back Telegram alert for
+        promoted wallets — same gate as the manual /golive, fired on the
+        crossing instead of waiting to be polled."""
+        if not CONFIG.copy_golive_alert_enabled:
+            return
+        try:
+            from src.copy_trading import golive_watch, promotion_state
+            golive_watch.run_golive_watch(
+                ledger.positions.values(),
+                promoted=promotion_state.promoted_wallets(),
+                state_path=os.path.join(CONFIG.data_dir, "golive_watch.json"),
+                send=telegram_bot.send_message,
+                min_settled=CONFIG.copy_golive_min_settled,
+                max_idle_days=CONFIG.copy_golive_max_idle_days,
+                min_roi=CONFIG.copy_golive_min_roi,
+                floor_kwargs=dict(
+                    min_n=CONFIG.copy_promote_min_settled,
+                    min_roi=CONFIG.copy_promote_min_roi,
+                    min_tstat=CONFIG.copy_promote_min_tstat,
+                    min_second_half_roi=CONFIG.copy_promote_min_second_half_roi,
+                    min_conditions=CONFIG.copy_promote_min_conditions,
+                    min_categories=CONFIG.copy_promote_min_categories))
+        except Exception as e:  # the watch must never break the copy cycle
+            logger.debug(f"[GOLIVE-WATCH] cycle check failed ({e})")
+
     def _on_cycle(summary, ledger):
         if summary.opened or summary.resolved:
             logger.info(
@@ -238,6 +264,7 @@ def _copy_paper_loop():
         except Exception as e:  # the alarm must never break the copy cycle
             logger.debug(f"[COPY-PAPER] stall check failed ({e})")
         _governance(ledger)
+        _golive_watch(ledger)
 
     # A cap <= 0 disables that guardrail (engine treats None as off).
     def _cap(v):
