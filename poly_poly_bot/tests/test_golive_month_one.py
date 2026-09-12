@@ -273,6 +273,19 @@ def test_daily_cap_is_the_lower_of_env_and_governor(budget):
     assert live_budget.daily_cap(live=False) == 500.0
 
 
+def test_the_spend_status_reports_the_enforced_cap(budget, monkeypatch, tmp_path):
+    """The digest handed the cloud routine "$21.45 of $500" on a day the
+    governor held at about $27; status() now reports the enforced cap."""
+    from src.copy_trading import daily_spend_guard
+    budget(80.0)
+    monkeypatch.setattr(live_budget, "DAILY_FRAC", 0.40)
+    monkeypatch.setattr(daily_spend_guard, "_STATE_FILE", str(tmp_path / "d.json"))
+    daily_spend_guard.reset_state()
+    daily_spend_guard.record_spend(5.0, "copy:1b")
+    st = daily_spend_guard.status()
+    assert st["cap_usd"] == 32.0 and st["remaining_usd"] == 27.0 and st["closed_reason"] == ""
+
+
 def test_the_spend_audit_line_prints_the_cap_that_was_enforced(budget, monkeypatch, tmp_path, caplog):
     """On 2026-09-06 the trail said "$10.00 / $500.00" while can_spend() was
     holding the day at the governor's $32. The line must name the real ceiling."""

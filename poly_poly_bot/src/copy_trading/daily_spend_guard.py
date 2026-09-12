@@ -211,15 +211,19 @@ def closed_reason() -> str:
 
 def status() -> dict:
     """Snapshot for /status-style commands."""
+    # The cap that can_spend() enforces (the governor's, when a budget is
+    # stated), never the raw env number: the digest handed the routine
+    # "$21.45 of $500" on a $27 day (2026-09-12).
+    from src.copy_trading import live_budget
+    cap = float(live_budget.daily_cap())
     with _lock:
         _load_locked()
         return {
             "date": _state.date,
             "spent_usd": round_cents(_state.spent_usd),
-            "cap_usd": CONFIG.max_daily_volume_usd,
-            "remaining_usd": round_cents(
-                max(0.0, CONFIG.max_daily_volume_usd - _state.spent_usd)
-            ),
+            "cap_usd": round_cents(cap),
+            "remaining_usd": round_cents(max(0.0, cap - _state.spent_usd)),
+            "closed_reason": _state.closed_reason,
         }
 
 

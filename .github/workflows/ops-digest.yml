@@ -6,12 +6,13 @@ name: Ops digest
 # the VM, where the bot sends it on Telegram at its next guard pass. Zero
 # new secrets: the same service account the heartbeat uses.
 # Proven by hand first (two dispatches: the pull, then a synthetic verdict
-# carried down and sent). Now scheduled: the digest 23 minutes before the
-# cloud routine's :40, and the carry-down the moment a verdict lands on the
-# branch (a push to ops/verdict.json), so an escalation is not an hour late.
+# carried down and sent). Scheduled hourly: the cloud routine's push of
+# ops/verdict.json did NOT fire the push trigger on 2026-09-12 (the routine
+# pushes through the Claude GitHub app), so the hourly cron is the carrier;
+# the push trigger stays in case it starts firing.
 on:
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: "17 * * * *"
   push:
     branches: [ops-digest]
     paths: [ops/verdict.json]
