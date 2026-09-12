@@ -2395,6 +2395,13 @@ def test_a_legacy_running_total_with_no_rows_is_not_exposure(monkeypatch, tmp_pa
         {"1b": {"open_total": 69.96, "daily_date": "2026-09-12", "daily_volume": 0.0}}))
     trm._load_state()
     assert trm._tier_exposures["1b"].open_total == 0.0, "the deployed VM's exact state"
+    # the cleaned state is written back once, so the next reload is silent
+    on_disk = json.loads((tmp_path / "tiered-risk-state.json").read_text())
+    assert on_disk["1b"]["placements"] == [] and on_disk["1b"]["open_total"] == 0.0
+    warned: list = []
+    monkeypatch.setattr(trm.logger, "warn", lambda m: warned.append(m))
+    trm._load_state()
+    assert warned == [], "the deployed bot warned on every evaluation"
 
 
 def test_release_takes_the_oldest_rows_first(monkeypatch, tmp_path):

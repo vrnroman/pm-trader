@@ -99,6 +99,7 @@ def _load_state() -> None:
         return
 
     today = today_utc()
+    legacy_dropped = False
     for tier_key in ("1a", "1b", "1c"):
         tier_data = raw.get(tier_key, {})
         exp = _tier_exposures[tier_key]
@@ -112,6 +113,7 @@ def _load_state() -> None:
             # the next reconcile against the wallet's positions rebuilds it.
             legacy = float(tier_data.get("open_total", 0) or 0)
             if legacy:
+                legacy_dropped = True
                 logger.warn(f"[tiered-risk] tier {tier_key} carried a legacy open total "
                             f"${legacy:.2f} with no placements behind it: dropped")
         exp.recount()
@@ -119,6 +121,11 @@ def _load_state() -> None:
         if exp.daily_date != today:
             exp.daily_volume = 0.0
             exp.daily_date = today
+    if legacy_dropped:
+        # Write the cleaned state back once, or every reload (each evaluation
+        # re-reads the file) would drop and warn about the same total again.
+        _save_state()
+    return
 
 
 def _save_state() -> None:
