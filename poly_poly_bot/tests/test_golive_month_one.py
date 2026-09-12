@@ -2703,6 +2703,43 @@ def test_the_closed_day_announce_does_not_hold_the_lock(tmp_path, monkeypatch):
     assert done.wait(2.0)
 
 
+def test_two_threads_at_cap_minus_one_book_exactly_one(tmp_path, monkeypatch, budget):
+    """Code review V10 (aged defer from s-kac3t7): can_spend then record_spend
+    across the executor loop and the Telegram thread both passed on the same
+    remaining cap. The reservation checks and records under one lock."""
+    import threading
+
+    from src.copy_trading import daily_spend_guard as g
+    budget(80.0)
+    monkeypatch.setattr(live_budget, "DAILY_FRAC", 0.40)  # cap 32
+    monkeypatch.setattr(g, "_STATE_FILE", str(tmp_path / "d.json"))
+    g.reset_state()
+    g.record_spend(26.0, "copy:1b")  # 6 left, one ticket
+    results: list = []
+    go = threading.Barrier(2)
+
+    def one():
+        go.wait()
+        results.append(g.reserve_spend(6.0, "race")[0])
+    ts = [threading.Thread(target=one) for _ in range(2)]
+    for t in ts: t.start()
+    for t in ts: t.join()
+    assert sorted(results) == [False, True] and g.status()["spent_usd"] == 32.0
+    g.release_spend(6.0, "race")
+    assert g.status()["spent_usd"] == 26.0
+
+
+def test_the_sink_reserves_before_the_post_and_releases_a_failed_one(tmp_path, monkeypatch):
+    from src.copy_trading import daily_spend_guard as g
+    h = _Harness(tmp_path, monkeypatch)
+    h.post_result = "fail"
+    assert h.run(h.trades(1)) == 0 and h.posted == [7.75]
+    assert g.status()["spent_usd"] == 0.0, "a failed post gives the day its money back"
+    h.post_result = "ok"
+    assert h.run(h.trades(1)) == 1
+    assert g.status()["spent_usd"] == 7.75, "one post, one booking, no double record"
+
+
 def test_the_verifier_reports_a_test_order_too():
     from src.copy_trading import trade_executor
     src = inspect.getsource(trade_executor.process_verifications)

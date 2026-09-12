@@ -820,10 +820,29 @@ async def place_trade_orders(
                             f"the arm is off")
 
             # --- Live order placement ---
+            # The day's money is reserved BEFORE the post, check and record
+            # under one lock, so two threads at cap minus one cannot both
+            # post (code review V10). A failed post gives it back.
+            reserved = False
+            if trade.side == "BUY":
+                from src.copy_trading.daily_spend_guard import release_spend, reserve_spend
+                _ok_r, _why_r = reserve_spend(copy_size, source=f"copy:{tier or 'legacy'}")
+                if not _ok_r:
+                    logger.skip(f"[exec] {_why_r}: not copied")
+                    mark_trade_as_seen(trade.id)
+                    continue
+                reserved = True
             order_submitted_at = time.time() * 1000
-            result = await _execute_copy_order(clob_client, trade, copy_size, snapshot)
+            try:
+                result = await _execute_copy_order(clob_client, trade, copy_size, snapshot)
+            except Exception:
+                if reserved:
+                    release_spend(copy_size, source=f"copy:{tier or 'legacy'}")
+                raise
 
             if result is None:
+                if reserved:
+                    release_spend(copy_size, source=f"copy:{tier or 'legacy'}")
                 logger.error(f"[exec] Order placement returned None for '{trade.market[:40]}'")
                 await tg.trade_failed(trade.market, "Order placement returned no result")
                 if canary_shot:
@@ -887,8 +906,8 @@ async def place_trade_orders(
                     record_placement_fn(trade, copy_size)
                 if trade.side == "BUY":
                     from src.copy_trading import live_budget as _lb
-                    from src.copy_trading.daily_spend_guard import record_spend, record_wallet_copy
-                    record_spend(copy_size, source=f"copy:{tier or 'legacy'}")
+                    from src.copy_trading.daily_spend_guard import record_wallet_copy
+                    # the day's spend was reserved before the post
                     record_wallet_copy(trade.trader_address)
                     _lb.note_spent(copy_size)
             except Exception as exc:

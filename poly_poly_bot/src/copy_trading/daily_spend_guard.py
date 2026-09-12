@@ -171,6 +171,47 @@ def can_spend(amount_usd: float) -> tuple[bool, str]:
     return True, ""
 
 
+def reserve_spend(amount_usd: float, source: str) -> tuple[bool, str]:
+    """Check AND record under one lock acquisition, before the post. Two
+    threads racing at cap minus one ticket (the executor loop and the
+    Telegram thread's /testorder) could both pass can_spend and both post
+    (code review V10); the reservation makes exactly one of them book.
+    Release with ``release_spend`` if the post then fails."""
+    if amount_usd <= 0:
+        return True, ""
+    from src.copy_trading import live_budget
+    cap = live_budget.daily_cap()
+    with _lock:
+        _load_locked()
+        if _state.closed_reason:
+            return False, f"spend guard closed: {_state.closed_reason}"
+        spent = _state.spent_usd
+        if spent >= cap:
+            return False, f"Daily spend cap reached: ${spent:.2f} >= ${cap:.2f}"
+        if spent + amount_usd > cap:
+            return False, (f"Daily spend cap would be exceeded: ${spent:.2f} + "
+                           f"${amount_usd:.2f} > ${cap:.2f}")
+        _state.spent_usd = round_cents(_state.spent_usd + amount_usd)
+        _save_locked()
+        spent = _state.spent_usd
+    logger.info(f"[daily-cap] +${amount_usd:.2f} ({source}) reserved | total today "
+                f"${spent:.2f} / ${cap:.2f}")
+    return True, ""
+
+
+def release_spend(amount_usd: float, source: str) -> None:
+    """The post failed after a reservation: give the day its money back."""
+    if amount_usd <= 0:
+        return
+    with _lock:
+        _load_locked()
+        _state.spent_usd = round_cents(max(0.0, _state.spent_usd - amount_usd))
+        _save_locked()
+        spent = _state.spent_usd
+    logger.info(f"[daily-cap] -${amount_usd:.2f} ({source}) released, post failed | "
+                f"total today ${spent:.2f}")
+
+
 def record_spend(amount_usd: float, source: str) -> None:
     """Record a successful placement against the daily cap.
 

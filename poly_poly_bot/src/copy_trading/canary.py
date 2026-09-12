@@ -453,7 +453,7 @@ async def fire_test_order(clob_client, token_id: str, *, title: str = "",
     from datetime import datetime, timezone
 
     from src.copy_trading import trade_executor
-    from src.copy_trading.daily_spend_guard import can_spend, record_spend
+    from src.copy_trading.daily_spend_guard import release_spend, reserve_spend
     from src.copy_trading.order_executor import quote_copy_order
     from src.copy_trading.trade_queue import boot_load_error, enqueue_pending_order
     from src.models import DetectedTrade, PendingOrder
@@ -495,7 +495,7 @@ async def fire_test_order(clob_client, token_id: str, *, title: str = "",
         return (False, f"this market's minimum order is ${size_usd:.2f}, over "
                        f"the per-copy cap ${c.per_copy_usd:.2f}; pick a market "
                        f"with a smaller minimum")
-    ok_spend, why = can_spend(size_usd)
+    ok_spend, why = reserve_spend(size_usd, source="testorder")
     if not ok_spend:
         return (False, f"the daily cap refuses it: {why}")
 
@@ -508,10 +508,16 @@ async def fire_test_order(clob_client, token_id: str, *, title: str = "",
            "ask_at_send": ask, "order_price": order_price, "copy_size": size_usd,
            "order_id": None, "posted": False, "fill": None}
     if not _write_test(rec):
+        release_spend(size_usd, source="testorder")
         return (False, "could not persist the test record; nothing was sent")
 
-    result = await trade_executor._execute_copy_order(clob_client, trade, size_usd, snapshot)
+    try:
+        result = await trade_executor._execute_copy_order(clob_client, trade, size_usd, snapshot)
+    except Exception:
+        release_spend(size_usd, source="testorder")
+        raise
     if result is None:
+        release_spend(size_usd, source="testorder")
         rec["post_error"] = "the exchange returned no order id"
         _write_test(rec)
         return (False, f"test order on '{trade.market[:50]}' did NOT post: "
@@ -520,7 +526,6 @@ async def fire_test_order(clob_client, token_id: str, *, title: str = "",
     rec.update({"order_id": result.order_id, "posted": True,
                 "order_price": result.order_price, "shares": result.shares})
     _write_test(rec)
-    record_spend(size_usd, source="testorder")
     enqueue_pending_order(PendingOrder(
         trade=trade, order_id=result.order_id, order_price=result.order_price,
         copy_size=size_usd, placed_at=now * 1000, market_key=trade.market,
