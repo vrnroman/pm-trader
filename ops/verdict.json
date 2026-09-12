@@ -1,10 +1,14 @@
 {
- "id": "proof-0001",
- "ts": 1789235565.204471,
- "kind": "escalation",
- "message": "Proof of the carry-down: this line was written to the ops-digest branch by the run s-g8int5 and reached you through the digest workflow and the bot. Nothing is wrong.",
- "evidence": [
-  "proof"
- ],
- "commit": null
+  "id": "2026-09-12T18:43:08Z-f638",
+  "ts": 1789238588.6360621,
+  "kind": "nothing",
+  "message": "Armed, 4 copies landed and filled in the window, spend $21.45 of $500 cap, no self-disarm. The note_collectable guard warning from earlier in the window was already fixed by the owner's own commit and stopped after the 16:25 restart.",
+  "evidence": [
+    "## arm: {\"armed\": true, ...}",
+    "## money state {\"spend\": {\"spent_usd\": 21.45, \"cap_usd\": 500.0, \"remaining_usd\": 478.55}, \"armed\": true}",
+    "2026-09-12 16:32:51 TRADE [verify] FILLED: BUY 7.46 shares on 'Will Alanyaspor vs. Göztepe SK end in a ' @ 0.7200",
+    "2026-09-12 17:48:51 TRADE [verify] FILLED: BUY 6.22 shares on 'Will FC Arda Kardzhali win on 2026-09-12' @ 0.8600",
+    "2026-09-12 16:23:51 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable' (last occurrence, before the 16:25 restart)"
+  ],
+  "commit": null
 }
