@@ -1,0 +1,10 @@
+{
+ "id": "proof-0001",
+ "ts": 1789235565.204471,
+ "kind": "escalation",
+ "message": "Proof of the carry-down: this line was written to the ops-digest branch by the run s-g8int5 and reached you through the digest workflow and the bot. Nothing is wrong.",
+ "evidence": [
+  "proof"
+ ],
+ "commit": null
+}
