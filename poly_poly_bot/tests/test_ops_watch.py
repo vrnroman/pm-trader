@@ -404,3 +404,85 @@ def test_the_scan_admits_one_wallet_per_pass(ops_env, monkeypatch):
     monkeypatch.setattr(zset, "evicted_set", lambda: set())
     monkeypatch.setattr(zc, "admit", lambda w, **k: (True, [], C(w)))
     assert ops_admit.scan(send=None, now=5.0) == ["0xa"]
+
+
+# ---- verifier s-g8int5 r1: the two production seams ----
+
+def test_self_rearm_fires_through_the_real_guard(ops_env, monkeypatch):
+    """The guard pops its reason on the pass the condition clears, which is
+    the pass the watcher runs on, so the re-arm never fired. The reason now
+    rides on the arm record and stays in the guard's state."""
+    from src.copy_trading import live_guard, live_mode
+    for mod in (live_guard, live_mode):
+        monkeypatch.setattr(mod.CONFIG, "data_dir", str(ops_env))
+    monkeypatch.setattr(live_mode.CONFIG, "live_arm_enabled", True)
+    monkeypatch.setattr(live_mode.CONFIG, "preview_mode", False)
+    monkeypatch.setattr(live_mode.CONFIG, "strategy1_enabled", True)
+    monkeypatch.setattr(live_mode, "_hard_disarmed", False)
+    ok, why = live_mode.arm(reason="t", by="test")
+    assert ok, why
+    t0 = 1_788_700_000.0
+    out = live_guard.run_once(feed_stale_s=3600, now=t0)
+    assert out["self_disarmed"] is True and live_mode.read_arm()["by"] == "live-guard"
+    assert "no trade data" in live_mode.read_arm()["reason"]
+    arms: list = []
+    sent: list = []
+    def arm_fn(reason="", by=""):
+        arms.append(by); return live_mode.arm(reason=reason, by=by)
+    for k, t in enumerate((t0 + 300, t0 + 600, t0 + 900, t0 + 1200, t0 + 1500)):
+        out = live_guard.run_once(feed_stale_s=10, now=t)
+        ow.maybe_rearm(arm=live_mode.read_arm(), guard_state=live_guard._read_state(),
+                       condition_clear=not out["disarm_condition"], now=t, send=sent.append, arm_fn=arm_fn)
+    assert len(arms) == 1 and arms[0].startswith("watcher:") and live_mode.read_arm()["armed"] is True
+    assert any("Re-armed" in m for m in sent)
+
+
+def test_the_important_file_is_written_in_a_fresh_process(tmp_path):
+    """The logger built its important handler from ops_watch, which imports
+    the logger back; the circular import was swallowed and no file was ever
+    written on the VM. The grammar is a leaf module now."""
+    import os
+    import subprocess
+    import sys
+    code = ("from src.logger import logger; logger.info('[LIVE] BUY $5 on x'); "
+            "logger.info('[queue] Enqueued pending order'); "
+            "import logging; [h.flush() for h in logging.getLogger('poly_poly_bot').handlers]")
+    env = {**os.environ, "PREVIEW_MODE": "true", "LOGS_DIR": str(tmp_path)}
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
+                         cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))), env=env)
+    assert out.returncode == 0, out.stderr[-500:]
+    files = list(tmp_path.glob("important-*.log"))
+    assert len(files) == 1, (files, out.stderr[-300:])
+    text = files[0].read_text()
+    assert "[LIVE] BUY" in text and "Enqueued" not in text
+
+
+def test_the_same_settlement_offered_twice_books_once(ops_env):
+    rows = [ow.Settlement("tX", "0xA", 5.0, 9.0), ow.Settlement("tY", "0xA", 5.0, 0.0)]
+    ow.record_settlements(rows, equity=67.0, stated=80.0, floor=56.0, send=None, now=1.0)
+    ow.record_settlements(rows, equity=67.0, stated=80.0, floor=56.0, send=None, now=2.0)
+    settled = [r for r in _ledger(ops_env) if r["kind"] == "settled"]
+    assert len(settled) == 2
+    assert json.loads((ops_env / ow.STATE_FILE).read_text())["day_pnl"] == -1.0
+
+
+def test_a_corrupt_escalation_file_goes_aside_and_is_logged(ops_env, caplog):
+    import logging
+    (ops_env / ow.ESCALATION_FILE).write_text("{broken")
+    with caplog.at_level(logging.DEBUG):
+        assert ow.deliver_escalation(send=None, now=7.0) is None
+    assert not (ops_env / ow.ESCALATION_FILE).exists()
+    assert [p for p in ops_env.iterdir() if p.name.startswith(ow.ESCALATION_FILE + ".bad-")]
+    assert any("escalation file unreadable" in r.getMessage() for r in caplog.records)
+
+
+def test_the_probation_share_applies_even_when_the_per_wallet_cap_is_one(ops_env, monkeypatch):
+    from src.copy_trading import daily_spend_guard as g
+    monkeypatch.setattr(g, "_STATE_FILE", str(ops_env / "d.json"))
+    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 1)
+    g.reset_state()
+    for w in ("0xP1", "0xP2", "0xP3"):
+        ow.probation_start(w, now=1.0)
+    g.record_wallet_copy("0xP1"); g.record_wallet_copy("0xP2")
+    ok, why = g.can_copy_wallet("0xP3")
+    assert ok is False and "probation share" in why

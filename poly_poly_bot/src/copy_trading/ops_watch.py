@@ -81,24 +81,8 @@ def auto_admit_enabled() -> bool:
     return v in ("1", "true", "yes", "on")
 
 
-# --- the presence grammar: lines the splitter keeps and the watcher reads ---
-IMPORTANT_PATTERNS = [
-    r"\[LIVE\]", r"\[verify\] (FILLED|UNFILLED|PARTIAL)", r"\[recovery\]",
-    r"\[live\] (ARMED|DISARMED|HARD DISARM|disarm)", r"DISARMED",
-    r"\[guard\] (cancelled|could not|pass failed|disarm|exposure reconcile failed)",
-    r"Self-disarmed", r"\[tiered-risk\] .*(released|Recorded|carried a legacy|unreadable)",
-    r"exposure full", r"\[daily-cap\]", r"spend guard closed", r"cash on chain",
-    r"\[zset\] (EVICTED|ADMITTED|admitted)", r"\[ops\]", r"\[disk-watch\] (TRIPPED|still)",
-    r"\[redeemer\] .*(ERROR|cannot|winner)", r"SEND FAILED", r"real-money line",
-    r"Traceback", r"\bERROR\b", r"\bCRITICAL\b", r"Bot started", r"shutting down",
-    r"pending orders file unreadable", r"\[testorder\]", r"Test order",
-]
-_IMPORTANT_RE = re.compile("|".join(f"(?:{p})" for p in IMPORTANT_PATTERNS))
-
-
-def is_important(line: str) -> bool:
-    """The deterministic split: no model, one regex, the same one everywhere."""
-    return bool(_IMPORTANT_RE.search(line or ""))
+# The presence grammar lives in ops_grammar (a leaf module the logger can import).
+from src.copy_trading.ops_grammar import IMPORTANT_PATTERNS, is_important  # noqa: E402,F401
 
 
 # --------------------------------------------------------------------------- #
@@ -226,7 +210,12 @@ def record_settlements(settled: list[Settlement], *, equity: Optional[float],
     streak = int(st.get("loss_streak") or 0)
     day = _day(now)
     day_pnl = float(st.get("day_pnl") or 0.0) if st.get("day_pnl_day") == day else 0.0
+    booked = list(st.get("settled_tokens") or [])
     for s in settled:
+        if s.token_id and s.token_id in booked:
+            continue  # the same settlement offered twice books once
+        if s.token_id:
+            booked.append(s.token_id)
         receipt("settled", before=f"open ${s.cost:.2f}", after=f"paid ${s.payout:.2f}",
                 detail=f"{'won' if s.won else 'lost'} {s.pnl:+.2f} on '{s.title[:40]}' "
                        f"({s.wallet[:10]}, tier {s.tier or '?'})", now=now,
@@ -248,7 +237,8 @@ def record_settlements(settled: list[Settlement], *, equity: Optional[float],
                                   f"({LOSS_DAILY_FRAC * 100:.0f}% of the ${bank:,.2f} bankroll).",
                             "daily_loss", now))
         st["day_loss_pushed"] = day
-    st.update({"loss_streak": streak, "day_pnl": day_pnl, "day_pnl_day": day})
+    st.update({"loss_streak": streak, "day_pnl": day_pnl, "day_pnl_day": day,
+               "settled_tokens": booked[-500:]})
     _write_json(_p(STATE_FILE), st)
     return [m for m in pushed if m]
 
@@ -398,7 +388,11 @@ def maybe_rearm(*, arm: dict, guard_state: dict, condition_clear: bool,
     by = str(arm.get("by") or "")
     if not by.startswith("live-guard"):
         return None  # the owner or a run disarmed it: theirs to arm
-    why = str(guard_state.get("self_disarm_reason") or "")
+    # The guard clears its own reason on the pass the condition lifts, which
+    # is exactly the pass this runs on; read the record first, then the
+    # guard's kept copy (verifier s-g8int5 r1).
+    why = str(arm.get("reason") or guard_state.get("self_disarm_reason")
+              or guard_state.get("last_self_disarm_reason") or "")
     if by == "live-guard:floor" or not is_transient_reason(why):
         return None
     st = _read_json(_p(STATE_FILE))
@@ -456,8 +450,16 @@ def deliver_escalation(send: Optional[Callable[[str], None]], now: Optional[floa
     cloud routine left one. Send it once, keyed on its id, then move it aside."""
     now = time.time() if now is None else now
     path = _p(ESCALATION_FILE)
+    if not os.path.exists(path):
+        return None
     d = _read_json(path)
     if not d:
+        # Present but unreadable: keep it for the RCA, say so, do not loop.
+        try:
+            os.replace(path, f"{path}.bad-{int(now)}")
+        except OSError:
+            pass
+        logger.error(f"[ops] escalation file unreadable, kept aside as {ESCALATION_FILE}.bad-{int(now)}")
         return None
     st = _read_json(_p(STATE_FILE))
     eid = str(d.get("id") or "")

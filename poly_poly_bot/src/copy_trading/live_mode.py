@@ -174,10 +174,12 @@ def arm(reason: str = "", by: str = "telegram") -> tuple[bool, str]:
     return (True, "armed")
 
 
-def disarm(by: str = "telegram") -> bool:
-    """Turn the moment's key back off. Always safe, always allowed."""
+def disarm(by: str = "telegram", reason: str = "") -> bool:
+    """Turn the moment's key back off. Always safe, always allowed. The
+    reason rides on the record so the watcher can tell a transient trigger
+    from a floor trip after the guard's own state has cleared."""
     prev = read_arm()
-    rec = {"armed": False, "ts": time.time(), "by": by}
+    rec = {"armed": False, "ts": time.time(), "by": by, "reason": str(reason or "")[:200]}
     if prev.get("first_armed_ts"):
         rec["first_armed_ts"] = prev["first_armed_ts"]
     try:

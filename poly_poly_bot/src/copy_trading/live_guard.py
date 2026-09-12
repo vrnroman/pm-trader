@@ -381,7 +381,7 @@ def run_once(*, pending_orders: Optional[list] = None,
             # Always allowed: this can only move toward preview. The floor
             # disarms under its own name so the next arm can carry the override.
             by = FLOOR_DISARM_BY if is_floor_reason(why) else "live-guard"
-            disarmed = bool(live_mode.disarm(by=by))
+            disarmed = bool(live_mode.disarm(by=by, reason=why))
             if not disarmed:
                 # `disarm` already hard-disarms this process on a write
                 # failure. Say it out loud too: the durable record still says
@@ -406,6 +406,7 @@ def run_once(*, pending_orders: Optional[list] = None,
                 except Exception as exc:
                     logger.warn(f"[guard] alert send failed: {exc}")
         st["self_disarm_reason"] = why
+        st["last_self_disarm_reason"] = why  # survives the clearing pass (the watcher reads it)
         edge("self_disarm", True, f"🛑 Self-disarmed, back to paper. {why}", None, st)
     else:
         cleared = edge("self_disarm", False, "self-disarm condition cleared", None, st)

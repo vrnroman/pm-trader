@@ -253,9 +253,10 @@ def can_copy_wallet(wallet: str) -> tuple[bool, str]:
     except Exception:
         pcap = None
     label = "per-wallet daily cap"
-    if pcap is not None and (cap <= 0 or pcap < cap):
-        cap, label = int(pcap), "probation cap"
-        # The probationers' shared share of the day.
+    if pcap is not None:
+        if cap <= 0 or pcap < cap:
+            cap, label = int(pcap), "probation cap"
+        # The probationers' shared share of the day, whatever the caps.
         try:
             total_cap = int(ops_watch.PROBATION_TOTAL_PER_DAY)
             probs = ops_watch.probation_wallets()

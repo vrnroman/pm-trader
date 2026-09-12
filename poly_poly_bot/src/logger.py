@@ -342,11 +342,11 @@ class BotLogger:
         # -- Important file: the deterministic split the watcher and the
         # digest read (one regex, ops_watch.is_important). Rolls daily, kept
         # for a fortnight by the same purge keyed on the filename date.
-        try:
-            from src.copy_trading.ops_watch import is_important as _is_important
-        except Exception:  # pragma: no cover - the app package is always there
-            _is_important = None
-        if _is_important is not None:
+        # ops_grammar is a leaf (no import back into this module): the
+        # earlier import of ops_watch was circular, the except swallowed it,
+        # and the file was never written on the VM.
+        from src.copy_trading.ops_grammar import is_important as _is_important
+        if True:
             imp_handler = _DailyRotatingFileHandler(
                 logs_dir, "important",
                 on_rollover=lambda d: _purge_old_prefixed_logs(d, "important", 14))

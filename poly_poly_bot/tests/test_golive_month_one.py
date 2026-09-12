@@ -115,7 +115,7 @@ def test_self_disarm_is_detected_but_not_messaged_while_unarmed(tmp_path, monkey
 def test_self_disarm_is_messaged_when_armed(tmp_path, monkeypatch):
     monkeypatch.setattr(live_guard.CONFIG, "data_dir", str(tmp_path))
     monkeypatch.setattr(live_guard.live_mode, "is_armed", lambda: True)
-    monkeypatch.setattr(live_guard.live_mode, "disarm", lambda by="": True)
+    monkeypatch.setattr(live_guard.live_mode, "disarm", lambda by="", **_k: True)
     sent: list = []
     out = live_guard.run_once(feed_stale_s=3600, send=sent.append)
     assert out["self_disarmed"] is True
@@ -652,7 +652,7 @@ def test_the_owner_rearming_after_a_trip_overrides_the_floor(tmp_path, monkeypat
     monkeypatch.setattr(live_guard.live_mode, "is_armed", lambda: True)
     monkeypatch.setattr(live_guard.live_mode, "read_arm", lambda: arm)
     disarms: list = []
-    monkeypatch.setattr(live_guard.live_mode, "disarm", lambda by="": disarms.append(by) or True)
+    monkeypatch.setattr(live_guard.live_mode, "disarm", lambda by="", **_k: disarms.append(by) or True)
     sent: list = []
 
     out = live_guard.run_once(equity_usd=200.0, floor_usd=217.0, now=2000.0, send=sent.append)
@@ -684,7 +684,7 @@ def test_a_condition_that_entered_while_unarmed_still_announces_the_disarm(tmp_p
     live_guard.run_once(feed_stale_s=3600, send=sent.append)      # unarmed: silent
     assert sent == [] and live_guard.active_block(), "and /live CONFIRM can see it"
     monkeypatch.setattr(live_guard.live_mode, "is_armed", lambda: True)
-    monkeypatch.setattr(live_guard.live_mode, "disarm", lambda by="": True)
+    monkeypatch.setattr(live_guard.live_mode, "disarm", lambda by="", **_k: True)
     out = live_guard.run_once(feed_stale_s=3600, send=sent.append)
     assert out["self_disarmed"] is True and len(sent) == 1 and "Self-disarmed" in sent[0]
     monkeypatch.setattr(live_guard.live_mode, "is_armed", lambda: False)
@@ -1810,7 +1810,7 @@ def test_an_expired_canary_no_longer_pulls_the_arm(canary_env, monkeypatch):
     canary.stage(by="test", now=1000.0)
     pulled: list = []
     monkeypatch.setattr(canary.live_mode, "is_armed", lambda: True)
-    monkeypatch.setattr(canary.live_mode, "disarm", lambda by="": pulled.append(by) or True)
+    monkeypatch.setattr(canary.live_mode, "disarm", lambda by="", **_k: pulled.append(by) or True)
     sent: list = []
     assert canary.expire_if_due(send=sent.append, now=1000.0 + canary.TTL_S + 1) is True
     assert pulled == [] and "continues at normal size" in sent[0]
