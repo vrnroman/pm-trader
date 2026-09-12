@@ -5,9 +5,16 @@ name: Ops digest
 # and carry any escalation the cloud routine left on that branch DOWN to
 # the VM, where the bot sends it on Telegram at its next guard pass. Zero
 # new secrets: the same service account the heartbeat uses.
-# Manual first: the digest is proven by hand (workflow_dispatch) before the
-# hourly cron is added, per the manager's "prove the logic, then schedule".
+# Proven by hand first (two dispatches: the pull, then a synthetic verdict
+# carried down and sent). Now scheduled: the digest 23 minutes before the
+# cloud routine's :40, and the carry-down the moment a verdict lands on the
+# branch (a push to ops/verdict.json), so an escalation is not an hour late.
 on:
+  schedule:
+    - cron: "17 */6 * * *"
+  push:
+    branches: [ops-digest]
+    paths: [ops/verdict.json]
   workflow_dispatch:
     inputs:
       hours:
@@ -82,7 +89,8 @@ jobs:
       - name: Pull the digest out of the VM
         run: |
           HOURS="${{ github.event.inputs.hours || '24' }}"
-          cut() { sed -n '/^@@OPS_DIGEST_BEGIN@@$/,/^@@OPS_DIGEST_END@@$/p' | sed '1d;$d'; }
+          # The SSH tunnel can hand back CRLF; strip it before the anchors.
+          cut() { tr -d '\r' | sed -n '/^@@OPS_DIGEST_BEGIN@@$/,/^@@OPS_DIGEST_END@@$/p' | sed '1d;$d'; }
           gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
             --command="docker exec poly-poly-bot python scripts/ops_digest.py --hours $HOURS" 2>/dev/null | cut > ops/latest.md
           gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
