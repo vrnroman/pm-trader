@@ -2729,15 +2729,80 @@ def test_two_threads_at_cap_minus_one_book_exactly_one(tmp_path, monkeypatch, bu
     assert g.status()["spent_usd"] == 26.0
 
 
-def test_the_sink_reserves_before_the_post_and_releases_a_failed_one(tmp_path, monkeypatch):
-    from src.copy_trading import daily_spend_guard as g
+def test_the_sink_reserves_before_the_post_keeps_an_ambiguous_one_and_refuses_at_cap(tmp_path, monkeypatch):
+    """Verifier delta (s-g8int5): the guard is the reservation INSIDE the
+    post, not the balance after. A None post keeps the money (the CLOB may
+    have accepted the order: code review finding 4); a raising post gives
+    it back; the next trade at the cap is refused before any post."""
+    from src.copy_trading import daily_spend_guard as g, trade_executor
+    from src.models import OrderResult
     h = _Harness(tmp_path, monkeypatch)
-    h.post_result = "fail"
-    assert h.run(h.trades(1)) == 0 and h.posted == [7.75]
-    assert g.status()["spent_usd"] == 0.0, "a failed post gives the day its money back"
-    h.post_result = "ok"
-    assert h.run(h.trades(1)) == 1
-    assert g.status()["spent_usd"] == 7.75, "one post, one booking, no double record"
+    seen_inside: list = []
+    mode = {"v": "none"}
+
+    async def post(client, trade, copy_size, snapshot):
+        seen_inside.append(g.status()["spent_usd"])
+        h.posted.append(copy_size)
+        if mode["v"] == "raise":
+            raise RuntimeError("boom")
+        if mode["v"] == "none":
+            return None
+        return OrderResult(order_id=f"ord-{len(h.posted)}", shares=10.0, order_price=0.51)
+    monkeypatch.setattr(trade_executor, "_execute_copy_order", post)
+    assert h.run(h.trades(1)) == 0
+    assert seen_inside == [7.75], "the day's money is booked before the post"
+    assert g.status()["spent_usd"] == 7.75, "an ambiguous (None) post keeps the reservation"
+    g.release_spend(7.75, "test")  # back to a clean day (reset_state alone re-reads the file)
+    mode["v"] = "raise"
+    h.seen.clear()
+    assert h.run(h.trades(1)) == 0
+    assert g.status()["spent_usd"] == 0.0, "a raising post gives the day its money back"
+    mode["v"] = "ok"
+    h.seen.clear()
+    monkeypatch.setattr(CONFIG, "max_daily_volume_usd", 500.0)
+    g.record_spend(93.0 - 7.75, "seed")  # cap 93 at budget 310: exactly one ticket left
+    n_before = len(h.posted)
+    assert h.run(h.trades(2)) == 1
+    assert len(h.posted) == n_before + 1, "the second trade at the cap never reached the post"
+    assert g.status()["spent_usd"] == 93.0 and "t1" in h.seen
+
+
+def test_the_no_copy_clock_sees_sink_refusals(tmp_path, monkeypatch):
+    """Code review finding 7: refusals at the live sink wrote no history row,
+    so the 'no copy in 3 days' clock could not see them."""
+    from src.copy_trading import daily_spend_guard as g, ops_watch
+    h = _Harness(tmp_path, monkeypatch)
+    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 2)
+    ops_watch.probation_start(W1, now=1.0)
+    monkeypatch.setattr(ops_watch, "PROBATION_TOTAL_PER_DAY", 1)
+    g.record_wallet_copy("0xother-probationer")
+    ops_watch.probation_start("0xother-probationer", now=1.0)
+    assert h.run(h.trades(1)) == 0 and h.posted == []
+    rows = [r for r in h.history if r.status == "SKIPPED"]
+    assert rows and "probation share" in (rows[-1].reason or "") and rows[-1].trader_address == W1
+
+
+def test_a_refused_reservation_after_the_canary_consumed_says_so():
+    """Code review finding 2: the refusal branch reports like a failed post."""
+    from src.copy_trading import trade_executor
+    src = inspect.getsource(trade_executor.place_trade_orders)
+    i = src.index("_ok_r, _why_r = reserve_spend(")
+    assert "canary.record_post_failed(" in src[i:i + 900] and "canary.report_text()" in src[i:i + 900]
+
+
+def test_released_rows_aggregate_per_token(tmp_path, monkeypatch):
+    """Code review finding 5: two placements on one token share one payout."""
+    from src.copy_trading import ops_watch
+    rows = [{"token_id": "T", "cost": 6.4, "trader": "0xa", "tier": "1b", "title": "m", "why": "resolved"},
+            {"token_id": "T", "cost": 6.4, "trader": "0xa", "tier": "1b", "title": "m", "why": "resolved"},
+            {"token_id": "U", "cost": 5.0, "trader": "0xb", "tier": "1b", "title": "n", "why": "gone"}]
+    out = ops_watch.aggregate_released(rows, lambda tok: (9.0, "m") if tok == "T" else (0.0, ""))
+    assert len(out) == 1 and out[0].token_id == "T" and out[0].cost == 12.8 and out[0].payout == 9.0
+    assert out[0].won is False and out[0].pnl == -3.8
+    import pathlib
+    src = (pathlib.Path(__file__).resolve().parents[1] / "main.py").read_text()
+    assert "ops_watch.aggregate_released(" in src and "out = None  # this pass's guard findings only" in src
+    assert "_clear = pass_ok and isinstance(out, dict)" in src
 
 
 def test_the_verifier_reports_a_test_order_too():

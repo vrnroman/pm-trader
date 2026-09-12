@@ -1,0 +1,28 @@
+name: Weekly drills
+
+# The go-live drills, on their own schedule outside the VM: a dedicated cron
+# (the heartbeat's half-hourly job cancelled its own 06:00 run at 06:30 and
+# a fresh checkout has no data dir; code review s-g8int5). Nothing here
+# places an order or arms anything.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  drills:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run the drills (nothing places an order or arms anything)
+        working-directory: poly_poly_bot
+        env:
+          PREVIEW_MODE: "true"
+        run: |
+          pip install -q -r requirements.txt
+          mkdir -p data logs
+          python scripts/golive_drills.py

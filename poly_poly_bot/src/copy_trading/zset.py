@@ -365,6 +365,11 @@ def evict(wallet: str, reason: str = "") -> bool:
                      f"Refusing to report an eviction that would not stick.")
         return False
     gone = promotion_state.remove_promoted(wallet, scope=SCOPE)
+    try:
+        from src.copy_trading import ops_watch
+        ops_watch.probation_end(wallet)
+    except Exception:
+        pass
     if gone:
         logger.warn(f"[zset] EVICTED {wallet} from set Z: {reason or 'no reason given'}")
         try:

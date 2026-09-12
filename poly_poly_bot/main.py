@@ -178,6 +178,7 @@ def _live_guard_loop():
     while not _shutdown_event.is_set():
         pass_ok, pass_error = True, ""
         released_rows: list = []
+        out = None  # this pass's guard findings only (code review, finding 3)
         # Gather the REAL inputs, from the sources that actually know. An
         # earlier version imported a function that does not exist, swallowed
         # the ImportError, and called run_once with nothing, so every detector
@@ -294,15 +295,10 @@ def _live_guard_loop():
                                 if _p.get(_k):
                                     _by_tok[str(_p.get(_k))] = _p
                                     break
-                    _settled = []
-                    for _r in released_rows:
-                        if _r.get("why") != "resolved":
-                            continue
-                        _row = _by_tok.get(str(_r.get("token_id") or ""), {})
-                        _settled.append(ops_watch.Settlement(
-                            token_id=str(_r.get("token_id") or ""), wallet=str(_r.get("trader") or ""),
-                            cost=float(_r.get("cost") or 0.0), payout=float(_pv(_row)) if _row else 0.0,
-                            tier=str(_r.get("tier") or ""), title=str(_r.get("title") or _row.get("title") or "")))
+                    _settled = ops_watch.aggregate_released(
+                        released_rows,
+                        lambda tok: ((float(_pv(_by_tok[tok])) if tok in _by_tok else 0.0),
+                                     (_by_tok.get(tok) or {}).get("title")))
                     _stated = live_budget.stated_budget()
                     if _settled:
                         ops_watch.record_settlements(_settled, equity=equity_usd, stated=_stated,
@@ -355,7 +351,7 @@ def _live_guard_loop():
             try:
                 _arm = _lm.read_arm()
                 _gs = live_guard._read_state()
-                _clear = not bool((out or {}).get("disarm_condition")) if isinstance(out, dict) else False
+                _clear = pass_ok and isinstance(out, dict) and not bool(out.get("disarm_condition"))
                 ops_watch.maybe_rearm(arm=_arm, guard_state=_gs, condition_clear=_clear, send=_send_deal)
             except Exception as _exc:
                 logger.warn(f"[guard] self re-arm check failed: {_exc}")

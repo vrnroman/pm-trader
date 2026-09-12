@@ -198,6 +198,27 @@ class Settlement:
         return self.payout > self.cost
 
 
+def aggregate_released(rows: list, value_of) -> list:
+    """One Settlement per token from the tier ledger's released rows: two
+    placements on one market side share one payout, so their costs are
+    summed against it (code review, finding 5). ``value_of(token) -> (payout,
+    title)`` reads the chain's resolved row."""
+    agg: dict = {}
+    for r in rows:
+        if r.get("why") != "resolved":
+            continue
+        tok = str(r.get("token_id") or "")
+        a = agg.setdefault(tok, {"cost": 0.0, "trader": str(r.get("trader") or ""),
+                                 "tier": str(r.get("tier") or ""), "title": str(r.get("title") or "")})
+        a["cost"] += float(r.get("cost") or 0.0)
+    out = []
+    for tok, a in agg.items():
+        payout, title = value_of(tok)
+        out.append(Settlement(token_id=tok, wallet=a["trader"], cost=round(a["cost"], 2),
+                              payout=float(payout or 0.0), tier=a["tier"], title=a["title"] or str(title or "")))
+    return out
+
+
 def record_settlements(settled: list[Settlement], *, equity: Optional[float],
                        stated: Optional[float], floor: Optional[float],
                        send: Optional[Callable[[str], None]], now: Optional[float] = None) -> list[str]:
@@ -233,10 +254,12 @@ def record_settlements(settled: list[Settlement], *, equity: Optional[float],
                                       f"📉 <b>{streak} losing copies in a row</b>, day {day_pnl:+.2f}.",
                                 "loss_streak", now))
     if bank and day_pnl < 0 and abs(day_pnl) >= LOSS_DAILY_FRAC * bank and not st.get("day_loss_pushed") == day:
-        pushed.append(_push(send, f"📉 <b>Today's losses reach ${abs(day_pnl):.2f}</b> "
-                                  f"({LOSS_DAILY_FRAC * 100:.0f}% of the ${bank:,.2f} bankroll).",
-                            "daily_loss", now))
-        st["day_loss_pushed"] = day
+        m = _push(send, f"📉 <b>Today's losses reach ${abs(day_pnl):.2f}</b> "
+                        f"({LOSS_DAILY_FRAC * 100:.0f}% of the ${bank:,.2f} bankroll).",
+                  "daily_loss", now)
+        pushed.append(m)
+        if m:
+            st["day_loss_pushed"] = day
     st.update({"loss_streak": streak, "day_pnl": day_pnl, "day_pnl_day": day,
                "settled_tokens": booked[-500:]})
     _write_json(_p(STATE_FILE), st)
@@ -264,12 +287,16 @@ def check_bankroll(*, equity: Optional[float], floor: Optional[float],
         last_day = st.get("floor_near_day")
         if near and not was and last_day != _day(now):
             gap = max(0.0, band - eq)
-            pushed.append(_push(send, f"⚠️ <b>Bankroll ${eq:,.2f} is within {FLOOR_NEAR_FRAC * 100:.0f}% "
-                                      f"of the ${float(floor):,.0f} floor.</b> A top-up of about "
-                                      f"${gap + 5:,.0f} would restore the margin; under the floor the "
-                                      f"arm comes off and stays off until /live CONFIRM.",
-                                "floor_near", now))
-            st["floor_near_day"] = _day(now)
+            m = _push(send, f"⚠️ <b>Bankroll ${eq:,.2f} is within {FLOOR_NEAR_FRAC * 100:.0f}% "
+                            f"of the ${float(floor):,.0f} floor.</b> A top-up of about "
+                            f"${gap + 5:,.0f} would restore the margin; under the floor the "
+                            f"arm comes off and stays off until /live CONFIRM.",
+                      "floor_near", now)
+            pushed.append(m)
+            if m:
+                st["floor_near_day"] = _day(now)
+            else:
+                near = False  # not told: try again next pass
         st["floor_near"] = bool(near)
     last = st.get("last_equity")
     if last is not None:
@@ -285,13 +312,21 @@ def check_bankroll(*, equity: Optional[float], floor: Optional[float],
 
 
 def _push(send: Optional[Callable[[str], None]], text: str, kind: str, now: float) -> str:
-    receipt(f"push:{kind}", after=text[:120], push="DEAL", now=now)
+    """Push a money line. Returns the text when it was delivered (a sender
+    that returns False, the Telegram wrapper's 4xx/5xx/unconfigured answer,
+    counts as not delivered: the caller must not commit its say-once state
+    on it; code review, finding 6). Returns "" when not delivered."""
+    delivered = send is None
     if send is not None:
         try:
-            send(text)
+            r = send(text)
+            delivered = r is None or bool(r)
         except Exception as exc:
             logger.warn(f"[ops] push failed ({kind}): {exc}")
-    return text
+            delivered = False
+    receipt(f"push:{kind}", after=text[:120], push="DEAL" if delivered else None,
+            detail="" if delivered else "NOT delivered", now=now)
+    return text if delivered else ""
 
 
 # --------------------------------------------------------------------------- #
@@ -327,9 +362,14 @@ def note_admit_scan(now: Optional[float] = None) -> None:
 
 
 def note_daily_line(sent: bool, now: Optional[float] = None) -> None:
+    """Stamp the day only when the line actually went out; a failed send
+    must still trip the no-daily-line clock (code review, finding 8)."""
     st = _read_json(_p(STATE_FILE))
-    st["daily_line_day"] = _day(now if now is not None else time.time())
+    day = _day(now if now is not None else time.time())
+    st["daily_line_attempt_day"] = day
     st["daily_line_sent"] = bool(sent)
+    if sent:
+        st["daily_line_day"] = day
     _write_json(_p(STATE_FILE), st)
 
 
@@ -352,7 +392,7 @@ def check_absences(*, followed_signals_3d: int, copies_3d: int, armed: bool,
     day = dt.strftime("%Y-%m-%d")
     hour = dt.hour + dt.minute / 60.0
     if hour >= DAILY_LINE_DEADLINE_UTC_H and st.get("daily_line_day") != day and st.get("daily_line_missing_day") != day:
-        if st.get("daily_line_day"):  # never on the very first day of the watcher
+        if st.get("daily_line_day") or st.get("daily_line_attempt_day"):  # never before the first attempt
             pushed.append(_push(send, f"🕘 <b>No 08:00 real-money line today</b> by "
                                       f"{DAILY_LINE_DEADLINE_UTC_H:.0f}:00 UTC. The reporter did not run or "
                                       f"its send failed; check the ledger and the log.", "no_daily_line", now))
@@ -396,7 +436,10 @@ def maybe_rearm(*, arm: dict, guard_state: dict, condition_clear: bool,
     if by == "live-guard:floor" or not is_transient_reason(why):
         return None
     st = _read_json(_p(STATE_FILE))
-    sig = why.split(":")[0][:60]
+    # Keyed on the matched marker, never on the reason text: "no trade data
+    # for 17 minutes" and "... 19 minutes" are one cause, one bucket, one
+    # cap (code review, finding 1).
+    sig = next((m for m in TRANSIENT_MARKERS if m in why), why[:60])
     key = f"clear_since:{sig}"
     if not condition_clear:
         st.pop(key, None)
@@ -414,10 +457,11 @@ def maybe_rearm(*, arm: dict, guard_state: dict, condition_clear: bool,
     n = int(counts.get(f"{day}:{sig}") or 0)
     if n >= REARM_MAX_PER_DAY:
         if st.get("rearm_cap_pushed") != f"{day}:{sig}":
-            _push(send, f"🚨 <b>Re-armed {n} times today for '{sig}' and it keeps coming back.</b> "
-                        f"Not re-arming again; send /live CONFIRM when you have looked.", "rearm_cap", now)
+            m = _push(send, f"🚨 <b>Re-armed {n} times today for '{sig}' and it keeps coming back.</b> "
+                            f"Not re-arming again; send /live CONFIRM when you have looked.", "rearm_cap", now)
             receipt("rearm_cap", before=f"{n} self re-arms", after="escalated", detail=sig, now=now)
-            st["rearm_cap_pushed"] = f"{day}:{sig}"
+            if m:
+                st["rearm_cap_pushed"] = f"{day}:{sig}"
             _write_json(_p(STATE_FILE), st)
         return None
     if arm_fn is None:
@@ -481,9 +525,12 @@ def deliver_escalation(send: Optional[Callable[[str], None]], now: Optional[floa
         try:
             if kind == "fix":
                 commit = str(d.get("commit") or "")[:10]
-                send(f"🔧 <b>The watcher pushed a fix</b>{(' (' + commit + ')') if commit else ''}: {text[:1400]}")
+                r = send(f"🔧 <b>The watcher pushed a fix</b>{(' (' + commit + ')') if commit else ''}: {text[:1400]}")
             else:
-                send(f"🧭 <b>From the watcher</b> ({kind}): {text[:1500]}")
+                r = send(f"🧭 <b>From the watcher</b> ({kind}): {text[:1500]}")
+            if r is not None and not r:
+                logger.warn(f"[ops] escalation {eid} not delivered (sender returned False); kept for the next pass")
+                return None
         except Exception as exc:
             logger.warn(f"[ops] escalation send failed: {exc}")
             return None
@@ -531,6 +578,14 @@ def probation_cap(wallet: str) -> Optional[int]:
     """Copies per day allowed while on probation, or None when not on it."""
     d = _read_json(_p(PROBATION_FILE))
     return PROBATION_COPIES_PER_DAY if (wallet or "").lower() in d else None
+
+
+def probation_end(wallet: str, why: str = "evicted") -> None:
+    d = _read_json(_p(PROBATION_FILE))
+    w = (wallet or "").lower()
+    if w in d:
+        d.pop(w, None)
+        _write_json(_p(PROBATION_FILE), d)
 
 
 def probation_wallets() -> set:

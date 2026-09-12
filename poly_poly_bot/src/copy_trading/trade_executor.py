@@ -74,6 +74,22 @@ def _skip_throttled(key: str, reason: str, message: str, now: Optional[float] = 
     return True
 
 
+def _skip_row(record_trade_history, trade, qt, reason: str) -> None:
+    """A refusal at the live sink is a SKIPPED row too, so the no-copy clock
+    can see it (code review, finding 7). Never raises."""
+    try:
+        record_trade_history(TradeRecord(
+            timestamp=trade.timestamp, trader_address=trade.trader_address, market=trade.market,
+            side=trade.side, trader_size=trade.size, copy_size=0, price=trade.price,
+            status="SKIPPED", reason=str(reason)[:200], source=getattr(qt, "source", None),
+            source_detected_at=getattr(qt, "source_detected_at", None),
+            enqueued_at=getattr(qt, "enqueued_at", None), condition_id=trade.condition_id,
+            token_id=trade.token_id, outcome=getattr(trade, "outcome", None),
+            received_at_ms=getattr(qt, "received_at_ms", None)))
+    except Exception as exc:
+        logger.warn(f"[exec] skip row not written: {exc}")
+
+
 def _tiered_risk():
     from src.copy_trading.tiered_risk_manager import (
         evaluate_tiered_trade,
@@ -588,6 +604,8 @@ async def place_trade_orders(
                     f"[exec] Max copies reached ({dup_count}/{CONFIG.max_copies_per_market_side}) "
                     f"for {trade.side} on '{trade.market[:40]}'"
                 )
+                _skip_row(record_trade_history, trade, qt,
+                          f"max copies reached ({dup_count}/{CONFIG.max_copies_per_market_side})")
                 mark_trade_as_seen(trade.id)
                 continue
 
@@ -728,6 +746,7 @@ async def place_trade_orders(
                 _ok_w, _why_w = can_copy_wallet(trade.trader_address)
                 if not _ok_w:
                     logger.skip(f"[exec] {_why_w}: not copied")
+                    _skip_row(record_trade_history, trade, qt, _why_w)
                     mark_trade_as_seen(trade.id)
                     continue
             if trade.side == "BUY" and trade.size < gov.min_trader_bet_usd:
@@ -743,10 +762,11 @@ async def place_trade_orders(
             if (trade.side == "BUY" and gov.balance_read
                     and gov.balance_usd is not None
                     and copy_size > float(gov.balance_usd) - 0.01):
-                logger.skip(f"[exec] cash on chain ${float(gov.balance_usd):.2f} is "
-                            f"under the ${copy_size:.2f} copy (${gov.open_cost_usd:.2f} "
-                            f"sits in open positions): waiting for them to resolve "
-                            f"and pay out before the next copy")
+                _why_c = (f"cash on chain ${float(gov.balance_usd):.2f} is under the "
+                          f"${copy_size:.2f} copy (${gov.open_cost_usd:.2f} sits in open "
+                          f"positions): waiting for them to resolve and pay out before the next copy")
+                logger.skip(f"[exec] {_why_c}")
+                _skip_row(record_trade_history, trade, qt, _why_c)
                 mark_trade_as_seen(trade.id)
                 continue
 
@@ -829,6 +849,17 @@ async def place_trade_orders(
                 _ok_r, _why_r = reserve_spend(copy_size, source=f"copy:{tier or 'legacy'}")
                 if not _ok_r:
                     logger.skip(f"[exec] {_why_r}: not copied")
+                    _skip_row(record_trade_history, trade, qt, _why_r)
+                    if canary_shot:
+                        # The shot was consumed and the arm pulled before this
+                        # refusal: say so the way a failed post does (code
+                        # review, finding 2).
+                        canary.record_post_failed(f"the daily cap refused the shot: {_why_r}")
+                        try:
+                            from src.copy_trading.telegram_notifier import _send_message
+                            await _send_message(canary.report_text())
+                        except Exception as exc:
+                            logger.warn(f"[canary] refusal message failed: {exc}")
                     mark_trade_as_seen(trade.id)
                     continue
                 reserved = True
@@ -841,8 +872,13 @@ async def place_trade_orders(
                 raise
 
             if result is None:
+                # The reservation is KEPT: _execute_copy_order swallows every
+                # exception, so None can be a timeout after the CLOB accepted
+                # the order (code review, finding 4). Fewer deals beats a
+                # second ticket against a live orphan; the day rolls over.
                 if reserved:
-                    release_spend(copy_size, source=f"copy:{tier or 'legacy'}")
+                    logger.info(f"[daily-cap] ${copy_size:.2f} reservation kept: the post's "
+                                f"fate is ambiguous (no order id)")
                 logger.error(f"[exec] Order placement returned None for '{trade.market[:40]}'")
                 await tg.trade_failed(trade.market, "Order placement returned no result")
                 if canary_shot:

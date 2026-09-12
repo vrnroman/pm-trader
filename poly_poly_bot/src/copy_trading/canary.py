@@ -517,7 +517,9 @@ async def fire_test_order(clob_client, token_id: str, *, title: str = "",
         release_spend(size_usd, source="testorder")
         raise
     if result is None:
-        release_spend(size_usd, source="testorder")
+        # Kept, not released: None can be a timeout after the CLOB accepted
+        # the order (code review, finding 4); the day rolls over.
+        logger.info(f"[daily-cap] ${size_usd:.2f} test reservation kept: the post's fate is ambiguous")
         rec["post_error"] = "the exchange returned no order id"
         _write_test(rec)
         return (False, f"test order on '{trade.market[:50]}' did NOT post: "

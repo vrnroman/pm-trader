@@ -2348,14 +2348,18 @@ def _handle_callback(data: str) -> tuple[str, str | None]:
 def _handle_zset_evict_tap(wallet: str) -> tuple[str, str | None]:
     """The owner's override of an automatic admission: one tap, sticky."""
     from src.copy_trading import zset
-    ok = zset.evict(wallet, reason="owner tap (Evict button)")
+    already = wallet.lower() in zset.evicted_set() and wallet.lower() not in zset.wallet_set()
+    ok = zset.evict(wallet, reason="owner tap (Evict button)") or already
     try:
         from src.copy_trading import ops_watch
-        ops_watch.receipt("evict", before=f"{wallet[:10]} in set Z",
-                          after="evicted (sticky)" if ok else "eviction NOT recorded",
-                          detail="owner tap", push=None, extra={"wallet": wallet.lower()})
+        if not already:
+            ops_watch.receipt("evict", before=f"{wallet[:10]} in set Z",
+                              after="evicted (sticky)" if ok else "eviction NOT recorded",
+                              detail="owner tap", push=None, extra={"wallet": wallet.lower()})
     except Exception:
         pass
+    if already:
+        return ("Already evicted", f"⛔ <b>Already evicted</b> <code>{_esc(wallet)}</code>. The eviction sticks.")
     if ok:
         return ("Evicted", f"⛔ <b>Evicted from set Z</b> <code>{_esc(wallet)}</code>\n"
                            "Real money no longer follows it. The eviction sticks; "

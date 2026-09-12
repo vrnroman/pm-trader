@@ -486,3 +486,73 @@ def test_the_probation_share_applies_even_when_the_per_wallet_cap_is_one(ops_env
     g.record_wallet_copy("0xP1"); g.record_wallet_copy("0xP2")
     ok, why = g.can_copy_wallet("0xP3")
     assert ok is False and "probation share" in why
+
+
+# ---- code review (s-g8int5) ----
+
+def test_the_rearm_cap_binds_across_varying_reason_text(ops_env):
+    """Finding 1: 'no trade data for 17 minutes' and '... 19 minutes' are one
+    cause; the cap was keyed on the varying text and never bound."""
+    arms: list = []
+    sent: list = []
+    arm_fn = lambda reason="", by="": (arms.append(by) or (True, "armed"))
+    t = 0.0
+    for minutes in (17, 19, 21, 23, 25):
+        gs = {"self_disarm_reason": f"no trade data for {minutes} minutes: the poller is dead"}
+        arm = {"armed": False, "by": "live-guard", "reason": gs["self_disarm_reason"]}
+        ow.maybe_rearm(arm=arm, guard_state=gs, condition_clear=True, now=t, send=sent.append, arm_fn=arm_fn)
+        ow.maybe_rearm(arm=arm, guard_state=gs, condition_clear=True, now=t + 1000, send=sent.append, arm_fn=arm_fn)
+        t += 2000
+    assert len(arms) == 3 and sum(1 for m in sent if "keeps coming back" in m) == 1
+
+
+def test_an_undelivered_push_does_not_commit_its_say_once_state(ops_env):
+    """Finding 6: the Telegram wrapper returns False on 4xx/5xx without
+    raising; that is not a delivery."""
+    calls = {"n": 0}
+    def flaky(text):
+        calls["n"] += 1
+        return calls["n"] > 1  # first send fails, second lands
+    out = ow.check_bankroll(equity=66.0, floor=56.0, send=flaky, now=1.0)
+    assert out == [] and calls["n"] == 1
+    out = ow.check_bankroll(equity=66.0, floor=56.0, send=flaky, now=2.0)
+    assert len(out) == 1 and calls["n"] == 2
+    rows = _ledger(ops_env)
+    assert rows[0]["push"] is None and rows[0]["detail"] == "NOT delivered" and rows[1]["push"] == "DEAL"
+    (ops_env / ow.ESCALATION_FILE).write_text(json.dumps({"id": "e9", "kind": "escalation", "message": "x"}))
+    assert ow.deliver_escalation(send=lambda t: False, now=3.0) is None
+    assert (ops_env / ow.ESCALATION_FILE).exists(), "kept for the next pass"
+    assert ow.deliver_escalation(send=lambda t: True, now=4.0)
+
+
+def test_a_failed_daily_send_still_trips_the_no_daily_line_clock(ops_env):
+    """Finding 8."""
+    day0 = 1_788_652_800.0
+    ow.note_daily_line(True, now=day0 + 8 * 3600)
+    ow.note_daily_line(False, now=day0 + 86400 + 8 * 3600)  # today: send failed
+    sent: list = []
+    ow.check_absences(followed_signals_3d=0, copies_3d=0, armed=True, send=sent.append, now=day0 + 86400 + 9.2 * 3600)
+    assert len(sent) == 1 and "No 08:00 real-money line" in sent[0]
+
+
+def test_eviction_ends_probation_and_a_second_tap_is_not_a_failure(ops_env, monkeypatch):
+    """Finding 9."""
+    from src import telegram_bot as tb
+    from src.copy_trading import zset
+    ow.probation_start("0xabc", now=1.0)
+    state = {"z": {"0xabc"}, "ev": set()}
+    def evict(w, reason=""):
+        w = w.lower()
+        if w not in state["z"]:
+            return False
+        state["z"].discard(w); state["ev"].add(w)
+        ow.probation_end(w)
+        return True
+    monkeypatch.setattr(zset, "evict", evict)
+    monkeypatch.setattr(zset, "evicted_set", lambda: set(state["ev"]))
+    monkeypatch.setattr(zset, "wallet_set", lambda: set(state["z"]))
+    toast, text = tb._handle_callback("zevict:0xabc")
+    assert toast == "Evicted" and ow.probation_cap("0xabc") is None
+    toast2, text2 = tb._handle_callback("zevict:0xabc")
+    assert toast2 == "Already evicted" and "Could not" not in text2
+    assert sum(1 for r in _ledger(ops_env) if r["kind"] == "evict") == 1

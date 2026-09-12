@@ -13,6 +13,12 @@ name: Ops digest
 on:
   schedule:
     - cron: "17 * * * *"
+  # Second carrier: the heartbeat's own schedule does fire on this repo
+  # (a handful of times a day); ride its completions too. Neither the 19:17
+  # nor the 20:17 slot fired on 2026-09-12.
+  workflow_run:
+    workflows: ["Heartbeat"]
+    types: [completed]
   push:
     branches: [ops-digest]
     paths: [ops/verdict.json]
