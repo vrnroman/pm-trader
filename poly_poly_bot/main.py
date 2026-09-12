@@ -166,8 +166,14 @@ def _live_guard_loop():
     interval = 300.0
     crash_streak = 0
     guard_started = time.time()
-    last_admit_scan = 0.0
+    # The scan cadence survives restarts: a deploy every ten minutes admitted
+    # two wallets per restart on 2026-09-12 because the clock started at 0.
     admit_scan_every = float(os.environ.get("ZSET_AUTO_ADMIT_EVERY_S", 6 * 3600))
+    try:
+        from src.copy_trading import ops_watch as _ow0
+        last_admit_scan = float(_ow0._read_json(_ow0._p(_ow0.STATE_FILE)).get("admit_scan_ts") or 0.0)
+    except Exception:
+        last_admit_scan = 0.0
     logger.info("[guard] live guard started (detect always, act only when armed)")
     while not _shutdown_event.is_set():
         pass_ok, pass_error = True, ""
@@ -356,6 +362,7 @@ def _live_guard_loop():
             ops_watch.deliver_escalation(send=_send_bot)
             if _now - last_admit_scan >= admit_scan_every:
                 last_admit_scan = _now
+                ops_watch.note_admit_scan(_now)
                 try:
                     from src.copy_trading import ops_admit
                     ops_admit.scan(send=_send_wallet_kb)

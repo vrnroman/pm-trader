@@ -63,11 +63,18 @@ jobs:
             VID=$(python3 -c "import json;print(json.load(open('ops/verdict.json')).get('id',''))" 2>/dev/null)
             LAST=$(cat ops/.delivered 2>/dev/null || echo "")
             if { [ "$KIND" = "escalation" ] || [ "$KIND" = "fix" ]; } && [ -n "$VID" ] && [ "$VID" != "$LAST" ]; then
-              gcloud compute scp ops/verdict.json poly-poly-bot:/tmp/ops-escalation.json \
-                --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
-              && gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
-                   --command='mv /tmp/ops-escalation.json /home/tianyuezhou/app/data/ops-escalation.json' \
-              && echo "$VID" > ops/.delivered && echo "delivered escalation $VID"
+              # The SSH user is the service account's, not the app's, so the
+              # data dir is not writable from the shell: copy INTO the
+              # container instead (docker cp lands as root, 644, which the
+              # bot can read and rename).
+              if gcloud compute scp ops/verdict.json poly-poly-bot:/tmp/ops-escalation.json \
+                   --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
+                 && gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
+                      --command='docker cp /tmp/ops-escalation.json poly-poly-bot:/app/data/ops-escalation.json && rm -f /tmp/ops-escalation.json'; then
+                echo "$VID" > ops/.delivered && echo "delivered $KIND $VID"
+              else
+                echo "::error::could not carry verdict $VID down to the VM; it will be retried next run"
+              fi
             fi
           fi
           set -e
@@ -80,7 +87,10 @@ jobs:
             --command="docker exec poly-poly-bot python scripts/ops_digest.py --hours $HOURS" 2>/dev/null | cut > ops/latest.md
           gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
             --command="docker exec poly-poly-bot python scripts/ops_digest.py --hours $HOURS --json" 2>/dev/null | cut > ops/state.json
-          python3 -c "import json;json.load(open('ops/state.json'))" && echo "state.json valid"
+          if ! python3 -c "import json;json.load(open('ops/state.json'))"; then
+            echo "::error::state.json is not valid json (the container may predate the sentinels)"; exit 1
+          fi
+          echo "state.json valid"
           DAY=$(date -u +%F)
           cp ops/latest.md "ops/digest-$DAY.md"
           # keep two weeks of daily files

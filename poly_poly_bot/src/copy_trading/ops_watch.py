@@ -326,6 +326,12 @@ def note_guard_pass(ok: bool, error: str = "", now: Optional[float] = None,
     return msg
 
 
+def note_admit_scan(now: Optional[float] = None) -> None:
+    st = _read_json(_p(STATE_FILE))
+    st["admit_scan_ts"] = float(now if now is not None else time.time())
+    _write_json(_p(STATE_FILE), st)
+
+
 def note_daily_line(sent: bool, now: Optional[float] = None) -> None:
     st = _read_json(_p(STATE_FILE))
     st["daily_line_day"] = _day(now if now is not None else time.time())

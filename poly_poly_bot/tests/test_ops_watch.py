@@ -362,3 +362,11 @@ def test_the_graduation_receipt_carries_its_trial(ops_env):
     row = [r for r in _ledger(ops_env) if r["kind"] == "probation_over"][-1]
     assert row["after"] == "5 settled live copies: 3 won, +2.00" and len(row["trial"]) == 5
     assert row["trial"][0]["token_id"] == "t0" and row["trial"][1]["won"] is False
+
+
+def test_the_admit_scan_clock_survives_a_restart(ops_env):
+    import pathlib
+    ow.note_admit_scan(now=1234.0)
+    assert json.loads((ops_env / ow.STATE_FILE).read_text())["admit_scan_ts"] == 1234.0
+    src = (pathlib.Path(__file__).resolve().parents[1] / "main.py").read_text()
+    assert 'get("admit_scan_ts")' in src and "ops_watch.note_admit_scan(_now)" in src
