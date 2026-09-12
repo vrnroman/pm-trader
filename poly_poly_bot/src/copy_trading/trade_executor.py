@@ -1081,7 +1081,7 @@ async def process_verifications(
                     unfilled_usd = po.copy_size - po.accounted_filled_usd
                     if unfilled_usd > 0:
                         if TIERED_MODE and po.tier is not None:
-                            release_tiered_exposure(po.tier, unfilled_usd)
+                            release_tiered_exposure(po.tier, unfilled_usd, token_id=po.trade.token_id)
                         else:
                             adjust_placement(trade, -unfilled_usd)
 
@@ -1119,7 +1119,7 @@ async def process_verifications(
                         )
                         # Release full exposure as a safety measure
                         if TIERED_MODE and po.tier is not None:
-                            release_tiered_exposure(po.tier, po.copy_size)
+                            release_tiered_exposure(po.tier, po.copy_size, token_id=po.trade.token_id)
                         else:
                             adjust_placement(trade, -po.copy_size)
 
@@ -1156,7 +1156,7 @@ async def process_verifications(
                     )
                     # Release full exposure
                     if TIERED_MODE and po.tier is not None:
-                        release_tiered_exposure(po.tier, po.copy_size)
+                        release_tiered_exposure(po.tier, po.copy_size, token_id=po.trade.token_id)
                     else:
                         adjust_placement(trade, -po.copy_size)
 
@@ -1278,7 +1278,7 @@ async def recover_pending_orders(clob_client: ClobClient) -> None:
                 unfilled_usd = po.copy_size - po.accounted_filled_usd
                 if unfilled_usd > 0:
                     if TIERED_MODE and po.tier is not None:
-                        release_tiered_exposure(po.tier, unfilled_usd)
+                        release_tiered_exposure(po.tier, unfilled_usd, token_id=po.trade.token_id)
                     else:
                         adjust_placement(trade, -unfilled_usd)
 

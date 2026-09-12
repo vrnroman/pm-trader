@@ -2404,6 +2404,46 @@ def test_a_legacy_running_total_with_no_rows_is_not_exposure(monkeypatch, tmp_pa
     assert warned == [], "the deployed bot warned on every evaluation"
 
 
+def test_an_unfilled_copy_releases_its_own_row_not_the_oldest(monkeypatch, tmp_path):
+    """Verifier r5 caveat 1: tokA $6 open + tokB $5 unfilled-cancelled left the
+    ledger at $1.00 because the release took the oldest row and the reconcile
+    then dropped tokB too."""
+    trm = _trm_env(monkeypatch, tmp_path)
+    trm.record_tiered_placement("1b", 6.0, token_id="tokA", now=1.0)
+    trm.record_tiered_placement("1b", 5.0, token_id="tokB", now=2.0)
+    trm.release_tiered_exposure("1b", 5.0, token_id="tokB")
+    exp = trm._tier_exposures["1b"]
+    assert [r["token_id"] for r in exp.placements] == ["tokA"] and exp.open_total == 6.0
+    trm.reconcile_tiered_exposure(resolved_tokens={"tokB"}, live_tokens={"tokA"}, now=3.0)
+    assert exp.open_total == 6.0
+    from src.copy_trading import trade_executor
+    src = inspect.getsource(trade_executor)
+    assert src.count("token_id=po.trade.token_id") == 4, "every release call site names the order's token"
+
+
+def test_a_corrupt_tier_state_goes_aside_with_one_error_and_one_push(monkeypatch, tmp_path, caplog):
+    """Verifier r5 caveat 2: a corrupt tiered-risk-state.json loaded as open
+    total 0 with no line; now the same class rule as the spend and queue files."""
+    import logging
+
+    from src import telegram_bot as tb
+    trm = _trm_env(monkeypatch, tmp_path)
+    (tmp_path / "tiered-risk-state.json").write_text("{nope")
+    pushed: list = []
+    monkeypatch.setattr(tb, "send_message", lambda text, **k: pushed.append((text, k.get("kind"))) or True)
+    with caplog.at_level(logging.DEBUG):
+        trm._load_state()
+        trm._load_state()
+    errs = [r for r in caplog.records if "unreadable" in r.getMessage() and r.levelno >= logging.ERROR]
+    assert len(errs) == 1, "once: the file is gone after the first load"
+    aside = [p for p in tmp_path.iterdir() if p.name.startswith("tiered-risk-state.json.corrupt-")]
+    assert len(aside) == 1 and aside[0].read_text() == "{nope"
+    assert len(pushed) == 1 and pushed[0][1] == tb.KIND_BOT and "Tier ledger unreadable" in pushed[0][0]
+    assert trm._tier_exposures["1b"].open_total == 0.0
+    trm.record_tiered_placement("1b", 6.0, token_id="t", now=1.0)
+    assert (tmp_path / "tiered-risk-state.json").exists(), "the next placement rewrites a clean file"
+
+
 def test_release_takes_the_oldest_rows_first(monkeypatch, tmp_path):
     trm = _trm_env(monkeypatch, tmp_path)
     trm.record_tiered_placement("1b", 6.0, token_id="a", now=1.0)

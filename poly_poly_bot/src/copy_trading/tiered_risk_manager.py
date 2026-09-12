@@ -18,6 +18,7 @@ import json
 import math
 import os
 import tempfile
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
@@ -95,7 +96,13 @@ def _load_state() -> None:
     try:
         with open(_STATE_FILE, "r") as f:
             raw = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except FileNotFoundError:
+        return
+    except (json.JSONDecodeError, ValueError) as exc:
+        # Unreadable is not "nothing open". The file goes aside for the RCA,
+        # one ERROR and one BOT push say so, and the next placement rewrites
+        # a clean one; until then the daily and per-wallet caps bound the day.
+        _quarantine_unreadable(exc)
         return
 
     today = today_utc()
@@ -126,6 +133,22 @@ def _load_state() -> None:
         # re-reads the file) would drop and warn about the same total again.
         _save_state()
     return
+
+
+def _quarantine_unreadable(exc: Exception) -> None:
+    aside = f"{_STATE_FILE}.corrupt-{int(time.time())}"
+    try:
+        os.replace(_STATE_FILE, aside)
+    except OSError:
+        aside = "(could not move it aside)"
+    msg = (f"tiered-risk state file was unreadable ({exc.__class__.__name__}); kept aside as "
+           f"{os.path.basename(aside)}; exposure reads empty until the next placement rewrites it")
+    logger.error(f"[tiered-risk] {msg}")
+    try:
+        from src import telegram_bot as tb
+        tb.send_message("⚠️ <b>Tier ledger unreadable.</b> " + tb._esc(msg), kind=tb.KIND_BOT)
+    except Exception as e:
+        logger.warn(f"[tiered-risk] could not announce the unreadable file: {e}")
 
 
 def _save_state() -> None:
@@ -319,24 +342,27 @@ def record_tiered_placement(tier: StrategyTier, copy_size: float,
     )
 
 
-def release_tiered_exposure(tier: StrategyTier, amount: float) -> None:
+def release_tiered_exposure(tier: StrategyTier, amount: float,
+                            token_id: Optional[str] = None) -> None:
     """Release exposure when a position is closed or settled.
 
-    Args:
-        tier: Which tier to release from.
-        amount: USD amount to release (positive).
+    With ``token_id`` the release comes off that order's own row (an
+    unfilled copy releases itself, not the oldest row; verifier r5); without
+    it the oldest rows go first, up to the amount.
     """
     exp = _tier_exposures.get(tier)
     if exp is None:
         logger.warn(f"[tiered-risk] Unknown tier for release: {tier}")
         return
 
-    # Release the oldest rows first, up to the amount.
     left = float(amount)
     kept = []
-    for row in exp.placements:
+    tok = str(token_id or "")
+    rows = list(exp.placements)
+    for row in rows:
         c = float(row.get("cost") or 0.0)
-        if left <= 0:
+        same = (not tok) or str(row.get("token_id") or "") == tok
+        if left <= 0 or not same:
             kept.append(row)
         elif c <= left + 1e-9:
             left -= c
