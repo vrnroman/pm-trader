@@ -2581,6 +2581,68 @@ def test_disk_watch_keeps_a_week_of_samples(tmp_path, monkeypatch):
     assert st["samples"][-1]["ts"] == 29 * 8 * 3600.0
 
 
+def test_the_queue_survives_two_writers(tmp_path, monkeypatch):
+    """Code review V10: the executor loop and the Telegram thread both rewrite
+    pending-orders.json whole; interleaved saves left the file equal to the
+    earlier snapshot, so a live order vanished across a restart."""
+    import json
+    import threading
+
+    from src.copy_trading import trade_queue as q
+    from src.models import DetectedTrade, PendingOrder
+    monkeypatch.setattr(q, "_ORDERS_FILE", str(tmp_path / "pending-orders.json"))
+    monkeypatch.setattr(q, "_pending_orders", [])
+
+    def po(i):
+        t = DetectedTrade(id=f"t{i}", trader_address=W1, timestamp="2026-09-12T10:00:00+00:00",
+                          market="m", token_id=f"tok{i}", condition_id="c", side="BUY", size=900.0, price=0.5)
+        return PendingOrder(trade=t, order_id=f"0x{i:04d}", order_price=0.5, copy_size=6.0, placed_at=1.0,
+                            market_key="m", side="BUY", source_detected_at=1.0, enqueued_at=1.0,
+                            order_submitted_at=1.0, source="copy:1b", tier="1b")
+
+    def writer(base):
+        for i in range(base, base + 60):
+            q.enqueue_pending_order(po(i))
+            if i % 3 == 0:
+                q.remove_pending_order(f"0x{i:04d}")
+    ts = [threading.Thread(target=writer, args=(0,)), threading.Thread(target=writer, args=(1000,))]
+    for t in ts: t.start()
+    for t in ts: t.join()
+    mem = sorted(o.order_id for o in q.peek_pending_orders())
+    disk = sorted(e["order_id"] for e in json.loads((tmp_path / "pending-orders.json").read_text()))
+    assert mem == disk, "the file is the queue"
+    assert len(mem) == 80, len(mem)
+
+
+def test_the_closed_day_announce_does_not_hold_the_lock(tmp_path, monkeypatch):
+    """Code review V11: the corrupt-file branch sent to Telegram while holding
+    the spend guard's lock on the executor's loop (up to 20 s frozen)."""
+    import threading
+    import time as _t
+
+    from src import telegram_bot as tb
+    from src.copy_trading import daily_spend_guard as g
+    monkeypatch.setattr(g, "_STATE_FILE", str(tmp_path / "daily-spend.json"))
+    (tmp_path / "daily-spend.json").write_text("{not json")
+    started = threading.Event()
+    done = threading.Event()
+
+    def slow_send(text, **k):
+        started.set()
+        _t.sleep(0.4)
+        done.set()
+    monkeypatch.setattr(tb, "send_message", slow_send)
+    t0 = _t.monotonic()
+    g.reset_state()
+    ok, why = g.can_spend(5.0)
+    assert ok is False and "spend guard closed" in why
+    assert _t.monotonic() - t0 < 0.2, "the money path did not wait for Telegram"
+    assert started.wait(1.0) and not done.is_set(), "the send is still running..."
+    t1 = _t.monotonic()
+    assert g.can_spend(5.0)[0] is False and _t.monotonic() - t1 < 0.2, "...and the lock is free"
+    assert done.wait(2.0)
+
+
 def test_the_verifier_reports_a_test_order_too():
     from src.copy_trading import trade_executor
     src = inspect.getsource(trade_executor.process_verifications)

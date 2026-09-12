@@ -115,12 +115,21 @@ def _load_locked() -> None:
 
 
 def _announce_closed(reason: str) -> None:
-    """One BOT-class push naming the closed day. Never raises."""
+    """One BOT-class push naming the closed day, from its own thread: the
+    caller holds ``_lock`` on the executor's loop, and a Telegram send can
+    take 10 to 20 s (code review, V11). Never raises."""
+    import threading
+
+    def _send() -> None:
+        try:
+            from src import telegram_bot as tb
+            tb.send_message("⛔ <b>Spend guard closed for today.</b> " + tb._esc(reason)
+                            if hasattr(tb, "_esc") else "⛔ Spend guard closed for today. " + reason,
+                            kind=getattr(tb, "KIND_BOT", None))
+        except Exception as exc:
+            logger.warn(f"[daily-cap] could not announce the closed day: {exc}")
     try:
-        from src import telegram_bot as tb
-        tb.send_message("⛔ <b>Spend guard closed for today.</b> " + tb._esc(reason)
-                        if hasattr(tb, "_esc") else "⛔ Spend guard closed for today. " + reason,
-                        kind=getattr(tb, "KIND_BOT", None))
+        threading.Thread(target=_send, name="spend-guard-announce", daemon=True).start()
     except Exception as exc:
         logger.warn(f"[daily-cap] could not announce the closed day: {exc}")
 

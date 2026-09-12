@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 import time
 import tempfile
 from typing import Optional
@@ -73,6 +74,11 @@ def drain_trades() -> list[QueuedTrade]:
 
 _ORDERS_FILE = os.path.join(CONFIG.data_dir, "pending-orders.json")
 _pending_orders: list[PendingOrder] = []
+# Two threads write this queue: the executor loop and the Telegram thread
+# (/testorder). The file is a whole-list rewrite, so two interleaved saves
+# left the file equal to the EARLIER snapshot (code review, V10). One lock
+# around every mutation and its save.
+_q_lock = threading.RLock()
 # False until the boot step that reloads pending orders has run. Between
 # Telegram polling starting and that step (about 18 s on the VM) an order
 # posted here would be overwritten by the reload and never verified.
@@ -104,9 +110,11 @@ def load_pending_orders_from_disk() -> int:
         with open(_ORDERS_FILE, "r") as f:
             raw = json.load(f)
         if isinstance(raw, list):
-            _pending_orders = [PendingOrder(**entry) for entry in raw]
-            logger.info(f"[queue] Loaded {len(_pending_orders)} pending orders from disk")
-            return len(_pending_orders)
+            with _q_lock:
+                _pending_orders = [PendingOrder(**entry) for entry in raw]
+                n = len(_pending_orders)
+            logger.info(f"[queue] Loaded {n} pending orders from disk")
+            return n
         raise ValueError(f"expected a list, got {type(raw).__name__}")
     except FileNotFoundError:
         return 0
@@ -143,28 +151,32 @@ def clear_pending_orders_on_disk() -> None:
 
 def enqueue_pending_order(order: PendingOrder) -> None:
     """Add a placed order to the verification queue. Persists to disk."""
-    _pending_orders.append(order)
-    _save_pending_orders()
+    with _q_lock:
+        _pending_orders.append(order)
+        _save_pending_orders()
+        depth = len(_pending_orders)
     logger.debug(
         f"[queue] Enqueued pending order {order.order_id[:12]}... | "
-        f"queue depth: {len(_pending_orders)}"
+        f"queue depth: {depth}"
     )
 
 
 def peek_pending_orders() -> list[PendingOrder]:
     """Get a copy of all pending orders (does not modify the queue)."""
-    return _pending_orders[:]
+    with _q_lock:
+        return _pending_orders[:]
 
 
 def remove_pending_order(order_id: str) -> Optional[PendingOrder]:
     """Remove a pending order by order_id. Persists to disk. Returns removed order or None."""
     global _pending_orders
-    for i, order in enumerate(_pending_orders):
-        if order.order_id == order_id:
-            removed = _pending_orders.pop(i)
-            _save_pending_orders()
-            logger.debug(f"[queue] Removed pending order {order_id[:12]}...")
-            return removed
+    with _q_lock:
+        for i, order in enumerate(_pending_orders):
+            if order.order_id == order_id:
+                removed = _pending_orders.pop(i)
+                _save_pending_orders()
+                logger.debug(f"[queue] Removed pending order {order_id[:12]}...")
+                return removed
     return None
 
 
@@ -178,13 +190,14 @@ def update_pending_order(order_id: str, **kwargs: object) -> bool:
     Returns:
         True if order was found and updated, False otherwise.
     """
-    for order in _pending_orders:
-        if order.order_id == order_id:
-            for key, value in kwargs.items():
-                if hasattr(order, key):
-                    setattr(order, key, value)
-            _save_pending_orders()
-            return True
+    with _q_lock:
+        for order in _pending_orders:
+            if order.order_id == order_id:
+                for key, value in kwargs.items():
+                    if hasattr(order, key):
+                        setattr(order, key, value)
+                _save_pending_orders()
+                return True
     return False
 
 
@@ -194,9 +207,11 @@ def replace_pending_orders(orders: list[PendingOrder]) -> None:
     Used for bulk updates (e.g. removing multiple filled orders at once).
     """
     global _pending_orders
-    _pending_orders = orders[:]
-    _save_pending_orders()
-    logger.debug(f"[queue] Replaced pending orders list ({len(_pending_orders)} orders)")
+    with _q_lock:
+        _pending_orders = orders[:]
+        _save_pending_orders()
+        n = len(_pending_orders)
+    logger.debug(f"[queue] Replaced pending orders list ({n} orders)")
 
 
 def get_pending_order_count() -> int:
