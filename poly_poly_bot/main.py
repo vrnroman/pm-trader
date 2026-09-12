@@ -106,6 +106,52 @@ def _send_deal(text: str) -> bool:
     return telegram_bot.send_message(text, kind=telegram_bot.KIND_DEAL)
 
 
+def _send_bot(text: str) -> bool:
+    return telegram_bot.send_message(text, kind=telegram_bot.KIND_BOT)
+
+
+def _send_wallet_kb(text: str, keyboard: dict) -> bool:
+    return telegram_bot.send_message(text, kind=telegram_bot.KIND_WALLET, reply_markup=keyboard)
+
+
+def _followed_activity_3d(now: float) -> tuple[int, int]:
+    """(qualifying buy signals from set-Z wallets, copies placed) in the last
+    three days, from the trade history. The absence clock's inputs."""
+    import json as _json
+    from src.copy_trading import zset
+    from src.copy_trading.trade_store import _HISTORY_FILE
+    z = zset.wallet_set()
+    floor = float(getattr(CONFIG, "copy_paper_min_usd", 300.0) or 300.0)
+    since = now - 3 * 86400
+    signals = copies = 0
+    try:
+        with open(_HISTORY_FILE, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    r = _json.loads(line)
+                except ValueError:
+                    continue
+                ts = r.get("received_at_ms") or r.get("source_detected_at")
+                try:
+                    ts = float(ts or 0)
+                    if ts > now * 10:  # milliseconds
+                        ts /= 1000.0
+                except (TypeError, ValueError):
+                    ts = 0.0
+                if ts < since:
+                    continue
+                if str(r.get("trader_address") or "").lower() not in z or str(r.get("side")) != "BUY":
+                    continue
+                if str(r.get("status")) in ("PLACED", "FILLED", "PARTIAL"):
+                    copies += 1
+                    signals += 1
+                elif float(r.get("trader_size") or 0) >= floor:
+                    signals += 1
+    except OSError:
+        pass
+    return signals, copies
+
+
 def _live_guard_loop():
     """Watch real money while nobody is looking (see live_guard).
 
@@ -120,8 +166,12 @@ def _live_guard_loop():
     interval = 300.0
     crash_streak = 0
     guard_started = time.time()
+    last_admit_scan = 0.0
+    admit_scan_every = float(os.environ.get("ZSET_AUTO_ADMIT_EVERY_S", 6 * 3600))
     logger.info("[guard] live guard started (detect always, act only when armed)")
     while not _shutdown_event.is_set():
+        pass_ok, pass_error = True, ""
+        released_rows: list = []
         # Gather the REAL inputs, from the sources that actually know. An
         # earlier version imported a function that does not exist, swallowed
         # the ImportError, and called run_once with nothing, so every detector
@@ -221,10 +271,53 @@ def _live_guard_loop():
                                  if float((p or {}).get("shares") or 0) > 0}
                     _trm.reconcile_tiered_exposure(
                         resolved_tokens=_resolved_ids if known else set(),
-                        live_tokens=_live_ids if _live_ids else None)
+                        live_tokens=_live_ids if _live_ids else None,
+                        rows_out=released_rows)
                 except Exception as _exc:
                     logger.warn(f"[guard] exposure reconcile failed: {_exc}")
+                # The watcher: settlements booked from the rows the reconcile
+                # released, the bankroll checked against the push policy, and
+                # the money state written for the digest.
+                try:
+                    from src.copy_trading import ops_watch
+                    from src.copy_trading.auto_redeemer import _position_value as _pv
+                    _by_tok = {}
+                    for _p in (redeemable or []):
+                        if isinstance(_p, dict):
+                            for _k in ("tokenId", "asset", "token_id"):
+                                if _p.get(_k):
+                                    _by_tok[str(_p.get(_k))] = _p
+                                    break
+                    _settled = []
+                    for _r in released_rows:
+                        if _r.get("why") != "resolved":
+                            continue
+                        _row = _by_tok.get(str(_r.get("token_id") or ""), {})
+                        _settled.append(ops_watch.Settlement(
+                            token_id=str(_r.get("token_id") or ""), wallet=str(_r.get("trader") or ""),
+                            cost=float(_r.get("cost") or 0.0), payout=float(_pv(_row)) if _row else 0.0,
+                            tier=str(_r.get("tier") or ""), title=str(_r.get("title") or _row.get("title") or "")))
+                    _stated = live_budget.stated_budget()
+                    if _settled:
+                        ops_watch.record_settlements(_settled, equity=equity_usd, stated=_stated,
+                                                     floor=floor_usd, send=_send_deal)
+                    ops_watch.check_bankroll(equity=equity_usd, floor=floor_usd, send=_send_deal)
+                    _spend = None
+                    try:
+                        from src.copy_trading import daily_spend_guard as _dsg
+                        _spend = _dsg.status()
+                    except Exception:
+                        pass
+                    ops_watch.write_money_state({
+                        "cash": bal, "open_cost": open_cost, "equity": equity_usd, "floor": floor_usd,
+                        "stated": _stated, "spend": _spend, "armed": live_mode.is_armed(),
+                        "resolved_unclaimed": len(redeemable or []),
+                        "tier": {k: v.open_total for k, v in _trm._tier_exposures.items()},
+                    })
+                except Exception as _exc:
+                    logger.warn(f"[guard] watcher money pass failed: {_exc}")
         except Exception as exc:
+            pass_ok, pass_error = False, str(exc)
             logger.warn(f"[guard] could not read equity for the floor: {exc}")
         try:
             out = live_guard.run_once(
@@ -238,7 +331,38 @@ def _live_guard_loop():
                             f"{out['unredeemed']} unredeemed")
         except Exception as exc:
             crash_streak += 1
+            pass_ok, pass_error = False, str(exc)
             logger.error(f"[guard] pass failed ({crash_streak} in a row): {exc}")
+        # The watcher's absence clocks, self re-arm, escalation delivery and
+        # the guard-failing streak. Each is its own try: one failing check
+        # must not silence the others.
+        try:
+            from src.copy_trading import live_mode as _lm, ops_watch
+            _now = time.time()
+            ops_watch.note_guard_pass(pass_ok, pass_error, send=_send_deal)
+            try:
+                _sig, _cop = _followed_activity_3d(_now)
+                ops_watch.check_absences(followed_signals_3d=_sig, copies_3d=_cop,
+                                         armed=_lm.is_armed(), send=_send_deal)
+            except Exception as _exc:
+                logger.warn(f"[guard] absence clocks failed: {_exc}")
+            try:
+                _arm = _lm.read_arm()
+                _gs = live_guard._read_state()
+                _clear = not bool((out or {}).get("disarm_condition")) if isinstance(out, dict) else False
+                ops_watch.maybe_rearm(arm=_arm, guard_state=_gs, condition_clear=_clear, send=_send_deal)
+            except Exception as _exc:
+                logger.warn(f"[guard] self re-arm check failed: {_exc}")
+            ops_watch.deliver_escalation(send=_send_bot)
+            if _now - last_admit_scan >= admit_scan_every:
+                last_admit_scan = _now
+                try:
+                    from src.copy_trading import ops_admit
+                    ops_admit.scan(send=_send_wallet_kb)
+                except Exception as _exc:
+                    logger.warn(f"[guard] auto-admit scan failed: {_exc}")
+        except Exception as exc:
+            logger.warn(f"[guard] watcher pass failed: {exc}")
         _shutdown_event.wait(interval)
 
 
@@ -1052,7 +1176,19 @@ def _ab_race_reporter_loop():
                 if held and not telegram_bot.research_enabled():
                     deal_text += (f"\n🔬 {held} research message(s) held since the last "
                                   f"daily line. /research on to receive them.")
+                try:
+                    from src.copy_trading import ops_watch as _ow
+                    deal_text += "\n" + _ow.daily_line()
+                    if datetime.now(timezone.utc).weekday() == 0:
+                        deal_text += "\n" + _ow.weekly_line()
+                except Exception as _exc:
+                    logger.warn(f"[AB-RACE] ledger lines failed: {_exc}")
                 sent_deal = telegram_bot.send_message(deal_text, kind=telegram_bot.KIND_DEAL)
+                try:
+                    from src.copy_trading import ops_watch as _ow
+                    _ow.note_daily_line(bool(sent_deal))
+                except Exception:
+                    pass
                 if sent_deal:
                     telegram_bot.suppressed_research_count(reset=True)
                 logger.info(f"[AB-RACE] rehearsal line "

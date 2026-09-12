@@ -148,3 +148,28 @@ jobs:
               timeout=20).read()
           raise SystemExit(1)
           PY
+
+  # Once a week the go-live drills run here, outside the VM, so the kill
+  # switch is proven on a schedule and not only on deploys. The probe job
+  # above is untouched; this is a second job on the same cron.
+  drills:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Only on Monday 06:xx UTC
+        id: when
+        run: |
+          if [ "$(date -u +%u)" = "1" ] && [ "$(date -u +%H)" = "06" ]; then echo "go=1" >> "$GITHUB_OUTPUT"; else echo "go=0" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-python@v5
+        if: steps.when.outputs.go == '1'
+        with:
+          python-version: "3.12"
+      - name: Run the drills (nothing places an order or arms anything)
+        if: steps.when.outputs.go == '1'
+        working-directory: poly_poly_bot
+        env:
+          PREVIEW_MODE: "true"
+        run: |
+          pip install -q -r requirements.txt
+          python scripts/golive_drills.py

@@ -175,6 +175,22 @@ class SecretScrubFormatter(logging.Formatter):
 _BOT_LOG_RE = re.compile(r"bot-(\d{4}-\d{2}-\d{2})\.log$")
 
 
+def _purge_old_prefixed_logs(logs_dir: Path, prefix: str, retention_days: int,
+                             today=None) -> None:
+    """Like _purge_old_bot_logs, for another dated prefix."""
+    today = today or datetime.now(timezone.utc).date()
+    cutoff = today - timedelta(days=retention_days)
+    for path in logs_dir.glob(f"{prefix}-*.log"):
+        m = re.search(r"(\d{4}-\d{2}-\d{2})", path.name)
+        if not m:
+            continue
+        try:
+            if datetime.strptime(m.group(1), "%Y-%m-%d").date() <= cutoff:
+                path.unlink()
+        except (ValueError, OSError):
+            continue
+
+
 def _purge_old_bot_logs(logs_dir: Path, retention_days: int,
                         today: "datetime.date | None" = None) -> None:
     """Delete ``bot-<date>.log`` files whose embedded UTC date is older than
@@ -322,6 +338,24 @@ class BotLogger:
         ops_handler.addFilter(_OperationalFilter())
         ops_handler.addFilter(SecretScrubFilter())
         self._logger.addHandler(ops_handler)
+
+        # -- Important file: the deterministic split the watcher and the
+        # digest read (one regex, ops_watch.is_important). Rolls daily, kept
+        # for a fortnight by the same purge keyed on the filename date.
+        try:
+            from src.copy_trading.ops_watch import is_important as _is_important
+        except Exception:  # pragma: no cover - the app package is always there
+            _is_important = None
+        if _is_important is not None:
+            imp_handler = _DailyRotatingFileHandler(
+                logs_dir, "important",
+                on_rollover=lambda d: _purge_old_prefixed_logs(d, "important", 14))
+            imp_handler.setLevel(logging.INFO)
+            imp_handler.setFormatter(formatter)
+            imp_handler.addFilter(lambda rec: bool(_is_important(rec.getMessage())))
+            imp_handler.addFilter(SecretScrubFilter())
+            self._logger.addHandler(imp_handler)
+            _purge_old_prefixed_logs(logs_dir, "important", 14)
 
         # Purge old operational logs on startup, then on every midnight rollover.
         _purge_old_bot_logs(logs_dir, retention)

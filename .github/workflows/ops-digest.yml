@@ -1,0 +1,93 @@
+name: Ops digest
+
+# Every hour: pull the important lines and the money state out of the VM,
+# commit them to the ops-digest branch (never main, so nothing deploys),
+# and carry any escalation the cloud routine left on that branch DOWN to
+# the VM, where the bot sends it on Telegram at its next guard pass. Zero
+# new secrets: the same service account the heartbeat uses.
+# Manual first: the digest is proven by hand (workflow_dispatch) before the
+# hourly cron is added, per the manager's "prove the logic, then schedule".
+on:
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: "Hours of log to include"
+        default: "24"
+
+concurrency:
+  group: ops-digest
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Prepare the ops-digest branch
+        run: |
+          git config user.name "ops-digest"
+          git config user.email "ops-digest@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin ops-digest >/dev/null 2>&1; then
+            git fetch origin ops-digest
+            git checkout -B ops-digest origin/ops-digest
+          else
+            git checkout --orphan ops-digest
+            git rm -rf -q . || true
+            mkdir -p ops
+            echo "# ops digest branch" > ops/README.md
+            git add ops && git commit -q -m "ops: start the digest branch"
+            git push -q origin ops-digest
+          fi
+          mkdir -p ops
+
+      - name: Carry any new escalation down to the VM
+        run: |
+          set +e
+          if [ -f ops/verdict.json ]; then
+            KIND=$(python3 -c "import json;print(json.load(open('ops/verdict.json')).get('kind',''))" 2>/dev/null)
+            VID=$(python3 -c "import json;print(json.load(open('ops/verdict.json')).get('id',''))" 2>/dev/null)
+            LAST=$(cat ops/.delivered 2>/dev/null || echo "")
+            if [ "$KIND" = "escalation" ] && [ -n "$VID" ] && [ "$VID" != "$LAST" ]; then
+              gcloud compute scp ops/verdict.json poly-poly-bot:/tmp/ops-escalation.json \
+                --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
+              && gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
+                   --command='mv /tmp/ops-escalation.json /home/tianyuezhou/app/data/ops-escalation.json' \
+              && echo "$VID" > ops/.delivered && echo "delivered escalation $VID"
+            fi
+          fi
+          set -e
+
+      - name: Pull the digest out of the VM
+        run: |
+          HOURS="${{ github.event.inputs.hours || '24' }}"
+          gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
+            --command="docker exec poly-poly-bot python scripts/ops_digest.py --hours $HOURS" > ops/latest.md
+          gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
+            --command="docker exec poly-poly-bot python scripts/ops_digest.py --hours $HOURS --json" > ops/state.json
+          DAY=$(date -u +%F)
+          cp ops/latest.md "ops/digest-$DAY.md"
+          # keep two weeks of daily files
+          ls -1 ops/digest-*.md 2>/dev/null | sort | head -n -14 | xargs -r git rm -q --ignore-unmatch
+          wc -l ops/latest.md
+
+      - name: Commit and push
+        run: |
+          git add -A ops
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -q -m "ops: digest $(date -u +%FT%TZ)"
+          git push -q origin ops-digest

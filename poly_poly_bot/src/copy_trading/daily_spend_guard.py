@@ -241,11 +241,21 @@ def can_copy_wallet(wallet: str) -> tuple[bool, str]:
     their turn.
     """
     cap = int(getattr(CONFIG, "live_max_per_wallet_day", 0) or 0)
+    # A wallet the bot admitted on its own is on probation: fewer copies a
+    # day until its first live copies have settled (ops_watch).
+    try:
+        from src.copy_trading import ops_watch
+        pcap = ops_watch.probation_cap(wallet)
+    except Exception:
+        pcap = None
+    label = "per-wallet daily cap"
+    if pcap is not None and (cap <= 0 or pcap < cap):
+        cap, label = int(pcap), "probation cap"
     if cap <= 0:
         return True, ""
     n = wallet_copies_today(wallet)
     if n >= cap:
-        return False, (f"per-wallet daily cap: {n} of {cap} copies from "
+        return False, (f"{label}: {n} of {cap} copies from "
                        f"{(wallet or '')[:10]} already today")
     return True, ""
 

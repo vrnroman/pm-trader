@@ -367,6 +367,13 @@ def evict(wallet: str, reason: str = "") -> bool:
     gone = promotion_state.remove_promoted(wallet, scope=SCOPE)
     if gone:
         logger.warn(f"[zset] EVICTED {wallet} from set Z: {reason or 'no reason given'}")
+        try:
+            from src.copy_trading import ops_watch
+            if "owner tap" not in (reason or ""):
+                ops_watch.receipt("evict", before=f"{wallet[:10]} in set Z", after="evicted (sticky)",
+                                  detail=reason or "", extra={"wallet": wallet.lower()})
+        except Exception:
+            pass
     return gone
 
 

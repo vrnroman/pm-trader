@@ -55,6 +55,7 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "canary", "description": "One minimum-size real order through the live path (/canary CONFIRM)"},
     {"command": "rehearse", "description": "What your budget would have made at real quotes, at several budgets"},
     {"command": "research", "description": "Deliver or hold the research-class messages (/research on|off)"},
+    {"command": "ops", "description": "The watcher's ledger: what it did on its own, what it pushed"},
     {"command": "testorder", "description": "One real order at the exchange minimum to prove the pipeline (/testorder <token>)"},
     {"command": "setkey", "description": "Rotate/clear in-memory private key (e.g. /setkey clear CONFIRM)"},
     {"command": "slice", "description": "Cost-slice @net table for a paper book (/slice A|B)"},
@@ -437,6 +438,8 @@ def _handle_command(text: str):
         _handle_canary(text)
     elif text.startswith("/rehearse"):
         _handle_rehearse(text)
+    elif text.startswith("/ops"):
+        _handle_ops(text)
     elif text.startswith("/research"):
         _handle_research(text)
     elif text.startswith("/testorder"):
@@ -461,6 +464,34 @@ def _handle_command(text: str):
         _handle_help()
     else:
         return
+
+
+def _handle_ops(text: str) -> None:
+    """/ops: the watcher's ledger, plainly. What it did on its own, what it
+    pushed, what is on probation, the clocks."""
+    from src.copy_trading import ops_watch
+    import json as _json
+    lines = ["<b>The watcher</b>",
+             _esc(ops_watch.daily_line()),
+             _esc(ops_watch.weekly_line())]
+    st = ops_watch._read_json(ops_watch._p(ops_watch.STATE_FILE))
+    if st:
+        lines.append(f"guard failing streak {int(st.get('guard_fail_streak') or 0)}, "
+                     f"loss streak {int(st.get('loss_streak') or 0)}, day pnl {float(st.get('day_pnl') or 0):+.2f}, "
+                     f"self re-arms today {sum(int(v) for k, v in (st.get('rearms') or {}).items())}")
+    prob = ops_watch._read_json(ops_watch._p(ops_watch.PROBATION_FILE))
+    if prob:
+        lines.append("on probation: " + ", ".join(f"{w[:10]} ({int(v.get('settled') or 0)}/5 settled)"
+                                                  for w, v in prob.items()))
+    lines.append(f"auto-admission {'on' if ops_watch.auto_admit_enabled() else 'off'} (ZSET_AUTO_ADMIT)")
+    rows = ops_watch.ledger_rows(since_ts=time.time() - 86400)[-12:]
+    if rows:
+        lines.append("\n<b>last 24h, newest last</b>")
+        for r in rows:
+            when = datetime.fromtimestamp(float(r.get("ts") or 0), tz=timezone.utc).strftime("%H:%M")
+            lines.append(_esc(f"{when} {r.get('kind')}: {r.get('before') or ''} -> {r.get('after') or ''}"
+                              + (f" | {r.get('detail')}" if r.get("detail") else "")))
+    send_message("\n".join(lines))
 
 
 def _handle_status():
@@ -1334,7 +1365,8 @@ def _handle_help():
         "<code>/canary CONFIRM</code>: one minimum-size real order through the live path, then the arm comes off\n"
         "<code>/rehearse [budgets]</code>: what your budget would have made at real quotes, and which cap bound\n"
         "<code>/testorder &lt;token&gt;</code>: one real order at the exchange minimum to prove the pipeline\n"
-        "<code>/research on|off</code>: deliver or hold the research-class messages\n\n"
+        "<code>/research on|off</code>: deliver or hold the research-class messages\n"
+        "<code>/ops</code>: the watcher's ledger, what it did on its own and what it pushed\n\n"
         "<b>Message classes</b>: 💰 DEAL real money · 👛 WALLET who is followed · "
         "🔬 RESEARCH paper books and detectors (off by default) · 🤖 BOT the process\n\n"
         "<b>Safety levers</b>\n"
@@ -2297,7 +2329,28 @@ def _handle_callback(data: str) -> tuple[str, str | None]:
         return _handle_promote_tap(data)
     if data.startswith("zadm:"):
         return _handle_zset_admit_tap(data[len("zadm:"):])
+    if data.startswith("zevict:"):
+        return _handle_zset_evict_tap(data[len("zevict:"):])
     return ("Unknown action", None)
+
+
+def _handle_zset_evict_tap(wallet: str) -> tuple[str, str | None]:
+    """The owner's override of an automatic admission: one tap, sticky."""
+    from src.copy_trading import zset
+    ok = zset.evict(wallet, reason="owner tap (Evict button)")
+    try:
+        from src.copy_trading import ops_watch
+        ops_watch.receipt("evict", before=f"{wallet[:10]} in set Z",
+                          after="evicted (sticky)" if ok else "eviction NOT recorded",
+                          detail="owner tap", push=None, extra={"wallet": wallet.lower()})
+    except Exception:
+        pass
+    if ok:
+        return ("Evicted", f"⛔ <b>Evicted from set Z</b> <code>{_esc(wallet)}</code>\n"
+                           "Real money no longer follows it. The eviction sticks; "
+                           "<code>/zset readmit</code> is the only way back.")
+    return ("Could not evict", f"⚠️ <b>Could not record the eviction</b> of <code>{_esc(wallet)}</code>. "
+                               "Check the disk on the VM, then try again.")
 
 
 def _process_callback(cq: dict) -> None:

@@ -881,7 +881,8 @@ async def place_trade_orders(
             # failure here is logged loudly, never re-raised.
             try:
                 if TIERED_MODE and tier is not None:
-                    record_tiered_placement(tier, copy_size, token_id=trade.token_id)
+                    record_tiered_placement(tier, copy_size, token_id=trade.token_id,
+                                            trader=trade.trader_address, title=trade.market)
                 else:
                     record_placement_fn(trade, copy_size)
                 if trade.side == "BUY":

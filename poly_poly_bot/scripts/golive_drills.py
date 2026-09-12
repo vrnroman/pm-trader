@@ -236,6 +236,48 @@ def drill_canary_is_bounded() -> None:
     check("a fired canary does not restage without RESET", ok2 is False, why2[:60])
 
 
+def drill_kill_switch_pulls_the_arm() -> None:
+    """The kill switch must move the durable record, and a switch that cannot
+    write must say so (this project once shipped a kill switch that reported
+    success on a failure). Sandbox only, and nothing here ARMS: the armed
+    record is written by hand into the throwaway data dir."""
+    import json
+    import os
+    print("\n[10] kill switch, proven, not assumed")
+    from src.copy_trading import live_mode
+
+    def _write_armed() -> None:
+        os.makedirs(os.path.dirname(live_mode._path()), exist_ok=True)
+        with open(live_mode._path(), "w", encoding="utf-8") as f:
+            json.dump({"armed": True, "ts": 1.0, "by": "drill", "reason": "drill"}, f)
+
+    live_mode._hard_disarmed = False
+    try:
+        _write_armed()
+        check("the sandbox record reads armed", live_mode.read_arm().get("armed") is True)
+        check("disarm moves the record", live_mode.disarm(by="drill") is True
+              and live_mode.read_arm().get("armed") is False)
+        _write_armed()
+        real_replace = os.replace
+        os.replace = lambda *a, **k: (_ for _ in ()).throw(OSError(28, "No space left on device"))
+        try:
+            res = live_mode.disarm(by="drill")
+        finally:
+            os.replace = real_replace
+        hard, reason = live_mode.is_hard_disarmed()
+        check("a disarm that cannot write reports FAILURE", res is False, "returned False")
+        check("... and hard-disarms the process in memory", hard is True, reason[:60])
+        check("... while the durable record still reads ARMED (the caller is told)",
+              live_mode.read_arm().get("armed") is True)
+    finally:
+        live_mode._hard_disarmed = False
+        live_mode._hard_disarm_reason = ""
+        try:
+            live_mode.disarm(by="drill")
+        except Exception:
+            pass
+
+
 def main() -> int:
     # Run the guard drills against a THROWAWAY data dir. The first version ran
     # them against the live one, which flipped live_guard.json's edge state to
@@ -261,6 +303,7 @@ def main() -> int:
         drill_guard_detects_without_acting()
         drill_self_disarm_triggers()
         drill_canary_is_bounded()
+        drill_kill_switch_pulls_the_arm()
     finally:
         CONFIG.data_dir = real_data_dir
         live_guard.CONFIG.data_dir = real_data_dir

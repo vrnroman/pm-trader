@@ -135,12 +135,20 @@ def _load_state() -> None:
     return
 
 
+_unreadable_said = False
+
+
 def _quarantine_unreadable(exc: Exception) -> None:
+    global _unreadable_said
     aside = f"{_STATE_FILE}.corrupt-{int(time.time())}"
     try:
         os.replace(_STATE_FILE, aside)
     except OSError:
         aside = "(could not move it aside)"
+        # The file stays in place, so every load would say it again: once.
+        if _unreadable_said:
+            return
+    _unreadable_said = True
     msg = (f"tiered-risk state file was unreadable ({exc.__class__.__name__}); kept aside as "
            f"{os.path.basename(aside)}; exposure reads empty until the next placement rewrites it")
     logger.error(f"[tiered-risk] {msg}")
@@ -318,7 +326,9 @@ def evaluate_tiered_trade(
 
 def record_tiered_placement(tier: StrategyTier, copy_size: float,
                             token_id: Optional[str] = None,
-                            now: Optional[float] = None) -> None:
+                            now: Optional[float] = None,
+                            trader: Optional[str] = None,
+                            title: Optional[str] = None) -> None:
     """Record a placed trade for a tier (increases open exposure and daily volume)."""
     import time as _time
     exp = _tier_exposures.get(tier)
@@ -332,7 +342,8 @@ def record_tiered_placement(tier: StrategyTier, copy_size: float,
         exp.daily_date = today
 
     exp.placements.append({"token_id": str(token_id or ""), "cost": round(float(copy_size), 2),
-                           "ts": float(now if now is not None else _time.time())})
+                           "ts": float(now if now is not None else _time.time()),
+                           "trader": str(trader or "").lower(), "title": str(title or "")[:60]})
     exp.recount()
     exp.daily_volume += copy_size
     _save_state()
@@ -358,7 +369,10 @@ def release_tiered_exposure(tier: StrategyTier, amount: float,
     left = float(amount)
     kept = []
     tok = str(token_id or "")
-    rows = list(exp.placements)
+    if tok:
+        rows = sorted(exp.placements, key=lambda r: 0 if str(r.get("token_id") or "") == tok else 1)
+    else:
+        rows = list(exp.placements)
     for row in rows:
         c = float(row.get("cost") or 0.0)
         same = (not tok) or str(row.get("token_id") or "") == tok
@@ -369,6 +383,7 @@ def release_tiered_exposure(tier: StrategyTier, amount: float,
         else:
             kept.append({**row, "cost": round(c - left, 2)})
             left = 0.0
+    kept.sort(key=lambda r: float(r.get("ts") or 0.0))
     exp.placements = kept
     exp.recount()
     _save_state()
@@ -384,7 +399,8 @@ RECONCILE_GRACE_S = 3600.0
 
 
 def reconcile_tiered_exposure(*, resolved_tokens: set, live_tokens: Optional[set],
-                              now: Optional[float] = None) -> dict:
+                              now: Optional[float] = None,
+                              rows_out: Optional[list] = None) -> dict:
     """Drop placements whose position has resolved (paid out or lost) or has
     left the wallet, so exposure is what is actually open.
 
@@ -411,6 +427,9 @@ def reconcile_tiered_exposure(*, resolved_tokens: set, live_tokens: Optional[set
                 released[tier_key] = round(released.get(tier_key, 0.0)
                                            + float(row.get("cost") or 0.0), 2)
                 changed = True
+                if rows_out is not None:
+                    rows_out.append({**row, "tier": tier_key,
+                                     "why": "resolved" if tok in resolved else "gone"})
             else:
                 kept.append(row)
         exp.placements = kept

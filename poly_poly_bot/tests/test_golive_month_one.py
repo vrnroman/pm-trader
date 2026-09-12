@@ -2450,7 +2450,7 @@ def test_release_takes_the_oldest_rows_first(monkeypatch, tmp_path):
     trm.record_tiered_placement("1b", 6.0, token_id="b", now=2.0)
     trm.release_tiered_exposure("1b", 8.0)
     exp = trm._tier_exposures["1b"]
-    assert exp.open_total == 4.0 and exp.placements == [{"token_id": "b", "cost": 4.0, "ts": 2.0}]
+    assert exp.open_total == 4.0 and exp.placements == [{"token_id": "b", "cost": 4.0, "ts": 2.0, "trader": "", "title": ""}]
 
 
 def test_the_sink_tracks_the_order_before_accounting_and_passes_the_token(tmp_path, monkeypatch, caplog):

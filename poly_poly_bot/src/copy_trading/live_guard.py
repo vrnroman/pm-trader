@@ -368,6 +368,7 @@ def run_once(*, pending_orders: Optional[list] = None,
         feed_stale_s=feed_stale_s,
         equity_usd=eq_for_trigger, floor_usd=floor_usd)
     disarmed = False
+    findings_disarm_condition = bool(disarm)
     # The self-disarm edge is DETECTED and logged whether or not anything is
     # armed, which is how it gets exercised before there is money on it. The
     # owner is messaged when the guard ACTS (every time it pulls the arm, not
@@ -425,5 +426,6 @@ def run_once(*, pending_orders: Optional[list] = None,
         "cancelled": acted,
         "self_disarmed": disarmed,
         "disarm_reason": why,
+        "disarm_condition": findings_disarm_condition,
         "floor_overridden": overridden,
     }
