@@ -1,12 +1,12 @@
-# ops digest 2026-09-12T21:26:45.979132+00:00 (last 24h)
+# ops digest 2026-09-12T23:13:29.104178+00:00 (last 24h)
 
 ## money state
-{"cash": 56.083671, "open_cost": 5.35, "equity": 61.43, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-12", "spent_usd": 21.45, "cap_usd": 24.57, "remaining_usd": 3.12, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 5.35, "1c": 0}, "ts": 1789248106.9246857, "day": "2026-09-12"}
+{"cash": 62.303671, "open_cost": 0.0, "equity": 62.3, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-12", "spent_usd": 21.45, "cap_usd": 24.92, "remaining_usd": 3.47, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789254794.885807, "day": "2026-09-12"}
 
 ## arm: {"armed": true, "ts": 1788698166.0465596, "by": "1shot:s-kac3t7", "reason": "owner: go activate bot, let go in; make sure deals are done (run s-kac3t7)", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-12", "spent_usd": 21.45, "wallet_copies": {"0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": 2, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2}, "wallet_copies_yesterday": {}, "yesterday": "2026-09-11", "closed_reason": ""}
 ## set Z: {"0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": {"wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd", "tier": "1b", "ts": 1786889554.1197178, "source": "gate"}, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {"wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3", "tier": "1b", "ts": 1788698181.3515182, "source": "telegram-gate"}, "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a": {"wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a", "tier": "1b", "ts": 1788698182.8017697, "source": "telegram-gate"}, "0x05878ac343c1387d592042d788424412733ac40b": {"wallet": "0x05878ac343c1387d592042d788424412733ac40b", "tier": "1b", "ts": 1789234932.162376, "source": "telegram-gate"}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"wallet": "0x09b045baad1fbe115c70785635a261411774a3b6", "tier": "1b", "ts": 1789234933.8880239, "source": "telegram-gate"}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab", "tier": "1b", "ts": 1789235975.528039, "source": "telegram-gate"}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709", "tier": "1b", "ts": 1789235977.260961, "source": "telegram-gate"}, "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {"wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35", "tier": "1b", "ts": 1789236561.2672133, "source": "telegram-gate"}, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {"wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2", "tier": "1b", "ts": 1789236563.7443745, "source": "telegram-gate"}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da", "tier": "1b", "ts": 1789237156.0778086, "source": "telegram-gate"}, "0xd970693a3384dc762b191707a4927ac3814bbbba": {"wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba", "tier": "1b", "ts": 1789237157.586524, "source": "telegram-gate"}}
-## tier exposure: {"1a": [0, 0], "1b": [5.35, 1], "1c": [0, 0]}
+## tier exposure: {"1a": [0, 0], "1b": [0, 0], "1c": [0, 0]}
 ## probation: {"0x05878ac343c1387d592042d788424412733ac40b": {"since": 1789234925.3749237, "settled": 0}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"since": 1789234925.3749237, "settled": 0}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"since": 1789235966.2959275, "settled": 0}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"since": 1789235966.2959275, "settled": 0}, "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {"since": 1789236552.0468774, "settled": 0}, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {"since": 1789236552.0468774, "settled": 0}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"since": 1789237149.0874667, "settled": 0}, "0xd970693a3384dc762b191707a4927ac3814bbbba": {"since": 1789237149.0874667, "settled": 0}}
 
 ## ledger (13 rows)
@@ -25,6 +25,19 @@
 {"ts": 1789246822.0691295, "day": "2026-09-12", "kind": "push:daily_loss", "before": null, "after": "📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll).", "detail": "", "push": "DEAL"}
 
 ## important lines (400)
+2026-09-12 15:57:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-12 15:58:44 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
+2026-09-12 16:02:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-12 16:03:46 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
+2026-09-12 16:08:48 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
+2026-09-12 16:13:49 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
+2026-09-12 16:18:50 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
+2026-09-12 16:23:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-12 16:23:51 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
+2026-09-12 16:24:09 INFO  Received signal 15, shutting down...
+2026-09-12 16:25:36 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped
+2026-09-12 16:25:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
+2026-09-12 16:25:39 INFO  Bot started. Monitoring trades...
 2026-09-12 16:25:44 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped
 2026-09-12 16:26:03 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped
 2026-09-12 16:27:12 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped
@@ -165,20 +178,7 @@
 2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.37' -> 'paid $0.00' | lost -5.37 on 'Will Alanyaspor vs. Göztepe SK end in a ' (, tier 1b)
 2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.36' -> 'paid $0.01' | lost -5.35 on 'FC Lugano vs. Young Boys Bern: O/U 3.5' (, tier 1b)
 2026-09-12 21:00:24 INFO  [ops] push:daily_loss: None -> "📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll)."
-2026-09-11 21:32:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $950.41 on 'Philadelphia Phillies vs. Atlanta Braves'
-2026-09-11 21:32:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $3358.85 on 'Philadelphia Phillies vs. Atlanta Braves'
-2026-09-11 21:32:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $390.69 on 'Philadelphia Phillies vs. Atlanta Braves'
-2026-09-11 21:37:34 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.79 on 'Will CA Newell's Old Boys vs. CA Vélez S'
-2026-09-11 21:43:55 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $3090.00 on 'Philadelphia Phillies vs. Atlanta Braves'
-2026-09-11 22:02:46 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $3013.37 on 'Will 1. FSV Mainz 05 win on 2026-09-12?'
-2026-09-11 22:41:18 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $3.23 on 'CSyD Defensa y Justicia vs. CA Gimnasia '
-2026-09-11 22:41:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.78 on 'LoL: Cupid Esports vs Maryville Universi'
-2026-09-11 22:53:32 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $5734.39 on 'Kansas City Royals vs. Boston Red Sox: O'
-2026-09-11 22:54:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $4.93 on 'Will NJ/NY Gotham FC win on 2026-09-11?'
-2026-09-11 22:56:06 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1294.00 on 'Coritiba FBC vs. CA Paranaense: O/U 2.5'
-2026-09-11 23:01:36 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.39 on 'Rainbow Six Siege: Shopify Rebellion vs '
-2026-09-11 23:08:29 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.63 on 'Rainbow Six Siege: Shopify Rebellion vs '
-2026-09-11 23:08:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $368.64 on 'Will New Mexico United win on 2026-09-11'
+2026-09-12 23:13:14 INFO  [tiered-risk] tier 1b: released $5.35 of exposure from resolved or closed positions | open now: $0.00
 2026-09-11 23:39:10 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.59 on 'Valorant: Team Liquid Brazil vs Evil Gen'
 2026-09-11 23:41:10 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.86 on 'Counter-Strike: FarmVille vs Overtake (B'
 2026-09-11 23:45:45 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $62.94 on 'Rutgers vs. Boston College'

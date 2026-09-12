@@ -1,26 +1,26 @@
 {
- "generated": "2026-09-12T21:27:02.284306+00:00",
+ "generated": "2026-09-12T23:13:35.494306+00:00",
  "money": {
-  "cash": 56.083671,
-  "open_cost": 5.35,
-  "equity": 61.43,
+  "cash": 62.303671,
+  "open_cost": 0.0,
+  "equity": 62.3,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-12",
    "spent_usd": 21.45,
-   "cap_usd": 24.57,
-   "remaining_usd": 3.12,
+   "cap_usd": 24.92,
+   "remaining_usd": 3.47,
    "closed_reason": ""
   },
   "armed": true,
   "resolved_unclaimed": 68,
   "tier": {
    "1a": 0,
-   "1b": 5.35,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1789248417.7507694,
+  "ts": 1789254794.885807,
   "day": "2026-09-12"
  },
  "arm": {
@@ -50,18 +50,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 5.35,
+   "open_total": 0,
    "daily_date": "2026-09-12",
    "daily_volume": 21.450000000000003,
-   "placements": [
-    {
-     "token_id": "22017103557740812707580911874261255813575132986015655959231267209290061014747",
-     "cost": 5.35,
-     "ts": 1789235330.9381156,
-     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Will FC Arda Kardzhali win on 2026-09-12?"
-    }
-   ]
+   "placements": []
   },
   "1c": {
    "open_total": 0,
@@ -140,7 +132,7 @@
  },
  "watch": {
   "floor_near": true,
-  "last_equity": 61.43,
+  "last_equity": 62.3,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -327,6 +319,19 @@
   }
  ],
  "important": [
+  "2026-09-12 15:57:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-12 15:58:44 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
+  "2026-09-12 16:02:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-12 16:03:46 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
+  "2026-09-12 16:08:48 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
+  "2026-09-12 16:13:49 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
+  "2026-09-12 16:18:50 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
+  "2026-09-12 16:23:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-12 16:23:51 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
+  "2026-09-12 16:24:09 INFO  Received signal 15, shutting down...",
+  "2026-09-12 16:25:36 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped",
+  "2026-09-12 16:25:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-12 16:25:39 INFO  Bot started. Monitoring trades...",
   "2026-09-12 16:25:44 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped",
   "2026-09-12 16:26:03 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped",
   "2026-09-12 16:27:12 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped",
@@ -467,20 +472,7 @@
   "2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.37' -> 'paid $0.00' | lost -5.37 on 'Will Alanyaspor vs. Göztepe SK end in a ' (, tier 1b)",
   "2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.36' -> 'paid $0.01' | lost -5.35 on 'FC Lugano vs. Young Boys Bern: O/U 3.5' (, tier 1b)",
   "2026-09-12 21:00:24 INFO  [ops] push:daily_loss: None -> \"📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll).\"",
-  "2026-09-11 21:32:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $950.41 on 'Philadelphia Phillies vs. Atlanta Braves'",
-  "2026-09-11 21:32:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $3358.85 on 'Philadelphia Phillies vs. Atlanta Braves'",
-  "2026-09-11 21:32:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $390.69 on 'Philadelphia Phillies vs. Atlanta Braves'",
-  "2026-09-11 21:37:34 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.79 on 'Will CA Newell's Old Boys vs. CA Vélez S'",
-  "2026-09-11 21:43:55 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $3090.00 on 'Philadelphia Phillies vs. Atlanta Braves'",
-  "2026-09-11 22:02:46 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $3013.37 on 'Will 1. FSV Mainz 05 win on 2026-09-12?'",
-  "2026-09-11 22:41:18 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $3.23 on 'CSyD Defensa y Justicia vs. CA Gimnasia '",
-  "2026-09-11 22:41:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.78 on 'LoL: Cupid Esports vs Maryville Universi'",
-  "2026-09-11 22:53:32 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $5734.39 on 'Kansas City Royals vs. Boston Red Sox: O'",
-  "2026-09-11 22:54:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $4.93 on 'Will NJ/NY Gotham FC win on 2026-09-11?'",
-  "2026-09-11 22:56:06 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1294.00 on 'Coritiba FBC vs. CA Paranaense: O/U 2.5'",
-  "2026-09-11 23:01:36 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.39 on 'Rainbow Six Siege: Shopify Rebellion vs '",
-  "2026-09-11 23:08:29 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.63 on 'Rainbow Six Siege: Shopify Rebellion vs '",
-  "2026-09-11 23:08:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $368.64 on 'Will New Mexico United win on 2026-09-11'",
+  "2026-09-12 23:13:14 INFO  [tiered-risk] tier 1b: released $5.35 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-11 23:39:10 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.59 on 'Valorant: Team Liquid Brazil vs Evil Gen'",
   "2026-09-11 23:41:10 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.86 on 'Counter-Strike: FarmVille vs Overtake (B'",
   "2026-09-11 23:45:45 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $62.94 on 'Rutgers vs. Boston College'",
