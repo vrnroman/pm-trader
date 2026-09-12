@@ -1,7 +1,7 @@
-# ops digest 2026-09-12T21:21:09.901796+00:00 (last 24h)
+# ops digest 2026-09-12T21:26:45.979132+00:00 (last 24h)
 
 ## money state
-{"cash": 56.083671, "open_cost": 5.35, "equity": 61.43, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-12", "spent_usd": 21.45, "cap_usd": 24.57, "remaining_usd": 3.12, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 5.35, "1c": 0}, "ts": 1789247782.202893, "day": "2026-09-12"}
+{"cash": 56.083671, "open_cost": 5.35, "equity": 61.43, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-12", "spent_usd": 21.45, "cap_usd": 24.57, "remaining_usd": 3.12, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 5.35, "1c": 0}, "ts": 1789248106.9246857, "day": "2026-09-12"}
 
 ## arm: {"armed": true, "ts": 1788698166.0465596, "by": "1shot:s-kac3t7", "reason": "owner: go activate bot, let go in; make sure deals are done (run s-kac3t7)", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-12", "spent_usd": 21.45, "wallet_copies": {"0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": 2, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2}, "wallet_copies_yesterday": {}, "yesterday": "2026-09-11", "closed_reason": ""}
