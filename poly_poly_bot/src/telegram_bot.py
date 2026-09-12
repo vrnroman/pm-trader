@@ -471,6 +471,17 @@ def _handle_ops(text: str) -> None:
     pushed, what is on probation, the clocks."""
     from src.copy_trading import ops_watch
     import json as _json
+    parts = text.split(maxsplit=2)
+    if len(parts) >= 2 and parts[1].lower() == "wallet":
+        # /ops wallet <addr>: the live book for one wallet, settled rows only.
+        addr = parts[2].strip().lower() if len(parts) > 2 else ""
+        rows = [a for a in ops_watch.wallet_ledger() if not addr or a["wallet"].startswith(addr)]
+        if not rows:
+            send_message("no settled live copies for that wallet in the last 30 days")
+            return
+        send_message("<b>settled live copies, 30 days</b>\n" + "\n".join(
+            _esc(f"{a['wallet'][:10]}: {a['settled']} settled, {a['won']} won, {a['pnl']:+.2f} on ${a['cost']:.2f}") for a in rows))
+        return
     lines = ["<b>The watcher</b>",
              _esc(ops_watch.daily_line()),
              _esc(ops_watch.weekly_line())]

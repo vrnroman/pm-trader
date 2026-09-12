@@ -78,6 +78,16 @@ def test_floor_distance_and_milestones_say_once(ops_env):
     assert len(sent) == 1 and "within 20%" in sent[0] and "top-up" in sent[0]
     ow.check_bankroll(equity=65.0, floor=56.0, send=sent.append, now=3.0)
     assert len(sent) == 1, "said once"
+    # hovering around the band edge does not flap: clear needs floor x 1.3
+    ow.check_bankroll(equity=68.0, floor=56.0, send=sent.append, now=4.0)
+    ow.check_bankroll(equity=66.0, floor=56.0, send=sent.append, now=5.0)
+    assert len(sent) == 1, "still inside the hysteresis band"
+    ow.check_bankroll(equity=74.0, floor=56.0, send=sent.append, now=6.0)   # clear
+    ow.check_bankroll(equity=66.0, floor=56.0, send=sent.append, now=7.0)   # back in, same day: no push
+    assert len(sent) == 1
+    ow.check_bankroll(equity=74.0, floor=56.0, send=sent.append, now=90000.0)
+    ow.check_bankroll(equity=66.0, floor=56.0, send=sent.append, now=90001.0)  # next day: one push
+    assert len(sent) == 2
     ow.check_bankroll(equity=49.0, floor=40.0, send=sent.append, now=4.0)
     assert any("fell under $50" in m for m in sent)
     ow.check_bankroll(equity=101.0, floor=40.0, send=sent.append, now=5.0)
@@ -321,3 +331,34 @@ def test_followed_activity_counts_signals_and_copies(tmp_path, monkeypatch):
     ]
     (tmp_path / "h.jsonl").write_text("\n".join(_json.dumps(r) for r in rows) + "\n")
     assert app_main._followed_activity_3d(now) == (2, 1)
+
+
+def test_the_wallet_ledger_is_an_aggregation_over_settled_rows(ops_env):
+    S = ow.Settlement
+    ow.record_settlements([S("a", "0xAAA", 5.0, 9.0), S("b", "0xAAA", 6.0, 0.0), S("c", "0xBBB", 5.5, 11.0)],
+                          equity=67.0, stated=80.0, floor=56.0, send=None, now=time.time())
+    rows = ow.wallet_ledger()
+    assert rows == [{"wallet": "0xaaa", "settled": 2, "won": 1, "pnl": -2.0, "cost": 11.0},
+                    {"wallet": "0xbbb", "settled": 1, "won": 1, "pnl": 5.5, "cost": 5.5}]
+    lines = ow.wallet_ledger_lines()
+    assert lines[0] == "0xaaa: 2 settled, 1 won, -2.00 on $11.00" and "\u2014" not in "".join(lines)
+    from src import telegram_bot as tb
+    sent: list = []
+    import src.telegram_bot as _tbm
+    orig = _tbm.send_message
+    _tbm.send_message = lambda text, **k: sent.append(text) or True
+    try:
+        tb._handle_ops("/ops wallet 0xaaa")
+    finally:
+        _tbm.send_message = orig
+    assert sent and "0xaaa: 2 settled, 1 won, -2.00 on $11.00" in sent[0] and "0xbbb" not in sent[0]
+
+
+def test_the_graduation_receipt_carries_its_trial(ops_env):
+    ow.probation_start("0xNEW", now=1.0)
+    for i in range(5):
+        ow.record_settlements([ow.Settlement(f"t{i}", "0xNEW", 5.0, 9.0 if i % 2 == 0 else 0.0, "1b", f"m{i}")],
+                              equity=67.0, stated=80.0, floor=56.0, send=None, now=10.0 + i)
+    row = [r for r in _ledger(ops_env) if r["kind"] == "probation_over"][-1]
+    assert row["after"] == "5 settled live copies: 3 won, +2.00" and len(row["trial"]) == 5
+    assert row["trial"][0]["token_id"] == "t0" and row["trial"][1]["won"] is False

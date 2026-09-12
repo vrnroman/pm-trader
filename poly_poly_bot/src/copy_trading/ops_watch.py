@@ -259,14 +259,23 @@ def check_bankroll(*, equity: Optional[float], floor: Optional[float],
     pushed: list[str] = []
     eq = float(equity)
     if floor is not None and float(floor) > 0:
-        near = eq <= float(floor) * (1.0 + FLOOR_NEAR_FRAC)
-        if near and not st.get("floor_near"):
-            gap = max(0.0, float(floor) * (1.0 + FLOOR_NEAR_FRAC) - eq)
+        # Edge with hysteresis: enters inside the band, leaves only once the
+        # bankroll is clear of it by another half band, and never more than
+        # once a day. At an $80 budget the band is $56 to $67, where the
+        # bankroll sits most days; without this it said so every crossing.
+        band = float(floor) * (1.0 + FLOOR_NEAR_FRAC)
+        clear = float(floor) * (1.0 + 1.5 * FLOOR_NEAR_FRAC)
+        was = bool(st.get("floor_near"))
+        near = eq <= band if not was else eq < clear
+        last_day = st.get("floor_near_day")
+        if near and not was and last_day != _day(now):
+            gap = max(0.0, band - eq)
             pushed.append(_push(send, f"⚠️ <b>Bankroll ${eq:,.2f} is within {FLOOR_NEAR_FRAC * 100:.0f}% "
                                       f"of the ${float(floor):,.0f} floor.</b> A top-up of about "
                                       f"${gap + 5:,.0f} would restore the margin; under the floor the "
                                       f"arm comes off and stays off until /live CONFIRM.",
                                 "floor_near", now))
+            st["floor_near_day"] = _day(now)
         st["floor_near"] = bool(near)
     last = st.get("last_equity")
     if last is not None:
@@ -458,7 +467,11 @@ def deliver_escalation(send: Optional[Callable[[str], None]], now: Optional[floa
     kind = str(d.get("kind") or "escalation")
     if send is not None:
         try:
-            send(f"🧭 <b>From the watcher</b> ({kind}): {text[:1500]}")
+            if kind == "fix":
+                commit = str(d.get("commit") or "")[:10]
+                send(f"🔧 <b>The watcher pushed a fix</b>{(' (' + commit + ')') if commit else ''}: {text[:1400]}")
+            else:
+                send(f"🧭 <b>From the watcher</b> ({kind}): {text[:1500]}")
         except Exception as exc:
             logger.warn(f"[ops] escalation send failed: {exc}")
             return None
@@ -488,7 +501,16 @@ def _probation_settled(wallet: str, now: float) -> None:
     if w in d:
         d[w]["settled"] = int(d[w].get("settled") or 0) + 1
         if d[w]["settled"] >= PROBATION_SETTLED_N:
-            receipt("probation_over", before=f"{w[:10]} on probation", after=f"{d[w]['settled']} settled live copies", now=now)
+            # The graduation shows its work: the trial's own settled rows.
+            since = float(d[w].get("since") or 0.0)
+            trial = [r for r in ledger_rows(since_ts=since, kinds={"settled"})
+                     if str(r.get("wallet") or "").lower() == w][-PROBATION_SETTLED_N:]
+            pnl = round(sum(float(r.get("pnl") or 0) for r in trial), 2)
+            won = sum(1 for r in trial if r.get("won"))
+            receipt("probation_over", before=f"{w[:10]} on probation",
+                    after=f"{d[w]['settled']} settled live copies: {won} won, {pnl:+.2f}",
+                    detail="; ".join(f"{str(r.get('detail') or '')[:38]}" for r in trial), now=now,
+                    extra={"wallet": w, "trial": [{"token_id": r.get("token_id"), "pnl": r.get("pnl"), "won": r.get("won")} for r in trial]})
             d.pop(w, None)
         _write_json(_p(PROBATION_FILE), d)
 
@@ -502,6 +524,32 @@ def probation_cap(wallet: str) -> Optional[int]:
 # --------------------------------------------------------------------------- #
 # Rendering from the ledger
 # --------------------------------------------------------------------------- #
+
+def wallet_ledger(now: Optional[float] = None, days: float = 30.0) -> list[dict]:
+    """Per followed wallet, from the settled rows only: n settled, wins, net
+    pnl. An aggregation, not a grade; nothing here ranks or decides."""
+    now = time.time() if now is None else now
+    out: dict = {}
+    for r in ledger_rows(since_ts=now - days * 86400, kinds={"settled"}):
+        w = str(r.get("wallet") or "").lower() or "?"
+        a = out.setdefault(w, {"wallet": w, "settled": 0, "won": 0, "pnl": 0.0, "cost": 0.0})
+        a["settled"] += 1
+        a["won"] += 1 if r.get("won") else 0
+        a["pnl"] = round(a["pnl"] + float(r.get("pnl") or 0), 2)
+        try:
+            a["cost"] = round(a["cost"] + float(str(r.get("before") or "").split("$")[-1]), 2)
+        except ValueError:
+            pass
+    return sorted(out.values(), key=lambda a: a["wallet"])
+
+
+def wallet_ledger_lines(now: Optional[float] = None, days: float = 30.0) -> list[str]:
+    rows = wallet_ledger(now, days)
+    if not rows:
+        return [f"no settled live copies in the last {days:.0f} days"]
+    return [f"{a['wallet'][:10]}: {a['settled']} settled, {a['won']} won, {a['pnl']:+.2f} on ${a['cost']:.2f}"
+            for a in rows]
+
 
 def weekly_line(now: Optional[float] = None) -> str:
     now = time.time() if now is None else now

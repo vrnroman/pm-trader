@@ -55,14 +55,14 @@ jobs:
           fi
           mkdir -p ops
 
-      - name: Carry any new escalation down to the VM
+      - name: Carry any new verdict down to the VM (escalation or fix, once per id)
         run: |
           set +e
           if [ -f ops/verdict.json ]; then
             KIND=$(python3 -c "import json;print(json.load(open('ops/verdict.json')).get('kind',''))" 2>/dev/null)
             VID=$(python3 -c "import json;print(json.load(open('ops/verdict.json')).get('id',''))" 2>/dev/null)
             LAST=$(cat ops/.delivered 2>/dev/null || echo "")
-            if [ "$KIND" = "escalation" ] && [ -n "$VID" ] && [ "$VID" != "$LAST" ]; then
+            if { [ "$KIND" = "escalation" ] || [ "$KIND" = "fix" ]; } && [ -n "$VID" ] && [ "$VID" != "$LAST" ]; then
               gcloud compute scp ops/verdict.json poly-poly-bot:/tmp/ops-escalation.json \
                 --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
               && gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
@@ -90,4 +90,6 @@ jobs:
           git add -A ops
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -q -m "ops: digest $(date -u +%FT%TZ)"
+          # The routine writes to the same branch: never push on a stale base.
+          git pull --rebase -q origin ops-digest || true
           git push -q origin ops-digest
