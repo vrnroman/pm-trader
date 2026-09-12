@@ -19,7 +19,7 @@ from src.logger import logger
 
 
 def scan(*, send: Optional[Callable[[str, dict], None]] = None,
-         now: Optional[float] = None, limit: int = 2) -> list[str]:
+         now: Optional[float] = None, limit: int = 1) -> list[str]:
     """Admit every gate-passing wallet not yet in Z and not evicted, up to
     ``limit`` per scan (one wallet at a time keeps the probation honest).
     Returns the admitted wallets. Never raises."""

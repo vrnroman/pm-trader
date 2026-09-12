@@ -255,6 +255,19 @@ def can_copy_wallet(wallet: str) -> tuple[bool, str]:
     label = "per-wallet daily cap"
     if pcap is not None and (cap <= 0 or pcap < cap):
         cap, label = int(pcap), "probation cap"
+        # The probationers' shared share of the day.
+        try:
+            total_cap = int(ops_watch.PROBATION_TOTAL_PER_DAY)
+            probs = ops_watch.probation_wallets()
+        except Exception:
+            total_cap, probs = 0, set()
+        if total_cap > 0 and probs:
+            with _lock:
+                _load_locked()
+                used = sum(int(v) for k, v in _state.wallet_copies.items() if k in probs)
+            if used >= total_cap:
+                return False, (f"probation share: {used} of {total_cap} probation copies "
+                               f"already today, {(wallet or '')[:10]} waits")
     if cap <= 0:
         return True, ""
     n = wallet_copies_today(wallet)

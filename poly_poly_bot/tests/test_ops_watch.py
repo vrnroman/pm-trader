@@ -370,3 +370,37 @@ def test_the_admit_scan_clock_survives_a_restart(ops_env):
     assert json.loads((ops_env / ow.STATE_FILE).read_text())["admit_scan_ts"] == 1234.0
     src = (pathlib.Path(__file__).resolve().parents[1] / "main.py").read_text()
     assert 'get("admit_scan_ts")' in src and "ops_watch.note_admit_scan(_now)" in src
+
+
+def test_probationers_share_two_copies_a_day_between_them(ops_env, monkeypatch):
+    """Manager r3: seven probationers at one copy a day each could take every
+    slot of a four-copy day from the proven wallets; together they get two."""
+    from src.copy_trading import daily_spend_guard as g
+    monkeypatch.setattr(g, "_STATE_FILE", str(ops_env / "d.json"))
+    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 2)
+    g.reset_state()
+    for w in ("0xP1", "0xP2", "0xP3"):
+        ow.probation_start(w, now=1.0)
+    assert g.can_copy_wallet("0xP1") == (True, "")
+    g.record_wallet_copy("0xP1")
+    assert g.can_copy_wallet("0xP2") == (True, "")
+    g.record_wallet_copy("0xP2")
+    ok, why = g.can_copy_wallet("0xP3")
+    assert ok is False and "probation share: 2 of 2" in why, why
+    # a proven wallet is untouched by the share
+    assert g.can_copy_wallet("0xOLD") == (True, "")
+    # graduation frees the share
+    monkeypatch.setattr(ow, "PROBATION_TOTAL_PER_DAY", 3)
+    assert g.can_copy_wallet("0xP3") == (True, "")
+
+
+def test_the_scan_admits_one_wallet_per_pass(ops_env, monkeypatch):
+    from src.copy_trading import ops_admit, zset, zset_candidates as zc
+    class C:
+        def __init__(self, w): self.wallet, self.ok, self.settled, self.paper_roi = w, True, [1] * 34, 0.1
+    monkeypatch.setattr(zc, "load_books", lambda: (0.0, [], []))
+    monkeypatch.setattr(zc, "candidates", lambda b, a, era, now, wallets=None: ([C("0xA"), C("0xB")], [], None))
+    monkeypatch.setattr(zset, "wallet_set", lambda: set())
+    monkeypatch.setattr(zset, "evicted_set", lambda: set())
+    monkeypatch.setattr(zc, "admit", lambda w, **k: (True, [], C(w)))
+    assert ops_admit.scan(send=None, now=5.0) == ["0xa"]
