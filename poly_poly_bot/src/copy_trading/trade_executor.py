@@ -43,6 +43,37 @@ def _risk_manager():
     return evaluate_trade, record_placement, adjust_placement
 
 
+# --- Skip lines, throttled -------------------------------------------------
+# A followed wallet that trades esports fires hundreds of sub-$300 bets a
+# day; each one produced a SKIP line (about 1,300 a day on the VM, every
+# one printed twice). The first skip of a (market, reason class) is logged
+# in full; repeats within the hour are counted and summarised once.
+SKIP_THROTTLE_S = 3600.0
+_skip_seen: dict = {}
+
+
+def _reason_class(reason: str) -> str:
+    import re
+    return re.sub(r"\$?-?\d[\d,.]*", "#", str(reason or ""))[:80]
+
+
+def _skip_throttled(key: str, reason: str, message: str, now: Optional[float] = None) -> bool:
+    """Log ``message`` at SKIP unless the same market and reason class was
+    logged within the hour; then count it. Returns True when it logged."""
+    now = time.time() if now is None else now
+    k = (key, _reason_class(reason))
+    first_ts, count = _skip_seen.get(k, (None, 0))
+    if first_ts is not None and now - first_ts < SKIP_THROTTLE_S:
+        _skip_seen[k] = (first_ts, count + 1)
+        return False
+    if count:
+        logger.skip(f"[exec] ... and {count} more skip(s) like the last one for "
+                    f"'{key.split(':', 2)[-1]}' in the past hour")
+    _skip_seen[k] = (now, 0)
+    logger.skip(message)
+    return True
+
+
 def _tiered_risk():
     from src.copy_trading.tiered_risk_manager import (
         evaluate_tiered_trade,
@@ -486,7 +517,9 @@ async def place_trade_orders(
                         continue
 
                     if not decision.should_copy:
-                        logger.skip(
+                        _skip_throttled(
+                            f"tier:{tier}:{trade.market[:40]}",
+                            decision.reason,
                             f"[exec] Tier {tier} skip: {decision.reason}: "
                             f"{trade.side} ${trade.size:.2f} on '{trade.market[:40]}'"
                         )
@@ -520,7 +553,9 @@ async def place_trade_orders(
                 # Legacy (non-tiered) risk evaluation
                 decision = evaluate_trade(trade)
                 if not decision.should_copy:
-                    logger.skip(
+                    _skip_throttled(
+                        f"legacy:{trade.market[:40]}",
+                        decision.reason,
                         f"[exec] Skip: {decision.reason}: "
                         f"{trade.side} ${trade.size:.2f} on '{trade.market[:40]}'"
                     )
@@ -820,21 +855,11 @@ async def place_trade_orders(
                 except Exception as exc:
                     logger.warn(f"[canary] fired message failed: {exc}")
 
-            # Critical operation order: record → enqueue → mark seen
-            # 1. Record placement in risk accounting
-            if TIERED_MODE and tier is not None:
-                record_tiered_placement(tier, copy_size)
-            else:
-                record_placement_fn(trade, copy_size)
-
-            # Global daily-spend cap accounting (BUY only)
-            if trade.side == "BUY":
-                from src.copy_trading.daily_spend_guard import record_spend
-                record_spend(copy_size, source=f"copy:{tier or 'legacy'}")
-                from src.copy_trading.daily_spend_guard import record_wallet_copy
-                record_wallet_copy(trade.trader_address)
-
-            # 2. Enqueue for verification
+            # The order is live on the exchange from here. Track it and mark
+            # the trade seen FIRST; accounting comes after and never raises
+            # past this point, or a full disk between the post and the
+            # enqueue left the order untracked and re-posted it up to three
+            # times (code review, V4).
             pending = PendingOrder(
                 trade=trade,
                 order_id=result.order_id,
@@ -850,9 +875,25 @@ async def place_trade_orders(
                 tier=tier,
             )
             enqueue_pending_order(pending)
-
-            # 3. Mark trade as seen (dedup)
             mark_trade_as_seen(trade.id)
+
+            # Accounting: risk ledgers, the daily cap, the cached cash. A
+            # failure here is logged loudly, never re-raised.
+            try:
+                if TIERED_MODE and tier is not None:
+                    record_tiered_placement(tier, copy_size, token_id=trade.token_id)
+                else:
+                    record_placement_fn(trade, copy_size)
+                if trade.side == "BUY":
+                    from src.copy_trading import live_budget as _lb
+                    from src.copy_trading.daily_spend_guard import record_spend, record_wallet_copy
+                    record_spend(copy_size, source=f"copy:{tier or 'legacy'}")
+                    record_wallet_copy(trade.trader_address)
+                    _lb.note_spent(copy_size)
+            except Exception as exc:
+                logger.error(f"[exec] order {result.order_id[:12]} is live and tracked, but "
+                             f"its accounting failed: {error_message(exc)}. The daily cap "
+                             f"and tier ledgers may under-count until the next reconcile.")
 
             await tg.trade_placed(trade.market, trade.side, copy_size, result.order_price)
 
@@ -1163,7 +1204,13 @@ async def recover_pending_orders(clob_client: ClobClient) -> None:
     record_buy, record_sell, _, _ = _inventory()
     _, remove_pending_order, _ = _trade_queue()
 
-    pending = load_pending()
+    # load_pending returns a COUNT; the orders are read back from the queue.
+    # Reading the count as the list crashed the boot with any resting order
+    # on disk (TypeError on len(int)), restart-looping the container
+    # (code review, V9).
+    from src.copy_trading.trade_queue import peek_pending_orders
+    load_pending()
+    pending = peek_pending_orders()
     if not pending:
         logger.info("[recovery] No pending orders to recover")
         return

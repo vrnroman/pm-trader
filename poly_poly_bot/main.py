@@ -206,6 +206,24 @@ def _live_guard_loop():
                     live_budget.note_collectable(
                         len(_winners), sum(_position_value(p) for p in _winners))
                 equity_usd = live_budget.equity_usd(bal, open_cost)
+                # The tier's exposure is what is still open, not a running
+                # sum: release rows whose position resolved or left the wallet.
+                try:
+                    from src.copy_trading import tiered_risk_manager as _trm
+                    _resolved_ids = set()
+                    for _p in (redeemable or []):
+                        if isinstance(_p, dict):
+                            for _k in ("tokenId", "asset", "token_id"):
+                                if _p.get(_k):
+                                    _resolved_ids.add(str(_p.get(_k)))
+                                    break
+                    _live_ids = {str(t) for t, p in inventory.get_positions().items()
+                                 if float((p or {}).get("shares") or 0) > 0}
+                    _trm.reconcile_tiered_exposure(
+                        resolved_tokens=_resolved_ids if known else set(),
+                        live_tokens=_live_ids if _live_ids else None)
+                except Exception as _exc:
+                    logger.warn(f"[guard] exposure reconcile failed: {_exc}")
         except Exception as exc:
             logger.warn(f"[guard] could not read equity for the floor: {exc}")
         try:
@@ -1022,16 +1040,21 @@ def _ab_race_reporter_loop():
             try:
                 from src.copy_trading import rehearsal
                 research_text, deal_text = rehearsal.daily_parts()
+                # Read the held count BEFORE this block's own research sends
+                # (they would count themselves), and reset it only after the
+                # DEAL line actually landed (code review, V12).
+                held = telegram_bot.suppressed_research_count(reset=False)
                 sent_reh = telegram_bot._send_chunked(research_text,
                                                       kind=telegram_bot.KIND_RESEARCH)
                 # The real-money line is a DEAL: it always lands, and it
                 # carries the count of research messages held since the last
                 # one, so silence is never mistaken for nothing happening.
-                held = telegram_bot.suppressed_research_count(reset=True)
                 if held and not telegram_bot.research_enabled():
                     deal_text += (f"\n🔬 {held} research message(s) held since the last "
                                   f"daily line. /research on to receive them.")
                 sent_deal = telegram_bot.send_message(deal_text, kind=telegram_bot.KIND_DEAL)
+                if sent_deal:
+                    telegram_bot.suppressed_research_count(reset=True)
                 logger.info(f"[AB-RACE] rehearsal line "
                             f"{'sent' if sent_reh else 'held/failed'}, real-money line "
                             f"{'sent' if sent_deal else 'SEND FAILED'}")
@@ -1142,6 +1165,11 @@ def _discovery_loop():
 
 # -- Main --
 
+def _not_app_record(rec) -> bool:
+    """Root handlers keep third-party records; BotLogger owns the app's."""
+    return not (rec.name == "poly_poly_bot" or rec.name.startswith("poly_poly_bot."))
+
+
 def _setup_logging():
     """Configure logging to console and file.
 
@@ -1165,10 +1193,14 @@ def _setup_logging():
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    # Console handler
+    # Console handler: third-party records only. The app logger propagates
+    # to root, and without this filter every app line reached stdout twice
+    # (once coloured from BotLogger, once plain from here), which doubled the
+    # container log on the VM.
     ch = logging.StreamHandler()
     ch.setFormatter(fmt)
     ch.setLevel(logging.INFO)
+    ch.addFilter(_not_app_record)
 
     # File handler — rolls to bot-<new-date>.log when the UTC date changes.
     # It shares that file with BotLogger's ops handler, and the app logger
@@ -1179,8 +1211,7 @@ def _setup_logging():
     fh = _DailyRotatingFileHandler(Path(CONFIG.logs_dir), "bot")
     fh.setFormatter(fmt)
     fh.setLevel(logging.DEBUG)
-    fh.addFilter(lambda rec: not (rec.name == "poly_poly_bot"
-                                  or rec.name.startswith("poly_poly_bot.")))
+    fh.addFilter(_not_app_record)
     # Third-party records (urllib3 request lines) can carry credentials in
     # URLs — the 2026-07-16→25 Telegram-token leak walked in through exactly
     # this handler. Scrub before anything is written.

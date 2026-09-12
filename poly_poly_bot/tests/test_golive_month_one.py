@@ -2349,6 +2349,238 @@ def test_the_test_floor_is_the_owners_number():
     assert canary.TEST_MIN_PRICE == 0.95
 
 
+# ---- week one on real money: the silence since 2026-09-08, the guard, the logs ----
+
+def _trm_env(monkeypatch, tmp_path):
+    from src.copy_trading import tiered_risk_manager as trm
+    monkeypatch.setattr(trm, "_STATE_FILE", str(tmp_path / "tiered-risk-state.json"))
+    trm.reset_state()
+    return trm
+
+
+def test_tier_exposure_is_made_of_placements_and_resolved_ones_release(monkeypatch, tmp_path):
+    """From 2026-09-08 every copy was refused 'exposure full: remaining=$-5.96'
+    while every position had resolved and paid out: the running total had no
+    release path (release_tiered_exposure had no caller)."""
+    trm = _trm_env(monkeypatch, tmp_path)
+    for i in range(11):
+        trm.record_tiered_placement("1b", 6.0, token_id=f"tok{i}", now=1000.0 + i)
+    exp = trm._tier_exposures["1b"]
+    assert exp.open_total == 66.0 and len(exp.placements) == 11
+    # nine resolved (paid out or lost), two still live in the wallet
+    rel = trm.reconcile_tiered_exposure(resolved_tokens={f"tok{i}" for i in range(9)},
+                                        live_tokens={"tok9", "tok10"}, now=2000.0)
+    assert rel == {"1b": 54.0} and exp.open_total == 12.0
+    assert [r["token_id"] for r in exp.placements] == ["tok9", "tok10"]
+    # a fresh copy absent from the not-yet-synced inventory is kept (grace)
+    trm.record_tiered_placement("1b", 6.0, token_id="tokX", now=2000.0)
+    trm.reconcile_tiered_exposure(resolved_tokens=set(), live_tokens={"tok9", "tok10"}, now=2100.0)
+    assert exp.open_total == 18.0
+    # after the grace it is gone from the wallet: released
+    trm.reconcile_tiered_exposure(resolved_tokens=set(), live_tokens={"tok9", "tok10"},
+                                  now=2000.0 + trm.RECONCILE_GRACE_S + 1)
+    assert exp.open_total == 12.0
+    # unknown inventory releases only on the resolved set
+    trm.reconcile_tiered_exposure(resolved_tokens={"tok9"}, live_tokens=None, now=9000.0)
+    assert exp.open_total == 6.0
+    # and the state round-trips through disk
+    trm._save_state(); trm._load_state()
+    assert trm._tier_exposures["1b"].open_total == 6.0
+
+
+def test_a_legacy_running_total_with_no_rows_is_not_exposure(monkeypatch, tmp_path):
+    import json
+    trm = _trm_env(monkeypatch, tmp_path)
+    (tmp_path / "tiered-risk-state.json").write_text(json.dumps(
+        {"1b": {"open_total": 69.96, "daily_date": "2026-09-12", "daily_volume": 0.0}}))
+    trm._load_state()
+    assert trm._tier_exposures["1b"].open_total == 0.0, "the deployed VM's exact state"
+
+
+def test_release_takes_the_oldest_rows_first(monkeypatch, tmp_path):
+    trm = _trm_env(monkeypatch, tmp_path)
+    trm.record_tiered_placement("1b", 6.0, token_id="a", now=1.0)
+    trm.record_tiered_placement("1b", 6.0, token_id="b", now=2.0)
+    trm.release_tiered_exposure("1b", 8.0)
+    exp = trm._tier_exposures["1b"]
+    assert exp.open_total == 4.0 and exp.placements == [{"token_id": "b", "cost": 4.0, "ts": 2.0}]
+
+
+def test_the_sink_tracks_the_order_before_accounting_and_passes_the_token(tmp_path, monkeypatch, caplog):
+    """Code review V4: an exception between the post and the enqueue left a
+    live order untracked and re-posted the trade. Now the order is queued and
+    the trade marked seen first; a failing ledger is logged, not raised."""
+    import logging
+
+    from src.copy_trading import trade_executor
+    h = _Harness(tmp_path, monkeypatch)
+    recorded: list = []
+    enqueued: list = []
+
+    def boom(tier, size, token_id=None, **k):
+        recorded.append((tier, size, token_id))
+        raise OSError(28, "No space left on device")
+    monkeypatch.setattr(trade_executor, "_tiered_risk",
+                        lambda: (h.te._tiered_risk()[0], boom, lambda *a, **k: None))
+    monkeypatch.setattr(trade_executor, "_trade_queue",
+                        lambda: (lambda po: enqueued.append(po), lambda *a, **k: None, lambda: 0))
+    # keep the harness's tiered evaluator stub
+    from src.models import TieredCopyDecision
+    monkeypatch.setattr(trade_executor, "_tiered_risk", lambda: (
+        lambda t, tier: TieredCopyDecision(should_copy=True, copy_size=25.0, tier=tier, alert_only=False),
+        boom, lambda *a, **k: None))
+    with caplog.at_level(logging.DEBUG):
+        placed = h.run(h.trades(1))
+    assert placed == 1 and h.posted == [7.75]
+    assert len(enqueued) == 1 and enqueued[0].order_id == "ord-1"
+    assert "t0" in h.seen, "marked seen even though the ledger failed"
+    assert recorded and recorded[0][2] == "tok0", "the token id reaches the ledger"
+    assert any("is live and tracked, but its accounting failed" in r.getMessage() for r in caplog.records)
+
+
+def test_a_post_lowers_the_cached_cash_at_once(tmp_path, monkeypatch):
+    """Code review V6: the cash check read a 5-minute-old cache, so a second
+    copy inside the window passed on money the first had already spent."""
+    h = _Harness(tmp_path, monkeypatch, budget=80.0)
+    monkeypatch.setattr(live_budget, "PER_COPY_FRAC", 0.08)
+    monkeypatch.setattr(live_budget, "_open_cost_cache", None)
+    now = time.time()
+    monkeypatch.setattr(live_budget, "_balance_cache", (now, 70.0))
+    live_budget.note_open_cost(10.0, now=now)
+    assert h.run(h.trades(1)) == 1 and h.posted == [6.4]
+    assert abs(live_budget._read_balance() - 63.6) < 1e-9
+    assert abs(live_budget._read_open_cost() - 16.4) < 1e-9
+
+
+def test_recovery_reads_the_orders_back_not_the_count(tmp_path, monkeypatch):
+    """Code review V9 (pre-existing): recover_pending_orders took the loader's
+    COUNT as the list; with one resting order on disk the boot died on
+    len(int) and the container restart-looped."""
+    from src.copy_trading import trade_executor, trade_queue
+    from src.models import DetectedTrade, FillResult, PendingOrder
+    monkeypatch.setattr(trade_queue, "_ORDERS_FILE", str(tmp_path / "pending-orders.json"))
+    monkeypatch.setattr(trade_queue, "_pending_orders", [])
+    t = DetectedTrade(id="r1", trader_address=W1, timestamp="2026-09-12T10:00:00+00:00",
+                      market="m", token_id="tokr", condition_id="c", side="BUY", size=900.0, price=0.5)
+    trade_queue.enqueue_pending_order(PendingOrder(
+        trade=t, order_id="0xrest", order_price=0.5, copy_size=6.0, placed_at=1.0,
+        market_key="m", side="BUY", source_detected_at=1.0, enqueued_at=1.0,
+        order_submitted_at=1.0, source="copy:1b", tier="1b"))
+    monkeypatch.setattr(trade_queue, "_pending_orders", [])  # a fresh process
+    bought: list = []
+    monkeypatch.setattr(trade_executor, "_inventory", lambda: (
+        lambda *a, **k: bought.append(a), lambda *a, **k: None, lambda t: False, _noop_async))
+    seen: list = []
+    monkeypatch.setattr(trade_executor, "_trade_store", lambda: (
+        lambda i: False, lambda i: seen.append(i), lambda i: 0, lambda i: False,
+        lambda r: None, lambda k, s: 0))
+    monkeypatch.setattr(trade_executor, "_risk_manager", lambda: (None, lambda *a, **k: None, lambda *a, **k: None))
+    monkeypatch.setattr(trade_executor, "_tiered_risk", lambda: (None, lambda *a, **k: None, lambda *a, **k: None))
+    monkeypatch.setattr(trade_executor, "_strategy_config", lambda: (True, None, None))
+
+    async def fill(client, oid):
+        return FillResult(status="FILLED", fill_price=0.5, filled_shares=12.0, filled_usd=6.0)
+    monkeypatch.setattr(trade_executor, "_verify_order_fill", fill)
+    _run(trade_executor.recover_pending_orders(object()))
+    assert bought and bought[0][0] == "tokr", "the resting order was recovered, not a TypeError"
+    assert trade_queue.get_pending_order_count() == 0
+
+
+def test_main_only_calls_governor_functions_that_exist():
+    """The deployed guard loop failed every pass from 2026-09-06 16:57 on
+    'module live_budget has no attribute note_collectable' (a call added with
+    no function behind it), which left the drawdown floor inert for a week."""
+    import ast
+    import pathlib
+    src = pathlib.Path(__file__).resolve().parents[1] / "main.py"
+    tree = ast.parse(src.read_text())
+    used = {n.attr for n in ast.walk(tree)
+            if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)
+            and n.value.id == "live_budget"}
+    missing = sorted(a for a in used if not hasattr(live_budget, a))
+    assert not missing, missing
+    assert "note_collectable" in used and hasattr(live_budget, "note_collectable")
+
+
+def test_the_guard_reconciles_tier_exposure_and_the_daily_block_counts_after_sending():
+    import inspect
+    import pathlib
+    src = (pathlib.Path(__file__).resolve().parents[1] / "main.py").read_text()
+    assert "reconcile_tiered_exposure(" in src
+    i = src.index("held = telegram_bot.suppressed_research_count(reset=False)")
+    j = src.index("_send_chunked(research_text", i)
+    k = src.index("suppressed_research_count(reset=True)", j)
+    assert i < j < k, "read before the block's own sends, reset only after the DEAL landed"
+    assert "if sent_deal:" in src[j:k + 80]
+
+
+def test_root_console_handler_keeps_third_party_records_only():
+    import logging
+    import main as app_main
+    own = logging.LogRecord("poly_poly_bot", logging.INFO, "f", 1, "x", None, None)
+    sub = logging.LogRecord("poly_poly_bot.exec", logging.INFO, "f", 1, "x", None, None)
+    lib = logging.LogRecord("py_clob_client_v2.http", logging.ERROR, "f", 1, "x", None, None)
+    assert app_main._not_app_record(own) is False and app_main._not_app_record(sub) is False
+    assert app_main._not_app_record(lib) is True
+    src = inspect.getsource(app_main._setup_logging)
+    assert src.count("addFilter(_not_app_record)") == 2, "both root handlers, console and file"
+
+
+def test_repeated_skips_are_throttled_per_market_and_reason_class(caplog):
+    import logging
+
+    from src.copy_trading import trade_executor as te
+    te._skip_seen.clear()
+    with caplog.at_level(logging.DEBUG):
+        a = te._skip_throttled("tier:1b:CS match", "Trader bet $31.73 < min_trader_bet $300.00", "[exec] skip 1", now=1000.0)
+        b = te._skip_throttled("tier:1b:CS match", "Trader bet $8.85 < min_trader_bet $300.00", "[exec] skip 2", now=1010.0)
+        c = te._skip_throttled("tier:1b:CS match", "Trader bet $19.48 < min_trader_bet $300.00", "[exec] skip 3", now=1020.0)
+        d = te._skip_throttled("tier:1b:CS match", "Tier 1b exposure full: remaining=$-5.96", "[exec] skip 4", now=1030.0)
+        e = te._skip_throttled("tier:1b:Other match", "Trader bet $1.11 < min_trader_bet $300.00", "[exec] skip 5", now=1040.0)
+        f = te._skip_throttled("tier:1b:CS match", "Trader bet $2.00 < min_trader_bet $300.00", "[exec] skip 6", now=1000.0 + te.SKIP_THROTTLE_S + 1)
+    assert (a, b, c, d, e, f) == (True, False, False, True, True, True)
+    msgs = [r.getMessage() for r in caplog.records]
+    assert "[exec] skip 1" in msgs and "[exec] skip 2" not in msgs and "[exec] skip 3" not in msgs
+    assert any("2 more skip(s) like the last one for 'CS match'" in m for m in msgs)
+
+
+def test_disk_watch_ignores_the_cache_sawtooth_but_sees_a_real_decline():
+    """2026-09: free space oscillated 7.0G / 6.8G every ~8h as caches filled and
+    pruned; the slope from the previous sample read the downstroke as
+    'shrinking 560MB/day, floor in 8d' and alerted most days at 64% used."""
+    from src.copy_trading import disk_watch as dw
+    h = 3600.0
+    saw = []
+    t = 0.0
+    for i in range(12):  # 4 days of 8-hour samples, alternating
+        saw.append({"ts": t, "free_gb": 7.0 if i % 2 == 0 else 6.8})
+        t += 8 * h
+    prev = {"ts": saw[-1]["ts"], "free_gb": saw[-1]["free_gb"], "samples": saw}
+    res = dw.evaluate(6.8, prev, floor_gb=2.5, days_bar=14, now=t)
+    assert res["tripped"] is False and res["days_to_floor"] is None or res["days_to_floor"] > 14, res
+    # a real decline: 400MB/day for three days
+    decline = [{"ts": d * 86400.0, "free_gb": 7.0 - 0.4 * d} for d in range(4)]
+    prev = {"ts": decline[-1]["ts"], "free_gb": decline[-1]["free_gb"], "samples": decline}
+    res = dw.evaluate(5.8 - 0.4, prev, floor_gb=2.5, days_bar=14, now=4 * 86400.0)
+    assert res["tripped"] is True and "shrinking" in res["reason"], res
+    # a single legacy sample from yesterday: no slope yet, only the floor
+    res = dw.evaluate(6.8, {"ts": 0.0, "free_gb": 7.0}, floor_gb=2.5, days_bar=14, now=86400.0)
+    assert res["tripped"] is False
+    assert dw.evaluate(2.0, None, floor_gb=2.5, days_bar=14, now=0.0)["tripped"] is True
+
+
+def test_disk_watch_keeps_a_week_of_samples(tmp_path, monkeypatch):
+    import json
+
+    from src.copy_trading import disk_watch as dw
+    monkeypatch.setattr(dw.shutil, "disk_usage", lambda p: type("U", (), {"free": 7 * 1024 ** 3})())
+    for i in range(30):
+        dw.check(str(tmp_path), now=i * 8 * 3600.0, sender=None)
+    st = json.loads((tmp_path / "disk-watch.json").read_text())
+    assert 15 <= len(st["samples"]) <= 22, len(st["samples"])  # 7 days at 8h
+    assert st["samples"][-1]["ts"] == 29 * 8 * 3600.0
+
+
 def test_the_verifier_reports_a_test_order_too():
     from src.copy_trading import trade_executor
     src = inspect.getsource(trade_executor.process_verifications)

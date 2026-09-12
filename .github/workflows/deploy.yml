@@ -136,6 +136,8 @@ jobs:
           # deals a day". And no single wallet may take more than 2 of them.
           ensure_env LIVE_BUDGET_DAILY_FRAC 0.40
           ensure_env LIVE_MAX_PER_WALLET_DAY 2
+          ensure_env WALLET_DISCOVERY_CACHE_MAX_GB 3
+          ensure_env WALLET_DISCOVERY_RES_CACHE_MAX_GB 1
           ensure_env LIVE_BUDGET_EXPOSURE_FRAC 0.80
           ensure_env LIVE_BUDGET_DRAWDOWN_FRAC 0.30
 

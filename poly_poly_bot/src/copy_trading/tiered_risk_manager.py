@@ -40,11 +40,23 @@ from src.utils import round_cents, today_utc
 
 @dataclass
 class TierExposure:
-    """Per-tier open exposure and daily volume tracking."""
+    """Per-tier open exposure and daily volume tracking.
+
+    ``placements`` names what the exposure is made of: one row per live
+    copy (token id, cost, when). ``open_total`` is their sum. Before this
+    the total was a running sum that nothing ever released (the release
+    function had no caller), so eleven $6 copies filled a $64 cap and every
+    copy from 2026-09-08 on was refused as "exposure full" while the
+    positions had long resolved and paid out.
+    """
 
     open_total: float = 0.0
     daily_date: str = ""
     daily_volume: float = 0.0
+    placements: list = field(default_factory=list)
+
+    def recount(self) -> None:
+        self.open_total = round(sum(float(p.get("cost") or 0.0) for p in self.placements), 2)
 
 
 _tier_exposures: dict[str, TierExposure] = {
@@ -90,9 +102,19 @@ def _load_state() -> None:
     for tier_key in ("1a", "1b", "1c"):
         tier_data = raw.get(tier_key, {})
         exp = _tier_exposures[tier_key]
-        exp.open_total = float(tier_data.get("open_total", 0))
         exp.daily_date = tier_data.get("daily_date", "")
         exp.daily_volume = float(tier_data.get("daily_volume", 0))
+        rows = tier_data.get("placements")
+        exp.placements = [dict(r) for r in rows if isinstance(r, dict)] if isinstance(rows, list) else []
+        if rows is None:
+            # Legacy state: a running total with no rows behind it. Nothing
+            # can say what it is made of, so it is not evidence of exposure;
+            # the next reconcile against the wallet's positions rebuilds it.
+            legacy = float(tier_data.get("open_total", 0) or 0)
+            if legacy:
+                logger.warn(f"[tiered-risk] tier {tier_key} carried a legacy open total "
+                            f"${legacy:.2f} with no placements behind it: dropped")
+        exp.recount()
         # Reset daily volume on new day
         if exp.daily_date != today:
             exp.daily_volume = 0.0
@@ -108,6 +130,7 @@ def _save_state() -> None:
             "open_total": exp.open_total,
             "daily_date": exp.daily_date,
             "daily_volume": exp.daily_volume,
+            "placements": list(exp.placements),
         }
     _atomic_write_json(_STATE_FILE, data)
 
@@ -263,8 +286,11 @@ def evaluate_tiered_trade(
     return _evaluate_tiered_trade_with_state(trade, tier, exposure, cfg)
 
 
-def record_tiered_placement(tier: StrategyTier, copy_size: float) -> None:
+def record_tiered_placement(tier: StrategyTier, copy_size: float,
+                            token_id: Optional[str] = None,
+                            now: Optional[float] = None) -> None:
     """Record a placed trade for a tier (increases open exposure and daily volume)."""
+    import time as _time
     exp = _tier_exposures.get(tier)
     if exp is None:
         logger.warn(f"[tiered-risk] Unknown tier: {tier}")
@@ -275,7 +301,9 @@ def record_tiered_placement(tier: StrategyTier, copy_size: float) -> None:
         exp.daily_volume = 0.0
         exp.daily_date = today
 
-    exp.open_total += copy_size
+    exp.placements.append({"token_id": str(token_id or ""), "cost": round(float(copy_size), 2),
+                           "ts": float(now if now is not None else _time.time())})
+    exp.recount()
     exp.daily_volume += copy_size
     _save_state()
     logger.info(
@@ -296,12 +324,71 @@ def release_tiered_exposure(tier: StrategyTier, amount: float) -> None:
         logger.warn(f"[tiered-risk] Unknown tier for release: {tier}")
         return
 
-    exp.open_total = max(0, exp.open_total - amount)
+    # Release the oldest rows first, up to the amount.
+    left = float(amount)
+    kept = []
+    for row in exp.placements:
+        c = float(row.get("cost") or 0.0)
+        if left <= 0:
+            kept.append(row)
+        elif c <= left + 1e-9:
+            left -= c
+        else:
+            kept.append({**row, "cost": round(c - left, 2)})
+            left = 0.0
+    exp.placements = kept
+    exp.recount()
     _save_state()
     logger.info(
         f"[tiered-risk] Released tier {tier} exposure: ${amount:.2f} | "
         f"open now: ${exp.open_total:.2f}"
     )
+
+
+# A copy placed less than this long ago may not be in the synced inventory
+# yet; it is never dropped for being absent from it.
+RECONCILE_GRACE_S = 3600.0
+
+
+def reconcile_tiered_exposure(*, resolved_tokens: set, live_tokens: Optional[set],
+                              now: Optional[float] = None) -> dict:
+    """Drop placements whose position has resolved (paid out or lost) or has
+    left the wallet, so exposure is what is actually open.
+
+    ``resolved_tokens``: token ids the chain has resolved (the redeemer's
+    list). ``live_tokens``: token ids the synced inventory still holds with
+    shares, or None when the inventory is not known this pass (then only
+    the resolved set releases). Returns {tier: released_usd} for the log.
+    """
+    import time as _time
+    now = float(now if now is not None else _time.time())
+    resolved = {str(t) for t in (resolved_tokens or set())}
+    live = {str(t) for t in live_tokens} if live_tokens is not None else None
+    released: dict[str, float] = {}
+    changed = False
+    for tier_key, exp in _tier_exposures.items():
+        kept = []
+        for row in exp.placements:
+            tok = str(row.get("token_id") or "")
+            age = now - float(row.get("ts") or now)
+            gone = bool(tok) and (tok in resolved
+                                  or (live is not None and tok not in live
+                                      and age > RECONCILE_GRACE_S))
+            if gone:
+                released[tier_key] = round(released.get(tier_key, 0.0)
+                                           + float(row.get("cost") or 0.0), 2)
+                changed = True
+            else:
+                kept.append(row)
+        exp.placements = kept
+        exp.recount()
+    if changed:
+        _save_state()
+        for tier_key, amt in released.items():
+            logger.info(f"[tiered-risk] tier {tier_key}: released ${amt:.2f} of exposure "
+                        f"from resolved or closed positions | open now: "
+                        f"${_tier_exposures[tier_key].open_total:.2f}")
+    return released
 
 
 def reset_state() -> None:

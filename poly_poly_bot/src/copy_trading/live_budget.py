@@ -132,6 +132,43 @@ def refresh_balance(now: Optional[float] = None) -> Optional[float]:
     return val
 
 
+_collectable_cache: Optional[tuple[float, int, float]] = None
+
+
+def note_collectable(count: int, payout_usd: float, now: Optional[float] = None) -> None:
+    """Resolved positions worth collecting (count, payout), from the guard's read."""
+    global _collectable_cache
+    now = time.time() if now is None else now
+    try:
+        _collectable_cache = (now, int(count), round(float(payout_usd), 2))
+    except (TypeError, ValueError):
+        return
+
+
+def collectable(now: Optional[float] = None) -> Optional[tuple[int, float]]:
+    now = time.time() if now is None else now
+    if _collectable_cache is not None and now - _collectable_cache[0] < _BALANCE_TTL_S:
+        return (_collectable_cache[1], _collectable_cache[2])
+    return None
+
+
+def note_spent(usd: float, now: Optional[float] = None) -> None:
+    """A copy just posted: lower the cached cash by its size and raise the
+    cached open cost by the same, so the next copy inside the 5-minute
+    guard window sees the money move (code review, V6)."""
+    global _balance_cache, _open_cost_cache
+    try:
+        v = float(usd)
+    except (TypeError, ValueError):
+        return
+    if v <= 0:
+        return
+    if _balance_cache is not None and _balance_cache[1] is not None:
+        _balance_cache = (_balance_cache[0], max(0.0, float(_balance_cache[1]) - v))
+    if _open_cost_cache is not None:
+        _open_cost_cache = (_open_cost_cache[0], float(_open_cost_cache[1]) + v)
+
+
 def note_open_cost(open_cost_usd: float, now: Optional[float] = None) -> None:
     """The guard loop's live open cost, when it could read the resolved set."""
     global _open_cost_cache

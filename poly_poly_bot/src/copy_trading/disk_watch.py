@@ -28,6 +28,13 @@ FREE_GB_ENV = "DISK_ALERT_FREE_GB"
 DAYS_ENV = "DISK_ALERT_DAYS"
 _DEFAULT_FREE_GB = 2.5     # e2-small: image pulls need ~1.5G headroom at deploy
 _DEFAULT_DAYS = 14.0       # alert two weeks before a full disk, not the day of
+# The caches prune per sweep, so free space is a sawtooth of a few hundred
+# MB over a few hours. A slope from the previous sample alone read the
+# downstroke as "shrinking 560MB/day, floor in 8d" and alerted the owner
+# most days of 2026-09 while the disk sat at 64%. The slope now runs from
+# the oldest sample at least this old (up to a week of samples is kept).
+_BASELINE_S = 2 * 86400.0
+_HISTORY_S = 7 * 86400.0
 
 
 def evaluate(free_gb: float, prev: Optional[dict], *,
@@ -44,13 +51,12 @@ def evaluate(free_gb: float, prev: Optional[dict], *,
     """
     shrink_gb_day = 0.0
     days_to_floor: Optional[float] = None
-    if prev and prev.get("free_gb") is not None and prev.get("ts") is not None:
-        dt_days = (now - float(prev["ts"])) / 86400.0
-        # Below ~1h between samples a few-MB wobble extrapolates to a bogus
-        # GB/day slope (a manual rerun right after a sweep, say) — too tight a
-        # pair to say anything about trajectory (code-review L8).
+    base = _baseline(prev, now)
+    if base is not None:
+        base_ts, base_free = base
+        dt_days = (now - base_ts) / 86400.0
         if dt_days >= 1.0 / 24.0:
-            shrink_gb_day = (float(prev["free_gb"]) - free_gb) / dt_days
+            shrink_gb_day = (base_free - free_gb) / dt_days
             if shrink_gb_day > 0 and free_gb > floor_gb:
                 days_to_floor = (free_gb - floor_gb) / shrink_gb_day
     if free_gb <= floor_gb:
@@ -69,6 +75,33 @@ def evaluate(free_gb: float, prev: Optional[dict], *,
             "shrink_gb_day": round(shrink_gb_day, 3),
             "days_to_floor": (round(days_to_floor, 1)
                               if days_to_floor is not None else None)}
+
+
+def _samples(prev: Optional[dict]) -> list:
+    """The sample history in the state, oldest first, plus the legacy single
+    sample when that is all there is."""
+    out = []
+    if not prev:
+        return out
+    rows = prev.get("samples")
+    if isinstance(rows, list):
+        for r in rows:
+            try:
+                out.append((float(r["ts"]), float(r["free_gb"])))
+            except (KeyError, TypeError, ValueError):
+                continue
+    if not out and prev.get("ts") is not None and prev.get("free_gb") is not None:
+        out.append((float(prev["ts"]), float(prev["free_gb"])))
+    out.sort()
+    return out
+
+
+def _baseline(prev: Optional[dict], now: float) -> Optional[tuple[float, float]]:
+    """The sample the slope runs from: the newest one at least _BASELINE_S
+    old. With a shorter history there is no slope yet (the sawtooth would
+    fake one), only the absolute floor can trip."""
+    old = [s for s in _samples(prev) if now - s[0] >= _BASELINE_S]
+    return old[-1] if old else None
 
 
 def _load_state(path: str) -> dict:
@@ -117,8 +150,11 @@ def check(data_dir: str, *, now: Optional[float] = None,
             res["alerted"] = False
             if res["tripped"]:
                 logger.warning(f"[disk-watch] still tripped: {res['reason']}")
+        samples = [s for s in _samples(prev) if now - s[0] <= _HISTORY_S]
+        samples.append((now, round(free_gb, 3)))
         _save_state(path, {"ts": now, "free_gb": round(free_gb, 3),
-                           "alerting": res["tripped"]})
+                           "alerting": res["tripped"],
+                           "samples": [{"ts": t, "free_gb": f} for t, f in samples]})
         return res
     except Exception as e:  # noqa: BLE001
         logger.warning(f"[disk-watch] check failed: {e}")
