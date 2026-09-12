@@ -75,10 +75,12 @@ jobs:
       - name: Pull the digest out of the VM
         run: |
           HOURS="${{ github.event.inputs.hours || '24' }}"
+          cut() { sed -n '/^@@OPS_DIGEST_BEGIN@@$/,/^@@OPS_DIGEST_END@@$/p' | sed '1d;$d'; }
           gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
-            --command="docker exec poly-poly-bot python scripts/ops_digest.py --hours $HOURS" > ops/latest.md
+            --command="docker exec poly-poly-bot python scripts/ops_digest.py --hours $HOURS" 2>/dev/null | cut > ops/latest.md
           gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --project=roman-vm --tunnel-through-iap --quiet \
-            --command="docker exec poly-poly-bot python scripts/ops_digest.py --hours $HOURS --json" > ops/state.json
+            --command="docker exec poly-poly-bot python scripts/ops_digest.py --hours $HOURS --json" 2>/dev/null | cut > ops/state.json
+          python3 -c "import json;json.load(open('ops/state.json'))" && echo "state.json valid"
           DAY=$(date -u +%F)
           cp ops/latest.md "ops/digest-$DAY.md"
           # keep two weeks of daily files

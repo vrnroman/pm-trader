@@ -71,8 +71,12 @@ def main() -> int:
         "ledger_tail": ops_watch.ledger_rows(since_ts=now - a.hours * 3600)[-200:],
         "important": important_lines(logs, a.hours, now)[-400:],
     }
+    # Sentinels: gcloud's SSH wrapper writes key-generation chatter around the
+    # payload the first time a runner connects; the workflow cuts to these.
+    print("@@OPS_DIGEST_BEGIN@@")
     if a.json:
         print(json.dumps(state, ensure_ascii=False, indent=1))
+        print("@@OPS_DIGEST_END@@")
         return 0
     m = state["money"] or {}
     print(f"# ops digest {state['generated']} (last {a.hours:.0f}h)")
@@ -93,6 +97,7 @@ def main() -> int:
     print(f"## important lines ({len(state['important'])})")
     for l in state["important"]:
         print(l)
+    print("@@OPS_DIGEST_END@@")
     return 0
 
 
