@@ -324,14 +324,21 @@ async def check_and_redeem_positions(private_key: str,
                 # into a total loss in realized-pnl.jsonl, overstating the
                 # loss by half the position on every refunded market.
                 cost_basis = shares * avg_price
-                if cur_price >= 0.99:
-                    payout_per_share = 1.0
-                elif 0.45 <= cur_price <= 0.55:
+                if 0.45 <= cur_price <= 0.55:
+                    # Cancelled. Verified 2026-09-13 on a real refunded market
+                    # (OpenSea token-or-IPO, condition 0x29e982b5...): every
+                    # holder's row reads curPrice 0.5, redeemable true, and
+                    # the API's own cashPnl values the shares at $0.50.
                     payout_per_share = 0.5
+                elif cur_price > 0.55:
+                    # A winner. The threshold stays where the old `> 0.5` rule
+                    # put it rather than demanding 0.99: a resolved winner the
+                    # API reports at 0.97 must never be booked as a total loss.
+                    payout_per_share = 1.0
                 else:
                     payout_per_share = 0.0
                 returned = shares * payout_per_share
-                won = payout_per_share >= 0.99
+                won = payout_per_share == 1.0
 
                 details.append(RedeemDetail(
                     title=title,

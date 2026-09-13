@@ -143,6 +143,37 @@ def test_a_refunded_market_books_the_half_payout_not_a_total_loss(redeem_env):
     assert row["won"] is False
 
 
+def test_a_winner_reported_below_one_still_books_the_full_payout(redeem_env):
+    """The refund band must not narrow the win band: the API may report a
+    resolved winner at a last-trade price short of 1.0, and `>= 0.99` would
+    have turned that win into a booked total loss — a worse error than the
+    one the refund band fixes. Anything above the refund band is a win."""
+    from src.copy_trading import auto_redeemer
+    from src.copy_trading import pnl as s1pnl
+
+    winner = {
+        "conditionId": "0xcond4",
+        "tokenId": "tok-4",
+        "shares": 50.0,
+        "avgPrice": 0.40,
+        "curPrice": 0.97,
+        "title": "Will D happen?",
+        "negRisk": False,
+        "outcomeCount": 2,
+    }
+
+    with patch.object(auto_redeemer, "Web3", _mock_web3()), \
+         patch.object(auto_redeemer, "_fetch_redeemable_positions",
+                      AsyncMock(return_value=[winner])):
+        result = _run(auto_redeemer.check_and_redeem_positions("aa" * 32))
+
+    assert result.count == 1
+    (row,) = s1pnl.load_realized()
+    assert row["returned"] == pytest.approx(50.0)
+    assert row["pnl"] == pytest.approx(30.0)
+    assert row["won"] is True
+
+
 def test_negrisk_position_skipped_and_not_recorded(redeem_env):
     from src.copy_trading import auto_redeemer
     from src.copy_trading import pnl as s1pnl
