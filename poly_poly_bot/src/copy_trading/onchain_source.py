@@ -63,14 +63,39 @@ def _canonical_trade_id(tx_hash: str, token_id: str, side: str) -> str:
 
 
 def _determine_side(maker_asset_id: int, taker_asset_id: int) -> str:
-    """Determine BUY/SELL from maker/taker asset IDs.
+    """Determine BUY/SELL from maker/taker asset IDs — from the MAKER's side.
 
-    If the maker asset is USDC (id == 0), the taker is buying outcome tokens → BUY.
-    Otherwise the maker is selling outcome tokens → SELL.
+    makerAssetId == 0 means the MAKER is paying USDC, i.e. the maker is buying
+    outcome tokens and the taker is selling them. Kept for compatibility;
+    `_process_events` does NOT use this for the stamped side, because the
+    tracked wallet can be the taker (see _tracked_side).
     """
     if maker_asset_id == 0:
         return "BUY"
     return "SELL"
+
+
+def _tracked_side(maker_asset_id: int, tracked_is_maker: bool) -> str:
+    """BUY/SELL from the TRACKED WALLET's side.
+
+    makerAssetId == 0 → the maker buys outcome tokens, the taker sells.
+    The old code stamped the maker's side on the trade regardless of which
+    role the tracked wallet played, so a tracked TAKER hitting a resting bid
+    (the common case for a whale taking the book) was mirrored as a BUY of
+    the thing it had just SOLD.
+    """
+    maker_buys = maker_asset_id == 0
+    return "BUY" if maker_buys == tracked_is_maker else "SELL"
+
+
+def _trade_legs(maker_asset_id: int, taker_asset_id: int,
+                maker_amount: int, taker_amount: int) -> tuple[str, int, int]:
+    """Split a fill into (token_id, usdc_amount, outcome_amount) from the
+    asset IDs — never from a side convention. USDC is asset id 0; the token
+    is the other leg, on whichever side holds it."""
+    if maker_asset_id == 0:
+        return str(taker_asset_id), maker_amount, taker_amount
+    return str(maker_asset_id), taker_amount, maker_amount
 
 
 def _usdc_to_float(amount: int) -> float:
@@ -129,20 +154,46 @@ class OnchainSource:
         events: list,
         contract_name: str,
     ) -> list[DetectedTrade]:
-        """Process OrderFilled events and return matching DetectedTrade objects."""
-        trades: list[DetectedTrade] = []
+        """Process OrderFilled events and return matching DetectedTrade objects.
 
+        The stamped side is the TRACKED WALLET's side (see _tracked_side).
+
+        A matchOrders tx emits one OrderFilled per MAKER order (its ``taker``
+        field is the taker order's signer) and one for the taker order itself
+        (``maker`` = that signer, ``taker`` = the exchange). A tracked wallet
+        taking the book therefore appears twice in one tx: as ``taker`` on
+        every maker leg and as ``maker`` on its own leg. The own leg is the
+        wallet's actual order: its side, its token, the whole fill. The maker
+        legs are partial and, for a MINT/MERGE match, on the complementary
+        token. When the own leg is in the batch the maker legs are dropped;
+        when it is not (defensive; Trading.sol always emits it) the maker legs
+        of one order are summed into one trade.
+        """
+        own_legs: set[tuple[str, str]] = set()
+        for event in events:
+            m = event["args"]["maker"].lower()
+            if m in self._tracked_addresses:
+                own_legs.add((event["transactionHash"].hex(), m))
+
+        by_id: dict[str, dict] = {}
         for event in events:
             args = event["args"]
             maker = args["maker"].lower()
             taker = args["taker"].lower()
+            tx_hash = event["transactionHash"].hex()
 
             # Check if either maker or taker is a tracked address
             trader_address: Optional[str] = None
+            tracked_is_maker = False
             if maker in self._tracked_addresses:
                 trader_address = maker
+                tracked_is_maker = True
             elif taker in self._tracked_addresses:
                 trader_address = taker
+                if (tx_hash, taker) in own_legs:
+                    # A maker leg of the wallet's own taker order; the own
+                    # leg in this tx carries the trade.
+                    continue
             else:
                 continue
 
@@ -151,29 +202,41 @@ class OnchainSource:
             maker_amount = int(args["makerAmountFilled"])
             taker_amount = int(args["takerAmountFilled"])
 
-            side = _determine_side(maker_asset_id, taker_asset_id)
+            side = _tracked_side(maker_asset_id, tracked_is_maker)
 
-            # Token ID is the non-USDC asset ID
-            token_id = str(taker_asset_id) if side == "BUY" else str(maker_asset_id)
-
-            # USDC size
-            usdc_amount = maker_amount if side == "BUY" else taker_amount
-            size = _usdc_to_float(usdc_amount)
-            if size <= 0:
+            # Token id, USDC size, and outcome size from the asset IDs, so the
+            # amounts stay right whichever role the tracked wallet played.
+            token_id, usdc_amount, outcome_amount = _trade_legs(
+                maker_asset_id, taker_asset_id, maker_amount, taker_amount)
+            if usdc_amount <= 0:
                 continue
 
-            # Price: USDC / outcome tokens
-            outcome_amount = taker_amount if side == "BUY" else maker_amount
-            price = _usdc_to_float(usdc_amount) / (_usdc_to_float(outcome_amount) or 1.0)
+            trade_id = _canonical_trade_id(tx_hash, token_id, side)
+            agg = by_id.get(trade_id)
+            if agg is not None:
+                # Several maker legs of one tracked taker order, no own leg
+                # seen: one order, summed.
+                agg["usdc"] += usdc_amount
+                agg["outcome"] += outcome_amount
+                continue
+            by_id[trade_id] = {
+                "trader_address": trader_address,
+                "token_id": token_id,
+                "side": side,
+                "usdc": usdc_amount,
+                "outcome": outcome_amount,
+                "block_number": event["blockNumber"],
+            }
 
-            tx_hash = event["transactionHash"].hex()
-            block_number = event["blockNumber"]
-            block_ts = self._get_block_timestamp(block_number)
+        trades: list[DetectedTrade] = []
+        for trade_id, agg in by_id.items():
+            size = _usdc_to_float(agg["usdc"])
+            # Price: USDC / outcome tokens
+            price = size / (_usdc_to_float(agg["outcome"]) or 1.0)
+            block_ts = self._get_block_timestamp(agg["block_number"])
 
             from datetime import datetime, timezone
             timestamp = datetime.fromtimestamp(block_ts, tz=timezone.utc).isoformat()
-
-            trade_id = _canonical_trade_id(tx_hash, token_id, side)
 
             # Enrich with market metadata
             market = ""
@@ -181,7 +244,7 @@ class OnchainSource:
             outcome = ""
             try:
                 from src.copy_trading.market_cache import get_market_meta
-                meta = get_market_meta(token_id)
+                meta = get_market_meta(agg["token_id"])
                 if meta is not None:
                     market = meta.market
                     condition_id = meta.condition_id
@@ -191,12 +254,12 @@ class OnchainSource:
 
             trades.append(DetectedTrade(
                 id=trade_id,
-                trader_address=trader_address,
+                trader_address=agg["trader_address"],
                 timestamp=timestamp,
                 market=market,
                 condition_id=condition_id,
-                token_id=token_id,
-                side=side,  # type: ignore[arg-type]
+                token_id=agg["token_id"],
+                side=agg["side"],  # type: ignore[arg-type]
                 size=size,
                 price=round(price, 4),
                 outcome=outcome,
