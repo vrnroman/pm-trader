@@ -372,7 +372,7 @@ def _live_guard_loop():
                 from src.copy_trading import wallet_form
                 _fs = float(ops_watch._read_json(ops_watch._p(ops_watch.STATE_FILE)).get("form_scan_ts") or 0.0)
                 _send_w = lambda t: telegram_bot.send_message(t, kind=telegram_bot.KIND_WALLET)
-                if _now - _fs >= wallet_form.FORM_EVERY_S:
+                if _now - _fs >= wallet_form.FORM_EVERY_S or wallet_form.needs_rescan():
                     _st = ops_watch._read_json(ops_watch._p(ops_watch.STATE_FILE)); _st["form_scan_ts"] = _now
                     ops_watch._write_json(ops_watch._p(ops_watch.STATE_FILE), _st)
                     wallet_form.scan(send=_send_w)

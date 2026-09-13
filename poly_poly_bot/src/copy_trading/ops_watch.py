@@ -528,9 +528,18 @@ def deliver_escalation(send: Optional[Callable[[str], None]], now: Optional[floa
         from src.copy_trading import wallet_form
         wallet = str(d.get("wallet") or "")
         action = str(d.get("action") or "")
-        ok = wallet_form.apply_override(wallet, action, text, now=now)
-        benched, why = wallet_form.is_benched(wallet, now=now) if ok else (None, "")
-        state = ("benched" if benched else "in form") if ok else "unchanged"
+        pend = st.get("wallet_action_pending") or {}
+        if pend.get("id") == eid:
+            # Applied on an earlier pass whose message did not go out: report
+            # that outcome, do not apply again (a second unbench would be
+            # refused and misreported, a second bench would restart the clock).
+            ok, state, why = bool(pend.get("ok")), str(pend.get("state") or "unchanged"), str(pend.get("why") or "")
+        else:
+            ok = wallet_form.apply_override(wallet, action, text, now=now)
+            benched, why = wallet_form.is_benched(wallet, now=now) if ok else (None, "")
+            state = ("benched" if benched else "in form") if ok else "unchanged"
+            st["wallet_action_pending"] = {"id": eid, "ok": ok, "state": state, "why": why}
+            _write_json(_p(STATE_FILE), st)
         delivered = True
         if send is not None:
             try:
@@ -544,8 +553,9 @@ def deliver_escalation(send: Optional[Callable[[str], None]], now: Optional[floa
         receipt("routine_wallet_action", before=wallet[:10], after=f"{action} {'applied' if ok else 'REFUSED'}, now {state}",
                 detail=text[:120], now=now, push="WALLET" if (ok and delivered) else None)
         if not delivered:
-            return None  # kept for the next pass
+            return None  # kept for the next pass; the applied outcome is kept with it
         st["last_escalation_id"] = eid
+        st.pop("wallet_action_pending", None)
         _write_json(_p(STATE_FILE), st)
         try:
             os.replace(path, f"{path}.sent-{eid[:12]}")

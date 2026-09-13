@@ -52,6 +52,8 @@ FORM_MIN_NET_PCT = _env_f("FORM_MIN_NET_PCT", 2.0)
 FORM_EVERY_S = _env_f("FORM_EVERY_S", 6 * 3600.0)
 FORM_OVERRIDE_S = _env_f("FORM_OVERRIDE_S", 24 * 3600.0)
 FORM_MAX_ROWS = int(_env_f("FORM_MAX_ROWS", 1500))
+FORM_STALE_S = _env_f("FORM_STALE_S", 4 * FORM_EVERY_S)   # a kept verdict this old is no verdict
+FORM_VERSION = 2   # bump when compute() changes: a table from an older compute is rescanned at boot
 
 
 @dataclass
@@ -241,7 +243,18 @@ def is_benched(wallet: str, now: Optional[float] = None) -> tuple[bool, str]:
     rec = (d.get("wallets") or {}).get(w)
     if not rec:
         return (True, "no form record yet (the scan runs every 6 hours)")
+    age = now - float(rec.get("ts") or now)
+    if age >= FORM_STALE_S:
+        # Reads kept failing: the last verdict is not carried forever.
+        return (True, f"form record stale ({age / 3600:.0f} h, reads failing)")
     return (not bool(rec.get("ok")), str(rec.get("reason") or ""))
+
+
+def needs_rescan() -> bool:
+    """A table written by an older compute() (or none): the guard scans at
+    once instead of honouring the old clock."""
+    d = _read()
+    return bool(d.get("wallets")) and int(d.get("version") or 0) != FORM_VERSION
 
 
 def in_form_wallets() -> list[str]:
@@ -328,7 +341,7 @@ def scan(*, get=None, send: Optional[Callable[[str], None]] = None,
     table = {w: r for w, r in table.items() if w in zs}
     ovs = {w: o for w, o in (prev.get("overrides") or {}).items()
            if now - float(o.get("ts") or 0) < FORM_OVERRIDE_S and w in zs}
-    d = {"ts": now, "wallets": table, "overrides": ovs,
+    d = {"ts": now, "version": FORM_VERSION, "wallets": table, "overrides": ovs,
          "paused": bool(prev.get("paused")), "paused_told": bool(prev.get("paused_told"))}
     _write(d)
     active = in_form_wallets()

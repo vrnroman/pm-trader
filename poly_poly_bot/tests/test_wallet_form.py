@@ -113,11 +113,22 @@ def test_scan_receipts_changes_and_pauses_once(form_env, monkeypatch):
 
 
 def test_a_failed_read_keeps_the_last_verdict(form_env):
-    wf._write({"ts": 1.0, "wallets": {"0xa": {"ok": True, "reason": "fine", "wallet": "0xa", "n": 40, "won": 25, "cost": 1.0, "back": 2.0, "avg_price": 0.5, "ts": 1.0}}})
+    wf._write({"ts": 1.0, "wallets": {"0xa": {"ok": True, "reason": "fine", "wallet": "0xa", "n": 40, "won": 25, "cost": 1.0, "back": 2.0, "avg_price": 0.5, "ts": NOW - 3600}}})
     def get(url):
         raise RuntimeError("429")
     d = wf.scan(get=get, send=None, now=NOW, wallets=["0xa"])
     assert d["wallets"]["0xa"]["ok"] is True and d["paused"] is False
+    assert wf.is_benched("0xa", now=NOW)[0] is False
+    # ...but not forever: a verdict older than FORM_STALE_S is no verdict
+    assert wf.is_benched("0xa", now=NOW - 3600 + wf.FORM_STALE_S) == (True, "form record stale (24 h, reads failing)")
+
+
+def test_a_table_from_an_older_compute_is_rescanned_at_boot(form_env):
+    assert wf.needs_rescan() is False, "no table: the clock decides"
+    wf._write({"ts": 1.0, "wallets": {"0xa": {"wallet": "0xa", "ok": False, "reason": "old bar", "ts": 1.0}}})
+    assert wf.needs_rescan() is True
+    d = wf.scan(get=lambda url: [], send=None, now=NOW, wallets=[])
+    assert d["version"] == wf.FORM_VERSION and wf.needs_rescan() is False
 
 
 def test_the_sink_skips_a_benched_wallet_with_a_row(tmp_path, monkeypatch):
@@ -156,7 +167,7 @@ def test_a_throttled_read_is_a_failure_not_an_empty_wallet(form_env, monkeypatch
     with pytest.raises(RuntimeError):
         wf.fetch_rows("0xT")
     assert "0xT" not in dd._activity_fetch_failures, "the marker is consumed, not left for the sweep report"
-    wf._write({"ts": 1.0, "wallets": {"0xt": {"ok": True, "reason": "fine", "wallet": "0xt", "n": 40, "won": 25, "cost": 1.0, "back": 2.0, "avg_price": 0.5, "ts": 1.0}}})
+    wf._write({"ts": 1.0, "wallets": {"0xt": {"ok": True, "reason": "fine", "wallet": "0xt", "n": 40, "won": 25, "cost": 1.0, "back": 2.0, "avg_price": 0.5, "ts": NOW - 60}}})
     d = wf.scan(send=None, now=NOW, wallets=["0xt"])
     assert d["wallets"]["0xt"]["ok"] is True and d["paused"] is False, "a throttled read keeps the last verdict"
 
@@ -216,3 +227,26 @@ def test_a_wallet_action_message_reports_the_state_after_and_waits_for_delivery(
     (form_env / ops_watch.ESCALATION_FILE).write_text(json.dumps({"id": "b1", "kind": "wallet_action", "wallet": "0xa", "action": "bench", "message": "losing days"}))
     assert ops_watch.deliver_escalation(send=lambda t: False, now=6.0) is None
     assert (form_env / ops_watch.ESCALATION_FILE).exists(), "not delivered: kept for the next pass"
+
+
+def test_a_wallet_action_is_applied_once_even_when_the_message_is_retried(form_env, monkeypatch):
+    from src.copy_trading import ops_watch, zset
+    monkeypatch.setattr(zset, "wallet_set", lambda: {"0xa"})
+    wf._write({"ts": 1.0, "wallets": {"0xa": {"wallet": "0xa", "ok": True, "reason": "fine", "ts": 1e6}}})
+    esc = form_env / ops_watch.ESCALATION_FILE
+    esc.write_text(json.dumps({"id": "b2", "kind": "wallet_action", "wallet": "0xa", "action": "bench", "message": "losing"}))
+    assert ops_watch.deliver_escalation(send=lambda t: True, now=10.0)["after"] == "applied"
+    esc.write_text(json.dumps({"id": "u2", "kind": "wallet_action", "wallet": "0xa", "action": "unbench", "message": "back"}))
+    assert ops_watch.deliver_escalation(send=lambda t: False, now=20.0) is None
+    assert wf.is_benched("0xa", now=21.0)[0] is False, "applied on the first pass"
+    sent: list = []
+    row = ops_watch.deliver_escalation(send=lambda t: sent.append(t) or True, now=30.0)
+    assert row["after"] == "applied" and "Now: in form" in sent[0], "the retry reports what happened, it does not re-apply"
+    assert wf.is_benched("0xa", now=31.0)[0] is False and not esc.exists()
+    acts = [r for r in ops_watch.ledger_rows(kinds={"routine_wallet_action"})]
+    assert [r["after"] for r in acts] == ["bench applied, now benched", "unbench applied, now in form", "unbench applied, now in form"]
+    # a bench retried does not restart its 24 h
+    esc.write_text(json.dumps({"id": "b3", "kind": "wallet_action", "wallet": "0xa", "action": "bench", "message": "again"}))
+    assert ops_watch.deliver_escalation(send=lambda t: False, now=100.0) is None
+    assert ops_watch.deliver_escalation(send=lambda t: True, now=100.0 + 3600)["after"] == "applied"
+    assert wf.is_benched("0xa", now=100.0 + wf.FORM_OVERRIDE_S)[0] is False, "the clock runs from the first application"
