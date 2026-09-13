@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import time
 from typing import Optional
 
 import httpx
@@ -32,6 +33,11 @@ Position = dict  # keys: shares, avg_price, market_key, market
 # ---------------------------------------------------------------------------
 
 _positions: dict[str, Position] = {}
+
+# The Data API's indexer lags real fills: a buy recorded seconds ago is ABSENT
+# from the positions response. A locally-recorded position younger than this
+# grace window is never treated as stale by sync_inventory_from_api.
+SYNC_STALE_GRACE_S = float(os.environ.get("INVENTORY_SYNC_GRACE_S", 900.0))
 
 _INVENTORY_FILE = os.path.join(
     CONFIG.data_dir,
@@ -138,11 +144,14 @@ def record_buy(
             "market": market,
             "tier": tier,
             "trader_address": trader_address,
+            "recorded_ts": time.time(),
         }
     else:
         new_avg = weighted_avg_price(pos["shares"], pos["avg_price"], shares, price)
         pos["shares"] = pos["shares"] + shares
         pos["avg_price"] = new_avg
+        # The latest fill is what the indexer lags behind; refresh the stamp.
+        pos["recorded_ts"] = time.time()
         if market_key:
             pos["market_key"] = market_key
         if market:
@@ -299,11 +308,25 @@ async def sync_inventory_from_api(proxy_wallet: str) -> int:
             "market": market,
             "tier": prev.get("tier", ""),
             "trader_address": prev.get("trader_address", ""),
+            "recorded_ts": prev.get("recorded_ts", 0.0),
         }
         synced += 1
 
-    # Remove local positions not found remotely
-    stale_ids = [tid for tid in _positions if tid not in remote_token_ids]
+    # Remove local positions not found remotely — but NOT a position recorded
+    # inside the grace window: it is absent because the Data API's indexer has
+    # not seen the fill yet, not because it is gone. Deleting it dropped the
+    # live position (unrealized PnL vanished, a later record_sell logged
+    # "unknown position", and when the next sync re-added it the tier/trader
+    # attribution was gone, orphaning its realized PnL into untagged).
+    now = time.time()
+    stale_ids = []
+    for tid in [t for t in _positions if t not in remote_token_ids]:
+        age = now - float(_positions[tid].get("recorded_ts") or 0.0)
+        if age < SYNC_STALE_GRACE_S:
+            logger.info(f"[inventory] Keeping {tid[:12]}...: absent from the API but "
+                        f"recorded {age:.0f}s ago (indexer lag, grace {SYNC_STALE_GRACE_S:.0f}s)")
+            continue
+        stale_ids.append(tid)
     for tid in stale_ids:
         logger.info(f"[inventory] Removing stale position: {tid[:12]}...")
         del _positions[tid]
