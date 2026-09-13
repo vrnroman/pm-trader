@@ -742,6 +742,15 @@ async def place_trade_orders(
                 mark_trade_as_seen(trade.id)
                 continue
             if trade.side == "BUY":
+                from src.copy_trading import wallet_form
+                _benched, _why_b = wallet_form.is_benched(trade.trader_address)
+                if _benched:
+                    _why_b = f"wallet out of form: {_why_b}"
+                    logger.skip(f"[exec] {trade.trader_address[:10]} {_why_b}: not copied")
+                    _skip_row(record_trade_history, trade, qt, _why_b)
+                    mark_trade_as_seen(trade.id)
+                    continue
+            if trade.side == "BUY":
                 from src.copy_trading.daily_spend_guard import can_copy_wallet
                 _ok_w, _why_w = can_copy_wallet(trade.trader_address)
                 if not _ok_w:

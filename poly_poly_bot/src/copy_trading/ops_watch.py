@@ -521,6 +521,25 @@ def deliver_escalation(send: Optional[Callable[[str], None]], now: Optional[floa
             pass
         return None
     kind = str(d.get("kind") or "escalation")
+    if kind == "wallet_action":
+        # The routine's call on a followed wallet, within set Z only.
+        from src.copy_trading import wallet_form
+        ok = wallet_form.apply_override(str(d.get("wallet") or ""), str(d.get("action") or ""), text)
+        receipt("routine_wallet_action", before=str(d.get("wallet") or "")[:10],
+                after=(str(d.get("action") or "") + (" applied" if ok else " REFUSED (not in set Z or bad action)")),
+                detail=text[:120], now=now, push="WALLET" if ok else None)
+        if ok and send is not None:
+            try:
+                send(f"🧭 <b>The watcher {d.get('action')}ed</b> <code>{str(d.get('wallet') or '')[:12]}</code>: {text[:600]}")
+            except Exception as exc:
+                logger.warn(f"[ops] wallet action message failed: {exc}")
+        st["last_escalation_id"] = eid
+        _write_json(_p(STATE_FILE), st)
+        try:
+            os.replace(path, f"{path}.sent-{eid[:12]}")
+        except OSError:
+            pass
+        return receipt("escalation_delivered", before=f"routine {kind}", after="applied" if ok else "refused", detail=text[:120], now=now)
     if send is not None:
         try:
             if kind == "fix":

@@ -942,6 +942,10 @@ class _Harness:
         zset.promotion_state.clear_cache()
         zset.admit(W1, ready=True, checks=[], settled=[_P(ideal=6.0, opened=5.0)] * 30,
                    era_floor=1.0, rails_supplied=True)
+        # the form rail: the harness wallet is in form unless a test says otherwise
+        from src.copy_trading import wallet_form
+        monkeypatch.setattr(wallet_form.CONFIG, "data_dir", str(tmp_path))
+        wallet_form._write({"ts": 1.0, "wallets": {W1.lower(): {"ok": True, "reason": "harness"}}})
         if armed:
             ok, why = live_mode.arm(reason="test", by="test")
             assert ok, why

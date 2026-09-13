@@ -495,6 +495,12 @@ def _handle_ops(text: str) -> None:
         lines.append("on probation: " + ", ".join(f"{w[:10]} ({int(v.get('settled') or 0)}/5 settled)"
                                                   for w, v in prob.items()))
     lines.append(f"auto-admission {'on' if ops_watch.auto_admit_enabled() else 'off'} (ZSET_AUTO_ADMIT)")
+    try:
+        from src.copy_trading import wallet_form
+        lines.append("\n<b>form (own money, last 14 days, our slice)</b>")
+        lines += [_esc(l) for l in wallet_form.lines()]
+    except Exception:
+        pass
     rows = ops_watch.ledger_rows(since_ts=time.time() - 86400)[-12:]
     if rows:
         lines.append("\n<b>last 24h, newest last</b>")

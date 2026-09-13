@@ -68,6 +68,7 @@ def main() -> int:
         "zset": _read(os.path.join(d, "promoted_wallets_z.json")),
         "watch": _read(os.path.join(d, ops_watch.STATE_FILE)),
         "probation": _read(os.path.join(d, ops_watch.PROBATION_FILE)),
+        "form": _read(os.path.join(d, "wallet-form.json")),
         "ledger_tail": ops_watch.ledger_rows(since_ts=now - a.hours * 3600)[-200:],
         "important": important_lines(logs, a.hours, now)[-400:],
     }
@@ -89,6 +90,13 @@ def main() -> int:
     print(f"## set Z: {json.dumps(state['zset'])}")
     print(f"## tier exposure: {json.dumps({k: (v.get('open_total'), len(v.get('placements') or [])) for k, v in (state['tier'] or {}).items()})}")
     print(f"## probation: {json.dumps(state['probation'])}")
+    print("## form (each wallet on its own money, last 14 days, our slice)")
+    try:
+        from src.copy_trading import wallet_form
+        for l in wallet_form.lines():
+            print(l)
+    except Exception as exc:
+        print(f"(form unavailable: {exc})")
     print()
     print(f"## ledger ({len(state['ledger_tail'])} rows)")
     for r in state["ledger_tail"]:

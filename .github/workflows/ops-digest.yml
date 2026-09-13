@@ -76,7 +76,7 @@ jobs:
             KIND=$(python3 -c "import json;print(json.load(open('ops/verdict.json')).get('kind',''))" 2>/dev/null)
             VID=$(python3 -c "import json;print(json.load(open('ops/verdict.json')).get('id',''))" 2>/dev/null)
             LAST=$(cat ops/.delivered 2>/dev/null || echo "")
-            if { [ "$KIND" = "escalation" ] || [ "$KIND" = "fix" ]; } && [ -n "$VID" ] && [ "$VID" != "$LAST" ]; then
+            if { [ "$KIND" = "escalation" ] || [ "$KIND" = "fix" ] || [ "$KIND" = "wallet_action" ]; } && [ -n "$VID" ] && [ "$VID" != "$LAST" ]; then
               # The SSH user is the service account's, not the app's, so the
               # data dir is not writable from the shell: copy INTO the
               # container instead (docker cp lands as root, 644, which the
