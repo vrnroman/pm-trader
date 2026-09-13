@@ -395,13 +395,23 @@ def make_feed_exit_detector(
 
 
 def resolve(condition_id: str) -> Optional[int]:
-    """Winning outcome index for a resolved market, else None (still open)."""
+    """Winning outcome index for a resolved market; ``copy_paper.REFUNDED``
+    for a cancelled one (every outcome priced ~0.5, the 50/50 payout vector);
+    else None (still open, or not cleanly resolved)."""
     if not condition_id:
         return None
     j = _get(GAMMA, "/markets", condition_ids=condition_id, closed="true")
     if not j:
         return None
-    op = j[0].get("outcomePrices")
+    return parse_winner(j[0])
+
+
+def parse_winner(market: dict) -> Optional[int]:
+    """The resolver's answer from a Gamma market dict (see ``resolve``)."""
+    from src.copy_trading.copy_paper import REFUNDED
+    if not market or not market.get("closed", True):
+        return None
+    op = market.get("outcomePrices")
     if isinstance(op, str):
         try:
             op = json.loads(op)
@@ -409,12 +419,17 @@ def resolve(condition_id: str) -> Optional[int]:
             return None
     if not op:
         return None
-    for i, p in enumerate(op):
+    prices: list[float] = []
+    for p in op:
         try:
-            if float(p) >= 0.99:
-                return i
+            prices.append(float(p))
         except (ValueError, TypeError):
-            continue
+            return None
+    for i, p in enumerate(prices):
+        if p >= 0.99:
+            return i
+    if len(prices) >= 2 and all(0.45 <= p <= 0.55 for p in prices):
+        return REFUNDED
     return None
 
 

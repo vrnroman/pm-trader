@@ -33,12 +33,15 @@ def _parse_list(raw) -> list:
     return list(raw) if isinstance(raw, (list, tuple)) else []
 
 
-def classify_position(market: Optional[dict], token_id: str) -> Optional[bool]:
-    """Did the held ``token_id`` win? ``True`` won, ``False`` lost, ``None`` if
-    the market is open / not cleanly resolved / the token isn't in the market.
+def classify_payout(market: Optional[dict], token_id: str) -> Optional[float]:
+    """What one held share of ``token_id`` pays at resolution: 1.0 (won),
+    0.0 (lost), 0.5 (a cancelled market's 50/50 refund, issue #33), or
+    ``None`` if the market is open / not cleanly resolved / the token isn't
+    in the market.
 
     Maps the token to its outcome via ``clobTokenIds`` and reads that outcome's
-    resolved price from ``outcomePrices`` (winner prices ~1.0)."""
+    resolved price from ``outcomePrices`` (winner prices ~1.0; a cancelled
+    market prices every outcome ~0.5)."""
     if not market or not market.get("closed"):
         return None
     prices = _parse_list(market.get("outcomePrices"))
@@ -49,12 +52,24 @@ def classify_position(market: Optional[dict], token_id: str) -> Optional[bool]:
         fprices = [float(p) for p in prices]
     except (ValueError, TypeError):
         return None
-    if max(fprices) < _RESOLVED_PRICE:
-        return None   # closed but not a clean YES/NO resolution yet
     idx = tokens.index(token_id)
     if idx >= len(fprices):
         return None
-    return fprices[idx] >= _RESOLVED_PRICE
+    if max(fprices) >= _RESOLVED_PRICE:
+        return 1.0 if fprices[idx] >= _RESOLVED_PRICE else 0.0
+    if len(fprices) >= 2 and all(0.45 <= p <= 0.55 for p in fprices):
+        return 0.5
+    return None   # closed but not a clean resolution yet
+
+
+def classify_position(market: Optional[dict], token_id: str) -> Optional[bool]:
+    """Did the held ``token_id`` win? ``True`` won, ``False`` lost, ``None`` if
+    the market is open / not cleanly resolved / the token isn't in the market.
+    A cancelled market is neither: ``None`` (the late-bet lead reads this)."""
+    payout = classify_payout(market, token_id)
+    if payout is None or payout == 0.5:
+        return None
+    return payout >= 1.0
 
 
 def realize_preview_positions(
@@ -79,12 +94,13 @@ def realize_preview_positions(
         shares = float(pos.get("shares", 0) or 0)
         if shares <= 0:
             continue
-        won = classify_position(market_fetcher(condition_id), token_id)
-        if won is None:
+        payout = classify_payout(market_fetcher(condition_id), token_id)
+        if payout is None:
             continue
+        won = payout >= 1.0
         avg = float(pos.get("avg_price", 0) or 0)
         cost = shares * avg
-        returned = shares if won else 0.0
+        returned = shares * payout
         rows.append({
             "timestamp": ts,
             "title": pos.get("market", "") or "",
@@ -100,6 +116,8 @@ def realize_preview_positions(
             "trader_address": pos.get("trader_address", "") or "",
             "exit": "resolution",
             "source": "preview",
+            # a cancelled market's 50/50 refund: neither a win nor a loss
+            "refunded": payout == 0.5,
         })
         drop.append(token_id)
     return rows, drop

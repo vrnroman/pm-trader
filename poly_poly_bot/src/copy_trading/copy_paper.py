@@ -68,6 +68,14 @@ DUST_FILL_FRAC = 0.5
 # few percent under their print is a real exit, not a moved book.
 EXIT_GATE_BPS = 500
 
+# A resolver's answer for a CANCELLED market: Polymarket sets the payout vector
+# 50/50, so every share of either outcome redeems for $0.50. Neither reader
+# treated that as a resolution (no outcome prices ~1.0), so a paper or preview
+# position on a cancelled market stayed open forever, inflating open cost and
+# understating ROI in the books that feed promotion and the race verdict
+# (issue #33). The engine books it at $0.50 a share, mirroring the CTF payout.
+REFUNDED = -1
+
 
 # Entry-price buckets for the P1-6 book-evidence gate. Edges match the §1.5
 # analysis that found book B's [0.2, 0.4) bucket at −61.5% ROI (win rate 16%
@@ -216,6 +224,9 @@ class PaperPosition:
     # best bid was outside the exit gate (issue #31). Default-safe: old rows
     # load as False.
     exit_clamped: bool = False
+    # closed by a cancelled market's 50/50 refund, not a win or a loss
+    # (issue #33). Default-safe: old rows load as False.
+    refunded: bool = False
     # Opened only thanks to the starved-wallet cap relief — a REAL-money book at
     # the normal category cap would have skipped this fill. Stamped so promotion
     # review can audit how much of a wallet's paper evidence came in over the
@@ -239,6 +250,18 @@ class PaperPosition:
         self.pnl = payout - self.spent
         ideal_cost = self.shares * self.their_price
         self.ideal_pnl = payout - ideal_cost
+        self.closed = True
+        self.closed_ts = now if now is not None else time.time()
+
+    def realize_refund(self, now: Optional[float] = None) -> None:
+        """Close on a cancelled market: every share pays $0.50 (the CTF's
+        50/50 payout vector), so this is neither a win nor a loss but the
+        refund of half the notional (issue #33)."""
+        payout = self.shares * 0.5
+        self.won = False
+        self.refunded = True
+        self.pnl = payout - self.spent
+        self.ideal_pnl = payout - self.shares * self.their_price
         self.closed = True
         self.closed_ts = now if now is not None else time.time()
 
@@ -369,6 +392,7 @@ class CycleSummary:
     marked: int = 0  # open positions marked-to-market this cycle (Strategy-4 book)
     exited: int = 0  # closed by following the target's SELL
     exit_clamped: int = 0  # of those, booked at their price: the bid failed the exit gate
+    refunded: int = 0  # of the resolved, closed by a cancelled market's 50/50 refund
     # the positions that resolved *this* cycle, so callers can name them in a
     # notification instead of only reporting cumulative ledger aggregates.
     resolved_positions: list["PaperPosition"] = field(default_factory=list)
@@ -884,7 +908,11 @@ class CopyPaperEngine:
             winner = self.resolver(pos.condition_id)
             if winner is None:
                 continue
-            pos.realize(won=(winner == pos.outcome_index), now=now)
+            if winner == REFUNDED:
+                pos.realize_refund(now=now)
+                s.refunded += 1
+            else:
+                pos.realize(won=(winner == pos.outcome_index), now=now)
             s.resolved += 1
             s.resolved_positions.append(pos)
 
