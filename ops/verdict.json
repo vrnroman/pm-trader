@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-13T00:41:49Z-c042",
-  "ts": 1789260109,
+  "id": "2026-09-13T06:41:28Z-bb1d",
+  "ts": 1789281688,
   "kind": "nothing",
-  "message": "Armed, spend $21.45 of $24.92 cap, tier 1b copies filled and verified, the $10.72 daily loss already reached the owner via push, and the earlier tier 1b legacy exposure block cleared by 16:25.",
+  "message": "Armed, spend $0.00 of $24.92 cap, no new trades, all 11 followed wallets benched by the bot's own bar so copying is paused by design, and the floor-near and daily-loss lines already reached the owner via push.",
   "evidence": [
-    "## money state {\"spend\": {\"spent_usd\": 21.45, \"cap_usd\": 24.92, \"remaining_usd\": 3.47}, \"armed\": true}",
-    "## arm: {\"armed\": true, \"ts\": 1788698166.0465596, \"by\": \"1shot:s-kac3t7\"}",
+    "## money state {\"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 24.92, \"remaining_usd\": 24.92}, \"armed\": true}",
+    "2026-09-13 04:35:11 INFO  [ops] form_pause: '11 followed' -> '0 in form: live copying paused'",
     "2026-09-12 21:00:24 INFO  [ops] push:daily_loss: None -> \"Today's losses reach $10.72 (10% of the $61.43 bankroll).\"",
-    "2026-09-12 17:48:50 INFO  [tiered-risk] Recorded tier 1b placement: $5.35 | open: $21.45 / $200.00",
-    "2026-09-12 16:25:36 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped"
+    "2026-09-12 17:41:54 INFO  [ops] push:floor_near: None -> '⚠️ Bankroll $66.83 is within 20% of the $56 floor.'",
+    "2026-09-13 04:34:42 INFO  Bot started. Monitoring trades..."
   ],
   "commit": null
 }
