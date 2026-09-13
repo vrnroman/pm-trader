@@ -123,11 +123,15 @@ def test_a_failed_read_keeps_the_last_verdict(form_env):
     assert wf.is_benched("0xa", now=NOW - 3600 + wf.FORM_STALE_S) == (True, "form record stale (24 h, reads failing)")
 
 
-def test_a_table_from_an_older_compute_is_rescanned_at_boot(form_env):
+def test_a_table_from_an_older_compute_is_rescanned_at_boot(form_env, monkeypatch):
+    from src.copy_trading import zset
+    monkeypatch.setattr(zset, "wallet_set", lambda: {"0xa"})
     assert wf.needs_rescan() is False, "no table: the clock decides"
     wf._write({"ts": 1.0, "wallets": {"0xa": {"wallet": "0xa", "ok": False, "reason": "old bar", "ts": 1.0}}})
     assert wf.needs_rescan() is True
     d = wf.scan(get=lambda url: [], send=None, now=NOW, wallets=[])
+    assert d["version"] == 0 and wf.needs_rescan() is True, "a catch-up scan does not vouch for the old rows"
+    d = wf.scan(get=lambda url: [], send=None, now=NOW)
     assert d["version"] == wf.FORM_VERSION and wf.needs_rescan() is False
 
 

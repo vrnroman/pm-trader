@@ -341,7 +341,9 @@ def scan(*, get=None, send: Optional[Callable[[str], None]] = None,
     table = {w: r for w, r in table.items() if w in zs}
     ovs = {w: o for w, o in (prev.get("overrides") or {}).items()
            if now - float(o.get("ts") or 0) < FORM_OVERRIDE_S and w in zs}
-    d = {"ts": now, "version": FORM_VERSION, "wallets": table, "overrides": ovs,
+    # only a full scan vouches for the whole table's compute version
+    ver = FORM_VERSION if wallets is None else int(prev.get("version") or 0)
+    d = {"ts": now, "version": ver, "wallets": table, "overrides": ovs,
          "paused": bool(prev.get("paused")), "paused_told": bool(prev.get("paused_told"))}
     _write(d)
     active = in_form_wallets()
