@@ -899,7 +899,13 @@ async def place_trade_orders(
                         logger.warn(f"[canary] post-failed message failed: {exc}")
                     mark_trade_as_seen(trade.id)
                     break
-                increment_retry(trade.id)
+                # Non-canary ambiguous post: the same invariant applies. The
+                # CLOB may hold this order; the trade must be marked seen so
+                # the detection poll cannot re-enqueue it into a SECOND real
+                # order against the possible orphan. increment_retry here kept
+                # it eligible (is_max_retries allows 3), so one timed-out
+                # reply could double the position and the day's spend.
+                mark_trade_as_seen(trade.id)
                 continue
 
             logger.trade(

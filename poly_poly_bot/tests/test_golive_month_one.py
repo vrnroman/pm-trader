@@ -1055,6 +1055,22 @@ def test_a_failed_canary_post_spends_the_shot_and_keeps_the_arm_off(tmp_path, mo
     assert canary.stage(by="test")[0] is False, "spent until RESET"
 
 
+def test_an_ambiguous_post_is_seen_so_the_next_poll_cannot_repost_it(tmp_path, monkeypatch):
+    """_execute_copy_order returns None when the reply was lost AFTER the CLOB
+    may have accepted the order. increment_retry left the trade un-seen, and
+    the detection poll re-enqueues anything unseen under 3 retries — so one
+    timed-out reply became a second real order against a live orphan, doubling
+    the position and taking a second daily-cap reservation. The canary branch
+    of this same code already handled the identical case with mark_trade_as_seen."""
+    h = _Harness(tmp_path, monkeypatch)
+    h.post_result = "fail"
+    placed = h.run(h.trades(1))
+    assert placed == 0 and len(h.posted) == 1
+    assert h.seen == {"t0"}, "an ambiguous post must close the trade, not retry it"
+    placed = h.run(h.trades(1))
+    assert len(h.posted) == 1, "and the next batch must not post it again"
+
+
 def test_a_disarmed_live_process_writes_no_paper_into_the_live_inventory(tmp_path, monkeypatch):
     h = _Harness(tmp_path, monkeypatch, armed=False)
     assert live_mode.is_preview() is True and CONFIG.preview_mode is False
