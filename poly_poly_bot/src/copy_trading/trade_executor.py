@@ -950,7 +950,13 @@ async def place_trade_orders(
             # Accounting: risk ledgers, the daily cap, the cached cash. A
             # failure here is logged loudly, never re-raised.
             try:
-                if TIERED_MODE and tier is not None:
+                # The ledger follows the tier, not TIERED_MODE: routing above
+                # is `TIERED_MODE or tier is not None`, and a wallet with a
+                # tier under TIERED_MODE=False (set Z with empty env tier
+                # lists) was evaluated against the tiered ledger but recorded
+                # into the legacy one, so its cap never grew (issue #34.1).
+                # Every release site below matches this test.
+                if tier is not None:
                     record_tiered_placement(tier, copy_size, token_id=trade.token_id,
                                             trader=trade.trader_address, title=trade.market)
                 else:
@@ -1028,6 +1034,27 @@ async def place_trade_orders(
 MAX_UNCERTAIN_CYCLES = 5
 
 
+def _release_sell_fill(release_tiered_exposure, po: PendingOrder, new_usd: float,
+                       filled_usd_total: float, final: bool) -> float:
+    """A SELL that fills is not open exposure. `record_tiered_placement` runs
+    for both sides, so a SELL reserved its copy_size against the tier, and
+    nothing released it on a fill: only the reconcile dropped the row once the
+    token had left the wallet, so a partial exit sat double-counted (buy +
+    sell) and refused later copies as "exposure full" (issue #34.2).
+
+    Releases, off the order's own token: the reservation as it fills, the
+    reservation left over once the order is final (a fill under copy_size),
+    and the proceeds' worth of the BUY row for the same token, because those
+    shares are gone. Returns the amount released."""
+    if po.tier is None or new_usd <= 0:
+        return 0.0
+    amount = new_usd * 2  # the sell's own reservation + the buy exposure it closed
+    if final:
+        amount += max(float(po.copy_size) - float(filled_usd_total), 0.0)
+    release_tiered_exposure(po.tier, round(amount, 6), token_id=po.trade.token_id)
+    return amount
+
+
 async def process_verifications(
     pending: list[PendingOrder],
     clob_client: ClobClient,
@@ -1080,6 +1107,8 @@ async def process_verifications(
                         )
                     elif trade.side == "SELL":
                         record_sell(trade.token_id, new_shares)
+                        _release_sell_fill(release_tiered_exposure, po, new_usd,
+                                           fill.filled_usd, final=True)
 
                 logger.trade(
                     f"[verify] FILLED: {trade.side} {fill.filled_shares:.2f} shares "
@@ -1130,6 +1159,8 @@ async def process_verifications(
                         )
                     elif trade.side == "SELL":
                         record_sell(trade.token_id, new_shares)
+                        _release_sell_fill(release_tiered_exposure, po, new_usd,
+                                           fill.filled_usd, final=False)
 
                     po.accounted_filled_shares = fill.filled_shares
                     po.accounted_filled_usd = fill.filled_usd
@@ -1151,7 +1182,7 @@ async def process_verifications(
                     # Adjust risk accounting: refund the unexecuted portion
                     unfilled_usd = po.copy_size - po.accounted_filled_usd
                     if unfilled_usd > 0:
-                        if TIERED_MODE and po.tier is not None:
+                        if po.tier is not None:
                             release_tiered_exposure(po.tier, unfilled_usd, token_id=po.trade.token_id)
                         else:
                             adjust_placement(trade, -unfilled_usd)
@@ -1189,7 +1220,7 @@ async def process_verifications(
                             f"after {MAX_UNCERTAIN_CYCLES} uncertain cycles"
                         )
                         # Release full exposure as a safety measure
-                        if TIERED_MODE and po.tier is not None:
+                        if po.tier is not None:
                             release_tiered_exposure(po.tier, po.copy_size, token_id=po.trade.token_id)
                         else:
                             adjust_placement(trade, -po.copy_size)
@@ -1226,7 +1257,7 @@ async def process_verifications(
                         f"after {MAX_UNCERTAIN_CYCLES} unknown cycles"
                     )
                     # Release full exposure
-                    if TIERED_MODE and po.tier is not None:
+                    if po.tier is not None:
                         release_tiered_exposure(po.tier, po.copy_size, token_id=po.trade.token_id)
                     else:
                         adjust_placement(trade, -po.copy_size)
@@ -1348,7 +1379,7 @@ async def recover_pending_orders(clob_client: ClobClient) -> None:
                 # Release risk exposure for unfilled portion
                 unfilled_usd = po.copy_size - po.accounted_filled_usd
                 if unfilled_usd > 0:
-                    if TIERED_MODE and po.tier is not None:
+                    if po.tier is not None:
                         release_tiered_exposure(po.tier, unfilled_usd, token_id=po.trade.token_id)
                     else:
                         adjust_placement(trade, -unfilled_usd)

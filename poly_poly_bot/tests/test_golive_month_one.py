@@ -2465,7 +2465,7 @@ def test_an_unfilled_copy_releases_its_own_row_not_the_oldest(monkeypatch, tmp_p
     assert exp.open_total == 6.0
     from src.copy_trading import trade_executor
     src = inspect.getsource(trade_executor)
-    assert src.count("token_id=po.trade.token_id") == 4, "every release call site names the order's token"
+    assert src.count("token_id=po.trade.token_id") == 5, "every release call site names the order's token"
 
 
 def test_a_corrupt_tier_state_goes_aside_with_one_error_and_one_push(monkeypatch, tmp_path, caplog):
@@ -2992,3 +2992,82 @@ def test_test_order_texts_say_polymarket_pays_the_wallet(canary_env, monkeypatch
     rep = canary.record_test_fill("0xt", _Fill())
     assert "pays the winnings to the wallet by itself" in rep and "does not send a redeem" in rep
     assert "works end to end" not in rep, "the cycle is not closed at redemption"
+
+
+# ---- issue #34: the tiered ledger's accounting follows the tier, and a SELL fill releases ----
+
+def test_the_tiered_ledger_is_chosen_by_the_tier_at_every_accounting_site():
+    """#34.1: routing is `TIERED_MODE or tier is not None`, accounting was
+    `TIERED_MODE and tier is not None`. With TIERED_MODE=False and a tier
+    carrying (set Z, empty env tier lists) a copy was sized against the
+    tiered ledger and recorded into the legacy one; the tiered cap never grew."""
+    from src.copy_trading import trade_executor
+    src = inspect.getsource(trade_executor)
+    assert "TIERED_MODE and tier is not None" not in src
+    assert "TIERED_MODE and po.tier is not None" not in src
+    assert "if TIERED_MODE or tier is not None:" in src, "routing is unchanged"
+
+
+def _sell_po(copy_size=10.0, accounted_usd=0.0, tier="1b"):
+    from src.models import DetectedTrade, PendingOrder
+    trade = DetectedTrade(id="s1", trader_address="0xW", timestamp="2026-09-13T00:00:00+00:00",
+                          market="m", condition_id="0xc", token_id="tokS", side="SELL",
+                          size=100.0, price=0.5, outcome="Yes")
+    return PendingOrder(trade=trade, order_id="ord-s", order_price=0.5, copy_size=copy_size,
+                        placed_at=1.0, market_key="0xc", side="SELL", source_detected_at=1.0,
+                        enqueued_at=1.0, order_submitted_at=1.0, tier=tier,
+                        accounted_filled_usd=accounted_usd)
+
+
+def test_a_sell_fill_releases_its_reservation_and_the_buy_exposure_it_closed():
+    """#34.2: the SELL's placement reserved copy_size and no fill released it;
+    only the reconcile dropped the row once the token was gone, so a partial
+    exit sat double-counted and refused later copies as exposure full."""
+    from src.copy_trading import trade_executor
+    released: list = []
+    rel = lambda tier, amount, token_id=None: released.append((tier, amount, token_id))
+    po = _sell_po(copy_size=10.0)
+    # a $4 partial: $4 of the reservation filled + $4 of the buy row closed
+    assert trade_executor._release_sell_fill(rel, po, 4.0, 4.0, final=False) == 8.0
+    po.accounted_filled_usd = 4.0
+    # final at $9 total: $5 more filled, $1 of reservation never used, $5 more of buy closed
+    assert trade_executor._release_sell_fill(rel, po, 5.0, 9.0, final=True) == 11.0
+    assert released == [("1b", 8.0, "tokS"), ("1b", 11.0, "tokS")]
+    assert sum(a for _, a, _ in released) == 10.0 + 9.0, "reservation + proceeds, once each"
+    assert trade_executor._release_sell_fill(rel, _sell_po(tier=None), 4.0, 4.0, final=False) == 0.0
+    assert len(released) == 2, "a legacy (untiered) order is not the tiered ledger's"
+
+
+def test_the_verifier_releases_on_a_filled_sell(monkeypatch):
+    """Through process_verifications: a FILLED SELL records the sell and
+    releases off the tiered ledger; a FILLED BUY releases nothing."""
+    from src.copy_trading import trade_executor, canary
+
+    class _Fill:
+        status, fill_price, filled_shares, filled_usd = "FILLED", 0.5, 20.0, 10.0
+
+    async def _verify(clob, order_id):
+        return _Fill()
+
+    released: list = []
+    sold: list = []
+
+    class _TG:
+        async def trade_filled(self, *a, **k): pass
+    monkeypatch.setattr(trade_executor, "_verify_order_fill", _verify)
+    monkeypatch.setattr(trade_executor, "_tiered_risk", lambda: (
+        None, None, lambda tier, amount, token_id=None: released.append((tier, amount, token_id))))
+    monkeypatch.setattr(trade_executor, "_risk_manager", lambda: (None, None, lambda *a, **k: None))
+    monkeypatch.setattr(trade_executor, "_strategy_config", lambda: (False, None, None))
+    monkeypatch.setattr(trade_executor, "_trade_queue", lambda: (None, lambda oid: None, None))
+    monkeypatch.setattr(trade_executor, "_inventory", lambda: (
+        lambda *a, **k: (_ for _ in ()).throw(AssertionError("a SELL must not record a buy")),
+        lambda tok, n: sold.append((tok, n)), None, None))
+    monkeypatch.setattr(trade_executor, "_trade_store", lambda: (
+        None, lambda tid: None, None, None, lambda rec: None, None))
+    monkeypatch.setattr(trade_executor, "_telegram", lambda: _TG())
+    monkeypatch.setattr(canary, "record_fill", lambda oid, fill: None)
+    monkeypatch.setattr(canary, "record_test_fill", lambda oid, fill: None)
+    _run(trade_executor.process_verifications([_sell_po(copy_size=10.0)], clob_client=None))
+    assert sold == [("tokS", 20.0)]
+    assert released == [("1b", 20.0, "tokS")], "the $10 reservation and the $10 of buy row it closed"
