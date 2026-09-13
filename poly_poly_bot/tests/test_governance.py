@@ -135,6 +135,7 @@ def test_cycle_offers_once_and_records(stores, tmp_path):
     assert ps.offer_status(WIN) == "offered"
     rows = gate_history.load(str(tmp_path / "promotion-gate-history.jsonl"))
     assert rows[-1]["event"] == "offer" and rows[-1]["wallet"] == WIN
+    assert rows[-1]["muted"] is False
     # a second pass must NOT re-offer
     offers2, _ = _run(diversified_winner(), sent, tmp_path=tmp_path)
     assert offers2 == []
@@ -210,6 +211,27 @@ def test_cycle_failed_review_is_retried_at_most_hourly(stores, tmp_path):
     _run(diversified_winner(), sent, tmp_path=tmp_path, now=1000.0 + 3600,
          send_ok=False, review_fn=review, review_memo=memo)
     assert len(calls) == 2
+
+
+def test_cycle_muted_offer_is_recorded_once_not_retried(stores, tmp_path):
+    # /research off decides what reaches the phone, never what the bot does:
+    # a muted offer is recorded like a delivered one, not retried or re-reviewed.
+    from src.copy_trading.llm_review import PromotionVerdict
+    calls = []
+
+    def review(dossier, **kw):
+        calls.append(1)
+        return PromotionVerdict("watch", 0.6, "thin sample", ())
+
+    sent = []
+    offers, _ = _run(diversified_winner(), sent, tmp_path=tmp_path,
+                     send_ok="muted", review_fn=review)
+    assert len(offers) == 1 and ps.offer_status(WIN) == "offered"
+    rows = gate_history.load(str(tmp_path / "promotion-gate-history.jsonl"))
+    assert rows[-1]["event"] == "offer" and rows[-1]["muted"] is True
+    offers2, _ = _run(diversified_winner(), sent, tmp_path=tmp_path, now=1060.0,
+                      send_ok="muted", review_fn=review)
+    assert offers2 == [] and len(calls) == 1 and len(sent) == 1
 
 
 def test_cycle_demotes_and_blacklists(stores, tmp_path):
