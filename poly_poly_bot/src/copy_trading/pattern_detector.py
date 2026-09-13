@@ -273,19 +273,26 @@ def _is_novel_wallet(
     age_days: Optional[float],
     prior_trade_ts: Optional[int],
     polymarket_count_truncated: bool,
+    polymarket_trade_count: Optional[int] = None,
 ) -> bool:
     """Wallet-quality gate used by the weak patterns (cluster, thin-market).
 
     A wallet is "novel" if it shows at least one of: first-ever Polymarket
     trade, dormant for ≥ dormant_days, or on-chain age < new_account_age_days.
-    Fail-closed: if a lookup was truncated or didn't return data, the wallet
-    is not considered novel and the weak pattern is suppressed. This is how
-    we keep organic whale activity from firing cluster / thin-market alerts.
+    Fail-closed: if a lookup was truncated, FAILED, or didn't return data, the
+    wallet is not considered novel and the weak pattern is suppressed. This is
+    how we keep organic whale activity from firing cluster / thin-market alerts.
     """
     if polymarket_count_truncated:
         return False
+    if polymarket_trade_count is None:
+        # The history lookup failed (wallet_history returns known_count=None);
+        # a failure cached as an EMPTY history used to land here as
+        # prior_trade_ts=None and ungate the weak patterns for seasoned
+        # wallets through an entire API hiccup. Unknown is not novel.
+        return False
     if prior_trade_ts is None:
-        return True  # first-ever trade on Polymarket
+        return True  # first-ever trade on Polymarket (lookup succeeded, empty)
     now = time.time()
     if (now - float(prior_trade_ts)) / 86400 >= TIER_1C.dormant_days:
         return True
@@ -1043,6 +1050,7 @@ async def analyze_trade_for_patterns(
         age_days=age_days,
         prior_trade_ts=prior_ts,
         polymarket_count_truncated=pm_truncated,
+        polymarket_trade_count=pm_count,
     )
 
     # Pattern 2: Cluster detection (same side + same market + novelty gate)
