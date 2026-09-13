@@ -343,11 +343,20 @@ def note_guard_pass(ok: bool, error: str = "", now: Optional[float] = None,
     st["guard_fail_streak"] = streak
     st["guard_last_error"] = "" if ok else error[:200]
     msg = None
-    if streak == GUARD_FAIL_STREAK:
+    if ok:
+        st["guard_failing_pushed"] = False
+    elif streak >= GUARD_FAIL_STREAK and not st.get("guard_failing_pushed"):
+        # Once per EPISODE, not once at streak == N: a restart or a failed
+        # send must not cost the only escalation. And _push returns "" when
+        # the send was not delivered — the say-once state commits only on
+        # delivery (the module's own push policy), or a Telegram hiccup at
+        # exactly the sixth pass would lose the alarm for the whole episode.
         msg = _push(send, f"🚨 <b>The guard loop has failed {streak} passes in a row.</b> "
                           f"Last error: {error[:160]}. The bankroll floor is not being watched "
                           f"until this clears.", "guard_failing", now)
         receipt("guard_failing", before="passing", after=f"{streak} failed passes", detail=error[:160], now=now)
+        if msg:
+            st["guard_failing_pushed"] = True
     if ok and int(st.get("guard_fail_streak_prev") or 0) >= GUARD_FAIL_STREAK:
         receipt("guard_recovered", before="failing", after="passing", now=now)
     st["guard_fail_streak_prev"] = streak
@@ -382,22 +391,33 @@ def check_absences(*, followed_signals_3d: int, copies_3d: int, armed: bool,
     pushed: list[str] = []
     quiet = armed and copies_3d == 0 and followed_signals_3d >= NO_COPY_MIN_SIGNALS
     if quiet and not st.get("no_copy_pushed"):
-        pushed.append(_push(send, f"🔇 <b>No copy in {NO_COPY_DAYS:.0f} days</b> while the followed "
-                                  f"wallets made {followed_signals_3d} qualifying trades and the arm is on. "
-                                  f"Something is refusing every copy; the last refusals are in the ledger.",
-                            "no_copy", now))
+        m = _push(send, f"🔇 <b>No copy in {NO_COPY_DAYS:.0f} days</b> while the followed "
+                        f"wallets made {followed_signals_3d} qualifying trades and the arm is on. "
+                        f"Something is refusing every copy; the last refusals are in the ledger.",
+                  "no_copy", now)
+        pushed.append(m)
         receipt("no_copy", before=f"{followed_signals_3d} signals", after="0 copies", now=now)
-    st["no_copy_pushed"] = bool(quiet)
+        # The say-once state commits only when the push was DELIVERED; _push
+        # returns "" otherwise, and committing anyway would lose the alarm
+        # for the entire episode on one Telegram hiccup (push policy).
+        if m:
+            st["no_copy_pushed"] = True
+    if not quiet:
+        st["no_copy_pushed"] = False
     dt = datetime.fromtimestamp(now, tz=timezone.utc)
     day = dt.strftime("%Y-%m-%d")
     hour = dt.hour + dt.minute / 60.0
     if hour >= DAILY_LINE_DEADLINE_UTC_H and st.get("daily_line_day") != day and st.get("daily_line_missing_day") != day:
         if st.get("daily_line_day") or st.get("daily_line_attempt_day"):  # never before the first attempt
-            pushed.append(_push(send, f"🕘 <b>No 08:00 real-money line today</b> by "
-                                      f"{DAILY_LINE_DEADLINE_UTC_H:.0f}:00 UTC. The reporter did not run or "
-                                      f"its send failed; check the ledger and the log.", "no_daily_line", now))
+            m = _push(send, f"🕘 <b>No 08:00 real-money line today</b> by "
+                            f"{DAILY_LINE_DEADLINE_UTC_H:.0f}:00 UTC. The reporter did not run or "
+                            f"its send failed; check the ledger and the log.", "no_daily_line", now)
+            pushed.append(m)
             receipt("no_daily_line", before="expected by 09:00 UTC", after="missing", now=now)
-        st["daily_line_missing_day"] = day
+            if m:  # delivered: once per day; not delivered: try again next pass
+                st["daily_line_missing_day"] = day
+        else:
+            st["daily_line_missing_day"] = day
     _write_json(_p(STATE_FILE), st)
     return [m for m in pushed if m]
 
