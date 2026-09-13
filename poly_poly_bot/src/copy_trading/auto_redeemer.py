@@ -316,11 +316,29 @@ async def check_and_redeem_positions(private_key: str,
                 redeemed_markets.append(title)
                 total_shares += shares
 
-                # P&L calculation: curPrice > 0.5 means the outcome won. A
-                # winning binary share redeems for $1, a losing one for $0.
+                # P&L calculation: a winning binary share redeems for $1, a
+                # losing one for $0 — and a CANCELLED market's shares redeem
+                # for $0.50 each. On a cancellation the CTF payout vector is
+                # set 50/50 (both outcomes pay half), and curPrice sits at
+                # 0.5; `cur_price > 0.5 ? shares : 0` turned that half-refund
+                # into a total loss in realized-pnl.jsonl, overstating the
+                # loss by half the position on every refunded market.
                 cost_basis = shares * avg_price
-                won = cur_price > 0.5
-                returned = shares if won else 0.0
+                if 0.45 <= cur_price <= 0.55:
+                    # Cancelled. Verified 2026-09-13 on a real refunded market
+                    # (OpenSea token-or-IPO, condition 0x29e982b5...): every
+                    # holder's row reads curPrice 0.5, redeemable true, and
+                    # the API's own cashPnl values the shares at $0.50.
+                    payout_per_share = 0.5
+                elif cur_price > 0.55:
+                    # A winner. The threshold stays where the old `> 0.5` rule
+                    # put it rather than demanding 0.99: a resolved winner the
+                    # API reports at 0.97 must never be booked as a total loss.
+                    payout_per_share = 1.0
+                else:
+                    payout_per_share = 0.0
+                returned = shares * payout_per_share
+                won = payout_per_share == 1.0
 
                 details.append(RedeemDetail(
                     title=title,

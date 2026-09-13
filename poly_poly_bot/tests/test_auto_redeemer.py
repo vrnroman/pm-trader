@@ -109,6 +109,71 @@ def test_losing_redemption_records_negative_pnl(redeem_env):
     assert rows[0]["won"] is False
 
 
+def test_a_refunded_market_books_the_half_payout_not_a_total_loss(redeem_env):
+    """A cancelled Polymarket market resolves 50/50: redeemPositions pays
+    $0.50 per share for EITHER outcome. curPrice is 0.5 there, and the old
+    `won = cur_price > 0.5; returned = shares if won else 0` booked the
+    refund as a realized loss of the entire cost basis."""
+    from src.copy_trading import auto_redeemer
+    from src.copy_trading import pnl as s1pnl
+
+    refunded_position = {
+        "conditionId": "0xcond3",
+        "tokenId": "tok-3",
+        "shares": 80.0,
+        "avgPrice": 0.60,
+        "curPrice": 0.5,   # cancelled/refunded: the CTF pays half per share
+        "title": "Will C happen?",
+        "negRisk": False,
+        "outcomeCount": 2,
+    }
+
+    with patch.object(auto_redeemer, "Web3", _mock_web3()), \
+         patch.object(auto_redeemer, "_fetch_redeemable_positions",
+                      AsyncMock(return_value=[refunded_position])):
+        result = _run(auto_redeemer.check_and_redeem_positions("aa" * 32))
+
+    assert result.count == 1
+    rows = s1pnl.load_realized()
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["cost_basis"] == pytest.approx(48.0)
+    assert row["returned"] == pytest.approx(40.0), "half of 80 shares, not zero"
+    assert row["pnl"] == pytest.approx(-8.0)
+    assert row["won"] is False
+
+
+def test_a_winner_reported_below_one_still_books_the_full_payout(redeem_env):
+    """The refund band must not narrow the win band: the API may report a
+    resolved winner at a last-trade price short of 1.0, and `>= 0.99` would
+    have turned that win into a booked total loss — a worse error than the
+    one the refund band fixes. Anything above the refund band is a win."""
+    from src.copy_trading import auto_redeemer
+    from src.copy_trading import pnl as s1pnl
+
+    winner = {
+        "conditionId": "0xcond4",
+        "tokenId": "tok-4",
+        "shares": 50.0,
+        "avgPrice": 0.40,
+        "curPrice": 0.97,
+        "title": "Will D happen?",
+        "negRisk": False,
+        "outcomeCount": 2,
+    }
+
+    with patch.object(auto_redeemer, "Web3", _mock_web3()), \
+         patch.object(auto_redeemer, "_fetch_redeemable_positions",
+                      AsyncMock(return_value=[winner])):
+        result = _run(auto_redeemer.check_and_redeem_positions("aa" * 32))
+
+    assert result.count == 1
+    (row,) = s1pnl.load_realized()
+    assert row["returned"] == pytest.approx(50.0)
+    assert row["pnl"] == pytest.approx(30.0)
+    assert row["won"] is True
+
+
 def test_negrisk_position_skipped_and_not_recorded(redeem_env):
     from src.copy_trading import auto_redeemer
     from src.copy_trading import pnl as s1pnl
