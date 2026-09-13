@@ -225,6 +225,8 @@ async def _periodic_loop() -> None:
                     if result.count > 0:
                         logger.info(f"Redeemed {result.count} resolved position(s)")
                         await telegram.positions_redeemed(result.count, result.details)
+                    if result.settled > 0:
+                        logger.info(f"Settled {result.settled} resolved position(s) from the API")
                 except Exception as err:
                     logger.warn(f"Auto-redeem failed: {error_message(err)}")
             elif (CONFIG.preview_mode and CONFIG.preview_realize_enabled

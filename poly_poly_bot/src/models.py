@@ -146,3 +146,8 @@ class RedeemResult(BaseModel):
     markets: list[str] = []
     total_shares: float = 0.0
     details: list[RedeemDetail] = []
+    # Resolved positions this bot will not redeem itself (neg-risk, or the
+    # signer is not the proxy wallet and Polymarket's own claim pays it) whose
+    # realized P&L was booked from the API's resolution instead (issue #32).
+    settled: int = 0
+    settled_details: list[RedeemDetail] = []

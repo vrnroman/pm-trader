@@ -196,3 +196,109 @@ def test_negrisk_position_skipped_and_not_recorded(redeem_env):
 
     assert result.count == 0
     assert s1pnl.load_realized() == []
+
+
+# ---- issue #32: resolved positions this bot does not redeem are booked from the API ----
+
+def _inventory_with(monkeypatch, positions: dict):
+    from src.copy_trading import inventory
+    monkeypatch.setattr(inventory, "_positions", positions)
+    monkeypatch.setattr(inventory, "_save_inventory", lambda: None)
+    return inventory
+
+
+def _redeemable(token, cond, shares, avg, cur, neg_risk=False, title="Will X?"):
+    return {"conditionId": cond, "tokenId": token, "shares": shares, "avgPrice": avg,
+            "curPrice": cur, "title": title, "negRisk": neg_risk, "outcomeCount": 2,
+            "currentValue": shares * cur}
+
+
+def test_a_signer_that_is_not_the_proxy_books_its_own_copies_from_the_api(redeem_env, monkeypatch):
+    """Production: the bot signs as a different address, sends no redeem, and
+    Polymarket's own claim pays the wallet; nothing ever reached the realized
+    ledger. The copies this bot made (attributed at buy time) are booked from
+    the API's resolution; the legacy tickets with no attribution are not."""
+    from src.copy_trading import auto_redeemer
+    from src.copy_trading import pnl as s1pnl
+    inv = _inventory_with(monkeypatch, {
+        "tok-win": {"shares": 20.0, "avg_price": 0.4, "market": "Will X?", "market_key": "0xcw",
+                    "tier": "1a", "trader_address": "0xWALLET"},
+        "tok-legacy": {"shares": 970.0, "avg_price": 0.26, "market": "", "market_key": "0xcl",
+                       "tier": "", "trader_address": ""},
+    })
+    web3 = _mock_web3()
+    web3.return_value.eth.account.from_key.return_value.address = "0xsomeoneelse"
+    notes: list = []
+    rows = [_redeemable("tok-win", "0xcw", 20.0, 0.4, 1.0),
+            _redeemable("tok-legacy", "0xcl", 970.0, 0.26, 0.0)]
+    with patch.object(auto_redeemer, "Web3", web3), \
+         patch.object(auto_redeemer, "_fetch_redeemable_positions", AsyncMock(return_value=rows)):
+        result = _run(auto_redeemer.check_and_redeem_positions("aa" * 32, notify=notes.append))
+    assert result.count == 0, "nothing sent on-chain"
+    assert result.settled == 1 and result.settled_details[0].returned == 20.0
+    web3.return_value.eth.send_raw_transaction.assert_not_called()
+    (row,) = s1pnl.load_realized()
+    assert row["token_id"] == "tok-win" and row["source"] == "redeemer" and row["settlement"] == "api"
+    assert row["returned"] == 20.0 and row["pnl"] == pytest.approx(12.0) and row["won"] is True
+    assert row["tier"] == "1a" and row["trader_address"] == "0xWALLET"
+    assert row["redeemed_onchain"] is False
+    assert "tok-win" not in inv._positions and "tok-legacy" in inv._positions
+    assert notes and "settled" in notes[0] and "+12.00" in notes[0]
+
+
+def test_a_settled_position_is_booked_once(redeem_env, monkeypatch):
+    from src.copy_trading import auto_redeemer
+    from src.copy_trading import pnl as s1pnl
+    _inventory_with(monkeypatch, {
+        "tok-a": {"shares": 10.0, "avg_price": 0.5, "market": "m", "market_key": "0xca",
+                  "tier": "1b", "trader_address": "0xW"}})
+    web3 = _mock_web3()
+    web3.return_value.eth.account.from_key.return_value.address = "0xsomeoneelse"
+    rows = [_redeemable("tok-a", "0xca", 10.0, 0.5, 0.0)]
+    with patch.object(auto_redeemer, "Web3", web3), \
+         patch.object(auto_redeemer, "_fetch_redeemable_positions", AsyncMock(return_value=rows)):
+        first = _run(auto_redeemer.check_and_redeem_positions("aa" * 32))
+        # the inventory sync re-adds an API row; still booked once
+        from src.copy_trading import inventory
+        inventory._positions["tok-a"] = {"shares": 10.0, "avg_price": 0.5, "tier": "1b",
+                                         "trader_address": "0xW", "market_key": "0xca", "market": "m"}
+        second = _run(auto_redeemer.check_and_redeem_positions("aa" * 32))
+    assert first.settled == 1 and second.settled == 0
+    assert len(s1pnl.load_realized()) == 1
+    assert s1pnl.load_realized()[0]["pnl"] == pytest.approx(-5.0)
+
+
+def test_a_neg_risk_winner_is_booked_from_the_api_not_sent_to_the_ctf(redeem_env, monkeypatch):
+    """The signer IS the proxy here, so plain positions go on-chain; the
+    neg-risk one is not sent (a different adapter) but no longer vanishes
+    from the ledger either."""
+    from src.copy_trading import auto_redeemer
+    from src.copy_trading import pnl as s1pnl
+    _inventory_with(monkeypatch, {
+        "tok-nr": {"shares": 30.0, "avg_price": 0.3, "market": "NR?", "market_key": "0xnr",
+                   "tier": "1a", "trader_address": "0xW"}})
+    web3 = _mock_web3()
+    rows = [_redeemable("tok-nr", "0xnr", 30.0, 0.3, 1.0, neg_risk=True, title="NR?")]
+    with patch.object(auto_redeemer, "Web3", web3), \
+         patch.object(auto_redeemer, "_fetch_redeemable_positions", AsyncMock(return_value=rows)):
+        result = _run(auto_redeemer.check_and_redeem_positions("aa" * 32))
+    assert result.count == 0 and result.settled == 1
+    web3.return_value.eth.send_raw_transaction.assert_not_called()
+    (row,) = s1pnl.load_realized()
+    assert row["neg_risk"] is True and row["returned"] == 30.0 and row["pnl"] == pytest.approx(21.0)
+
+
+def test_a_refunded_position_settles_at_half(redeem_env, monkeypatch):
+    from src.copy_trading import auto_redeemer
+    from src.copy_trading import pnl as s1pnl
+    _inventory_with(monkeypatch, {
+        "tok-r": {"shares": 80.0, "avg_price": 0.6, "market": "R?", "market_key": "0xr",
+                  "tier": "1a", "trader_address": "0xW"}})
+    web3 = _mock_web3()
+    web3.return_value.eth.account.from_key.return_value.address = "0xsomeoneelse"
+    rows = [_redeemable("tok-r", "0xr", 80.0, 0.6, 0.5)]
+    with patch.object(auto_redeemer, "Web3", web3), \
+         patch.object(auto_redeemer, "_fetch_redeemable_positions", AsyncMock(return_value=rows)):
+        _run(auto_redeemer.check_and_redeem_positions("aa" * 32))
+    (row,) = s1pnl.load_realized()
+    assert row["returned"] == 40.0 and row["refunded"] is True and row["won"] is False

@@ -186,6 +186,104 @@ async def _fetch_redeemable_positions(
     return redeemable
 
 
+def _payout_per_share(cur_price: float) -> float:
+    """What one resolved share pays: $1 (won), $0 (lost), or $0.50 on a
+    cancelled market (the CTF's 50/50 payout vector; verified 2026-09-13 on
+    a real refunded market, every holder row at curPrice 0.5). The win
+    threshold stays where the old `> 0.5` rule put it: a resolved winner the
+    API reports at 0.97 must never be booked as a total loss."""
+    if 0.45 <= cur_price <= 0.55:
+        return 0.5
+    return 1.0 if cur_price > 0.55 else 0.0
+
+
+def settle_from_api(positions: list[dict], notify=None) -> list[RedeemDetail]:
+    """Book realized P&L for resolved positions this bot will not redeem
+    itself, from the API's resolution (issue #32).
+
+    Two paths never reached realized-pnl.jsonl: neg-risk positions (a
+    different adapter; skipped by design) and, in production, EVERY position,
+    because the bot signs as a different address from the proxy wallet, sends
+    no redeem, and Polymarket's own claim pays the wallet. The outcome is
+    fixed at resolution whoever claims it, so a resolved position that the
+    local inventory attributes to a followed wallet (stamped at buy time by
+    the live copy path) is booked now, source "redeemer" so /pnl and the
+    daily real-money line count it, settlement "api" so the row says how,
+    and taken out of the inventory. The legacy tickets on the wallet carry no
+    attribution and are left alone, as before. The ledger's
+    (condition_id, token_id) resolution dedup keeps a later on-chain redeem
+    from booking the same position twice."""
+    from src.copy_trading.inventory import get_position, record_sell
+    from src.copy_trading.pnl import append_realized, load_realized, _settled_resolution_keys
+
+    booked = _settled_resolution_keys(load_realized())
+    out: list[RedeemDetail] = []
+    for pos in positions:
+        token_id = str(pos.get("tokenId") or "")
+        condition_id = str(pos.get("conditionId") or "")
+        if not token_id or not condition_id:
+            continue
+        if (condition_id, token_id) in booked:
+            continue
+        try:
+            inv_pos = get_position(token_id) or {}
+        except Exception:
+            inv_pos = {}
+        if not inv_pos.get("trader_address"):
+            continue  # not a live copy this bot made; no attribution, no row
+        shares = float(inv_pos.get("shares") or pos.get("shares") or 0.0)
+        avg_price = float(inv_pos.get("avg_price") or pos.get("avgPrice") or 0.0)
+        if shares <= 0:
+            continue
+        payout = _payout_per_share(float(pos.get("curPrice") or 0.0))
+        cost_basis = shares * avg_price
+        returned = shares * payout
+        title = str(pos.get("title") or inv_pos.get("market") or "")
+        try:
+            append_realized({
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "title": title,
+                "condition_id": condition_id,
+                "token_id": token_id,
+                "shares": round(shares, 6),
+                "avg_price": round(avg_price, 6),
+                "cost_basis": round(cost_basis, 6),
+                "returned": round(returned, 6),
+                "pnl": round(returned - cost_basis, 6),
+                "won": payout >= 1.0,
+                "refunded": payout == 0.5,
+                "tier": inv_pos.get("tier", ""),
+                "trader_address": inv_pos.get("trader_address", ""),
+                "exit": "resolution",
+                "source": "redeemer",
+                "settlement": "api",
+                "redeemed_onchain": False,
+                "neg_risk": bool(pos.get("negRisk", False)),
+            })
+        except Exception as exc:
+            logger.warn(f"[redeemer] settlement row not written for '{title[:60]}': {error_message(exc)}")
+            continue
+        try:
+            record_sell(token_id, shares)
+        except Exception as exc:
+            logger.warn(f"[redeemer] settled position not dropped from inventory: {error_message(exc)}")
+        out.append(RedeemDetail(title=title, shares=shares, cost_basis=cost_basis, returned=returned))
+        logger.info(f"[redeemer] settled '{title[:60]}' from the API: {shares:.2f} sh, "
+                    f"returned ${returned:.2f} on ${cost_basis:.2f}"
+                    f"{' (refund)' if payout == 0.5 else ''}")
+    if out and notify is not None:
+        pnl = sum(d.returned - d.cost_basis for d in out)
+        lines = [f"📒 <b>{len(out)} resolved position(s) settled</b> from the API "
+                 f"(realized {pnl:+,.2f} USD). Claimed by Polymarket, not by this bot."]
+        for d in out[:6]:
+            lines.append(f"• {d.title[:50]}: {d.returned - d.cost_basis:+,.2f}")
+        try:
+            notify("\n".join(lines))
+        except Exception as exc:
+            logger.warn(f"[redeemer] settlement notify failed: {exc}")
+    return out
+
+
 # Conditions already reported, so a permanent situation speaks once, not every
 # 30 minutes forever.
 _warned: set = set()
@@ -252,6 +350,9 @@ async def check_and_redeem_positions(private_key: str,
     # once, and leave the positions counted so the guard's unredeemed trigger
     # can still fire.
     if (CONFIG.proxy_wallet or "").lower() != account.address.lower():
+        # This bot sends no redeem here; the outcome is booked from the API
+        # for the positions it made (issue #32), then the standing warnings.
+        settled = settle_from_api(positions, notify=notify)
         # Only positions with something to collect are worth a message. The
         # 61 April-era losers on this wallet are worth under $1 each; naming
         # them "worth $837 at cost" on every boot read as a loss six times in
@@ -262,7 +363,7 @@ async def check_and_redeem_positions(private_key: str,
                 logger.info(f"[redeemer] {len(positions)} resolved position(s) sit on "
                             f"the proxy wallet, each worth under ${DUST_VALUE_USD:.0f}: "
                             f"nothing to claim, nothing sent, no P&L recorded.")
-            return RedeemResult()
+            return RedeemResult(settled=len(settled), settled_details=settled)
         if _warn_once("proxy-mismatch"):
             value = sum(float(p.get("currentValue") or 0.0) for p in collectable)
             msg = (f"{len(collectable)} position(s) worth ${value:,.2f} are held by "
@@ -277,7 +378,7 @@ async def check_and_redeem_positions(private_key: str,
                     notify("💤 <b>Cannot redeem automatically.</b> " + msg)
                 except Exception as exc:
                     logger.warn(f"[redeemer] notify failed: {exc}")
-        return RedeemResult()
+        return RedeemResult(settled=len(settled), settled_details=settled)
 
     ctf = w3.eth.contract(
         address=Web3.to_checksum_address(CTF_CONTRACT),
@@ -295,10 +396,13 @@ async def check_and_redeem_positions(private_key: str,
     total_shares = 0.0
     details: list[RedeemDetail] = []
 
+    # Neg-risk positions use a different redemption mechanism (the adapter);
+    # they are not redeemed here, but their outcome is booked from the API
+    # (issue #32) so the realized ledger sees them.
+    settled = settle_from_api([p for p in positions if p.get("negRisk", False)], notify=notify)
+
     for pos in positions:
-        # Skip neg-risk positions — they use a different redemption mechanism
         if pos.get("negRisk", False):
-            logger.info(f"[redeemer] Skipping neg-risk position: {pos['title'][:60]}")
             continue
 
         condition_id = pos["conditionId"]
@@ -342,19 +446,7 @@ async def check_and_redeem_positions(private_key: str,
                 # into a total loss in realized-pnl.jsonl, overstating the
                 # loss by half the position on every refunded market.
                 cost_basis = shares * avg_price
-                if 0.45 <= cur_price <= 0.55:
-                    # Cancelled. Verified 2026-09-13 on a real refunded market
-                    # (OpenSea token-or-IPO, condition 0x29e982b5...): every
-                    # holder's row reads curPrice 0.5, redeemable true, and
-                    # the API's own cashPnl values the shares at $0.50.
-                    payout_per_share = 0.5
-                elif cur_price > 0.55:
-                    # A winner. The threshold stays where the old `> 0.5` rule
-                    # put it rather than demanding 0.99: a resolved winner the
-                    # API reports at 0.97 must never be booked as a total loss.
-                    payout_per_share = 1.0
-                else:
-                    payout_per_share = 0.0
+                payout_per_share = _payout_per_share(cur_price)
                 returned = shares * payout_per_share
                 won = payout_per_share == 1.0
 
@@ -419,4 +511,6 @@ async def check_and_redeem_positions(private_key: str,
         markets=redeemed_markets,
         total_shares=total_shares,
         details=details,
+        settled=len(settled),
+        settled_details=settled,
     )
