@@ -49,7 +49,7 @@ _cache: "OrderedDict[str, WalletHistory]" = OrderedDict()
 _inflight: dict[str, asyncio.Task] = {}
 
 
-async def _fetch(address: str) -> WalletHistory:
+async def _fetch(address: str) -> Optional[WalletHistory]:
     url = f"{CONFIG.data_api_url}{_LOOKUP_URL_PATH}"
     params = {
         "user": address,
@@ -63,19 +63,19 @@ async def _fetch(address: str) -> WalletHistory:
                 resp = await client.get(url, params=params)
     except Exception as exc:
         logger.debug(f"[wallet-hist] lookup err for {address[:10]}: {error_message(exc)}")
-        return WalletHistory(now, [], False)
+        return None  # failure is NOT an empty history; the callers fail closed on None
 
     if resp.status_code != 200:
         logger.debug(f"[wallet-hist] HTTP {resp.status_code} for {address[:10]}")
-        return WalletHistory(now, [], False)
+        return None
 
     try:
         data = resp.json()
     except Exception:
-        return WalletHistory(now, [], False)
+        return None
 
     if not isinstance(data, list):
-        return WalletHistory(now, [], False)
+        return None
 
     raw: list[tuple[int, str]] = []
     for item in data:
@@ -106,7 +106,7 @@ async def _fetch(address: str) -> WalletHistory:
     return WalletHistory(now, deduped, truncated)
 
 
-async def _get_or_fetch(address: str) -> WalletHistory:
+async def _get_or_fetch(address: str) -> Optional[WalletHistory]:
     key = address.lower()
     now = time.time()
 
@@ -125,6 +125,12 @@ async def _get_or_fetch(address: str) -> WalletHistory:
     finally:
         _inflight.pop(key, None)
 
+    # A FAILED lookup is never cached: caching the empty placeholder served
+    # "this wallet has zero prior trades" from cache for ten minutes, firing
+    # first-ever and ungating the weak patterns for seasoned wallets through
+    # an entire API hiccup.
+    if history is None:
+        return None
     _cache[key] = history
     _cache.move_to_end(key)
     while len(_cache) > _CACHE_MAX:
@@ -135,13 +141,14 @@ async def _get_or_fetch(address: str) -> WalletHistory:
 async def get_prior_trade_ts(
     address: str,
     exclude_tx: str = "",
-) -> tuple[Optional[int], int, bool]:
+) -> tuple[Optional[int], Optional[int], bool]:
     """Look up the wallet's most-recent trade that isn't `exclude_tx`.
 
     Returns (prior_ts, known_count, truncated):
       - prior_ts:   epoch seconds of the most-recent prior fill, or None if the
                     wallet has no prior activity on Polymarket.
-      - known_count: number of distinct fills currently cached (≤ _LOOKUP_LIMIT).
+      - known_count: number of distinct fills currently cached (≤ _LOOKUP_LIMIT),
+                    or None when THE LOOKUP FAILED (fail closed: None is not 0).
       - truncated:  True if the wallet has at least _LOOKUP_LIMIT fills (exact
                     count not determinable from this cache alone).
 
@@ -149,6 +156,10 @@ async def get_prior_trade_ts(
     so that the current trade does not get counted as its own "prior" trade.
     """
     history = await _get_or_fetch(address)
+    if history is None:
+        # Lookup failed. known_count=None is the fail-closed signal: callers
+        # must NOT read this as "zero prior trades".
+        return None, None, False
     prior: Optional[int] = None
     ex = exclude_tx.lower() if exclude_tx else ""
     for ts, tx in history.entries:
