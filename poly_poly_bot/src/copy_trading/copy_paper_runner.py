@@ -13,7 +13,10 @@ Live data access (detection/books/resolution) is injected from
 from __future__ import annotations
 
 import threading
+import time
 from typing import Callable, Optional
+
+from src.logger import logger
 
 from src.copy_trading import era_state
 from src.copy_trading import promotion_state
@@ -331,9 +334,23 @@ class CopyPaperRunner:
         return summary
 
     def run_forever(self, shutdown_event: threading.Event) -> None:
+        fail_count = 0
+        last_log = 0.0
         while not shutdown_event.is_set():
             try:
                 self.run_once()
-            except Exception:  # pragma: no cover - defensive; loop must survive
-                pass
+                fail_count = 0
+            except Exception:  # defensive; the loop must survive
+                # But never silently: a persistent failure (a corrupt ledger,
+                # a watchlist parse error, a broken detector factory) otherwise
+                # spins every cycle with no trace — the exact shape of the
+                # week-long silent guard-loop incident, and the ops_watch
+                # absence clocks only watch LIVE copies, not this book's
+                # liveness. First failure logs the traceback; a crashloop
+                # re-logs a running count hourly instead of flooding.
+                fail_count += 1
+                now = time.time()
+                if fail_count == 1 or now - last_log >= 3600.0:
+                    logger.exception(f"[copy-paper] cycle failed ({fail_count} in a row)")
+                    last_log = now
             shutdown_event.wait(self.cycle_interval_s)
