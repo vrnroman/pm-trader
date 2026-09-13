@@ -125,6 +125,48 @@ def test_a_missing_daily_line_is_noticed_by_nine_utc(ops_env):
     assert len(sent) == 1, "once per day"
 
 
+def test_a_failed_guard_failing_push_is_retried_until_delivered(ops_env):
+    """The escalation fired exactly once at streak == 6 with no delivery
+    gate: a Telegram hiccup on that one pass (or a restart moving the
+    persisted streak past 6) lost the 'bankroll floor is not watched' alarm
+    for the whole episode — the failure mode the watcher exists for."""
+    fail = lambda x: False
+    for i in range(ow.GUARD_FAIL_STREAK + 2):
+        assert not ow.note_guard_pass(False, "boom", now=float(i), send=fail)
+    sent: list = []
+    msg = ow.note_guard_pass(False, "boom", now=100.0, send=sent.append)
+    assert msg and "failed 9 passes" in msg
+    assert not ow.note_guard_pass(False, "boom", now=101.0, send=sent.append), \
+        "once delivered, once per episode"
+    ow.note_guard_pass(True, now=102.0, send=sent.append)
+    for i in range(ow.GUARD_FAIL_STREAK + 1):
+        ow.note_guard_pass(False, "boom again", now=200.0 + i, send=sent.append)
+    assert len(sent) == 2, "a new episode escalates again"
+
+
+def test_a_failed_no_copy_push_is_retried_until_delivered(ops_env):
+    fail = lambda x: False
+    assert ow.check_absences(followed_signals_3d=7, copies_3d=0, armed=True, send=fail, now=1000.0) == []
+    sent: list = []
+    out = ow.check_absences(followed_signals_3d=8, copies_3d=0, armed=True, send=sent.append, now=2000.0)
+    assert len(out) == 1 and "No copy in 3 days" in out[0]
+    assert ow.check_absences(followed_signals_3d=9, copies_3d=0, armed=True, send=sent.append, now=3000.0) == []
+
+
+def test_a_failed_missing_daily_line_push_is_retried(ops_env):
+    day0 = 1_788_652_800.0  # 2026-09-06 00:00 UTC
+    ow.note_daily_line(True, now=day0 + 8 * 3600)
+    fail = lambda x: False
+    assert ow.check_absences(followed_signals_3d=0, copies_3d=0, armed=True, send=fail,
+                             now=day0 + 86400 + 9.2 * 3600) == []
+    sent: list = []
+    out = ow.check_absences(followed_signals_3d=0, copies_3d=0, armed=True, send=sent.append,
+                            now=day0 + 86400 + 9.5 * 3600)
+    assert len(out) == 1 and "No 08:00 real-money line" in out[0]
+    assert ow.check_absences(followed_signals_3d=0, copies_3d=0, armed=True, send=sent.append,
+                             now=day0 + 86400 + 10 * 3600) == []
+
+
 def test_transient_disarms_self_clear_after_fifteen_minutes_with_a_cap(ops_env, monkeypatch):
     sent: list = []
     arms: list = []
