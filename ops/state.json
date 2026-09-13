@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-12T23:13:35.494306+00:00",
+ "generated": "2026-09-13T00:00:15.918409+00:00",
  "money": {
   "cash": 62.303671,
   "open_cost": 0.0,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789254794.885807,
+  "ts": 1789257506.2208438,
   "day": "2026-09-12"
  },
  "arm": {
@@ -319,6 +319,10 @@
   }
  ],
  "important": [
+  "2026-09-12 15:38:41 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
+  "2026-09-12 15:43:42 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
+  "2026-09-12 15:48:42 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
+  "2026-09-12 15:53:43 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
   "2026-09-12 15:57:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-12 15:58:44 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'",
   "2026-09-12 16:02:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -473,10 +477,6 @@
   "2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.36' -> 'paid $0.01' | lost -5.35 on 'FC Lugano vs. Young Boys Bern: O/U 3.5' (, tier 1b)",
   "2026-09-12 21:00:24 INFO  [ops] push:daily_loss: None -> \"📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll).\"",
   "2026-09-12 23:13:14 INFO  [tiered-risk] tier 1b: released $5.35 of exposure from resolved or closed positions | open now: $0.00",
-  "2026-09-11 23:39:10 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.59 on 'Valorant: Team Liquid Brazil vs Evil Gen'",
-  "2026-09-11 23:41:10 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.86 on 'Counter-Strike: FarmVille vs Overtake (B'",
-  "2026-09-11 23:45:45 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $62.94 on 'Rutgers vs. Boston College'",
-  "2026-09-11 23:56:04 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $17.53 on 'Colorado Rockies vs. Detroit Tigers'",
   "2026-09-12 00:00:39 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.60 on 'Counter-Strike: Without a Roof vs Marsbo'",
   "2026-09-12 00:03:02 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $11.70 on 'Counter-Strike: Without a Roof vs Marsbo'",
   "2026-09-12 00:03:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $3.81 on 'Counter-Strike: Without a Roof vs Marsbo'",
