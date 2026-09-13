@@ -48,6 +48,24 @@ class RedeemFetchError(RuntimeError):
 _FETCH_RETRY_DELAYS_S: tuple[float, ...] = (1.0, 3.0, 9.0)
 
 
+def _neg_risk_flag(row: dict) -> bool:
+    """The live Data API row spells it ``negativeRisk``; this code read
+    ``negRisk``, a key the row does not carry, so the flag was False for every
+    real position and the neg-risk skip below never fired. Checked 2026-09-13
+    on the proxy wallet: 68 redeemable rows, 5 of them negativeRisk, none
+    carrying negRisk. A neg-risk winner would have gone to the CTF's
+    redeemPositions with USDC as collateral, a call that succeeds with no
+    payout (the tokens sit on the wrapped-collateral position id), and the
+    receipt's status 1 would have booked the full payout as realized and
+    sold the position out of the inventory while the shares stayed
+    unredeemed on-chain. Accept both spellings."""
+    for key in ("negativeRisk", "negRisk", "neg_risk"):
+        v = row.get(key)
+        if v is not None:
+            return bool(v)
+    return False
+
+
 async def _fetch_redeemable_positions(
     proxy_wallet: str,
     *,
@@ -109,12 +127,12 @@ async def _fetch_redeemable_positions(
         if isinstance(market_obj, dict):
             condition_id = market_obj.get("conditionId", "") or entry.get("conditionId", "")
             title = market_obj.get("question", "") or entry.get("title", "")
-            neg_risk = market_obj.get("negRisk", False) or entry.get("negRisk", False)
+            neg_risk = _neg_risk_flag(market_obj) or _neg_risk_flag(entry)
             outcome_count = int(market_obj.get("outcomeCount", 2))
         else:
             condition_id = entry.get("conditionId", "")
             title = entry.get("title", "") or entry.get("market", "")
-            neg_risk = entry.get("negRisk", False)
+            neg_risk = _neg_risk_flag(entry)
             outcome_count = int(entry.get("outcomeCount", 2))
 
         if not condition_id:

@@ -1304,6 +1304,20 @@ def test_the_redeemable_list_reads_the_key_the_api_actually_sends(monkeypatch):
     assert len(out) == 1 and out[0]["conditionId"] == "0xc1"
 
 
+def test_the_neg_risk_flag_reads_the_key_the_api_actually_sends(monkeypatch):
+    """Same failure class as the `redeemable` key: the row spells it
+    `negativeRisk`, the code read `negRisk`, so every real neg-risk position
+    passed the skip and would have gone to the plain CTF redeem, which
+    succeeds with no payout and then books the full win as realized."""
+    from src.copy_trading import auto_redeemer
+    row = _pos_row(redeemable=True)
+    row.pop("negRisk", None)
+    row["negativeRisk"] = True
+    monkeypatch.setattr(auto_redeemer.httpx, "AsyncClient", _http([row]))
+    (out,) = _run(auto_redeemer._fetch_redeemable_positions("0xp"))
+    assert out["negRisk"] is True, "the skip must see the live API's spelling"
+
+
 def test_a_row_carrying_the_old_key_still_works(monkeypatch):
     from src.copy_trading import auto_redeemer
     monkeypatch.setattr(auto_redeemer.httpx, "AsyncClient",
