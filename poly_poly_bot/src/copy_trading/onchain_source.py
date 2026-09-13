@@ -63,14 +63,39 @@ def _canonical_trade_id(tx_hash: str, token_id: str, side: str) -> str:
 
 
 def _determine_side(maker_asset_id: int, taker_asset_id: int) -> str:
-    """Determine BUY/SELL from maker/taker asset IDs.
+    """Determine BUY/SELL from maker/taker asset IDs — from the MAKER's side.
 
-    If the maker asset is USDC (id == 0), the taker is buying outcome tokens → BUY.
-    Otherwise the maker is selling outcome tokens → SELL.
+    makerAssetId == 0 means the MAKER is paying USDC, i.e. the maker is buying
+    outcome tokens and the taker is selling them. Kept for compatibility;
+    `_process_events` does NOT use this for the stamped side, because the
+    tracked wallet can be the taker (see _tracked_side).
     """
     if maker_asset_id == 0:
         return "BUY"
     return "SELL"
+
+
+def _tracked_side(maker_asset_id: int, tracked_is_maker: bool) -> str:
+    """BUY/SELL from the TRACKED WALLET's side.
+
+    makerAssetId == 0 → the maker buys outcome tokens, the taker sells.
+    The old code stamped the maker's side on the trade regardless of which
+    role the tracked wallet played, so a tracked TAKER hitting a resting bid
+    (the common case for a whale taking the book) was mirrored as a BUY of
+    the thing it had just SOLD.
+    """
+    maker_buys = maker_asset_id == 0
+    return "BUY" if maker_buys == tracked_is_maker else "SELL"
+
+
+def _trade_legs(maker_asset_id: int, taker_asset_id: int,
+                maker_amount: int, taker_amount: int) -> tuple[str, int, int]:
+    """Split a fill into (token_id, usdc_amount, outcome_amount) from the
+    asset IDs — never from a side convention. USDC is asset id 0; the token
+    is the other leg, on whichever side holds it."""
+    if maker_asset_id == 0:
+        return str(taker_asset_id), maker_amount, taker_amount
+    return str(maker_asset_id), taker_amount, maker_amount
 
 
 def _usdc_to_float(amount: int) -> float:
@@ -151,19 +176,17 @@ class OnchainSource:
             maker_amount = int(args["makerAmountFilled"])
             taker_amount = int(args["takerAmountFilled"])
 
-            side = _determine_side(maker_asset_id, taker_asset_id)
+            side = _tracked_side(maker_asset_id, trader_address == maker)
 
-            # Token ID is the non-USDC asset ID
-            token_id = str(taker_asset_id) if side == "BUY" else str(maker_asset_id)
-
-            # USDC size
-            usdc_amount = maker_amount if side == "BUY" else taker_amount
+            # Token id, USDC size, and outcome size from the asset IDs, so the
+            # amounts stay right whichever role the tracked wallet played.
+            token_id, usdc_amount, outcome_amount = _trade_legs(
+                maker_asset_id, taker_asset_id, maker_amount, taker_amount)
             size = _usdc_to_float(usdc_amount)
             if size <= 0:
                 continue
 
             # Price: USDC / outcome tokens
-            outcome_amount = taker_amount if side == "BUY" else maker_amount
             price = _usdc_to_float(usdc_amount) / (_usdc_to_float(outcome_amount) or 1.0)
 
             tx_hash = event["transactionHash"].hex()
