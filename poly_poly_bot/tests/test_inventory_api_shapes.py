@@ -132,3 +132,45 @@ def test_zero_shares_filtered():
 def test_empty_proxy_skips():
     from src.copy_trading import inventory
     assert _run(inventory.sync_inventory_from_api("")) == 0
+
+
+def test_a_freshly_bought_position_survives_a_sync_that_cannot_see_it_yet():
+    """The Data API's indexer lags real fills. A record_buy followed within
+    the lag window by sync_inventory_from_api used to DELETE the live
+    position as 'stale': unrealized PnL vanished, the later record_sell
+    logged 'unknown position', and when the position reappeared on the next
+    sync it came back without tier/trader attribution — its realized PnL
+    landed in untagged forever."""
+    import time
+
+    from src.copy_trading import inventory
+
+    inventory.record_buy("tok-new", shares=10.0, price=0.5, tier="1a",
+                         trader_address="0xWALLET")
+
+    with patch("src.copy_trading.inventory.httpx.AsyncClient",
+               return_value=_fake_httpx_client([])):
+        _run(inventory.sync_inventory_from_api("0xproxy"))
+
+    pos = inventory.get_position("tok-new")
+    assert pos is not None, "a seconds-old buy is indexer lag, not staleness"
+    assert pos["tier"] == "1a" and pos["trader_address"] == "0xWALLET"
+
+
+def test_an_old_position_missing_remotely_is_still_removed():
+    """The grace window covers the indexer lag, nothing more: a position
+    older than it that the API does not carry is stale and goes."""
+    import time
+
+    from src.copy_trading import inventory
+
+    inventory.record_buy("tok-old", shares=10.0, price=0.5, tier="1a",
+                         trader_address="0xWALLET")
+    inventory._positions["tok-old"]["recorded_ts"] = (
+        time.time() - inventory.SYNC_STALE_GRACE_S - 60)
+
+    with patch("src.copy_trading.inventory.httpx.AsyncClient",
+               return_value=_fake_httpx_client([])):
+        _run(inventory.sync_inventory_from_api("0xproxy"))
+
+    assert inventory.get_position("tok-old") is None
