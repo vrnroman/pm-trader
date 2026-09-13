@@ -1,15 +1,28 @@
-# ops digest 2026-09-13T03:08:55.152652+00:00 (last 24h)
+# ops digest 2026-09-13T04:45:24.733460+00:00 (last 24h)
 
 ## money state
-{"cash": 62.303671, "open_cost": 0.0, "equity": 62.3, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 0.0, "cap_usd": 24.92, "remaining_usd": 24.92, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789268653.8832154, "day": "2026-09-13"}
+{"cash": 62.303671, "open_cost": 0.0, "equity": 62.3, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 0.0, "cap_usd": 24.92, "remaining_usd": 24.92, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789274417.8841257, "day": "2026-09-13"}
 
 ## arm: {"armed": true, "ts": 1788698166.0465596, "by": "1shot:s-kac3t7", "reason": "owner: go activate bot, let go in; make sure deals are done (run s-kac3t7)", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-13", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": 2, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2}, "yesterday": "2026-09-12", "closed_reason": ""}
 ## set Z: {"0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": {"wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd", "tier": "1b", "ts": 1786889554.1197178, "source": "gate"}, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {"wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3", "tier": "1b", "ts": 1788698181.3515182, "source": "telegram-gate"}, "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a": {"wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a", "tier": "1b", "ts": 1788698182.8017697, "source": "telegram-gate"}, "0x05878ac343c1387d592042d788424412733ac40b": {"wallet": "0x05878ac343c1387d592042d788424412733ac40b", "tier": "1b", "ts": 1789234932.162376, "source": "telegram-gate"}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"wallet": "0x09b045baad1fbe115c70785635a261411774a3b6", "tier": "1b", "ts": 1789234933.8880239, "source": "telegram-gate"}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab", "tier": "1b", "ts": 1789235975.528039, "source": "telegram-gate"}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709", "tier": "1b", "ts": 1789235977.260961, "source": "telegram-gate"}, "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {"wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35", "tier": "1b", "ts": 1789236561.2672133, "source": "telegram-gate"}, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {"wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2", "tier": "1b", "ts": 1789236563.7443745, "source": "telegram-gate"}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da", "tier": "1b", "ts": 1789237156.0778086, "source": "telegram-gate"}, "0xd970693a3384dc762b191707a4927ac3814bbbba": {"wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba", "tier": "1b", "ts": 1789237157.586524, "source": "telegram-gate"}}
 ## tier exposure: {"1a": [0, 0], "1b": [0, 0], "1c": [0, 0]}
 ## probation: {"0x05878ac343c1387d592042d788424412733ac40b": {"since": 1789234925.3749237, "settled": 0}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"since": 1789234925.3749237, "settled": 0}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"since": 1789235966.2959275, "settled": 0}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"since": 1789235966.2959275, "settled": 0}, "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {"since": 1789236552.0468774, "settled": 0}, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {"since": 1789236552.0468774, "settled": 0}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"since": 1789237149.0874667, "settled": 0}, "0xd970693a3384dc762b191707a4927ac3814bbbba": {"since": 1789237149.0874667, "settled": 0}}
+## form (each wallet on its own money, last 14 days, our slice)
+benched  0x05878ac3: 154 settled, 1% won vs 42% needed, net -97.8% on $149,983, worst day -27,220
+benched  0x09b045ba: 61 settled, 0% won vs 56% needed, net -100.0% on $23,894, worst day -3,747
+benched  0x1985327e: 62 settled, 0% won vs 55% needed, net -100.0% on $24,607, worst day -5,047
+benched  0x3f3aa700: 195 settled, 57% won vs 54% needed, net +3.4% on $522,597, worst day -40,433
+benched  0x4980930d: 15 settled, 7% won vs 28% needed, net -71.6% on $37,961, worst day -13,384
+benched  0x5213eb85: 106 settled, 43% won vs 39% needed, net -20.6% on $60,176, worst day -3,491
+benched  0x57b25849: 105 settled, 50% won vs 44% needed, net -11.7% on $109,916, worst day -4,929
+benched  0x73653992: 35 settled, 60% won vs 67% needed, net -29.3% on $69,650, worst day -13,822
+benched  0x9f15613e: 233 settled, 57% won vs 53% needed, net +0.7% on $629,786, worst day -19,215
+benched  0xd970693a: 66 settled, 2% won vs 54% needed, net -99.3% on $28,666, worst day -7,007
+benched  0xfd3e6449: 21 settled, 90% won vs 73% needed, net -12.8% on $14,087, worst day -2,562
+live copying is paused: nobody in form
 
-## ledger (13 rows)
+## ledger (25 rows)
 {"ts": 1789234914.4048996, "day": "2026-09-12", "kind": "push:floor_near", "before": null, "after": "⚠️ <b>Bankroll $66.83 is within 20% of the $56 floor.</b> A top-up of about $5 would restore the margin; under the floor", "detail": "", "push": "DEAL"}
 {"ts": 1789234925.3749237, "day": "2026-09-12", "kind": "auto_admit", "before": "0x05878ac3 not in Z", "after": "in set Z, on probation", "detail": "52 settled paper copies, paper ROI +25.6%, trimmed +15.8%, ideal +26.6%", "push": "WALLET", "wallet": "0x05878ac343c1387d592042d788424412733ac40b"}
 {"ts": 1789234925.3749237, "day": "2026-09-12", "kind": "auto_admit", "before": "0x09b045ba not in Z", "after": "in set Z, on probation", "detail": "46 settled paper copies, paper ROI +39.2%, trimmed +29.5%, ideal +40.2%", "push": "WALLET", "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6"}
@@ -23,16 +36,20 @@
 {"ts": 1789246822.0691295, "day": "2026-09-12", "kind": "settled", "before": "open $5.37", "after": "paid $0.00", "detail": "lost -5.37 on 'Will Alanyaspor vs. Göztepe SK end in a ' (, tier 1b)", "push": null, "token_id": "6691701803539626176077488709374004737591849995522510168757367609925258534749", "wallet": "", "pnl": -5.37, "won": false}
 {"ts": 1789246822.0691295, "day": "2026-09-12", "kind": "settled", "before": "open $5.36", "after": "paid $0.01", "detail": "lost -5.35 on 'FC Lugano vs. Young Boys Bern: O/U 3.5' (, tier 1b)", "push": null, "token_id": "111426907502041127672975490206099880504280577275905396462330907920963353499778", "wallet": "", "pnl": -5.35, "won": false}
 {"ts": 1789246822.0691295, "day": "2026-09-12", "kind": "push:daily_loss", "before": null, "after": "📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll).", "detail": "", "push": "DEAL"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x05878ac3 unknown", "after": "benched", "detail": "0x05878ac3: 154 settled, 1% won vs 42% needed, net -97.8% on $149,983, worst day -27,220", "push": null, "wallet": "0x05878ac343c1387d592042d788424412733ac40b"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x09b045ba unknown", "after": "benched", "detail": "0x09b045ba: 61 settled, 0% won vs 56% needed, net -100.0% on $23,894, worst day -3,747", "push": null, "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x1985327e unknown", "after": "benched", "detail": "0x1985327e: 62 settled, 0% won vs 55% needed, net -100.0% on $24,607, worst day -5,047", "push": null, "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x3f3aa700 unknown", "after": "benched", "detail": "0x3f3aa700: 195 settled, 57% won vs 54% needed, net +3.4% on $522,597, worst day -40,433", "push": null, "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x4980930d unknown", "after": "benched", "detail": "0x4980930d: 15 settled, 7% won vs 28% needed, net -71.6% on $37,961, worst day -13,384", "push": null, "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x5213eb85 unknown", "after": "benched", "detail": "0x5213eb85: 106 settled, 43% won vs 39% needed, net -20.6% on $60,176, worst day -3,491", "push": null, "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x57b25849 unknown", "after": "benched", "detail": "0x57b25849: 105 settled, 50% won vs 44% needed, net -11.7% on $109,916, worst day -4,929", "push": null, "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x73653992 unknown", "after": "benched", "detail": "0x73653992: 35 settled, 60% won vs 67% needed, net -29.3% on $69,650, worst day -13,822", "push": null, "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x9f15613e unknown", "after": "benched", "detail": "0x9f15613e: 233 settled, 57% won vs 53% needed, net +0.7% on $629,786, worst day -19,215", "push": null, "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0xd970693a unknown", "after": "benched", "detail": "0xd970693a: 66 settled, 2% won vs 54% needed, net -99.3% on $28,666, worst day -7,007", "push": null, "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0xfd3e6449 unknown", "after": "benched", "detail": "0xfd3e6449: 21 settled, 90% won vs 73% needed, net -12.8% on $14,087, worst day -2,562", "push": null, "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a"}
+{"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form_pause", "before": "11 followed", "after": "0 in form: live copying paused", "detail": "", "push": "DEAL"}
 
 ## important lines (400)
-2026-09-12 14:13:19 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:18:26 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:23:27 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:28:28 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:33:29 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:38:29 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:43:31 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:46:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-12 14:48:31 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
 2026-09-12 14:52:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-12 14:53:33 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
@@ -208,18 +225,25 @@
 2026-09-13 01:44:26 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
 2026-09-13 02:37:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-13 02:58:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-12 03:12:29 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $21.69 on 'M25 Sapporo: Jerry Roddick vs Chase Ferg'
-2026-09-12 03:23:01 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.47 on 'Angel City FC vs. Denver Summit FC: O/U '
-2026-09-12 03:30:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $4.70 on 'M25 Sapporo: Jerry Roddick vs Chase Ferg'
-2026-09-12 03:40:47 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $370.67 on 'Philadelphia Phillies vs. Atlanta Braves'
-2026-09-12 03:40:47 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $768.04 on 'Philadelphia Phillies vs. Atlanta Braves'
-2026-09-12 03:42:10 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $31.75 on 'O/U 53.5'
-2026-09-12 03:51:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $14223.56 on 'US Open WTA: Aryna Sabalenka vs Elena Ry'
-2026-09-12 03:56:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $581.45 on '1H Spread: Georgia (-23.5)'
-2026-09-12 03:57:31 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $511.86 on '1H Spread: Georgia (-23.5)'
-2026-09-12 04:16:37 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.62 on 'Spread: San Diego Padres (-1.5)'
-2026-09-12 04:30:41 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $7690.23 on 'Will AC Milan win on 2026-09-12?'
-2026-09-12 04:44:22 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $3.45 on 'Seattle Mariners vs. Athletics'
+2026-09-13 03:14:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 03:19:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 03:29:01 ERROR HTTP 500 fetching activity for 0x57b2...9da2
+2026-09-13 04:18:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 04:34:18 INFO  Received signal 15, shutting down...
+2026-09-13 04:34:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
+2026-09-13 04:34:42 INFO  Bot started. Monitoring trades...
+2026-09-13 04:34:50 INFO  [ops] form: '0x05878ac3 unknown' -> 'benched' | 0x05878ac3: 154 settled, 1% won vs 42% needed, net -97.8% on $149,983, worst day -27,220
+2026-09-13 04:34:51 INFO  [ops] form: '0x09b045ba unknown' -> 'benched' | 0x09b045ba: 61 settled, 0% won vs 56% needed, net -100.0% on $23,894, worst day -3,747
+2026-09-13 04:34:52 INFO  [ops] form: '0x1985327e unknown' -> 'benched' | 0x1985327e: 62 settled, 0% won vs 55% needed, net -100.0% on $24,607, worst day -5,047
+2026-09-13 04:34:54 INFO  [ops] form: '0x3f3aa700 unknown' -> 'benched' | 0x3f3aa700: 195 settled, 57% won vs 54% needed, net +3.4% on $522,597, worst day -40,433
+2026-09-13 04:34:56 INFO  [ops] form: '0x4980930d unknown' -> 'benched' | 0x4980930d: 15 settled, 7% won vs 28% needed, net -71.6% on $37,961, worst day -13,384
+2026-09-13 04:34:58 INFO  [ops] form: '0x5213eb85 unknown' -> 'benched' | 0x5213eb85: 106 settled, 43% won vs 39% needed, net -20.6% on $60,176, worst day -3,491
+2026-09-13 04:35:00 INFO  [ops] form: '0x57b25849 unknown' -> 'benched' | 0x57b25849: 105 settled, 50% won vs 44% needed, net -11.7% on $109,916, worst day -4,929
+2026-09-13 04:35:01 INFO  [ops] form: '0x73653992 unknown' -> 'benched' | 0x73653992: 35 settled, 60% won vs 67% needed, net -29.3% on $69,650, worst day -13,822
+2026-09-13 04:35:03 INFO  [ops] form: '0x9f15613e unknown' -> 'benched' | 0x9f15613e: 233 settled, 57% won vs 53% needed, net +0.7% on $629,786, worst day -19,215
+2026-09-13 04:35:06 INFO  [ops] form: '0xd970693a unknown' -> 'benched' | 0xd970693a: 66 settled, 2% won vs 54% needed, net -99.3% on $28,666, worst day -7,007
+2026-09-13 04:35:11 INFO  [ops] form: '0xfd3e6449 unknown' -> 'benched' | 0xfd3e6449: 21 settled, 90% won vs 73% needed, net -12.8% on $14,087, worst day -2,562
+2026-09-13 04:35:11 INFO  [ops] form_pause: '11 followed' -> '0 in form: live copying paused'
 2026-09-12 04:47:49 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $8.84 on 'Atlante FC vs. CF Pachuca: Both Teams to'
 2026-09-12 04:47:49 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.02 on 'Atlante FC vs. CF Pachuca: Both Teams to'
 2026-09-12 04:50:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $5.48 on 'Seattle Mariners vs. Athletics: O/U 10.5'
@@ -425,3 +449,4 @@
 2026-09-12 19:33:59 INFO  [recovery] No pending orders to recover
 2026-09-12 20:03:01 INFO  [recovery] No pending orders to recover
 2026-09-12 20:33:52 INFO  [recovery] No pending orders to recover
+2026-09-13 04:34:42 INFO  [recovery] No pending orders to recover
