@@ -143,3 +143,32 @@ def test_run_forever_survives_cycle_exception():
         )
         r.run_forever(ev)  # exception inside cycle must not escape the loop
         assert calls["n"] == 1
+
+
+def test_run_forever_logs_the_cycle_failure(caplog):
+    """The survival used to be silent: `except Exception: pass` meant a
+    persistent failure (corrupt ledger, broken detector factory) spun every
+    cycle with no trace — the shape of the week-long silent guard-loop
+    incident, on the loop that feeds the A/B race and the S4 book."""
+    import logging
+
+    with tempfile.TemporaryDirectory() as d:
+        ev = threading.Event()
+
+        def boom(w, age, usd, fb=None):
+            def detect():
+                ev.set()
+                raise RuntimeError("ledger corrupt")
+            return detect
+
+        r = CopyPaperRunner(
+            ledger_path=os.path.join(d, "l.jsonl"), wallets=["0xT"],
+            detector_factory=boom, book_fetcher=lambda t: [], resolver=lambda c: None,
+            cycle_interval_s=0,
+        )
+        with caplog.at_level(logging.ERROR):
+            r.run_forever(ev)
+        msgs = [rec.getMessage() for rec in caplog.records]
+        assert any("cycle failed" in m and "1 in a row" in m for m in msgs), msgs
+        assert any("ledger corrupt" in (rec.exc_text or "") for rec in caplog.records), \
+            "the traceback must ride along"
