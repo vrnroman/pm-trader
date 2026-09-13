@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-13T19:15:46.649575+00:00",
+ "generated": "2026-09-13T20:48:45.987555+00:00",
  "money": {
   "cash": 75.510531,
-  "open_cost": 36.05,
-  "equity": 111.56,
+  "open_cost": 29.65,
+  "equity": 105.16,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
@@ -17,10 +17,10 @@
   "resolved_unclaimed": 63,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1789326749.879904,
+  "ts": 1789332474.9895716,
   "day": "2026-09-13"
  },
  "arm": {
@@ -53,18 +53,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
+   "open_total": 0,
    "daily_date": "2026-09-13",
    "daily_volume": 12.8,
-   "placements": [
-    {
-     "token_id": "114556384557672192848193423634841646018607107163319293002599202039593761740720",
-     "cost": 6.4,
-     "ts": 1789315952.1779416,
-     "trader": "0x05878ac343c1387d592042d788424412733ac40b",
-     "title": "LoL: LOUD vs paiN Gaming - Game 1 Winner"
-    }
-   ]
+   "placements": []
   },
   "1c": {
    "open_total": 0,
@@ -149,7 +141,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 111.56,
+  "last_equity": 105.16,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -631,25 +623,6 @@
   }
  ],
  "important": [
-  "2026-09-12 19:21:33 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-12 19:21:33 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-12 19:21:36 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-12 19:21:36 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-12 19:21:36 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.",
-  "2026-09-12 19:33:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-12 19:33:59 INFO  Bot started. Monitoring trades...",
-  "2026-09-12 19:34:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-12 20:02:14 INFO  Received signal 15, shutting down...",
-  "2026-09-12 20:03:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-12 20:03:01 INFO  Bot started. Monitoring trades...",
-  "2026-09-12 20:19:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 20:19:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 20:19:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 20:32:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 20:33:07 INFO  Received signal 15, shutting down...",
-  "2026-09-12 20:33:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-12 20:33:52 INFO  Bot started. Monitoring trades...",
-  "2026-09-12 20:48:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-12 20:57:28 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-12 21:00:21 INFO  [tiered-risk] tier 1b: released $10.73 of exposure from resolved or closed positions | open now: $5.35",
   "2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.37' -> 'paid $0.00' | lost -5.37 on 'Will Alanyaspor vs. Göztepe SK end in a ' (, tier 1b)",
@@ -763,9 +736,7 @@
   "2026-09-13 16:57:00 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-13 17:57:07 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
   "2026-09-13 19:12:29 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll crossed $100</b> upward: $111.56.'",
-  "2026-09-12 19:33:59 INFO  [recovery] No pending orders to recover",
-  "2026-09-12 20:03:01 INFO  [recovery] No pending orders to recover",
-  "2026-09-12 20:33:52 INFO  [recovery] No pending orders to recover",
+  "2026-09-13 19:17:31 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-13 04:34:42 INFO  [recovery] No pending orders to recover",
   "2026-09-13 04:53:38 INFO  [recovery] No pending orders to recover",
   "2026-09-13 05:03:06 INFO  [recovery] No pending orders to recover",
