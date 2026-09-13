@@ -1,7 +1,7 @@
-# ops digest 2026-09-13T04:45:24.733460+00:00 (last 24h)
+# ops digest 2026-09-13T06:40:32.054893+00:00 (last 24h)
 
 ## money state
-{"cash": 62.303671, "open_cost": 0.0, "equity": 62.3, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 0.0, "cap_usd": 24.92, "remaining_usd": 24.92, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789274417.8841257, "day": "2026-09-13"}
+{"cash": 62.303671, "open_cost": 0.0, "equity": 62.3, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 0.0, "cap_usd": 24.92, "remaining_usd": 24.92, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789281483.8385768, "day": "2026-09-13"}
 
 ## arm: {"armed": true, "ts": 1788698166.0465596, "by": "1shot:s-kac3t7", "reason": "owner: go activate bot, let go in; make sure deals are done (run s-kac3t7)", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-13", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": 2, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2}, "yesterday": "2026-09-12", "closed_reason": ""}
@@ -9,20 +9,19 @@
 ## tier exposure: {"1a": [0, 0], "1b": [0, 0], "1c": [0, 0]}
 ## probation: {"0x05878ac343c1387d592042d788424412733ac40b": {"since": 1789234925.3749237, "settled": 0}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"since": 1789234925.3749237, "settled": 0}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"since": 1789235966.2959275, "settled": 0}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"since": 1789235966.2959275, "settled": 0}, "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {"since": 1789236552.0468774, "settled": 0}, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {"since": 1789236552.0468774, "settled": 0}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"since": 1789237149.0874667, "settled": 0}, "0xd970693a3384dc762b191707a4927ac3814bbbba": {"since": 1789237149.0874667, "settled": 0}}
 ## form (each wallet on its own money, last 14 days, our slice)
-benched  0x05878ac3: 154 settled, 1% won vs 42% needed, net -97.8% on $149,983, worst day -27,220
-benched  0x09b045ba: 61 settled, 0% won vs 56% needed, net -100.0% on $23,894, worst day -3,747
-benched  0x1985327e: 62 settled, 0% won vs 55% needed, net -100.0% on $24,607, worst day -5,047
-benched  0x3f3aa700: 195 settled, 57% won vs 54% needed, net +3.4% on $522,597, worst day -40,433
-benched  0x4980930d: 15 settled, 7% won vs 28% needed, net -71.6% on $37,961, worst day -13,384
-benched  0x5213eb85: 106 settled, 43% won vs 39% needed, net -20.6% on $60,176, worst day -3,491
-benched  0x57b25849: 105 settled, 50% won vs 44% needed, net -11.7% on $109,916, worst day -4,929
-benched  0x73653992: 35 settled, 60% won vs 67% needed, net -29.3% on $69,650, worst day -13,822
-benched  0x9f15613e: 233 settled, 57% won vs 53% needed, net +0.7% on $629,786, worst day -19,215
-benched  0xd970693a: 66 settled, 2% won vs 54% needed, net -99.3% on $28,666, worst day -7,007
-benched  0xfd3e6449: 21 settled, 90% won vs 73% needed, net -12.8% on $14,087, worst day -2,562
-live copying is paused: nobody in form
+in form  0x05878ac3: 113 settled, 54% won vs 47% needed, net +23.0% on $102,442, worst day -2,592
+in form  0x09b045ba: 54 settled, 78% won vs 61% needed, net +23.9% on $20,676, worst day -200
+in form  0x1985327e: 53 settled, 83% won vs 56% needed, net +24.9% on $20,907, worst day -247
+benched  0x3f3aa700: 180 settled, 54% won vs 55% needed, net +10.1% on $487,078, worst day -39,107
+benched  0x4980930d: 10 settled, 50% won vs 37% needed, net +121.3% on $19,943, worst day -1,364
+benched  0x5213eb85: 94 settled, 46% won vs 38% needed, net -9.3% on $51,904, worst day -2,023
+benched  0x57b25849: 85 settled, 47% won vs 46% needed, net -8.7% on $93,230, worst day -3,874
+benched  0x73653992: 28 settled, 86% won vs 78% needed, net +61.5% on $48,382, worst day +108
+benched  0x9f15613e: 219 settled, 56% won vs 53% needed, net +3.8% on $612,135, worst day -19,498
+in form  0xd970693a: 59 settled, 76% won vs 57% needed, net +22.0% on $24,564, worst day +52
+benched  0xfd3e6449: 14 settled, 79% won vs 77% needed, net +6.3% on $10,227, worst day -1,129
 
-## ledger (25 rows)
+## ledger (30 rows)
 {"ts": 1789234914.4048996, "day": "2026-09-12", "kind": "push:floor_near", "before": null, "after": "⚠️ <b>Bankroll $66.83 is within 20% of the $56 floor.</b> A top-up of about $5 would restore the margin; under the floor", "detail": "", "push": "DEAL"}
 {"ts": 1789234925.3749237, "day": "2026-09-12", "kind": "auto_admit", "before": "0x05878ac3 not in Z", "after": "in set Z, on probation", "detail": "52 settled paper copies, paper ROI +25.6%, trimmed +15.8%, ideal +26.6%", "push": "WALLET", "wallet": "0x05878ac343c1387d592042d788424412733ac40b"}
 {"ts": 1789234925.3749237, "day": "2026-09-12", "kind": "auto_admit", "before": "0x09b045ba not in Z", "after": "in set Z, on probation", "detail": "46 settled paper copies, paper ROI +39.2%, trimmed +29.5%, ideal +40.2%", "push": "WALLET", "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6"}
@@ -48,6 +47,11 @@ live copying is paused: nobody in form
 {"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0xd970693a unknown", "after": "benched", "detail": "0xd970693a: 66 settled, 2% won vs 54% needed, net -99.3% on $28,666, worst day -7,007", "push": null, "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba"}
 {"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0xfd3e6449 unknown", "after": "benched", "detail": "0xfd3e6449: 21 settled, 90% won vs 73% needed, net -12.8% on $14,087, worst day -2,562", "push": null, "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a"}
 {"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form_pause", "before": "11 followed", "after": "0 in form: live copying paused", "detail": "", "push": "DEAL"}
+{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form", "before": "0x05878ac3 benched", "after": "in form", "detail": "0x05878ac3: 113 settled, 54% won vs 47% needed, net +23.0% on $102,442, worst day -2,592", "push": "WALLET", "wallet": "0x05878ac343c1387d592042d788424412733ac40b"}
+{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form", "before": "0x09b045ba benched", "after": "in form", "detail": "0x09b045ba: 54 settled, 78% won vs 61% needed, net +23.9% on $20,676, worst day -200", "push": "WALLET", "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6"}
+{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form", "before": "0x1985327e benched", "after": "in form", "detail": "0x1985327e: 53 settled, 83% won vs 56% needed, net +24.9% on $20,907, worst day -247", "push": "WALLET", "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab"}
+{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form", "before": "0xd970693a benched", "after": "in form", "detail": "0xd970693a: 59 settled, 76% won vs 57% needed, net +22.0% on $24,564, worst day +52", "push": "WALLET", "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba"}
+{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form_resume", "before": "paused", "after": "4 in form: copying resumes", "detail": "0x05878ac3, 0x09b045ba, 0x1985327e, 0xd970693a", "push": "DEAL"}
 
 ## important lines (400)
 2026-09-12 14:48:31 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
@@ -244,27 +248,25 @@ live copying is paused: nobody in form
 2026-09-13 04:35:06 INFO  [ops] form: '0xd970693a unknown' -> 'benched' | 0xd970693a: 66 settled, 2% won vs 54% needed, net -99.3% on $28,666, worst day -7,007
 2026-09-13 04:35:11 INFO  [ops] form: '0xfd3e6449 unknown' -> 'benched' | 0xfd3e6449: 21 settled, 90% won vs 73% needed, net -12.8% on $14,087, worst day -2,562
 2026-09-13 04:35:11 INFO  [ops] form_pause: '11 followed' -> '0 in form: live copying paused'
-2026-09-12 04:47:49 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $8.84 on 'Atlante FC vs. CF Pachuca: Both Teams to'
-2026-09-12 04:47:49 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.02 on 'Atlante FC vs. CF Pachuca: Both Teams to'
-2026-09-12 04:50:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $5.48 on 'Seattle Mariners vs. Athletics: O/U 10.5'
-2026-09-12 04:50:28 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $9.08 on 'Spread: Seattle Mariners (-1.5)'
-2026-09-12 04:50:49 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $51.73 on 'W50 Guiyang: Yufei Ren vs Daria KHOMUTSI'
-2026-09-12 05:07:45 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $55.68 on 'Will Club Tijuana vs. Querétaro FC end i'
-2026-09-12 05:15:06 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1800.30 on 'Spread: Arsenal FC (-1.5)'
-2026-09-12 05:18:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $3400.00 on 'Spread: Arsenal FC (-1.5)'
-2026-09-12 05:30:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.29 on 'LoL: Hanwha Life Esports vs T1 - Game 1 '
-2026-09-12 05:33:16 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $441.00 on 'SC Cambuur-Leeuwarden vs. NEC: O/U 3.5'
-2026-09-12 05:37:47 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $5.38 on 'LoL: Hanwha Life Esports vs T1 - Game 1 '
-2026-09-12 05:52:31 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $2285.24 on 'Will 1. FSV Mainz 05 win on 2026-09-12?'
-2026-09-12 05:52:52 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2223.54 on 'Will 1. FSV Mainz 05 win on 2026-09-12?'
-2026-09-12 05:56:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1551.55 on 'Will AS Saint-Étienne win on 2026-09-12?'
-2026-09-12 05:58:46 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $27.03 on 'M25 Sapporo: Keisuke Saitoh vs Seongchan'
-2026-09-12 06:05:28 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $843.71 on 'Oregon Team Total: O/U 40.5'
-2026-09-12 06:21:38 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $11310.26 on 'SS Lazio vs. AC Milan: O/U 2.5'
-2026-09-12 06:34:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $2972.31 on 'Will FC Seoul win on 2026-09-12?'
-2026-09-12 06:39:39 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.24 on 'LoL: Hanwha Life Esports vs T1 - Game 2 '
-2026-09-12 06:39:39 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $4.32 on 'LoL: Hanwha Life Esports vs T1 - Game 2 '
-2026-09-12 06:39:52 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $301.08 on 'Will Trabzonspor win on 2026-09-12?'
+2026-09-13 04:52:53 INFO  Received signal 15, shutting down...
+2026-09-13 04:53:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
+2026-09-13 04:53:38 INFO  Bot started. Monitoring trades...
+2026-09-13 04:53:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
+2026-09-13 04:54:02 INFO  [ops] form: '0x05878ac3 benched' -> 'in form' | 0x05878ac3: 113 settled, 54% won vs 47% needed, net +23.0% on $102,442, worst day -2,592
+2026-09-13 04:54:08 INFO  [ops] form: '0x09b045ba benched' -> 'in form' | 0x09b045ba: 54 settled, 78% won vs 61% needed, net +23.9% on $20,676, worst day -200
+2026-09-13 04:54:11 INFO  [ops] form: '0x1985327e benched' -> 'in form' | 0x1985327e: 53 settled, 83% won vs 56% needed, net +24.9% on $20,907, worst day -247
+2026-09-13 04:54:31 INFO  [ops] form: '0xd970693a benched' -> 'in form' | 0xd970693a: 59 settled, 76% won vs 57% needed, net +22.0% on $24,564, worst day +52
+2026-09-13 04:54:34 INFO  [ops] form_resume: 'paused' -> '4 in form: copying resumes' | 0x05878ac3, 0x09b045ba, 0x1985327e, 0xd970693a
+2026-09-13 05:02:21 INFO  Received signal 15, shutting down...
+2026-09-13 05:03:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
+2026-09-13 05:03:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
+2026-09-13 05:03:06 INFO  Bot started. Monitoring trades...
+2026-09-13 05:19:26 ERROR Network error fetching 0x9f15...bdb3: 
+2026-09-13 05:19:26 ERROR Network error fetching 0xfd3e...5a7a: 
+2026-09-13 05:19:26 ERROR Network error fetching 0x3f3a...e8fd: 
+2026-09-13 05:19:26 ERROR Network error fetching 0x0587...c40b: 
+2026-09-13 05:19:29 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.
+2026-09-13 05:51:42 ERROR [inventory] API sync failed: 
 2026-09-12 06:41:14 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.09 on 'Counter-Strike: Legacy vs MIBR - Map 1 W'
 2026-09-12 06:42:46 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1069.90 on 'Will Júbilo Iwata win on 2026-09-12?'
 2026-09-12 06:53:32 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $11263.91 on 'SS Lazio vs. AC Milan: O/U 2.5'
@@ -450,3 +452,5 @@ live copying is paused: nobody in form
 2026-09-12 20:03:01 INFO  [recovery] No pending orders to recover
 2026-09-12 20:33:52 INFO  [recovery] No pending orders to recover
 2026-09-13 04:34:42 INFO  [recovery] No pending orders to recover
+2026-09-13 04:53:38 INFO  [recovery] No pending orders to recover
+2026-09-13 05:03:06 INFO  [recovery] No pending orders to recover
