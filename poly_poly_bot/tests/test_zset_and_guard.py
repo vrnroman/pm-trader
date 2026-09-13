@@ -801,6 +801,49 @@ def test_zset_drop_reports_a_failed_eviction_as_a_failure(tmp_path, monkeypatch)
     assert len(zset.wallets()) == 1, "and it really is still in Z"
 
 
+def test_zset_readmit_clears_the_eviction_through_telegram(tmp_path):
+    """The eviction message and zset.admit both pointed the owner at
+    `/zset readmit`, but the handler had no such branch: the command fell
+    through to the status page and the wallet stayed evicted forever. The
+    eviction tap on a live-money wallet was a one-way door whose own error
+    messages misdirected."""
+    from unittest.mock import patch
+
+    import src.telegram_bot as tb
+    zset.admit("0xAAAABBBB", ready=True, checks=[], settled=[P(ideal=6.0)] * 30,
+               rails_supplied=True)
+    zset.evict("0xAAAABBBB", reason="test")
+    assert "0xaaaabbbb" in zset.evicted_set()
+    assert zset.wallets() == []
+
+    sent = []
+    with patch.object(tb, "send_message", lambda x, **k: sent.append(x)),          patch.object(tb, "_send_chunked", lambda x: sent.append(x)):
+        tb._handle_zset("/zset readmit 0xAAAABBBB")
+    out = "\n".join(sent)
+    assert "Eviction cleared" in out, out
+    assert "0xaaaabbbb" not in zset.evicted_set()
+    assert zset.wallets() == [], "readmit must not re-admit; the gate re-passes it"
+
+
+def test_zset_readmit_reports_an_unwritable_record_as_a_failure(tmp_path, monkeypatch):
+    """Same contract as drop: if the durable record cannot be written, the
+    reply must not claim it was."""
+    from unittest.mock import patch
+
+    import src.telegram_bot as tb
+    zset.admit("0xAAAABBBB", ready=True, checks=[], settled=[P(ideal=6.0)] * 30,
+               rails_supplied=True)
+    zset.evict("0xAAAABBBB", reason="test")
+    monkeypatch.setattr(zset.promotion_state, "_write",
+                        lambda *a, **k: (_ for _ in ()).throw(OSError("ENOSPC")))
+    sent = []
+    with patch.object(tb, "send_message", lambda x, **k: sent.append(x)),          patch.object(tb, "_send_chunked", lambda x: sent.append(x)):
+        tb._handle_zset("/zset readmit 0xAAAABBBB")
+    out = "\n".join(sent)
+    assert "READMIT FAILED" in out, out
+    assert "0xaaaabbbb" in zset.evicted_set(), "and it really is still evicted"
+
+
 def test_a_deleted_eviction_history_closes_the_set(tmp_path):
     """Corrupt already failed closed; MISSING did not, which left the
     2026-08-18 expiry live on its third failure mode. `seed_zset` draws

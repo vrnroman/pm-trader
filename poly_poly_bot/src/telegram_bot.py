@@ -1890,18 +1890,42 @@ def _handle_speed(text: str) -> None:
 
 
 def _handle_zset(text: str) -> None:
-    """/zset [drop WALLET]: the only wallets real money may ever follow.
+    """/zset [drop|readmit WALLET]: the only wallets real money may ever follow.
 
     Read-only by default. `drop` evicts, and eviction is deliberately the one
     unguarded operation: getting into Z needs the go-live gate plus the
     concentration rail, getting out needs one word, because anything that only
-    reduces live exposure should be easy.
+    reduces live exposure should be easy. `readmit` only clears the eviction
+    record — the wallet must still pass the gate again to re-enter Z.
     """
     from src.copy_trading import live_mode, zset
 
     parts = text.split()
     if len(parts) >= 2 and parts[1].lower() == "candidates":
         _handle_zset_candidates()
+        return
+    if len(parts) >= 3 and parts[1].lower() == "readmit":
+        target = parts[2]
+        # "*" is the fail-closed sentinel evicted_set() returns when the
+        # eviction history is missing, not a wallet.
+        matches = [w for w in sorted(zset.evicted_set())
+                   if w != "*" and w.lower().startswith(target.lower())]
+        if len(matches) != 1:
+            send_message(f"No unique evicted wallet matches "
+                         f"<code>{_esc(target)}</code> "
+                         f"({len(matches)} match(es)).")
+            return
+        ok = zset.readmit(matches[0], reason="telegram /zset readmit")
+        if not ok or matches[0].lower() in {w.lower() for w in zset.evicted_set()}:
+            send_message(
+                f"⚠️ <b>READMIT FAILED</b>\n<code>{_esc(matches[0])}</code>\n"
+                f"The eviction record could not be cleared (check disk space "
+                f"on the VM). The wallet is still off the money path.")
+            return
+        send_message(f"♻️ <b>Eviction cleared</b>\n<code>{_esc(matches[0])}</code>\n"
+                     f"It is <b>not</b> back in set Z: the gate must pass it "
+                     f"again (a /zset candidates admit tap or the 6-hourly "
+                     f"scan) before real money can follow it.")
         return
     if len(parts) >= 3 and parts[1].lower() == "drop":
         target = parts[2]
@@ -1953,6 +1977,7 @@ def _handle_zset(text: str) -> None:
         lines.append(f"  • {_esc(r)}")
     lines.append("")
     lines.append("<code>/zset drop &lt;wallet&gt;</code> to remove one · "
+                 "<code>/zset readmit &lt;wallet&gt;</code> to clear an eviction · "
                  "<code>/live</code> for the interlock")
     _send_chunked("\n".join(lines))
 
