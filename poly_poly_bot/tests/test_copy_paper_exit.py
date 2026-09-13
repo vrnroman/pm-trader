@@ -65,3 +65,62 @@ def test_no_exit_detector_keeps_resolution_path(tmp_path):
     pos = ledger.closed_positions()[0]
     assert pos.exited_early is False and pos.won is True   # 20 shares payout - 10 = +10
     assert abs(pos.pnl - 10.0) < 1e-9
+
+
+# ---- issue #31: exit fills are gated like entry fills ----
+
+def _eng(ledger, bid, their=0.70, **kw):
+    return CopyPaperEngine(
+        ledger, detector=lambda: [], book_fetcher=lambda t: [], resolver=lambda cid: None,
+        exit_detector=lambda: [{"target": "0xT", "token_id": "tok1", "their_price": their}],
+        bid_fetcher=lambda t: [(bid, 100)], **kw,
+    )
+
+
+def test_an_inflated_bid_is_booked_at_their_price(tmp_path):
+    """A stale 1.50 bid used to book 20 * 1.50 = $30 of proceeds on a $10
+    position as REALIZED paper PnL, and the same write corrupted the
+    at-their-price column the artifact cross-check reads."""
+    ledger = _ledger(tmp_path)
+    _open_pos(ledger, spent=10.0, shares=20.0)
+    s = _eng(ledger, bid=1.50).run_cycle(now=100.0)
+    pos = ledger.closed_positions()[0]
+    assert s.exited == 1 and s.exit_clamped == 1 and pos.exit_clamped is True
+    assert abs(pos.pnl - (20 * 0.70 - 10.0)) < 1e-9, "booked at their 0.70, not the 1.50 bid"
+
+
+def test_a_collapsed_bid_is_booked_at_their_price(tmp_path):
+    ledger = _ledger(tmp_path)
+    _open_pos(ledger, spent=10.0, shares=20.0)
+    s = _eng(ledger, bid=0.01).run_cycle(now=100.0)
+    pos = ledger.closed_positions()[0]
+    assert s.exit_clamped == 1 and pos.exit_clamped is True
+    assert abs(pos.pnl - (20 * 0.70 - 10.0)) < 1e-9
+
+
+def test_a_bid_inside_the_gate_is_the_fill(tmp_path):
+    ledger = _ledger(tmp_path)
+    _open_pos(ledger, spent=10.0, shares=20.0)
+    s = _eng(ledger, bid=0.68).run_cycle(now=100.0)   # 286 bps under their price: a real post-sell bid
+    pos = ledger.closed_positions()[0]
+    assert s.exit_clamped == 0 and pos.exit_clamped is False
+    assert abs(pos.pnl - (20 * 0.68 - 10.0)) < 1e-9
+
+
+def test_without_a_gate_the_bid_is_still_held_inside_zero_and_one(tmp_path):
+    ledger = _ledger(tmp_path)
+    _open_pos(ledger, spent=10.0, shares=20.0)
+    s = _eng(ledger, bid=1.20, exit_gate_bps=None).run_cycle(now=100.0)
+    pos = ledger.closed_positions()[0]
+    assert s.exit_clamped == 1 and abs(pos.pnl - (20 * 0.70 - 10.0)) < 1e-9
+
+
+def test_clamp_exit_price_table():
+    from src.copy_trading.copy_paper import clamp_exit_price
+    assert clamp_exit_price(0.69, 0.70, 150) == (0.69, False)
+    assert clamp_exit_price(0.66, 0.70, 150) == (0.70, True)
+    assert clamp_exit_price(1.0, 0.99, 150) == (0.99, True)
+    assert clamp_exit_price(0.66, 0.70, None) == (0.66, False)
+    assert clamp_exit_price(0.0, 0.70, None) == (0.70, True)
+    assert clamp_exit_price(0.66, None, 150) == (0.66, False), "no target price: a sane bid stands"
+    assert clamp_exit_price(1.5, None, 150) == (None, False), "no target price, no sane bid: no fill"

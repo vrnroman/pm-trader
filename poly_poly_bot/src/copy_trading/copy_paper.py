@@ -55,6 +55,19 @@ MIN_FILL_FRAC = 0.97
 # no matter where the simulator floor sits.
 DUST_FILL_FRAC = 0.5
 
+# Exit-following fills. The entry side refuses a non-credible book (the
+# MIN_FILL_FRAC floor, the two-sided fill gate, the `price >= 1.0` break); the
+# exit side took the best bid raw, and a stale or garbage bid, inflated or
+# collapsed, booked unbounded REALIZED paper PnL into the ledger the race, the
+# kill bar and promotion all read, corrupting the at-their-price column in the
+# same write (issue #31). A bid outside their_exit_price * (1 +/- gate), or
+# at/above 1.0, is not a fill we could get: the exit is booked at THEIR price
+# instead (the same fallback the entry side uses for a non-credible book) and
+# the position is stamped `exit_clamped` so the artifact stays visible.
+# Wider than the entry gate (150): the target's own SELL moves the bids, so a
+# few percent under their print is a real exit, not a moved book.
+EXIT_GATE_BPS = 500
+
 
 # Entry-price buckets for the P1-6 book-evidence gate. Edges match the §1.5
 # analysis that found book B's [0.2, 0.4) bucket at −61.5% ROI (win rate 16%
@@ -128,6 +141,28 @@ def simulate_copy_fill(
     return FillSim(avg_price=avg, spent=spent, shares=shares, drag_bps=drag)
 
 
+def clamp_exit_price(bid: float, their_price: Optional[float],
+                     gate_bps: Optional[int]) -> tuple[Optional[float], bool]:
+    """The exit price to book from the book's best ``bid``, and whether it was
+    clamped. A bid is credible when it is in (0, 1.0) and, with a gate, within
+    ``their_price * (1 +/- gate)``; otherwise the exit is booked at their
+    price (issue #31). With no target price at all, a bid in (0, 1.0) is
+    taken as is and anything else is no fill (None)."""
+    try:
+        b = float(bid)
+    except (TypeError, ValueError):
+        b = 0.0
+    credible = 0.0 < b < 1.0
+    if credible and gate_bps is not None and their_price:
+        g = gate_bps / 10000.0
+        credible = their_price * (1 - g) <= b <= their_price * (1 + g)
+    if credible:
+        return b, False
+    if their_price:
+        return min(float(their_price), 1.0), True
+    return None, False
+
+
 # --------------------------------------------------------------------------- #
 # Paper position + ledger
 # --------------------------------------------------------------------------- #
@@ -177,6 +212,10 @@ class PaperPosition:
     ideal_pnl: float = 0.0  # PnL had we filled at their_price (drag-free)
     closed_ts: float = 0.0
     exited_early: bool = False  # closed by mirroring the target's SELL, not resolution
+    # the exit-following fill was clamped to their price because the book's
+    # best bid was outside the exit gate (issue #31). Default-safe: old rows
+    # load as False.
+    exit_clamped: bool = False
     # Opened only thanks to the starved-wallet cap relief — a REAL-money book at
     # the normal category cap would have skipped this fill. Stamped so promotion
     # review can audit how much of a wallet's paper evidence came in over the
@@ -329,6 +368,7 @@ class CycleSummary:
     resolved: int = 0
     marked: int = 0  # open positions marked-to-market this cycle (Strategy-4 book)
     exited: int = 0  # closed by following the target's SELL
+    exit_clamped: int = 0  # of those, booked at their price: the bid failed the exit gate
     # the positions that resolved *this* cycle, so callers can name them in a
     # notification instead of only reporting cumulative ledger aggregates.
     resolved_positions: list["PaperPosition"] = field(default_factory=list)
@@ -371,6 +411,13 @@ class CopyPaperEngine:
         # since the target traded, so the copy no longer measures the target's
         # edge at the target's price.
         fill_gate_bps: Optional[int] = None,
+        # exit-following: a best bid more than this many bps from the target's
+        # exit price on either side (or at/above 1.0) is not credible and the
+        # exit is booked at their price instead (issue #31). None = only the
+        # (0, 1.0) clamp. Deliberately ON by default, unlike the entry gate:
+        # every book, including the ones that fill entries at their price,
+        # exits off the live book.
+        exit_gate_bps: Optional[int] = EXIT_GATE_BPS,
         # only copy a wallet's FIRST entry into a (market, outcome); skip its
         # averaging-down / re-entry buys (the harness copies the opening trade).
         first_entry_only: bool = False,
@@ -503,6 +550,7 @@ class CopyPaperEngine:
         self.exit_detector = exit_detector
         self.bid_fetcher = bid_fetcher
         self.fill_gate_bps = fill_gate_bps
+        self.exit_gate_bps = exit_gate_bps
         self.first_entry_only = first_entry_only
         self.max_copies_per_wallet_day = max_copies_per_wallet_day
         self.max_copies_per_category_day = max_copies_per_category_day
@@ -809,7 +857,9 @@ class CopyPaperEngine:
                 pos = held.get((ex.get("target"), ex.get("token_id")))
                 if pos is None:
                     continue
-                exit_price = ex.get("their_price")
+                their_exit = ex.get("their_price")
+                exit_price = their_exit
+                clamped = False
                 if self.bid_fetcher is not None:
                     book = self.bid_fetcher(pos.token_id)
                     if book:
@@ -819,11 +869,16 @@ class CopyPaperEngine:
                         # order path shipped a real bug from exactly this
                         # assumption: the CLOB returns bids ASCENDING, so an
                         # index-0 read there took the WORST bid.
-                        exit_price = max(p for p, _ in book)
+                        bid = max(p for p, _ in book)
+                        exit_price, clamped = clamp_exit_price(
+                            bid, their_exit, self.exit_gate_bps)
                 if exit_price is None:
                     continue
                 pos.realize_exit(float(exit_price), now=now)
+                pos.exit_clamped = clamped
                 s.exited += 1
+                if clamped:
+                    s.exit_clamped += 1
 
         for pos in self.ledger.open_positions():
             winner = self.resolver(pos.condition_id)
