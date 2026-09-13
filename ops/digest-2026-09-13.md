@@ -1,7 +1,7 @@
-# ops digest 2026-09-13T12:39:20.649308+00:00 (last 24h)
+# ops digest 2026-09-13T14:25:54.948608+00:00 (last 24h)
 
 ## money state
-{"cash": 62.303671, "open_cost": 0.0, "equity": 62.3, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 0.0, "cap_usd": 24.92, "remaining_usd": 24.92, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789302915.3826416, "day": "2026-09-13"}
+{"cash": 62.303671, "open_cost": 29.65, "equity": 91.95, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789309537.5755143, "day": "2026-09-13"}
 
 ## arm: {"armed": true, "ts": 1788698166.0465596, "by": "1shot:s-kac3t7", "reason": "owner: go activate bot, let go in; make sure deals are done (run s-kac3t7)", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-13", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": 2, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2}, "yesterday": "2026-09-12", "closed_reason": ""}
@@ -53,30 +53,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form", "before": "0xd970693a benched", "after": "in form", "detail": "0xd970693a: 59 settled, 76% won vs 57% needed, net +22.0% on $24,564, worst day +52", "push": "WALLET", "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba"}
 {"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form_resume", "before": "paused", "after": "4 in form: copying resumes", "detail": "0x05878ac3, 0x09b045ba, 0x1985327e, 0xd970693a", "push": "DEAL"}
 
-## important lines (343)
-2026-09-12 12:43:07 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 12:48:07 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 12:53:08 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 12:58:08 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:03:09 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:04:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-12 13:08:09 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:13:10 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:18:11 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:23:12 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:28:13 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:33:13 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:38:14 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:43:15 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:48:15 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:51:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-12 13:53:16 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 13:58:17 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:03:18 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:08:18 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:13:19 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:18:26 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
-2026-09-12 14:23:27 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
+## important lines (304)
 2026-09-12 14:28:28 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
 2026-09-12 14:33:29 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
 2026-09-12 14:38:29 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
@@ -302,47 +279,29 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-13 12:13:38 INFO  Received signal 15, shutting down...
 2026-09-13 12:14:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
 2026-09-13 12:14:01 INFO  Bot started. Monitoring trades...
-2026-09-12 12:41:31 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.08 on 'Will Wycombe Wanderers FC win on 2026-09'
-2026-09-12 12:50:27 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $450.00 on 'Game Spread: Paquet (-3.5) vs Capurro (+'
-2026-09-12 12:51:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $301.76 on 'West Ham United FC vs. London City Lione'
-2026-09-12 12:51:22 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $818.78 on 'West Ham United FC vs. London City Lione'
-2026-09-12 12:51:22 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $301.76 on 'West Ham United FC vs. London City Lione'
-2026-09-12 12:51:22 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $638.64 on 'West Ham United FC vs. London City Lione'
-2026-09-12 12:51:22 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $356.92 on 'Will West Ham United FC win on 2026-09-1'
-2026-09-12 12:51:22 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $393.21 on 'Will West Ham United FC win on 2026-09-1'
-2026-09-12 12:51:23 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $360.24 on 'West Ham United FC vs. London City Lione'
-2026-09-12 12:52:47 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $4.37 on 'Counter-Strike: Color vs SPARTA - Map 2 '
-2026-09-12 12:53:55 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $4.30 on 'West Ham United FC vs. London City Lione'
-2026-09-12 12:55:38 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1256.94 on 'Milton Keynes Dons FC vs. Peterborough U'
-2026-09-12 13:02:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $3.94 on 'Counter-Strike: Saint Sinners vs mellren'
-2026-09-12 13:04:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.72 on 'Counter-Strike: BetBoom Team vs G2 - Map'
-2026-09-12 13:05:52 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.97 on 'Counter-Strike: BetBoom Team vs G2 - Map'
-2026-09-12 13:10:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $31.26 on 'LoL: Anyone's Legend vs Invictus Gaming '
-2026-09-12 13:11:32 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.77 on 'Real Racing Club vs. Deportivo Alavés: O'
-2026-09-12 13:12:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $3.29 on 'LoL: Anyone's Legend vs Invictus Gaming '
-2026-09-12 13:12:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.15 on 'Counter-Strike: BetBoom Team vs G2 - Map'
-2026-09-12 13:14:32 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $300.03 on 'Will RSC Anderlecht Futures win on 2026-'
-2026-09-12 13:15:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.14 on 'Counter-Strike: BBL vs Wildcard - Map 2 '
-2026-09-12 13:21:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $29926.17 on 'Will Borussia Mönchengladbach win on 202'
-2026-09-12 13:21:57 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.54 on 'Counter-Strike: BBL vs Wildcard (BO3) - '
-2026-09-12 13:22:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.84 on 'Counter-Strike: BetBoom Team vs G2 - Map'
-2026-09-12 13:23:13 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.86 on 'LoL: Anyone's Legend vs Invictus Gaming '
-2026-09-12 13:24:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.40 on 'Counter-Strike: BBL vs Wildcard - Map 2 '
-2026-09-12 13:26:18 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $0.84 on 'Counter-Strike: BBL vs Wildcard - Map 2 '
-2026-09-12 13:26:19 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $3615.84 on 'Will Crystal Palace FC win on 2026-09-12'
-2026-09-12 13:41:07 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1853.12 on 'Will SCR Altach win on 2026-09-12?'
-2026-09-12 13:41:27 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $522.56 on 'Will Qatar SC win on 2026-09-12?'
-2026-09-12 13:43:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $333.19 on 'Will Port Vale FC win on 2026-09-12?'
-2026-09-12 13:45:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1853.12 on 'Will SCR Altach win on 2026-09-12?'
-2026-09-12 13:55:32 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $2460.52 on 'Samsunspor vs. Çorum FK: O/U 2.5'
-2026-09-12 14:00:09 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $63.00 on 'Cassis: Titouan Droguet vs Nicolai Budko'
-2026-09-12 14:01:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1536.19 on 'Will Cesena FC vs. US Cremonese end in a'
-2026-09-12 14:09:33 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $910.82 on 'Holy Cross vs. Miami (OH): O/U 47.5'
-2026-09-12 14:10:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $11.77 on 'Spread: Blackpool FC (-2.5)'
-2026-09-12 14:11:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1536.19 on 'Will Cesena FC vs. US Cremonese end in a'
-2026-09-12 14:18:49 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $791.32 on 'Northern Colorado vs. Wyoming: O/U 46.5'
-2026-09-12 14:23:12 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1536.19 on 'Will Cesena FC vs. US Cremonese end in a'
-2026-09-12 14:24:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.30 on 'Counter-Strike: BetBoom Team vs G2 (BO3)'
+2026-09-13 12:59:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 13:02:04 ERROR [inventory] API sync failed: 
+2026-09-13 13:12:22 INFO  Received signal 15, shutting down...
+2026-09-13 13:13:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
+2026-09-13 13:13:10 INFO  Bot started. Monitoring trades...
+2026-09-13 13:21:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 13:21:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 13:21:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 13:21:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 13:21:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 13:22:05 INFO  Received signal 15, shutting down...
+2026-09-13 13:22:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
+2026-09-13 13:22:43 INFO  Bot started. Monitoring trades...
+2026-09-13 13:48:20 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
+2026-09-13 14:00:14 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
+2026-09-13 14:05:47 ERROR [inventory] API sync failed: 
+2026-09-13 14:18:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 14:18:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 14:18:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 14:22:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 14:22:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 14:22:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 14:22:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-12 14:26:00 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $6.60 on 'Roda JC Kerkrade vs. Vitesse Arnhem: Vit'
 2026-09-12 14:29:00 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $17.74 on 'Antalya 4: Alevtina Ibragimova vs Alicia'
 2026-09-12 14:33:55 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $1536.19 on 'Will Cesena FC vs. US Cremonese end in a'
@@ -397,3 +356,5 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-13 04:53:38 INFO  [recovery] No pending orders to recover
 2026-09-13 05:03:06 INFO  [recovery] No pending orders to recover
 2026-09-13 12:14:01 INFO  [recovery] No pending orders to recover
+2026-09-13 13:13:10 INFO  [recovery] No pending orders to recover
+2026-09-13 13:22:43 INFO  [recovery] No pending orders to recover
