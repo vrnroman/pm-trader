@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-12T18:43:08Z-f638",
-  "ts": 1789238588.6360621,
+  "id": "2026-09-13T00:41:49Z-c042",
+  "ts": 1789260109,
   "kind": "nothing",
-  "message": "Armed, 4 copies landed and filled in the window, spend $21.45 of $500 cap, no self-disarm. The note_collectable guard warning from earlier in the window was already fixed by the owner's own commit and stopped after the 16:25 restart.",
+  "message": "Armed, spend $21.45 of $24.92 cap, tier 1b copies filled and verified, the $10.72 daily loss already reached the owner via push, and the earlier tier 1b legacy exposure block cleared by 16:25.",
   "evidence": [
-    "## arm: {\"armed\": true, ...}",
-    "## money state {\"spend\": {\"spent_usd\": 21.45, \"cap_usd\": 500.0, \"remaining_usd\": 478.55}, \"armed\": true}",
-    "2026-09-12 16:32:51 TRADE [verify] FILLED: BUY 7.46 shares on 'Will Alanyaspor vs. Göztepe SK end in a ' @ 0.7200",
-    "2026-09-12 17:48:51 TRADE [verify] FILLED: BUY 6.22 shares on 'Will FC Arda Kardzhali win on 2026-09-12' @ 0.8600",
-    "2026-09-12 16:23:51 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable' (last occurrence, before the 16:25 restart)"
+    "## money state {\"spend\": {\"spent_usd\": 21.45, \"cap_usd\": 24.92, \"remaining_usd\": 3.47}, \"armed\": true}",
+    "## arm: {\"armed\": true, \"ts\": 1788698166.0465596, \"by\": \"1shot:s-kac3t7\"}",
+    "2026-09-12 21:00:24 INFO  [ops] push:daily_loss: None -> \"Today's losses reach $10.72 (10% of the $61.43 bankroll).\"",
+    "2026-09-12 17:48:50 INFO  [tiered-risk] Recorded tier 1b placement: $5.35 | open: $21.45 / $200.00",
+    "2026-09-12 16:25:36 WARNING [tiered-risk] tier 1b carried a legacy open total $59.70 with no placements behind it: dropped"
   ],
   "commit": null
 }
