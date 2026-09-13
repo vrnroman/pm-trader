@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-13T18:12:20.730146+00:00",
+ "generated": "2026-09-13T19:15:46.649575+00:00",
  "money": {
-  "cash": 56.690531,
+  "cash": 75.510531,
   "open_cost": 36.05,
-  "equity": 92.74,
+  "equity": 111.56,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
@@ -20,7 +20,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1789323131.276763,
+  "ts": 1789326749.879904,
   "day": "2026-09-13"
  },
  "arm": {
@@ -149,7 +149,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 92.74,
+  "last_equity": 111.56,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -389,26 +389,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1789237149.0874667,
-   "day": "2026-09-12",
-   "kind": "auto_admit",
-   "before": "0x73653992 not in Z",
-   "after": "in set Z, on probation",
-   "detail": "30 settled paper copies, paper ROI +12.3%, trimmed +4.3%, ideal +13.3%",
-   "push": "WALLET",
-   "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da"
-  },
-  {
-   "ts": 1789237149.0874667,
-   "day": "2026-09-12",
-   "kind": "auto_admit",
-   "before": "0xd970693a not in Z",
-   "after": "in set Z, on probation",
-   "detail": "42 settled paper copies, paper ROI +30.8%, trimmed +16.6%, ideal +31.8%",
-   "push": "WALLET",
-   "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba"
-  },
-  {
    "ts": 1789246822.0691295,
    "day": "2026-09-12",
    "kind": "settled",
@@ -639,41 +619,18 @@
    "detail": "0xeef6ad0e: no settled bets on our slice in 14 days",
    "push": null,
    "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c"
+  },
+  {
+   "ts": 1789326749.006611,
+   "day": "2026-09-13",
+   "kind": "push:milestone",
+   "before": null,
+   "after": "🏁 <b>Bankroll crossed $100</b> upward: $111.56.",
+   "detail": "",
+   "push": "DEAL"
   }
  ],
  "important": [
-  "2026-09-12 18:18:18 INFO  Received signal 15, shutting down...",
-  "2026-09-12 18:18:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-12 18:18:59 INFO  Bot started. Monitoring trades...",
-  "2026-09-12 18:19:16 WARNING [zset] ADMITTED 0x736539924a5602b37a03a54fc12c1cc8f98964da to set Z (+4% over 27 copies with its best 3 deleted). Real money may now follow it once armed.",
-  "2026-09-12 18:19:16 INFO  [ops] auto_admit: '0x73653992 not in Z' -> 'in set Z, on probation' | 30 settled paper copies, paper ROI +12.3%, trimmed +4.3%, ideal +13.3%",
-  "2026-09-12 18:19:17 WARNING [zset] ADMITTED 0xd970693a3384dc762b191707a4927ac3814bbbba to set Z (+17% over 39 copies with its best 3 deleted). Real money may now follow it once armed.",
-  "2026-09-12 18:19:17 INFO  [ops] auto_admit: '0xd970693a not in Z' -> 'in set Z, on probation' | 42 settled paper copies, paper ROI +30.8%, trimmed +16.6%, ideal +31.8%",
-  "2026-09-12 18:19:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 18:19:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 18:19:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 18:28:11 INFO  Received signal 15, shutting down...",
-  "2026-09-12 18:28:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-12 18:28:53 INFO  Bot started. Monitoring trades...",
-  "2026-09-12 18:29:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 18:29:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 18:29:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 18:29:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 18:29:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 18:29:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-12 18:40:24 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-12 18:40:24 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-12 18:40:24 ERROR Network error fetching 0x3f3a...e8fd: ",
-  "2026-09-12 18:40:24 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-12 18:40:25 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-12 18:45:32 ERROR [inventory] API sync failed: ",
-  "2026-09-12 18:55:19 INFO  [tiered-risk] tier 1b: released $5.37 of exposure from resolved or closed positions | open now: $16.08",
-  "2026-09-12 19:00:12 INFO  Received signal 15, shutting down...",
-  "2026-09-12 19:00:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-12 19:00:56 INFO  Bot started. Monitoring trades...",
-  "2026-09-12 19:09:44 INFO  Received signal 15, shutting down...",
-  "2026-09-12 19:10:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-12 19:10:26 INFO  Bot started. Monitoring trades...",
   "2026-09-12 19:21:33 ERROR Network error fetching 0x9f15...bdb3: ",
   "2026-09-12 19:21:33 ERROR Network error fetching 0x09b0...a3b6: ",
   "2026-09-12 19:21:36 ERROR Network error fetching 0xfd3e...5a7a: ",
@@ -805,10 +762,7 @@
   "2026-09-13 16:54:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-13 16:57:00 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-13 17:57:07 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
-  "2026-09-12 18:18:59 INFO  [recovery] No pending orders to recover",
-  "2026-09-12 18:28:53 INFO  [recovery] No pending orders to recover",
-  "2026-09-12 19:00:56 INFO  [recovery] No pending orders to recover",
-  "2026-09-12 19:10:26 INFO  [recovery] No pending orders to recover",
+  "2026-09-13 19:12:29 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll crossed $100</b> upward: $111.56.'",
   "2026-09-12 19:33:59 INFO  [recovery] No pending orders to recover",
   "2026-09-12 20:03:01 INFO  [recovery] No pending orders to recover",
   "2026-09-12 20:33:52 INFO  [recovery] No pending orders to recover",
