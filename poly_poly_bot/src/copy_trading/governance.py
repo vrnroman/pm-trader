@@ -292,13 +292,14 @@ def _log_history(history_path: Optional[str], row: dict) -> None:
     gate_history.append(history_path, row)
 
 
-# A pending offer that was not delivered (RESEARCH pushes held, Telegram down)
-# is retried every cycle, and the advisory review used to run again on every
-# retry. With research held 2026-09-06..12 that re-reviewed the same two records
-# ~1,400 times a day (9.6k Opus calls, nearly all of that week's Langfuse
-# traces). The caller's ``review_memo`` keys the verdict on the evidence it
-# judged; a retry on unchanged evidence reuses it. A failed review (None) is
-# retried at most once per _REVIEW_RETRY_S on the same evidence.
+# An offer whose send failed is retried every cycle, and the advisory review
+# used to run again on every retry. 2026-09-06..12 a research-muted offer also
+# counted as a failed send, which re-reviewed the same two records ~1,400 times
+# a day (9.6k Opus calls, nearly all of that week's Langfuse traces). A muted
+# offer is now recorded like a delivered one; for real failures the caller's
+# ``review_memo`` keys the verdict on the evidence it judged, so a retry on
+# unchanged evidence reuses it. A failed review (None) is retried at most once
+# per _REVIEW_RETRY_S on the same evidence.
 _REVIEW_RETRY_S = 3600.0
 _REVIEW_MEMO_MAX = 256
 
@@ -342,9 +343,10 @@ def run_governance_cycle(
 ) -> tuple[list[dict], list[dict]]:
     """Group the settled ledger, evaluate the gate, then persist + notify.
 
-    ``send_offer(offer)`` must return truthy when the Telegram offer was actually
-    delivered — only then is it recorded, so a transient send failure is retried
-    next cycle. ``review_fn`` (default off) is the ADVISORY Claude promotion
+    ``send_offer(offer)`` returns truthy when the offer was delivered, or
+    ``"muted"`` when the owner's /research off held it. Both are recorded:
+    research decides what reaches his phone, never what the bot decides. Falsy
+    is a real send failure, retried next cycle. ``review_fn`` (default off) is the ADVISORY Claude promotion
     review; its verdict rides along on the offer dict as ``llm`` and never blocks
     the offer. ``review_memo`` (a dict the caller keeps across cycles) holds
     that verdict per evidence, so retrying an undelivered offer does not
@@ -409,7 +411,8 @@ def run_governance_cycle(
                     review_memo[memo_key] = (verdict, now)
         o = {**o, "tier": o_tier, "llm": verdict,
              "llm_attempted": review_fn is not None}
-        if send_offer(o):
+        outcome = send_offer(o)
+        if outcome:
             promotion_state.record_offer(
                 o["wallet"], status="offered",
                 n_closed=o["n_closed"], roi=o["roi"], now=now, scope=state_scope)
@@ -426,6 +429,7 @@ def run_governance_cycle(
                 "llm_verdict": getattr(verdict, "verdict", None),
                 "llm_confidence": getattr(verdict, "confidence", None),
                 "llm_reasoning": getattr(verdict, "reasoning", None),
+                "muted": outcome == "muted",
             })
             sent.append(o)
 
