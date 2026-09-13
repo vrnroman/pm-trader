@@ -172,6 +172,46 @@ def test_cycle_does_not_record_when_send_fails(stores, tmp_path):
     assert ps.offer_status(WIN) is None
 
 
+def test_cycle_undelivered_offer_reuses_review_until_evidence_changes(stores, tmp_path):
+    # 2026-09-06..12: research pushes were held, every cycle retried the offer
+    # and re-ran the Claude review on the same record (~1,400 calls a day).
+    from src.copy_trading.llm_review import PromotionVerdict
+    calls = []
+
+    def review(dossier, **kw):
+        calls.append(dossier["wallet"])
+        return PromotionVerdict("watch", 0.6, "thin sample", ())
+
+    memo, sent = {}, []
+    for t in (1000.0, 1060.0, 1120.0):
+        offers, _ = _run(diversified_winner(), sent, tmp_path=tmp_path, now=t,
+                         send_ok=False, review_fn=review, review_memo=memo)
+        assert offers == []
+    assert len(calls) == 1                         # held three times, reviewed once
+    assert len(sent) == 3 and all(o["llm"].verdict == "watch" for o in sent)
+    # another settled copy is new evidence: that one is reviewed again
+    _run(diversified_winner(n=16), sent, tmp_path=tmp_path, now=1180.0,
+         send_ok=False, review_fn=review, review_memo=memo)
+    assert len(calls) == 2
+
+
+def test_cycle_failed_review_is_retried_at_most_hourly(stores, tmp_path):
+    calls = []
+
+    def review(dossier, **kw):
+        calls.append(1)
+        return None                                # rate-limited / CLI down
+
+    memo, sent = {}, []
+    for t in (1000.0, 1060.0, 1000.0 + 3599):
+        _run(diversified_winner(), sent, tmp_path=tmp_path, now=t,
+             send_ok=False, review_fn=review, review_memo=memo)
+    assert len(calls) == 1
+    _run(diversified_winner(), sent, tmp_path=tmp_path, now=1000.0 + 3600,
+         send_ok=False, review_fn=review, review_memo=memo)
+    assert len(calls) == 2
+
+
 def test_cycle_demotes_and_blacklists(stores, tmp_path):
     sent = []
     offers, dem = _run(loser(), sent, tmp_path=tmp_path)

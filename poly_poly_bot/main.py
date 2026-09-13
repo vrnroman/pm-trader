@@ -451,6 +451,9 @@ def _copy_paper_loop():
     # promotion-gate-history lives beside the discovery gate-history log.
     _promo_history = os.path.join(
         os.path.dirname(CONFIG.wallet_discovery_state), "promotion-gate-history.jsonl")
+    # Review verdicts per evidence, kept across cycles: retrying an undelivered
+    # offer reuses its review instead of re-running Claude every minute.
+    _review_memo: dict = {}
 
     def _load_replay_by_wallet():
         """Per-wallet own-history copy-replay stats from the discovery watchlist,
@@ -510,6 +513,7 @@ def _copy_paper_loop():
                 cooldown_s=CONFIG.copy_demote_cooldown_days * 86400.0,
                 default_tier=CONFIG.promote_default_tier,
                 review_fn=_promo_review,
+                review_memo=_review_memo,
                 llm_model=CONFIG.wallet_discovery_llm_model,
                 history_path=_promo_history,
                 send_offer=lambda o: telegram_bot.send_promotion_offer(
@@ -864,6 +868,7 @@ def _copy_paper_b_loop():
     _promo_history_b = os.path.join(
         os.path.dirname(CONFIG.wallet_discovery_state),
         "promotion-gate-history_b.jsonl")
+    _review_memo: dict = {}  # same memo as strategy A's, B's own evidence
 
     def _load_replay_by_wallet():
         """Same probation fast-track input as strategy A: replay stats from the
@@ -919,6 +924,7 @@ def _copy_paper_b_loop():
                 cooldown_s=CONFIG.copy_demote_cooldown_days * 86400.0,
                 default_tier=CONFIG.promote_default_tier,
                 review_fn=_promo_review,
+                review_memo=_review_memo,
                 llm_model=CONFIG.wallet_discovery_llm_model,
                 history_path=_promo_history_b,
                 state_scope="b",
