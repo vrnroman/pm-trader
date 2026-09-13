@@ -1,7 +1,7 @@
-# ops digest 2026-09-13T20:48:38.524181+00:00 (last 24h)
+# ops digest 2026-09-13T21:37:31.658289+00:00 (last 24h)
 
 ## money state
-{"cash": 75.510531, "open_cost": 29.65, "equity": 105.16, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789332474.9895716, "day": "2026-09-13"}
+{"cash": 75.510531, "open_cost": 29.65, "equity": 105.16, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789335188.018831, "day": "2026-09-13"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-13", "spent_usd": 12.8, "wallet_copies": {"0x05878ac343c1387d592042d788424412733ac40b": 1, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": 1}, "wallet_copies_yesterday": {"0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": 2, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2}, "yesterday": "2026-09-12", "closed_reason": ""}
@@ -22,10 +22,7 @@ in form  0xd970693a: 60 settled, 77% won vs 56% needed, net +21.9% on $24,890, w
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
 benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, worst day -1,129
 
-## ledger (24 rows)
-{"ts": 1789246822.0691295, "day": "2026-09-12", "kind": "settled", "before": "open $5.37", "after": "paid $0.00", "detail": "lost -5.37 on 'Will Alanyaspor vs. Göztepe SK end in a ' (, tier 1b)", "push": null, "token_id": "6691701803539626176077488709374004737591849995522510168757367609925258534749", "wallet": "", "pnl": -5.37, "won": false}
-{"ts": 1789246822.0691295, "day": "2026-09-12", "kind": "settled", "before": "open $5.36", "after": "paid $0.01", "detail": "lost -5.35 on 'FC Lugano vs. Young Boys Bern: O/U 3.5' (, tier 1b)", "push": null, "token_id": "111426907502041127672975490206099880504280577275905396462330907920963353499778", "wallet": "", "pnl": -5.35, "won": false}
-{"ts": 1789246822.0691295, "day": "2026-09-12", "kind": "push:daily_loss", "before": null, "after": "📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll).", "detail": "", "push": "DEAL"}
+## ledger (21 rows)
 {"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x05878ac3 unknown", "after": "benched", "detail": "0x05878ac3: 154 settled, 1% won vs 42% needed, net -97.8% on $149,983, worst day -27,220", "push": null, "wallet": "0x05878ac343c1387d592042d788424412733ac40b"}
 {"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x09b045ba unknown", "after": "benched", "detail": "0x09b045ba: 61 settled, 0% won vs 56% needed, net -100.0% on $23,894, worst day -3,747", "push": null, "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6"}
 {"ts": 1789274087.7013485, "day": "2026-09-13", "kind": "form", "before": "0x1985327e unknown", "after": "benched", "detail": "0x1985327e: 62 settled, 0% won vs 55% needed, net -100.0% on $24,607, worst day -5,047", "push": null, "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab"}
@@ -48,12 +45,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1789317837.8643563, "day": "2026-09-13", "kind": "form", "before": "0xeef6ad0e unknown", "after": "benched", "detail": "0xeef6ad0e: no settled bets on our slice in 14 days", "push": null, "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c"}
 {"ts": 1789326749.006611, "day": "2026-09-13", "kind": "push:milestone", "before": null, "after": "🏁 <b>Bankroll crossed $100</b> upward: $111.56.", "detail": "", "push": "DEAL"}
 
-## important lines (125)
-2026-09-12 20:57:28 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
-2026-09-12 21:00:21 INFO  [tiered-risk] tier 1b: released $10.73 of exposure from resolved or closed positions | open now: $5.35
-2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.37' -> 'paid $0.00' | lost -5.37 on 'Will Alanyaspor vs. Göztepe SK end in a ' (, tier 1b)
-2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.36' -> 'paid $0.01' | lost -5.35 on 'FC Lugano vs. Young Boys Bern: O/U 3.5' (, tier 1b)
-2026-09-12 21:00:24 INFO  [ops] push:daily_loss: None -> "📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll)."
+## important lines (120)
 2026-09-12 23:13:14 INFO  [tiered-risk] tier 1b: released $5.35 of exposure from resolved or closed positions | open now: $0.00
 2026-09-13 01:13:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-13 01:44:26 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'

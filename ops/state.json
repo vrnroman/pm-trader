@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-13T20:48:45.987555+00:00",
+ "generated": "2026-09-13T21:37:38.437473+00:00",
  "money": {
   "cash": 75.510531,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789332474.9895716,
+  "ts": 1789335188.018831,
   "day": "2026-09-13"
  },
  "arm": {
@@ -381,41 +381,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1789246822.0691295,
-   "day": "2026-09-12",
-   "kind": "settled",
-   "before": "open $5.37",
-   "after": "paid $0.00",
-   "detail": "lost -5.37 on 'Will Alanyaspor vs. Göztepe SK end in a ' (, tier 1b)",
-   "push": null,
-   "token_id": "6691701803539626176077488709374004737591849995522510168757367609925258534749",
-   "wallet": "",
-   "pnl": -5.37,
-   "won": false
-  },
-  {
-   "ts": 1789246822.0691295,
-   "day": "2026-09-12",
-   "kind": "settled",
-   "before": "open $5.36",
-   "after": "paid $0.01",
-   "detail": "lost -5.35 on 'FC Lugano vs. Young Boys Bern: O/U 3.5' (, tier 1b)",
-   "push": null,
-   "token_id": "111426907502041127672975490206099880504280577275905396462330907920963353499778",
-   "wallet": "",
-   "pnl": -5.35,
-   "won": false
-  },
-  {
-   "ts": 1789246822.0691295,
-   "day": "2026-09-12",
-   "kind": "push:daily_loss",
-   "before": null,
-   "after": "📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll).",
-   "detail": "",
-   "push": "DEAL"
-  },
-  {
    "ts": 1789274087.7013485,
    "day": "2026-09-13",
    "kind": "form",
@@ -623,11 +588,6 @@
   }
  ],
  "important": [
-  "2026-09-12 20:57:28 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-12 21:00:21 INFO  [tiered-risk] tier 1b: released $10.73 of exposure from resolved or closed positions | open now: $5.35",
-  "2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.37' -> 'paid $0.00' | lost -5.37 on 'Will Alanyaspor vs. Göztepe SK end in a ' (, tier 1b)",
-  "2026-09-12 21:00:22 INFO  [ops] settled: 'open $5.36' -> 'paid $0.01' | lost -5.35 on 'FC Lugano vs. Young Boys Bern: O/U 3.5' (, tier 1b)",
-  "2026-09-12 21:00:24 INFO  [ops] push:daily_loss: None -> \"📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll).\"",
   "2026-09-12 23:13:14 INFO  [tiered-risk] tier 1b: released $5.35 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-13 01:13:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-13 01:44:26 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
