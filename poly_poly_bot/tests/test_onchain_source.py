@@ -15,6 +15,8 @@ from src.copy_trading.onchain_source import OnchainSource, _determine_side, _tra
 
 TRACKED = "0xAAAA00000000000000000000000000000000aaAA"
 OTHER = "0xBBBB00000000000000000000000000000000bbBB"
+OTHER2 = "0xCCCC00000000000000000000000000000000ccCC"
+EXCHANGE = "0xEEEE00000000000000000000000000000000eeEE"
 
 
 class _Event:
@@ -96,3 +98,51 @@ def test_a_tracked_maker_still_reads_right():
                 maker_amount=100_000_000, taker_amount=200_000_000)
     (t,) = _source()._process_events([ev], "ctf")
     assert t.side == "BUY" and t.token_id == "123" and t.size == 100.0
+
+
+def test_a_tracked_taker_order_is_one_trade_read_from_its_own_leg():
+    """Trading.sol emits, in one matchOrders tx, an OrderFilled per maker
+    leg (taker = the tracked wallet) AND one for the wallet's own order
+    (maker = the tracked wallet, taker = the exchange). Before: the maker
+    legs became inverted phantom trades beside the real one. Now: one trade,
+    the own leg's side and the whole fill, the maker legs dropped."""
+    evs = [
+        _Event(maker=OTHER, taker=TRACKED, maker_asset_id=0, taker_asset_id=123,
+               maker_amount=60_000_000, taker_amount=120_000_000),
+        _Event(maker=OTHER2, taker=TRACKED, maker_asset_id=0, taker_asset_id=123,
+               maker_amount=40_000_000, taker_amount=80_000_000),
+        _Event(maker=TRACKED, taker=EXCHANGE, maker_asset_id=123, taker_asset_id=0,
+               maker_amount=200_000_000, taker_amount=100_000_000),
+    ]
+    trades = _source()._process_events(evs, "ctf")
+    assert len(trades) == 1
+    (t,) = trades
+    assert t.side == "SELL" and t.token_id == "123"
+    assert t.size == 100.0 and abs(t.price - 0.5) < 1e-9
+
+
+def test_a_mint_match_reads_the_tracked_wallets_own_token_and_side():
+    """MINT match: the tracked wallet buys YES; the maker leg is another
+    wallet buying NO. Read from the maker leg the trade would be a SELL of
+    NO — a token the wallet never touched. The own leg wins."""
+    evs = [
+        _Event(maker=OTHER, taker=TRACKED, maker_asset_id=0, taker_asset_id=456,
+               maker_amount=50_000_000, taker_amount=100_000_000),
+        _Event(maker=TRACKED, taker=EXCHANGE, maker_asset_id=0, taker_asset_id=123,
+               maker_amount=50_000_000, taker_amount=100_000_000),
+    ]
+    (t,) = _source()._process_events(evs, "ctf")
+    assert t.side == "BUY" and t.token_id == "123" and t.size == 50.0
+
+
+def test_maker_legs_without_an_own_leg_are_summed_into_one_order():
+    """Defensive: the contract always emits the own leg, but if a batch ever
+    carried only the maker legs they are one order, not two half-orders."""
+    evs = [
+        _Event(maker=OTHER, taker=TRACKED, maker_asset_id=0, taker_asset_id=123,
+               maker_amount=60_000_000, taker_amount=120_000_000),
+        _Event(maker=OTHER2, taker=TRACKED, maker_asset_id=0, taker_asset_id=123,
+               maker_amount=40_000_000, taker_amount=80_000_000),
+    ]
+    (t,) = _source()._process_events(evs, "ctf")
+    assert t.side == "SELL" and t.size == 100.0 and abs(t.price - 0.5) < 1e-9
