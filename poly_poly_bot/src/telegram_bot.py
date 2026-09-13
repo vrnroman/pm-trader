@@ -177,6 +177,22 @@ def suppressed_research_count(reset: bool = False) -> int:
     return n
 
 
+MUTED = "muted"
+
+
+def research_outcome(sent: bool) -> bool | str:
+    """Outcome of a RESEARCH push for a caller that records state on delivery.
+
+    A message held because the owner switched research off is MUTED: handled,
+    not a failed send to retry. Research decides what reaches his phone, never
+    what the bot does or records (2026-09-06..12 a muted promotion offer was
+    retried as a failure and re-ran the Claude review every minute). False
+    only when research is on and the send really failed."""
+    if sent:
+        return True
+    return False if research_enabled() else MUTED
+
+
 def classify(text: str, kind: str | None) -> tuple[str, bool]:
     """(text with its class prefix, deliver?) for a push message."""
     global _suppressed_research

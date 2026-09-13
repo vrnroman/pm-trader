@@ -292,6 +292,18 @@ def _log_history(history_path: Optional[str], row: dict) -> None:
     gate_history.append(history_path, row)
 
 
+# An offer whose send failed is retried every cycle, and the advisory review
+# used to run again on every retry. 2026-09-06..12 a research-muted offer also
+# counted as a failed send, which re-reviewed the same two records ~1,400 times
+# a day (9.6k Opus calls, nearly all of that week's Langfuse traces). A muted
+# offer is now recorded like a delivered one; for real failures the caller's
+# ``review_memo`` keys the verdict on the evidence it judged, so a retry on
+# unchanged evidence reuses it. A failed review (None) is retried at most once
+# per _REVIEW_RETRY_S on the same evidence.
+_REVIEW_RETRY_S = 3600.0
+_REVIEW_MEMO_MAX = 256
+
+
 def run_governance_cycle(
     paper_positions,
     *,
@@ -312,6 +324,7 @@ def run_governance_cycle(
     send_demotion: Optional[Callable[[dict], None]] = None,
     review_fn: Optional[Callable[[dict], object]] = None,
     llm_model: Optional[str] = None,
+    review_memo: Optional[dict] = None,
     history_path: Optional[str] = None,
     replay_by_wallet: dict | None = None,
     probation_enabled: bool = False,
@@ -330,11 +343,14 @@ def run_governance_cycle(
 ) -> tuple[list[dict], list[dict]]:
     """Group the settled ledger, evaluate the gate, then persist + notify.
 
-    ``send_offer(offer)`` must return truthy when the Telegram offer was actually
-    delivered — only then is it recorded, so a transient send failure is retried
-    next cycle. ``review_fn`` (default off) is the ADVISORY Claude promotion
+    ``send_offer(offer)`` returns truthy when the offer was delivered, or
+    ``"muted"`` when the owner's /research off held it. Both are recorded:
+    research decides what reaches his phone, never what the bot decides. Falsy
+    is a real send failure, retried next cycle. ``review_fn`` (default off) is the ADVISORY Claude promotion
     review; its verdict rides along on the offer dict as ``llm`` and never blocks
-    the offer. Every fired offer / demote / first-time hold is appended to
+    the offer. ``review_memo`` (a dict the caller keeps across cycles) holds
+    that verdict per evidence, so retrying an undelivered offer does not
+    re-run Claude. Every fired offer / demote / first-time hold is appended to
     ``history_path`` (promotion-gate-history) for ``/gate``. Returns
     ``(offers_sent, demotions_applied)``."""
     positions_by_wallet = group_settled_by_wallet(paper_positions)
@@ -373,19 +389,30 @@ def run_governance_cycle(
         o_tier = o.get("tier") or default_tier
         verdict = None
         if review_fn is not None:
-            try:
-                from src.copy_trading.llm_review import build_promotion_dossier
-                dossier = build_promotion_dossier(
-                    o["wallet"], stats=stats, theories=o.get("theories"),
-                    floor_warnings=o.get("warnings"), tier=o_tier)
-                verdict = review_fn(dossier) if llm_model is None else review_fn(dossier, model=llm_model)
-            except Exception:  # advisory only — a broken review never blocks the offer
-                logger.warning("[PROMOTE-GATE] LLM review errored for %s (offering anyway)",
-                               o["wallet"], exc_info=True)
-                verdict = None
+            memo_key = ((o["wallet"] or "").lower(), o["n_closed"],
+                        round(float(o["roi"] or 0.0), 4), o_tier)
+            hit = review_memo.get(memo_key) if review_memo is not None else None
+            if hit is not None and (hit[0] is not None or now - hit[1] < _REVIEW_RETRY_S):
+                verdict = hit[0]
+            else:
+                try:
+                    from src.copy_trading.llm_review import build_promotion_dossier
+                    dossier = build_promotion_dossier(
+                        o["wallet"], stats=stats, theories=o.get("theories"),
+                        floor_warnings=o.get("warnings"), tier=o_tier)
+                    verdict = review_fn(dossier) if llm_model is None else review_fn(dossier, model=llm_model)
+                except Exception:  # advisory only — a broken review never blocks the offer
+                    logger.warning("[PROMOTE-GATE] LLM review errored for %s (offering anyway)",
+                                   o["wallet"], exc_info=True)
+                    verdict = None
+                if review_memo is not None:
+                    if len(review_memo) >= _REVIEW_MEMO_MAX:
+                        review_memo.clear()
+                    review_memo[memo_key] = (verdict, now)
         o = {**o, "tier": o_tier, "llm": verdict,
              "llm_attempted": review_fn is not None}
-        if send_offer(o):
+        outcome = send_offer(o)
+        if outcome:
             promotion_state.record_offer(
                 o["wallet"], status="offered",
                 n_closed=o["n_closed"], roi=o["roi"], now=now, scope=state_scope)
@@ -402,6 +429,7 @@ def run_governance_cycle(
                 "llm_verdict": getattr(verdict, "verdict", None),
                 "llm_confidence": getattr(verdict, "confidence", None),
                 "llm_reasoning": getattr(verdict, "reasoning", None),
+                "muted": outcome == "muted",
             })
             sent.append(o)
 
