@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-13T12:42:03Z-9dfd",
-  "ts": 1789303323,
+  "id": "2026-09-13T18:42:04Z-9d8c",
+  "ts": 1789324924,
   "kind": "nothing",
-  "message": "Armed, spend $0.00 of $24.92 cap, 4 of 11 followed wallets in form and copying live (all net +22% to +25%, no losing streaks), no self-disarm or traceback, bankroll $62.30 above the $56 floor.",
+  "message": "Armed, spend $12.80 of $32.00 cap, 4 of 11 followed wallets in form and copying live (net +21.1% to +32.1%, no losing streaks), two live trades filled today, equity $92.74 well above the $56 floor, no self-disarm or traceback.",
   "evidence": [
-    "## money state {\"cash\": 62.303671, \"equity\": 62.3, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 24.92}, \"armed\": true}",
-    "in form  0x05878ac3: 112 settled, 54% won vs 47% needed, net +22.5% on $102,142, worst day -2,592",
-    "in form  0xd970693a: 59 settled, 76% won vs 57% needed, net +22.0% on $24,564, worst day +52",
-    "2026-09-13 04:54:34 INFO  [ops] form_resume: 'paused' -> '4 in form: copying resumes' | 0x05878ac3, 0x09b045ba, 0x1985327e, 0xd970693a",
-    "2026-09-13 12:14:01 INFO  [recovery] No pending orders to recover"
+    "## money state {\"cash\": 56.690531, \"equity\": 92.74, \"floor\": 56.0, \"spend\": {\"spent_usd\": 12.8, \"cap_usd\": 32.0}, \"armed\": true}",
+    "## arm: {\"armed\": true, \"ts\": 1789312200.3067093, \"by\": \"telegram\", \"reason\": \"\"}",
+    "in form  0x05878ac3: 161 settled, 55% won vs 48% needed, net +32.1% on $149,004, worst day -3,155",
+    "in form  0xd970693a: 60 settled, 77% won vs 56% needed, net +21.9% on $24,890, worst day +52",
+    "2026-09-13 16:52:34 TRADE [verify] FILLED: BUY 7.44 shares on 'SV 07 Elversberg vs. FC Bayern München: ' @ 0.8600"
   ],
   "commit": null
 }
