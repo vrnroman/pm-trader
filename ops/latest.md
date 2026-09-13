@@ -1,7 +1,7 @@
-# ops digest 2026-09-13T01:21:44.573444+00:00 (last 24h)
+# ops digest 2026-09-13T03:08:55.152652+00:00 (last 24h)
 
 ## money state
-{"cash": 62.303671, "open_cost": 0.0, "equity": 62.3, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 0.0, "cap_usd": 24.92, "remaining_usd": 24.92, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789262328.1050587, "day": "2026-09-13"}
+{"cash": 62.303671, "open_cost": 0.0, "equity": 62.3, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-13", "spent_usd": 0.0, "cap_usd": 24.92, "remaining_usd": 24.92, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789268653.8832154, "day": "2026-09-13"}
 
 ## arm: {"armed": true, "ts": 1788698166.0465596, "by": "1shot:s-kac3t7", "reason": "owner: go activate bot, let go in; make sure deals are done (run s-kac3t7)", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-13", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": 2, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2}, "yesterday": "2026-09-12", "closed_reason": ""}
@@ -25,6 +25,9 @@
 {"ts": 1789246822.0691295, "day": "2026-09-12", "kind": "push:daily_loss", "before": null, "after": "📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll).", "detail": "", "push": "DEAL"}
 
 ## important lines (400)
+2026-09-12 14:13:19 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
+2026-09-12 14:18:26 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
+2026-09-12 14:23:27 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
 2026-09-12 14:28:28 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
 2026-09-12 14:33:29 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
 2026-09-12 14:38:29 WARNING [guard] could not read equity for the floor: module 'src.copy_trading.live_budget' has no attribute 'note_collectable'
@@ -202,12 +205,9 @@
 2026-09-12 21:00:24 INFO  [ops] push:daily_loss: None -> "📉 <b>Today's losses reach $10.72</b> (10% of the $61.43 bankroll)."
 2026-09-12 23:13:14 INFO  [tiered-risk] tier 1b: released $5.35 of exposure from resolved or closed positions | open now: $0.00
 2026-09-13 01:13:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-12 01:22:09 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $13.29 on 'Counter-Strike: Without a Roof vs Marsbo'
-2026-09-12 01:22:40 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $2.72 on 'Counter-Strike: Without a Roof vs Marsbo'
-2026-09-12 01:26:39 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $329.64 on 'Chicago White Sox vs. St. Louis Cardinal'
-2026-09-12 01:31:37 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: BUY $2140.41 on 'Spread: Seattle Mariners (-1.5)'
-2026-09-12 02:56:41 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $3.50 on 'Spread: Cleveland Guardians (-1.5)'
-2026-09-12 03:04:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $9.62 on 'Chicago White Sox vs. St. Louis Cardinal'
+2026-09-13 01:44:26 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
+2026-09-13 02:37:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-13 02:58:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-12 03:12:29 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $21.69 on 'M25 Sapporo: Jerry Roddick vs Chase Ferg'
 2026-09-12 03:23:01 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $1.47 on 'Angel City FC vs. Denver Summit FC: O/U '
 2026-09-12 03:30:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-5.96 < min_bet=$5.00: SELL $4.70 on 'M25 Sapporo: Jerry Roddick vs Chase Ferg'
