@@ -51,7 +51,11 @@ FORM_MIN_EDGE_PTS = _env_f("FORM_MIN_EDGE_PTS", 3.0)
 FORM_MIN_NET_PCT = _env_f("FORM_MIN_NET_PCT", 2.0)
 FORM_EVERY_S = _env_f("FORM_EVERY_S", 6 * 3600.0)
 FORM_OVERRIDE_S = _env_f("FORM_OVERRIDE_S", 24 * 3600.0)
-FORM_MAX_ROWS = int(_env_f("FORM_MAX_ROWS", 1500))
+# The read is TIME-scoped (see fetch_rows). Rows this far before the window
+# are still read so a market's FIRST buy is seen even when it predates the
+# window; FORM_MAX_ROWS is a hard stop on a runaway wallet, not the window.
+FORM_LOOKBACK_DAYS = _env_f("FORM_LOOKBACK_DAYS", 28.0)
+FORM_MAX_ROWS = int(_env_f("FORM_MAX_ROWS", 20000))
 FORM_STALE_S = _env_f("FORM_STALE_S", 4 * FORM_EVERY_S)   # a kept verdict this old is no verdict
 FORM_VERSION = 2   # bump when compute() changes: a table from an older compute is rescanned at boot
 
@@ -113,38 +117,78 @@ def _write(d: dict) -> None:
 # The read: public data api, no key
 # --------------------------------------------------------------------------- #
 
-def fetch_rows(wallet: str, *, max_rows: int = FORM_MAX_ROWS, get=None) -> tuple[list, list]:
+def fetch_rows(wallet: str, *, max_rows: int = FORM_MAX_ROWS, get=None,
+               now: Optional[float] = None, days: float = FORM_DAYS) -> tuple[list, list]:
     """(activity rows newest first, positions) for a wallet. ``get`` is the
-    JSON fetcher (injected for tests)."""
+    JSON fetcher (injected for tests).
+
+    Pages newest-first and stops once a page reaches FORM_LOOKBACK_DAYS
+    before the window, or at ``max_rows``. The old read took the newest 1500
+    rows with no time bound: a wallet with more rows than that in the window
+    (about 107 a day, plausible for a followed whale) had its window silently
+    truncated, and the first-buy-before-the-window exclusion was computed on
+    the capped slice, so a large pre-window position redeemed in-window read
+    as a window market and its payout inflated the form (issue #34.4a).
+
+    A throttled page is a failed read and raises. It is tracked here, never
+    through the discovery sweep's shared failure list: the old code deleted
+    its own entries from that list by index while the sweep thread was
+    appending to and reading it (issue #34.4b).
+    """
+    now = time.time() if now is None else now
+    cutoff = now - (days + FORM_LOOKBACK_DAYS) * 86400
     if get is None:
-        # The discovery fetcher: retries, and a throttled page is never
-        # mistaken for "no more trades" (its docstring tells that story). It
-        # returns a TRUNCATED list on exhaustion and records the wallet in
-        # _activity_fetch_failures instead of raising; here that is a failed
-        # read (code review, finding 1).
         from src.copy_trading import discovery_data as _dd
         import httpx
-        before = len(_dd._activity_fetch_failures)
-        acts = list(_dd.fetch_activity(wallet, None, 0.0, cap=max_rows) or [])
-        if len(_dd._activity_fetch_failures) > before:
-            del _dd._activity_fetch_failures[before:]
-            raise RuntimeError("activity read incomplete (throttled)")
-        r = httpx.get(f"{DATA_API}/positions?user={wallet}&sizeThreshold=1&limit=500",
-                      timeout=30.0, headers={"User-Agent": "pm-trader-form"})
-        r.raise_for_status()
-        return acts, (r.json() or [])
+        import requests
+        session = requests.Session()
+        page_size = 500
+
+        def get_page(offset: int):
+            # The discovery fetcher's page read: retries, and returns None once
+            # a page has exhausted its attempts, which is a failed read, not
+            # "no more trades".
+            page = _dd._get(session, DATA_API, "/activity", user=wallet,
+                            limit=page_size, offset=offset)
+            if page is None:
+                raise RuntimeError("activity read incomplete (throttled)")
+            return page
+
+        def get_positions():
+            r = httpx.get(f"{DATA_API}/positions?user={wallet}&sizeThreshold=1&limit=500",
+                          timeout=30.0, headers={"User-Agent": "pm-trader-form"})
+            r.raise_for_status()
+            return r.json() or []
+    else:
+        page_size = 100
+
+        def get_page(offset: int):
+            return get(f"{DATA_API}/activity?user={wallet}&limit={page_size}&offset={offset}")
+
+        def get_positions():
+            return get(f"{DATA_API}/positions?user={wallet}&sizeThreshold=1&limit=500") or []
+
     acts: list = []
     offset = 0
     while offset < max_rows:
-        page = get(f"{DATA_API}/activity?user={wallet}&limit=100&offset={offset}")
+        page = get_page(offset)
         if not page:
             break
         acts.extend(page)
-        offset += 100
-        if len(page) < 100:
+        offset += page_size
+        if len(page) < page_size:
             break
-    pos = get(f"{DATA_API}/positions?user={wallet}&sizeThreshold=1&limit=500") or []
-    return acts, pos
+        oldest = min((_ts(a) for a in page), default=0.0)
+        if oldest and oldest < cutoff:
+            break
+    return acts, get_positions()
+
+
+def _ts(row: dict) -> float:
+    try:
+        return float(row.get("timestamp") or 0)
+    except (TypeError, ValueError, AttributeError):
+        return 0.0
 
 
 def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,

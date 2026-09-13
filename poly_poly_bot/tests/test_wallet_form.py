@@ -167,10 +167,12 @@ def test_a_throttled_read_is_a_failure_not_an_empty_wallet(form_env, monkeypatch
     """Finding 1: the discovery fetcher returns a truncated list and records
     the wallet in _activity_fetch_failures instead of raising."""
     from src.copy_trading import discovery_data as dd
-    monkeypatch.setattr(dd, "fetch_activity", lambda w, c, ttl, cap=0: (dd._activity_fetch_failures.append(w) or []))
+    monkeypatch.setattr(dd, "_get", lambda s, base, path, **kw: None)   # exhausted its attempts
+    monkeypatch.setattr(dd, "_activity_fetch_failures", ["0xSWEEP"])
     with pytest.raises(RuntimeError):
         wf.fetch_rows("0xT")
-    assert "0xT" not in dd._activity_fetch_failures, "the marker is consumed, not left for the sweep report"
+    assert dd._activity_fetch_failures == ["0xSWEEP"], \
+        "tracked locally; the sweep's shared list is neither read nor pruned (#34.4b)"
     wf._write({"ts": 1.0, "wallets": {"0xt": {"ok": True, "reason": "fine", "wallet": "0xt", "n": 40, "won": 25, "cost": 1.0, "back": 2.0, "avg_price": 0.5, "ts": NOW - 60}}})
     d = wf.scan(send=None, now=NOW, wallets=["0xt"])
     assert d["wallets"]["0xt"]["ok"] is True and d["paused"] is False, "a throttled read keeps the last verdict"
@@ -254,3 +256,52 @@ def test_a_wallet_action_is_applied_once_even_when_the_message_is_retried(form_e
     assert ops_watch.deliver_escalation(send=lambda t: False, now=100.0) is None
     assert ops_watch.deliver_escalation(send=lambda t: True, now=100.0 + 3600)["after"] == "applied"
     assert wf.is_benched("0xa", now=100.0 + wf.FORM_OVERRIDE_S)[0] is False, "the clock runs from the first application"
+
+
+# ---- issue #34.4a: the read is time-scoped, not row-capped ----
+
+def test_the_read_covers_the_whole_window_and_stops_after_the_lookback(form_env):
+    """A followed whale with more rows in the window than the old 1500-row cap
+    had its window silently truncated. Now the read pages newest-first until
+    the rows predate the window by FORM_LOOKBACK_DAYS, however many that is,
+    and stops there instead of reading the wallet's whole history."""
+    rows = [{"type": "TRADE", "side": "BUY", "conditionId": f"c{i}", "usdcSize": 400.0,
+             "size": 800.0, "timestamp": NOW - i * 3600.0} for i in range(5000)]  # one an hour
+    calls: list = []
+
+    def get(url):
+        calls.append(url)
+        if "/positions" in url:
+            return []
+        offset = int(url.rsplit("offset=", 1)[1])
+        return rows[offset:offset + 100]
+
+    acts, pos = wf.fetch_rows("0xW", get=get, now=NOW)
+    in_window = [a for a in acts if a["timestamp"] >= NOW - wf.FORM_DAYS * 86400]
+    assert len(in_window) == int(wf.FORM_DAYS * 24) + 1, "every row of the window, past the old 1500 cap"
+    lookback_rows = int((wf.FORM_DAYS + wf.FORM_LOOKBACK_DAYS) * 24)
+    assert lookback_rows <= len(acts) < lookback_rows + 200, "and it stops after the lookback"
+    assert len(calls) < 5000 // 100, "not the wallet's whole history"
+
+
+def test_a_pre_window_first_buy_past_the_old_cap_is_still_left_out(form_env):
+    """The exclusion is computed on what was read: a large position first
+    bought 20 days ago and redeemed today used to fall outside the capped
+    slice and count as a window market, its payout inflating the form."""
+    filler = [{"type": "TRADE", "side": "BUY", "conditionId": f"f{i}", "usdcSize": 50.0,
+               "size": 100.0, "timestamp": NOW - 60.0 * (i + 1)} for i in range(1600)]
+    old_buy = {"type": "TRADE", "side": "BUY", "conditionId": "old", "usdcSize": 2000.0,
+               "size": 4000.0, "timestamp": NOW - 20 * 86400}
+    redeem = {"type": "REDEEM", "conditionId": "old", "usdcSize": 4000.0, "size": 4000.0,
+              "timestamp": NOW - 30.0}
+    rows = [redeem] + filler + [old_buy]
+
+    def get(url):
+        if "/positions" in url:
+            return []
+        offset = int(url.rsplit("offset=", 1)[1])
+        return rows[offset:offset + 100]
+
+    acts, pos = wf.fetch_rows("0xW", get=get, now=NOW)
+    f = wf.compute("0xW", acts, pos, now=NOW)
+    assert f.n == 0 and f.back == 0.0, "the pre-window market is left out, its payout not counted"
