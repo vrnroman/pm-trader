@@ -116,10 +116,17 @@ def fetch_rows(wallet: str, *, max_rows: int = FORM_MAX_ROWS, get=None) -> tuple
     JSON fetcher (injected for tests)."""
     if get is None:
         # The discovery fetcher: retries, and a throttled page is never
-        # mistaken for "no more trades" (its docstring tells that story).
-        from src.copy_trading.discovery_data import fetch_activity
+        # mistaken for "no more trades" (its docstring tells that story). It
+        # returns a TRUNCATED list on exhaustion and records the wallet in
+        # _activity_fetch_failures instead of raising; here that is a failed
+        # read (code review, finding 1).
+        from src.copy_trading import discovery_data as _dd
         import httpx
-        acts = list(fetch_activity(wallet, None, 0.0, cap=max_rows) or [])
+        before = len(_dd._activity_fetch_failures)
+        acts = list(_dd.fetch_activity(wallet, None, 0.0, cap=max_rows) or [])
+        if len(_dd._activity_fetch_failures) > before:
+            del _dd._activity_fetch_failures[before:]
+            raise RuntimeError("activity read incomplete (throttled)")
         r = httpx.get(f"{DATA_API}/positions?user={wallet}&sizeThreshold=1&limit=500",
                       timeout=30.0, headers={"User-Agent": "pm-trader-form"})
         r.raise_for_status()
@@ -140,14 +147,18 @@ def fetch_rows(wallet: str, *, max_rows: int = FORM_MAX_ROWS, get=None) -> tuple
 
 def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
             days: float = FORM_DAYS, min_bet: Optional[float] = None) -> Form:
-    """Form from the rows. A market counts once, at the wallet's total cost;
-    it is won if a REDEEM row or a redeemable position exists for it, open if
-    the position still trades, lost otherwise."""
+    """Form from the rows. A market counts once, on the rows the bot would
+    have copied (each BUY row of at least the slice minimum, the sink's own
+    trigger); a market whose first buy predates the window is left out so a
+    stale payout cannot inflate the window; SELL rows are inflow (an exit is
+    not a loss); a REDEEM counts its usdcSize only; a market is open while
+    the wallet still holds it; it is WON when it came out ahead."""
     now = time.time() if now is None else now
     since = now - days * 86400
     floor = float(min_bet if min_bet is not None else getattr(CONFIG, "copy_paper_min_usd", 300.0) or 300.0)
+    first_buy: dict = {}
     by_cond: dict = {}
-    redeem: dict = {}
+    inflow: dict = {}
     day_of: dict = {}
     for a in acts:
         try:
@@ -157,37 +168,43 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
         cid = str(a.get("conditionId") or "")
         if not cid:
             continue
-        if a.get("type") == "REDEEM":
-            redeem[cid] = redeem.get(cid, 0.0) + float(a.get("usdcSize") or a.get("size") or 0)
-        elif a.get("type") == "TRADE" and a.get("side") == "BUY" and ts >= since:
-            c = by_cond.setdefault(cid, {"cost": 0.0, "sh": 0.0})
-            c["cost"] += float(a.get("usdcSize") or 0)
-            c["sh"] += float(a.get("size") or 0)
-            day_of.setdefault(cid, time.strftime("%Y-%m-%d", time.gmtime(ts)))
+        t = a.get("type")
+        if t == "TRADE" and a.get("side") == "BUY":
+            first_buy[cid] = min(first_buy.get(cid, ts), ts)
+            usd = float(a.get("usdcSize") or 0)
+            if ts >= since and usd >= floor:
+                c = by_cond.setdefault(cid, {"cost": 0.0, "sh": 0.0})
+                c["cost"] += usd
+                c["sh"] += float(a.get("size") or 0)
+                day_of.setdefault(cid, time.strftime("%Y-%m-%d", time.gmtime(ts)))
+        elif t == "TRADE" and a.get("side") == "SELL" and ts >= since:
+            inflow[cid] = inflow.get(cid, 0.0) + float(a.get("usdcSize") or 0)
+        elif t == "REDEEM" and ts >= since:
+            inflow[cid] = inflow.get(cid, 0.0) + float(a.get("usdcSize") or 0)
     open_c: set = set()
-    won_unclaimed: dict = {}
+    unclaimed: dict = {}
     for p in pos or []:
         cid = str(p.get("conditionId") or "")
         cur = float(p.get("curPrice") or 0)
         val = float(p.get("currentValue") or 0)
         if p.get("redeemable"):
             if val >= 1:
-                won_unclaimed[cid] = val
+                unclaimed[cid] = val
         elif val > 1 and 0.0 < cur < 1.0:
             open_c.add(cid)
     f = Form(wallet=wallet.lower(), ts=now)
     sh = 0.0
     per_day: dict = {}
     for cid, c in by_cond.items():
-        if c["cost"] < floor or cid in open_c:
+        if cid in open_c or first_buy.get(cid, since) < since:
             continue
         f.n += 1
         f.cost += c["cost"]
         sh += c["sh"]
-        back = redeem.get(cid, 0.0) or won_unclaimed.get(cid, 0.0)
-        if back > 0:
+        back = inflow.get(cid, 0.0) + unclaimed.get(cid, 0.0)
+        if back > c["cost"]:
             f.won += 1
-            f.back += back
+        f.back += back
         d0 = day_of.get(cid, "")
         per_day[d0] = per_day.get(d0, 0.0) + (back - c["cost"])
     f.worst_day = round(min(per_day.values()), 2) if per_day else 0.0
@@ -199,12 +216,12 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
     else:
         edge = (f.hit - f.avg_price) * 100.0
         if edge < FORM_MIN_EDGE_PTS:
-            f.ok, f.reason = False, (f"{f.hit * 100:.0f}% won vs {f.avg_price * 100:.0f}% needed "
+            f.ok, f.reason = False, (f"{f.hit * 100:.0f}% came out ahead vs {f.avg_price * 100:.0f}% needed "
                                      f"({edge:+.0f} points, need +{FORM_MIN_EDGE_PTS:.0f})")
         elif f.net_pct < FORM_MIN_NET_PCT:
             f.ok, f.reason = False, f"net {f.net_pct:+.1f}% (need +{FORM_MIN_NET_PCT:.0f}%)"
         else:
-            f.ok, f.reason = True, f"{f.hit * 100:.0f}% won vs {f.avg_price * 100:.0f}% needed, net {f.net_pct:+.1f}%"
+            f.ok, f.reason = True, f"{f.hit * 100:.0f}% came out ahead vs {f.avg_price * 100:.0f}% needed, net {f.net_pct:+.1f}%"
     return f
 
 
@@ -251,9 +268,9 @@ def apply_override(wallet: str, action: str, why: str, now: Optional[float] = No
     d = _read()
     ovs = d.setdefault("overrides", {})
     if action == "unbench":
-        # Monotone: the routine lifts only its own bench, never the bar's.
+        # Monotone: the routine lifts only its own ACTIVE bench, never the bar's.
         prev = ovs.get(w)
-        if not prev or prev.get("action") != "bench":
+        if not prev or prev.get("action") != "bench" or now - float(prev.get("ts") or 0) >= FORM_OVERRIDE_S:
             return False
         ovs.pop(w, None)
         _write(d)
@@ -263,16 +280,28 @@ def apply_override(wallet: str, action: str, why: str, now: Optional[float] = No
     return True
 
 
+def wallets_without_record() -> list[str]:
+    """Set-Z wallets the table has never measured (admitted by another path,
+    or read failed on their first scan): the guard catches them up each pass."""
+    from src.copy_trading import zset
+    have = set((_read().get("wallets") or {}).keys())
+    return sorted(w for w in zset.wallet_set() if w not in have)
+
+
 def scan(*, get=None, send: Optional[Callable[[str], None]] = None,
          now: Optional[float] = None, wallets: Optional[list] = None) -> dict:
-    """Recompute every set-Z wallet's form, persist, receipt and push changes,
-    and say once per episode when nobody is in form. Returns the table."""
+    """Recompute the form of the given (default: every set-Z) wallet, persist,
+    receipt and push changes, and say once per episode when nobody is in
+    form. A failed read keeps the last verdict and never flips one; a wallet
+    never measured stays absent (benched, and caught up next pass). The
+    pause notice is stamped only when it was delivered. Returns the table."""
     from src.copy_trading import ops_watch, zset
     now = time.time() if now is None else now
     prev = _read()
-    prev_w = prev.get("wallets") or {}
+    prev_w = dict(prev.get("wallets") or {})
     ws = list(wallets) if wallets is not None else sorted(zset.wallet_set())
-    table: dict = {}
+    table: dict = dict(prev_w) if wallets is not None else {}
+    measured = 0
     for w in ws:
         try:
             acts, pos = fetch_rows(w, get=get)
@@ -281,56 +310,72 @@ def scan(*, get=None, send: Optional[Callable[[str], None]] = None,
             logger.warn(f"[form] could not read {w[:10]}: {exc}")
             old = prev_w.get(w)
             if old:
-                table[w] = old  # keep yesterday's verdict rather than flip on a failed read
+                table[w] = old
             continue
+        measured += 1
         table[w] = {**asdict(f), "hit": round(f.hit, 4), "net_pct": round(f.net_pct, 2)}
         was = prev_w.get(w, {}).get("ok")
         if was is not None and bool(was) != f.ok:
+            delivered = _send(send, ("🟢 <b>Back in form</b>" if f.ok else "🪑 <b>Benched</b>") + f": <code>{w}</code>\n{f.line()}")
             ops_watch.receipt("form", before=f"{w[:10]} {'in form' if was else 'benched'}",
                               after="in form" if f.ok else "benched", detail=f.line(), now=now,
-                              push="WALLET", extra={"wallet": w})
-            if send is not None:
-                try:
-                    send(("🟢 <b>Back in form</b>" if f.ok else "🪑 <b>Benched</b>") + f": <code>{w}</code>\n{f.line()}")
-                except Exception as exc:
-                    logger.warn(f"[form] push failed: {exc}")
+                              push="WALLET" if delivered else None, extra={"wallet": w})
         elif was is None:
             ops_watch.receipt("form", before=f"{w[:10]} unknown", after="in form" if f.ok else "benched",
                               detail=f.line(), now=now, extra={"wallet": w})
-    d = {"ts": now, "wallets": table, "overrides": prev.get("overrides") or {}}
+    # drop wallets that left set Z (a full scan only); purge expired routine overrides
+    zs = zset.wallet_set() if wallets is None else (set(ws) | set(prev_w))
+    table = {w: r for w, r in table.items() if w in zs}
+    ovs = {w: o for w, o in (prev.get("overrides") or {}).items()
+           if now - float(o.get("ts") or 0) < FORM_OVERRIDE_S and w in zs}
+    d = {"ts": now, "wallets": table, "overrides": ovs,
+         "paused": bool(prev.get("paused")), "paused_told": bool(prev.get("paused_told"))}
     _write(d)
     active = in_form_wallets()
     paused_before = bool(prev.get("paused"))
-    paused = not active
+    paused = (not active) and bool(table)  # nothing measured is not "nobody in form"
     d["paused"] = paused
-    _write(d)
-    if paused and not paused_before:
-        ops_watch.receipt("form_pause", before=f"{len(ws)} followed", after="0 in form: live copying paused", now=now, push="DEAL")
-        if send is not None:
-            try:
-                send("⏸ <b>Live copying paused</b>: none of the followed wallets is in form on its own money "
-                     f"(last {FORM_DAYS:.0f} days, bets of ${float(getattr(CONFIG, 'copy_paper_min_usd', 300) or 300):.0f}+). "
-                     "It resumes on its own when one qualifies. Nothing else changed: the arm, the gate and the paper books keep running.\n"
-                     + "\n".join(Form(**{k: v for k, v in r.items() if k in Form.__dataclass_fields__}).line() for r in table.values()))
-            except Exception as exc:
-                logger.warn(f"[form] pause push failed: {exc}")
+    if paused and (not paused_before or not prev.get("paused_told")):
+        text = ("⏸ <b>Live copying paused</b>: none of the followed wallets is in form on its own money "
+                f"(last {FORM_DAYS:.0f} days, bets of ${float(getattr(CONFIG, 'copy_paper_min_usd', 300) or 300):.0f}+). "
+                "It resumes on its own when one qualifies. Nothing else changed: the arm, the gate and the paper books keep running.\n"
+                + "\n".join(_form_of(r).line() for r in table.values()))
+        delivered = _send(send, text)
+        ops_watch.receipt("form_pause", before=f"{len(table)} measured", after="0 in form: live copying paused", now=now,
+                          push="DEAL" if delivered else None, detail="" if delivered else "NOT delivered")
+        d["paused_told"] = bool(delivered)
     elif not paused and paused_before:
-        ops_watch.receipt("form_resume", before="paused", after=f"{len(active)} in form: copying resumes", now=now, push="DEAL",
-                          detail=", ".join(a[:10] for a in active))
-        if send is not None:
-            try:
-                send("▶️ <b>Live copying resumes</b>: in form now: " + ", ".join(a[:10] for a in active))
-            except Exception as exc:
-                logger.warn(f"[form] resume push failed: {exc}")
-    logger.info(f"[form] scanned {len(ws)} wallet(s): {len(active)} in form" + (" (paused)" if paused else ""))
+        delivered = _send(send, "▶️ <b>Live copying resumes</b>: in form now: " + ", ".join(a[:10] for a in active))
+        ops_watch.receipt("form_resume", before="paused", after=f"{len(active)} in form: copying resumes", now=now,
+                          push="DEAL" if delivered else None, detail=", ".join(a[:10] for a in active))
+        d["paused_told"] = False
+    _write(d)
+    logger.info(f"[form] scanned {len(ws)} wallet(s), {measured} measured: {len(active)} in form" + (" (paused)" if paused else ""))
     return d
+
+
+def _form_of(r: dict) -> "Form":
+    return Form(**{k: v for k, v in r.items() if k in Form.__dataclass_fields__})
+
+
+def _send(send, text: str) -> bool:
+    """A sender that returns False has not delivered (the Telegram wrapper
+    returns False on 4xx/5xx without raising)."""
+    if send is None:
+        return True
+    try:
+        r = send(text)
+        return r is None or bool(r)
+    except Exception as exc:
+        logger.warn(f"[form] push failed: {exc}")
+        return False
 
 
 def lines() -> list[str]:
     d = _read()
     out = []
     for w, r in sorted((d.get("wallets") or {}).items()):
-        f = Form(**{k: v for k, v in r.items() if k in Form.__dataclass_fields__})
+        f = _form_of(r)
         b, why = is_benched(w)
         out.append(("in form  " if not b else "benched  ") + f.line())
     if not out:

@@ -356,8 +356,7 @@ def _live_guard_loop():
             except Exception as _exc:
                 logger.warn(f"[guard] self re-arm check failed: {_exc}")
             ops_watch.deliver_escalation(send=_send_bot)
-            _form_missing = not os.path.exists(os.path.join(CONFIG.data_dir, "wallet-form.json"))
-            if _now - last_admit_scan >= admit_scan_every or _form_missing:
+            if _now - last_admit_scan >= admit_scan_every:
                 last_admit_scan = _now
                 ops_watch.note_admit_scan(_now)
                 try:
@@ -365,11 +364,24 @@ def _live_guard_loop():
                     ops_admit.scan(send=_send_wallet_kb)
                 except Exception as _exc:
                     logger.warn(f"[guard] auto-admit scan failed: {_exc}")
-                try:
-                    from src.copy_trading import wallet_form
-                    wallet_form.scan(send=lambda t: telegram_bot.send_message(t, kind=telegram_bot.KIND_WALLET))
-                except Exception as _exc:
-                    logger.warn(f"[guard] form scan failed: {_exc}")
+            # The form scan on its own persisted clock (FORM_EVERY_S), plus a
+            # catch-up each pass for wallets the table has never measured
+            # (admitted by another path, or a failed first read): they are
+            # benched until measured, so measure them soon.
+            try:
+                from src.copy_trading import wallet_form
+                _fs = float(ops_watch._read_json(ops_watch._p(ops_watch.STATE_FILE)).get("form_scan_ts") or 0.0)
+                _send_w = lambda t: telegram_bot.send_message(t, kind=telegram_bot.KIND_WALLET)
+                if _now - _fs >= wallet_form.FORM_EVERY_S:
+                    _st = ops_watch._read_json(ops_watch._p(ops_watch.STATE_FILE)); _st["form_scan_ts"] = _now
+                    ops_watch._write_json(ops_watch._p(ops_watch.STATE_FILE), _st)
+                    wallet_form.scan(send=_send_w)
+                else:
+                    _missing = wallet_form.wallets_without_record()
+                    if _missing:
+                        wallet_form.scan(send=_send_w, wallets=_missing[:3])
+            except Exception as _exc:
+                logger.warn(f"[guard] form scan failed: {_exc}")
         except Exception as exc:
             logger.warn(f"[guard] watcher pass failed: {exc}")
         _shutdown_event.wait(interval)

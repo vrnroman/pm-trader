@@ -46,7 +46,7 @@ def test_compute_counts_markets_once_and_knows_won_lost_open(form_env):
     f = wf.compute("0xW", acts, pos, now=NOW)
     assert (f.n, f.won) == (34, 24), "small bets and open markets excluded; unclaimed winners count as won"
     assert abs(f.avg_price - 0.5) < 1e-9 and f.cost == 34 * 400.0 and f.back == 24 * 800.0
-    assert f.ok is True and "71% won vs 50% needed" in f.reason
+    assert f.ok is True and "71% came out ahead vs 50% needed" in f.reason
 
 
 def test_bars_bench_thin_flat_and_negative_records(form_env):
@@ -144,3 +144,75 @@ def test_a_wallet_action_verdict_is_applied_not_sent(form_env, monkeypatch):
     (form_env / ops_watch.ESCALATION_FILE).write_text(json.dumps({"id": "v8", "kind": "wallet_action", "wallet": "0xNOT", "action": "bench", "message": "x"}))
     row = ops_watch.deliver_escalation(send=lambda t: sent.append(t) or True, now=7.0)
     assert row and row["after"] == "refused"
+
+
+# ---- code review of the form rail ----
+
+def test_a_throttled_read_is_a_failure_not_an_empty_wallet(form_env, monkeypatch):
+    """Finding 1: the discovery fetcher returns a truncated list and records
+    the wallet in _activity_fetch_failures instead of raising."""
+    from src.copy_trading import discovery_data as dd
+    monkeypatch.setattr(dd, "fetch_activity", lambda w, c, ttl, cap=0: (dd._activity_fetch_failures.append(w) or []))
+    with pytest.raises(RuntimeError):
+        wf.fetch_rows("0xT")
+    assert "0xT" not in dd._activity_fetch_failures, "the marker is consumed, not left for the sweep report"
+    wf._write({"ts": 1.0, "wallets": {"0xt": {"ok": True, "reason": "fine", "wallet": "0xt", "n": 40, "won": 25, "cost": 1.0, "back": 2.0, "avg_price": 0.5, "ts": 1.0}}})
+    d = wf.scan(send=None, now=NOW, wallets=["0xt"])
+    assert d["wallets"]["0xt"]["ok"] is True and d["paused"] is False, "a throttled read keeps the last verdict"
+
+
+def test_sells_are_inflow_and_pre_window_buys_are_left_out(form_env):
+    acts = [{"type": "TRADE", "side": "BUY", "conditionId": "x", "usdcSize": 400.0, "size": 800.0, "timestamp": NOW - 3600},
+            {"type": "TRADE", "side": "SELL", "conditionId": "x", "usdcSize": 680.0, "size": 800.0, "timestamp": NOW - 1800},
+            {"type": "TRADE", "side": "BUY", "conditionId": "old", "usdcSize": 2000.0, "size": 4000.0, "timestamp": NOW - 20 * 86400},
+            {"type": "TRADE", "side": "BUY", "conditionId": "old", "usdcSize": 350.0, "size": 700.0, "timestamp": NOW - 3 * 86400},
+            {"type": "REDEEM", "conditionId": "old", "usdcSize": 4000.0, "size": 4000.0, "timestamp": NOW - 100},
+            {"type": "REDEEM", "conditionId": "zero", "usdcSize": 0, "size": 1200.0, "timestamp": NOW - 100},
+            {"type": "TRADE", "side": "BUY", "conditionId": "zero", "usdcSize": 500.0, "size": 1000.0, "timestamp": NOW - 7200}]
+    f = wf.compute("0xS", acts, [], now=NOW)
+    assert f.n == 2, "the exit market and the zero-payout market; the pre-window market is left out"
+    assert f.won == 1 and f.cost == 900.0 and f.back == 680.0, "the sale is inflow; a zero-usdc redeem is not a win"
+
+
+def test_the_slice_is_per_row_like_the_sink(form_env):
+    acts = [{"type": "TRADE", "side": "BUY", "conditionId": "d", "usdcSize": 50.0, "size": 100.0, "timestamp": NOW - 3600 * k} for k in range(1, 9)]
+    acts += [{"type": "TRADE", "side": "BUY", "conditionId": "b", "usdcSize": 350.0, "size": 700.0, "timestamp": NOW - 3600},
+             {"type": "TRADE", "side": "BUY", "conditionId": "b", "usdcSize": 50.0, "size": 100.0, "timestamp": NOW - 1800},
+             {"type": "REDEEM", "conditionId": "b", "usdcSize": 700.0, "timestamp": NOW - 100}]
+    f = wf.compute("0xR", acts, [], now=NOW)
+    assert f.n == 1 and f.cost == 350.0, "eight $50 clips on one market are not our slice; only the $350 row counts"
+
+
+def test_the_pause_notice_is_stamped_only_when_delivered(form_env):
+    data = {"0xa": _rows(n_won=20, n_lost=10)}
+    def get(url):
+        acts, pos = data["0xa"]
+        return pos if "/positions" in url else (acts if "offset=0" in url else [])
+    wf.scan(get=get, send=None, now=NOW, wallets=["0xa"])
+    data["0xa"] = _rows(n_won=10, n_lost=20)
+    calls = {"n": 0}
+    def flaky(text):
+        calls["n"] += 1
+        return calls["n"] > 2  # the bench push and the first pause push fail, the retry lands
+    d = wf.scan(get=get, send=flaky, now=NOW + 100, wallets=["0xa"])
+    assert d["paused"] is True and d["paused_told"] is False
+    d = wf.scan(get=get, send=flaky, now=NOW + 200, wallets=["0xa"])
+    assert d["paused_told"] is True, "told on the retry"
+    d = wf.scan(get=get, send=flaky, now=NOW + 300, wallets=["0xa"])
+    assert calls["n"] == 3, "once told, silent"
+    rows = [json.loads(l) for l in (form_env / "ops-ledger.jsonl").read_text().splitlines()]
+    pauses = [r for r in rows if r["kind"] == "form_pause"]
+    assert [r["push"] for r in pauses] == [None, "DEAL"]
+
+
+def test_a_wallet_action_message_reports_the_state_after_and_waits_for_delivery(form_env, monkeypatch):
+    from src.copy_trading import ops_watch, zset
+    monkeypatch.setattr(zset, "wallet_set", lambda: {"0xa"})
+    wf._write({"ts": 1.0, "wallets": {"0xa": {"ok": False, "reason": "cold by the bar"}}})
+    (form_env / ops_watch.ESCALATION_FILE).write_text(json.dumps({"id": "u1", "kind": "wallet_action", "wallet": "0xa", "action": "unbench", "message": "recovered"}))
+    sent: list = []
+    row = ops_watch.deliver_escalation(send=lambda t: sent.append(t) or True, now=5.0)
+    assert row["after"] == "refused" and "unchanged" in sent[0], "the bar's bench cannot be lifted by the routine"
+    (form_env / ops_watch.ESCALATION_FILE).write_text(json.dumps({"id": "b1", "kind": "wallet_action", "wallet": "0xa", "action": "bench", "message": "losing days"}))
+    assert ops_watch.deliver_escalation(send=lambda t: False, now=6.0) is None
+    assert (form_env / ops_watch.ESCALATION_FILE).exists(), "not delivered: kept for the next pass"
