@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T18:38:38.183066+00:00",
+ "generated": "2026-09-14T20:29:24.002004+00:00",
  "money": {
   "cash": 83.809781,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789410833.7351754,
+  "ts": 1789417511.8860703,
   "day": "2026-09-14"
  },
  "arm": {
@@ -378,20 +378,8 @@
   "paused": false,
   "paused_told": false
  },
- "ledger_tail": [
-  {
-   "ts": 1789326749.006611,
-   "day": "2026-09-13",
-   "kind": "push:milestone",
-   "before": null,
-   "after": "🏁 <b>Bankroll crossed $100</b> upward: $111.56.",
-   "detail": "",
-   "push": "DEAL"
-  }
- ],
+ "ledger_tail": [],
  "important": [
-  "2026-09-13 19:12:29 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll crossed $100</b> upward: $111.56.'",
-  "2026-09-13 19:17:31 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-13 23:19:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-13 23:22:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-13 23:31:14 ERROR Network error fetching 0x1985...51ab: ",
@@ -435,6 +423,7 @@
   "2026-09-14 17:09:42 ERROR Network error fetching 0x1985...51ab: Server disconnected without sending a response.",
   "2026-09-14 17:37:13 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
   "2026-09-14 18:16:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-14 18:53:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-14 10:56:51 TRADE [LIVE] BUY $6.40 on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300, order 0x7e6632c574...",
   "2026-09-14 10:56:52 TRADE [verify] FILLED: BUY 14.88 shares on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300"
  ]
