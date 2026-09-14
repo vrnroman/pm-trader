@@ -489,3 +489,136 @@ def test_bot_menu_matches_dispatcher():
     assert not missing_from_dispatch, (
         f"commands in menu but not handled: {sorted(missing_from_dispatch)}"
     )
+
+
+# ------------------------------------------------------------------
+# /real — the real-money panel
+# ------------------------------------------------------------------
+
+def _real_history() -> list[dict]:
+    """A history with one filled real order, one cancelled one, and noise
+    from both paper tracks (a preview copy and a disarmed skip)."""
+    base = {
+        "timestamp": "2026-09-10T12:00:00+00:00",
+        "trader_address": "0x" + "1" * 40,
+        "market": "Will X happen?",
+        "side": "BUY",
+        "price": 0.5,
+        "copy_size": 8.0,
+        "token_id": "t1",
+    }
+    return [
+        {**base, "status": "PREVIEW", "copy_size": 25.0},
+        {**base, "status": "DISARMED", "copy_size": 8.0},
+        {**base, "status": "PLACED", "order_id": "ord-1"},
+        {**base, "status": "FILLED", "order_id": "ord-1",
+         "fill_price": 0.5, "fill_shares": 16.0},
+        {**base, "status": "PLACED", "order_id": "ord-2", "token_id": "t2"},
+        {**base, "status": "UNFILLED", "order_id": "ord-2", "token_id": "t2",
+         "fill_shares": 0.0},
+    ]
+
+
+@pytest.fixture
+def real_money_env(monkeypatch):
+    """Point /real at fixture ledgers and a readable chain; no network."""
+    from src import telegram_bot
+    from src.copy_trading import pnl as s1pnl
+    from src.copy_trading import real_money
+
+    monkeypatch.setattr(telegram_bot, "_load_s1_trades", _real_history)
+    monkeypatch.setattr(s1pnl, "load_realized", lambda: [
+        {"source": "redeemer", "token_id": "t1", "pnl": 2.0, "cost_basis": 8.0,
+         "returned": 10.0, "won": True, "timestamp": "2026-09-12T00:00:00+00:00",
+         "trader_address": "0x" + "1" * 40},
+        {"source": "preview", "token_id": "t9", "pnl": 99.0, "cost_basis": 50.0,
+         "timestamp": "2026-09-12T00:00:00+00:00"},
+    ])
+    monkeypatch.setattr(real_money, "fetch_chain_positions",
+                        lambda *_a, **_kw: [{"size": 12.0, "avgPrice": 0.5,
+                                             "currentValue": 7.0}])
+    monkeypatch.setattr(telegram_bot, "_real_header_lines", lambda: ["  (header)"])
+
+
+def test_real_reports_only_real_money(captured_messages, real_money_env):
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real")
+    out = "\n".join(captured_messages)
+
+    assert "Real money" in out
+    # Two real orders; the preview copy and the disarmed skip are not orders.
+    assert "(2 real, none of them paper)" in out
+    assert "$8.00" in out            # the one buy that actually filled
+    # The paper +$99 realized row must never reach the real headline: only
+    # the redeemer's +$2.00 is real money.
+    assert "Realized: <b>$+2.00</b>" in out
+    assert "99" not in out.replace("-09-", "-")
+    # The refused copy is reported as money NOT spent.
+    assert "disarmed" in out
+    assert "paper copy" in out
+
+
+def test_real_shows_the_chain_view_of_open_money(captured_messages, real_money_env):
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real")
+    out = "\n".join(captured_messages)
+    assert "Open positions: <b>1</b> at <b>$6.00</b> cost" in out
+
+
+def test_real_says_so_when_the_chain_cannot_be_read(captured_messages,
+                                                    real_money_env, monkeypatch):
+    from src import telegram_bot
+    from src.copy_trading import real_money
+
+    monkeypatch.setattr(real_money, "fetch_chain_positions", lambda *_a, **_kw: None)
+    telegram_bot._handle_command("/real")
+    out = "\n".join(captured_messages)
+    assert "the chain could not be read" in out
+
+
+def test_real_with_no_real_orders_says_everything_is_paper(captured_messages,
+                                                           monkeypatch):
+    from src import telegram_bot
+    from src.copy_trading import pnl as s1pnl
+    from src.copy_trading import real_money
+
+    monkeypatch.setattr(telegram_bot, "_load_s1_trades",
+                        lambda: [{"status": "PREVIEW", "copy_size": 25.0,
+                                  "timestamp": "2026-09-10T12:00:00+00:00"}])
+    monkeypatch.setattr(s1pnl, "load_realized", lambda: [])
+    monkeypatch.setattr(real_money, "fetch_chain_positions", lambda *_a, **_kw: [])
+    monkeypatch.setattr(telegram_bot, "_real_header_lines", lambda: ["  (header)"])
+
+    telegram_bot._handle_command("/real")
+    out = "\n".join(captured_messages)
+    assert "No real order has ever been placed" in out
+
+
+def test_real_window_argument_scopes_the_report(captured_messages, real_money_env,
+                                                monkeypatch):
+    """A 1-day window drops the 2026-09-10 orders (the fixture is older)."""
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real 1")
+    out = "\n".join(captured_messages)
+    assert "last 1 day(s)" in out
+    assert "No real order has ever been placed" in out
+
+
+def test_real_rejects_a_nonsense_window(captured_messages, real_money_env):
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real banana")
+    assert "Usage" in captured_messages[-1]
+
+
+def test_real_orders_lists_the_individual_tickets(captured_messages, real_money_env):
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real orders")
+    out = "\n".join(captured_messages)
+    assert "Real orders" in out
+    assert "ord-1" in out and "ord-2" in out
+    assert "FILLED" in out and "UNFILLED" in out

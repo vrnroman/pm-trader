@@ -71,6 +71,9 @@ Each copy tier (`STRATEGY_1A_*`, `STRATEGY_1B_*`, `STRATEGY_1C_*`) has independe
 |---------|-------------|
 | `/status` | Bot status (balance, positions, daily limits) |
 | `/pnl` | Realized + unrealized P&L |
+| `/real` | Real money only: what was spent, what came back, what is still out |
+| `/real 7` | The same, windowed to the last 7 days |
+| `/real orders [n]` | The individual real orders, newest first |
 | `/history` | Last 10 copy trades |
 | `/check` | Verify trading setup (read-only, no orders) |
 | `/setkey` | Rotate/clear the in-memory private key |
