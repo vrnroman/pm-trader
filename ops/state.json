@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T01:03:36.885699+00:00",
+ "generated": "2026-09-14T04:44:57.486921+00:00",
  "money": {
   "cash": 75.510531,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789347815.7995,
+  "ts": 1789360825.083598,
   "day": "2026-09-14"
  },
  "arm": {
@@ -378,125 +378,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0x05878ac3 unknown",
-   "after": "benched",
-   "detail": "0x05878ac3: 154 settled, 1% won vs 42% needed, net -97.8% on $149,983, worst day -27,220",
-   "push": null,
-   "wallet": "0x05878ac343c1387d592042d788424412733ac40b"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0x09b045ba unknown",
-   "after": "benched",
-   "detail": "0x09b045ba: 61 settled, 0% won vs 56% needed, net -100.0% on $23,894, worst day -3,747",
-   "push": null,
-   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0x1985327e unknown",
-   "after": "benched",
-   "detail": "0x1985327e: 62 settled, 0% won vs 55% needed, net -100.0% on $24,607, worst day -5,047",
-   "push": null,
-   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0x3f3aa700 unknown",
-   "after": "benched",
-   "detail": "0x3f3aa700: 195 settled, 57% won vs 54% needed, net +3.4% on $522,597, worst day -40,433",
-   "push": null,
-   "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0x4980930d unknown",
-   "after": "benched",
-   "detail": "0x4980930d: 15 settled, 7% won vs 28% needed, net -71.6% on $37,961, worst day -13,384",
-   "push": null,
-   "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0x5213eb85 unknown",
-   "after": "benched",
-   "detail": "0x5213eb85: 106 settled, 43% won vs 39% needed, net -20.6% on $60,176, worst day -3,491",
-   "push": null,
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0x57b25849 unknown",
-   "after": "benched",
-   "detail": "0x57b25849: 105 settled, 50% won vs 44% needed, net -11.7% on $109,916, worst day -4,929",
-   "push": null,
-   "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0x73653992 unknown",
-   "after": "benched",
-   "detail": "0x73653992: 35 settled, 60% won vs 67% needed, net -29.3% on $69,650, worst day -13,822",
-   "push": null,
-   "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0x9f15613e unknown",
-   "after": "benched",
-   "detail": "0x9f15613e: 233 settled, 57% won vs 53% needed, net +0.7% on $629,786, worst day -19,215",
-   "push": null,
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0xd970693a unknown",
-   "after": "benched",
-   "detail": "0xd970693a: 66 settled, 2% won vs 54% needed, net -99.3% on $28,666, worst day -7,007",
-   "push": null,
-   "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form",
-   "before": "0xfd3e6449 unknown",
-   "after": "benched",
-   "detail": "0xfd3e6449: 21 settled, 90% won vs 73% needed, net -12.8% on $14,087, worst day -2,562",
-   "push": null,
-   "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a"
-  },
-  {
-   "ts": 1789274087.7013485,
-   "day": "2026-09-13",
-   "kind": "form_pause",
-   "before": "11 followed",
-   "after": "0 in form: live copying paused",
-   "detail": "",
-   "push": "DEAL"
-  },
-  {
    "ts": 1789275237.4494553,
    "day": "2026-09-13",
    "kind": "form",
@@ -585,29 +466,6 @@
   }
  ],
  "important": [
-  "2026-09-13 01:13:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 01:44:26 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-13 02:37:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 02:58:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 03:14:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 03:19:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 03:29:01 ERROR HTTP 500 fetching activity for 0x57b2...9da2",
-  "2026-09-13 04:18:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 04:34:18 INFO  Received signal 15, shutting down...",
-  "2026-09-13 04:34:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-13 04:34:42 INFO  Bot started. Monitoring trades...",
-  "2026-09-13 04:34:50 INFO  [ops] form: '0x05878ac3 unknown' -> 'benched' | 0x05878ac3: 154 settled, 1% won vs 42% needed, net -97.8% on $149,983, worst day -27,220",
-  "2026-09-13 04:34:51 INFO  [ops] form: '0x09b045ba unknown' -> 'benched' | 0x09b045ba: 61 settled, 0% won vs 56% needed, net -100.0% on $23,894, worst day -3,747",
-  "2026-09-13 04:34:52 INFO  [ops] form: '0x1985327e unknown' -> 'benched' | 0x1985327e: 62 settled, 0% won vs 55% needed, net -100.0% on $24,607, worst day -5,047",
-  "2026-09-13 04:34:54 INFO  [ops] form: '0x3f3aa700 unknown' -> 'benched' | 0x3f3aa700: 195 settled, 57% won vs 54% needed, net +3.4% on $522,597, worst day -40,433",
-  "2026-09-13 04:34:56 INFO  [ops] form: '0x4980930d unknown' -> 'benched' | 0x4980930d: 15 settled, 7% won vs 28% needed, net -71.6% on $37,961, worst day -13,384",
-  "2026-09-13 04:34:58 INFO  [ops] form: '0x5213eb85 unknown' -> 'benched' | 0x5213eb85: 106 settled, 43% won vs 39% needed, net -20.6% on $60,176, worst day -3,491",
-  "2026-09-13 04:35:00 INFO  [ops] form: '0x57b25849 unknown' -> 'benched' | 0x57b25849: 105 settled, 50% won vs 44% needed, net -11.7% on $109,916, worst day -4,929",
-  "2026-09-13 04:35:01 INFO  [ops] form: '0x73653992 unknown' -> 'benched' | 0x73653992: 35 settled, 60% won vs 67% needed, net -29.3% on $69,650, worst day -13,822",
-  "2026-09-13 04:35:03 INFO  [ops] form: '0x9f15613e unknown' -> 'benched' | 0x9f15613e: 233 settled, 57% won vs 53% needed, net +0.7% on $629,786, worst day -19,215",
-  "2026-09-13 04:35:06 INFO  [ops] form: '0xd970693a unknown' -> 'benched' | 0xd970693a: 66 settled, 2% won vs 54% needed, net -99.3% on $28,666, worst day -7,007",
-  "2026-09-13 04:35:11 INFO  [ops] form: '0xfd3e6449 unknown' -> 'benched' | 0xfd3e6449: 21 settled, 90% won vs 73% needed, net -12.8% on $14,087, worst day -2,562",
-  "2026-09-13 04:35:11 INFO  [ops] form_pause: '11 followed' -> '0 in form: live copying paused'",
   "2026-09-13 04:52:53 INFO  Received signal 15, shutting down...",
   "2026-09-13 04:53:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
   "2026-09-13 04:53:38 INFO  Bot started. Monitoring trades...",
@@ -702,7 +560,6 @@
   "2026-09-14 00:08:24 ERROR Network error fetching 0x9f15...bdb3: ",
   "2026-09-14 00:08:24 ERROR Network error fetching 0x09b0...a3b6: ",
   "2026-09-14 00:08:24 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-13 04:34:42 INFO  [recovery] No pending orders to recover",
   "2026-09-13 04:53:38 INFO  [recovery] No pending orders to recover",
   "2026-09-13 05:03:06 INFO  [recovery] No pending orders to recover",
   "2026-09-13 12:14:01 INFO  [recovery] No pending orders to recover",
