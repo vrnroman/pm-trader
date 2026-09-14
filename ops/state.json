@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-14T12:53:35.849122+00:00",
+ "generated": "2026-09-14T16:30:41.270589+00:00",
  "money": {
-  "cash": 68.929781,
-  "open_cost": 36.05,
-  "equity": 104.98,
+  "cash": 83.809781,
+  "open_cost": 29.65,
+  "equity": 113.46,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
@@ -17,10 +17,10 @@
   "resolved_unclaimed": 63,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1789390214.6063788,
+  "ts": 1789403188.3409166,
   "day": "2026-09-14"
  },
  "arm": {
@@ -52,18 +52,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
+   "open_total": 0,
    "daily_date": "2026-09-14",
    "daily_volume": 6.4,
-   "placements": [
-    {
-     "token_id": "25856268592814824187030243017025995731326669754584962104456102551220441205951",
-     "cost": 6.4,
-     "ts": 1789383412.255937,
-     "trader": "0x05878ac343c1387d592042d788424412733ac40b",
-     "title": "LoL: Dplus KIA Challengers vs KT Rolster Challengers - Game "
-    }
-   ]
+   "placements": []
   },
   "1c": {
    "open_total": 0,
@@ -148,7 +140,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 104.98,
+  "last_equity": 113.46,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -388,15 +380,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1789311962.0330517,
-   "day": "2026-09-13",
-   "kind": "push:floor_near",
-   "before": null,
-   "after": "⚠️ <b>Bankroll $62.30 is within 20% of the $56 floor.</b> A top-up of about $10 would restore the margin; under the floo",
-   "detail": "",
-   "push": "DEAL"
-  },
-  {
    "ts": 1789317835.1951635,
    "day": "2026-09-13",
    "kind": "auto_admit",
@@ -427,46 +410,6 @@
   }
  ],
  "important": [
-  "2026-09-13 12:59:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 13:02:04 ERROR [inventory] API sync failed: ",
-  "2026-09-13 13:12:22 INFO  Received signal 15, shutting down...",
-  "2026-09-13 13:13:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-13 13:13:10 INFO  Bot started. Monitoring trades...",
-  "2026-09-13 13:21:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 13:21:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 13:21:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 13:21:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 13:21:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 13:22:05 INFO  Received signal 15, shutting down...",
-  "2026-09-13 13:22:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-13 13:22:43 INFO  Bot started. Monitoring trades...",
-  "2026-09-13 13:48:20 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-13 14:00:14 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-13 14:05:47 ERROR [inventory] API sync failed: ",
-  "2026-09-13 14:18:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 14:18:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 14:18:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 14:22:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 14:22:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 14:22:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 14:22:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 14:29:50 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-13 14:46:50 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-13 14:51:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-13 15:00:29 INFO  Received signal 15, shutting down...",
-  "2026-09-13 15:00:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-13 15:00:52 INFO  Bot started. Monitoring trades...",
-  "2026-09-13 15:06:04 INFO  [ops] push:floor_near: None -> '⚠️ <b>Bankroll $62.30 is within 20% of the $56 floor.</b> A top-up of about $10 would restore the margin; under the floo'",
-  "2026-09-13 15:10:00 WARNING [live] ARMED for real orders by telegram: no reason given",
-  "2026-09-13 15:16:27 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-13 15:35:45 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
-  "2026-09-13 15:35:45 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
-  "2026-09-13 15:35:45 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
-  "2026-09-13 15:35:48 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-13 15:41:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-13 16:12:30 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
-  "2026-09-13 16:12:32 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
-  "2026-09-13 16:27:56 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-13 16:43:56 WARNING [zset] ADMITTED 0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c to set Z (+3% over 43 copies with its best 3 deleted). Real money may now follow it once armed.",
   "2026-09-13 16:43:56 INFO  [ops] auto_admit: '0xeef6ad0e not in Z' -> 'in set Z, on probation' | 75 settled paper copies, paper ROI +10.5%, trimmed +2.8%, ideal +18.1%",
   "2026-09-13 16:44:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -507,11 +450,9 @@
   "2026-09-14 10:14:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-14 10:56:51 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
   "2026-09-14 10:56:52 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
-  "2026-09-13 13:13:10 INFO  [recovery] No pending orders to recover",
-  "2026-09-13 13:22:43 INFO  [recovery] No pending orders to recover",
-  "2026-09-13 15:00:52 INFO  [recovery] No pending orders to recover",
-  "2026-09-13 16:12:31 TRADE [LIVE] BUY $6.40 on 'LoL: LOUD vs paiN Gaming - Game 1 Winner' @ 0.3400, order 0x8150fdd57d...",
-  "2026-09-13 16:12:46 TRADE [verify] FILLED: BUY 18.82 shares on 'LoL: LOUD vs paiN Gaming - Game 1 Winner' @ 0.3400",
+  "2026-09-14 13:49:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-14 14:10:41 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
+  "2026-09-14 16:02:56 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-13 16:52:31 TRADE [LIVE] BUY $6.40 on 'SV 07 Elversberg vs. FC Bayern München: ' @ 0.8600, order 0xdc9394d059...",
   "2026-09-13 16:52:34 TRADE [verify] FILLED: BUY 7.44 shares on 'SV 07 Elversberg vs. FC Bayern München: ' @ 0.8600",
   "2026-09-14 10:56:51 TRADE [LIVE] BUY $6.40 on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300, order 0x7e6632c574...",
