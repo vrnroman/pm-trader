@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14T06:17:02.450564+00:00",
+ "generated": "2026-09-14T10:27:32.985739+00:00",
  "money": {
   "cash": 75.510531,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789366608.9884994,
+  "ts": 1789381404.3866663,
   "day": "2026-09-14"
  },
  "arm": {
@@ -155,9 +155,9 @@
    "111426907502041127672975490206099880504280577275905396462330907920963353499778"
   ],
   "form_scan_ts": 1789362936.629614,
-  "daily_line_attempt_day": "2026-09-13",
+  "daily_line_attempt_day": "2026-09-14",
   "daily_line_sent": true,
-  "daily_line_day": "2026-09-13",
+  "daily_line_day": "2026-09-14",
   "guard_failing_pushed": false,
   "floor_near_day": "2026-09-13"
  },
@@ -417,9 +417,6 @@
   }
  ],
  "important": [
-  "2026-09-13 07:28:07 ERROR HTTP 408 fetching activity for 0x5213...6a35",
-  "2026-09-13 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
-  "2026-09-13 09:13:43 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-13 11:34:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-13 12:13:38 INFO  Received signal 15, shutting down...",
   "2026-09-13 12:14:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
@@ -492,6 +489,16 @@
   "2026-09-14 00:08:24 ERROR Network error fetching 0x9f15...bdb3: ",
   "2026-09-14 00:08:24 ERROR Network error fetching 0x09b0...a3b6: ",
   "2026-09-14 00:08:24 ERROR Network error fetching 0x0587...c40b: ",
+  "2026-09-14 08:01:21 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
+  "2026-09-14 08:03:38 ERROR [inventory] API sync failed: ",
+  "2026-09-14 08:24:55 ERROR [inventory] API sync failed: ",
+  "2026-09-14 08:50:01 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
+  "2026-09-14 08:50:02 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.",
+  "2026-09-14 08:50:02 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
+  "2026-09-14 08:50:03 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
+  "2026-09-14 08:50:03 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
+  "2026-09-14 08:53:07 ERROR [inventory] API sync failed: ",
+  "2026-09-14 10:14:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-13 12:14:01 INFO  [recovery] No pending orders to recover",
   "2026-09-13 13:13:10 INFO  [recovery] No pending orders to recover",
   "2026-09-13 13:22:43 INFO  [recovery] No pending orders to recover",

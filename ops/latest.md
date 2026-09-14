@@ -1,7 +1,7 @@
-# ops digest 2026-09-14T06:16:55.531603+00:00 (last 24h)
+# ops digest 2026-09-14T10:27:27.025937+00:00 (last 24h)
 
 ## money state
-{"cash": 75.510531, "open_cost": 29.65, "equity": 105.16, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-14", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789366608.9884994, "day": "2026-09-14"}
+{"cash": 75.510531, "open_cost": 29.65, "equity": 105.16, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-14", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789381404.3866663, "day": "2026-09-14"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-14", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x05878ac343c1387d592042d788424412733ac40b": 1, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": 1}, "yesterday": "2026-09-13", "closed_reason": ""}
@@ -28,10 +28,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1789317837.8643563, "day": "2026-09-13", "kind": "form", "before": "0xeef6ad0e unknown", "after": "benched", "detail": "0xeef6ad0e: no settled bets on our slice in 14 days", "push": null, "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c"}
 {"ts": 1789326749.006611, "day": "2026-09-13", "kind": "push:milestone", "before": null, "after": "🏁 <b>Bankroll crossed $100</b> upward: $111.56.", "detail": "", "push": "DEAL"}
 
-## important lines (83)
-2026-09-13 07:28:07 ERROR HTTP 408 fetching activity for 0x5213...6a35
-2026-09-13 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent
-2026-09-13 09:13:43 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
+## important lines (90)
 2026-09-13 11:34:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-13 12:13:38 INFO  Received signal 15, shutting down...
 2026-09-13 12:14:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
@@ -104,6 +101,16 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-14 00:08:24 ERROR Network error fetching 0x9f15...bdb3: 
 2026-09-14 00:08:24 ERROR Network error fetching 0x09b0...a3b6: 
 2026-09-14 00:08:24 ERROR Network error fetching 0x0587...c40b: 
+2026-09-14 08:01:21 INFO  [AB-RACE] rehearsal line sent, real-money line sent
+2026-09-14 08:03:38 ERROR [inventory] API sync failed: 
+2026-09-14 08:24:55 ERROR [inventory] API sync failed: 
+2026-09-14 08:50:01 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.
+2026-09-14 08:50:02 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.
+2026-09-14 08:50:02 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.
+2026-09-14 08:50:03 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.
+2026-09-14 08:50:03 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.
+2026-09-14 08:53:07 ERROR [inventory] API sync failed: 
+2026-09-14 10:14:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-13 12:14:01 INFO  [recovery] No pending orders to recover
 2026-09-13 13:13:10 INFO  [recovery] No pending orders to recover
 2026-09-13 13:22:43 INFO  [recovery] No pending orders to recover
