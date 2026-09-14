@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-14T00:41:18Z-165d",
-  "ts": 1789346478,
+  "id": "2026-09-14T06:41:13Z-09ef",
+  "ts": 1789368073,
   "kind": "nothing",
-  "message": "Armed, spend $12.80 of $32.00 cap, 4 of 11 followed wallets in form and copying live (net +20.7% to +33.7%, no losing streaks), two live trades filled and equity crossed $100 to $105.16, well above the $56 floor, no self-disarm or traceback.",
+  "message": "Armed, spend $0.00 of $32.00 cap on a fresh day, equity $105.16 well above the $56 floor, 4 of 12 followed wallets in form and copying live (net +20.7% to +32.8%, no losing streaks), no self-disarm or traceback.",
   "evidence": [
-    "## money state {\"cash\": 75.510531, \"open_cost\": 29.65, \"equity\": 105.16, \"floor\": 56.0, \"spend\": {\"spent_usd\": 12.8, \"cap_usd\": 32.0}, \"armed\": true}",
-    "in form  0x05878ac3: 161 settled, 55% won vs 47% needed, net +33.7% on $146,966, worst day -2,592",
+    "## money state {\"cash\": 75.510531, \"open_cost\": 29.65, \"equity\": 105.16, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 32.0}, \"armed\": true}",
+    "in form  0x05878ac3: 162 settled, 55% won vs 47% needed, net +32.8% on $147,966, worst day -2,592",
     "in form  0xd970693a: 60 settled, 75% won vs 56% needed, net +20.7% on $24,889, worst day +52",
-    "2026-09-13 19:12:29 INFO  [ops] push:milestone: None -> Bankroll crossed $100 upward: $111.56.",
-    "2026-09-13 16:52:34 TRADE [verify] FILLED: BUY 7.44 shares on SV 07 Elversberg vs. FC Bayern M\u00fcnchen @ 0.8600"
+    "in form  0x1985327e: 56 settled, 82% won vs 56% needed, net +24.2% on $22,045, worst day -159",
+    "2026-09-13 16:52:34 TRADE [verify] FILLED: BUY 7.44 shares on SV 07 Elversberg vs. FC Bayern München @ 0.8600"
   ],
   "commit": null
 }
