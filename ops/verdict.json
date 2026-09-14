@@ -1,8 +1,8 @@
 {
-  "id": "2026-09-14T06:41:13Z-09ef",
-  "ts": 1789368073,
+  "id": "2026-09-14T12:41:15Z-9c7c",
+  "ts": 1789389675,
   "kind": "nothing",
-  "message": "Armed, spend $0.00 of $32.00 cap on a fresh day, equity $105.16 well above the $56 floor, 4 of 12 followed wallets in form and copying live (net +20.7% to +32.8%, no losing streaks), no self-disarm or traceback.",
+  "message": "Armed, spend $0.00 of $32.00 cap on a fresh day, equity $105.16 well above the $56 floor, 4 of 12 followed wallets in form and copying live with net +20.7% to +32.8% and no losing streaks, no self-disarm or traceback.",
   "evidence": [
     "## money state {\"cash\": 75.510531, \"open_cost\": 29.65, \"equity\": 105.16, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 32.0}, \"armed\": true}",
     "in form  0x05878ac3: 162 settled, 55% won vs 47% needed, net +32.8% on $147,966, worst day -2,592",
