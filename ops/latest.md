@@ -1,7 +1,7 @@
-# ops digest 2026-09-14T04:44:52.239327+00:00 (last 24h)
+# ops digest 2026-09-14T06:16:55.531603+00:00 (last 24h)
 
 ## money state
-{"cash": 75.510531, "open_cost": 29.65, "equity": 105.16, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-14", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789360825.083598, "day": "2026-09-14"}
+{"cash": 75.510531, "open_cost": 29.65, "equity": 105.16, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-14", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789366608.9884994, "day": "2026-09-14"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-14", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x05878ac343c1387d592042d788424412733ac40b": 1, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": 1}, "yesterday": "2026-09-13", "closed_reason": ""}
@@ -9,50 +9,26 @@
 ## tier exposure: {"1a": [0, 0], "1b": [0, 0], "1c": [0, 0]}
 ## probation: {"0x05878ac343c1387d592042d788424412733ac40b": {"since": 1789234925.3749237, "settled": 0}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"since": 1789234925.3749237, "settled": 0}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"since": 1789235966.2959275, "settled": 0}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"since": 1789235966.2959275, "settled": 0}, "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {"since": 1789236552.0468774, "settled": 0}, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {"since": 1789236552.0468774, "settled": 0}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"since": 1789237149.0874667, "settled": 0}, "0xd970693a3384dc762b191707a4927ac3814bbbba": {"since": 1789237149.0874667, "settled": 0}, "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {"since": 1789317835.1951635, "settled": 0}}
 ## form (each wallet on its own money, last 14 days, our slice)
-in form  0x05878ac3: 161 settled, 55% won vs 47% needed, net +33.7% on $146,966, worst day -2,592
+in form  0x05878ac3: 162 settled, 55% won vs 47% needed, net +32.8% on $147,966, worst day -2,592
 in form  0x09b045ba: 51 settled, 76% won vs 61% needed, net +21.5% on $19,500, worst day -200
-in form  0x1985327e: 55 settled, 82% won vs 56% needed, net +23.9% on $21,645, worst day -159
+in form  0x1985327e: 56 settled, 82% won vs 56% needed, net +24.2% on $22,045, worst day -159
 benched  0x3f3aa700: 160 settled, 51% won vs 54% needed, net -1.2% on $414,324, worst day -39,107
 benched  0x4980930d: 10 settled, 40% won vs 36% needed, net +63.9% on $11,693, worst day -1,364
 benched  0x5213eb85: 94 settled, 46% won vs 38% needed, net -9.3% on $51,904, worst day -2,023
-benched  0x57b25849: 72 settled, 47% won vs 46% needed, net -5.6% on $75,254, worst day -3,820
+benched  0x57b25849: 67 settled, 48% won vs 46% needed, net -5.4% on $70,154, worst day -3,854
 benched  0x73653992: 20 settled, 85% won vs 76% needed, net +57.2% on $36,210, worst day +108
 benched  0x9f15613e: 203 settled, 51% won vs 50% needed, net +8.4% on $554,669, worst day -19,498
 in form  0xd970693a: 60 settled, 75% won vs 56% needed, net +20.7% on $24,889, worst day +52
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
 benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, worst day -1,129
 
-## ledger (9 rows)
-{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form", "before": "0x05878ac3 benched", "after": "in form", "detail": "0x05878ac3: 113 settled, 54% won vs 47% needed, net +23.0% on $102,442, worst day -2,592", "push": "WALLET", "wallet": "0x05878ac343c1387d592042d788424412733ac40b"}
-{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form", "before": "0x09b045ba benched", "after": "in form", "detail": "0x09b045ba: 54 settled, 78% won vs 61% needed, net +23.9% on $20,676, worst day -200", "push": "WALLET", "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6"}
-{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form", "before": "0x1985327e benched", "after": "in form", "detail": "0x1985327e: 53 settled, 83% won vs 56% needed, net +24.9% on $20,907, worst day -247", "push": "WALLET", "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab"}
-{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form", "before": "0xd970693a benched", "after": "in form", "detail": "0xd970693a: 59 settled, 76% won vs 57% needed, net +22.0% on $24,564, worst day +52", "push": "WALLET", "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba"}
-{"ts": 1789275237.4494553, "day": "2026-09-13", "kind": "form_resume", "before": "paused", "after": "4 in form: copying resumes", "detail": "0x05878ac3, 0x09b045ba, 0x1985327e, 0xd970693a", "push": "DEAL"}
+## ledger (4 rows)
 {"ts": 1789311962.0330517, "day": "2026-09-13", "kind": "push:floor_near", "before": null, "after": "⚠️ <b>Bankroll $62.30 is within 20% of the $56 floor.</b> A top-up of about $10 would restore the margin; under the floo", "detail": "", "push": "DEAL"}
 {"ts": 1789317835.1951635, "day": "2026-09-13", "kind": "auto_admit", "before": "0xeef6ad0e not in Z", "after": "in set Z, on probation", "detail": "75 settled paper copies, paper ROI +10.5%, trimmed +2.8%, ideal +18.1%", "push": "WALLET", "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c"}
 {"ts": 1789317837.8643563, "day": "2026-09-13", "kind": "form", "before": "0xeef6ad0e unknown", "after": "benched", "detail": "0xeef6ad0e: no settled bets on our slice in 14 days", "push": null, "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c"}
 {"ts": 1789326749.006611, "day": "2026-09-13", "kind": "push:milestone", "before": null, "after": "🏁 <b>Bankroll crossed $100</b> upward: $111.56.", "detail": "", "push": "DEAL"}
 
-## important lines (104)
-2026-09-13 04:52:53 INFO  Received signal 15, shutting down...
-2026-09-13 04:53:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
-2026-09-13 04:53:38 INFO  Bot started. Monitoring trades...
-2026-09-13 04:53:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
-2026-09-13 04:54:02 INFO  [ops] form: '0x05878ac3 benched' -> 'in form' | 0x05878ac3: 113 settled, 54% won vs 47% needed, net +23.0% on $102,442, worst day -2,592
-2026-09-13 04:54:08 INFO  [ops] form: '0x09b045ba benched' -> 'in form' | 0x09b045ba: 54 settled, 78% won vs 61% needed, net +23.9% on $20,676, worst day -200
-2026-09-13 04:54:11 INFO  [ops] form: '0x1985327e benched' -> 'in form' | 0x1985327e: 53 settled, 83% won vs 56% needed, net +24.9% on $20,907, worst day -247
-2026-09-13 04:54:31 INFO  [ops] form: '0xd970693a benched' -> 'in form' | 0xd970693a: 59 settled, 76% won vs 57% needed, net +22.0% on $24,564, worst day +52
-2026-09-13 04:54:34 INFO  [ops] form_resume: 'paused' -> '4 in form: copying resumes' | 0x05878ac3, 0x09b045ba, 0x1985327e, 0xd970693a
-2026-09-13 05:02:21 INFO  Received signal 15, shutting down...
-2026-09-13 05:03:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
-2026-09-13 05:03:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
-2026-09-13 05:03:06 INFO  Bot started. Monitoring trades...
-2026-09-13 05:19:26 ERROR Network error fetching 0x9f15...bdb3: 
-2026-09-13 05:19:26 ERROR Network error fetching 0xfd3e...5a7a: 
-2026-09-13 05:19:26 ERROR Network error fetching 0x3f3a...e8fd: 
-2026-09-13 05:19:26 ERROR Network error fetching 0x0587...c40b: 
-2026-09-13 05:19:29 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.
-2026-09-13 05:51:42 ERROR [inventory] API sync failed: 
+## important lines (83)
 2026-09-13 07:28:07 ERROR HTTP 408 fetching activity for 0x5213...6a35
 2026-09-13 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent
 2026-09-13 09:13:43 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
@@ -128,8 +104,6 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-14 00:08:24 ERROR Network error fetching 0x9f15...bdb3: 
 2026-09-14 00:08:24 ERROR Network error fetching 0x09b0...a3b6: 
 2026-09-14 00:08:24 ERROR Network error fetching 0x0587...c40b: 
-2026-09-13 04:53:38 INFO  [recovery] No pending orders to recover
-2026-09-13 05:03:06 INFO  [recovery] No pending orders to recover
 2026-09-13 12:14:01 INFO  [recovery] No pending orders to recover
 2026-09-13 13:13:10 INFO  [recovery] No pending orders to recover
 2026-09-13 13:22:43 INFO  [recovery] No pending orders to recover
