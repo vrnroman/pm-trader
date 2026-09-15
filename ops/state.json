@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-15T07:30:00.252144+00:00",
+ "generated": "2026-09-15T07:43:42.849462+00:00",
  "money": {
   "cash": 83.809781,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789457367.281486,
+  "ts": 1789457970.3378868,
   "day": "2026-09-15"
  },
  "arm": {
@@ -143,7 +143,7 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
-  "last_escalation_id": "proof-0001",
+  "last_escalation_id": "2026-09-15T06:43:45Z-6eb7",
   "admit_scan_ts": 1789448574.8818543,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 2,
@@ -375,7 +375,17 @@
   "paused": false,
   "paused_told": false
  },
- "ledger_tail": [],
+ "ledger_tail": [
+  {
+   "ts": 1789457668.947386,
+   "day": "2026-09-15",
+   "kind": "escalation_delivered",
+   "before": "routine escalation",
+   "after": "sent",
+   "detail": "Ops digest is stale. Last refresh 2026-09-15 01:48 UTC, now 06:43 UTC, a gap of about 4 hours 55 minutes, past the 3 hou",
+   "push": "BOT"
+  }
+ ],
  "important": [
   "2026-09-14 08:01:21 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
   "2026-09-14 08:03:38 ERROR [inventory] API sync failed: ",
@@ -422,6 +432,7 @@
   "2026-09-15 01:48:51 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
   "2026-09-15 04:19:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-15 04:25:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 07:34:29 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest is stale. Last refresh 2026-09-15 01:48 UTC, now 06:43 UTC, a gap of about 4 hours 55 minutes, past the 3 hou",
   "2026-09-14 10:56:51 TRADE [LIVE] BUY $6.40 on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300, order 0x7e6632c574...",
   "2026-09-14 10:56:52 TRADE [verify] FILLED: BUY 14.88 shares on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300"
  ]
