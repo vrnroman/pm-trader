@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-15T17:35:17.609366+00:00",
+ "generated": "2026-09-15T18:11:39.450641+00:00",
  "money": {
-  "cash": 70.789991,
-  "open_cost": 36.05,
-  "equity": 106.84,
+  "cash": 77.149211,
+  "open_cost": 29.65,
+  "equity": 106.8,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
@@ -17,10 +17,10 @@
   "resolved_unclaimed": 64,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 0.0,
    "1c": 0
   },
-  "ts": 1789493515.2270086,
+  "ts": 1789495625.827942,
   "day": "2026-09-15"
  },
  "arm": {
@@ -52,14 +52,14 @@
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
+   "open_total": 0.0,
    "daily_date": "2026-09-15",
-   "daily_volume": 12.8,
+   "daily_volume": 19.200000000000003,
    "placements": [
     {
      "token_id": "22433734531438598803376818209645628547907077032114975124836816639817075869884",
-     "cost": 6.4,
-     "ts": 1789491969.6019404,
+     "cost": 0.0,
+     "ts": 1789494897.3702161,
      "trader": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
      "title": "Will El Ahly SC win on 2026-09-15?"
     }
@@ -154,7 +154,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 106.84,
+  "last_equity": 106.8,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -465,7 +465,6 @@
   }
  ],
  "important": [
-  "2026-09-14 17:37:13 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
   "2026-09-14 18:16:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-14 18:53:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-15 01:21:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -510,10 +509,32 @@
   "2026-09-15 17:06:08 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00",
   "2026-09-15 17:06:09 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
   "2026-09-15 17:31:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:36:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:37:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:37:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:38:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:40:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:41:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:41:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:42:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:44:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:44:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:46:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:47:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:49:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:50:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:50:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:51:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:51:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 17:54:57 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
+  "2026-09-15 17:55:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 18:02:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-15 09:01:30 TRADE [LIVE] BUY $6.40 on 'LoL: T1 Academy vs KT Rolster Challenger' @ 0.5000, order 0x36a45637c7...",
   "2026-09-15 09:01:31 TRADE [verify] FILLED: BUY 12.80 shares on 'LoL: T1 Academy vs KT Rolster Challenger' @ 0.5000",
   "2026-09-15 13:26:24 INFO  [recovery] No pending orders to recover",
   "2026-09-15 17:06:09 TRADE [LIVE] BUY $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100, order 0x57aa7b4fe4...",
-  "2026-09-15 17:06:10 TRADE [verify] FILLED: BUY 7.90 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100"
+  "2026-09-15 17:06:10 TRADE [verify] FILLED: BUY 7.90 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100",
+  "2026-09-15 17:54:57 TRADE [LIVE] SELL $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800, order 0x8a16f7e69c...",
+  "2026-09-15 17:54:57 TRADE [verify] FILLED: SELL 7.27 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800"
  ]
 }
