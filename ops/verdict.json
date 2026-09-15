@@ -1,13 +1,13 @@
 {
-  "id": "2026-09-15T00:41:32Z-a896",
-  "ts": 1789432892,
-  "kind": "nothing",
-  "message": "Armed, spend $6.40 of $32.00 cap, equity $113.46 well above the $56.00 floor, 4 of 12 followed wallets in form and copying live with net +19.1% to +29.7% and no losing streaks, no self-disarm or traceback.",
+  "id": "2026-09-15T06:43:45Z-6eb7",
+  "ts": 1789454625,
+  "kind": "escalation",
+  "message": "Ops digest is stale. Last refresh 2026-09-15 01:48 UTC, now 06:43 UTC, a gap of about 4 hours 55 minutes, past the 3 hour bar. No new Ops digest workflow run has landed since then; the 06:17 scheduled run is missing from Actions. Last known money state was fine: armed true, spend $0.00 of $32.00 cap, equity $113.46 against floor $56.00, no self-disarm, no Traceback. Cannot see anything newer than 01:48 UTC.",
   "evidence": [
-    "## money state {\"cash\": 83.809781, \"open_cost\": 29.65, \"equity\": 113.46, \"floor\": 56.0, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 32.0}, \"armed\": true}",
+    "# ops digest 2026-09-15T01:48:39.412807+00:00 (last 24h)",
+    "## money state {\"cash\": 83.809781, \"equity\": 113.46, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 32.0}, \"armed\": true}",
+    "Ops digest workflow (GitHub Actions): last completed run started 2026-09-15T01:47:40Z, no run since; scheduled cron fires 17 */6 * * * (next due 06:17 UTC, not seen)",
     "in form  0x05878ac3: 163 settled, 55% won vs 47% needed, net +29.7% on $144,279, worst day -2,592",
-    "in form  0x09b045ba: 53 settled, 75% won vs 61% needed, net +19.1% on $20,290, worst day -306",
-    "in form  0x1985327e: 60 settled, 83% won vs 57% needed, net +24.8% on $23,540, worst day -159",
     "in form  0xd970693a: 63 settled, 75% won vs 56% needed, net +19.7% on $26,012, worst day -18"
   ],
   "commit": null
