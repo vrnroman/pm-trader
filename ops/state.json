@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-15T01:28:05.139879+00:00",
+ "generated": "2026-09-15T01:48:51.689747+00:00",
  "money": {
   "cash": 83.809781,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789435375.378568,
+  "ts": 1789436660.4030879,
   "day": "2026-09-15"
  },
  "arm": {
@@ -414,6 +414,12 @@
   "2026-09-14 18:53:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-15 01:21:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-15 01:28:02 ERROR [inventory] API sync failed: ",
+  "2026-09-15 01:43:57 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
+  "2026-09-15 01:48:50 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.",
+  "2026-09-15 01:48:50 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
+  "2026-09-15 01:48:50 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
+  "2026-09-15 01:48:51 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
+  "2026-09-15 01:48:51 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
   "2026-09-14 10:56:51 TRADE [LIVE] BUY $6.40 on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300, order 0x7e6632c574...",
   "2026-09-14 10:56:52 TRADE [verify] FILLED: BUY 14.88 shares on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300"
  ]

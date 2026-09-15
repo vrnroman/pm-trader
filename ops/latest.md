@@ -1,7 +1,7 @@
-# ops digest 2026-09-15T01:27:49.898526+00:00 (last 24h)
+# ops digest 2026-09-15T01:48:39.412807+00:00 (last 24h)
 
 ## money state
-{"cash": 83.809781, "open_cost": 29.65, "equity": 113.46, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-15", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789435375.378568, "day": "2026-09-15"}
+{"cash": 83.809781, "open_cost": 29.65, "equity": 113.46, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-15", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789436660.4030879, "day": "2026-09-15"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-15", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x05878ac343c1387d592042d788424412733ac40b": 1}, "yesterday": "2026-09-14", "closed_reason": ""}
@@ -24,7 +24,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 
 ## ledger (0 rows)
 
-## important lines (38)
+## important lines (40)
 2026-09-14 08:01:21 INFO  [AB-RACE] rehearsal line sent, real-money line sent
 2026-09-14 08:03:38 ERROR [inventory] API sync failed: 
 2026-09-14 08:24:55 ERROR [inventory] API sync failed: 
@@ -61,5 +61,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-14 18:16:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected
 2026-09-14 18:53:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-15 01:21:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-15 01:28:02 ERROR [inventory] API sync failed: 
+2026-09-15 01:43:57 ERROR [inventory] API sync failed: Server disconnected without sending a response.
 2026-09-14 10:56:51 TRADE [LIVE] BUY $6.40 on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300, order 0x7e6632c574...
 2026-09-14 10:56:52 TRADE [verify] FILLED: BUY 14.88 shares on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300
