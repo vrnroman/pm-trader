@@ -301,9 +301,18 @@ def needs_rescan() -> bool:
     return bool(d.get("wallets")) and int(d.get("version") or 0) != FORM_VERSION
 
 
-def in_form_wallets() -> list[str]:
+def in_form_wallets(now: Optional[float] = None) -> list[str]:
+    """The wallets not benched at ``now`` (the wall clock when not given).
+
+    The clock is injectable because ``scan`` computes every verdict at its own
+    ``now`` and then asks this question: reading the wall clock here answered
+    it at a *different* instant. Harmless in production, where the two are the
+    same second, and wrong everywhere the clock is supplied — a scan replayed
+    over historical rows, and the tests, which pin a fixed ``NOW`` and started
+    failing the moment real time passed it by more than FORM_OVERRIDE_S.
+    """
     d = _read()
-    now = time.time()
+    now = time.time() if now is None else now
     out = []
     for w, rec in (d.get("wallets") or {}).items():
         b, _ = is_benched(w, now)
@@ -390,7 +399,7 @@ def scan(*, get=None, send: Optional[Callable[[str], None]] = None,
     d = {"ts": now, "version": ver, "wallets": table, "overrides": ovs,
          "paused": bool(prev.get("paused")), "paused_told": bool(prev.get("paused_told"))}
     _write(d)
-    active = in_form_wallets()
+    active = in_form_wallets(now)
     paused_before = bool(prev.get("paused"))
     paused = (not active) and bool(table)  # nothing measured is not "nobody in form"
     d["paused"] = paused
