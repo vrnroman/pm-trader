@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-14T18:41:49Z-db94",
-  "ts": 1789411309,
+  "id": "2026-09-15T00:41:32Z-a896",
+  "ts": 1789432892,
   "kind": "nothing",
-  "message": "Armed, spend $6.40 of $32.00 cap, equity $113.46 well above the $56 floor, 4 of 12 followed wallets in form and copying live with net +20.6% to +29.5% and no losing streaks, no self-disarm or traceback.",
+  "message": "Armed, spend $6.40 of $32.00 cap, equity $113.46 well above the $56.00 floor, 4 of 12 followed wallets in form and copying live with net +19.1% to +29.7% and no losing streaks, no self-disarm or traceback.",
   "evidence": [
     "## money state {\"cash\": 83.809781, \"open_cost\": 29.65, \"equity\": 113.46, \"floor\": 56.0, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 32.0}, \"armed\": true}",
-    "in form  0x05878ac3: 164 settled, 54% won vs 47% needed, net +29.5% on $147,381, worst day -2,592",
-    "in form  0x09b045ba: 51 settled, 76% won vs 61% needed, net +21.5% on $19,500, worst day -200",
-    "in form  0x1985327e: 56 settled, 82% won vs 56% needed, net +24.2% on $22,045, worst day -159",
-    "in form  0xd970693a: 61 settled, 75% won vs 56% needed, net +20.6% on $25,274, worst day +52"
+    "in form  0x05878ac3: 163 settled, 55% won vs 47% needed, net +29.7% on $144,279, worst day -2,592",
+    "in form  0x09b045ba: 53 settled, 75% won vs 61% needed, net +19.1% on $20,290, worst day -306",
+    "in form  0x1985327e: 60 settled, 83% won vs 57% needed, net +24.8% on $23,540, worst day -159",
+    "in form  0xd970693a: 63 settled, 75% won vs 56% needed, net +19.7% on $26,012, worst day -18"
   ],
   "commit": null
 }
