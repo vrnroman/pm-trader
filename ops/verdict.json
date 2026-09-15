@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-15T06:43:45Z-6eb7",
-  "ts": 1789454625,
+  "id": "2026-09-15T12:42:32Z-a884",
+  "ts": 1789476152,
   "kind": "escalation",
-  "message": "Ops digest is stale. Last refresh 2026-09-15 01:48 UTC, now 06:43 UTC, a gap of about 4 hours 55 minutes, past the 3 hour bar. No new Ops digest workflow run has landed since then; the 06:17 scheduled run is missing from Actions. Last known money state was fine: armed true, spend $0.00 of $32.00 cap, equity $113.46 against floor $56.00, no self-disarm, no Traceback. Cannot see anything newer than 01:48 UTC.",
+  "message": "Ops digest is stale again. Last refresh 2026-09-15 07:43 UTC, now 12:42 UTC, a gap of about 5 hours, past the 3 hour bar. This is the second time today: the last gap was flagged at 06:43 UTC and closed only when a digest landed at 07:43 UTC. No Ops digest run has completed since. GitHub Actions shows no queued or in progress run and the scheduled 12:17 UTC run did not fire. Last known money state was fine: armed true, spend $0.00 of $32.00 cap, equity $113.46 against floor $56.00, no self-disarm, no Traceback. Cannot see anything newer than 07:43 UTC.",
   "evidence": [
-    "# ops digest 2026-09-15T01:48:39.412807+00:00 (last 24h)",
+    "# ops digest 2026-09-15T07:43:34.682518+00:00 (last 24h)",
     "## money state {\"cash\": 83.809781, \"equity\": 113.46, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 32.0}, \"armed\": true}",
-    "Ops digest workflow (GitHub Actions): last completed run started 2026-09-15T01:47:40Z, no run since; scheduled cron fires 17 */6 * * * (next due 06:17 UTC, not seen)",
+    "Ops digest workflow (GitHub Actions): last completed run 34943094663 finished 2026-09-15T07:43:50Z, no run since; scheduled cron fires 17 */6 * * * (next due 12:17 UTC, not seen)",
     "in form  0x05878ac3: 163 settled, 55% won vs 47% needed, net +29.7% on $144,279, worst day -2,592",
-    "in form  0xd970693a: 63 settled, 75% won vs 56% needed, net +19.7% on $26,012, worst day -18"
+    "in form  0xd970693a: 64 settled, 75% won vs 56% needed, net +19.6% on $26,359, worst day +27"
   ],
   "commit": null
 }
