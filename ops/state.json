@@ -1,26 +1,26 @@
 {
- "generated": "2026-09-15T07:43:42.849462+00:00",
+ "generated": "2026-09-15T12:53:19.883941+00:00",
  "money": {
-  "cash": 83.809781,
+  "cash": 77.249781,
   "open_cost": 29.65,
-  "equity": 113.46,
+  "equity": 106.9,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-15",
-   "spent_usd": 0.0,
+   "spent_usd": 6.4,
    "cap_usd": 32.0,
-   "remaining_usd": 32.0,
+   "remaining_usd": 25.6,
    "closed_reason": ""
   },
   "armed": true,
-  "resolved_unclaimed": 63,
+  "resolved_unclaimed": 64,
   "tier": {
    "1a": 0,
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789457970.3378868,
+  "ts": 1789476775.4307306,
   "day": "2026-09-15"
  },
  "arm": {
@@ -33,8 +33,10 @@
  },
  "spend": {
   "date": "2026-09-15",
-  "spent_usd": 0.0,
-  "wallet_copies": {},
+  "spent_usd": 6.4,
+  "wallet_copies": {
+   "0x05878ac343c1387d592042d788424412733ac40b": 1
+  },
   "wallet_copies_yesterday": {
    "0x05878ac343c1387d592042d788424412733ac40b": 1
   },
@@ -44,19 +46,19 @@
  "tier": {
   "1a": {
    "open_total": 0,
-   "daily_date": "2026-09-14",
+   "daily_date": "2026-09-15",
    "daily_volume": 0.0,
    "placements": []
   },
   "1b": {
    "open_total": 0,
-   "daily_date": "2026-09-14",
+   "daily_date": "2026-09-15",
    "daily_volume": 6.4,
    "placements": []
   },
   "1c": {
    "open_total": 0,
-   "daily_date": "2026-09-14",
+   "daily_date": "2026-09-15",
    "daily_volume": 0.0,
    "placements": []
   }
@@ -137,33 +139,34 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 113.46,
+  "last_equity": 106.9,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T06:43:45Z-6eb7",
-  "admit_scan_ts": 1789448574.8818543,
+  "admit_scan_ts": 1789470272.543234,
   "day_loss_pushed": "2026-09-12",
-  "loss_streak": 2,
-  "day_pnl": -10.72,
-  "day_pnl_day": "2026-09-12",
+  "loss_streak": 3,
+  "day_pnl": -6.39,
+  "day_pnl_day": "2026-09-15",
   "settled_tokens": [
    "6691701803539626176077488709374004737591849995522510168757367609925258534749",
-   "111426907502041127672975490206099880504280577275905396462330907920963353499778"
+   "111426907502041127672975490206099880504280577275905396462330907920963353499778",
+   "45664770486754830410276385709296820028038533040592413432582939697519809216911"
   ],
-  "form_scan_ts": 1789449780.9729347,
-  "daily_line_attempt_day": "2026-09-14",
+  "form_scan_ts": 1789471518.8166702,
+  "daily_line_attempt_day": "2026-09-15",
   "daily_line_sent": true,
-  "daily_line_day": "2026-09-14",
+  "daily_line_day": "2026-09-15",
   "guard_failing_pushed": false,
   "floor_near_day": "2026-09-13"
  },
  "probation": {
   "0x05878ac343c1387d592042d788424412733ac40b": {
    "since": 1789234925.3749237,
-   "settled": 0
+   "settled": 1
   },
   "0x09b045baad1fbe115c70785635a261411774a3b6": {
    "since": 1789234925.3749237,
@@ -199,22 +202,22 @@
   }
  },
  "form": {
-  "ts": 1789449781.4009662,
+  "ts": 1789471522.886798,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
-    "n": 163,
+    "n": 162,
     "won": 89,
-    "cost": 144278.68,
+    "cost": 143431.78,
     "back": 187200.95,
-    "avg_price": 0.4743022294895477,
+    "avg_price": 0.4744507558037916,
     "worst_day": -2591.78,
     "ok": true,
-    "reason": "55% came out ahead vs 47% needed, net +29.7%",
-    "ts": 1789449781.4009662,
-    "hit": 0.546,
-    "net_pct": 29.75
+    "reason": "55% came out ahead vs 47% needed, net +30.5%",
+    "ts": 1789471522.886798,
+    "hit": 0.5494,
+    "net_pct": 30.52
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
@@ -226,7 +229,7 @@
     "worst_day": -305.58,
     "ok": true,
     "reason": "75% came out ahead vs 61% needed, net +19.1%",
-    "ts": 1789449781.4009662,
+    "ts": 1789471522.886798,
     "hit": 0.7547,
     "net_pct": 19.13
    },
@@ -240,7 +243,7 @@
     "worst_day": -159.38,
     "ok": true,
     "reason": "83% came out ahead vs 57% needed, net +24.8%",
-    "ts": 1789449781.4009662,
+    "ts": 1789471522.886798,
     "hit": 0.8333,
     "net_pct": 24.77
    },
@@ -268,7 +271,7 @@
     "worst_day": -1364.22,
     "ok": false,
     "reason": "only 10 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789449781.4009662,
+    "ts": 1789471522.886798,
     "hit": 0.4,
     "net_pct": 63.9
    },
@@ -288,17 +291,17 @@
    },
    "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {
     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
-    "n": 66,
+    "n": 64,
     "won": 31,
-    "cost": 66125.98,
+    "cost": 65174.47,
     "back": 60384.43,
-    "avg_price": 0.4594862709306972,
+    "avg_price": 0.4600317217413986,
     "worst_day": -3820.23,
     "ok": false,
-    "reason": "47% came out ahead vs 46% needed (+1 points, need +3)",
-    "ts": 1789449781.4009662,
-    "hit": 0.4697,
-    "net_pct": -8.68
+    "reason": "48% came out ahead vs 46% needed (+2 points, need +3)",
+    "ts": 1789471522.886798,
+    "hit": 0.4844,
+    "net_pct": -7.35
    },
    "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
@@ -310,7 +313,7 @@
     "worst_day": 107.82,
     "ok": false,
     "reason": "only 21 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789449781.4009662,
+    "ts": 1789471522.886798,
     "hit": 0.8571,
     "net_pct": 58.44
    },
@@ -338,7 +341,7 @@
     "worst_day": 26.63,
     "ok": true,
     "reason": "75% came out ahead vs 56% needed, net +19.6%",
-    "ts": 1789449781.4009662,
+    "ts": 1789471522.886798,
     "hit": 0.75,
     "net_pct": 19.63
    },
@@ -352,7 +355,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789449781.4009662,
+    "ts": 1789471522.886798,
     "hit": 0.0,
     "net_pct": 0.0
    },
@@ -384,21 +387,22 @@
    "after": "sent",
    "detail": "Ops digest is stale. Last refresh 2026-09-15 01:48 UTC, now 06:43 UTC, a gap of about 4 hours 55 minutes, past the 3 hou",
    "push": "BOT"
+  },
+  {
+   "ts": 1789472543.7269788,
+   "day": "2026-09-15",
+   "kind": "settled",
+   "before": "open $6.40",
+   "after": "paid $0.01",
+   "detail": "lost -6.39 on 'LoL: T1 Academy vs KT Rolster Challenger' (0x05878ac3, tier 1b)",
+   "push": null,
+   "token_id": "45664770486754830410276385709296820028038533040592413432582939697519809216911",
+   "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
+   "pnl": -6.39,
+   "won": false
   }
  ],
  "important": [
-  "2026-09-14 08:01:21 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
-  "2026-09-14 08:03:38 ERROR [inventory] API sync failed: ",
-  "2026-09-14 08:24:55 ERROR [inventory] API sync failed: ",
-  "2026-09-14 08:50:01 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
-  "2026-09-14 08:50:02 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.",
-  "2026-09-14 08:50:02 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
-  "2026-09-14 08:50:03 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
-  "2026-09-14 08:50:03 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
-  "2026-09-14 08:53:07 ERROR [inventory] API sync failed: ",
-  "2026-09-14 10:14:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-14 10:56:51 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
-  "2026-09-14 10:56:52 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
   "2026-09-14 13:49:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-14 14:10:41 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-14 16:02:56 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -433,7 +437,26 @@
   "2026-09-15 04:19:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-15 04:25:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-15 07:34:29 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest is stale. Last refresh 2026-09-15 01:48 UTC, now 06:43 UTC, a gap of about 4 hours 55 minutes, past the 3 hou",
-  "2026-09-14 10:56:51 TRADE [LIVE] BUY $6.40 on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300, order 0x7e6632c574...",
-  "2026-09-14 10:56:52 TRADE [verify] FILLED: BUY 14.88 shares on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300"
+  "2026-09-15 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
+  "2026-09-15 09:01:30 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
+  "2026-09-15 09:01:31 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
+  "2026-09-15 09:56:39 ERROR Network error fetching 0xfd3e...5a7a: ",
+  "2026-09-15 09:56:39 ERROR Network error fetching 0x0587...c40b: ",
+  "2026-09-15 09:56:39 ERROR Network error fetching 0x3f3a...e8fd: ",
+  "2026-09-15 09:56:41 ERROR Network error fetching 0x09b0...a3b6: ",
+  "2026-09-15 09:56:41 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-09-15 10:32:21 ERROR [inventory] API sync failed: ",
+  "2026-09-15 10:36:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-15 10:36:45 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
+  "2026-09-15 10:36:45 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
+  "2026-09-15 10:36:45 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
+  "2026-09-15 10:38:14 ERROR [inventory] API sync failed: ",
+  "2026-09-15 10:55:46 ERROR Network error fetching 0x0587...c40b: ",
+  "2026-09-15 10:55:46 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-09-15 10:55:47 ERROR Network error fetching 0x09b0...a3b6: ",
+  "2026-09-15 11:42:23 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
+  "2026-09-15 11:42:23 INFO  [ops] settled: 'open $6.40' -> 'paid $0.01' | lost -6.39 on 'LoL: T1 Academy vs KT Rolster Challenger' (0x05878ac3, tier 1b)",
+  "2026-09-15 09:01:30 TRADE [LIVE] BUY $6.40 on 'LoL: T1 Academy vs KT Rolster Challenger' @ 0.5000, order 0x36a45637c7...",
+  "2026-09-15 09:01:31 TRADE [verify] FILLED: BUY 12.80 shares on 'LoL: T1 Academy vs KT Rolster Challenger' @ 0.5000"
  ]
 }
