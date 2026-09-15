@@ -1,7 +1,7 @@
-# ops digest 2026-09-15T01:48:39.412807+00:00 (last 24h)
+# ops digest 2026-09-15T07:29:53.962693+00:00 (last 24h)
 
 ## money state
-{"cash": 83.809781, "open_cost": 29.65, "equity": 113.46, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-15", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789436660.4030879, "day": "2026-09-15"}
+{"cash": 83.809781, "open_cost": 29.65, "equity": 113.46, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-15", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 63, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789457367.281486, "day": "2026-09-15"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-15", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x05878ac343c1387d592042d788424412733ac40b": 1}, "yesterday": "2026-09-14", "closed_reason": ""}
@@ -15,16 +15,16 @@ in form  0x1985327e: 60 settled, 83% won vs 57% needed, net +24.8% on $23,540, w
 benched  0x3f3aa700: 160 settled, 51% won vs 54% needed, net -1.2% on $414,324, worst day -39,107
 benched  0x4980930d: 10 settled, 40% won vs 36% needed, net +63.9% on $11,693, worst day -1,364
 benched  0x5213eb85: 94 settled, 46% won vs 38% needed, net -9.3% on $51,904, worst day -2,023
-benched  0x57b25849: 66 settled, 47% won vs 46% needed, net -9.4% on $66,632, worst day -3,854
+benched  0x57b25849: 66 settled, 47% won vs 46% needed, net -8.7% on $66,126, worst day -3,820
 benched  0x73653992: 21 settled, 86% won vs 76% needed, net +58.4% on $37,084, worst day +108
 benched  0x9f15613e: 203 settled, 51% won vs 50% needed, net +8.4% on $554,669, worst day -19,498
-in form  0xd970693a: 63 settled, 75% won vs 56% needed, net +19.7% on $26,012, worst day -18
+in form  0xd970693a: 64 settled, 75% won vs 56% needed, net +19.6% on $26,359, worst day +27
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
 benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, worst day -1,129
 
 ## ledger (0 rows)
 
-## important lines (40)
+## important lines (47)
 2026-09-14 08:01:21 INFO  [AB-RACE] rehearsal line sent, real-money line sent
 2026-09-14 08:03:38 ERROR [inventory] API sync failed: 
 2026-09-14 08:24:55 ERROR [inventory] API sync failed: 
@@ -63,5 +63,12 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-15 01:21:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-15 01:28:02 ERROR [inventory] API sync failed: 
 2026-09-15 01:43:57 ERROR [inventory] API sync failed: Server disconnected without sending a response.
+2026-09-15 01:48:50 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.
+2026-09-15 01:48:50 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.
+2026-09-15 01:48:50 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.
+2026-09-15 01:48:51 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.
+2026-09-15 01:48:51 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.
+2026-09-15 04:19:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-15 04:25:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-14 10:56:51 TRADE [LIVE] BUY $6.40 on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300, order 0x7e6632c574...
 2026-09-14 10:56:52 TRADE [verify] FILLED: BUY 14.88 shares on 'LoL: Dplus KIA Challengers vs KT Rolster' @ 0.4300
