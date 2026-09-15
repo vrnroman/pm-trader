@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-15T12:53:19.883941+00:00",
+ "generated": "2026-09-15T13:33:02.755559+00:00",
  "money": {
   "cash": 77.249781,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789476775.4307306,
+  "ts": 1789479088.5154743,
   "day": "2026-09-15"
  },
  "arm": {
@@ -145,7 +145,7 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
-  "last_escalation_id": "2026-09-15T06:43:45Z-6eb7",
+  "last_escalation_id": "2026-09-15T12:42:32Z-a884",
   "admit_scan_ts": 1789470272.543234,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 3,
@@ -400,6 +400,15 @@
    "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
    "pnl": -6.39,
    "won": false
+  },
+  {
+   "ts": 1789477077.1364615,
+   "day": "2026-09-15",
+   "kind": "escalation_delivered",
+   "before": "routine escalation",
+   "after": "sent",
+   "detail": "Ops digest is stale again. Last refresh 2026-09-15 07:43 UTC, now 12:42 UTC, a gap of about 5 hours, past the 3 hour bar",
+   "push": "BOT"
   }
  ],
  "important": [
@@ -456,7 +465,12 @@
   "2026-09-15 10:55:47 ERROR Network error fetching 0x09b0...a3b6: ",
   "2026-09-15 11:42:23 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-15 11:42:23 INFO  [ops] settled: 'open $6.40' -> 'paid $0.01' | lost -6.39 on 'LoL: T1 Academy vs KT Rolster Challenger' (0x05878ac3, tier 1b)",
+  "2026-09-15 12:57:57 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest is stale again. Last refresh 2026-09-15 07:43 UTC, now 12:42 UTC, a gap of about 5 hours, past the 3 hour bar",
+  "2026-09-15 13:25:54 INFO  Received signal 15, shutting down...",
+  "2026-09-15 13:26:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-15 13:26:24 INFO  Bot started. Monitoring trades...",
   "2026-09-15 09:01:30 TRADE [LIVE] BUY $6.40 on 'LoL: T1 Academy vs KT Rolster Challenger' @ 0.5000, order 0x36a45637c7...",
-  "2026-09-15 09:01:31 TRADE [verify] FILLED: BUY 12.80 shares on 'LoL: T1 Academy vs KT Rolster Challenger' @ 0.5000"
+  "2026-09-15 09:01:31 TRADE [verify] FILLED: BUY 12.80 shares on 'LoL: T1 Academy vs KT Rolster Challenger' @ 0.5000",
+  "2026-09-15 13:26:24 INFO  [recovery] No pending orders to recover"
  ]
 }
