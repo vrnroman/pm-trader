@@ -205,18 +205,22 @@ def _purge_old_bot_logs(logs_dir: Path, retention_days: int,
     """
     today = today or datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=retention_days)
-    mtime_cutoff = time.time() - retention_days * 86400
     for path in logs_dir.glob("bot-*.log"):
         m = _BOT_LOG_RE.search(path.name)
         try:
             if m:
                 file_date = datetime.strptime(m.group(1), "%Y-%m-%d").date()
-                stale = file_date <= cutoff
             else:
                 # Odd names (bot-old.log, a truncated/legacy name) can't be dated
                 # from the filename — fall back to mtime so they still get reclaimed
                 # rather than accumulating forever (the pre-refactor behaviour).
-                stale = path.stat().st_mtime < mtime_cutoff
+                # Dated against the SAME ``today`` the named branch uses: reading
+                # the wall clock here gave one call two notions of now, so a
+                # caller that supplied ``today`` got the name rule at its date
+                # and the mtime rule at the real one.
+                file_date = datetime.fromtimestamp(
+                    path.stat().st_mtime, timezone.utc).date()
+            stale = file_date <= cutoff
         except (ValueError, OSError):
             continue
         if stale:

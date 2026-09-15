@@ -6,6 +6,12 @@
 - The local venv at `poly_poly_bot/.venv` must have all of `requirements.txt` installed before running tests. If `pytest` fails on import errors (e.g. `py_clob_client`, `web3`, `pandas`), run `.venv/bin/pip install -r requirements.txt` first instead of skipping the broken modules.
 - Command: `cd poly_poly_bot && .venv/bin/python -m pytest tests/ -q`
 - Reporting: state the actual count the run printed ("N passed"), not "all tests pass" without a number.
+- **No test may depend on the wall clock.** A test that pins an absolute
+  timestamp is fine; production code that reads `time.time()` where its caller
+  supplied a `now` is not — that pairing is what turned the suite red on
+  2026-09-14 with no commit behind it. Prove it before pushing:
+  `CLOCK_DRIFT_DAYS=90 .venv/bin/python -m pytest tests/ -q -p tests.clock_drift_plugin`
+  (needs `freezegun`). The `CI` workflow runs this on every PR and nightly.
 - Do NOT record a test count in this file or in ROADMAP.md. A hand-maintained
   derived number goes stale on the next commit and then misinforms; read it
   from the run instead.
