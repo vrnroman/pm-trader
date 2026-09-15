@@ -3,6 +3,7 @@
 Commands:
   /status           : Show bot status (balance, positions, daily limits)
   /pnl              : Show P&L: realized + unrealized
+  /real             : Real money only: spent, returned, still at work
   /history          : Show last 10 copy trades
   /check            : Verify trading setup (read-only, no orders)
   /setkey           : Rotate/clear the in-memory private key
@@ -45,6 +46,7 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "help", "description": "Show all commands"},
     {"command": "status", "description": "Balance, positions, daily limits"},
     {"command": "pnl", "description": "P&L by strategy: realized + unrealized + total"},
+    {"command": "real", "description": "Real money only: what was spent, what came back, what is still out"},
     {"command": "wallets", "description": "Top wallets overall + best/worst per strategy (deduped)"},
     {"command": "gate", "description": "Gate picture: shortlist admit/reject + promotion offers/holds/demotes"},
     {"command": "history", "description": "Last 10 copy trades"},
@@ -440,6 +442,8 @@ def _handle_command(text: str):
         _handle_status()
     elif text.startswith("/pnl"):
         _handle_pnl()
+    elif text.startswith("/real"):
+        _handle_real(text)
     elif text.startswith("/wallets"):
         _handle_wallets()
     elif text.startswith("/gate"):
@@ -547,9 +551,18 @@ def _handle_status():
         lines.append(f"Copy size: ${CONFIG.copy_size:.0f}")
         s1_trades = _load_s1_trades()
         if s1_trades:
-            total_cost = sum((t.get("cost") or 0) for t in s1_trades)
-            lines.append(f"Total deployed: ${total_cost:.2f}")
-            lines.append(f"Total trades: {len(s1_trades)}")
+            # "Total deployed" used to sum a ``cost`` key that TradeRecord has
+            # never written, so it printed $0.00 forever — and it counted
+            # paper copies as deployment anyway. Real money is the real-order
+            # fills and nothing else; the paper count rides alongside so the
+            # two are never read as one number.
+            from src.copy_trading import real_money as rm
+            real_orders = rm.collapse_orders(s1_trades)
+            real_stats = rm.summarize_orders(real_orders)
+            lines.append(f"Real money deployed: ${real_stats.filled_usd:,.2f} "
+                         f"in {real_stats.n_filled} filled order(s) — /real")
+            lines.append(f"Trade-history rows: {len(s1_trades)} "
+                         f"({real_stats.n_orders} real order(s))")
     else:
         lines.append("Status: ⚪ DISABLED")
 
@@ -1390,6 +1403,9 @@ def _handle_help():
         "<code>/history</code>: Last 10 copy trades\n"
         "<code>/check</code>: Verify trading setup (read-only)\n\n"
         "<b>Real money</b>\n"
+        "<code>/real</code>: real money only: what was spent, what came back, what is still out\n"
+        "<code>/real 7</code>: the same, windowed to the last 7 days\n"
+        "<code>/real orders [n]</code>: the individual real tickets\n"
         "<code>/zset</code>: set Z, the only wallets real money may follow\n"
         "<code>/zset candidates</code>: every wallet the gate passes today, one card each, admit by tap\n"
         "<code>/zset drop &lt;wallet&gt;</code>: evict a wallet from set Z\n"
@@ -2030,6 +2046,232 @@ def _handle_zset_candidates() -> None:
             send_message(text)
         else:
             send_message(text, reply_markup=zc.admit_keyboard(c.wallet))
+
+
+def _real_window_day(days: int | None) -> str:
+    """The inclusive UTC ``YYYY-MM-DD`` floor for a window of ``days``."""
+    if not days or days <= 0:
+        return ""
+    return (datetime.now(timezone.utc) - timedelta(days=days - 1)).strftime("%Y-%m-%d")
+
+
+def _build_real_report(days: int | None):
+    """The real-money report plus the live-state bits /real renders around it.
+
+    The chain read is best-effort and separate from the ledgers: a Data API
+    outage costs the open-positions block, not the whole command.
+    """
+    from src.copy_trading import pnl as s1pnl
+    from src.copy_trading import real_money as rm
+
+    since = _real_window_day(days)
+    history = _load_s1_trades()
+    try:
+        realized = s1pnl.load_realized()
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"realized ledger load failed: {e}")
+        realized = []
+    chain = rm.fetch_chain_positions(CONFIG.proxy_wallet)
+    return rm.build_report(history, realized, chain_rows=chain, since_day=since)
+
+
+def _real_header_lines() -> list[str]:
+    """Where real money stands right now: the interlock, the cash, the day."""
+    from src.copy_trading import live_budget, live_mode
+
+    lines: list[str] = []
+    st = live_mode.status()
+    if not st["preview"]:
+        when = ""
+        try:
+            ts = float(st.get("armed_ts") or 0)
+            if ts:
+                when = time.strftime(" since %Y-%m-%d %H:%M UTC", time.gmtime(ts))
+        except (TypeError, ValueError):
+            pass
+        lines.append(f"🔴 <b>LIVE and armed</b>{when} — real orders can be placed")
+    else:
+        why = "; ".join(live_mode.blocking_reasons()) or "not armed"
+        lines.append(f"🟢 <b>No real money can move right now</b> ({_esc(why)})")
+
+    balance = None
+    try:
+        from src.copy_trading.get_balance import get_usdc_balance
+        b = float(get_usdc_balance())
+        balance = b if b >= 0 else None
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"balance read failed: {e}")
+    lines.append(f"  Cash on chain: <b>${balance:,.2f}</b> USDC" if balance is not None
+                 else "  Cash on chain: ⚠ could not read the wallet")
+
+    stated = live_budget.stated_budget()
+    floor = live_budget.floor_usd()
+    if stated is not None:
+        lines.append(f"  Budget: ${stated:,.0f} stated · floor ${floor:,.0f} "
+                     f"(the guard disarms below it)")
+    else:
+        lines.append("  Budget: ❌ LIVE_BUDGET_USD is not set, so live copies are refused")
+
+    try:
+        from src.copy_trading.daily_spend_guard import status as spend_status
+        sp = spend_status()
+        lines.append(f"  Today ({sp['date']}): <b>${sp['spent_usd']:,.2f}</b> spent "
+                     f"of a ${sp['cap_usd']:,.2f} cap")
+        if sp.get("closed_reason"):
+            lines.append(f"  ⚠ spending is closed today: {_esc(sp['closed_reason'])}")
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"daily spend read failed: {e}")
+    return lines
+
+
+def _handle_real(text: str) -> None:
+    """/real [days|orders [n]]: the real money, and only the real money.
+
+    Paper and preview are excluded everywhere here by construction (see
+    ``real_money``): an order only reaches this panel if it went to the
+    exchange past the two-key interlock.
+    """
+    parts = text.split()
+    arg = parts[1].lower() if len(parts) > 1 else ""
+
+    if arg in ("orders", "order", "tickets"):
+        n = 10
+        if len(parts) > 2:
+            try:
+                n = max(1, min(50, int(parts[2])))
+            except ValueError:
+                pass
+        _handle_real_orders(n)
+        return
+
+    days: int | None = None
+    if arg:
+        try:
+            days = max(1, int(arg))
+        except ValueError:
+            send_message("Usage: <code>/real</code> (all time) · "
+                         "<code>/real 7</code> (last 7 days) · "
+                         "<code>/real orders [n]</code> (the individual tickets)")
+            return
+
+    rep = _build_real_report(days)
+    window = f"last {days} day(s)" if days else "all time"
+    lines = [f"💵 <b>Real money</b> — <i>{window}</i>", ""]
+    lines.extend(_real_header_lines())
+
+    if rep.chain is not None:
+        c = rep.chain
+        if c.n_positions:
+            lines.append(f"  Open positions: <b>{c.n_positions}</b> at "
+                         f"<b>${c.cost_usd:,.2f}</b> cost, worth ${c.value_usd:,.2f} "
+                         f"now (${c.unrealized:+,.2f})")
+            if c.n_redeemable:
+                lines.append(f"    ↳ {c.n_redeemable} resolved and uncollected, "
+                             f"worth ${c.redeemable_usd:,.2f}")
+        else:
+            lines.append("  Open positions: none on chain")
+    else:
+        lines.append("  Open positions: ⚠ the chain could not be read")
+
+    st = rep.stats
+    lines.append("")
+    if not rep.has_real_activity:
+        lines.append("<b>No real order has ever been placed</b> in this window. "
+                     "Everything in /pnl is paper.")
+        lines.append("")
+        lines.append("<i>/live to see the interlock · /pnl for the paper books</i>")
+        _send_chunked("\n".join(lines))
+        return
+
+    lines.append(f"<b>Orders</b> ({st.n_orders} real, none of them paper)")
+    lines.append(f"  Committed: <b>${st.posted_usd:,.2f}</b> across {st.n_buy} buy(s)")
+    lines.append(f"  Filled: <b>{st.n_filled}</b> — <b>${st.filled_usd:,.2f}</b> "
+                 f"actually left the wallet")
+    if st.n_unfilled:
+        lines.append(f"  Unfilled/cancelled: {st.n_unfilled} — ${st.returned_usd:,.2f} "
+                     f"never left")
+    if st.n_pending:
+        lines.append(f"  Still working at the exchange: {st.n_pending} "
+                     f"(${st.pending_usd:,.2f} committed)")
+    if st.n_sell:
+        lines.append(f"  Sells: {st.n_sell} — ${st.sell_proceeds_usd:,.2f} back")
+    if st.first_ts:
+        lines.append(f"  First: {_esc(st.first_ts[:16].replace('T', ' '))} · "
+                     f"last: {_esc(st.last_ts[:16].replace('T', ' '))}")
+
+    r = rep.realized
+    lines.append("")
+    lines.append("<b>Settled</b>")
+    if r.n_rows:
+        roi = f" (ROI {r.roi:+.0%})" if r.roi is not None else ""
+        lines.append(f"  Realized: <b>${r.pnl:+,.2f}</b> on ${r.cost_basis:,.2f} "
+                     f"settled{roi}")
+        lines.append(f"  Record: <b>{r.wins}W/{r.losses}L</b> · "
+                     f"${r.returned_usd:,.2f} came back")
+    else:
+        lines.append("  Nothing has settled yet.")
+    lines.append(f"  Still at work: <b>${rep.at_work_usd:,.2f}</b>")
+    if rep.n_unattributed_realized:
+        lines.append(f"  ⚠ {rep.n_unattributed_realized} settled row(s) could not be "
+                     f"tied to a real order and are NOT counted above (see /pnl)")
+
+    if rep.days:
+        lines.append("")
+        lines.append("<b>By day</b>  <i>(orders | filled | realized)</i>")
+        for d in rep.days[:7]:
+            lines.append(f"  <code>{d.date}</code>  {d.n_orders}  "
+                         f"${d.filled_usd:,.2f}  ${d.realized_pnl:+,.2f}")
+
+    if rep.wallets:
+        lines.append("")
+        lines.append("<b>By wallet</b>  <i>(orders | filled | realized)</i>")
+        for w in rep.wallets[:8]:
+            label = (_short_wallet(w.wallet) if w.wallet.startswith("0x")
+                     else _esc(w.wallet))
+            rec = f" {w.wins}W/{w.losses}L" if (w.wins or w.losses) else ""
+            lines.append(f"  {label}  {w.n_orders}  ${w.filled_usd:,.2f}  "
+                         f"${w.realized_pnl:+,.2f}{rec}")
+
+    ns = rep.not_spent
+    if ns.n_disarmed or ns.n_preview:
+        lines.append("")
+        lines.append("<b>Not spent</b>")
+        if ns.n_disarmed:
+            lines.append(f"  {ns.n_disarmed} followed-wallet buy(s) skipped while "
+                         f"disarmed — about ${ns.disarmed_usd:,.2f} not spent")
+        if ns.n_preview:
+            lines.append(f"  {ns.n_preview} paper copy(ies) in the same window "
+                         f"(${ns.preview_usd:,.2f} simulated, see /pnl)")
+
+    lines.append("")
+    lines.append("<i>/real 7 to window it · /real orders for the individual tickets "
+                 "· /live for the interlock · /pnl for the paper books</i>")
+    _send_chunked("\n".join(lines))
+
+
+def _handle_real_orders(n: int) -> None:
+    """/real orders [n]: the last ``n`` real tickets, newest first."""
+    rep = _build_real_report(None)
+    if not rep.orders:
+        send_message("💵 <b>Real orders</b>\nNone: no real order has ever been placed.")
+        return
+    recent = rep.orders[-n:]
+    lines = [f"💵 <b>Real orders</b> — last {len(recent)} of {len(rep.orders)}", ""]
+    for o in reversed(recent):
+        mark = {"FILLED": "✅", "UNFILLED": "↩️", "ABANDONED": "❓"}.get(o.status, "⏳")
+        who = (_short_wallet(o.wallet) if o.wallet else
+               ("test order" if o.source == "testorder" else "—"))
+        price = f" @ {o.fill_price:.3f}" if o.fill_price else ""
+        lines.append(
+            f"{mark} <code>{_esc(o.ts[:16].replace('T', ' '))}</code> {o.side} "
+            f"<b>${o.filled_usd:,.2f}</b>{price}"
+            f"{'' if o.filled_usd >= o.posted_usd else f' of ${o.posted_usd:,.2f}'}\n"
+            f"  {_esc(o.market[:48])}\n"
+            f"  {o.status} · {who} · order {_esc((o.order_id or '?')[:12])}"
+        )
+    lines.append("")
+    lines.append("<i>/real for the totals</i>")
+    _send_chunked("\n".join(lines))
 
 
 def _handle_live(text: str) -> None:
