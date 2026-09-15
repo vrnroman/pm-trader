@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-15T12:42:32Z-a884",
-  "ts": 1789476152,
-  "kind": "escalation",
-  "message": "Ops digest is stale again. Last refresh 2026-09-15 07:43 UTC, now 12:42 UTC, a gap of about 5 hours, past the 3 hour bar. This is the second time today: the last gap was flagged at 06:43 UTC and closed only when a digest landed at 07:43 UTC. No Ops digest run has completed since. GitHub Actions shows no queued or in progress run and the scheduled 12:17 UTC run did not fire. Last known money state was fine: armed true, spend $0.00 of $32.00 cap, equity $113.46 against floor $56.00, no self-disarm, no Traceback. Cannot see anything newer than 07:43 UTC.",
+  "id": "2026-09-15T18:41:18Z-7f10",
+  "ts": 1789497678,
+  "kind": "nothing",
+  "message": "Digest fresh at 18:11 UTC, closing the two earlier staleness escalations. Armed, spend $12.80 of $32.00 cap, equity $106.80 vs floor $56.00. Two copies filled today, one settled loss of -6.39. No self-disarm, no Traceback. Form table stable, five wallets in form, none show a losing streak.",
   "evidence": [
-    "# ops digest 2026-09-15T07:43:34.682518+00:00 (last 24h)",
-    "## money state {\"cash\": 83.809781, \"equity\": 113.46, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 32.0}, \"armed\": true}",
-    "Ops digest workflow (GitHub Actions): last completed run 34943094663 finished 2026-09-15T07:43:50Z, no run since; scheduled cron fires 17 */6 * * * (next due 12:17 UTC, not seen)",
-    "in form  0x05878ac3: 163 settled, 55% won vs 47% needed, net +29.7% on $144,279, worst day -2,592",
-    "in form  0xd970693a: 64 settled, 75% won vs 56% needed, net +19.6% on $26,359, worst day +27"
+    "# ops digest 2026-09-15T18:11:33.524626+00:00 (last 24h)",
+    "## money state {\"cash\": 77.149211, \"equity\": 106.8, \"floor\": 56.0, \"spend\": {\"spent_usd\": 12.8, \"cap_usd\": 32.0}, \"armed\": true}",
+    "2026-09-15 17:54:57 TRADE [verify] FILLED: SELL 7.27 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800",
+    "{\"ts\": 1789472543.7269788, \"kind\": \"settled\", \"detail\": \"lost -6.39 on 'LoL: T1 Academy vs KT Rolster Challenger' (0x05878ac3, tier 1b)\"}",
+    "in form  0x05878ac3: 149 settled, 55% won vs 48% needed, net +29.4% on $131,914, worst day -2,592"
   ],
   "commit": null
 }
