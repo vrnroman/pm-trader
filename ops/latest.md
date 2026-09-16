@@ -1,7 +1,7 @@
-# ops digest 2026-09-16T14:20:31.569902+00:00 (last 24h)
+# ops digest 2026-09-16T16:53:40.755175+00:00 (last 24h)
 
 ## money state
-{"cash": 77.149211, "open_cost": 29.65, "equity": 106.8, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-16", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 64, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789568130.9809146, "day": "2026-09-16"}
+{"cash": 77.149211, "open_cost": 29.65, "equity": 106.8, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-16", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 64, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789577535.4710684, "day": "2026-09-16"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-16", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x05878ac343c1387d592042d788424412733ac40b": 1, "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1}, "yesterday": "2026-09-15", "closed_reason": ""}
@@ -27,7 +27,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1789491935.7564917, "day": "2026-09-15", "kind": "auto_admit", "before": "0x722abb54 not in Z", "after": "in set Z, on probation", "detail": "30 settled paper copies, paper ROI +18.1%, trimmed +9.2%, ideal +19.1%", "push": "WALLET", "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
 {"ts": 1789491940.0932405, "day": "2026-09-15", "kind": "form", "before": "0x722abb54 unknown", "after": "in form", "detail": "0x722abb54: 94 settled, 78% won vs 73% needed, net +10.8% on $214,557, worst day -5,949", "push": null, "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
 
-## important lines (354)
+## important lines (357)
 2026-09-15 17:05:38 WARNING [zset] ADMITTED 0x722abb5460060870d46728bf45f66a6b1635d6ed to set Z (+9% over 27 copies with its best 3 deleted). Real money may now follow it once armed.
 2026-09-15 17:05:39 INFO  [ops] auto_admit: '0x722abb54 not in Z' -> 'in set Z, on probation' | 30 settled paper copies, paper ROI +18.1%, trimmed +9.2%, ideal +19.1%
 2026-09-15 17:05:43 INFO  [ops] form: '0x722abb54 unknown' -> 'in form' | 0x722abb54: 94 settled, 78% won vs 73% needed, net +10.8% on $214,557, worst day -5,949
@@ -376,6 +376,9 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-16 13:27:46 INFO  Received signal 15, shutting down...
 2026-09-16 13:28:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
 2026-09-16 13:28:10 INFO  Bot started. Monitoring trades...
+2026-09-16 14:21:25 ERROR [inventory] API sync failed: 
+2026-09-16 15:07:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-16 16:27:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-15 17:06:09 TRADE [LIVE] BUY $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100, order 0x57aa7b4fe4...
 2026-09-15 17:06:10 TRADE [verify] FILLED: BUY 7.90 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100
 2026-09-15 17:54:57 TRADE [LIVE] SELL $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800, order 0x8a16f7e69c...

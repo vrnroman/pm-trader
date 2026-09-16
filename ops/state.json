@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-16T14:20:46.806056+00:00",
+ "generated": "2026-09-16T16:53:47.970322+00:00",
  "money": {
   "cash": 77.149211,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789568130.9809146,
+  "ts": 1789577535.4710684,
   "day": "2026-09-16"
  },
  "arm": {
@@ -772,6 +772,9 @@
   "2026-09-16 13:27:46 INFO  Received signal 15, shutting down...",
   "2026-09-16 13:28:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
   "2026-09-16 13:28:10 INFO  Bot started. Monitoring trades...",
+  "2026-09-16 14:21:25 ERROR [inventory] API sync failed: ",
+  "2026-09-16 15:07:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-16 16:27:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-15 17:06:09 TRADE [LIVE] BUY $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100, order 0x57aa7b4fe4...",
   "2026-09-15 17:06:10 TRADE [verify] FILLED: BUY 7.90 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100",
   "2026-09-15 17:54:57 TRADE [LIVE] SELL $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800, order 0x8a16f7e69c...",
