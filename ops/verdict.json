@@ -1,10 +1,10 @@
 {
-  "id": "2026-09-16T06:41:40Z-bd13",
-  "ts": 1789540900,
+  "id": "2026-09-16T12:41:39Z-9a5e",
+  "ts": 1789562499,
   "kind": "nothing",
-  "message": "Digest fresh at 06:00 UTC. Armed, spend $0.00 of $32.00 cap today, equity $106.80 vs floor $56.00. Five wallets in form, none losing now. No self-disarm, no Traceback.",
+  "message": "Digest fresh at 11:29 UTC. Armed, spend $0.00 of $32.00 cap today, equity $106.80 vs floor $56.00. Five wallets in form, none losing now. Both restarts trace to merged PRs #36 and #37, not self-disarm. No Traceback.",
   "evidence": [
-    "# ops digest 2026-09-16T06:00:00.881569+00:00 (last 24h)",
+    "# ops digest 2026-09-16T11:29:59.043268+00:00 (last 24h)",
     "## money state {\"cash\": 77.149211, \"equity\": 106.8, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 32.0}, \"armed\": true}",
     "in form  0x722abb54: 99 settled, 79% won vs 74% needed, net +10.1% on $219,896, worst day -5,949",
     "in form  0xd970693a: 59 settled, 73% won vs 57% needed, net +18.5% on $24,473, worst day +27",
