@@ -126,15 +126,24 @@ def test_purge_never_deletes_the_active_file_even_if_touched_now(tmp_path):
 
 def test_purge_keeps_fresh_malformed_names_but_reclaims_old_ones(tmp_path):
     import os
-    import time
+    from datetime import datetime, time as _time, timezone
 
-    fresh = tmp_path / "bot-notadate.log"      # odd name, just written
+    # Both mtimes are set relative to the SAME ``today`` the purge is given.
+    # Stamping them off the wall clock instead made the test read one clock
+    # while the call read another — it passed only because the two happened to
+    # agree, and any drift between them (a shifted clock, a slow CI box) put
+    # the "fresh" file on the wrong side of the cutoff.
+    today = _date("2026-07-02")
+    noon = datetime.combine(today, _time(12, 0), tzinfo=timezone.utc).timestamp()
+
+    fresh = tmp_path / "bot-notadate.log"      # odd name, written "today"
     fresh.write_text("x")
+    os.utime(fresh, (noon, noon))
     old = tmp_path / "bot-old.log"             # odd name, ancient mtime
     old.write_text("x")
-    os.utime(old, (time.time() - 10 * 86400, time.time() - 10 * 86400))
+    os.utime(old, (noon - 10 * 86400, noon - 10 * 86400))
 
-    _purge_old_bot_logs(tmp_path, 2, today=_date("2026-07-02"))
+    _purge_old_bot_logs(tmp_path, 2, today=today)
 
     # can't date these from the name, so fall back to mtime (the pre-refactor
     # behaviour): fresh survives, ancient is reclaimed instead of accumulating.
