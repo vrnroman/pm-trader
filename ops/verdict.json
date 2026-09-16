@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-15T18:41:18Z-7f10",
-  "ts": 1789497678,
+  "id": "2026-09-16T00:41:17Z-75f7",
+  "ts": 1789519277,
   "kind": "nothing",
-  "message": "Digest fresh at 18:11 UTC, closing the two earlier staleness escalations. Armed, spend $12.80 of $32.00 cap, equity $106.80 vs floor $56.00. Two copies filled today, one settled loss of -6.39. No self-disarm, no Traceback. Form table stable, five wallets in form, none show a losing streak.",
+  "message": "Digest fresh at 00:18 UTC. Armed, spend $0.00 of $32.00 cap today, equity $106.80 vs floor $56.00. Five wallets in form, none show a losing streak. No self-disarm, no Traceback.",
   "evidence": [
-    "# ops digest 2026-09-15T18:11:33.524626+00:00 (last 24h)",
-    "## money state {\"cash\": 77.149211, \"equity\": 106.8, \"floor\": 56.0, \"spend\": {\"spent_usd\": 12.8, \"cap_usd\": 32.0}, \"armed\": true}",
-    "2026-09-15 17:54:57 TRADE [verify] FILLED: SELL 7.27 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800",
-    "{\"ts\": 1789472543.7269788, \"kind\": \"settled\", \"detail\": \"lost -6.39 on 'LoL: T1 Academy vs KT Rolster Challenger' (0x05878ac3, tier 1b)\"}",
-    "in form  0x05878ac3: 149 settled, 55% won vs 48% needed, net +29.4% on $131,914, worst day -2,592"
+    "# ops digest 2026-09-16T00:18:23.929484+00:00 (last 24h)",
+    "## money state {\"cash\": 77.149211, \"equity\": 106.8, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 32.0}, \"armed\": true}",
+    "in form  0x722abb54: 99 settled, 79% won vs 74% needed, net +10.1% on $219,896, worst day -5,949",
+    "in form  0x05878ac3: 144 settled, 56% won vs 48% needed, net +29.3% on $126,901, worst day -2,592",
+    "2026-09-15 17:54:57 TRADE [verify] FILLED: SELL 7.27 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800"
   ],
   "commit": null
 }
