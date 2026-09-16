@@ -2,47 +2,46 @@
 
 Every other P&L surface in this repo mixes paper and real. ``/pnl`` is the
 unified paper+preview book, ``/status`` counts copies, ``/live`` shows the
-caps that *would* apply. None of them answer the owner's plainest question:
-**how much real money has this bot spent, what came back, and what is still
-out there?**
+caps that *would* apply. ``/real`` answers the owner's plainest question:
+**what is in the wallet, what is it holding, and what did the deals do?**
 
-This module answers exactly that, from the three records real money leaves:
+Polymarket is the only source it trusts for money:
 
-* ``trade-history.jsonl`` — the audit trail. A row's ``status`` says which
-  side of the interlock it fell on, and that is the whole classification:
+* the Data API's ``/activity`` for the proxy wallet — every trade the
+  exchange matched and every payout the chain made, at the cash that moved
+  (fees included);
+* the Data API's ``/positions`` — what is still held, at the entry price and
+  at the current price, and which of it has resolved.
+
+The bot's own ``realized-pnl.jsonl`` is NOT read here. It only learns of a
+settlement the bot's redeemer saw, and winners are paid out on-chain without
+the redeemer (a payout empties the position before the redeemer's pass), so
+until 2026-09-16 ``/real`` showed every loss and none of the wins: 0W/8L and
+-$47 realized on a book that was 12W/8L and -$2.63 net of fees.
+
+``trade-history.jsonl`` is still read, for two things Polymarket cannot say:
+when live trading started (the first real order), and which followed wallet
+each deal copied. A row's ``status`` says which side of the interlock it
+fell on, and that is the whole classification:
 
     - ``PLACED`` / ``FILLED`` / ``PARTIAL`` / ``UNFILLED`` / ``ABANDONED``
       are written only *past* the ``live_mode.is_preview()`` gate, so every
       one of them is an order that went to the exchange with real money.
-    - ``PREVIEW`` is paper, ``DISARMED`` is a copy the arm refused (real
-      money the bot did **not** spend — worth showing, never counted), and
+    - ``PREVIEW`` is paper, ``DISARMED`` is a copy the arm refused, and
       ``SKIPPED`` / ``ALERT_ONLY`` never reached an order at all.
 
-  Rows are collapsed per ``order_id`` because one order writes several rows
-  (``PLACED`` then ``FILLED``); summing them raw double-counts the ticket.
-
-* ``realized-pnl.jsonl`` — what settled. ``source="redeemer"`` rows are real
-  by construction: the redeemer only runs when ``PREVIEW_MODE=false``
-  (``runner.py``), and it reads the proxy wallet's on-chain positions.
-  ``source="preview"`` rows are the paper analogue. Anything else is tied to
-  real money only when its ``token_id`` matches a token a real order bought;
-  what cannot be tied is reported as unattributed rather than folded in, so
-  the headline never quietly inherits pre-schema debris.
-
-* the Data API's ``/positions`` for the proxy wallet — the chain's own word
-  on what is still open, at cost and at the current mark. Local inventory
-  cannot serve here: in a ``PREVIEW_MODE=true`` process the inventory file is
-  the *simulated* one, so reading it would report paper as real.
+Rows are collapsed per ``order_id`` because one order writes several rows
+(``PLACED`` then ``FILLED``); summing them raw double-counts the ticket.
 
 Everything below is pure — rows in, dataclasses out — so it unit-tests with
-no network and no disk. The one network call (``fetch_chain_positions``) is
-isolated at the bottom and returns raw rows for ``summarize_chain_positions``
-to fold.
+no network and no disk. The two network reads (``fetch_chain_positions``,
+``fetch_activity``) are isolated at the bottom and return raw rows.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Iterable, Optional
 
 # Statuses written only on the real-money path (past the interlock gate).
@@ -273,321 +272,471 @@ def summarize_orders(orders: Iterable[RealOrder]) -> OrderStats:
     return st
 
 
+
+
+def iso_epoch(ts) -> Optional[int]:
+    """Epoch seconds of an ISO timestamp (naive means UTC), or None."""
+    s = str(ts or "").strip()
+    if not s:
+        return None
+    try:
+        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return int(dt.timestamp())
+
+
+def live_start_ts(orders: Iterable[RealOrder]) -> Optional[int]:
+    """When real money first moved: the earliest real order, or None."""
+    stamps = [e for e in (iso_epoch(o.ts) for o in orders) if e is not None]
+    return min(stamps) if stamps else None
+
+
+# ---------------------------------------------------------------------------
+# Polymarket's word: deals (activity) and holdings (positions).
+# ---------------------------------------------------------------------------
+
+BUY, SELL, PAYOUT = "BUY", "SELL", "PAYOUT"
+
+# A resolved position worth less than this is spent: nothing to collect.
+DUST_USD = 0.01
+
+# How far a Polymarket fill may sit from the ledger row that placed it and
+# still be tied to that row's followed wallet. The ledger stamps the copied
+# trade; the exchange stamps the match, minutes later for a resting order.
+ATTRIBUTION_GAP_S = 3600
+
+
 @dataclass
-class NotSpent:
-    """What the interlock kept in the wallet: copies the arm refused."""
+class Deal:
+    """One money movement Polymarket recorded for the proxy wallet."""
 
-    n_disarmed: int = 0
-    disarmed_usd: float = 0.0
-    n_preview: int = 0
-    preview_usd: float = 0.0
+    ts: int
+    kind: str                 # BUY | SELL | PAYOUT
+    title: str = ""
+    outcome: str = ""
+    shares: float = 0.0
+    price: float = 0.0
+    usd: float = 0.0          # signed: a buy is negative, a sell or payout positive
+    condition_id: str = ""
+    asset: str = ""
+    wallet: str = ""          # the followed wallet copied, when the ledger ties it
 
 
-def summarize_not_spent(rows: Iterable[dict], *, since_day: str = "") -> NotSpent:
-    """Followed-wallet buys that did NOT become real orders.
+def parse_deals(rows: Iterable[dict], *, since_ts: int = 0) -> tuple[list[Deal], int]:
+    """``(deals newest first, n rows of a type this does not count)``.
 
-    ``DISARMED`` is the number the owner asks about after an outage ("what
-    did I miss?"); ``PREVIEW`` is the paper book's size for contrast.
+    Only TRADE and REDEEM are money this bot makes move. Anything else
+    (split, merge, reward, conversion) is counted and reported rather than
+    guessed at, so a new row type can never silently skew the totals.
     """
-    out = NotSpent()
+    deals: list[Deal] = []
+    other = 0
     for row in rows or []:
         if not isinstance(row, dict):
             continue
-        kind = classify_row(row)
-        if kind not in ("paper", "not-placed"):
+        try:
+            ts = int(row.get("timestamp"))
+        except (TypeError, ValueError):
             continue
-        ts = str(row.get("timestamp") or "")
-        if since_day and _day(ts) and _day(ts) < since_day:
+        if ts < since_ts:
             continue
-        status = str(row.get("status") or "").upper()
-        size = _num(row.get("copy_size"))
-        if status == "DISARMED":
-            out.n_disarmed += 1
-            out.disarmed_usd += size
-        elif status == "PREVIEW":
-            out.n_preview += 1
-            out.preview_usd += size
-    return out
+        typ = str(row.get("type") or "").upper()
+        usdc = _num(row.get("usdcSize"))
+        if typ == "TRADE":
+            side = str(row.get("side") or "").upper()
+            if side not in (BUY, SELL):
+                other += 1
+                continue
+            kind, usd = side, (-usdc if side == BUY else usdc)
+        elif typ == "REDEEM":
+            kind, usd = PAYOUT, usdc
+        else:
+            other += 1
+            continue
+        deals.append(Deal(
+            ts=ts, kind=kind,
+            title=str(row.get("title") or ""),
+            outcome=str(row.get("outcome") or ""),
+            shares=_num(row.get("size")),
+            price=_num(row.get("price")),
+            usd=usd,
+            condition_id=str(row.get("conditionId") or ""),
+            asset=str(row.get("asset") or ""),
+        ))
+    deals.sort(key=lambda d: d.ts, reverse=True)
+    return deals, other
 
 
-def split_realized(rows: Iterable[dict], real_token_ids: set[str],
-                   *, since_day: str = "") -> tuple[list[dict], list[dict]]:
-    """``(real, other)`` realized rows.
+def attribute_wallets(deals: Iterable[Deal], orders: Iterable[RealOrder], *,
+                      max_gap_s: int = ATTRIBUTION_GAP_S) -> None:
+    """Stamp each BUY/SELL deal with the followed wallet its real order copied.
 
-    Real by construction when the redeemer wrote it (it runs only in a live
-    process, against the chain). Otherwise real only when the row's token was
-    bought by a real order in this history — a preview-sourced row never
-    qualifies. Everything else lands in ``other`` and is *reported* as
-    unattributed rather than assumed either way.
+    Matched on token and side, nearest in time within ``max_gap_s``. A payout
+    has no order behind it and keeps no wallet here (its market carries one).
     """
-    real: list[dict] = []
-    other: list[dict] = []
-    for row in rows or []:
-        if not isinstance(row, dict):
+    index: dict[tuple[str, str], list[tuple[int, str]]] = {}
+    for o in orders or []:
+        ep = iso_epoch(o.ts)
+        if ep is None or not o.token_id:
             continue
-        if since_day and _day(row.get("timestamp")) and _day(row.get("timestamp")) < since_day:
+        index.setdefault((o.token_id, o.side), []).append((ep, o.wallet_label))
+    for d in deals or []:
+        if d.kind not in (BUY, SELL) or not d.asset:
             continue
-        source = str(row.get("source") or "").lower()
-        token = str(row.get("token_id") or "")
-        if source == "redeemer":
-            real.append(row)
-        elif source != "preview" and token and token in real_token_ids:
-            real.append(row)
-        else:
-            other.append(row)
-    return (real, other)
+        best = None
+        for ep, wallet in index.get((d.asset, d.kind), ()):
+            gap = abs(ep - d.ts)
+            if gap <= max_gap_s and (best is None or gap < best[0]):
+                best = (gap, wallet)
+        if best is not None:
+            d.wallet = best[1]
 
 
 @dataclass
-class RealizedStats:
-    n_rows: int = 0
-    pnl: float = 0.0
-    cost_basis: float = 0.0
-    returned_usd: float = 0.0
-    wins: int = 0
-    losses: int = 0
+class Position:
+    """One holding as Polymarket marks it."""
 
-    @property
-    def roi(self) -> Optional[float]:
-        return (self.pnl / self.cost_basis) if self.cost_basis > 0 else None
-
-
-def summarize_realized(rows: Iterable[dict]) -> RealizedStats:
-    """Settled real money: what it cost, what came back, what it made."""
-    st = RealizedStats()
-    for row in rows or []:
-        st.n_rows += 1
-        pnl = _num(row.get("pnl"))
-        st.pnl += pnl
-        st.cost_basis += _num(row.get("cost_basis"))
-        st.returned_usd += _num(row.get("returned"))
-        won = row.get("won")
-        if won is None:
-            won = pnl > 0
-        if won:
-            st.wins += 1
-        else:
-            st.losses += 1
-    return st
-
-
-@dataclass
-class DayLine:
-    date: str
-    n_orders: int = 0
-    filled_usd: float = 0.0
-    realized_pnl: float = 0.0
-
-
-def by_day(orders: Iterable[RealOrder], realized_rows: Iterable[dict]) -> list[DayLine]:
-    """One line per UTC day that saw real money move, newest first."""
-    days: dict[str, DayLine] = {}
-
-    def _line(d: str) -> DayLine:
-        if d not in days:
-            days[d] = DayLine(date=d)
-        return days[d]
-
-    for o in orders:
-        if not o.day or o.side == "SELL":
-            continue
-        ln = _line(o.day)
-        ln.n_orders += 1
-        ln.filled_usd += o.filled_usd
-    for row in realized_rows or []:
-        d = _day(row.get("timestamp"))
-        if d:
-            _line(d).realized_pnl += _num(row.get("pnl"))
-    return sorted(days.values(), key=lambda x: x.date, reverse=True)
-
-
-@dataclass
-class WalletLine:
-    wallet: str
-    n_orders: int = 0
-    n_filled: int = 0
-    filled_usd: float = 0.0
-    realized_pnl: float = 0.0
-    wins: int = 0
-    losses: int = 0
-
-    @property
-    def roi(self) -> Optional[float]:
-        return (self.realized_pnl / self.filled_usd) if self.filled_usd > 0 else None
-
-
-def by_wallet(orders: Iterable[RealOrder], realized_rows: Iterable[dict]) -> list[WalletLine]:
-    """Real dollars and real settled P&L per followed wallet, biggest first.
-
-    Realized rows are attributed by their stamped ``trader_address``; a row
-    the redeemer could not attribute falls back to the wallet that bought the
-    token, so a settled loss is never orphaned away from the wallet that
-    caused it.
-    """
-    wallets: dict[str, WalletLine] = {}
-    token_owner: dict[str, str] = {}
-
-    def _line(w: str) -> WalletLine:
-        if w not in wallets:
-            wallets[w] = WalletLine(wallet=w)
-        return wallets[w]
-
-    for o in orders:
-        if o.side == "SELL":
-            continue
-        w = o.wallet_label
-        ln = _line(w)
-        ln.n_orders += 1
-        ln.filled_usd += o.filled_usd
-        if o.status == "FILLED":
-            ln.n_filled += 1
-        if o.token_id and o.filled_usd > 0:
-            token_owner.setdefault(o.token_id, w)
-    for row in realized_rows or []:
-        w = str(row.get("trader_address") or "").lower()
-        if not w:
-            w = token_owner.get(str(row.get("token_id") or ""), UNKNOWN_WALLET)
-        ln = _line(w)
-        pnl = _num(row.get("pnl"))
-        ln.realized_pnl += pnl
-        won = row.get("won")
-        if won is None:
-            won = pnl > 0
-        if won:
-            ln.wins += 1
-        else:
-            ln.losses += 1
-    return sorted(wallets.values(), key=lambda x: x.filled_usd, reverse=True)
-
-
-@dataclass
-class ChainStats:
-    """The chain's own word on open real positions (Data API ``/positions``)."""
-
-    n_positions: int = 0
+    title: str = ""
+    outcome: str = ""
+    condition_id: str = ""
+    shares: float = 0.0
+    avg_price: float = 0.0
+    cur_price: float = 0.0
     cost_usd: float = 0.0
     value_usd: float = 0.0
-    n_redeemable: int = 0
-    redeemable_usd: float = 0.0
+    resolved: bool = False
+    end_date: str = ""
 
     @property
-    def unrealized(self) -> float:
+    def pnl(self) -> float:
         return self.value_usd - self.cost_usd
 
+    @property
+    def pnl_pct(self) -> Optional[float]:
+        return self.pnl / self.cost_usd if self.cost_usd > 0 else None
 
-def summarize_chain_positions(rows: Iterable[dict]) -> ChainStats:
-    """Fold Data API position rows into cost / mark / collectable.
+    @property
+    def state(self) -> str:
+        """``open`` (market still trading) | ``collect`` (resolved, worth
+        something) | ``spent`` (resolved, worth nothing)."""
+        if not self.resolved:
+            return "open"
+        return "collect" if self.value_usd >= DUST_USD else "spent"
 
-    ``initialValue`` is the API's own cost basis; ``size * avgPrice`` is the
-    fallback when it is absent. A resolved-and-unredeemed position still
-    counts as open money — it IS money, sitting in a token instead of in
-    USDC — and is called out separately so "go collect it" is visible.
+
+def parse_positions(rows: Iterable[dict]) -> list[Position]:
+    """Data API position rows as ``Position``s; empty holdings dropped.
+
+    ``initialValue`` is the API's cost basis and ``currentValue`` its mark;
+    ``size * avgPrice`` and ``size * curPrice`` stand in when a key is absent.
     """
-    st = ChainStats()
+    out: list[Position] = []
     for row in rows or []:
         if not isinstance(row, dict):
             continue
         size = _num(row.get("size"))
         if size <= 0:
             continue
-        cost = _num(row.get("initialValue"))
-        if cost <= 0:
-            cost = size * _num(row.get("avgPrice"))
-        value = _num(row.get("currentValue"))
-        if value <= 0:
-            value = size * _num(row.get("curPrice"))
-        st.n_positions += 1
-        st.cost_usd += cost
-        st.value_usd += value
-        flag = row.get("redeemable")
-        if flag is None:
-            flag = row.get("resolved")
-        if flag:
-            st.n_redeemable += 1
-            st.redeemable_usd += value
-    return st
+        avg = _num(row.get("avgPrice"))
+        cur = _num(row.get("curPrice"))
+        cost = (_num(row.get("initialValue")) if row.get("initialValue") is not None
+                else size * avg)
+        value = (_num(row.get("currentValue")) if row.get("currentValue") is not None
+                 else size * cur)
+        out.append(Position(
+            title=str(row.get("title") or ""),
+            outcome=str(row.get("outcome") or ""),
+            condition_id=str(row.get("conditionId") or ""),
+            shares=size, avg_price=avg, cur_price=cur,
+            cost_usd=cost, value_usd=value,
+            resolved=bool(row.get("redeemable")),
+            end_date=str(row.get("endDate") or ""),
+        ))
+    return out
 
 
 @dataclass
-class RealMoneyReport:
+class MarketResult:
+    """Everything real money did in one market, from Polymarket's rows."""
+
+    condition_id: str
+    title: str = ""
+    outcome: str = ""
+    first_buy_ts: int = 0
+    wallet: str = ""
+    paid_usd: float = 0.0       # buys, fees included
+    sold_usd: float = 0.0
+    paid_out_usd: float = 0.0
+    held_usd: float = 0.0       # what its positions are worth now
+    open: bool = False
+    unseen: bool = False        # bought, but Polymarket shows no holding and no cash back yet
+
+    @property
+    def back_usd(self) -> float:
+        return self.sold_usd + self.paid_out_usd
+
+    @property
+    def pnl(self) -> float:
+        return self.back_usd + self.held_usd - self.paid_usd
+
+    @property
+    def state(self) -> str:
+        if self.open:
+            return "open"
+        return "won" if self.pnl > 0 else "lost"
+
+
+def market_results(deals: Iterable[Deal], positions: Iterable[Position]) -> list[MarketResult]:
+    """One ``MarketResult`` per market the deals bought into, oldest first.
+
+    A market is settled when no holding in it is still trading: its result
+    is the cash back plus whatever resolved value is left to collect, minus
+    what was paid. A winner that has already paid out has no position row at
+    all, which is exactly the case the redeemer-fed ledger never counted.
+
+    A market with a buy but neither a holding nor any cash back is one
+    Polymarket has not caught up with yet: it is reported as open at cost,
+    never as a loss (a real loser keeps its worthless position row).
+    """
+    by_cid: dict[str, list[Position]] = {}
+    for p in positions or []:
+        by_cid.setdefault(p.condition_id, []).append(p)
+    markets: dict[str, MarketResult] = {}
+    for d in sorted(deals or [], key=lambda d: d.ts):
+        if not d.condition_id:
+            continue
+        m = markets.get(d.condition_id)
+        if m is None:
+            if d.kind != BUY:
+                continue   # cash for a market this window never bought into
+            m = markets[d.condition_id] = MarketResult(
+                condition_id=d.condition_id, title=d.title, outcome=d.outcome,
+                first_buy_ts=d.ts, wallet=d.wallet)
+        if d.kind == BUY:
+            m.paid_usd += -d.usd
+            m.wallet = m.wallet or d.wallet
+        elif d.kind == SELL:
+            m.sold_usd += d.usd
+        else:
+            m.paid_out_usd += d.usd
+    for m in markets.values():
+        held = by_cid.get(m.condition_id, [])
+        m.held_usd = sum(p.value_usd for p in held)
+        m.open = any(p.state == "open" for p in held)
+        if not held and m.back_usd <= 0:
+            m.open = m.unseen = True
+            m.held_usd = m.paid_usd
+    return sorted(markets.values(), key=lambda m: m.first_buy_ts)
+
+
+@dataclass
+class WalletResult:
+    wallet: str
+    n_markets: int = 0
+    wins: int = 0
+    losses: int = 0
+    n_open: int = 0
+    paid_usd: float = 0.0
+    pnl: float = 0.0            # settled markets only
+
+
+def by_wallet(markets: Iterable[MarketResult]) -> list[WalletResult]:
+    """Results per followed wallet, the biggest spend first."""
+    out: dict[str, WalletResult] = {}
+    for m in markets or []:
+        key = m.wallet or UNKNOWN_WALLET
+        w = out.setdefault(key, WalletResult(wallet=key))
+        w.n_markets += 1
+        w.paid_usd += m.paid_usd
+        if m.state == "open":
+            w.n_open += 1
+            continue
+        w.pnl += m.pnl
+        if m.state == "won":
+            w.wins += 1
+        else:
+            w.losses += 1
+    return sorted(out.values(), key=lambda w: w.paid_usd, reverse=True)
+
+
+@dataclass
+class RealBook:
     """Everything ``/real`` renders, computed once."""
 
-    orders: list[RealOrder] = field(default_factory=list)
-    stats: OrderStats = field(default_factory=OrderStats)
-    realized: RealizedStats = field(default_factory=RealizedStats)
-    not_spent: NotSpent = field(default_factory=NotSpent)
-    days: list[DayLine] = field(default_factory=list)
-    wallets: list[WalletLine] = field(default_factory=list)
-    chain: Optional[ChainStats] = None
-    n_unattributed_realized: int = 0
-    since_day: str = ""
+    since_ts: int = 0                                   # the window's floor
+    live_ts: Optional[int] = None                       # first real order
+    deals: list[Deal] = field(default_factory=list)     # in the window, newest first
+    positions: Optional[list[Position]] = None          # None: could not read
+    markets: list[MarketResult] = field(default_factory=list)
+    n_other_rows: int = 0
+    live_condition_ids: set[str] = field(default_factory=set)   # every live-era market, unwindowed
+    activity_ok: bool = True                            # False: the trade history could not be read
+
+    @property
+    def open_positions(self) -> list[Position]:
+        return sorted((p for p in self.positions or [] if p.state == "open"),
+                      key=lambda p: p.cost_usd, reverse=True)
+
+    @property
+    def to_collect(self) -> list[Position]:
+        return sorted((p for p in self.positions or [] if p.state == "collect"),
+                      key=lambda p: p.value_usd, reverse=True)
+
+    @property
+    def value_usd(self) -> float:
+        return sum(p.value_usd for p in self.positions or [])
+
+    @property
+    def spent_before_live(self) -> list[Position]:
+        """Worthless resolved holdings that no live-era market accounts for:
+        the pre-live wallet's leftovers, reported once and never counted.
+        Unknowable without the trade history, so empty then."""
+        if not self.activity_ok:
+            return []
+        return [p for p in self.positions or []
+                if p.state == "spent" and p.condition_id not in self.live_condition_ids]
+
+    @property
+    def settled(self) -> list[MarketResult]:
+        return [m for m in self.markets if m.state != "open"]
+
+    @property
+    def wins(self) -> int:
+        return sum(1 for m in self.markets if m.state == "won")
+
+    @property
+    def losses(self) -> int:
+        return sum(1 for m in self.markets if m.state == "lost")
+
+    @property
+    def n_open(self) -> int:
+        return sum(1 for m in self.markets if m.state == "open")
+
+    @property
+    def n_unseen(self) -> int:
+        return sum(1 for m in self.markets if m.unseen)
+
+    @property
+    def paid_usd(self) -> float:
+        return sum(m.paid_usd for m in self.markets)
+
+    @property
+    def sold_usd(self) -> float:
+        return sum(m.sold_usd for m in self.markets)
+
+    @property
+    def paid_out_usd(self) -> float:
+        return sum(m.paid_out_usd for m in self.markets)
+
+    @property
+    def held_usd(self) -> float:
+        return sum(m.held_usd for m in self.markets)
 
     @property
     def net_usd(self) -> float:
-        """Realized P&L on real money, before anything still open."""
-        return self.realized.pnl
+        """Cash back plus what is still held, minus what was paid."""
+        return self.sold_usd + self.paid_out_usd + self.held_usd - self.paid_usd
 
     @property
-    def at_work_usd(self) -> float:
-        """Real money currently out there: open positions at cost when the
-        chain could be read, else the unsettled part of what was filled."""
-        if self.chain is not None:
-            return self.chain.cost_usd
-        return max(0.0, self.stats.filled_usd - self.realized.cost_basis)
-
-    @property
-    def has_real_activity(self) -> bool:
-        return bool(self.orders) or self.realized.n_rows > 0
+    def result_for(self) -> dict[str, MarketResult]:
+        return {m.condition_id: m for m in self.markets}
 
 
-def build_report(history_rows: Iterable[dict], realized_rows: Iterable[dict],
-                 *, chain_rows: Optional[Iterable[dict]] = None,
-                 since_day: str = "") -> RealMoneyReport:
-    """The whole real-money picture from the raw ledger rows.
+def build_book(activity_rows: Optional[Iterable[dict]],
+               position_rows: Optional[Iterable[dict]],
+               orders: Iterable[RealOrder] = (), *,
+               since_ts: int = 0) -> RealBook:
+    """The whole real-money picture from Polymarket's rows.
 
-    Pure: pass ``chain_rows=None`` when the chain could not be read and every
-    number that does not depend on it still renders.
+    Markets are grouped over every deal since live trading started, then the
+    window (``since_ts``) keeps the markets first bought inside it and the
+    deals made inside it. A payout inside the window for a market bought
+    before it therefore never reads as a free win.
+
+    ``None`` for either read means it failed: the book says so
+    (``activity_ok``, ``positions is None``) and never guesses.
     """
-    history_rows = list(history_rows or [])
-    orders = collapse_orders(history_rows, since_day=since_day)
-    real_tokens = {o.token_id for o in orders if o.token_id}
-    real_realized, other = split_realized(realized_rows, real_tokens, since_day=since_day)
-    return RealMoneyReport(
-        orders=orders,
-        stats=summarize_orders(orders),
-        realized=summarize_realized(real_realized),
-        not_spent=summarize_not_spent(history_rows, since_day=since_day),
-        days=by_day(orders, real_realized),
-        wallets=by_wallet(orders, real_realized),
-        chain=(summarize_chain_positions(chain_rows) if chain_rows is not None else None),
-        n_unattributed_realized=len(other),
-        since_day=since_day,
+    orders = list(orders or [])
+    live_ts = live_start_ts(orders)
+    floor = live_ts if live_ts is not None else 0
+    deals, other = parse_deals(activity_rows or [], since_ts=floor)
+    attribute_wallets(deals, orders)
+    positions = parse_positions(position_rows) if position_rows is not None else None
+    everything = market_results(deals, positions or [])
+    return RealBook(
+        since_ts=max(since_ts, floor),
+        live_ts=live_ts,
+        deals=[d for d in deals if d.ts >= since_ts],
+        positions=positions,
+        markets=[m for m in everything if m.first_buy_ts >= since_ts],
+        n_other_rows=other,
+        live_condition_ids={m.condition_id for m in everything},
+        activity_ok=activity_rows is not None,
     )
 
 
 # ---------------------------------------------------------------------------
-# The one impure edge: the chain read.
+# The impure edge: Polymarket's Data API.
 # ---------------------------------------------------------------------------
 
-def fetch_chain_positions(proxy_wallet: str, *, timeout: float = 10.0) -> Optional[list[dict]]:
-    """Open positions for the proxy wallet from the Data API, or None.
+_PAGE = 500
+_MAX_PAGES = 20
 
-    None means "could not read", never "nothing there" — the caller says so
-    rather than reporting a confident zero, which is the exact failure mode
-    that left the bankroll floor inert (see ``auto_redeemer``).
+
+def _fetch_pages(path: str, params: dict, timeout: float) -> Optional[list[dict]]:
+    """Every page of a Data API list, or None when any page fails.
+
+    A partial read is no read: half the deals would print a confident,
+    wrong total.
     """
-    if not proxy_wallet:
-        return None
     try:
         import requests
 
         from src.config import CONFIG
 
-        resp = requests.get(f"{CONFIG.data_api_url}/positions",
-                            params={"user": proxy_wallet}, timeout=timeout)
-        if not resp.ok:
-            return None
-        data = resp.json()
+        rows: list[dict] = []
+        for page in range(_MAX_PAGES):
+            resp = requests.get(f"{CONFIG.data_api_url}{path}",
+                                params={**params, "limit": _PAGE,
+                                        "offset": page * _PAGE},
+                                timeout=timeout)
+            if not resp.ok:
+                return None
+            data = resp.json()
+            if not isinstance(data, list):
+                return None
+            rows.extend(data)
+            if len(data) < _PAGE:
+                return rows
     except Exception:  # noqa: BLE001 - a read failure is reported, never raised
         return None
-    return data if isinstance(data, list) else None
+    return None   # more pages than the cap: refuse rather than truncate
+
+
+def fetch_chain_positions(proxy_wallet: str, *, timeout: float = 10.0) -> Optional[list[dict]]:
+    """Every holding of the proxy wallet from the Data API, or None.
+
+    None means "could not read", never "nothing there" — the caller says so
+    rather than reporting a confident zero, which is the exact failure mode
+    that left the bankroll floor inert (see ``auto_redeemer``).
+    ``sizeThreshold=0`` because the API's default hides holdings under one
+    share, and a resolved winner's leftover is often exactly that.
+    """
+    if not proxy_wallet:
+        return None
+    return _fetch_pages("/positions", {"user": proxy_wallet, "sizeThreshold": 0},
+                        timeout)
+
+
+def fetch_activity(proxy_wallet: str, *, since_ts: int = 0,
+                   timeout: float = 10.0) -> Optional[list[dict]]:
+    """The proxy wallet's trades and payouts since ``since_ts``, or None."""
+    if not proxy_wallet:
+        return None
+    params: dict = {"user": proxy_wallet}
+    if since_ts:
+        params["start"] = int(since_ts)
+    return _fetch_pages("/activity", params, timeout)

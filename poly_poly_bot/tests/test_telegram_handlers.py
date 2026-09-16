@@ -491,120 +491,215 @@ def test_bot_menu_matches_dispatcher():
     )
 
 
+
+
 # ------------------------------------------------------------------
-# /real — the real-money panel
+# /real — the real-money panel, as Polymarket counts it
 # ------------------------------------------------------------------
 
+_W = "0x" + "1" * 40
+_LIVE = 1788696000          # 2026-09-06 12:00 UTC
+
+
 def _real_history() -> list[dict]:
-    """A history with one filled real order, one cancelled one, and noise
-    from both paper tracks (a preview copy and a disarmed skip)."""
-    base = {
-        "timestamp": "2026-09-10T12:00:00+00:00",
-        "trader_address": "0x" + "1" * 40,
-        "market": "Will X happen?",
-        "side": "BUY",
-        "price": 0.5,
-        "copy_size": 8.0,
-        "token_id": "t1",
-    }
+    """One real order behind each Polymarket buy, plus paper noise."""
+    base = {"trader_address": _W, "market": "m", "side": "BUY", "price": 0.5,
+            "copy_size": 6.4, "status": "FILLED", "fill_price": 0.5,
+            "fill_shares": 12.8}
     return [
-        {**base, "status": "PREVIEW", "copy_size": 25.0},
-        {**base, "status": "DISARMED", "copy_size": 8.0},
-        {**base, "status": "PLACED", "order_id": "ord-1"},
-        {**base, "status": "FILLED", "order_id": "ord-1",
-         "fill_price": 0.5, "fill_shares": 16.0},
-        {**base, "status": "PLACED", "order_id": "ord-2", "token_id": "t2"},
-        {**base, "status": "UNFILLED", "order_id": "ord-2", "token_id": "t2",
-         "fill_shares": 0.0},
+        {**base, "status": "PREVIEW", "copy_size": 25.0,
+         "timestamp": "2026-09-01T00:00:00+00:00", "token_id": "paper"},
+        {**base, "order_id": "o-w", "token_id": "tok-w",
+         "timestamp": "2026-09-06T12:00:00+00:00"},
+        {**base, "order_id": "o-l", "token_id": "tok-l",
+         "timestamp": "2026-09-06T14:00:00+00:00"},
+        {**base, "order_id": "o-o", "token_id": "tok-o",
+         "timestamp": "2026-09-06T16:00:00+00:00"},
+    ]
+
+
+def _real_activity() -> list[dict]:
+    def row(ts, typ, side, cid, usdc, size, price, title):
+        return {"timestamp": ts, "type": typ, "side": side, "conditionId": cid,
+                "asset": f"tok-{cid}" if typ == "TRADE" else "", "usdcSize": usdc,
+                "size": size, "price": price, "title": title, "outcome": "Yes"}
+    return [
+        row(_LIVE + 30, "TRADE", "BUY", "w", 6.58, 14.88, 0.43, "Dplus win market"),
+        row(_LIVE + 3 * 3600, "REDEEM", "", "w", 14.88, 14.88, 0, "Dplus win market"),
+        row(_LIVE + 2 * 3600 + 30, "TRADE", "BUY", "l", 6.56, 12.8, 0.5, "Lost market"),
+        row(_LIVE + 4 * 3600 + 30, "TRADE", "BUY", "o", 5.00, 10.0, 0.5, "Open market"),
+    ]
+
+
+def _real_positions() -> list[dict]:
+    return [
+        {"conditionId": "l", "title": "Lost market", "outcome": "Yes", "size": 12.8,
+         "avgPrice": 0.5, "curPrice": 0, "initialValue": 6.4, "currentValue": 0,
+         "redeemable": True},
+        {"conditionId": "o", "title": "Open market", "outcome": "Yes", "size": 10.0,
+         "avgPrice": 0.5, "curPrice": 0.62, "initialValue": 5.0,
+         "currentValue": 6.2, "redeemable": False},
+        {"conditionId": "old", "title": "Legacy", "outcome": "Yes", "size": 970.0,
+         "avgPrice": 0.26, "curPrice": 0, "initialValue": 252.1,
+         "currentValue": 0, "redeemable": True},
     ]
 
 
 @pytest.fixture
 def real_money_env(monkeypatch):
-    """Point /real at fixture ledgers and a readable chain; no network."""
+    """Point /real at fixture rows; no network, no chain."""
     from src import telegram_bot
-    from src.copy_trading import pnl as s1pnl
     from src.copy_trading import real_money
 
+    calls = {}
+
+    def fake_activity(wallet, since_ts=0, **_kw):
+        calls["since_ts"] = since_ts
+        return _real_activity()
+
     monkeypatch.setattr(telegram_bot, "_load_s1_trades", _real_history)
-    monkeypatch.setattr(s1pnl, "load_realized", lambda: [
-        {"source": "redeemer", "token_id": "t1", "pnl": 2.0, "cost_basis": 8.0,
-         "returned": 10.0, "won": True, "timestamp": "2026-09-12T00:00:00+00:00",
-         "trader_address": "0x" + "1" * 40},
-        {"source": "preview", "token_id": "t9", "pnl": 99.0, "cost_basis": 50.0,
-         "timestamp": "2026-09-12T00:00:00+00:00"},
-    ])
+    monkeypatch.setattr(real_money, "fetch_activity", fake_activity)
     monkeypatch.setattr(real_money, "fetch_chain_positions",
-                        lambda *_a, **_kw: [{"size": 12.0, "avgPrice": 0.5,
-                                             "currentValue": 7.0}])
+                        lambda *_a, **_kw: _real_positions())
+    monkeypatch.setattr(telegram_bot, "_read_real_cash", lambda: 77.15)
     monkeypatch.setattr(telegram_bot, "_real_header_lines", lambda: ["  (header)"])
+    return calls
 
 
-def test_real_reports_only_real_money(captured_messages, real_money_env):
+def test_real_shows_the_polymarket_balance(captured_messages, real_money_env):
     from src import telegram_bot
 
     telegram_bot._handle_command("/real")
     out = "\n".join(captured_messages)
-
-    assert "Real money" in out
-    # Two real orders; the preview copy and the disarmed skip are not orders.
-    assert "(2 real, none of them paper)" in out
-    assert "$8.00" in out            # the one buy that actually filled
-    # The paper +$99 realized row must never reach the real headline: only
-    # the redeemer's +$2.00 is real money.
-    assert "Realized: <b>$+2.00</b>" in out
-    assert "99" not in out.replace("-09-", "-")
-    # The refused copy is reported as money NOT spent.
-    assert "disarmed" in out
-    assert "paper copy" in out
+    assert "Polymarket's own numbers" in out
+    assert "Cash: <b>$77.15</b> pUSD" in out
+    assert "Positions: <b>$6.20</b>" in out
+    assert "Total: <b>$83.35</b>" in out
 
 
-def test_real_shows_the_chain_view_of_open_money(captured_messages, real_money_env):
+def test_real_shows_open_positions_entry_vs_now(captured_messages, real_money_env):
     from src import telegram_bot
 
     telegram_bot._handle_command("/real")
     out = "\n".join(captured_messages)
-    assert "Open positions: <b>1</b> at <b>$6.00</b> cost" in out
+    assert "<b>Open positions</b> (1)" in out
+    assert "<b>Open market</b>" in out
+    assert "10.00 sh · 0.500 → 0.620 · $5.00 → $6.20 <b>+$1.20</b> (+24%)" in out
+    # The pre-live wreck is set aside, not counted as money at work.
+    assert "1 holding(s) from before live trading resolved worthless ($252.10" in out
 
 
-def test_real_says_so_when_the_chain_cannot_be_read(captured_messages,
-                                                    real_money_env, monkeypatch):
+def test_real_counts_the_win_polymarket_paid_out(captured_messages, real_money_env):
+    """The bug this surface was rebuilt for: the payout is a win."""
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real")
+    out = "\n".join(captured_messages)
+    assert "3 market(s): <b>1 won</b> · <b>1 lost</b> · 1 open" in out
+    assert "paid out $14.88" in out
+    # 14.88 back + 6.20 held - (6.58 + 6.56 + 5.00) paid
+    assert "Net: <b>+$2.94</b>" in out
+    assert "25.00" not in out            # the paper copy never shows
+
+
+def test_real_lists_the_latest_deals(captured_messages, real_money_env):
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real")
+    out = "\n".join(captured_messages)
+    assert "<b>Latest deals</b>" in out
+    assert "🏆 PAID OUT 14.88 × Yes  <b>+$14.88</b>" in out
+    assert "🟢 BUY 14.88 × Yes @ 0.430  <b>-$6.58</b>" in out
+    assert "Dplus win market · copied 0x1111…1111 · won +$8.30" in out
+    assert "Lost market · copied 0x1111…1111 · lost -$6.56" in out
+    # Newest first.
+    assert out.index("Open market · copied") < out.index("Dplus win market · copied")
+
+
+def test_real_reads_activity_from_the_first_real_order(captured_messages,
+                                                       real_money_env):
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real")
+    assert real_money_env["since_ts"] == _LIVE      # the paper row is not the start
+
+
+def test_real_by_wallet_uses_the_true_results(captured_messages, real_money_env):
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real")
+    out = "\n".join(captured_messages)
+    assert "0x1111…1111  3 · 1W/1L · $18.14 · +$1.74 · 1 open" in out
+
+
+def test_real_says_so_when_the_holdings_cannot_be_read(captured_messages,
+                                                       real_money_env, monkeypatch):
     from src import telegram_bot
     from src.copy_trading import real_money
 
     monkeypatch.setattr(real_money, "fetch_chain_positions", lambda *_a, **_kw: None)
     telegram_bot._handle_command("/real")
     out = "\n".join(captured_messages)
-    assert "the chain could not be read" in out
+    assert "Polymarket's holdings could not be read" in out
+    assert "results need the holdings" in out
+    assert "Total:" not in out           # never a confident total without them
+
+
+def test_real_says_so_when_the_trade_history_cannot_be_read(captured_messages,
+                                                            real_money_env,
+                                                            monkeypatch):
+    from src import telegram_bot
+    from src.copy_trading import real_money
+
+    monkeypatch.setattr(real_money, "fetch_activity", lambda *_a, **_kw: None)
+    telegram_bot._handle_command("/real")
+    out = "\n".join(captured_messages)
+    assert "trade history could not be read" in out
+    assert "Latest deals" not in out
+    assert "Cash: <b>$77.15</b>" in out      # the balance still renders
+    # Which holdings predate live trading is unknowable without the history.
+    assert "before live trading" not in out
+
+
+def test_real_says_so_when_the_cash_cannot_be_read(captured_messages,
+                                                   real_money_env, monkeypatch):
+    from src import telegram_bot
+
+    monkeypatch.setattr(telegram_bot, "_read_real_cash", lambda: None)
+    telegram_bot._handle_command("/real")
+    out = "\n".join(captured_messages)
+    assert "Cash: ⚠ could not read the wallet" in out
+    assert "Total:" not in out
 
 
 def test_real_with_no_real_orders_says_everything_is_paper(captured_messages,
+                                                           real_money_env,
                                                            monkeypatch):
     from src import telegram_bot
-    from src.copy_trading import pnl as s1pnl
-    from src.copy_trading import real_money
 
     monkeypatch.setattr(telegram_bot, "_load_s1_trades",
                         lambda: [{"status": "PREVIEW", "copy_size": 25.0,
                                   "timestamp": "2026-09-10T12:00:00+00:00"}])
-    monkeypatch.setattr(s1pnl, "load_realized", lambda: [])
-    monkeypatch.setattr(real_money, "fetch_chain_positions", lambda *_a, **_kw: [])
-    monkeypatch.setattr(telegram_bot, "_real_header_lines", lambda: ["  (header)"])
-
     telegram_bot._handle_command("/real")
     out = "\n".join(captured_messages)
     assert "No real order has ever been placed" in out
+    assert "Latest deals" not in out
 
 
-def test_real_window_argument_scopes_the_report(captured_messages, real_money_env,
-                                                monkeypatch):
-    """A 1-day window drops the 2026-09-10 orders (the fixture is older)."""
+def test_real_window_argument_labels_the_report(captured_messages, real_money_env):
     from src import telegram_bot
 
     telegram_bot._handle_command("/real 1")
     out = "\n".join(captured_messages)
-    assert "last 1 day(s)" in out
-    assert "No real order has ever been placed" in out
+    assert "<b>Last 1 day(s)</b>" in out
+
+
+def test_real_window_keeps_markets_bought_inside_it(real_money_env):
+    from src import telegram_bot
+
+    data = telegram_bot._build_real_report(1, now=_LIVE + 3 * 3600 + 60 + 86400)
+    assert sorted(m.condition_id for m in data.book.markets) == ["o"]
+    assert [d.condition_id for d in data.book.deals] == ["o"]
 
 
 def test_real_rejects_a_nonsense_window(captured_messages, real_money_env):
@@ -614,11 +709,30 @@ def test_real_rejects_a_nonsense_window(captured_messages, real_money_env):
     assert "Usage" in captured_messages[-1]
 
 
-def test_real_orders_lists_the_individual_tickets(captured_messages, real_money_env):
+@pytest.mark.parametrize("cmd", ["/real deals", "/real orders"])
+def test_real_deals_lists_polymarket_deals(captured_messages, real_money_env, cmd):
     from src import telegram_bot
 
-    telegram_bot._handle_command("/real orders")
+    telegram_bot._handle_command(cmd)
     out = "\n".join(captured_messages)
-    assert "Real orders" in out
-    assert "ord-1" in out and "ord-2" in out
-    assert "FILLED" in out and "UNFILLED" in out
+    assert "Real deals" in out and "last 4 of 4" in out
+    assert "PAID OUT" in out and "Open market" in out
+
+
+def test_real_deals_honours_the_count(captured_messages, real_money_env):
+    from src import telegram_bot
+
+    telegram_bot._handle_command("/real deals 1")
+    out = "\n".join(captured_messages)
+    assert "last 1 of 4" in out
+    assert "Open market" in out and "Lost market" not in out
+
+
+def test_real_deals_when_the_history_cannot_be_read(captured_messages,
+                                                    real_money_env, monkeypatch):
+    from src import telegram_bot
+    from src.copy_trading import real_money
+
+    monkeypatch.setattr(real_money, "fetch_activity", lambda *_a, **_kw: None)
+    telegram_bot._handle_command("/real deals")
+    assert "could not be read" in captured_messages[-1]
