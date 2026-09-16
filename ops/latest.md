@@ -1,7 +1,7 @@
-# ops digest 2026-09-16T16:53:40.755175+00:00 (last 24h)
+# ops digest 2026-09-16T18:21:37.889512+00:00 (last 24h)
 
 ## money state
-{"cash": 77.149211, "open_cost": 29.65, "equity": 106.8, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-16", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 64, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789577535.4710684, "day": "2026-09-16"}
+{"cash": 77.149211, "open_cost": 29.65, "equity": 106.8, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-16", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 64, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789582734.064004, "day": "2026-09-16"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-16", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x05878ac343c1387d592042d788424412733ac40b": 1, "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1}, "yesterday": "2026-09-15", "closed_reason": ""}
@@ -9,53 +9,23 @@
 ## tier exposure: {"1a": [0, 0], "1b": [0, 0], "1c": [0, 0]}
 ## probation: {"0x05878ac343c1387d592042d788424412733ac40b": {"since": 1789234925.3749237, "settled": 1}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"since": 1789234925.3749237, "settled": 0}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"since": 1789235966.2959275, "settled": 0}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"since": 1789235966.2959275, "settled": 0}, "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {"since": 1789236552.0468774, "settled": 0}, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {"since": 1789236552.0468774, "settled": 0}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"since": 1789237149.0874667, "settled": 0}, "0xd970693a3384dc762b191707a4927ac3814bbbba": {"since": 1789237149.0874667, "settled": 0}, "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {"since": 1789317835.1951635, "settled": 0}, "0x722abb5460060870d46728bf45f66a6b1635d6ed": {"since": 1789491935.7564917, "settled": 0}}
 ## form (each wallet on its own money, last 14 days, our slice)
-in form  0x05878ac3: 139 settled, 55% won vs 48% needed, net +24.9% on $122,106, worst day -2,592
-in form  0x09b045ba: 49 settled, 76% won vs 60% needed, net +18.5% on $18,747, worst day -306
+in form  0x05878ac3: 128 settled, 53% won vs 48% needed, net +19.4% on $110,791, worst day -2,592
+in form  0x09b045ba: 48 settled, 77% won vs 60% needed, net +19.3% on $18,365, worst day -306
 in form  0x1985327e: 62 settled, 81% won vs 55% needed, net +22.6% on $24,258, worst day -313
 benched  0x3f3aa700: 160 settled, 51% won vs 54% needed, net -1.2% on $414,324, worst day -39,107
 benched  0x4980930d: 8 settled, 38% won vs 36% needed, net +61.4% on $8,781, worst day -1,364
-benched  0x5213eb85: 97 settled, 44% won vs 35% needed, net -14.6% on $51,746, worst day -2,744
-benched  0x57b25849: 53 settled, 45% won vs 46% needed, net -9.1% on $51,935, worst day -3,820
-in form  0x722abb54: 99 settled, 79% won vs 74% needed, net +10.1% on $219,896, worst day -5,949
-benched  0x73653992: 15 settled, 80% won vs 61% needed, net +77.6% on $20,063, worst day -839
+benched  0x5213eb85: 92 settled, 47% won vs 35% needed, net -9.6% on $49,216, worst day -2,023
+benched  0x57b25849: 50 settled, 46% won vs 46% needed, net -8.3% on $47,088, worst day -3,820
+in form  0x722abb54: 100 settled, 79% won vs 74% needed, net +10.3% on $221,984, worst day -5,949
+benched  0x73653992: 13 settled, 92% won vs 61% needed, net +108.4% on $16,848, worst day -330
 benched  0x9f15613e: 203 settled, 51% won vs 50% needed, net +8.4% on $554,669, worst day -19,498
-in form  0xd970693a: 60 settled, 73% won vs 57% needed, net +18.4% on $24,857, worst day +27
+in form  0xd970693a: 59 settled, 73% won vs 57% needed, net +17.8% on $24,496, worst day +27
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
 benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, worst day -1,129
 
-## ledger (2 rows)
-{"ts": 1789491935.7564917, "day": "2026-09-15", "kind": "auto_admit", "before": "0x722abb54 not in Z", "after": "in set Z, on probation", "detail": "30 settled paper copies, paper ROI +18.1%, trimmed +9.2%, ideal +19.1%", "push": "WALLET", "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
-{"ts": 1789491940.0932405, "day": "2026-09-15", "kind": "form", "before": "0x722abb54 unknown", "after": "in form", "detail": "0x722abb54: 94 settled, 78% won vs 73% needed, net +10.8% on $214,557, worst day -5,949", "push": null, "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
+## ledger (0 rows)
 
-## important lines (357)
-2026-09-15 17:05:38 WARNING [zset] ADMITTED 0x722abb5460060870d46728bf45f66a6b1635d6ed to set Z (+9% over 27 copies with its best 3 deleted). Real money may now follow it once armed.
-2026-09-15 17:05:39 INFO  [ops] auto_admit: '0x722abb54 not in Z' -> 'in set Z, on probation' | 30 settled paper copies, paper ROI +18.1%, trimmed +9.2%, ideal +19.1%
-2026-09-15 17:05:43 INFO  [ops] form: '0x722abb54 unknown' -> 'in form' | 0x722abb54: 94 settled, 78% won vs 73% needed, net +10.8% on $214,557, worst day -5,949
-2026-09-15 17:05:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:05:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:06:08 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00
-2026-09-15 17:06:09 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00
-2026-09-15 17:31:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:36:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:37:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:37:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:38:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:40:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:41:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:41:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:42:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:44:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:44:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:46:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:47:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:49:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:50:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:50:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:51:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:51:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:54:57 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00
-2026-09-15 17:55:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 18:02:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+## important lines (327)
 2026-09-15 18:21:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-15 18:24:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-15 18:35:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
@@ -379,9 +349,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-16 14:21:25 ERROR [inventory] API sync failed: 
 2026-09-16 15:07:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-16 16:27:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-15 17:06:09 TRADE [LIVE] BUY $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100, order 0x57aa7b4fe4...
-2026-09-15 17:06:10 TRADE [verify] FILLED: BUY 7.90 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100
-2026-09-15 17:54:57 TRADE [LIVE] SELL $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800, order 0x8a16f7e69c...
-2026-09-15 17:54:57 TRADE [verify] FILLED: SELL 7.27 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800
+2026-09-16 16:58:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-16 18:12:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-16 01:54:14 INFO  [recovery] No pending orders to recover
 2026-09-16 13:28:10 INFO  [recovery] No pending orders to recover
