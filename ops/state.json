@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-16T11:30:07.634309+00:00",
+ "generated": "2026-09-16T14:20:46.806056+00:00",
  "money": {
   "cash": 77.149211,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789557936.2539198,
+  "ts": 1789568130.9809146,
   "day": "2026-09-16"
  },
  "arm": {
@@ -161,7 +161,7 @@
    "111426907502041127672975490206099880504280577275905396462330907920963353499778",
    "45664770486754830410276385709296820028038533040592413432582939697519809216911"
   ],
-  "form_scan_ts": 1789536604.5442166,
+  "form_scan_ts": 1789558238.2392051,
   "daily_line_attempt_day": "2026-09-16",
   "daily_line_sent": true,
   "daily_line_day": "2026-09-16",
@@ -211,22 +211,22 @@
   }
  },
  "form": {
-  "ts": 1789536605.1488545,
+  "ts": 1789558238.850544,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
-    "n": 144,
-    "won": 80,
-    "cost": 126901.42,
-    "back": 164033.49,
-    "avg_price": 0.4771491928914203,
+    "n": 139,
+    "won": 76,
+    "cost": 122106.12,
+    "back": 152530.51,
+    "avg_price": 0.47702171631951945,
     "worst_day": -2591.78,
     "ok": true,
-    "reason": "56% came out ahead vs 48% needed, net +29.3%",
-    "ts": 1789536605.1488545,
-    "hit": 0.5556,
-    "net_pct": 29.26
+    "reason": "55% came out ahead vs 48% needed, net +24.9%",
+    "ts": 1789558238.850544,
+    "hit": 0.5468,
+    "net_pct": 24.92
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
@@ -252,7 +252,7 @@
     "worst_day": -312.79,
     "ok": true,
     "reason": "81% came out ahead vs 55% needed, net +22.6%",
-    "ts": 1789536605.1488545,
+    "ts": 1789558238.850544,
     "hit": 0.8065,
     "net_pct": 22.62
    },
@@ -280,37 +280,37 @@
     "worst_day": -1364.22,
     "ok": false,
     "reason": "only 8 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789536605.1488545,
+    "ts": 1789558238.850544,
     "hit": 0.375,
     "net_pct": 61.38
    },
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-    "n": 94,
-    "won": 44,
-    "cost": 50463.69,
-    "back": 45137.95,
-    "avg_price": 0.3459811763063603,
-    "worst_day": -2023.3,
+    "n": 97,
+    "won": 43,
+    "cost": 51746.45,
+    "back": 44189.68,
+    "avg_price": 0.349184520615523,
+    "worst_day": -2743.6,
     "ok": false,
-    "reason": "net -10.6% (need +2%)",
-    "ts": 1789536605.1488545,
-    "hit": 0.4681,
-    "net_pct": -10.55
+    "reason": "net -14.6% (need +2%)",
+    "ts": 1789558238.850544,
+    "hit": 0.4433,
+    "net_pct": -14.6
    },
    "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {
     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
-    "n": 54,
+    "n": 53,
     "won": 24,
-    "cost": 55301.66,
-    "back": 46456.15,
-    "avg_price": 0.4585122409937245,
+    "cost": 51934.93,
+    "back": 47184.06,
+    "avg_price": 0.4577131433394407,
     "worst_day": -3820.23,
     "ok": false,
-    "reason": "44% came out ahead vs 46% needed (-1 points, need +3)",
-    "ts": 1789536605.1488545,
-    "hit": 0.4444,
-    "net_pct": -16.0
+    "reason": "45% came out ahead vs 46% needed (-0 points, need +3)",
+    "ts": 1789558238.850544,
+    "hit": 0.4528,
+    "net_pct": -9.15
    },
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
@@ -322,23 +322,23 @@
     "worst_day": -5949.41,
     "ok": true,
     "reason": "79% came out ahead vs 74% needed, net +10.1%",
-    "ts": 1789536605.1488545,
+    "ts": 1789558238.850544,
     "hit": 0.7879,
     "net_pct": 10.13
    },
    "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
-    "n": 16,
+    "n": 15,
     "won": 12,
-    "cost": 21216.07,
-    "back": 36720.47,
-    "avg_price": 0.6236303195774395,
-    "worst_day": -900.51,
+    "cost": 20063.07,
+    "back": 35629.4,
+    "avg_price": 0.6109900216995445,
+    "worst_day": -838.59,
     "ok": false,
-    "reason": "only 16 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789536605.1488545,
-    "hit": 0.75,
-    "net_pct": 73.08
+    "reason": "only 15 settled bets on our slice in 14 days (need 30)",
+    "ts": 1789558238.850544,
+    "hit": 0.8,
+    "net_pct": 77.59
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
@@ -356,17 +356,17 @@
    },
    "0xd970693a3384dc762b191707a4927ac3814bbbba": {
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
-    "n": 59,
-    "won": 43,
-    "cost": 24472.66,
-    "back": 28999.15,
-    "avg_price": 0.5715891842737733,
+    "n": 60,
+    "won": 44,
+    "cost": 24857.35,
+    "back": 29436.44,
+    "avg_price": 0.5737002836537283,
     "worst_day": 26.63,
     "ok": true,
-    "reason": "73% came out ahead vs 57% needed, net +18.5%",
-    "ts": 1789536605.1488545,
-    "hit": 0.7288,
-    "net_pct": 18.5
+    "reason": "73% came out ahead vs 57% needed, net +18.4%",
+    "ts": 1789558238.850544,
+    "hit": 0.7333,
+    "net_pct": 18.42
    },
    "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
@@ -378,7 +378,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789536605.1488545,
+    "ts": 1789558238.850544,
     "hit": 0.0,
     "net_pct": 0.0
    },
@@ -403,28 +403,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1789472543.7269788,
-   "day": "2026-09-15",
-   "kind": "settled",
-   "before": "open $6.40",
-   "after": "paid $0.01",
-   "detail": "lost -6.39 on 'LoL: T1 Academy vs KT Rolster Challenger' (0x05878ac3, tier 1b)",
-   "push": null,
-   "token_id": "45664770486754830410276385709296820028038533040592413432582939697519809216911",
-   "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
-   "pnl": -6.39,
-   "won": false
-  },
-  {
-   "ts": 1789477077.1364615,
-   "day": "2026-09-15",
-   "kind": "escalation_delivered",
-   "before": "routine escalation",
-   "after": "sent",
-   "detail": "Ops digest is stale again. Last refresh 2026-09-15 07:43 UTC, now 12:42 UTC, a gap of about 5 hours, past the 3 hour bar",
-   "push": "BOT"
-  },
-  {
    "ts": 1789491935.7564917,
    "day": "2026-09-15",
    "kind": "auto_admit",
@@ -446,12 +424,6 @@
   }
  ],
  "important": [
-  "2026-09-15 11:42:23 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
-  "2026-09-15 11:42:23 INFO  [ops] settled: 'open $6.40' -> 'paid $0.01' | lost -6.39 on 'LoL: T1 Academy vs KT Rolster Challenger' (0x05878ac3, tier 1b)",
-  "2026-09-15 12:57:57 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest is stale again. Last refresh 2026-09-15 07:43 UTC, now 12:42 UTC, a gap of about 5 hours, past the 3 hour bar",
-  "2026-09-15 13:25:54 INFO  Received signal 15, shutting down...",
-  "2026-09-15 13:26:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-15 13:26:24 INFO  Bot started. Monitoring trades...",
   "2026-09-15 17:05:38 WARNING [zset] ADMITTED 0x722abb5460060870d46728bf45f66a6b1635d6ed to set Z (+9% over 27 copies with its best 3 deleted). Real money may now follow it once armed.",
   "2026-09-15 17:05:39 INFO  [ops] auto_admit: '0x722abb54 not in Z' -> 'in set Z, on probation' | 30 settled paper copies, paper ROI +18.1%, trimmed +9.2%, ideal +19.1%",
   "2026-09-15 17:05:43 INFO  [ops] form: '0x722abb54 unknown' -> 'in form' | 0x722abb54: 94 settled, 78% won vs 73% needed, net +10.8% on $214,557, worst day -5,949",
@@ -795,11 +767,16 @@
   "2026-09-16 10:40:05 ERROR Network error fetching 0x3f3a...e8fd: ",
   "2026-09-16 10:40:05 ERROR Network error fetching 0xfd3e...5a7a: ",
   "2026-09-16 10:40:05 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-15 13:26:24 INFO  [recovery] No pending orders to recover",
+  "2026-09-16 11:38:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-16 12:05:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-16 13:27:46 INFO  Received signal 15, shutting down...",
+  "2026-09-16 13:28:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-16 13:28:10 INFO  Bot started. Monitoring trades...",
   "2026-09-15 17:06:09 TRADE [LIVE] BUY $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100, order 0x57aa7b4fe4...",
   "2026-09-15 17:06:10 TRADE [verify] FILLED: BUY 7.90 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100",
   "2026-09-15 17:54:57 TRADE [LIVE] SELL $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800, order 0x8a16f7e69c...",
   "2026-09-15 17:54:57 TRADE [verify] FILLED: SELL 7.27 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800",
-  "2026-09-16 01:54:14 INFO  [recovery] No pending orders to recover"
+  "2026-09-16 01:54:14 INFO  [recovery] No pending orders to recover",
+  "2026-09-16 13:28:10 INFO  [recovery] No pending orders to recover"
  ]
 }

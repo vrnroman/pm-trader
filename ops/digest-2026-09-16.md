@@ -1,7 +1,7 @@
-# ops digest 2026-09-16T11:29:59.043268+00:00 (last 24h)
+# ops digest 2026-09-16T14:20:31.569902+00:00 (last 24h)
 
 ## money state
-{"cash": 77.149211, "open_cost": 29.65, "equity": 106.8, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-16", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 64, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789557936.2539198, "day": "2026-09-16"}
+{"cash": 77.149211, "open_cost": 29.65, "equity": 106.8, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-16", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 64, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789568130.9809146, "day": "2026-09-16"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-16", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x05878ac343c1387d592042d788424412733ac40b": 1, "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1}, "yesterday": "2026-09-15", "closed_reason": ""}
@@ -9,33 +9,25 @@
 ## tier exposure: {"1a": [0, 0], "1b": [0, 0], "1c": [0, 0]}
 ## probation: {"0x05878ac343c1387d592042d788424412733ac40b": {"since": 1789234925.3749237, "settled": 1}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"since": 1789234925.3749237, "settled": 0}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"since": 1789235966.2959275, "settled": 0}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"since": 1789235966.2959275, "settled": 0}, "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {"since": 1789236552.0468774, "settled": 0}, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {"since": 1789236552.0468774, "settled": 0}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"since": 1789237149.0874667, "settled": 0}, "0xd970693a3384dc762b191707a4927ac3814bbbba": {"since": 1789237149.0874667, "settled": 0}, "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {"since": 1789317835.1951635, "settled": 0}, "0x722abb5460060870d46728bf45f66a6b1635d6ed": {"since": 1789491935.7564917, "settled": 0}}
 ## form (each wallet on its own money, last 14 days, our slice)
-in form  0x05878ac3: 144 settled, 56% won vs 48% needed, net +29.3% on $126,901, worst day -2,592
+in form  0x05878ac3: 139 settled, 55% won vs 48% needed, net +24.9% on $122,106, worst day -2,592
 in form  0x09b045ba: 49 settled, 76% won vs 60% needed, net +18.5% on $18,747, worst day -306
 in form  0x1985327e: 62 settled, 81% won vs 55% needed, net +22.6% on $24,258, worst day -313
 benched  0x3f3aa700: 160 settled, 51% won vs 54% needed, net -1.2% on $414,324, worst day -39,107
 benched  0x4980930d: 8 settled, 38% won vs 36% needed, net +61.4% on $8,781, worst day -1,364
-benched  0x5213eb85: 94 settled, 47% won vs 35% needed, net -10.6% on $50,464, worst day -2,023
-benched  0x57b25849: 54 settled, 44% won vs 46% needed, net -16.0% on $55,302, worst day -3,820
+benched  0x5213eb85: 97 settled, 44% won vs 35% needed, net -14.6% on $51,746, worst day -2,744
+benched  0x57b25849: 53 settled, 45% won vs 46% needed, net -9.1% on $51,935, worst day -3,820
 in form  0x722abb54: 99 settled, 79% won vs 74% needed, net +10.1% on $219,896, worst day -5,949
-benched  0x73653992: 16 settled, 75% won vs 62% needed, net +73.1% on $21,216, worst day -901
+benched  0x73653992: 15 settled, 80% won vs 61% needed, net +77.6% on $20,063, worst day -839
 benched  0x9f15613e: 203 settled, 51% won vs 50% needed, net +8.4% on $554,669, worst day -19,498
-in form  0xd970693a: 59 settled, 73% won vs 57% needed, net +18.5% on $24,473, worst day +27
+in form  0xd970693a: 60 settled, 73% won vs 57% needed, net +18.4% on $24,857, worst day +27
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
 benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, worst day -1,129
 
-## ledger (4 rows)
-{"ts": 1789472543.7269788, "day": "2026-09-15", "kind": "settled", "before": "open $6.40", "after": "paid $0.01", "detail": "lost -6.39 on 'LoL: T1 Academy vs KT Rolster Challenger' (0x05878ac3, tier 1b)", "push": null, "token_id": "45664770486754830410276385709296820028038533040592413432582939697519809216911", "wallet": "0x05878ac343c1387d592042d788424412733ac40b", "pnl": -6.39, "won": false}
-{"ts": 1789477077.1364615, "day": "2026-09-15", "kind": "escalation_delivered", "before": "routine escalation", "after": "sent", "detail": "Ops digest is stale again. Last refresh 2026-09-15 07:43 UTC, now 12:42 UTC, a gap of about 5 hours, past the 3 hour bar", "push": "BOT"}
+## ledger (2 rows)
 {"ts": 1789491935.7564917, "day": "2026-09-15", "kind": "auto_admit", "before": "0x722abb54 not in Z", "after": "in set Z, on probation", "detail": "30 settled paper copies, paper ROI +18.1%, trimmed +9.2%, ideal +19.1%", "push": "WALLET", "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
 {"ts": 1789491940.0932405, "day": "2026-09-15", "kind": "form", "before": "0x722abb54 unknown", "after": "in form", "detail": "0x722abb54: 94 settled, 78% won vs 73% needed, net +10.8% on $214,557, worst day -5,949", "push": null, "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
 
-## important lines (355)
-2026-09-15 11:42:23 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00
-2026-09-15 11:42:23 INFO  [ops] settled: 'open $6.40' -> 'paid $0.01' | lost -6.39 on 'LoL: T1 Academy vs KT Rolster Challenger' (0x05878ac3, tier 1b)
-2026-09-15 12:57:57 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest is stale again. Last refresh 2026-09-15 07:43 UTC, now 12:42 UTC, a gap of about 5 hours, past the 3 hour bar
-2026-09-15 13:25:54 INFO  Received signal 15, shutting down...
-2026-09-15 13:26:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
-2026-09-15 13:26:24 INFO  Bot started. Monitoring trades...
+## important lines (354)
 2026-09-15 17:05:38 WARNING [zset] ADMITTED 0x722abb5460060870d46728bf45f66a6b1635d6ed to set Z (+9% over 27 copies with its best 3 deleted). Real money may now follow it once armed.
 2026-09-15 17:05:39 INFO  [ops] auto_admit: '0x722abb54 not in Z' -> 'in set Z, on probation' | 30 settled paper copies, paper ROI +18.1%, trimmed +9.2%, ideal +19.1%
 2026-09-15 17:05:43 INFO  [ops] form: '0x722abb54 unknown' -> 'in form' | 0x722abb54: 94 settled, 78% won vs 73% needed, net +10.8% on $214,557, worst day -5,949
@@ -379,9 +371,14 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-16 10:40:05 ERROR Network error fetching 0x3f3a...e8fd: 
 2026-09-16 10:40:05 ERROR Network error fetching 0xfd3e...5a7a: 
 2026-09-16 10:40:05 ERROR Network error fetching 0x0587...c40b: 
-2026-09-15 13:26:24 INFO  [recovery] No pending orders to recover
+2026-09-16 11:38:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-16 12:05:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-16 13:27:46 INFO  Received signal 15, shutting down...
+2026-09-16 13:28:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={"error":"Could not create api key"}
+2026-09-16 13:28:10 INFO  Bot started. Monitoring trades...
 2026-09-15 17:06:09 TRADE [LIVE] BUY $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100, order 0x57aa7b4fe4...
 2026-09-15 17:06:10 TRADE [verify] FILLED: BUY 7.90 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8100
 2026-09-15 17:54:57 TRADE [LIVE] SELL $6.40 on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800, order 0x8a16f7e69c...
 2026-09-15 17:54:57 TRADE [verify] FILLED: SELL 7.27 shares on 'Will El Ahly SC win on 2026-09-15?' @ 0.8800
 2026-09-16 01:54:14 INFO  [recovery] No pending orders to recover
+2026-09-16 13:28:10 INFO  [recovery] No pending orders to recover
