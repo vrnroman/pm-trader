@@ -1,7 +1,7 @@
-# ops digest 2026-09-17T19:12:58.637070+00:00 (last 24h)
+# ops digest 2026-09-17T21:21:05.246722+00:00 (last 24h)
 
 ## money state
-{"cash": 83.302391, "open_cost": 29.65, "equity": 112.95, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-17", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 64, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789672320.7850404, "day": "2026-09-17"}
+{"cash": 83.302391, "open_cost": 29.65, "equity": 112.95, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-17", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 64, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789679853.5145924, "day": "2026-09-17"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-17", "spent_usd": 12.8, "wallet_copies": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x05878ac343c1387d592042d788424412733ac40b": 1}, "wallet_copies_yesterday": {"0x1985327e5782c62362dbbdf714c423d40d8f51ab": 1}, "yesterday": "2026-09-16", "closed_reason": ""}
@@ -25,14 +25,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 
 ## ledger (0 rows)
 
-## important lines (23)
-2026-09-16 19:35:14 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00
-2026-09-16 19:35:15 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00
-2026-09-16 19:37:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={"error":"not enough balance / allowance: the balance is not enough -\u003e balance: 11640000, order amount: 14550000"}
-2026-09-16 19:37:57 ERROR [exec] Order placement failed: PolyApiException[status_code=400, error_message={'error': 'not enough balance / allowance: the balance is not enough -> balance: 11640000, order amount: 14550000'}]
-2026-09-16 19:37:57 ERROR [exec] Order placement returned None for 'Will Stade Rennais FC 1901 win on 2026-0'
-2026-09-16 21:05:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-16 21:20:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+## important lines (14)
 2026-09-16 23:07:35 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00
 2026-09-17 00:17:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-17 01:56:41 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00
@@ -43,8 +36,6 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-17 09:16:01 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00
 2026-09-17 09:16:02 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00
 2026-09-17 10:58:24 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00
-2026-09-16 19:35:15 TRADE [LIVE] BUY $6.40 on 'Will Stade Rennais FC 1901 win on 2026-0' @ 0.5500, order 0x187e04cd12...
-2026-09-16 19:35:16 TRADE [verify] FILLED: BUY 11.64 shares on 'Will Stade Rennais FC 1901 win on 2026-0' @ 0.5500
 2026-09-17 01:56:42 TRADE [LIVE] BUY $6.40 on 'Will Internacional de Bogotá win on 2026' @ 0.8700, order 0x4bf6f099e9...
 2026-09-17 01:56:42 TRADE [verify] FILLED: BUY 7.36 shares on 'Will Internacional de Bogotá win on 2026' @ 0.8700
 2026-09-17 09:16:01 TRADE [LIVE] BUY $6.40 on 'LoL: Top Esports vs Invictus Gaming - Ga' @ 0.4900, order 0x937788d101...

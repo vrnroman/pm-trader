@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-17T19:13:06.279455+00:00",
+ "generated": "2026-09-17T21:21:12.700007+00:00",
  "money": {
   "cash": 83.302391,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789672320.7850404,
+  "ts": 1789679853.5145924,
   "day": "2026-09-17"
  },
  "arm": {
@@ -405,13 +405,6 @@
  },
  "ledger_tail": [],
  "important": [
-  "2026-09-16 19:35:14 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
-  "2026-09-16 19:35:15 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
-  "2026-09-16 19:37:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={\"error\":\"not enough balance / allowance: the balance is not enough -\\u003e balance: 11640000, order amount: 14550000\"}",
-  "2026-09-16 19:37:57 ERROR [exec] Order placement failed: PolyApiException[status_code=400, error_message={'error': 'not enough balance / allowance: the balance is not enough -> balance: 11640000, order amount: 14550000'}]",
-  "2026-09-16 19:37:57 ERROR [exec] Order placement returned None for 'Will Stade Rennais FC 1901 win on 2026-0'",
-  "2026-09-16 21:05:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-16 21:20:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-16 23:07:35 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-17 00:17:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-17 01:56:41 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
@@ -422,8 +415,6 @@
   "2026-09-17 09:16:01 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00",
   "2026-09-17 09:16:02 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
   "2026-09-17 10:58:24 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
-  "2026-09-16 19:35:15 TRADE [LIVE] BUY $6.40 on 'Will Stade Rennais FC 1901 win on 2026-0' @ 0.5500, order 0x187e04cd12...",
-  "2026-09-16 19:35:16 TRADE [verify] FILLED: BUY 11.64 shares on 'Will Stade Rennais FC 1901 win on 2026-0' @ 0.5500",
   "2026-09-17 01:56:42 TRADE [LIVE] BUY $6.40 on 'Will Internacional de Bogotá win on 2026' @ 0.8700, order 0x4bf6f099e9...",
   "2026-09-17 01:56:42 TRADE [verify] FILLED: BUY 7.36 shares on 'Will Internacional de Bogotá win on 2026' @ 0.8700",
   "2026-09-17 09:16:01 TRADE [LIVE] BUY $6.40 on 'LoL: Top Esports vs Invictus Gaming - Ga' @ 0.4900, order 0x937788d101...",
