@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-17T18:13:28.729485+00:00",
+ "generated": "2026-09-17T19:13:06.279455+00:00",
  "money": {
   "cash": 83.302391,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789668704.469001,
+  "ts": 1789672320.7850404,
   "day": "2026-09-17"
  },
  "arm": {
@@ -405,7 +405,6 @@
  },
  "ledger_tail": [],
  "important": [
-  "2026-09-16 18:32:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-16 19:35:14 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
   "2026-09-16 19:35:15 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
   "2026-09-16 19:37:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={\"error\":\"not enough balance / allowance: the balance is not enough -\\u003e balance: 11640000, order amount: 14550000\"}",
