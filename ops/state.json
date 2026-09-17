@@ -1,27 +1,27 @@
 {
- "generated": "2026-09-16T22:56:26.641730+00:00",
+ "generated": "2026-09-17T00:15:13.420254+00:00",
  "money": {
-  "cash": 70.747211,
-  "open_cost": 36.05,
-  "equity": 106.8,
+  "cash": 82.387211,
+  "open_cost": 29.65,
+  "equity": 112.04,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
-   "date": "2026-09-16",
-   "spent_usd": 6.4,
+   "date": "2026-09-17",
+   "spent_usd": 0.0,
    "cap_usd": 32.0,
-   "remaining_usd": 25.6,
+   "remaining_usd": 32.0,
    "closed_reason": ""
   },
   "armed": true,
   "resolved_unclaimed": 64,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1789599146.2558858,
-  "day": "2026-09-16"
+  "ts": 1789603821.5330472,
+  "day": "2026-09-17"
  },
  "arm": {
   "armed": true,
@@ -32,16 +32,13 @@
   "floor_override": false
  },
  "spend": {
-  "date": "2026-09-16",
-  "spent_usd": 6.4,
-  "wallet_copies": {
+  "date": "2026-09-17",
+  "spent_usd": 0.0,
+  "wallet_copies": {},
+  "wallet_copies_yesterday": {
    "0x1985327e5782c62362dbbdf714c423d40d8f51ab": 1
   },
-  "wallet_copies_yesterday": {
-   "0x05878ac343c1387d592042d788424412733ac40b": 1,
-   "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1
-  },
-  "yesterday": "2026-09-15",
+  "yesterday": "2026-09-16",
   "closed_reason": ""
  },
  "tier": {
@@ -52,18 +49,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
+   "open_total": 0,
    "daily_date": "2026-09-16",
    "daily_volume": 6.4,
-   "placements": [
-    {
-     "token_id": "9383374385617352637963706274618012499104473522389193625144372245697258675276",
-     "cost": 6.4,
-     "ts": 1789587315.9477515,
-     "trader": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-     "title": "Will Stade Rennais FC 1901 win on 2026-09-16?"
-    }
-   ]
+   "placements": []
   },
   "1c": {
    "open_total": 0,
@@ -154,14 +143,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 106.8,
+  "last_equity": 112.04,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1789578746.287641,
+  "admit_scan_ts": 1789600362.4119368,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 3,
   "day_pnl": -6.39,
@@ -171,7 +160,7 @@
    "111426907502041127672975490206099880504280577275905396462330907920963353499778",
    "45664770486754830410276385709296820028038533040592413432582939697519809216911"
   ],
-  "form_scan_ts": 1789579953.519716,
+  "form_scan_ts": 1789601599.873973,
   "daily_line_attempt_day": "2026-09-16",
   "daily_line_sent": true,
   "daily_line_day": "2026-09-16",
@@ -221,50 +210,50 @@
   }
  },
  "form": {
-  "ts": 1789579954.224582,
+  "ts": 1789601604.368719,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
-    "n": 128,
-    "won": 68,
-    "cost": 110791.21,
-    "back": 132293.99,
-    "avg_price": 0.47538817092307395,
+    "n": 119,
+    "won": 63,
+    "cost": 104443.78,
+    "back": 125015.51,
+    "avg_price": 0.4738105190133935,
     "worst_day": -2591.78,
     "ok": true,
-    "reason": "53% came out ahead vs 48% needed, net +19.4%",
-    "ts": 1789579954.224582,
-    "hit": 0.5312,
-    "net_pct": 19.41
+    "reason": "53% came out ahead vs 47% needed, net +19.7%",
+    "ts": 1789601604.368719,
+    "hit": 0.5294,
+    "net_pct": 19.7
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
     "n": 48,
-    "won": 37,
-    "cost": 18365.45,
-    "back": 21915.79,
-    "avg_price": 0.603483153295008,
+    "won": 38,
+    "cost": 18357.92,
+    "back": 21945.54,
+    "avg_price": 0.600512410411932,
     "worst_day": -305.58,
     "ok": true,
-    "reason": "77% came out ahead vs 60% needed, net +19.3%",
-    "ts": 1789579954.224582,
-    "hit": 0.7708,
-    "net_pct": 19.33
+    "reason": "79% came out ahead vs 60% needed, net +19.5%",
+    "ts": 1789601604.368719,
+    "hit": 0.7917,
+    "net_pct": 19.54
    },
    "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-    "n": 62,
-    "won": 50,
-    "cost": 24258.35,
-    "back": 29744.88,
-    "avg_price": 0.5483163324694835,
-    "worst_day": -312.79,
+    "n": 59,
+    "won": 46,
+    "cost": 23244.35,
+    "back": 28018.83,
+    "avg_price": 0.5462893630273923,
+    "worst_day": -535.02,
     "ok": true,
-    "reason": "81% came out ahead vs 55% needed, net +22.6%",
-    "ts": 1789579954.224582,
-    "hit": 0.8065,
-    "net_pct": 22.62
+    "reason": "78% came out ahead vs 55% needed, net +20.5%",
+    "ts": 1789601604.368719,
+    "hit": 0.7797,
+    "net_pct": 20.54
    },
    "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": {
     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
@@ -290,65 +279,65 @@
     "worst_day": -1364.22,
     "ok": false,
     "reason": "only 8 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789579954.224582,
+    "ts": 1789601604.368719,
     "hit": 0.375,
     "net_pct": 61.38
    },
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-    "n": 92,
-    "won": 43,
-    "cost": 49215.68,
-    "back": 44473.35,
-    "avg_price": 0.34666370444188416,
+    "n": 87,
+    "won": 40,
+    "cost": 46324.23,
+    "back": 41101.39,
+    "avg_price": 0.3413289276025963,
     "worst_day": -2023.3,
     "ok": false,
-    "reason": "net -9.6% (need +2%)",
-    "ts": 1789579954.224582,
-    "hit": 0.4674,
-    "net_pct": -9.64
+    "reason": "net -11.3% (need +2%)",
+    "ts": 1789601604.368719,
+    "hit": 0.4598,
+    "net_pct": -11.27
    },
    "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {
     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
     "n": 50,
-    "won": 23,
-    "cost": 47088.48,
-    "back": 43184.06,
-    "avg_price": 0.46117191404228136,
+    "won": 22,
+    "cost": 46287.81,
+    "back": 41713.49,
+    "avg_price": 0.46167925330207876,
     "worst_day": -3820.23,
     "ok": false,
-    "reason": "46% came out ahead vs 46% needed (-0 points, need +3)",
-    "ts": 1789579954.224582,
-    "hit": 0.46,
-    "net_pct": -8.29
+    "reason": "44% came out ahead vs 46% needed (-2 points, need +3)",
+    "ts": 1789601604.368719,
+    "hit": 0.44,
+    "net_pct": -9.88
    },
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
-    "n": 100,
-    "won": 79,
-    "cost": 221984.42,
-    "back": 244901.57,
-    "avg_price": 0.7360045739755814,
+    "n": 101,
+    "won": 80,
+    "cost": 224583.43,
+    "back": 247521.23,
+    "avg_price": 0.7378777114698655,
     "worst_day": -5949.41,
     "ok": true,
-    "reason": "79% came out ahead vs 74% needed, net +10.3%",
-    "ts": 1789579954.224582,
-    "hit": 0.79,
-    "net_pct": 10.32
+    "reason": "79% came out ahead vs 74% needed, net +10.2%",
+    "ts": 1789601604.368719,
+    "hit": 0.7921,
+    "net_pct": 10.21
    },
    "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
-    "n": 13,
-    "won": 12,
-    "cost": 16847.53,
-    "back": 35108.31,
-    "avg_price": 0.6073073440461041,
+    "n": 12,
+    "won": 11,
+    "cost": 16065.03,
+    "back": 34302.38,
+    "avg_price": 0.6163534441330616,
     "worst_day": -329.83,
     "ok": false,
-    "reason": "only 13 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789579954.224582,
-    "hit": 0.9231,
-    "net_pct": 108.39
+    "reason": "only 12 settled bets on our slice in 14 days (need 30)",
+    "ts": 1789601604.368719,
+    "hit": 0.9167,
+    "net_pct": 113.52
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
@@ -366,17 +355,17 @@
    },
    "0xd970693a3384dc762b191707a4927ac3814bbbba": {
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
-    "n": 59,
-    "won": 43,
-    "cost": 24496.45,
-    "back": 28854.01,
-    "avg_price": 0.5745744650758265,
+    "n": 55,
+    "won": 41,
+    "cost": 22993.87,
+    "back": 27056.49,
+    "avg_price": 0.5741709682703456,
     "worst_day": 26.63,
     "ok": true,
-    "reason": "73% came out ahead vs 57% needed, net +17.8%",
-    "ts": 1789579954.224582,
-    "hit": 0.7288,
-    "net_pct": 17.79
+    "reason": "75% came out ahead vs 57% needed, net +17.7%",
+    "ts": 1789601604.368719,
+    "hit": 0.7455,
+    "net_pct": 17.67
    },
    "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
@@ -388,7 +377,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789579954.224582,
+    "ts": 1789601604.368719,
     "hit": 0.0,
     "net_pct": 0.0
    },
@@ -413,22 +402,6 @@
  },
  "ledger_tail": [],
  "important": [
-  "2026-09-15 23:01:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:06:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:10:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:12:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:14:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:20:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:20:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:30:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:31:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:31:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:40:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:41:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:58:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-15 23:59:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-16 00:11:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-16 00:13:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-16 00:15:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-16 00:19:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-16 00:27:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -635,6 +608,7 @@
   "2026-09-16 19:37:57 ERROR [exec] Order placement returned None for 'Will Stade Rennais FC 1901 win on 2026-0'",
   "2026-09-16 21:05:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-16 21:20:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-16 23:07:35 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-16 01:54:14 INFO  [recovery] No pending orders to recover",
   "2026-09-16 13:28:10 INFO  [recovery] No pending orders to recover",
   "2026-09-16 19:35:15 TRADE [LIVE] BUY $6.40 on 'Will Stade Rennais FC 1901 win on 2026-0' @ 0.5500, order 0x187e04cd12...",
