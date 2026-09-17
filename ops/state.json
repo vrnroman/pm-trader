@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-17T10:20:02.632897+00:00",
+ "generated": "2026-09-17T13:26:29.895636+00:00",
  "money": {
-  "cash": 75.942391,
-  "open_cost": 36.05,
-  "equity": 111.99,
+  "cash": 83.302391,
+  "open_cost": 29.65,
+  "equity": 112.95,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
@@ -17,10 +17,10 @@
   "resolved_unclaimed": 64,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1789640293.4843209,
+  "ts": 1789651499.0847769,
   "day": "2026-09-17"
  },
  "arm": {
@@ -52,18 +52,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
+   "open_total": 0,
    "daily_date": "2026-09-17",
    "daily_volume": 12.8,
-   "placements": [
-    {
-     "token_id": "84383326141863732710846075685443796749588891898721355805038212278593956511020",
-     "cost": 6.4,
-     "ts": 1789610202.2672997,
-     "trader": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
-     "title": "Will Internacional de Bogotá win on 2026-09-16?"
-    }
-   ]
+   "placements": []
   },
   "1c": {
    "open_total": 0,
@@ -154,14 +146,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 111.99,
+  "last_equity": 112.95,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1789622204.5176094,
+  "admit_scan_ts": 1789643909.6632888,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 3,
   "day_pnl": -6.39,
@@ -171,7 +163,7 @@
    "111426907502041127672975490206099880504280577275905396462330907920963353499778",
    "45664770486754830410276385709296820028038533040592413432582939697519809216911"
   ],
-  "form_scan_ts": 1789623410.538207,
+  "form_scan_ts": 1789645115.6023185,
   "daily_line_attempt_day": "2026-09-17",
   "daily_line_sent": true,
   "daily_line_day": "2026-09-17",
@@ -221,22 +213,22 @@
   }
  },
  "form": {
-  "ts": 1789623411.190176,
+  "ts": 1789645116.1478457,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
-    "n": 119,
-    "won": 63,
-    "cost": 104443.78,
-    "back": 125015.51,
-    "avg_price": 0.4738105190133935,
-    "worst_day": -2591.78,
+    "n": 115,
+    "won": 60,
+    "cost": 93786.96,
+    "back": 110912.96,
+    "avg_price": 0.4887411430818965,
+    "worst_day": -4536.54,
     "ok": true,
-    "reason": "53% came out ahead vs 47% needed, net +19.7%",
-    "ts": 1789623411.190176,
-    "hit": 0.5294,
-    "net_pct": 19.7
+    "reason": "52% came out ahead vs 49% needed, net +18.3%",
+    "ts": 1789645116.1478457,
+    "hit": 0.5217,
+    "net_pct": 18.26
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
@@ -248,7 +240,7 @@
     "worst_day": -305.58,
     "ok": true,
     "reason": "79% came out ahead vs 60% needed, net +19.4%",
-    "ts": 1789623411.190176,
+    "ts": 1789645116.1478457,
     "hit": 0.7872,
     "net_pct": 19.4
    },
@@ -262,7 +254,7 @@
     "worst_day": -535.02,
     "ok": true,
     "reason": "78% came out ahead vs 54% needed, net +21.0%",
-    "ts": 1789623411.190176,
+    "ts": 1789645116.1478457,
     "hit": 0.7833,
     "net_pct": 21.02
    },
@@ -290,37 +282,37 @@
     "worst_day": -1364.22,
     "ok": false,
     "reason": "only 8 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789623411.190176,
+    "ts": 1789645116.1478457,
     "hit": 0.375,
     "net_pct": 61.38
    },
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-    "n": 87,
-    "won": 40,
-    "cost": 46324.23,
-    "back": 41101.39,
-    "avg_price": 0.3413289276025963,
+    "n": 83,
+    "won": 37,
+    "cost": 43822.25,
+    "back": 37780.64,
+    "avg_price": 0.3521418329484531,
     "worst_day": -2023.3,
     "ok": false,
-    "reason": "net -11.3% (need +2%)",
-    "ts": 1789623411.190176,
-    "hit": 0.4598,
-    "net_pct": -11.27
+    "reason": "net -13.8% (need +2%)",
+    "ts": 1789645116.1478457,
+    "hit": 0.4458,
+    "net_pct": -13.79
    },
    "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {
     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
-    "n": 49,
+    "n": 45,
     "won": 21,
-    "cost": 45086.3,
+    "cost": 40932.31,
     "back": 38646.7,
-    "avg_price": 0.46388482953820137,
-    "worst_day": -5183.48,
+    "avg_price": 0.47823120561252613,
+    "worst_day": -3820.23,
     "ok": false,
-    "reason": "43% came out ahead vs 46% needed (-4 points, need +3)",
-    "ts": 1789623411.190176,
-    "hit": 0.4286,
-    "net_pct": -14.28
+    "reason": "47% came out ahead vs 48% needed (-1 points, need +3)",
+    "ts": 1789645116.1478457,
+    "hit": 0.4667,
+    "net_pct": -5.58
    },
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
@@ -332,7 +324,7 @@
     "worst_day": -5949.41,
     "ok": true,
     "reason": "79% came out ahead vs 74% needed, net +10.3%",
-    "ts": 1789623411.190176,
+    "ts": 1789645116.1478457,
     "hit": 0.7941,
     "net_pct": 10.28
    },
@@ -346,7 +338,7 @@
     "worst_day": -329.83,
     "ok": false,
     "reason": "only 12 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789623411.190176,
+    "ts": 1789645116.1478457,
     "hit": 0.9167,
     "net_pct": 113.52
    },
@@ -374,7 +366,7 @@
     "worst_day": 26.63,
     "ok": true,
     "reason": "75% came out ahead vs 58% needed, net +17.8%",
-    "ts": 1789623411.190176,
+    "ts": 1789645116.1478457,
     "hit": 0.75,
     "net_pct": 17.75
    },
@@ -388,7 +380,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789623411.190176,
+    "ts": 1789645116.1478457,
     "hit": 0.0,
     "net_pct": 0.0
    },
@@ -413,18 +405,6 @@
  },
  "ledger_tail": [],
  "important": [
-  "2026-09-16 10:33:11 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-16 10:33:11 ERROR Network error fetching 0x3f3a...e8fd: ",
-  "2026-09-16 10:33:11 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-16 10:33:11 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-16 10:33:11 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-16 10:40:05 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-16 10:40:05 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-16 10:40:05 ERROR Network error fetching 0x3f3a...e8fd: ",
-  "2026-09-16 10:40:05 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-16 10:40:05 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-16 11:38:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-16 12:05:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-16 13:27:46 INFO  Received signal 15, shutting down...",
   "2026-09-16 13:28:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
   "2026-09-16 13:28:10 INFO  Bot started. Monitoring trades...",
@@ -450,6 +430,7 @@
   "2026-09-17 09:06:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-17 09:16:01 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00",
   "2026-09-17 09:16:02 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
+  "2026-09-17 10:58:24 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-16 13:28:10 INFO  [recovery] No pending orders to recover",
   "2026-09-16 19:35:15 TRADE [LIVE] BUY $6.40 on 'Will Stade Rennais FC 1901 win on 2026-0' @ 0.5500, order 0x187e04cd12...",
   "2026-09-16 19:35:16 TRADE [verify] FILLED: BUY 11.64 shares on 'Will Stade Rennais FC 1901 win on 2026-0' @ 0.5500",
