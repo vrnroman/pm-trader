@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-18T00:41:47Z-1527",
-  "ts": 1789692107,
+  "id": "2026-09-18T06:40:53Z-42ac",
+  "ts": 1789713653,
   "kind": "nothing",
-  "message": "Digest fresh at 00:16 UTC. Armed, spend $0.00 of $32.00 cap today, equity $112.95 vs floor $56.00. Two copy attempts in the last 24h: Internacional Bogota 01:56 filled, LoL Top Esports 09:16 unfilled and cancelled cleanly. Five wallets in form and stable, none losing now. Recurring 404 no-orderbook errors and one 429 rate limit hit, same as prior days, no self-disarm and no guard failure. No Traceback.",
+  "message": "Digest fresh at 05:41 UTC. Armed, spend $6.40 of $32.00 cap today, equity $112.93 vs floor $56.00. One trade filled today (Club Bolivar $6.40), one prior trade unfilled and cancelled cleanly (LoL Top Esports). Five wallets in form, all net positive and above breakeven, none losing now. Recurring 404 no-orderbook errors and one 429 rate limit, same as prior days, no self-disarm, no guard failure, no Traceback.",
   "evidence": [
-    "# ops digest 2026-09-18T00:16:47.400152+00:00 (last 24h)",
-    "{\"cash\": 83.302391, \"open_cost\": 29.65, \"equity\": 112.95, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-18\", \"spent_usd\": 0.0, \"cap_usd\": 32.0, \"remaining_usd\": 32.0, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 64, \"tier\": {\"1a\": 0, \"1b\": 0, \"1c\": 0}, \"ts\": 1789690352.143254, \"day\": \"2026-09-18\"}",
+    "# ops digest 2026-09-18T05:41:53.087602+00:00 (last 24h)",
+    "{\"cash\": 76.881601, \"open_cost\": 36.05, \"equity\": 112.93, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-18\", \"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 64, \"tier\": {\"1a\": 0, \"1b\": 6.4, \"1c\": 0}, \"ts\": 1789709941.8743439, \"day\": \"2026-09-18\"}",
     "## arm: {\"armed\": true, \"ts\": 1789312200.3067093, \"by\": \"telegram\", \"reason\": \"\", \"first_armed_ts\": 1788617432.0499406, \"floor_override\": false}",
     "in form  0x722abb54: 103 settled, 80% won vs 74% needed, net +10.1% on $231,375, worst day -5,949",
-    "2026-09-17 09:16:03 INFO  [verify] UNFILLED, cancelled order 0x937788d101..."
+    "2026-09-18 00:52:07 TRADE [verify] FILLED: BUY 6.88 shares on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300"
   ],
   "commit": null
 }
