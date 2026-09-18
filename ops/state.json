@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-18T14:52:58.013597+00:00",
+ "generated": "2026-09-18T18:12:38.632016+00:00",
  "money": {
   "cash": 77.208751,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789742966.3110454,
+  "ts": 1789755103.9458296,
   "day": "2026-09-18"
  },
  "arm": {
@@ -143,6 +143,12 @@
    "tier": "1b",
    "ts": 1789491938.939273,
    "source": "telegram-gate"
+  },
+  "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
+   "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
+   "tier": "1b",
+   "ts": 1789752841.6491823,
+   "source": "telegram-gate"
   }
  },
  "watch": {
@@ -154,7 +160,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1789731139.827635,
+  "admit_scan_ts": 1789752804.3754005,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 4,
   "day_pnl": -6.4,
@@ -165,7 +171,7 @@
    "45664770486754830410276385709296820028038533040592413432582939697519809216911",
    "86842978223026466862449934105595250822075305679428664631958332197768084254089"
   ],
-  "form_scan_ts": 1789732046.7587883,
+  "form_scan_ts": 1789753795.6020734,
   "daily_line_attempt_day": "2026-09-18",
   "daily_line_sent": true,
   "daily_line_day": "2026-09-18",
@@ -212,25 +218,29 @@
   "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
    "since": 1789491935.7564917,
    "settled": 0
+  },
+  "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
+   "since": 1789752828.6614223,
+   "settled": 0
   }
  },
  "form": {
-  "ts": 1789732047.2568257,
+  "ts": 1789755107.0875385,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
-    "n": 108,
-    "won": 60,
-    "cost": 85186.14,
-    "back": 109717.64,
-    "avg_price": 0.5010179969131249,
+    "n": 110,
+    "won": 61,
+    "cost": 88187.81,
+    "back": 113813.22,
+    "avg_price": 0.5020322915571448,
     "worst_day": -1400.41,
     "ok": true,
-    "reason": "56% came out ahead vs 50% needed, net +28.8%",
-    "ts": 1789732047.2568257,
-    "hit": 0.5556,
-    "net_pct": 28.8
+    "reason": "55% came out ahead vs 50% needed, net +29.1%",
+    "ts": 1789753796.260311,
+    "hit": 0.5545,
+    "net_pct": 29.06
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
@@ -242,7 +252,7 @@
     "worst_day": -305.58,
     "ok": true,
     "reason": "76% came out ahead vs 60% needed, net +18.3%",
-    "ts": 1789732047.2568257,
+    "ts": 1789753796.260311,
     "hit": 0.7551,
     "net_pct": 18.33
    },
@@ -256,7 +266,7 @@
     "worst_day": -535.02,
     "ok": true,
     "reason": "77% came out ahead vs 54% needed, net +20.0%",
-    "ts": 1789732047.2568257,
+    "ts": 1789753796.260311,
     "hit": 0.7705,
     "net_pct": 20.02
    },
@@ -276,73 +286,73 @@
    },
    "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {
     "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
-    "n": 8,
-    "won": 3,
-    "cost": 8780.77,
-    "back": 14170.05,
-    "avg_price": 0.3606958077520602,
+    "n": 7,
+    "won": 2,
+    "cost": 6064.32,
+    "back": 6678.28,
+    "avg_price": 0.33906686820986803,
     "worst_day": -1364.22,
     "ok": false,
-    "reason": "only 8 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789732047.2568257,
-    "hit": 0.375,
-    "net_pct": 61.38
+    "reason": "only 7 settled bets on our slice in 14 days (need 30)",
+    "ts": 1789753796.260311,
+    "hit": 0.2857,
+    "net_pct": 10.12
    },
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-    "n": 82,
+    "n": 83,
     "won": 38,
-    "cost": 43008.3,
-    "back": 39536.9,
-    "avg_price": 0.36216313884290746,
+    "cost": 43341.99,
+    "back": 39416.79,
+    "avg_price": 0.3528894636505192,
     "worst_day": -2023.3,
     "ok": false,
-    "reason": "net -8.1% (need +2%)",
-    "ts": 1789732047.2568257,
-    "hit": 0.4634,
-    "net_pct": -8.07
+    "reason": "net -9.1% (need +2%)",
+    "ts": 1789753796.260311,
+    "hit": 0.4578,
+    "net_pct": -9.06
    },
    "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {
     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
-    "n": 39,
-    "won": 19,
-    "cost": 35098.42,
-    "back": 36235.36,
-    "avg_price": 0.45971707047560123,
-    "worst_day": -2642.38,
-    "ok": false,
-    "reason": "49% came out ahead vs 46% needed (+3 points, need +3)",
-    "ts": 1789732047.2568257,
-    "hit": 0.4872,
-    "net_pct": 3.24
+    "n": 36,
+    "won": 18,
+    "cost": 32326.97,
+    "back": 35735.36,
+    "avg_price": 0.4573286120809593,
+    "worst_day": -2210.24,
+    "ok": true,
+    "reason": "50% came out ahead vs 46% needed, net +10.5%",
+    "ts": 1789753796.260311,
+    "hit": 0.5,
+    "net_pct": 10.54
    },
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
-    "n": 104,
+    "n": 105,
     "won": 83,
-    "cost": 235941.91,
-    "back": 260109.05,
-    "avg_price": 0.7451154759410221,
+    "cost": 235016.67,
+    "back": 258478.59,
+    "avg_price": 0.7446622922187531,
     "worst_day": -5949.41,
     "ok": true,
-    "reason": "80% came out ahead vs 75% needed, net +10.2%",
-    "ts": 1789732047.2568257,
-    "hit": 0.7981,
-    "net_pct": 10.24
+    "reason": "79% came out ahead vs 74% needed, net +10.0%",
+    "ts": 1789753796.260311,
+    "hit": 0.7905,
+    "net_pct": 9.98
    },
    "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
-    "n": 8,
-    "won": 7,
-    "cost": 9150.23,
-    "back": 13290.1,
-    "avg_price": 0.6159079327604963,
+    "n": 6,
+    "won": 5,
+    "cost": 6299.99,
+    "back": 7697.4,
+    "avg_price": 0.6443296406458453,
     "worst_day": -329.83,
     "ok": false,
-    "reason": "only 8 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789732047.2568257,
-    "hit": 0.875,
-    "net_pct": 45.24
+    "reason": "only 6 settled bets on our slice in 14 days (need 30)",
+    "ts": 1789753796.260311,
+    "hit": 0.8333,
+    "net_pct": 22.18
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
@@ -360,17 +370,17 @@
    },
    "0xd970693a3384dc762b191707a4927ac3814bbbba": {
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
-    "n": 59,
-    "won": 43,
-    "cost": 24554.09,
-    "back": 28728.46,
-    "avg_price": 0.5805835499223496,
+    "n": 57,
+    "won": 41,
+    "cost": 23816.81,
+    "back": 27831.48,
+    "avg_price": 0.5756850979085956,
     "worst_day": 26.63,
     "ok": true,
-    "reason": "73% came out ahead vs 58% needed, net +17.0%",
-    "ts": 1789732047.2568257,
-    "hit": 0.7288,
-    "net_pct": 17.0
+    "reason": "72% came out ahead vs 58% needed, net +16.9%",
+    "ts": 1789753796.260311,
+    "hit": 0.7193,
+    "net_pct": 16.86
    },
    "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
@@ -382,7 +392,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789732047.2568257,
+    "ts": 1789753796.260311,
     "hit": 0.0,
     "net_pct": 0.0
    },
@@ -427,6 +437,26 @@
    "after": "📉 <b>4 losing copies in a row</b>, day -6.40. Bankroll $106.86.",
    "detail": "",
    "push": "DEAL"
+  },
+  {
+   "ts": 1789752828.6614223,
+   "day": "2026-09-18",
+   "kind": "auto_admit",
+   "before": "0x00110b8e not in Z",
+   "after": "in set Z, on probation",
+   "detail": "35 settled paper copies, paper ROI +34.2%, trimmed +2.1%, ideal +35.2%",
+   "push": "WALLET",
+   "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333"
+  },
+  {
+   "ts": 1789753796.260311,
+   "day": "2026-09-18",
+   "kind": "form",
+   "before": "0x57b25849 benched",
+   "after": "in form",
+   "detail": "0x57b25849: 36 settled, 50% won vs 46% needed, net +10.5% on $32,327, worst day -2,210",
+   "push": "WALLET",
+   "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2"
   }
  ],
  "important": [
@@ -456,9 +486,15 @@
   "2026-09-18 12:23:46 INFO  [ops] push:loss_streak: None -> '📉 <b>4 losing copies in a row</b>, day -6.40. Bankroll $106.86.'",
   "2026-09-18 13:33:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-18 14:27:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-18 16:03:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-18 17:17:56 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-18 17:34:02 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-18 17:34:02 INFO  [ops] auto_admit: '0x00110b8e not in Z' -> 'in set Z, on probation' | 35 settled paper copies, paper ROI +34.2%, trimmed +2.1%, ideal +35.2%",
+  "2026-09-18 17:50:47 INFO  [ops] form: '0x57b25849 benched' -> 'in form' | 0x57b25849: 36 settled, 50% won vs 46% needed, net +10.5% on $32,327, worst day -2,210",
   "2026-09-18 00:52:07 TRADE [LIVE] BUY $6.40 on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300, order 0xbb5834fab5...",
   "2026-09-18 00:52:07 TRADE [verify] FILLED: BUY 6.88 shares on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300",
   "2026-09-18 09:12:48 TRADE [LIVE] BUY $6.40 on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300, order 0xfad9c2fa03...",
-  "2026-09-18 09:12:52 TRADE [verify] FILLED: BUY 12.08 shares on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300"
+  "2026-09-18 09:12:52 TRADE [verify] FILLED: BUY 12.08 shares on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300",
+  "2026-09-18 17:34:01 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed."
  ]
 }
