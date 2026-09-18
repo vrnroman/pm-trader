@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-18T09:45:56.523489+00:00",
+ "generated": "2026-09-18T10:53:56.604892+00:00",
  "money": {
   "cash": 77.208751,
   "open_cost": 36.05,
@@ -20,7 +20,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1789724721.0112617,
+  "ts": 1789728729.4017916,
   "day": "2026-09-18"
  },
  "arm": {
@@ -435,6 +435,7 @@
   "2026-09-18 08:28:21 ERROR Network error fetching 0x09b0...a3b6: ",
   "2026-09-18 09:12:47 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00",
   "2026-09-18 09:12:48 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
+  "2026-09-18 09:56:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-18 00:52:07 TRADE [LIVE] BUY $6.40 on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300, order 0xbb5834fab5...",
   "2026-09-18 00:52:07 TRADE [verify] FILLED: BUY 6.88 shares on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300",
   "2026-09-18 09:12:48 TRADE [LIVE] BUY $6.40 on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300, order 0xfad9c2fa03...",
