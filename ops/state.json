@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-18T18:12:38.632016+00:00",
+ "generated": "2026-09-18T18:28:12.610182+00:00",
  "money": {
   "cash": 77.208751,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789755103.9458296,
+  "ts": 1789756041.589647,
   "day": "2026-09-18"
  },
  "arm": {
@@ -225,7 +225,7 @@
   }
  },
  "form": {
-  "ts": 1789755107.0875385,
+  "ts": 1789756044.5447204,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -491,6 +491,7 @@
   "2026-09-18 17:34:02 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed.",
   "2026-09-18 17:34:02 INFO  [ops] auto_admit: '0x00110b8e not in Z' -> 'in set Z, on probation' | 35 settled paper copies, paper ROI +34.2%, trimmed +2.1%, ideal +35.2%",
   "2026-09-18 17:50:47 INFO  [ops] form: '0x57b25849 benched' -> 'in form' | 0x57b25849: 36 settled, 50% won vs 46% needed, net +10.5% on $32,327, worst day -2,210",
+  "2026-09-18 18:14:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-18 00:52:07 TRADE [LIVE] BUY $6.40 on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300, order 0xbb5834fab5...",
   "2026-09-18 00:52:07 TRADE [verify] FILLED: BUY 6.88 shares on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300",
   "2026-09-18 09:12:48 TRADE [LIVE] BUY $6.40 on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300, order 0xfad9c2fa03...",

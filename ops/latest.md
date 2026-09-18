@@ -1,7 +1,7 @@
-# ops digest 2026-09-18T18:12:31.164804+00:00 (last 24h)
+# ops digest 2026-09-18T18:27:54.072459+00:00 (last 24h)
 
 ## money state
-{"cash": 77.208751, "open_cost": 29.65, "equity": 106.86, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-18", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789755103.9458296, "day": "2026-09-18"}
+{"cash": 77.208751, "open_cost": 29.65, "equity": 106.86, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-18", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789756041.589647, "day": "2026-09-18"}
 
 ## arm: {"armed": true, "ts": 1789312200.3067093, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-18", "spent_usd": 12.8, "wallet_copies": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x05878ac343c1387d592042d788424412733ac40b": 1}, "wallet_copies_yesterday": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x05878ac343c1387d592042d788424412733ac40b": 1}, "yesterday": "2026-09-17", "closed_reason": ""}
@@ -29,7 +29,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1789752828.6614223, "day": "2026-09-18", "kind": "auto_admit", "before": "0x00110b8e not in Z", "after": "in set Z, on probation", "detail": "35 settled paper copies, paper ROI +34.2%, trimmed +2.1%, ideal +35.2%", "push": "WALLET", "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333"}
 {"ts": 1789753796.260311, "day": "2026-09-18", "kind": "form", "before": "0x57b25849 benched", "after": "in form", "detail": "0x57b25849: 36 settled, 50% won vs 46% needed, net +10.5% on $32,327, worst day -2,210", "push": "WALLET", "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2"}
 
-## important lines (36)
+## important lines (37)
 2026-09-17 23:04:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-17 23:17:09 ERROR Network error fetching 0x3f3a...e8fd: 
 2026-09-17 23:39:02 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
@@ -61,6 +61,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-18 17:34:02 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed.
 2026-09-18 17:34:02 INFO  [ops] auto_admit: '0x00110b8e not in Z' -> 'in set Z, on probation' | 35 settled paper copies, paper ROI +34.2%, trimmed +2.1%, ideal +35.2%
 2026-09-18 17:50:47 INFO  [ops] form: '0x57b25849 benched' -> 'in form' | 0x57b25849: 36 settled, 50% won vs 46% needed, net +10.5% on $32,327, worst day -2,210
+2026-09-18 18:14:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-18 00:52:07 TRADE [LIVE] BUY $6.40 on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300, order 0xbb5834fab5...
 2026-09-18 00:52:07 TRADE [verify] FILLED: BUY 6.88 shares on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300
 2026-09-18 09:12:48 TRADE [LIVE] BUY $6.40 on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300, order 0xfad9c2fa03...
