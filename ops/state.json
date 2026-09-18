@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-18T21:41:10.867688+00:00",
+ "generated": "2026-09-18T23:32:09.171847+00:00",
  "money": {
   "cash": 77.208751,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789767490.701051,
+  "ts": 1789774246.9812458,
   "day": "2026-09-18"
  },
  "arm": {
@@ -225,7 +225,7 @@
   }
  },
  "form": {
-  "ts": 1789767491.4902112,
+  "ts": 1789774247.400093,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -460,8 +460,6 @@
   }
  ],
  "important": [
-  "2026-09-17 23:04:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-17 23:17:09 ERROR Network error fetching 0x3f3a...e8fd: ",
   "2026-09-17 23:39:02 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-18 00:52:06 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
   "2026-09-18 00:52:07 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
@@ -492,6 +490,7 @@
   "2026-09-18 17:34:02 INFO  [ops] auto_admit: '0x00110b8e not in Z' -> 'in set Z, on probation' | 35 settled paper copies, paper ROI +34.2%, trimmed +2.1%, ideal +35.2%",
   "2026-09-18 17:50:47 INFO  [ops] form: '0x57b25849 benched' -> 'in form' | 0x57b25849: 36 settled, 50% won vs 46% needed, net +10.5% on $32,327, worst day -2,210",
   "2026-09-18 18:14:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-18 22:27:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-18 00:52:07 TRADE [LIVE] BUY $6.40 on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300, order 0xbb5834fab5...",
   "2026-09-18 00:52:07 TRADE [verify] FILLED: BUY 6.88 shares on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300",
   "2026-09-18 09:12:48 TRADE [LIVE] BUY $6.40 on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300, order 0xfad9c2fa03...",
