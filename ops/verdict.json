@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-18T12:41:57Z-01e9",
-  "ts": 1789735317,
+  "id": "2026-09-18T18:41:04Z-9ec4",
+  "ts": 1789756864,
   "kind": "nothing",
-  "message": "Digest fresh at 10:53 UTC. Armed, spend $12.80 of $32.00 cap today, equity $113.26 vs floor $56.00. Two trades filled today (Club Bolivar $6.40, LoL Team WE vs JD Gaming $6.40), tier 1b open $6.40 of $200.00. Five wallets in form, all net positive and above breakeven, none showing a losing streak or oversized worst day. Recurring 404 no-orderbook errors, one 429 rate limit, and intermittent wallet-fetch network errors, same noisy pattern as prior days, no self-disarm, no guard failure, no Traceback.",
+  "message": "Digest fresh at 18:27 UTC. Armed, spend $12.80 of $32.00 cap, equity $106.86 vs floor $56.00. Six wallets in form, all net positive above breakeven with no losing streak or oversized worst-day move; today's one settled loss (-6.40) already pushed to the owner as the loss-streak line. Same recurring 404 no-orderbook and network errors as prior days, no self-disarm, no guard failure, no Traceback.",
   "evidence": [
-    "# ops digest 2026-09-18T10:53:49.327720+00:00 (last 24h)",
-    "{\"cash\": 77.208751, \"open_cost\": 36.05, \"equity\": 113.26, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-18\", \"spent_usd\": 12.8, \"cap_usd\": 32.0, \"remaining_usd\": 19.2, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 64, \"tier\": {\"1a\": 0, \"1b\": 6.4, \"1c\": 0}, \"ts\": 1789728729.4017916, \"day\": \"2026-09-18\"}",
-    "in form  0x722abb54: 104 settled, 80% won vs 75% needed, net +10.2% on $235,942, worst day -5,949",
-    "in form  0x05878ac3: 109 settled, 55% won vs 50% needed, net +27.6% on $86,512, worst day -1,400",
-    "2026-09-18 09:12:48 TRADE [verify] FILLED: BUY 12.08 shares on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300"
+    "# ops digest 2026-09-18T18:27:54.072459+00:00 (last 24h)",
+    "{\"cash\": 77.208751, \"open_cost\": 29.65, \"equity\": 106.86, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-18\", \"spent_usd\": 12.8, \"cap_usd\": 32.0, \"remaining_usd\": 19.2, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 65, \"tier\": {\"1a\": 0, \"1b\": 0, \"1c\": 0}, \"ts\": 1789756041.589647, \"day\": \"2026-09-18\"}",
+    "in form  0x722abb54: 105 settled, 79% won vs 74% needed, net +10.0% on $235,017, worst day -5,949",
+    "in form  0x05878ac3: 110 settled, 55% won vs 50% needed, net +29.1% on $88,188, worst day -1,400",
+    "{\"ts\": 1789734225.1441488, \"day\": \"2026-09-18\", \"kind\": \"push:loss_streak\", \"before\": null, \"after\": \"\\ud83d\\udcc9 <b>4 losing copies in a row</b>, day -6.40. Bankroll $106.86.\", \"detail\": \"\", \"push\": \"DEAL\"}"
   ],
   "commit": null
 }
