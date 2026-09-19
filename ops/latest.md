@@ -1,7 +1,7 @@
-# ops digest 2026-09-19T18:00:56.757328+00:00 (last 24h)
+# ops digest 2026-09-19T18:46:44.965666+00:00 (last 24h)
 
 ## money state
-{"cash": 33.873013, "open_cost": 79.65, "equity": 113.52, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-19", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789840756.8731322, "day": "2026-09-19"}
+{"cash": 33.873013, "open_cost": 79.65, "equity": 113.52, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-19", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789843365.3982484, "day": "2026-09-19"}
 
 ## arm: {"armed": true, "ts": 1789822526.018225, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-19", "spent_usd": 12.8, "wallet_copies": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x05878ac343c1387d592042d788424412733ac40b": 1}, "wallet_copies_yesterday": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x05878ac343c1387d592042d788424412733ac40b": 1}, "yesterday": "2026-09-18", "closed_reason": ""}
@@ -9,17 +9,17 @@
 ## tier exposure: {"1a": [0, 0], "1b": [0, 0], "1c": [0, 0]}
 ## probation: {"0x05878ac343c1387d592042d788424412733ac40b": {"since": 1789234925.3749237, "settled": 2}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"since": 1789234925.3749237, "settled": 0}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"since": 1789235966.2959275, "settled": 0}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"since": 1789235966.2959275, "settled": 0}, "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {"since": 1789236552.0468774, "settled": 0}, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {"since": 1789236552.0468774, "settled": 0}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"since": 1789237149.0874667, "settled": 0}, "0xd970693a3384dc762b191707a4927ac3814bbbba": {"since": 1789237149.0874667, "settled": 0}, "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {"since": 1789317835.1951635, "settled": 0}, "0x722abb5460060870d46728bf45f66a6b1635d6ed": {"since": 1789491935.7564917, "settled": 0}, "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {"since": 1789752828.6614223, "settled": 0}, "0xf49614e63fb15383d4a9b717a1be03ad2410fe79": {"since": 1789827868.9550335, "settled": 0}}
 ## form (each wallet on its own money, last 14 days, our slice)
-in form  0x05878ac3: 109 settled, 53% won vs 50% needed, net +23.9% on $92,217, worst day -3,105
-in form  0x09b045ba: 49 settled, 73% won vs 59% needed, net +14.9% on $18,780, worst day -333
-in form  0x1985327e: 60 settled, 77% won vs 53% needed, net +19.2% on $23,642, worst day -535
+in form  0x05878ac3: 112 settled, 53% won vs 50% needed, net +21.3% on $101,090, worst day -3,105
+in form  0x09b045ba: 51 settled, 75% won vs 59% needed, net +15.7% on $19,560, worst day -333
+in form  0x1985327e: 64 settled, 78% won vs 54% needed, net +20.9% on $25,181, worst day -535
 benched  0x3f3aa700: 160 settled, 51% won vs 54% needed, net -1.2% on $414,324, worst day -39,107
 benched  0x4980930d: 6 settled, 17% won vs 32% needed, net -62.1% on $4,436, worst day -1,364
-benched  0x5213eb85: 88 settled, 44% won vs 36% needed, net -9.6% on $45,692, worst day -2,023
-benched  0x57b25849: 38 settled, 47% won vs 46% needed, net -2.4% on $36,612, worst day -5,175
-in form  0x722abb54: 106 settled, 78% won vs 74% needed, net +9.3% on $232,783, worst day -5,949
-benched  0x73653992: 7 settled, 86% won vs 63% needed, net +38.2% on $8,846, worst day -330
+benched  0x5213eb85: 86 settled, 47% won vs 36% needed, net -4.3% on $44,498, worst day -2,023
+benched  0x57b25849: 39 settled, 49% won vs 46% needed, net -3.4% on $37,411, worst day -5,175
+in form  0x722abb54: 107 settled, 79% won vs 74% needed, net +9.7% on $229,283, worst day -5,949
+benched  0x73653992: 6 settled, 83% won vs 81% needed, net +34.0% on $5,919, worst day -330
 benched  0x9f15613e: 203 settled, 51% won vs 50% needed, net +8.4% on $554,669, worst day -19,498
-in form  0xd970693a: 56 settled, 70% won vs 57% needed, net +14.6% on $23,468, worst day -324
+in form  0xd970693a: 54 settled, 70% won vs 57% needed, net +14.2% on $22,763, worst day -324
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
 benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, worst day -1,129
 
@@ -30,8 +30,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1789822532.52036, "day": "2026-09-19", "kind": "push:milestone", "before": null, "after": "🏁 <b>Bankroll crossed $100</b> upward: $113.52.", "detail": "", "push": "DEAL"}
 {"ts": 1789827868.9550335, "day": "2026-09-19", "kind": "auto_admit", "before": "0xf49614e6 not in Z", "after": "in set Z, on probation", "detail": "63 settled paper copies, paper ROI +37.2%, trimmed +19.5%, ideal +38.2%", "push": "WALLET", "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79"}
 
-## important lines (74)
-2026-09-18 18:14:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+## important lines (73)
 2026-09-18 22:27:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-18 23:52:04 INFO  [ops] form: '0x57b25849 in form' -> 'benched' | 0x57b25849: 37 settled, 49% won vs 46% needed, net +0.3% on $35,641, worst day -3,685
 2026-09-19 00:20:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
