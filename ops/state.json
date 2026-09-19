@@ -1,26 +1,26 @@
 {
- "generated": "2026-09-19T00:20:15.274441+00:00",
+ "generated": "2026-09-19T03:57:50.079612+00:00",
  "money": {
-  "cash": 77.208751,
-  "open_cost": 29.65,
-  "equity": 106.86,
+  "cash": 70.744751,
+  "open_cost": 36.05,
+  "equity": 106.79,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-19",
-   "spent_usd": 0.0,
+   "spent_usd": 6.4,
    "cap_usd": 32.0,
-   "remaining_usd": 32.0,
+   "remaining_usd": 25.6,
    "closed_reason": ""
   },
   "armed": true,
   "resolved_unclaimed": 65,
   "tier": {
    "1a": 0,
-   "1b": 0,
+   "1b": 6.4,
    "1c": 0
   },
-  "ts": 1789777078.1500869,
+  "ts": 1789790000.974968,
   "day": "2026-09-19"
  },
  "arm": {
@@ -33,8 +33,10 @@
  },
  "spend": {
   "date": "2026-09-19",
-  "spent_usd": 0.0,
-  "wallet_copies": {},
+  "spent_usd": 6.4,
+  "wallet_copies": {
+   "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1
+  },
   "wallet_copies_yesterday": {
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
    "0x05878ac343c1387d592042d788424412733ac40b": 1
@@ -45,19 +47,27 @@
  "tier": {
   "1a": {
    "open_total": 0,
-   "daily_date": "2026-09-18",
+   "daily_date": "2026-09-19",
    "daily_volume": 0.0,
    "placements": []
   },
   "1b": {
-   "open_total": 0,
-   "daily_date": "2026-09-18",
-   "daily_volume": 12.8,
-   "placements": []
+   "open_total": 6.4,
+   "daily_date": "2026-09-19",
+   "daily_volume": 6.4,
+   "placements": [
+    {
+     "token_id": "62672815144499804818335440874964244517943923295277016512739376183187163478409",
+     "cost": 6.4,
+     "ts": 1789778822.661754,
+     "trader": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+     "title": "Will Club Alianza Lima win on 2026-09-18?"
+    }
+   ]
   },
   "1c": {
    "open_total": 0,
-   "daily_date": "2026-09-18",
+   "daily_date": "2026-09-19",
    "daily_volume": 0.0,
    "placements": []
   }
@@ -150,7 +160,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 106.86,
+  "last_equity": 106.79,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -222,7 +232,7 @@
   }
  },
  "form": {
-  "ts": 1789777078.7256916,
+  "ts": 1789790003.1230803,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -467,8 +477,6 @@
   }
  ],
  "important": [
-  "2026-09-18 00:52:06 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
-  "2026-09-18 00:52:07 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
   "2026-09-18 06:30:13 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-18 07:33:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-18 07:38:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -498,10 +506,16 @@
   "2026-09-18 18:14:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-18 22:27:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-18 23:52:04 INFO  [ops] form: '0x57b25849 in form' -> 'benched' | 0x57b25849: 37 settled, 49% won vs 46% needed, net +0.3% on $35,641, worst day -3,685",
-  "2026-09-18 00:52:07 TRADE [LIVE] BUY $6.40 on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300, order 0xbb5834fab5...",
-  "2026-09-18 00:52:07 TRADE [verify] FILLED: BUY 6.88 shares on 'Will Club Bolívar win on 2026-09-17?' @ 0.9300",
+  "2026-09-19 00:20:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-19 00:47:01 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
+  "2026-09-19 00:47:02 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
+  "2026-09-19 01:36:03 ERROR [inventory] API sync failed: ",
+  "2026-09-19 01:41:09 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-19 02:12:27 ERROR [inventory] API sync failed: ",
   "2026-09-18 09:12:48 TRADE [LIVE] BUY $6.40 on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300, order 0xfad9c2fa03...",
   "2026-09-18 09:12:52 TRADE [verify] FILLED: BUY 12.08 shares on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300",
-  "2026-09-18 17:34:01 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed."
+  "2026-09-18 17:34:01 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-19 00:47:02 TRADE [LIVE] BUY $6.40 on 'Will Club Alianza Lima win on 2026-09-18' @ 0.8000, order 0x6424578edb...",
+  "2026-09-19 00:47:03 TRADE [verify] FILLED: BUY 8.00 shares on 'Will Club Alianza Lima win on 2026-09-18' @ 0.8000"
  ]
 }
