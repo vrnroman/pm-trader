@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-19T12:41:33Z-1514",
-  "ts": 1789821693,
+  "id": "2026-09-19T18:41:13Z-1856",
+  "ts": 1789843273,
   "kind": "nothing",
-  "message": "Digest fresh at 10:57 UTC. Armed, spend $12.80 of $32.00 cap, equity $108.26 vs floor $56.00. Five wallets in form, all net positive well above breakeven, no losing streak or oversized worst-day move on any of them, no benched wallet of mine due for un-bench. Recurring 404 no-orderbook, server-disconnected, and network-error-fetching-wallet lines continue at similar volume to prior days. No self-disarm, no guard failure, no Traceback.",
+  "message": "Digest fresh at 18:00 UTC. Armed, spend $12.80 of $32.00 cap, equity $113.52 vs floor $56.00. Five wallets in form, all net positive well above breakeven, no losing streak or oversized worst-day move on any of them, no benched wallet of mine due for un-bench. Recurring 404 no-orderbook, server-disconnected, 429 inventory-sync, and network-error-fetching-wallet lines continue at similar volume to prior days. Bot restarted at 12:44 and was re-armed by telegram at 12:55, both human-driven, not a self-disarm. No guard failure, no Traceback.",
   "evidence": [
-    "# ops digest 2026-09-19T10:57:14.500874+00:00 (last 24h)",
-    "{\"cash\": 72.213011, \"open_cost\": 36.05, \"equity\": 108.26, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-19\", \"spent_usd\": 12.8, \"cap_usd\": 32.0, \"remaining_usd\": 19.2, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 65, \"tier\": {\"1a\": 0, \"1b\": 6.4, \"1c\": 0}, \"ts\": 1789815198.9136052, \"day\": \"2026-09-19\"}",
-    "in form  0x05878ac3: 112 settled, 54% won vs 50% needed, net +23.6% on $90,839, worst day -3,105",
+    "# ops digest 2026-09-19T18:00:56.757328+00:00 (last 24h)",
+    "{\"cash\": 33.873013, \"open_cost\": 79.65, \"equity\": 113.52, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-19\", \"spent_usd\": 12.8, \"cap_usd\": 32.0, \"remaining_usd\": 19.2, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 65}",
+    "in form  0x05878ac3: 109 settled, 53% won vs 50% needed, net +23.9% on $92,217, worst day -3,105",
     "in form  0x722abb54: 106 settled, 78% won vs 74% needed, net +9.3% on $232,783, worst day -5,949",
-    "2026-09-19 10:56:27 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'"
+    "2026-09-19 12:55:26 WARNING [live] ARMED for real orders by telegram: no reason given"
   ],
   "commit": null
 }
