@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-19T03:57:50.079612+00:00",
+ "generated": "2026-09-19T05:52:23.249305+00:00",
  "money": {
   "cash": 70.744751,
   "open_cost": 36.05,
@@ -20,7 +20,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1789790000.974968,
+  "ts": 1789797066.155577,
   "day": "2026-09-19"
  },
  "arm": {
@@ -167,7 +167,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1789774553.5231543,
+  "admit_scan_ts": 1789796448.400649,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 4,
   "day_pnl": -6.4,
@@ -232,7 +232,7 @@
   }
  },
  "form": {
-  "ts": 1789790003.1230803,
+  "ts": 1789797066.7738717,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -512,6 +512,7 @@
   "2026-09-19 01:36:03 ERROR [inventory] API sync failed: ",
   "2026-09-19 01:41:09 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-19 02:12:27 ERROR [inventory] API sync failed: ",
+  "2026-09-19 04:40:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-18 09:12:48 TRADE [LIVE] BUY $6.40 on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300, order 0xfad9c2fa03...",
   "2026-09-18 09:12:52 TRADE [verify] FILLED: BUY 12.08 shares on 'LoL: Team WE vs JD Gaming - Game 1 Winne' @ 0.5300",
   "2026-09-18 17:34:01 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed.",
