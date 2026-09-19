@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-19T10:57:28.776128+00:00",
+ "generated": "2026-09-19T13:00:54.561830+00:00",
  "money": {
-  "cash": 72.213011,
-  "open_cost": 36.05,
-  "equity": 108.26,
+  "cash": 33.873013,
+  "open_cost": 79.65,
+  "equity": 113.52,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
@@ -17,15 +17,15 @@
   "resolved_unclaimed": 65,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1789815198.9136052,
+  "ts": 1789822534.7852476,
   "day": "2026-09-19"
  },
  "arm": {
   "armed": true,
-  "ts": 1789312200.3067093,
+  "ts": 1789822526.018225,
   "by": "telegram",
   "reason": "",
   "first_armed_ts": 1788617432.0499406,
@@ -53,18 +53,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
+   "open_total": 0,
    "daily_date": "2026-09-19",
    "daily_volume": 12.8,
-   "placements": [
-    {
-     "token_id": "113808578194766071512735867044767117751771084198235886410222255933823740407676",
-     "cost": 6.4,
-     "ts": 1789809268.4431763,
-     "trader": "0x05878ac343c1387d592042d788424412733ac40b",
-     "title": "LoL: Invictus Gaming vs JD Gaming - Game 1 Winner"
-    }
-   ]
+   "placements": []
   },
   "1c": {
    "open_total": 0,
@@ -161,14 +153,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 108.26,
+  "last_equity": 113.52,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1789796448.400649,
+  "admit_scan_ts": 1789818337.7183034,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 4,
   "day_pnl": -6.4,
@@ -179,12 +171,12 @@
    "45664770486754830410276385709296820028038533040592413432582939697519809216911",
    "86842978223026466862449934105595250822075305679428664631958332197768084254089"
   ],
-  "form_scan_ts": 1789797373.826293,
+  "form_scan_ts": 1789819282.8414261,
   "daily_line_attempt_day": "2026-09-19",
   "daily_line_sent": true,
   "daily_line_day": "2026-09-19",
   "guard_failing_pushed": false,
-  "floor_near_day": "2026-09-13"
+  "floor_near_day": "2026-09-19"
  },
  "probation": {
   "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -233,50 +225,50 @@
   }
  },
  "form": {
-  "ts": 1789815236.6738222,
+  "ts": 1789822557.262732,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
-    "n": 112,
-    "won": 60,
-    "cost": 90839.49,
-    "back": 112288.17,
-    "avg_price": 0.49848310891661474,
+    "n": 109,
+    "won": 58,
+    "cost": 92216.86,
+    "back": 114235.51,
+    "avg_price": 0.49961825882935373,
     "worst_day": -3105.39,
     "ok": true,
-    "reason": "54% came out ahead vs 50% needed, net +23.6%",
-    "ts": 1789797374.5134914,
-    "hit": 0.5357,
-    "net_pct": 23.61
+    "reason": "53% came out ahead vs 50% needed, net +23.9%",
+    "ts": 1789819286.281406,
+    "hit": 0.5321,
+    "net_pct": 23.88
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-    "n": 50,
-    "won": 37,
-    "cost": 19206.1,
-    "back": 21999.46,
-    "avg_price": 0.596399341184845,
+    "n": 49,
+    "won": 36,
+    "cost": 18779.63,
+    "back": 21580.66,
+    "avg_price": 0.5902124705605459,
     "worst_day": -332.99,
     "ok": true,
-    "reason": "74% came out ahead vs 60% needed, net +14.5%",
-    "ts": 1789797374.5134914,
-    "hit": 0.74,
-    "net_pct": 14.54
+    "reason": "73% came out ahead vs 59% needed, net +14.9%",
+    "ts": 1789819286.281406,
+    "hit": 0.7347,
+    "net_pct": 14.92
    },
    "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
     "n": 60,
     "won": 46,
-    "cost": 23665.16,
-    "back": 28157.05,
-    "avg_price": 0.5350050314870569,
+    "cost": 23642.33,
+    "back": 28189.46,
+    "avg_price": 0.5340904907314252,
     "worst_day": -535.02,
     "ok": true,
-    "reason": "77% came out ahead vs 54% needed, net +19.0%",
-    "ts": 1789797374.5134914,
+    "reason": "77% came out ahead vs 53% needed, net +19.2%",
+    "ts": 1789819286.281406,
     "hit": 0.7667,
-    "net_pct": 18.98
+    "net_pct": 19.23
    },
    "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": {
     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
@@ -302,23 +294,23 @@
     "worst_day": -1364.22,
     "ok": false,
     "reason": "only 6 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789797374.5134914,
+    "ts": 1789819286.281406,
     "hit": 0.1667,
     "net_pct": -62.05
    },
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-    "n": 86,
-    "won": 38,
-    "cost": 44677.09,
-    "back": 39674.07,
-    "avg_price": 0.36200466419577904,
+    "n": 88,
+    "won": 39,
+    "cost": 45691.83,
+    "back": 41290.38,
+    "avg_price": 0.3608143961761416,
     "worst_day": -2023.3,
     "ok": false,
-    "reason": "net -11.2% (need +2%)",
-    "ts": 1789797374.5134914,
-    "hit": 0.4419,
-    "net_pct": -11.2
+    "reason": "net -9.6% (need +2%)",
+    "ts": 1789819286.281406,
+    "hit": 0.4432,
+    "net_pct": -9.63
    },
    "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {
     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
@@ -330,7 +322,7 @@
     "worst_day": -5174.98,
     "ok": false,
     "reason": "47% came out ahead vs 46% needed (+1 points, need +3)",
-    "ts": 1789797374.5134914,
+    "ts": 1789819286.281406,
     "hit": 0.4737,
     "net_pct": -2.39
    },
@@ -344,23 +336,23 @@
     "worst_day": -5949.41,
     "ok": true,
     "reason": "78% came out ahead vs 74% needed, net +9.3%",
-    "ts": 1789797374.5134914,
+    "ts": 1789819286.281406,
     "hit": 0.783,
     "net_pct": 9.25
    },
    "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
-    "n": 6,
-    "won": 5,
-    "cost": 7608.57,
-    "back": 9983.99,
-    "avg_price": 0.6133084790579165,
+    "n": 7,
+    "won": 6,
+    "cost": 8846.43,
+    "back": 12223.02,
+    "avg_price": 0.63277279425033,
     "worst_day": -329.83,
     "ok": false,
-    "reason": "only 6 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789797374.5134914,
-    "hit": 0.8333,
-    "net_pct": 31.22
+    "reason": "only 7 settled bets on our slice in 14 days (need 30)",
+    "ts": 1789819286.281406,
+    "hit": 0.8571,
+    "net_pct": 38.17
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
@@ -380,15 +372,15 @@
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
     "n": 56,
     "won": 39,
-    "cost": 23447.87,
-    "back": 26860.69,
-    "avg_price": 0.5723566537555373,
+    "cost": 23467.99,
+    "back": 26905.95,
+    "avg_price": 0.567555562327143,
     "worst_day": -324.01,
     "ok": true,
     "reason": "70% came out ahead vs 57% needed, net +14.6%",
-    "ts": 1789797374.5134914,
+    "ts": 1789819286.281406,
     "hit": 0.6964,
-    "net_pct": 14.55
+    "net_pct": 14.65
    },
    "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
@@ -400,7 +392,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789797374.5134914,
+    "ts": 1789819286.281406,
     "hit": 0.0,
     "net_pct": 0.0
    },
@@ -424,28 +416,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1789734225.1441488,
-   "day": "2026-09-18",
-   "kind": "settled",
-   "before": "open $6.40",
-   "after": "paid $0.00",
-   "detail": "lost -6.40 on 'LoL: Team WE vs JD Gaming - Game 1 Winne' (0x05878ac3, tier 1b)",
-   "push": null,
-   "token_id": "86842978223026466862449934105595250822075305679428664631958332197768084254089",
-   "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
-   "pnl": -6.4,
-   "won": false
-  },
-  {
-   "ts": 1789734225.1441488,
-   "day": "2026-09-18",
-   "kind": "push:loss_streak",
-   "before": null,
-   "after": "📉 <b>4 losing copies in a row</b>, day -6.40. Bankroll $106.86.",
-   "detail": "",
-   "push": "DEAL"
-  },
   {
    "ts": 1789752828.6614223,
    "day": "2026-09-18",
@@ -475,12 +445,36 @@
    "detail": "0x57b25849: 37 settled, 49% won vs 46% needed, net +0.3% on $35,641, worst day -3,685",
    "push": "WALLET",
    "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2"
+  },
+  {
+   "ts": 1789822196.5506392,
+   "day": "2026-09-19",
+   "kind": "push:floor_near",
+   "before": null,
+   "after": "⚠️ <b>Bankroll $63.52 is within 20% of the $56 floor.</b> A top-up of about $9 would restore the margin; under the floor",
+   "detail": "",
+   "push": "DEAL"
+  },
+  {
+   "ts": 1789822196.5506392,
+   "day": "2026-09-19",
+   "kind": "push:milestone",
+   "before": null,
+   "after": "🏁 <b>Bankroll fell under $100</b>: $63.52.",
+   "detail": "",
+   "push": "DEAL"
+  },
+  {
+   "ts": 1789822532.52036,
+   "day": "2026-09-19",
+   "kind": "push:milestone",
+   "before": null,
+   "after": "🏁 <b>Bankroll crossed $100</b> upward: $113.52.",
+   "detail": "",
+   "push": "DEAL"
   }
  ],
  "important": [
-  "2026-09-18 12:23:45 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
-  "2026-09-18 12:23:45 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'LoL: Team WE vs JD Gaming - Game 1 Winne' (0x05878ac3, tier 1b)",
-  "2026-09-18 12:23:46 INFO  [ops] push:loss_streak: None -> '📉 <b>4 losing copies in a row</b>, day -6.40. Bankroll $106.86.'",
   "2026-09-18 13:33:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-18 14:27:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-18 16:03:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -515,10 +509,27 @@
   "2026-09-19 10:40:27 ERROR Network error fetching 0x09b0...a3b6: ",
   "2026-09-19 10:47:06 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.",
   "2026-09-19 10:56:27 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-19 11:02:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-19 11:18:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-19 12:23:11 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
+  "2026-09-19 12:44:15 INFO  Received signal 15, shutting down...",
+  "2026-09-19 12:44:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-19 12:44:41 INFO  Bot started. Monitoring trades...",
+  "2026-09-19 12:49:58 INFO  [ops] push:floor_near: None -> '⚠️ <b>Bankroll $63.52 is within 20% of the $56 floor.</b> A top-up of about $9 would restore the margin; under the floor'",
+  "2026-09-19 12:49:59 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll fell under $100</b>: $63.52.'",
+  "2026-09-19 12:50:17 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
+  "2026-09-19 12:52:43 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
+  "2026-09-19 12:52:44 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
+  "2026-09-19 12:52:44 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.",
+  "2026-09-19 12:52:44 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
+  "2026-09-19 12:52:44 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
+  "2026-09-19 12:55:26 WARNING [live] ARMED for real orders by telegram: no reason given",
+  "2026-09-19 12:55:34 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll crossed $100</b> upward: $113.52.'",
   "2026-09-18 17:34:01 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed.",
   "2026-09-19 00:47:02 TRADE [LIVE] BUY $6.40 on 'Will Club Alianza Lima win on 2026-09-18' @ 0.8000, order 0x6424578edb...",
   "2026-09-19 00:47:03 TRADE [verify] FILLED: BUY 8.00 shares on 'Will Club Alianza Lima win on 2026-09-18' @ 0.8000",
   "2026-09-19 09:14:28 TRADE [LIVE] BUY $6.40 on 'LoL: Invictus Gaming vs JD Gaming - Game' @ 0.5800, order 0x195f1c2afb...",
-  "2026-09-19 09:14:29 TRADE [verify] FILLED: BUY 11.03 shares on 'LoL: Invictus Gaming vs JD Gaming - Game' @ 0.5800"
+  "2026-09-19 09:14:29 TRADE [verify] FILLED: BUY 11.03 shares on 'LoL: Invictus Gaming vs JD Gaming - Game' @ 0.5800",
+  "2026-09-19 12:44:41 INFO  [recovery] No pending orders to recover"
  ]
 }
