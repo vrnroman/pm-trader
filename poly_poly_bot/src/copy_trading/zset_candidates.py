@@ -202,6 +202,97 @@ def admit(wallet: str, *, era: Optional[float], b_positions, a_positions,
 
 
 # --------------------------------------------------------------------------- #
+# Standing at the door, for surfaces that rank by return
+# --------------------------------------------------------------------------- #
+
+# How many failing checks a one-line standing names before "+N more".
+STANDING_MAX_FAILS = 2
+
+
+def distinct_fails(fails: list) -> list:
+    """The failing checks with the said-twice ones removed, order kept.
+
+    ``golive_check`` states the sample-size bar twice — "\u226530 settled copies"
+    and "\u226530 settled copies IN THE CLEAN ERA" — so a thin wallet fails both
+    and spent BOTH of a row's two slots saying "not enough copies", hiding the
+    reasons the owner cannot read off the leaderboard (concentration, the
+    floor, idleness). True of 32 of the 50 refused wallets on 2026-09-19.
+    A check whose label another failing check extends is that same fact, less
+    precisely put: the longer one wins, and it carries both counts in its
+    detail ("17 clean (of 17 all-time)"), so nothing is lost. The dropped
+    check is still counted in the "n/m" and in "+k more" — this picks which
+    fails get spelled out, never how many there are.
+    """
+    labels = [str(lab) for lab, _ in fails]
+    return [(lab, det) for i, (lab, det) in enumerate(fails)
+            if not any(j != i and labels[j] != labels[i]
+                       and labels[j].startswith(labels[i])
+                       for j in range(len(labels)))]
+
+
+def standing(wallet: str, cand: Optional[Candidate], *, in_z: set, evicted: set,
+             auto_admit: bool) -> str:
+    """One short phrase: where this wallet stands at set Z's door.
+
+    ``/wallets`` ranks by all-time net PnL, realized plus marked opens. The
+    door reads something else entirely (the clean era at their price over
+    thirty settled copies, then the rails), and since 2026-09-12 the
+    auto-admit scan takes every passer on its own. So a wallet that looks
+    good on the leaderboard and is not in Z is one the gate is refusing, and
+    this names the check, so the leaderboard never prints READY next to a
+    refusal again (the old PROMOTE-READY verdict did exactly that).
+    """
+    key = (wallet or "").lower()
+    if key in in_z:
+        return "🅩 in set Z"
+    if "*" in evicted:
+        return "🅩 eviction history unreadable; Z is closed"
+    if key in evicted:
+        return "🅩 evicted; /zset readmit clears it, then the gate must pass it again"
+    if cand is None:
+        # NOT just "book B": the leaderboard's own B:1a/B:1b rows come from the
+        # near-term book, so a wallet with 9W/3L on the row read "no settled
+        # copies in book B" next to its record. Name the book the way the
+        # leaderboard labels it.
+        return "gate: no settled copies in B-instant, the book the door reads"
+    if cand.ok:
+        if auto_admit:
+            return "gate \u2713 passes today; auto-admit takes it at the next scan"
+        return "gate \u2713 passes today; ZSET_AUTO_ADMIT is off, /zset candidates admits"
+    fails = [(lab, det) for lab, ok, det in cand.checks if not ok]
+    lead = distinct_fails(fails)[:STANDING_MAX_FAILS]
+    shown = "; ".join(f"{lab} ({det})" if det else str(lab)
+                      for lab, det in lead)
+    more = len(fails) - len(lead)
+    tail = f"; +{more} more" if more > 0 else ""
+    return f"gate \u2717 {len(fails)}/{len(cand.checks)}: {shown}{tail}"
+
+
+def standing_map(wallets: Iterable[str], b_positions, a_positions, *,
+                 era: Optional[float], now: float, book_corr=None,
+                 auto_admit: bool = True) -> dict[str, str]:
+    """``standing`` for each wallet, keyed by lowercased address.
+
+    One evaluation per wallet, the same one the cards and the scan run.
+    Keys that are not addresses (the leaderboard's ``(legacy)`` and
+    ``(unknown)`` accumulators) are skipped, not judged.
+    """
+    if book_corr is None:
+        book_corr = promotion_gate.split_half_corr(b_positions, min_opened_ts=era)
+    in_z, evicted = zset.wallet_set(), zset.evicted_set()
+    out: dict[str, str] = {}
+    for w in wallets:
+        key = (w or "").lower()
+        if not key.startswith("0x") or key in out:
+            continue
+        cand = evaluate(key, b_positions, a_positions, era=era, now=now,
+                        book_corr=book_corr)
+        out[key] = standing(key, cand, in_z=in_z, evicted=evicted,
+                            auto_admit=auto_admit)
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # The measured columns
 # --------------------------------------------------------------------------- #
 

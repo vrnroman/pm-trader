@@ -109,8 +109,10 @@ def promotion_verdict(net_pnl: float, n_closed: int) -> tuple[str, str]:
 
     Gates on *settled sample size* + *positive measured PnL* — deliberately NOT
     on hit-rate, because a +EV longshot theory (e.g. 1e) wins well under 50% of
-    the time by design and a hit-rate gate would wrongly hold it. Advisory only;
-    promotion stays a manual ``.env`` edit the owner makes."""
+    the time by design and a hit-rate gate would wrongly hold it. Advisory only.
+    No longer rendered by ``/wallets``: real money follows set Z, whose gate
+    reads the clean era at their price, and the leaderboard now prints that
+    gate's own standing per row (``zset_candidates.standing``) instead."""
     if n_closed < MATURITY_READY:
         return ("HOLD", f"only {n_closed} resolved (need ≥{MATURITY_READY})")
     if net_pnl <= 0:

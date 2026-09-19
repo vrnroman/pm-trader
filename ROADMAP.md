@@ -1167,6 +1167,14 @@ In Telegram: `/zset candidates` (one card per passer, admit by tap),
   from mirrored exits, slices, idle days) and one button; the tap re-runs the
   gate at that moment and `zset.admit` decides. The seeding script and the
   cards share one evaluation (`zset_candidates.evaluate`).
+- **The leaderboard says where each wallet stands at the door.** `/wallets`
+  ranks by all-time net PnL, a number the gate never reads, and its old row
+  verdict (PROMOTE-READY on 15 settled and positive PnL) printed READY next
+  to wallets Z refuses. Each row now carries the gate's own standing from
+  `zset_candidates.standing_map` (in Z, evicted, passes today, or the checks
+  it fails with their detail), and the header counts Z, today's passers and
+  the auto-admit state. A good-looking wallet that is not in Z is one the
+  gate is refusing; the row names the check.
 - **The canary.** `/canary CONFIRM` makes the next set-Z copy that passes every
   rail go out at the market's minimum size, pulls the arm the moment it
   posts, and reports their price, quoted ask, order price, fill, penalty and
