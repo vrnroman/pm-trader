@@ -184,3 +184,94 @@ def test_wallets_still_renders_when_the_books_cannot_be_read(monkeypatch):
     assert "standing unavailable" in out
     assert "Top wallets: all strategies" in out and W1[:6] in out
     assert "PROMOTE-READY" not in out
+
+
+# --------------------------------------------------------------------------- #
+# The two counts in the header, and the fails a row spells out
+# --------------------------------------------------------------------------- #
+
+def test_the_two_sample_size_checks_do_not_eat_both_slots():
+    """The gate states the settled bar twice; a thin wallet fails both, and
+    that used to spend the whole row saying one thing."""
+    checks = [("≥30 settled copies", False, "17"),
+              ("≥30 settled copies IN THE CLEAN ERA", False, "17 clean (of 17 all-time)"),
+              ("promotion floor still holds", False, "copy ROI +3% < floor +10%"),
+              ("still positive with its best 3 copies deleted", False, "-24% over 14"),
+              ("active within 14d", True, "1d ago")]
+    s = zc.standing(W1, _cand(False, checks), in_z=set(), evicted=set(), auto_admit=True)
+    assert s.startswith("gate ✗ 4/5: "), "the count is every fail, not the spelled-out ones"
+    assert "IN THE CLEAN ERA (17 clean (of 17 all-time))" in s
+    assert "promotion floor still holds (copy ROI +3% < floor +10%)" in s, \
+        "the second slot goes to a different fact, not the same one restated"
+    assert "+2 more" in s, "the dropped twin is still counted, never silently gone"
+
+
+def test_distinct_fails_keeps_order_and_unrelated_checks():
+    fails = [("a", "1"), ("a b", "2"), ("c", "3")]
+    assert zc.distinct_fails(fails) == [("a b", "2"), ("c", "3")]
+    assert zc.distinct_fails([("x", "1"), ("y", "2")]) == [("x", "1"), ("y", "2")]
+    assert zc.distinct_fails([]) == []
+
+
+def _passer(w):
+    return zc.Candidate(wallet=w, ok=True, gate_ready=True)
+
+
+def test_the_header_names_every_way_the_two_counts_differ():
+    from src import telegram_bot as tb
+
+    # 2026-09-19 in production: 14 in Z, 14 passing, not the same 14.
+    line = tb._zset_reconcile([_passer(W1), _passer(W2)], {W2, W3}, {W1}, True)[0]
+    assert "1 passing but evicted (held out)" in line
+    assert "1 in Z that would not pass today" in line
+
+    line = tb._zset_reconcile([_passer(W1)], set(), set(), True)[0]
+    assert "1 passing and not in Z yet" in line and "auto-admit scan takes them" in line
+    line = tb._zset_reconcile([_passer(W1)], set(), set(), False)[0]
+    assert "auto-admit is OFF" in line
+
+    assert tb._zset_reconcile([_passer(W1)], {W1}, set(), True) == [], \
+        "no line at all when the set and today's passers are the same wallets"
+    assert "closed" in tb._zset_reconcile([_passer(W1)], set(), {"*"}, True)[0]
+
+
+def test_wallets_header_carries_the_reconcile_line(monkeypatch):
+    from src import telegram_bot as tb
+    from src.copy_trading import ops_watch
+
+    monkeypatch.setattr(tb, "_compute_unified", _unified)
+    monkeypatch.setattr(zc, "load_books", lambda: (1.0, [], []))
+    monkeypatch.setattr(zc, "candidates", lambda b, a, era, now, wallets=None:
+                        ([_passer(W1)], [], None))
+    monkeypatch.setattr(zc, "standing_map", lambda *a, **k: {})
+    monkeypatch.setattr(ops_watch, "auto_admit_enabled", lambda: True)
+    monkeypatch.setattr(zset, "wallet_set", lambda: {W2})
+    monkeypatch.setattr(zset, "evicted_set", lambda: {W1})
+
+    sent: list = []
+    with patch.object(tb, "send_message", lambda x, **k: sent.append(x)):
+        tb._handle_command("/wallets")
+    out = sent[-1]
+    assert "Set Z</b>: 1 wallet(s) · 1 pass the gate today" in out
+    assert "1 passing but evicted (held out)" in out
+    assert "1 in Z that would not pass today" in out
+
+
+def test_the_set_z_marker_is_the_one_zset_itself_prints():
+    """🅩 (U+1F169), not 🅹 (U+1F179, a squared J) — the standings sit next to
+    /zset's own header and must not print a different letter."""
+    Z = "\U0001f169"
+    passing = _cand(True, [("x", True, "")])
+    for s in (zc.standing(W1, passing, in_z={W1}, evicted=set(), auto_admit=True),
+              zc.standing(W1, passing, in_z=set(), evicted={W1}, auto_admit=True),
+              zc.standing(W1, passing, in_z=set(), evicted={"*"}, auto_admit=True)):
+        assert s.startswith(Z), s
+    assert "\U0001f179" not in open(
+        "src/copy_trading/zset_candidates.py", encoding="utf-8").read()
+
+
+def test_a_wallet_absent_from_the_doors_book_names_that_book():
+    """The leaderboard's own B:1a rows come from the OTHER book, so "no settled
+    copies in book B" printed next to a 9W/3L record read as a contradiction."""
+    s = zc.standing(W1, None, in_z=set(), evicted=set(), auto_admit=True)
+    assert "B-instant" in s and "the book the door reads" in s

@@ -1016,17 +1016,52 @@ def _wallet_standings(wallets) -> tuple[dict, list[str]]:
         auto = ops_watch.auto_admit_enabled()
         st = zc.standing_map(wallets, b_pos, a_pos, era=era, now=now,
                              book_corr=corr, auto_admit=auto)
-        n_z = len(zset.wallets())
+        in_z, evicted = zset.wallet_set(), zset.evicted_set()
     except Exception as exc:  # noqa: BLE001
         logger.warning(f"/wallets: set-Z standing unavailable: {exc}")
-        return {}, [("\U0001f179 <i>set-Z standing unavailable (books unreadable); "
+        return {}, [("🅩 <i>set-Z standing unavailable (books unreadable); "
                      "/zset for the set itself</i>")]
-    head = (f"\U0001f179 <b>Set Z</b>: {n_z} wallet(s) · {len(passers)} pass the gate today · "
+    head = (f"🅩 <b>Set Z</b>: {len(in_z)} wallet(s) · {len(passers)} pass the gate today · "
             f"{len(near)} near misses · auto-admit {'on' if auto else 'OFF'}")
     note = ("<i>Ranked by net PnL: all-time, realized plus marked opens. The door "
             "reads the clean era at their price over 30 settled, then the rails; "
             "each row says where it stands there. /zset candidates for the cards.</i>")
-    return st, [head, note]
+    return st, [head, *_zset_reconcile(passers, in_z, evicted, auto), note]
+
+
+def _zset_reconcile(passers, in_z: set, evicted: set, auto: bool) -> list:
+    """The line that keeps the header's two counts from lying by agreeing.
+
+    On 2026-09-19 set Z held 14 wallets and 14 wallets passed the gate, which
+    reads as "the set is exactly today's passers" and was not true of a single
+    pair: 13 passers are in Z, the 14th passer is evicted and deliberately
+    held out, and one member of Z no longer clears the promotion floor —
+    admission is never re-run on a wallet already inside. Two equal numbers
+    made of different wallets is the same failure as the PROMOTE-READY verdict
+    this block replaces, so the differences are named, and the line is not
+    printed when there are none.
+    """
+    if "*" in evicted:
+        return ["<i>Set Z is closed: its eviction history is unreadable, so no "
+                "wallet counts as in it.</i>"]
+    keys = {(getattr(c, "wallet", "") or "").lower() for c in passers}
+    held_ev = sorted(w for w in keys - in_z if w in evicted)
+    held_new = sorted(w for w in keys - in_z if w not in evicted)
+    stale = sorted(in_z - keys)
+    bits = []
+    if held_ev:
+        bits.append(f"{len(held_ev)} passing but evicted (held out)")
+    if held_new:
+        bits.append(f"{len(held_new)} passing and not in Z yet"
+                    + (", the next auto-admit scan takes them" if auto
+                       else ", auto-admit is OFF"))
+    if stale:
+        bits.append(f"{len(stale)} in Z that would not pass today "
+                    "(admission is not re-run on a member)")
+    if not bits:
+        return []
+    joined = " · ".join(bits)
+    return [f"<i>Same wallets on both counts, except: {joined}.</i>"]
 
 
 def _gate_history_path() -> str:

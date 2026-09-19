@@ -209,6 +209,27 @@ def admit(wallet: str, *, era: Optional[float], b_positions, a_positions,
 STANDING_MAX_FAILS = 2
 
 
+def distinct_fails(fails: list) -> list:
+    """The failing checks with the said-twice ones removed, order kept.
+
+    ``golive_check`` states the sample-size bar twice — "\u226530 settled copies"
+    and "\u226530 settled copies IN THE CLEAN ERA" — so a thin wallet fails both
+    and spent BOTH of a row's two slots saying "not enough copies", hiding the
+    reasons the owner cannot read off the leaderboard (concentration, the
+    floor, idleness). True of 32 of the 50 refused wallets on 2026-09-19.
+    A check whose label another failing check extends is that same fact, less
+    precisely put: the longer one wins, and it carries both counts in its
+    detail ("17 clean (of 17 all-time)"), so nothing is lost. The dropped
+    check is still counted in the "n/m" and in "+k more" — this picks which
+    fails get spelled out, never how many there are.
+    """
+    labels = [str(lab) for lab, _ in fails]
+    return [(lab, det) for i, (lab, det) in enumerate(fails)
+            if not any(j != i and labels[j] != labels[i]
+                       and labels[j].startswith(labels[i])
+                       for j in range(len(labels)))]
+
+
 def standing(wallet: str, cand: Optional[Candidate], *, in_z: set, evicted: set,
              auto_admit: bool) -> str:
     """One short phrase: where this wallet stands at set Z's door.
@@ -223,21 +244,26 @@ def standing(wallet: str, cand: Optional[Candidate], *, in_z: set, evicted: set,
     """
     key = (wallet or "").lower()
     if key in in_z:
-        return "\U0001f179 in set Z"
+        return "🅩 in set Z"
     if "*" in evicted:
-        return "\U0001f179 eviction history unreadable; Z is closed"
+        return "🅩 eviction history unreadable; Z is closed"
     if key in evicted:
-        return "\U0001f179 evicted; /zset readmit clears it, then the gate must pass it again"
+        return "🅩 evicted; /zset readmit clears it, then the gate must pass it again"
     if cand is None:
-        return "gate: no settled copies in book B"
+        # NOT just "book B": the leaderboard's own B:1a/B:1b rows come from the
+        # near-term book, so a wallet with 9W/3L on the row read "no settled
+        # copies in book B" next to its record. Name the book the way the
+        # leaderboard labels it.
+        return "gate: no settled copies in B-instant, the book the door reads"
     if cand.ok:
         if auto_admit:
             return "gate \u2713 passes today; auto-admit takes it at the next scan"
         return "gate \u2713 passes today; ZSET_AUTO_ADMIT is off, /zset candidates admits"
     fails = [(lab, det) for lab, ok, det in cand.checks if not ok]
+    lead = distinct_fails(fails)[:STANDING_MAX_FAILS]
     shown = "; ".join(f"{lab} ({det})" if det else str(lab)
-                      for lab, det in fails[:STANDING_MAX_FAILS])
-    more = len(fails) - STANDING_MAX_FAILS
+                      for lab, det in lead)
+    more = len(fails) - len(lead)
     tail = f"; +{more} more" if more > 0 else ""
     return f"gate \u2717 {len(fails)}/{len(cand.checks)}: {shown}{tail}"
 
