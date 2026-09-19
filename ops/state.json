@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-19T16:24:39.120261+00:00",
+ "generated": "2026-09-19T18:01:03.242369+00:00",
  "money": {
   "cash": 33.873013,
   "open_cost": 79.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789835071.1114185,
+  "ts": 1789840756.8731322,
   "day": "2026-09-19"
  },
  "arm": {
@@ -166,7 +166,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1789818337.7183034,
+  "admit_scan_ts": 1789840123.6887844,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 4,
   "day_pnl": -6.4,
@@ -235,7 +235,7 @@
   }
  },
  "form": {
-  "ts": 1789834755.976674,
+  "ts": 1789840757.3602655,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -427,26 +427,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1789752828.6614223,
-   "day": "2026-09-18",
-   "kind": "auto_admit",
-   "before": "0x00110b8e not in Z",
-   "after": "in set Z, on probation",
-   "detail": "35 settled paper copies, paper ROI +34.2%, trimmed +2.1%, ideal +35.2%",
-   "push": "WALLET",
-   "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333"
-  },
-  {
-   "ts": 1789753796.260311,
-   "day": "2026-09-18",
-   "kind": "form",
-   "before": "0x57b25849 benched",
-   "after": "in form",
-   "detail": "0x57b25849: 36 settled, 50% won vs 46% needed, net +10.5% on $32,327, worst day -2,210",
-   "push": "WALLET",
-   "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2"
-  },
-  {
    "ts": 1789775479.346948,
    "day": "2026-09-18",
    "kind": "form",
@@ -495,10 +475,6 @@
   }
  ],
  "important": [
-  "2026-09-18 17:17:56 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-18 17:34:02 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed.",
-  "2026-09-18 17:34:02 INFO  [ops] auto_admit: '0x00110b8e not in Z' -> 'in set Z, on probation' | 35 settled paper copies, paper ROI +34.2%, trimmed +2.1%, ideal +35.2%",
-  "2026-09-18 17:50:47 INFO  [ops] form: '0x57b25849 benched' -> 'in form' | 0x57b25849: 36 settled, 50% won vs 46% needed, net +10.5% on $32,327, worst day -2,210",
   "2026-09-18 18:14:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-18 22:27:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-18 23:52:04 INFO  [ops] form: '0x57b25849 in form' -> 'benched' | 0x57b25849: 37 settled, 49% won vs 46% needed, net +0.3% on $35,641, worst day -3,685",
@@ -567,7 +543,6 @@
   "2026-09-19 14:24:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-19 14:24:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-19 16:22:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-18 17:34:01 WARNING [zset] ADMITTED 0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333 to set Z (+2% over 32 copies with its best 3 deleted). Real money may now follow it once armed.",
   "2026-09-19 00:47:02 TRADE [LIVE] BUY $6.40 on 'Will Club Alianza Lima win on 2026-09-18' @ 0.8000, order 0x6424578edb...",
   "2026-09-19 00:47:03 TRADE [verify] FILLED: BUY 8.00 shares on 'Will Club Alianza Lima win on 2026-09-18' @ 0.8000",
   "2026-09-19 09:14:28 TRADE [LIVE] BUY $6.40 on 'LoL: Invictus Gaming vs JD Gaming - Game' @ 0.5800, order 0x195f1c2afb...",
