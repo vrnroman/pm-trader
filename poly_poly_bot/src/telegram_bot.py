@@ -47,7 +47,7 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "status", "description": "Balance, positions, daily limits"},
     {"command": "pnl", "description": "P&L by strategy: realized + unrealized + total"},
     {"command": "real", "description": "Real money: balance, open positions, latest deals"},
-    {"command": "wallets", "description": "Top wallets overall + best/worst per strategy (deduped)"},
+    {"command": "wallets", "description": "Top wallets overall + best/worst per strategy, each with its set-Z standing"},
     {"command": "gate", "description": "Gate picture: shortlist admit/reject + promotion offers/holds/demotes"},
     {"command": "history", "description": "Last 10 copy trades"},
     {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
@@ -925,10 +925,13 @@ def _cost_lines(paper_books: dict, floor) -> list:
     return lines
 
 
-def _wallet_line(w, *, tags=None, strategies=None) -> str:
+def _wallet_line(w, *, tags=None, strategies=None, standing=None) -> str:
     """One leaderboard row: maturity glyph, addr, net P&L, ROI, win/loss record,
-    and: for paper (System B) wallets: a PROMOTE-READY/HOLD verdict that gates
-    the manual promote-to-real-money call on settled sample size + positive PnL.
+    and where the wallet stands at set Z's door (``standing``, one phrase from
+    ``zset_candidates.standing_map``: in Z, evicted, passing, or the checks it
+    fails). The PROMOTE-READY/HOLD verdict this used to print read all-time
+    net PnL over 15 settled, a bar the door does not use, so it said READY
+    next to wallets the gate refuses; the gate's own word replaces it.
 
     ``tags`` annotates *why* a wallet is notable within a strategy (e.g.
     ``▲PnL ▲ROI``); ``strategies`` lists the strategy labels a wallet spans (used
@@ -939,10 +942,7 @@ def _wallet_line(w, *, tags=None, strategies=None) -> str:
     roi_str = f"ROI {roi:+.0%}" if roi is not None else "ROI n/a"
     rec = f", {w.wins}W/{w.losses}L" if (w.wins + w.losses) else ""
     tag = u.maturity_tag(w.n_closed)
-    verdict = ""
-    if w.system == "B":
-        v, reason = u.promotion_verdict(w.net_pnl, w.n_closed)
-        verdict = f" → <b>{v}</b>: {reason}"
+    verdict = f" → {_esc(standing)}" if standing else ""
     line = (f"{tag} <code>{_short_wallet(w.wallet)}</code> "
             f"<b>${w.net_pnl:+.2f}</b> ({roi_str}{rec}){verdict}")
     if strategies:
@@ -967,15 +967,23 @@ def _handle_wallets():
         send_message("\U0001f3c5 <b>Wallet leaderboard</b>\nNo positions yet.")
         return
 
+    top = u.top_wallets(a_w, b_w, k=3)
+    per_strategy = [(sp, u.strategy_highlights(sp.wallets, k=3))
+                    for sp in unified.strategies]
+    shown = [w.wallet for w in top] + [h.wallet.wallet for _sp, hs in per_strategy for h in hs]
+    standing, z_lines = _wallet_standings(shown)
+
     lines = [
         "\U0001f3c5 <b>Wallet leaderboard</b> <i>(promotion / removal candidates)</i>",
         "",
+        *z_lines,
+        "",
         "<b>\U0001f3c6 Top wallets: all strategies</b>",
     ]
-    top = u.top_wallets(a_w, b_w, k=3)
     if top:
         for w in top:
-            lines.append("  " + _wallet_line(w, strategies=list(w.strategies)))
+            lines.append("  " + _wallet_line(w, strategies=list(w.strategies),
+                                             standing=standing.get(w.wallet.lower())))
     else:
         lines.append("  <i>(no profitable wallets yet)</i>")
 
@@ -983,13 +991,42 @@ def _handle_wallets():
     lines.append("<b>By strategy</b>  <i>(▲/▼ = top/bottom by PnL / ROI)</i>")
     lines.append("")
 
-    for sp in unified.strategies:
+    for sp, highlights in per_strategy:
         lines.append(f"<b>{_esc(sp.label)}</b>  ({sp.n_wallets}w)")
-        for h in u.strategy_highlights(sp.wallets, k=3):
-            lines.append("  " + _wallet_line(h.wallet, tags=h.tags))
+        for h in highlights:
+            lines.append("  " + _wallet_line(h.wallet, tags=h.tags,
+                                             standing=standing.get(h.wallet.wallet.lower())))
         lines.append("")
 
     _send_chunked("\n".join(lines))
+
+
+def _wallet_standings(wallets) -> tuple[dict, list[str]]:
+    """Set Z's door next to the leaderboard: how many are in Z, how many pass
+    the gate today, and one standing phrase per shown wallet, from the same
+    evaluation the cards and the auto-admit scan run. A book read that fails
+    costs this block only, never the leaderboard."""
+    from src.copy_trading import ops_watch, zset
+    from src.copy_trading import zset_candidates as zc
+
+    try:
+        now = time.time()
+        era, b_pos, a_pos = zc.load_books()
+        passers, near, corr = zc.candidates(b_pos, a_pos, era=era, now=now)
+        auto = ops_watch.auto_admit_enabled()
+        st = zc.standing_map(wallets, b_pos, a_pos, era=era, now=now,
+                             book_corr=corr, auto_admit=auto)
+        n_z = len(zset.wallets())
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(f"/wallets: set-Z standing unavailable: {exc}")
+        return {}, [("\U0001f179 <i>set-Z standing unavailable (books unreadable); "
+                     "/zset for the set itself</i>")]
+    head = (f"\U0001f179 <b>Set Z</b>: {n_z} wallet(s) · {len(passers)} pass the gate today · "
+            f"{len(near)} near misses · auto-admit {'on' if auto else 'OFF'}")
+    note = ("<i>Ranked by net PnL: all-time, realized plus marked opens. The door "
+            "reads the clean era at their price over 30 settled, then the rails; "
+            "each row says where it stands there. /zset candidates for the cards.</i>")
+    return st, [head, note]
 
 
 def _gate_history_path() -> str:
@@ -1397,7 +1434,7 @@ def _handle_help():
         "<b>Strategy #1: Copy Trading</b>\n"
         "<code>/status</code>: Bot status, balance, positions\n"
         "<code>/pnl</code>: P&amp;L by strategy: realized + unrealized + total\n"
-        "<code>/wallets</code>: Top wallets overall + best/worst per strategy\n"
+        "<code>/wallets</code>: Top wallets overall + best/worst per strategy, each with its set-Z standing\n"
         "<code>/gate</code>: Gate picture: shortlist admit/reject + promotion offers/holds/demotes\n"
         "<code>/golive &lt;wallet&gt;</code>: Re-check a promoted wallet before the real-money flip\n"
         "<code>/history</code>: Last 10 copy trades\n"
