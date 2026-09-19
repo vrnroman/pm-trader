@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-19T00:41:29Z-238c",
-  "ts": 1789777289,
+  "id": "2026-09-19T06:41:07Z-237d",
+  "ts": 1789800067,
   "kind": "nothing",
-  "message": "Digest fresh at 00:20 UTC. Armed, spend reset to $0.00 of $32.00 for the new day, equity $106.86 vs floor $56.00. Five wallets in form, all net positive above breakeven with no losing streak or oversized worst-day move; no wallet I benched is due for un-bench. Same recurring 404 no-orderbook and network-disconnected errors as prior days, no self-disarm, no guard failure, no Traceback.",
+  "message": "Digest fresh at 05:52 UTC. Armed, spend $6.40 of $32.00 cap, equity $106.79 vs floor $56.00. Five wallets in form, all net positive above breakeven; no losing streak or oversized worst-day move on any of them, no wallet I benched is due for un-bench. Same recurring 404 no-orderbook and network-disconnected errors as prior days, no self-disarm, no guard failure, no Traceback.",
   "evidence": [
-    "# ops digest 2026-09-19T00:20:08.986423+00:00 (last 24h)",
-    "{\"cash\": 77.208751, \"open_cost\": 29.65, \"equity\": 106.86, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-19\", \"spent_usd\": 0.0, \"cap_usd\": 32.0, \"remaining_usd\": 32.0, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 65, \"tier\": {\"1a\": 0, \"1b\": 0, \"1c\": 0}, \"ts\": 1789777078.1500869, \"day\": \"2026-09-19\"}",
-    "in form  0x722abb54: 105 settled, 78% won vs 74% needed, net +9.2% on $231,774, worst day -5,949",
+    "# ops digest 2026-09-19T05:52:16.540132+00:00 (last 24h)",
+    "{\"cash\": 70.744751, \"open_cost\": 36.05, \"equity\": 106.79, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-19\", \"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 65, \"tier\": {\"1a\": 0, \"1b\": 6.4, \"1c\": 0}, \"ts\": 1789797066.155577, \"day\": \"2026-09-19\"}",
     "in form  0x05878ac3: 112 settled, 54% won vs 50% needed, net +23.6% on $90,839, worst day -3,105",
-    "{\"ts\": 1789734225.1441488, \"day\": \"2026-09-18\", \"kind\": \"push:loss_streak\", \"before\": null, \"after\": \"\\ud83d\\udcc9 <b>4 losing copies in a row</b>, day -6.40. Bankroll $106.86.\", \"detail\": \"\", \"push\": \"DEAL\"}"
+    "in form  0x722abb54: 105 settled, 78% won vs 74% needed, net +9.2% on $231,774, worst day -5,949",
+    "2026-09-19 00:47:02 TRADE [LIVE] BUY $6.40 on 'Will Club Alianza Lima win on 2026-09-18' @ 0.8000, order 0x6424578edb..."
   ],
   "commit": null
 }
