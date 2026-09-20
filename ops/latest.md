@@ -1,7 +1,7 @@
-# ops digest 2026-09-20T18:47:22.969357+00:00 (last 24h)
+# ops digest 2026-09-20T19:00:26.905069+00:00 (last 24h)
 
 ## money state
-{"cash": 92.859453, "open_cost": 29.65, "equity": 122.51, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-20", "spent_usd": 6.4, "cap_usd": 32.0, "remaining_usd": 25.6, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789929831.8951204, "day": "2026-09-20"}
+{"cash": 92.859453, "open_cost": 29.65, "equity": 122.51, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-20", "spent_usd": 6.4, "cap_usd": 32.0, "remaining_usd": 25.6, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789930777.471181, "day": "2026-09-20"}
 
 ## arm: {"armed": true, "ts": 1789919410.9079125, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-20", "spent_usd": 6.4, "wallet_copies": {"0x05878ac343c1387d592042d788424412733ac40b": 1}, "wallet_copies_yesterday": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x05878ac343c1387d592042d788424412733ac40b": 1}, "yesterday": "2026-09-19", "closed_reason": ""}
