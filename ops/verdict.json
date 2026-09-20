@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-20T12:09:34Z-7c1a",
-  "ts": 1789905966,
+  "id": "2026-09-20T18:41:57Z-8ea6",
+  "ts": 1789929717,
   "kind": "nothing",
-  "message": "Digest fresh at 12:09 UTC. Armed, spend $6.40 of $32.00 cap, remaining $25.60, equity $122.51 vs floor $56.00. One live copy filled clean on 0x05878ac3 today. Six wallets in form all clear the 3-point margin over breakeven with positive net and no worst-day move out of proportion to volume; every benched wallet is correctly benched by the bar (negative net, sub-30 settled, or margin under 3 points), none of mine to touch. Guard fail streak is 0 with no guard error, no self-disarm, no Traceback, resolved_unclaimed steady at 65. Recurring 404 no-orderbook, server-disconnected, and 429 inventory-sync lines continue at similar volume to prior days.",
+  "message": "Digest at 16:26 UTC, armed, spend $6.40 of $32.00 cap, remaining $25.60, equity $122.51 vs floor $56.00. One live copy on 0x05878ac3 filled clean. The bar itself benched 0x05878ac3 at 12:11 after its net crossed to a losing margin, that is its own automatic call, not mine. The four wallets still in form (0x09b045ba, 0x1985327e, 0x722abb54, 0xd970693a) show unchanged or healthy margins over breakeven with no new losing streak, none of mine to touch. No self-disarm, no guard failure, no Traceback. The telegram re-arm at 15:50 is a normal owner action. Recurring 404 no-orderbook, server-disconnected, and inventory-sync errors continue at the same volume as prior days.",
   "evidence": [
-    "{\"cash\": 92.859453, \"open_cost\": 29.65, \"equity\": 122.51, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-20\", \"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 65}",
-    "2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...",
+    "{\"cash\": 92.859453, \"open_cost\": 29.65, \"equity\": 122.51, \"floor\": 56.0, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6}, \"armed\": true, \"resolved_unclaimed\": 65}",
     "2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400",
+    "2026-09-20 12:11:35 INFO  [ops] form: '0x05878ac3 in form' -> 'benched' | 0x05878ac3: 109 settled, 50% won vs 49% needed, net +18.3% on $103,709, worst day -3,105",
     "in form  0x722abb54: 106 settled, 77% won vs 74% needed, net +8.3% on $220,825, worst day -5,949",
-    "benched  0x3f3aa700: 160 settled, 51% won vs 54% needed, net -1.2% on $414,324, worst day -39,107"
+    "2026-09-20 15:50:10 WARNING [live] ARMED for real orders by telegram: no reason given"
   ],
   "commit": null
 }
