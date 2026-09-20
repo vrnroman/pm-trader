@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-20T06:15:03.337986+00:00",
+ "generated": "2026-09-20T06:55:29.824384+00:00",
  "money": {
   "cash": 87.201013,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789884618.0894117,
+  "ts": 1789887100.0645213,
   "day": "2026-09-20"
  },
  "arm": {
@@ -232,7 +232,7 @@
   }
  },
  "form": {
-  "ts": 1789884618.650129,
+  "ts": 1789887117.349814,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -525,6 +525,9 @@
   "2026-09-20 00:32:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-20 00:47:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-20 01:03:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-20 06:46:57 ERROR Network error fetching 0x7365...64da: ",
+  "2026-09-20 06:47:01 ERROR Network error fetching 0x5213...6a35: Server disconnected without sending a response.",
+  "2026-09-20 06:47:01 ERROR Network error fetching 0x4980...5709: Server disconnected without sending a response.",
   "2026-09-19 09:14:28 TRADE [LIVE] BUY $6.40 on 'LoL: Invictus Gaming vs JD Gaming - Game' @ 0.5800, order 0x195f1c2afb...",
   "2026-09-19 09:14:29 TRADE [verify] FILLED: BUY 11.03 shares on 'LoL: Invictus Gaming vs JD Gaming - Game' @ 0.5800",
   "2026-09-19 12:44:41 INFO  [recovery] No pending orders to recover",
