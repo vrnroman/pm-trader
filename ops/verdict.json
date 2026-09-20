@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-20T00:41:24Z-fae8",
-  "ts": 1789864884,
+  "id": "2026-09-20T06:41:38Z-e429",
+  "ts": 1789886498,
   "kind": "nothing",
-  "message": "Digest fresh at 23:25 UTC. Armed, spend $12.80 of $32.00 cap, equity $113.52 vs floor $56.00, daily line sent for 2026-09-19. Five wallets in form, all net positive well clear of breakeven with no losing streak or oversized worst-day move, no benched wallet of mine due for un-bench. Recurring 404 no-orderbook, server-disconnected, 429 inventory-sync, and network-error-fetching-wallet lines continue at similar volume to prior days. The 12:44 restart was a signal 15 shutdown followed by a clean start, and the 12:55 re-arm was by telegram, both human-driven, not a self-disarm. Guard fail streak is 0 with no guard error.",
+  "message": "Digest fresh at 06:14 UTC. Armed, spend $0.00 of $32.00 cap on the new day, equity $116.85 vs floor $56.00, daily line was sent for 2026-09-19. Five wallets in form, all net positive with 3+ points of margin over breakeven and no worst-day move out of proportion to volume, no benched wallet of mine due for un-bench. Guard fail streak is 0 with no guard error. Recurring 404 no-orderbook, server-disconnected, 429 inventory-sync, and network-error-fetching-wallet lines continue at similar volume to prior days with no new self-disarm or Traceback.",
   "evidence": [
-    "{\"cash\": 33.873013, \"open_cost\": 79.65, \"equity\": 113.52, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-19\", \"spent_usd\": 12.8, \"cap_usd\": 32.0, \"remaining_usd\": 19.2, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 65}",
-    "in form  0x05878ac3: 112 settled, 53% won vs 50% needed, net +21.3% on $101,090, worst day -3,105",
-    "in form  0x722abb54: 107 settled, 79% won vs 74% needed, net +9.7% on $229,283, worst day -5,949",
-    "2026-09-19 12:44:41 INFO  Bot started. Monitoring trades...",
-    "2026-09-19 12:55:26 WARNING [live] ARMED for real orders by telegram: no reason given"
+    "{\"cash\": 87.201013, \"open_cost\": 29.65, \"equity\": 116.85, \"floor\": 56.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-09-20\", \"spent_usd\": 0.0, \"cap_usd\": 32.0, \"remaining_usd\": 32.0, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 65}",
+    "in form  0x05878ac3: 119 settled, 53% won vs 49% needed, net +21.9% on $110,142, worst day -3,105",
+    "in form  0x722abb54: 106 settled, 77% won vs 74% needed, net +8.3% on $220,825, worst day -5,949",
+    "## arm: {\"armed\": true, \"ts\": 1789822526.018225, \"by\": \"telegram\", \"reason\": \"\", \"first_armed_ts\": 1788617432.0499406, \"floor_override\": false}",
+    "## spend today: {\"date\": \"2026-09-20\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {\"0x722abb5460060870d46728bf45f66a6b1635d6ed\": 1, \"0x05878ac343c1387d592042d788424412733ac40b\": 1}, \"yesterday\": \"2026-09-19\", \"closed_reason\": \"\"}"
   ],
   "commit": null
 }
