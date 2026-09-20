@@ -1,26 +1,26 @@
 {
- "generated": "2026-09-20T06:55:29.824384+00:00",
+ "generated": "2026-09-20T11:24:40.499493+00:00",
  "money": {
-  "cash": 87.201013,
-  "open_cost": 29.65,
-  "equity": 116.85,
+  "cash": 81.009453,
+  "open_cost": 35.69,
+  "equity": 116.7,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-20",
-   "spent_usd": 0.0,
+   "spent_usd": 6.4,
    "cap_usd": 32.0,
-   "remaining_usd": 32.0,
+   "remaining_usd": 25.6,
    "closed_reason": ""
   },
   "armed": true,
   "resolved_unclaimed": 65,
   "tier": {
    "1a": 0,
-   "1b": 0,
+   "1b": 6.4,
    "1c": 0
   },
-  "ts": 1789887100.0645213,
+  "ts": 1789903446.2353685,
   "day": "2026-09-20"
  },
  "arm": {
@@ -33,8 +33,10 @@
  },
  "spend": {
   "date": "2026-09-20",
-  "spent_usd": 0.0,
-  "wallet_copies": {},
+  "spent_usd": 6.4,
+  "wallet_copies": {
+   "0x05878ac343c1387d592042d788424412733ac40b": 1
+  },
   "wallet_copies_yesterday": {
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
    "0x05878ac343c1387d592042d788424412733ac40b": 1
@@ -45,19 +47,27 @@
  "tier": {
   "1a": {
    "open_total": 0,
-   "daily_date": "2026-09-19",
+   "daily_date": "2026-09-20",
    "daily_volume": 0.0,
    "placements": []
   },
   "1b": {
-   "open_total": 0,
-   "daily_date": "2026-09-19",
-   "daily_volume": 12.8,
-   "placements": []
+   "open_total": 6.4,
+   "daily_date": "2026-09-20",
+   "daily_volume": 6.4,
+   "placements": [
+    {
+     "token_id": "87504158565589525837863229325783611992139135552663431740569766272841975063899",
+     "cost": 6.4,
+     "ts": 1789900905.8769698,
+     "trader": "0x05878ac343c1387d592042d788424412733ac40b",
+     "title": "Dota 2: Conventus Stellarum vs Xtreme Gaming (BO3) - PGL Wal"
+    }
+   ]
   },
   "1c": {
    "open_total": 0,
-   "daily_date": "2026-09-19",
+   "daily_date": "2026-09-20",
    "daily_volume": 0.0,
    "placements": []
   }
@@ -156,7 +166,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 116.85,
+  "last_equity": 116.7,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -175,9 +185,9 @@
    "86842978223026466862449934105595250822075305679428664631958332197768084254089"
   ],
   "form_scan_ts": 1789884618.0908039,
-  "daily_line_attempt_day": "2026-09-19",
+  "daily_line_attempt_day": "2026-09-20",
   "daily_line_sent": true,
-  "daily_line_day": "2026-09-19",
+  "daily_line_day": "2026-09-20",
   "guard_failing_pushed": false,
   "floor_near_day": "2026-09-19"
  },
@@ -232,7 +242,7 @@
   }
  },
  "form": {
-  "ts": 1789887117.349814,
+  "ts": 1789903446.9756508,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -462,24 +472,6 @@
   }
  ],
  "important": [
-  "2026-09-19 07:27:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-19 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
-  "2026-09-19 09:14:27 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00",
-  "2026-09-19 09:14:28 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
-  "2026-09-19 10:00:46 ERROR Network error fetching 0x57b2...9da2: ",
-  "2026-09-19 10:00:46 ERROR Network error fetching 0x5213...6a35: ",
-  "2026-09-19 10:00:47 ERROR Network error fetching 0x1985...51ab: ",
-  "2026-09-19 10:00:47 ERROR Network error fetching 0x7365...64da: ",
-  "2026-09-19 10:00:47 ERROR Network error fetching 0x4980...5709: ",
-  "2026-09-19 10:40:27 ERROR Network error fetching 0x3f3a...e8fd: ",
-  "2026-09-19 10:40:27 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-19 10:40:27 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-19 10:40:27 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-19 10:40:27 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-19 10:47:06 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.",
-  "2026-09-19 10:56:27 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-19 11:02:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-19 11:18:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-19 12:23:11 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-19 12:44:15 INFO  Received signal 15, shutting down...",
   "2026-09-19 12:44:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
@@ -528,9 +520,15 @@
   "2026-09-20 06:46:57 ERROR Network error fetching 0x7365...64da: ",
   "2026-09-20 06:47:01 ERROR Network error fetching 0x5213...6a35: Server disconnected without sending a response.",
   "2026-09-20 06:47:01 ERROR Network error fetching 0x4980...5709: Server disconnected without sending a response.",
-  "2026-09-19 09:14:28 TRADE [LIVE] BUY $6.40 on 'LoL: Invictus Gaming vs JD Gaming - Game' @ 0.5800, order 0x195f1c2afb...",
-  "2026-09-19 09:14:29 TRADE [verify] FILLED: BUY 11.03 shares on 'LoL: Invictus Gaming vs JD Gaming - Game' @ 0.5800",
+  "2026-09-20 07:05:41 ERROR [inventory] API sync failed: ",
+  "2026-09-20 08:00:48 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
+  "2026-09-20 08:27:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-20 10:41:44 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
+  "2026-09-20 10:41:45 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
+  "2026-09-20 11:00:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-19 12:44:41 INFO  [recovery] No pending orders to recover",
-  "2026-09-19 13:11:18 ERROR Network error fetching 0x0587...c40b: "
+  "2026-09-19 13:11:18 ERROR Network error fetching 0x0587...c40b: ",
+  "2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...",
+  "2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400"
  ]
 }
