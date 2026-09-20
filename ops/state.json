@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-20T21:32:34.679470+00:00",
+ "generated": "2026-09-20T23:27:35.379705+00:00",
  "money": {
   "cash": 86.278703,
   "open_cost": 36.05,
@@ -20,7 +20,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1789939916.0459187,
+  "ts": 1789946833.499768,
   "day": "2026-09-20"
  },
  "arm": {
@@ -243,7 +243,7 @@
   }
  },
  "form": {
-  "ts": 1789939916.8495095,
+  "ts": 1789946834.729884,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -456,7 +456,6 @@
   }
  ],
  "important": [
-  "2026-09-19 22:43:19 ERROR [inventory] API sync failed: ",
   "2026-09-20 00:32:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-20 00:47:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-20 01:03:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -510,6 +509,11 @@
   "2026-09-20 20:21:08 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
   "2026-09-20 21:04:05 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-20 21:04:15 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
+  "2026-09-20 22:06:13 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-20 22:06:26 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-20 22:20:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-20 22:42:15 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-20 23:20:23 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
   "2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...",
   "2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400",
   "2026-09-20 20:21:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300, order 0x03932c67b5...",

@@ -1,7 +1,7 @@
-# ops digest 2026-09-20T21:32:27.420991+00:00 (last 24h)
+# ops digest 2026-09-20T23:27:28.166122+00:00 (last 24h)
 
 ## money state
-{"cash": 86.278703, "open_cost": 36.05, "equity": 122.33, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-20", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 6.4, "1c": 0}, "ts": 1789939916.0459187, "day": "2026-09-20"}
+{"cash": 86.278703, "open_cost": 36.05, "equity": 122.33, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-20", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 6.4, "1c": 0}, "ts": 1789946833.499768, "day": "2026-09-20"}
 
 ## arm: {"armed": true, "ts": 1789919410.9079125, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-20", "spent_usd": 12.8, "wallet_copies": {"0x05878ac343c1387d592042d788424412733ac40b": 1, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": 1}, "wallet_copies_yesterday": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x05878ac343c1387d592042d788424412733ac40b": 1}, "yesterday": "2026-09-19", "closed_reason": ""}
@@ -27,8 +27,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1789906281.0272796, "day": "2026-09-20", "kind": "form", "before": "0x05878ac3 in form", "after": "benched", "detail": "0x05878ac3: 109 settled, 50% won vs 49% needed, net +18.3% on $103,709, worst day -3,105", "push": "WALLET", "wallet": "0x05878ac343c1387d592042d788424412733ac40b"}
 {"ts": 1789928148.60107, "day": "2026-09-20", "kind": "form", "before": "0x57b25849 benched", "after": "in form", "detail": "0x57b25849: 40 settled, 52% won vs 47% needed, net +5.7% on $39,526, worst day -4,570", "push": "WALLET", "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2"}
 
-## important lines (58)
-2026-09-19 22:43:19 ERROR [inventory] API sync failed: 
+## important lines (62)
 2026-09-20 00:32:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-20 00:47:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-20 01:03:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
@@ -82,6 +81,11 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-20 20:21:08 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00
 2026-09-20 21:04:05 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-20 21:04:15 ERROR HTTP 408 fetching activity for 0x57b2...9da2
+2026-09-20 22:06:13 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-20 22:06:26 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
+2026-09-20 22:20:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-20 22:42:15 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-20 23:20:23 ERROR HTTP 408 fetching activity for 0x57b2...9da2
 2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...
 2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400
 2026-09-20 20:21:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300, order 0x03932c67b5...
