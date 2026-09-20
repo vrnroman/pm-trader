@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-20T11:24:40.499493+00:00",
+ "generated": "2026-09-20T12:09:39.935866+00:00",
  "money": {
-  "cash": 81.009453,
-  "open_cost": 35.69,
-  "equity": 116.7,
+  "cash": 92.859453,
+  "open_cost": 29.65,
+  "equity": 122.51,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
@@ -17,10 +17,10 @@
   "resolved_unclaimed": 65,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1789903446.2353685,
+  "ts": 1789905966.2135913,
   "day": "2026-09-20"
  },
  "arm": {
@@ -52,18 +52,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
+   "open_total": 0,
    "daily_date": "2026-09-20",
    "daily_volume": 6.4,
-   "placements": [
-    {
-     "token_id": "87504158565589525837863229325783611992139135552663431740569766272841975063899",
-     "cost": 6.4,
-     "ts": 1789900905.8769698,
-     "trader": "0x05878ac343c1387d592042d788424412733ac40b",
-     "title": "Dota 2: Conventus Stellarum vs Xtreme Gaming (BO3) - PGL Wal"
-    }
-   ]
+   "placements": []
   },
   "1c": {
    "open_total": 0,
@@ -166,14 +158,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 116.7,
+  "last_equity": 122.51,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1789883680.9919138,
+  "admit_scan_ts": 1789905335.3636568,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 4,
   "day_pnl": -6.4,
@@ -242,7 +234,7 @@
   }
  },
  "form": {
-  "ts": 1789903446.9756508,
+  "ts": 1789905966.999072,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -526,6 +518,7 @@
   "2026-09-20 10:41:44 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
   "2026-09-20 10:41:45 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
   "2026-09-20 11:00:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-20 11:45:03 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-19 12:44:41 INFO  [recovery] No pending orders to recover",
   "2026-09-19 13:11:18 ERROR Network error fetching 0x0587...c40b: ",
   "2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...",
