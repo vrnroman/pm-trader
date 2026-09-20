@@ -1,26 +1,26 @@
 {
- "generated": "2026-09-20T19:00:33.200647+00:00",
+ "generated": "2026-09-20T21:29:25.668737+00:00",
  "money": {
-  "cash": 92.859453,
-  "open_cost": 29.65,
-  "equity": 122.51,
+  "cash": 86.278703,
+  "open_cost": 36.05,
+  "equity": 122.33,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-20",
-   "spent_usd": 6.4,
+   "spent_usd": 12.8,
    "cap_usd": 32.0,
-   "remaining_usd": 25.6,
+   "remaining_usd": 19.2,
    "closed_reason": ""
   },
   "armed": true,
   "resolved_unclaimed": 65,
   "tier": {
    "1a": 0,
-   "1b": 0,
+   "1b": 6.4,
    "1c": 0
   },
-  "ts": 1789930777.471181,
+  "ts": 1789939604.2161667,
   "day": "2026-09-20"
  },
  "arm": {
@@ -33,9 +33,10 @@
  },
  "spend": {
   "date": "2026-09-20",
-  "spent_usd": 6.4,
+  "spent_usd": 12.8,
   "wallet_copies": {
-   "0x05878ac343c1387d592042d788424412733ac40b": 1
+   "0x05878ac343c1387d592042d788424412733ac40b": 1,
+   "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": 1
   },
   "wallet_copies_yesterday": {
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
@@ -52,10 +53,18 @@
    "placements": []
   },
   "1b": {
-   "open_total": 0,
+   "open_total": 6.4,
    "daily_date": "2026-09-20",
-   "daily_volume": 6.4,
-   "placements": []
+   "daily_volume": 12.8,
+   "placements": [
+    {
+     "token_id": "96998131034687394987869300990474810645455355843214977734260368889207437752543",
+     "cost": 6.4,
+     "ts": 1789935668.739672,
+     "trader": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
+     "title": "Counter-Strike: Bounty Hunters Esports vs BESTIA (BO3) - Cir"
+    }
+   ]
   },
   "1c": {
    "open_total": 0,
@@ -158,7 +167,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 122.51,
+  "last_equity": 122.33,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -234,7 +243,7 @@
   }
  },
  "form": {
-  "ts": 1789930778.2389295,
+  "ts": 1789939604.949538,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -447,8 +456,6 @@
   }
  ],
  "important": [
-  "2026-09-19 19:12:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-19 20:42:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-19 22:43:19 ERROR [inventory] API sync failed: ",
   "2026-09-20 00:32:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-20 00:47:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -491,7 +498,21 @@
   "2026-09-20 18:35:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-20 18:35:32 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-20 18:38:05 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-20 19:20:04 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-20 20:01:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-20 20:04:28 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-20 20:18:07 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-20 20:18:23 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-20 20:18:33 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-20 20:18:34 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-20 20:18:44 ERROR HTTP 500 fetching activity for 0x722a...d6ed",
+  "2026-09-20 20:21:07 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00",
+  "2026-09-20 20:21:08 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
+  "2026-09-20 21:04:05 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-20 21:04:15 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
   "2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...",
-  "2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400"
+  "2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400",
+  "2026-09-20 20:21:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300, order 0x03932c67b5...",
+  "2026-09-20 20:21:09 TRADE [verify] FILLED: BUY 14.88 shares on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300"
  ]
 }
