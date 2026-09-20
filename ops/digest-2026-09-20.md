@@ -1,7 +1,7 @@
-# ops digest 2026-09-20T16:04:25.569268+00:00 (last 24h)
+# ops digest 2026-09-20T16:26:08.267449+00:00 (last 24h)
 
 ## money state
-{"cash": 92.859453, "open_cost": 29.65, "equity": 122.51, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-20", "spent_usd": 6.4, "cap_usd": 32.0, "remaining_usd": 25.6, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789920208.3280425, "day": "2026-09-20"}
+{"cash": 92.859453, "open_cost": 29.65, "equity": 122.51, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-20", "spent_usd": 6.4, "cap_usd": 32.0, "remaining_usd": 25.6, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 65, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789921546.5296152, "day": "2026-09-20"}
 
 ## arm: {"armed": true, "ts": 1789919410.9079125, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-20", "spent_usd": 6.4, "wallet_copies": {"0x05878ac343c1387d592042d788424412733ac40b": 1}, "wallet_copies_yesterday": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x05878ac343c1387d592042d788424412733ac40b": 1}, "yesterday": "2026-09-19", "closed_reason": ""}
@@ -26,8 +26,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 ## ledger (1 rows)
 {"ts": 1789906281.0272796, "day": "2026-09-20", "kind": "form", "before": "0x05878ac3 in form", "after": "benched", "detail": "0x05878ac3: 109 settled, 50% won vs 49% needed, net +18.3% on $103,709, worst day -3,105", "push": "WALLET", "wallet": "0x05878ac343c1387d592042d788424412733ac40b"}
 
-## important lines (34)
-2026-09-19 16:22:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected
+## important lines (37)
 2026-09-19 19:12:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-19 20:42:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-19 22:43:19 ERROR [inventory] API sync failed: 
@@ -59,5 +58,9 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-20 15:40:39 ERROR Network error fetching 0x0587...c40b: 
 2026-09-20 15:40:39 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.
 2026-09-20 15:50:10 WARNING [live] ARMED for real orders by telegram: no reason given
+2026-09-20 16:25:43 ERROR Network error fetching 0x0587...c40b: 
+2026-09-20 16:25:44 ERROR Network error fetching 0x9f15...bdb3: 
+2026-09-20 16:25:44 ERROR Network error fetching 0xfd3e...5a7a: 
+2026-09-20 16:25:44 ERROR Network error fetching 0x09b0...a3b6: 
 2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...
 2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-20T16:04:42.297774+00:00",
+ "generated": "2026-09-20T16:26:34.473519+00:00",
  "money": {
   "cash": 92.859453,
   "open_cost": 29.65,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789920208.3280425,
+  "ts": 1789921546.5296152,
   "day": "2026-09-20"
  },
  "arm": {
@@ -234,7 +234,7 @@
   }
  },
  "form": {
-  "ts": 1789920212.3103688,
+  "ts": 1789921219.1545377,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -437,7 +437,6 @@
   }
  ],
  "important": [
-  "2026-09-19 16:22:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-19 19:12:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-19 20:42:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-19 22:43:19 ERROR [inventory] API sync failed: ",
@@ -469,6 +468,10 @@
   "2026-09-20 15:40:39 ERROR Network error fetching 0x0587...c40b: ",
   "2026-09-20 15:40:39 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
   "2026-09-20 15:50:10 WARNING [live] ARMED for real orders by telegram: no reason given",
+  "2026-09-20 16:25:43 ERROR Network error fetching 0x0587...c40b: ",
+  "2026-09-20 16:25:44 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-09-20 16:25:44 ERROR Network error fetching 0xfd3e...5a7a: ",
+  "2026-09-20 16:25:44 ERROR Network error fetching 0x09b0...a3b6: ",
   "2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...",
   "2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400"
  ]
