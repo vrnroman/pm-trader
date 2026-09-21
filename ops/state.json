@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-21T10:42:35.075764+00:00",
+ "generated": "2026-09-21T13:58:43.783741+00:00",
  "money": {
   "cash": 79.830203,
   "open_cost": 36.05,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789987324.3609447,
+  "ts": 1789998829.0934446,
   "day": "2026-09-21"
  },
  "arm": {
@@ -154,6 +154,12 @@
    "tier": "1b",
    "ts": 1789827877.6900246,
    "source": "telegram-gate"
+  },
+  "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
+   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
+   "tier": "1b",
+   "ts": 1789992497.9469755,
+   "source": "telegram-gate"
   }
  },
  "watch": {
@@ -165,7 +171,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1789970878.5931828,
+  "admit_scan_ts": 1789992495.9808922,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 5,
   "day_pnl": -6.4,
@@ -177,7 +183,7 @@
    "86842978223026466862449934105595250822075305679428664631958332197768084254089",
    "96998131034687394987869300990474810645455355843214977734260368889207437752543"
   ],
-  "form_scan_ts": 1789971519.9339936,
+  "form_scan_ts": 1789993203.3373928,
   "daily_line_attempt_day": "2026-09-21",
   "daily_line_sent": true,
   "daily_line_day": "2026-09-21",
@@ -232,10 +238,14 @@
   "0xf49614e63fb15383d4a9b717a1be03ad2410fe79": {
    "since": 1789827868.9550335,
    "settled": 0
+  },
+  "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
+   "since": 1789992496.5955625,
+   "settled": 0
   }
  },
  "form": {
-  "ts": 1789986976.3717191,
+  "ts": 1789998829.7381556,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -262,7 +272,7 @@
     "worst_day": -332.99,
     "ok": true,
     "reason": "77% came out ahead vs 59% needed, net +16.0%",
-    "ts": 1789971521.2541409,
+    "ts": 1789993204.122294,
     "hit": 0.7674,
     "net_pct": 16.03
    },
@@ -276,7 +286,7 @@
     "worst_day": -535.02,
     "ok": true,
     "reason": "77% came out ahead vs 54% needed, net +19.7%",
-    "ts": 1789971521.2541409,
+    "ts": 1789993204.122294,
     "hit": 0.7692,
     "net_pct": 19.75
    },
@@ -304,37 +314,37 @@
     "worst_day": -1358.43,
     "ok": false,
     "reason": "only 5 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789971521.2541409,
+    "ts": 1789993204.122294,
     "hit": 0.2,
     "net_pct": -45.2
    },
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-    "n": 73,
-    "won": 34,
-    "cost": 36207.26,
-    "back": 35622.71,
-    "avg_price": 0.3628607988120821,
+    "n": 72,
+    "won": 32,
+    "cost": 35616.3,
+    "back": 33883.13,
+    "avg_price": 0.3660538299358856,
     "worst_day": -1556.86,
     "ok": false,
-    "reason": "net -1.6% (need +2%)",
-    "ts": 1789971521.2541409,
-    "hit": 0.4658,
-    "net_pct": -1.61
+    "reason": "net -4.9% (need +2%)",
+    "ts": 1789993204.122294,
+    "hit": 0.4444,
+    "net_pct": -4.87
    },
    "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {
     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
-    "n": 42,
+    "n": 40,
     "won": 22,
-    "cost": 40449.53,
-    "back": 43078.71,
-    "avg_price": 0.4639869434219519,
+    "cost": 38331.22,
+    "back": 42625.81,
+    "avg_price": 0.47709018517384233,
     "worst_day": -4569.62,
     "ok": true,
-    "reason": "52% came out ahead vs 46% needed, net +6.5%",
-    "ts": 1789971521.2541409,
-    "hit": 0.5238,
-    "net_pct": 6.5
+    "reason": "55% came out ahead vs 48% needed, net +11.2%",
+    "ts": 1789993204.122294,
+    "hit": 0.55,
+    "net_pct": 11.2
    },
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
@@ -346,7 +356,7 @@
     "worst_day": -7696.47,
     "ok": false,
     "reason": "77% came out ahead vs 74% needed (+3 points, need +3)",
-    "ts": 1789971521.2541409,
+    "ts": 1789993204.122294,
     "hit": 0.7723,
     "net_pct": 5.39
    },
@@ -360,7 +370,7 @@
     "worst_day": -329.83,
     "ok": false,
     "reason": "only 5 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789971521.2541409,
+    "ts": 1789993204.122294,
     "hit": 0.8,
     "net_pct": 20.84
    },
@@ -388,7 +398,7 @@
     "worst_day": -324.01,
     "ok": true,
     "reason": "71% came out ahead vs 56% needed, net +13.6%",
-    "ts": 1789971521.2541409,
+    "ts": 1789993204.122294,
     "hit": 0.7059,
     "net_pct": 13.62
    },
@@ -402,9 +412,23 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1789971521.2541409,
+    "ts": 1789993204.122294,
     "hit": 0.0,
     "net_pct": 0.0
+   },
+   "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
+    "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
+    "n": 45,
+    "won": 26,
+    "cost": 120466.81,
+    "back": 131211.0,
+    "avg_price": 0.4565076156046442,
+    "worst_day": -6319.64,
+    "ok": true,
+    "reason": "58% came out ahead vs 46% needed, net +8.9%",
+    "ts": 1789993204.122294,
+    "hit": 0.5778,
+    "net_pct": 8.92
    },
    "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a": {
     "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
@@ -426,16 +450,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1789906281.0272796,
-   "day": "2026-09-20",
-   "kind": "form",
-   "before": "0x05878ac3 in form",
-   "after": "benched",
-   "detail": "0x05878ac3: 109 settled, 50% won vs 49% needed, net +18.3% on $103,709, worst day -3,105",
-   "push": "WALLET",
-   "wallet": "0x05878ac343c1387d592042d788424412733ac40b"
-  },
   {
    "ts": 1789928148.60107,
    "day": "2026-09-20",
@@ -468,16 +482,29 @@
    "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
    "pnl": -6.4,
    "won": false
+  },
+  {
+   "ts": 1789992496.5955625,
+   "day": "2026-09-21",
+   "kind": "auto_admit",
+   "before": "0xf9168343 not in Z",
+   "after": "in set Z, on probation",
+   "detail": "39 settled paper copies, paper ROI +12.4%, trimmed +1.8%, ideal +13.4%",
+   "push": "WALLET",
+   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770"
+  },
+  {
+   "ts": 1789992498.9342961,
+   "day": "2026-09-21",
+   "kind": "form",
+   "before": "0xf9168343 unknown",
+   "after": "in form",
+   "detail": "0xf9168343: 45 settled, 58% won vs 46% needed, net +8.9% on $120,467, worst day -6,320",
+   "push": null,
+   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770"
   }
  ],
  "important": [
-  "2026-09-20 11:00:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-20 11:45:03 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
-  "2026-09-20 12:11:35 INFO  [ops] form: '0x05878ac3 in form' -> 'benched' | 0x05878ac3: 109 settled, 50% won vs 49% needed, net +18.3% on $103,709, worst day -3,105",
-  "2026-09-20 13:35:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-20 13:46:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-20 13:46:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-20 13:46:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-20 14:19:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-20 14:59:12 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
   "2026-09-20 14:59:12 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
@@ -584,6 +611,18 @@
   "2026-09-21 10:03:06 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-21 10:25:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-21 10:35:03 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-21 10:48:14 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-21 12:00:36 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
+  "2026-09-21 12:08:17 WARNING [zset] ADMITTED 0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770 to set Z (+2% over 36 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-21 12:08:18 INFO  [ops] auto_admit: '0xf9168343 not in Z' -> 'in set Z, on probation' | 39 settled paper copies, paper ROI +12.4%, trimmed +1.8%, ideal +13.4%",
+  "2026-09-21 12:08:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-21 12:08:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-21 12:08:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-21 12:08:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-21 12:08:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-21 12:08:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-21 12:08:58 INFO  [ops] form: '0xf9168343 unknown' -> 'in form' | 0xf9168343: 45 settled, 58% won vs 46% needed, net +8.9% on $120,467, worst day -6,320",
+  "2026-09-21 12:28:29 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-20 20:21:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300, order 0x03932c67b5...",
   "2026-09-20 20:21:09 TRADE [verify] FILLED: BUY 14.88 shares on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300",
   "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
