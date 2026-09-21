@@ -1,26 +1,26 @@
 {
- "generated": "2026-09-21T13:58:43.783741+00:00",
+ "generated": "2026-09-21T17:03:14.306372+00:00",
  "money": {
-  "cash": 79.830203,
-  "open_cost": 36.05,
-  "equity": 115.88,
+  "cash": 73.306533,
+  "open_cost": 42.45,
+  "equity": 115.76,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-21",
-   "spent_usd": 6.4,
+   "spent_usd": 12.8,
    "cap_usd": 32.0,
-   "remaining_usd": 25.6,
+   "remaining_usd": 19.2,
    "closed_reason": ""
   },
   "armed": true,
   "resolved_unclaimed": 66,
   "tier": {
    "1a": 0,
-   "1b": 0,
+   "1b": 6.4,
    "1c": 0
   },
-  "ts": 1789998829.0934446,
+  "ts": 1790009914.4221592,
   "day": "2026-09-21"
  },
  "arm": {
@@ -33,9 +33,10 @@
  },
  "spend": {
   "date": "2026-09-21",
-  "spent_usd": 6.4,
+  "spent_usd": 12.8,
   "wallet_copies": {
-   "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1
+   "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
+   "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": 1
   },
   "wallet_copies_yesterday": {
    "0x05878ac343c1387d592042d788424412733ac40b": 1,
@@ -52,10 +53,18 @@
    "placements": []
   },
   "1b": {
-   "open_total": 0,
+   "open_total": 6.4,
    "daily_date": "2026-09-21",
-   "daily_volume": 6.4,
-   "placements": []
+   "daily_volume": 12.8,
+   "placements": [
+    {
+     "token_id": "44723508312349478265266368058158505462696112057305040858943606613905113542356",
+     "cost": 6.4,
+     "ts": 1790002664.9260223,
+     "trader": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
+     "title": "Dota 2: Team Yandex vs Natus Vincere (BO3) - PGL Wallachia G"
+    }
+   ]
   },
   "1c": {
    "open_total": 0,
@@ -164,7 +173,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 115.88,
+  "last_equity": 115.76,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -245,7 +254,7 @@
   }
  },
  "form": {
-  "ts": 1789998829.7381556,
+  "ts": 1790009915.167744,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -505,22 +514,6 @@
   }
  ],
  "important": [
-  "2026-09-20 14:19:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-20 14:59:12 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
-  "2026-09-20 14:59:12 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
-  "2026-09-20 15:16:10 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
-  "2026-09-20 15:39:01 ERROR [inventory] API sync failed: ",
-  "2026-09-20 15:39:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-20 15:40:38 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-20 15:40:39 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-20 15:40:39 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
-  "2026-09-20 15:50:10 WARNING [live] ARMED for real orders by telegram: no reason given",
-  "2026-09-20 16:25:43 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-20 16:25:44 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-20 16:25:44 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-20 16:25:44 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-20 16:30:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-20 16:30:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-20 17:07:08 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-20 17:55:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-20 18:16:49 INFO  [ops] form: '0x57b25849 benched' -> 'in form' | 0x57b25849: 40 settled, 52% won vs 47% needed, net +5.7% on $39,526, worst day -4,570",
@@ -623,9 +616,17 @@
   "2026-09-21 12:08:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-21 12:08:58 INFO  [ops] form: '0xf9168343 unknown' -> 'in form' | 0xf9168343: 45 settled, 58% won vs 46% needed, net +8.9% on $120,467, worst day -6,320",
   "2026-09-21 12:28:29 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-21 14:04:10 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-21 14:57:43 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00",
+  "2026-09-21 14:57:44 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
+  "2026-09-21 15:59:11 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-21 16:00:13 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-21 16:26:06 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-20 20:21:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300, order 0x03932c67b5...",
   "2026-09-20 20:21:09 TRADE [verify] FILLED: BUY 14.88 shares on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300",
   "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
-  "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500"
+  "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
+  "2026-09-21 14:57:44 TRADE [LIVE] BUY $6.40 on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100, order 0x6f49770a8b...",
+  "2026-09-21 14:57:48 TRADE [verify] FILLED: BUY 10.49 shares on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100"
  ]
 }
