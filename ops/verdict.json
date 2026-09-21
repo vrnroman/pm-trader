@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-21T00:41:20Z-fbf0",
-  "ts": 1789951280,
+  "id": "2026-09-21T06:41:06Z-e4e9",
+  "ts": 1789972866,
   "kind": "nothing",
-  "message": "Digest at 00:16 UTC, armed, spend $6.40 of $32.00 cap, remaining $25.60, equity $122.28 vs floor $56.00. Three live copies filled clean in the last 24h. Form table unchanged from the bar's own automatic calls: 0x05878ac3 stays benched (crossed to a losing margin on 09-20 12:11), 0x57b25849 stays in form after the bar un-benched it on 09-20 18:16, both the bar's own action not mine. The four other in-form wallets (0x09b045ba, 0x1985327e, 0x722abb54, 0xd970693a) show no losing streak or out-of-proportion worst day, none of mine to touch. No self-disarm, no guard failure, no Traceback. Recurring 404 no-orderbook, server-disconnected, 429, and 408 activity-fetch errors continue at the same volume as prior days.",
+  "message": "Digest at 04:58 UTC, armed by telegram, spend $6.40 of $32.00 cap, remaining $25.60, equity $115.88 vs floor $56.00. Three live copies filled clean in the last 24h, one settled a loss of $6.40 on Counter-Strike (0x57b25849). Form table matches the bar's own automatic calls: 0x722abb54 crossed to benched on 09-21 00:18 (76% won vs 74% needed, +2 points, need +3), 0x05878ac3 stays benched, 0x57b25849 stays in form after the bar un-benched it on 09-20. The four in-form wallets (0x09b045ba, 0x1985327e, 0x57b25849, 0xd970693a) show no losing streak or out-of-proportion worst day, none of mine to touch. No self-disarm, no guard failure, no Traceback. Recurring 404 no-orderbook, server-disconnected, 429, and 408 activity-fetch errors continue at the same volume as prior days.",
   "evidence": [
-    "{\"cash\": 79.830203, \"open_cost\": 42.45, \"equity\": 122.28, \"floor\": 56.0, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6}, \"armed\": true, \"resolved_unclaimed\": 65}",
-    "in form  0x722abb54: 104 settled, 77% won vs 74% needed, net +6.1% on $218,390, worst day -5,949",
-    "in form  0x57b25849: 40 settled, 52% won vs 47% needed, net +5.7% on $39,526, worst day -4,570",
-    "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
-    "2026-09-20 20:21:08 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00"
+    "{\"cash\": 79.830203, \"open_cost\": 36.05, \"equity\": 115.88, \"floor\": 56.0, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6}, \"armed\": true}",
+    "benched  0x722abb54: 101 settled, 76% won vs 74% needed, net +5.0% on $213,391, worst day -7,408",
+    "in form  0x57b25849: 42 settled, 52% won vs 46% needed, net +6.5% on $40,450, worst day -4,570",
+    "2026-09-21 00:18:31 INFO  [ops] form: '0x722abb54 in form' -> 'benched' | 0x722abb54: 101 settled, 76% won vs 74% needed, net +5.0% on $213,391, worst day -7,408",
+    "2026-09-21 00:52:20 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Counter-Strike: Bounty Hunters Esports v' (0x57b25849, tier 1b)"
   ],
   "commit": null
 }
