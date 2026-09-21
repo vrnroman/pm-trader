@@ -1,7 +1,7 @@
-# ops digest 2026-09-21T21:04:01.819028+00:00 (last 24h)
+# ops digest 2026-09-21T22:46:43.191187+00:00 (last 24h)
 
 ## money state
-{"cash": 83.796533, "open_cost": 36.05, "equity": 119.85, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-21", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 66, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1790024423.4824836, "day": "2026-09-21"}
+{"cash": 83.796533, "open_cost": 36.05, "equity": 119.85, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-21", "spent_usd": 12.8, "cap_usd": 32.0, "remaining_usd": 19.2, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 66, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1790030708.8470778, "day": "2026-09-21"}
 
 ## arm: {"armed": true, "ts": 1789919410.9079125, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-21", "spent_usd": 12.8, "wallet_copies": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": 1}, "wallet_copies_yesterday": {"0x05878ac343c1387d592042d788424412733ac40b": 1, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": 1}, "yesterday": "2026-09-20", "closed_reason": ""}
@@ -31,13 +31,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1789992498.9342961, "day": "2026-09-21", "kind": "form", "before": "0xf9168343 unknown", "after": "in form", "detail": "0xf9168343: 45 settled, 58% won vs 46% needed, net +8.9% on $120,467, worst day -6,320", "push": null, "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770"}
 {"ts": 1790014996.3058822, "day": "2026-09-21", "kind": "form", "before": "0x722abb54 benched", "after": "in form", "detail": "0x722abb54: 99 settled, 79% won vs 74% needed, net +9.1% on $206,134, worst day -3,391", "push": "WALLET", "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
 
-## important lines (99)
-2026-09-20 21:04:05 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-20 21:04:15 ERROR HTTP 408 fetching activity for 0x57b2...9da2
-2026-09-20 22:06:13 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-20 22:06:26 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
-2026-09-20 22:20:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-20 22:42:15 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+## important lines (95)
 2026-09-20 23:20:23 ERROR HTTP 408 fetching activity for 0x57b2...9da2
 2026-09-20 23:32:21 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-20 23:34:53 ERROR HTTP 408 fetching activity for 0x722a...d6ed
@@ -127,6 +121,8 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-21 18:25:04 INFO  [ops] form: '0x722abb54 benched' -> 'in form' | 0x722abb54: 99 settled, 79% won vs 74% needed, net +9.1% on $206,134, worst day -3,391
 2026-09-21 19:13:19 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-21 19:20:10 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
+2026-09-21 22:12:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-21 22:22:07 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...
 2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500
 2026-09-21 14:57:44 TRADE [LIVE] BUY $6.40 on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100, order 0x6f49770a8b...
