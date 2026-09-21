@@ -1,7 +1,7 @@
-# ops digest 2026-09-21T07:00:35.502209+00:00 (last 24h)
+# ops digest 2026-09-21T10:42:29.219800+00:00 (last 24h)
 
 ## money state
-{"cash": 79.830203, "open_cost": 36.05, "equity": 115.88, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-21", "spent_usd": 6.4, "cap_usd": 32.0, "remaining_usd": 25.6, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 66, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789973813.4678423, "day": "2026-09-21"}
+{"cash": 79.830203, "open_cost": 36.05, "equity": 115.88, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-21", "spent_usd": 6.4, "cap_usd": 32.0, "remaining_usd": 25.6, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 66, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1789987324.3609447, "day": "2026-09-21"}
 
 ## arm: {"armed": true, "ts": 1789919410.9079125, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-21", "spent_usd": 6.4, "wallet_copies": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1}, "wallet_copies_yesterday": {"0x05878ac343c1387d592042d788424412733ac40b": 1, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": 1}, "yesterday": "2026-09-20", "closed_reason": ""}
@@ -29,12 +29,7 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1789949814.6347468, "day": "2026-09-21", "kind": "form", "before": "0x722abb54 in form", "after": "benched", "detail": "0x722abb54: 101 settled, 76% won vs 74% needed, net +5.0% on $213,391, worst day -7,408", "push": "WALLET", "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
 {"ts": 1789951940.654675, "day": "2026-09-21", "kind": "settled", "before": "open $6.40", "after": "paid $0.00", "detail": "lost -6.40 on 'Counter-Strike: Bounty Hunters Esports v' (0x57b25849, tier 1b)", "push": null, "token_id": "96998131034687394987869300990474810645455355843214977734260368889207437752543", "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2", "pnl": -6.4, "won": false}
 
-## important lines (106)
-2026-09-20 07:05:41 ERROR [inventory] API sync failed: 
-2026-09-20 08:00:48 INFO  [AB-RACE] rehearsal line sent, real-money line sent
-2026-09-20 08:27:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-09-20 10:41:44 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00
-2026-09-20 10:41:45 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00
+## important lines (117)
 2026-09-20 11:00:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-20 11:45:03 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00
 2026-09-20 12:11:35 INFO  [ops] form: '0x05878ac3 in form' -> 'benched' | 0x05878ac3: 109 settled, 50% won vs 49% needed, net +18.3% on $103,709, worst day -3,105
@@ -130,8 +125,24 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-21 05:34:47 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-21 05:34:57 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-21 05:36:44 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...
-2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400
+2026-09-21 07:02:10 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-21 07:35:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-21 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent
+2026-09-21 08:22:13 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-21 09:00:35 ERROR Network error fetching 0x4980...5709: Server disconnected without sending a response.
+2026-09-21 09:00:35 ERROR Network error fetching 0x1985...51ab: Server disconnected without sending a response.
+2026-09-21 09:00:54 ERROR Network error fetching 0xd970...bbba: 
+2026-09-21 09:00:54 ERROR Network error fetching 0xeef6...cd4c: 
+2026-09-21 09:01:55 ERROR Network error fetching 0xf496...fe79: Server disconnected without sending a response.
+2026-09-21 09:01:55 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.
+2026-09-21 09:04:12 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-21 09:34:07 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-21 09:37:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-21 09:44:14 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-21 09:58:05 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
+2026-09-21 10:03:06 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
+2026-09-21 10:25:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-21 10:35:03 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-20 20:21:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300, order 0x03932c67b5...
 2026-09-20 20:21:09 TRADE [verify] FILLED: BUY 14.88 shares on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300
 2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...

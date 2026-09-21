@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-21T07:00:41.602866+00:00",
+ "generated": "2026-09-21T10:42:35.075764+00:00",
  "money": {
   "cash": 79.830203,
   "open_cost": 36.05,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1789973813.4678423,
+  "ts": 1789987324.3609447,
   "day": "2026-09-21"
  },
  "arm": {
@@ -178,9 +178,9 @@
    "96998131034687394987869300990474810645455355843214977734260368889207437752543"
   ],
   "form_scan_ts": 1789971519.9339936,
-  "daily_line_attempt_day": "2026-09-20",
+  "daily_line_attempt_day": "2026-09-21",
   "daily_line_sent": true,
-  "daily_line_day": "2026-09-20",
+  "daily_line_day": "2026-09-21",
   "guard_failing_pushed": false,
   "floor_near_day": "2026-09-19"
  },
@@ -235,7 +235,7 @@
   }
  },
  "form": {
-  "ts": 1789973813.960193,
+  "ts": 1789986976.3717191,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -471,11 +471,6 @@
   }
  ],
  "important": [
-  "2026-09-20 07:05:41 ERROR [inventory] API sync failed: ",
-  "2026-09-20 08:00:48 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
-  "2026-09-20 08:27:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-20 10:41:44 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
-  "2026-09-20 10:41:45 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
   "2026-09-20 11:00:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-20 11:45:03 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-20 12:11:35 INFO  [ops] form: '0x05878ac3 in form' -> 'benched' | 0x05878ac3: 109 settled, 50% won vs 49% needed, net +18.3% on $103,709, worst day -3,105",
@@ -571,8 +566,24 @@
   "2026-09-21 05:34:47 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-21 05:34:57 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-21 05:36:44 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-20 10:41:45 TRADE [LIVE] BUY $6.40 on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400, order 0xe86e040222...",
-  "2026-09-20 10:41:46 TRADE [verify] FILLED: BUY 11.85 shares on 'Dota 2: Conventus Stellarum vs Xtreme Ga' @ 0.5400",
+  "2026-09-21 07:02:10 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-21 07:35:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-21 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
+  "2026-09-21 08:22:13 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-21 09:00:35 ERROR Network error fetching 0x4980...5709: Server disconnected without sending a response.",
+  "2026-09-21 09:00:35 ERROR Network error fetching 0x1985...51ab: Server disconnected without sending a response.",
+  "2026-09-21 09:00:54 ERROR Network error fetching 0xd970...bbba: ",
+  "2026-09-21 09:00:54 ERROR Network error fetching 0xeef6...cd4c: ",
+  "2026-09-21 09:01:55 ERROR Network error fetching 0xf496...fe79: Server disconnected without sending a response.",
+  "2026-09-21 09:01:55 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.",
+  "2026-09-21 09:04:12 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-21 09:34:07 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-21 09:37:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-21 09:44:14 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-21 09:58:05 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-21 10:03:06 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-21 10:25:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-21 10:35:03 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-20 20:21:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300, order 0x03932c67b5...",
   "2026-09-20 20:21:09 TRADE [verify] FILLED: BUY 14.88 shares on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300",
   "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
