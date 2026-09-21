@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-21T19:15:29.867071+00:00",
+ "generated": "2026-09-21T21:04:08.685164+00:00",
  "money": {
   "cash": 83.796533,
   "open_cost": 36.05,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1790017986.5495005,
+  "ts": 1790024423.4824836,
   "day": "2026-09-21"
  },
  "arm": {
@@ -246,7 +246,7 @@
   }
  },
  "form": {
-  "ts": 1790017991.5997958,
+  "ts": 1790024424.273899,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -506,17 +506,6 @@
   }
  ],
  "important": [
-  "2026-09-20 19:20:04 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-20 20:01:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-20 20:04:28 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-20 20:18:07 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-20 20:18:23 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-20 20:18:33 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-20 20:18:34 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-20 20:18:44 ERROR HTTP 500 fetching activity for 0x722a...d6ed",
-  "2026-09-20 20:21:07 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00",
-  "2026-09-20 20:21:08 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
-  "2026-09-20 21:04:05 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-20 21:04:15 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
   "2026-09-20 22:06:13 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-20 22:06:26 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
@@ -610,8 +599,7 @@
   "2026-09-21 18:17:10 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
   "2026-09-21 18:25:04 INFO  [ops] form: '0x722abb54 benched' -> 'in form' | 0x722abb54: 99 settled, 79% won vs 74% needed, net +9.1% on $206,134, worst day -3,391",
   "2026-09-21 19:13:19 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-20 20:21:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300, order 0x03932c67b5...",
-  "2026-09-20 20:21:09 TRADE [verify] FILLED: BUY 14.88 shares on 'Counter-Strike: Bounty Hunters Esports v' @ 0.4300",
+  "2026-09-21 19:20:10 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
   "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
   "2026-09-21 14:57:44 TRADE [LIVE] BUY $6.40 on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100, order 0x6f49770a8b...",
