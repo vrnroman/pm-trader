@@ -40,6 +40,7 @@ STATE_FILE = "ops-watch.json"
 MONEY_STATE_FILE = "money-state.json"
 ESCALATION_FILE = "ops-escalation.json"
 PROBATION_FILE = "ops-probation.json"
+THOUGHTS_FILE = "ops-thoughts.jsonl"     # the AI SRE's ledger (scripts/ai_sre.py)
 
 
 def _env_f(name: str, default: float) -> float:
@@ -698,6 +699,41 @@ def weekly_line(now: Optional[float] = None) -> str:
             f"{len(evicts)} eviction(s), {len(pushes)} push(es) to you.")
 
 
+def watcher_thoughts(since_ts: float = 0.0) -> list[dict]:
+    """The AI SRE's ledger rows (one per wake), oldest first."""
+    out: list[dict] = []
+    try:
+        with open(_p(THOUGHTS_FILE), encoding="utf-8") as f:
+            for ln in f:
+                try:
+                    r = json.loads(ln)
+                except ValueError:
+                    continue
+                if float(r.get("ts") or 0) >= since_ts:
+                    out.append(r)
+    except OSError:
+        return []
+    return out
+
+
+def watcher_line(now: Optional[float] = None) -> str:
+    """The second line under the 08:00 UTC real-money line (s-qbzbrw): what
+    the watcher on the box did in the last 24h. Empty when nothing woke it,
+    so a quiet day adds no line. Raw counts, no grades."""
+    now = time.time() if now is None else now
+    rows = watcher_thoughts(since_ts=now - 86400)
+    if not rows:
+        return ""
+    woke = sum(1 for r in rows if r.get("kind") != "revert")
+    acted = sum(1 for r in rows if str(r.get("did") or "").startswith(("fix pushed", "disarmed", "escalated")))
+    reverted = sum(1 for r in rows if r.get("kind") == "revert")
+    escalated = sum(1 for r in rows if str(r.get("did") or "").startswith("escalated"))
+    cost = sum(float(r.get("cost_usd") or 0) for r in rows)
+    noticed = str(rows[-1].get("concluded") or "")[:110]
+    return (f"\U0001f916 watcher, last 24h: woke {woke}, acted {acted}, reverted {reverted}, escalated {escalated}, "
+            f"spent ${cost:.2f}; last: {noticed}")
+
+
 def daily_line(now: Optional[float] = None) -> str:
     now = time.time() if now is None else now
     rows = ledger_rows(since_ts=now - 86400)
@@ -705,7 +741,9 @@ def daily_line(now: Optional[float] = None) -> str:
     pnl = round(sum(float(r.get("pnl") or 0) for r in settled), 2)
     won = sum(1 for r in settled if r.get("won"))
     heals = [r for r in rows if r.get("kind") in ("rearm", "guard_recovered")]
+    tail = watcher_line(now)
     if not rows:
-        return "📒 ledger: nothing happened in the last 24h"
+        return "📒 ledger: nothing happened in the last 24h" + (("\n" + tail) if tail else "")
     return (f"📒 ledger, last 24h: {len(settled)} settled ({won} won) {pnl:+.2f}; "
-            f"{len(heals)} self-heal(s); {sum(1 for r in rows if r.get('kind') == 'auto_admit')} auto-admission(s)")
+            f"{len(heals)} self-heal(s); {sum(1 for r in rows if r.get('kind') == 'auto_admit')} auto-admission(s)"
+            + (("\n" + tail) if tail else ""))

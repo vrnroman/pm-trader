@@ -132,9 +132,11 @@ def line(since_ts: float = 0.0, now: Optional[float] = None) -> str:
     r = report(since_ts, now)
     if not r["rows"]:
         return "two clocks: no fills stamped yet"
+    def s(v):
+        return "n/a" if v is None else f"{v}s"
     return (f"two clocks: {r['matched']} matched fills over {r['days']:.1f} d, "
-            f"api lag p50 {r['api_lag_p50']}s, chain lag p50 {r['chain_lag_p50']}s, "
-            f"chain earlier by {r['gain_p50']}s at the median; api-only {r['api_only']}, "
+            f"api lag p50 {s(r['api_lag_p50'])}, chain lag p50 {s(r['chain_lag_p50'])}, "
+            f"chain earlier by {s(r['gain_p50'])} at the median; api-only {r['api_only']}, "
             f"chain-only {r['chain_only']}, duplicate ids {r['dupes']}; "
             f"{'CHAIN IS PRIMARY' if is_primary() else 'chain is a shadow'}")
 

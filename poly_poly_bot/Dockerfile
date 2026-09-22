@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ && rm -
 # old pipe (`curl | bash`, no pipefail) turned that into a silent no-op — apt
 # then installed the distro nodejs, which splits npm out, and the build died at
 # `npm: not found`. Pinned v22 LTS; bump deliberately.
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates xz-utils \
+# git + ssh client: the AI SRE sidecar (scripts/ai_sre.py, s-qbzbrw) runs
+# from this same image and commits its fixes over a write deploy key.
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates xz-utils git openssh-client \
     && curl -fsSL https://nodejs.org/dist/v22.17.0/node-v22.17.0-linux-x64.tar.xz -o /tmp/node-v22.17.0-linux-x64.tar.xz \
     && curl -fsSL https://nodejs.org/dist/v22.17.0/SHASUMS256.txt -o /tmp/SHASUMS256.txt \
     && (cd /tmp && grep "node-v22.17.0-linux-x64.tar.xz$" SHASUMS256.txt | sha256sum -c -) \

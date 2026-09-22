@@ -38,6 +38,9 @@ class _Event:
     def __getitem__(self, k):
         return self._d[k]
 
+    def get(self, k, default=None):
+        return self._d.get(k, default)
+
 
 def _source():
     s = OnchainSource()
@@ -241,17 +244,21 @@ def test_shadow_mode_stamps_the_clock_and_never_enqueues(tmp_path, monkeypatch):
     assert len(enq) == 1 and enq[0].source == "onchain" and enq[0].trade.id.endswith("-123-BUY")
 
 
-def test_events_are_read_with_the_web3_7_keyword_names():
+def test_events_are_read_with_the_web3_7_keyword_names_and_the_tracked_filters():
     """web3 8 (deployed) rejects create_filter(fromBlock=...); the read goes
-    through get_logs(from_block=..., to_block=...). A fake contract that only
-    accepts the new names is the mutation check."""
+    through get_logs(from_block=..., to_block=..., argument_filters=...) with
+    the tracked set on maker, then on taker, so the node returns only their
+    fills. A fake contract that only accepts the new names is the mutation
+    check; a fill returned by both queries is counted once."""
     s = _source()
-    seen = {}
+    calls = []
 
     class _Ev:
-        def get_logs(self, *, from_block, to_block):
-            seen["range"] = (from_block, to_block)
-            return [_Event(TRACKED, OTHER, 0, 123, 500_000, 1_000_000)]
+        def get_logs(self, *, from_block, to_block, argument_filters):
+            calls.append((from_block, to_block, argument_filters))
+            ev = _Event(TRACKED, OTHER, 0, 123, 500_000, 1_000_000)
+            ev._d["logIndex"] = 7
+            return [ev]   # the same log for the maker query and the taker query
 
         def create_filter(self, **kw):
             raise AssertionError("create_filter is the web3 6 API; get_logs is the read")
@@ -264,9 +271,14 @@ def test_events_are_read_with_the_web3_7_keyword_names():
 
     s._ctf_contract = _Contract()
     s._neg_risk_contract = _Contract()
-    trades = s._fetch_events_range(100, 108)
-    assert seen["range"] == (100, 108)
-    assert len(trades) == 2 and all(t.id.endswith("-123-BUY") for t in trades)
+    trades = s._fetch_events_range(100, 159)
+    assert [c[:2] for c in calls] == [(100, 159)] * 4
+    assert [list(c[2].keys()) for c in calls] == [["maker"], ["taker"], ["maker"], ["taker"]]
+    assert all(c[2][k][0].lower() == TRACKED.lower() for c in calls for k in c[2])
+    assert len(trades) == 2, "one fill per contract, the maker/taker duplicate dropped"
+    s._tracked_addresses = set()
+    calls.clear()
+    assert s._fetch_events_range(100, 159) == [] and calls == [], "nothing tracked, no query"
 
 
 # --------------------------------------------------------------------------- #

@@ -1173,6 +1173,27 @@ In Telegram: `/zset candidates` (one card per passer, admit by tap),
   from mirrored exits, slices, idle days) and one button; the tap re-runs the
   gate at that moment and `zset.admit` decides. The seeding script and the
   cards share one evaluation (`zset_candidates.evaluate`).
+- **The watcher on the box (run s-qbzbrw, 2026-09-22).** `scripts/ai_sre.py`
+  runs as a second container from the same image (`poly-poly-sre`, started by
+  `deploy.sh` next to the bot, no PRIVATE_KEY in its env, logs read-only).
+  Every `SRE_TICK_S` it fingerprints the new important lines
+  (`ops_fingerprint`: ids, amounts and titles collapsed, one row per fault
+  with a count) and wakes `claude -p` only on a NEW fingerprint or a rate
+  crossing. The verdict is one of nothing, note, escalate (one Telegram
+  line), disarm (the bot's own `live_mode.disarm`, never arm) or fix (a
+  unified diff applied to a fresh clone, the FULL suite, then a push to
+  main if the diff touches no money-path file, else a branch `sre/<fp>` and
+  the owner merges from the phone). Proof of a fix is two counters, never an
+  opinion: fingerprint hits after the action and runs of the path it names;
+  a recurrence within 24 h of its OWN push reverts that push. Rate limits:
+  `SRE_MAX_WAKES_PER_HOUR`, `SRE_MAX_PUSHES_PER_DAY`,
+  `SRE_MAX_USD_PER_DIAGNOSIS`. Every wake is a row in
+  `data/ops-thoughts.jsonl` (woke because, looked at, concluded, did,
+  proof); the hourly digest prints it and the 08:00 UTC line carries one
+  summary line under the real-money line (`ops_watch.watcher_line`). It
+  pushes over a write deploy key (`SRE_DEPLOY_KEY` secret, a file mounted
+  read-only at `/run/sre_deploy_key`). Read it: `cat ~/app/data/ops-thoughts.jsonl`
+  and `docker logs poly-poly-sre` on the VM.
 - **The leaderboard says where each wallet stands at the door.** `/wallets`
   ranks by all-time net PnL, a number the gate never reads, and its old row
   verdict (PROMOTE-READY on 15 settled and positive PnL) printed READY next

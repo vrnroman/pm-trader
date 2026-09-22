@@ -71,6 +71,8 @@ def main() -> int:
         "form": _read(os.path.join(d, "wallet-form.json")),
         "ledger_tail": ops_watch.ledger_rows(since_ts=now - a.hours * 3600)[-200:],
         "important": important_lines(logs, a.hours, now)[-400:],
+        "watcher": ops_watch.watcher_thoughts(since_ts=now - a.hours * 3600)[-40:],
+        "fingerprints": _read(os.path.join(d, "ops-fingerprints.json")),
     }
     # Sentinels: gcloud's SSH wrapper writes key-generation chatter around the
     # payload the first time a runner connects; the workflow cuts to these.
@@ -102,6 +104,22 @@ def main() -> int:
         print(two_clocks.line(since_ts=now - a.hours * 3600, now=now))
     except Exception as exc:
         print(f"(two clocks unavailable: {exc})")
+    print()
+    # The watcher on the box (scripts/ai_sre.py): what woke it and what it did,
+    # and the fingerprint table it reasons over. This is where "the process
+    # monitors, thinks, acts" is visible without opening the VM.
+    print(f"## watcher ({len(state['watcher'])} wakes in {a.hours:.0f}h)")
+    for r in state["watcher"]:
+        print(json.dumps({k: r.get(k) for k in ("ts", "kind", "woke_because", "concluded", "did", "proof", "cost_usd")
+                          if r.get(k) not in (None, "")}, ensure_ascii=False)[:400])
+    try:
+        from src.copy_trading import ops_fingerprint
+        fps = ops_fingerprint.rows(now, limit=30)
+        print(f"## fingerprints ({len(fps)} shown)")
+        for l in fps:
+            print(l)
+    except Exception as exc:
+        print(f"(fingerprints unavailable: {exc})")
     print()
     print(f"## ledger ({len(state['ledger_tail'])} rows)")
     for r in state["ledger_tail"]:

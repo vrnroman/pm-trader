@@ -71,7 +71,20 @@ jobs:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
           LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          SRE_DEPLOY_KEY: ${{ secrets.SRE_DEPLOY_KEY }}
         run: |
+          # The AI SRE sidecar's write deploy key (s-qbzbrw, 2026-09-22): a
+          # FILE next to .env, never an .env line (docker --env-file cannot
+          # carry a multi-line value). deploy.sh copies it to the VM and
+          # mounts it read-only into the sidecar; the bot container never
+          # sees it. Unset means the sidecar starts without a push path and
+          # says so.
+          if [ -n "$SRE_DEPLOY_KEY" ]; then
+            printf '%s\n' "$SRE_DEPLOY_KEY" > sre_deploy_key && chmod 600 sre_deploy_key
+            echo "wrote sre_deploy_key ($(wc -l < sre_deploy_key) lines)"
+          else
+            echo "  - SRE_DEPLOY_KEY secret unset: the sidecar will run without a push path"
+          fi
           if [ -z "$ENV_FILE" ]; then
             echo "::error::ENV_FILE secret is empty — add it in repo Settings > Secrets"
             exit 1
@@ -194,4 +207,4 @@ jobs:
 
       - name: Scrub secrets from runner
         if: always()
-        run: rm -f .env
+        run: rm -f .env sre_deploy_key

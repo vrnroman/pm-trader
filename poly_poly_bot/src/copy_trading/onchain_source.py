@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import time
 from pathlib import Path
 from typing import Optional
@@ -22,8 +23,14 @@ from src.logger import logger
 from src.models import DetectedTrade
 from src.utils import error_message, short_address
 
-MAX_BLOCK_RANGE = 9
+# Blocks per eth_getLogs. With the maker/taker topic filters below a chunk
+# returns a handful of logs, so it can be wide (200 blocks read at 75 to 90
+# blocks/s on the public RPC, 2026-09-22): 9 unfiltered blocks (about
+# 1,000 OrderFilled logs on the v2 exchanges) took ~2 minutes a chunk on the
+# box and the cursor fell 300 blocks behind in the first hour (2026-09-22).
+MAX_BLOCK_RANGE = int(float(os.environ.get("ONCHAIN_BLOCK_RANGE", 200)))
 MAX_BLOCKS_BEHIND = 10000
+LAG_LOG_EVERY = 30
 # Stay this many blocks behind the reported head. The public RPC is a pool of
 # nodes: eth_getLogs up to the very block one node just reported fails on
 # another with "invalid block range params" (1 of 3 tries at the head, 0 of 3
@@ -316,6 +323,10 @@ class OnchainSource:
         assert self._neg_risk_contract is not None
 
         all_trades: list[DetectedTrade] = []
+        tracked = sorted(self._tracked_addresses)
+        if not tracked:
+            return all_trades
+        checksummed = [Web3.to_checksum_address(a) for a in tracked]
 
         for contract, name in [
             (self._ctf_contract, "CTF"),
@@ -327,12 +338,22 @@ class OnchainSource:
                 # spelling: on the deployed web3 8 it raised "unexpected keyword
                 # argument 'fromBlock'" on every poll (found 2026-09-22 in a
                 # read-only dry run; this source had never worked in prod).
-                # ``get_logs`` also needs no server-side filter, which public
-                # RPCs often refuse.
-                events = contract.events.OrderFilled.get_logs(
-                    from_block=from_block,
-                    to_block=to_block,
-                )
+                # ``maker`` and ``taker`` are indexed, so the node filters on
+                # the tracked set and hands back only their fills: two small
+                # queries per contract instead of every fill on the exchange.
+                # A fill where a tracked wallet is BOTH sides comes back twice;
+                # (tx, logIndex) dedupes it.
+                seen: set = set()
+                events: list = []
+                for filt in ({"maker": checksummed}, {"taker": checksummed}):
+                    for ev in contract.events.OrderFilled.get_logs(
+                            from_block=from_block, to_block=to_block, argument_filters=filt):
+                        h = ev["transactionHash"]
+                        key = (h.hex() if hasattr(h, "hex") else str(h), ev.get("logIndex", 0))
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        events.append(ev)
                 trades = self._process_events(events, name)
                 all_trades.extend(trades)
             except Exception as exc:
@@ -352,6 +373,9 @@ class OnchainSource:
             logger.info(f"Onchain source: no cursor, starting at block {cursor}")
 
         logger.info(f"Onchain source started, cursor at block {cursor}")
+        iterations = 0
+        t_started = time.time()
+        blocks_done = 0
 
         while self._running:
             try:
@@ -425,14 +449,22 @@ class OnchainSource:
                         except Exception as exc:
                             logger.error(f"Error enqueueing onchain trade: {error_message(exc)}")
 
+                blocks_done += to_block - cursor
                 cursor = to_block
                 _save_cursor(cursor)
+                iterations += 1
+                if iterations % LAG_LOG_EVERY == 0:
+                    rate = blocks_done / max(1.0, time.time() - t_started)
+                    logger.info(f"Onchain: cursor {cursor}, head {latest}, lag {latest - cursor} block(s), "
+                                f"{rate:.2f} blocks/s over {iterations} chunk(s), {len(self._tracked_addresses)} tracked")
 
             except Exception as exc:
                 logger.error(f"Onchain poll error: {error_message(exc)}")
                 await asyncio.sleep(5.0)
 
-            await asyncio.sleep(POLL_INTERVAL_S)
+            # No pause while behind: the sleep is for an idle head, not a backlog.
+            if cursor >= latest:
+                await asyncio.sleep(POLL_INTERVAL_S)
 
     def stop(self) -> None:
         """Stop the polling loop."""

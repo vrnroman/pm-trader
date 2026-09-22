@@ -135,6 +135,16 @@ gcloud compute scp "${SSH_FLAGS[@]}" .env "$TARGET:~/app/.env" \
 gcloud compute ssh "$TARGET" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
     --command='chmod 600 ~/app/.env && stat -c "secured .env: %A" ~/app/.env'
+# The AI SRE sidecar's write deploy key, when the runner materialized one
+# (deploy.yml, secret SRE_DEPLOY_KEY). Mounted read-only into the sidecar
+# only; the bot container never sees it.
+if [ -f sre_deploy_key ]; then
+    gcloud compute scp "${SSH_FLAGS[@]}" sre_deploy_key "$TARGET:~/app/sre_deploy_key" \
+        --project="$GCP_PROJECT_ID" --zone="$ZONE"
+    gcloud compute ssh "$TARGET" \
+        --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
+        --command='chmod 600 ~/app/sre_deploy_key && stat -c "secured sre_deploy_key: %A" ~/app/sre_deploy_key'
+fi
 
 # The VM's service account lacks the cloud-platform/AR OAuth scope, so it can't
 # mint its own pull token. Instead mint one HERE (from the deploy identity,
@@ -157,7 +167,7 @@ gcloud compute ssh "$TARGET" \
         cd ~/app
 
         # Preserve data across deployments
-        mkdir -p data cache results logs
+        mkdir -p data cache results logs sre
 
         # Force preview mode on every deploy: drop the persisted preview/live
         # toggle so the bot boots with PREVIEW_MODE from .env. Telegram
@@ -235,6 +245,38 @@ gcloud compute ssh "$TARGET" \
 
         echo "Container started:"
         docker ps --filter name=poly-poly-bot --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+        # The AI SRE sidecar (scripts/ai_sre.py, s-qbzbrw 2026-09-22): the same
+        # image, a second process next to the bot. It reads the logs and the
+        # state, wakes on a new error fingerprint, and acts inside its
+        # envelope. What it structurally cannot do: sign an order (no
+        # PRIVATE_KEY in its env), and restart with the bot it watches (its
+        # own container). Logs read-only; data read-write because its one
+        # money lever, disarm, is the bot'"'"'s own live_mode.disarm writing
+        # live_arm.json, and its ledgers live there.
+        grep -v "^PRIVATE_KEY=" .env > .env.sre
+        chmod 600 .env.sre
+        docker stop poly-poly-sre 2>/dev/null || true
+        docker rm poly-poly-sre 2>/dev/null || true
+        KEY_MOUNT=""
+        if [ -f ~/app/sre_deploy_key ]; then
+            KEY_MOUNT="-v $HOME/app/sre_deploy_key:/run/sre_deploy_key:ro"
+        fi
+        docker run -d \
+            --name poly-poly-sre \
+            --restart unless-stopped \
+            --memory=700m \
+            --memory-swap=700m \
+            --log-opt max-size=20m --log-opt max-file=3 \
+            --env-file .env.sre \
+            -e SRE_ROLE=sre \
+            -v ~/app/data:/app/data \
+            -v ~/app/logs:/app/logs:ro \
+            -v ~/app/sre:/app/sre \
+            $KEY_MOUNT \
+            "$IMAGE" python scripts/ai_sre.py
+        echo "Sidecar started:"
+        docker ps --filter name=poly-poly-sre --format "table {{.Names}}\t{{.Status}}"
 
         docker logout "$AR_HOST" >/dev/null 2>&1 || true
 
