@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T00:06:04.263189+00:00",
+ "generated": "2026-09-22T01:32:28.217905+00:00",
  "money": {
   "cash": 83.796533,
   "open_cost": 36.05,
@@ -20,7 +20,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1790035424.159975,
+  "ts": 1790040556.2304237,
   "day": "2026-09-22"
  },
  "arm": {
@@ -169,7 +169,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1790014262.403952,
+  "admit_scan_ts": 1790036048.3427079,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 5,
   "day_pnl": -6.4,
@@ -181,7 +181,7 @@
    "86842978223026466862449934105595250822075305679428664631958332197768084254089",
    "96998131034687394987869300990474810645455355843214977734260368889207437752543"
   ],
-  "form_scan_ts": 1790014979.5344725,
+  "form_scan_ts": 1790036684.8263805,
   "daily_line_attempt_day": "2026-09-21",
   "daily_line_sent": true,
   "daily_line_day": "2026-09-21",
@@ -243,7 +243,7 @@
   }
  },
  "form": {
-  "ts": 1790035424.948696,
+  "ts": 1790040556.748589,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -256,37 +256,37 @@
     "worst_day": -3105.39,
     "ok": false,
     "reason": "49% came out ahead vs 49% needed (-0 points, need +3)",
-    "ts": 1790014996.3058822,
+    "ts": 1790036685.336523,
     "hit": 0.488,
     "net_pct": 13.5
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-    "n": 42,
-    "won": 32,
-    "cost": 16264.11,
-    "back": 18828.12,
-    "avg_price": 0.5908838945398958,
+    "n": 41,
+    "won": 31,
+    "cost": 15880.65,
+    "back": 18079.87,
+    "avg_price": 0.5949714889760774,
     "worst_day": -332.99,
     "ok": true,
-    "reason": "76% came out ahead vs 59% needed, net +15.8%",
-    "ts": 1790014996.3058822,
-    "hit": 0.7619,
-    "net_pct": 15.76
+    "reason": "76% came out ahead vs 59% needed, net +13.8%",
+    "ts": 1790036685.336523,
+    "hit": 0.7561,
+    "net_pct": 13.85
    },
    "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-    "n": 64,
-    "won": 49,
-    "cost": 25193.08,
-    "back": 30135.72,
-    "avg_price": 0.542193098023514,
+    "n": 63,
+    "won": 48,
+    "cost": 24862.14,
+    "back": 29678.5,
+    "avg_price": 0.5423780070192731,
     "worst_day": -535.02,
     "ok": true,
-    "reason": "77% came out ahead vs 54% needed, net +19.6%",
-    "ts": 1790014996.3058822,
-    "hit": 0.7656,
-    "net_pct": 19.62
+    "reason": "76% came out ahead vs 54% needed, net +19.4%",
+    "ts": 1790036685.336523,
+    "hit": 0.7619,
+    "net_pct": 19.37
    },
    "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": {
     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
@@ -312,23 +312,23 @@
     "worst_day": -1358.43,
     "ok": false,
     "reason": "only 5 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790014996.3058822,
+    "ts": 1790036685.336523,
     "hit": 0.2,
     "net_pct": -45.2
    },
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-    "n": 74,
-    "won": 33,
-    "cost": 36537.65,
-    "back": 34711.37,
-    "avg_price": 0.36898637983570287,
-    "worst_day": -1716.3,
+    "n": 75,
+    "won": 34,
+    "cost": 37055.39,
+    "back": 36804.33,
+    "avg_price": 0.3678108362135588,
+    "worst_day": -1556.86,
     "ok": false,
-    "reason": "net -5.0% (need +2%)",
-    "ts": 1790014996.3058822,
-    "hit": 0.4459,
-    "net_pct": -5.0
+    "reason": "net -0.7% (need +2%)",
+    "ts": 1790036685.336523,
+    "hit": 0.4533,
+    "net_pct": -0.68
    },
    "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {
     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
@@ -340,37 +340,37 @@
     "worst_day": -4569.62,
     "ok": true,
     "reason": "57% came out ahead vs 49% needed, net +16.7%",
-    "ts": 1790014996.3058822,
+    "ts": 1790036685.336523,
     "hit": 0.575,
     "net_pct": 16.68
    },
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
-    "n": 99,
+    "n": 98,
     "won": 78,
-    "cost": 206134.3,
+    "cost": 205752.81,
     "back": 224946.45,
-    "avg_price": 0.7413476807083372,
+    "avg_price": 0.7415907011967053,
     "worst_day": -3391.19,
     "ok": true,
-    "reason": "79% came out ahead vs 74% needed, net +9.1%",
-    "ts": 1790014996.3058822,
-    "hit": 0.7879,
-    "net_pct": 9.13
+    "reason": "80% came out ahead vs 74% needed, net +9.3%",
+    "ts": 1790036685.336523,
+    "hit": 0.7959,
+    "net_pct": 9.33
    },
    "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
-    "n": 4,
-    "won": 3,
-    "cost": 3807.48,
-    "back": 3857.72,
-    "avg_price": 0.8572780779579947,
+    "n": 5,
+    "won": 4,
+    "cost": 4688.44,
+    "back": 4768.29,
+    "avg_price": 0.7573764814290778,
     "worst_day": -329.83,
     "ok": false,
-    "reason": "only 4 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790014996.3058822,
-    "hit": 0.75,
-    "net_pct": 1.32
+    "reason": "only 5 settled bets on our slice in 14 days (need 30)",
+    "ts": 1790036685.336523,
+    "hit": 0.8,
+    "net_pct": 1.7
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
@@ -388,17 +388,17 @@
    },
    "0xd970693a3384dc762b191707a4927ac3814bbbba": {
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
-    "n": 50,
-    "won": 35,
-    "cost": 18820.0,
-    "back": 21330.12,
-    "avg_price": 0.5556633821895975,
+    "n": 49,
+    "won": 34,
+    "cost": 18460.74,
+    "back": 20559.9,
+    "avg_price": 0.5579213655411772,
     "worst_day": -324.01,
     "ok": true,
-    "reason": "70% came out ahead vs 56% needed, net +13.3%",
-    "ts": 1790014996.3058822,
-    "hit": 0.7,
-    "net_pct": 13.34
+    "reason": "69% came out ahead vs 56% needed, net +11.4%",
+    "ts": 1790036685.336523,
+    "hit": 0.6939,
+    "net_pct": 11.37
    },
    "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
@@ -410,23 +410,23 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790014996.3058822,
+    "ts": 1790036685.336523,
     "hit": 0.0,
     "net_pct": 0.0
    },
    "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
     "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
-    "n": 45,
-    "won": 26,
-    "cost": 120466.81,
-    "back": 131211.0,
-    "avg_price": 0.4565076156046442,
+    "n": 48,
+    "won": 27,
+    "cost": 127912.77,
+    "back": 138000.38,
+    "avg_price": 0.4589550889079191,
     "worst_day": -6319.64,
     "ok": true,
-    "reason": "58% came out ahead vs 46% needed, net +8.9%",
-    "ts": 1790014996.3058822,
-    "hit": 0.5778,
-    "net_pct": 8.92
+    "reason": "56% came out ahead vs 46% needed, net +7.9%",
+    "ts": 1790036685.336523,
+    "hit": 0.5625,
+    "net_pct": 7.89
    },
    "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a": {
     "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
@@ -448,29 +448,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1789949814.6347468,
-   "day": "2026-09-21",
-   "kind": "form",
-   "before": "0x722abb54 in form",
-   "after": "benched",
-   "detail": "0x722abb54: 101 settled, 76% won vs 74% needed, net +5.0% on $213,391, worst day -7,408",
-   "push": "WALLET",
-   "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"
-  },
-  {
-   "ts": 1789951940.654675,
-   "day": "2026-09-21",
-   "kind": "settled",
-   "before": "open $6.40",
-   "after": "paid $0.00",
-   "detail": "lost -6.40 on 'Counter-Strike: Bounty Hunters Esports v' (0x57b25849, tier 1b)",
-   "push": null,
-   "token_id": "96998131034687394987869300990474810645455355843214977734260368889207437752543",
-   "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
-   "pnl": -6.4,
-   "won": false
-  },
   {
    "ts": 1789992496.5955625,
    "day": "2026-09-21",
@@ -503,20 +480,6 @@
   }
  ],
  "important": [
-  "2026-09-21 00:06:09 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
-  "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
-  "2026-09-21 00:18:31 INFO  [ops] form: '0x722abb54 in form' -> 'benched' | 0x722abb54: 101 settled, 76% won vs 74% needed, net +5.0% on $213,391, worst day -7,408",
-  "2026-09-21 00:38:11 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-21 00:52:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
-  "2026-09-21 00:52:20 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Counter-Strike: Bounty Hunters Esports v' (0x57b25849, tier 1b)",
-  "2026-09-21 00:52:33 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-21 00:52:48 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
-  "2026-09-21 00:53:05 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-21 01:18:04 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-21 01:26:43 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
-  "2026-09-21 01:26:58 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-21 01:27:20 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
   "2026-09-21 01:38:07 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-21 01:47:44 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
   "2026-09-21 01:47:59 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
@@ -585,8 +548,9 @@
   "2026-09-21 22:22:07 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-21 23:11:17 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-21 23:41:08 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
-  "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
+  "2026-09-22 00:47:09 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-22 01:07:57 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-22 01:08:59 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-21 14:57:44 TRADE [LIVE] BUY $6.40 on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100, order 0x6f49770a8b...",
   "2026-09-21 14:57:48 TRADE [verify] FILLED: BUY 10.49 shares on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100"
  ]
