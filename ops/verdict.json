@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-22T12:41:42Z-1cd1",
-  "ts": 1790080902,
+  "id": "2026-09-22T18:43:15Z-10ca",
+  "ts": 1790102595,
   "kind": "nothing",
-  "message": "Digest at 09:56 UTC, armed by telegram, spend $12.80 of $32.00 cap today, equity $126.11 vs floor $56.00. Three trades placed and filled today with no verify failures. No self-disarm, no guard failure, no Traceback; recurring 408, 429, and 404 no-orderbook errors continue at similar volume to prior days. All in-form wallets still clear the bar with no new losing streak; 0x722abb54 and 0xf9168343 unchanged from the last check, none of mine to touch.",
+  "message": "Digest at 17:44 UTC, armed by telegram, spend $19.20 of $32.00 cap today, equity $119.65 vs floor $56.00. Two trades placed and filled today with no verify failures, one settled loss of $6.40. Six restarts today all line up with the owner's own deploy commits on main, not a crash loop; two 'fromBlock' onchain errors at 15:44 and 16:08 stopped after the owner's own onchain fix deployed and have not recurred. No self-disarm, no guard failure, no re-arm cap hit, no Traceback. Form bar moved 0x00110b8e and 0x9f15613e to in form and 0xf49614e6 to benched on its own; none of it mine to touch.",
   "evidence": [
-    "{\"cash\": 83.661393, \"open_cost\": 42.45, \"equity\": 126.11, \"floor\": 56.0, \"spend\": {\"spent_usd\": 12.8, \"cap_usd\": 32.0}, \"armed\": true}",
-    "2026-09-22 09:28:24 TRADE [LIVE] BUY $6.40 on 'Dota 2:  Pipsqueak+4 vs Team Cobra - Gam' @ 0.2700, order 0x65d0c69b42...",
-    "2026-09-22 09:28:25 TRADE [verify] FILLED: BUY 23.70 shares on 'Dota 2:  Pipsqueak+4 vs Team Cobra - Gam' @ 0.2700",
-    "in form  0x722abb54: 98 settled, 80% won vs 74% needed, net +9.3% on $205,753, worst day -3,391",
-    "in form  0xf9168343: 51 settled, 55% won vs 46% needed, net +7.8% on $136,032, worst day -6,320"
+    "{\"cash\": 77.195213, \"open_cost\": 42.45, \"equity\": 119.65, \"floor\": 56.0, \"spend\": {\"spent_usd\": 19.2, \"cap_usd\": 32.0}, \"armed\": true}",
+    "2026-09-22 16:42:01 TRADE [LIVE] BUY $6.40 on 'Will FC Bayern München vs. Manchester Ci' @ 0.7900, order 0x16b2611e4b...",
+    "2026-09-22 16:42:11 TRADE [verify] FILLED: BUY 8.10 shares on 'Will FC Bayern München vs. Manchester Ci' @ 0.7900",
+    "2026-09-22 15:44:13 ERROR Error fetching CTF events [94257796-94257836]: ContractEvent.create_filter() got an unexpected keyword argument 'fromBlock'",
+    "2026-09-22 16:37:37 INFO  [ops] form: '0xf49614e6 unknown' -> 'benched' | 0xf49614e6: 77 settled, 51% won vs 50% needed, net +11.5% on $279,878, worst day -11,771 (capped: window read in full, older lookback cut, 5500 rows)"
   ],
   "commit": null
 }
