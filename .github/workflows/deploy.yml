@@ -84,6 +84,13 @@ jobs:
           # working endpoint, in place — durable across deploys without editing
           # the ENV_FILE secret (which still pins the dead URL).
           sed -i -E 's#^RPC_URL=.*polygon-rpc\.com.*#RPC_URL=https://polygon-bor-rpc.publicnode.com#' .env
+          # The ENV_FILE secret pins TRADE_MONITOR_MODE=data-api from before the
+          # chain reader worked (s-qbzbrw, 2026-09-22). Rewrite it in place, the
+          # same way as RPC_URL above: hybrid runs the chain as a SHADOW that
+          # cannot copy until two_clocks' own evidence flips it. To pin either
+          # answer set ONCHAIN_SHADOW in the secret; to leave the chain off
+          # entirely, delete this line.
+          sed -i -E 's#^TRADE_MONITOR_MODE=.*#TRADE_MONITOR_MODE=hybrid#' .env
 
           # Default-on activation flags. Only appended if the ENV_FILE secret
           # doesn't already set them, so the secret stays the source of truth —

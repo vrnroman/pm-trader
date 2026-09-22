@@ -1824,6 +1824,10 @@ def test_the_deploy_pins_five_deals_a_day_and_three_per_wallet():
     assert "ensure_env LIVE_BUDGET_DAILY_FRAC 0.40" in src
     assert "ensure_env LIVE_MAX_PER_WALLET_DAY 3" in src
     assert "ensure_env LIVE_MAX_PER_WALLET_DAY 2" not in src
+    # The chain reader rides as a shadow: the secret's data-api value is
+    # rewritten in place, since ensure_env never overrides a defined key.
+    assert "s#^TRADE_MONITOR_MODE=.*#TRADE_MONITOR_MODE=hybrid#" in src
+    assert "ensure_env TRADE_MONITOR_MODE hybrid" in src
     assert round(80 * 0.40 / (80 * 0.08)) == 5
 
 
