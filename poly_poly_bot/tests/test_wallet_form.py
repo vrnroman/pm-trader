@@ -430,3 +430,22 @@ def test_a_pre_window_first_buy_past_the_old_cap_is_still_left_out(form_env):
     acts, pos, _cov = wf.fetch_rows("0xW", get=get, now=NOW)
     f = wf.compute("0xW", acts, pos, now=NOW)
     assert f.n == 0 and f.back == 0.0, "the pre-window market is left out, its payout not counted"
+
+
+def test_a_held_verdict_with_a_failed_read_is_retried_on_its_backoff(form_env, monkeypatch):
+    """The row said "next try 16:50" for 0x722abb54 while the catch-up only
+    retried record-less wallets; the real next try was the 6 h scan."""
+    from src.copy_trading import zset
+    monkeypatch.setattr(zset, "wallet_set", lambda: {"0xa"})
+    wf._write({"ts": 1.0, "version": wf.FORM_VERSION, "wallets": {"0xa": {"ok": True, "reason": "fine", "wallet": "0xa", "n": 40, "won": 25, "cost": 1.0, "back": 2.0, "avg_price": 0.5, "ts": NOW - 3600}}})
+    def get(url):
+        raise wf.ReadFailed("HTTP 408")
+    d = wf.scan(get=get, send=None, now=NOW, wallets=["0xa"])
+    assert d["wallets"]["0xa"]["ok"] is True and d["unread"]["0xa"]["tries"] == 1
+    assert wf.wallets_due_for_catchup(NOW) == [], "not before the backoff"
+    assert wf.wallets_due_for_catchup(NOW + wf.FORM_RETRY_MIN_S) == ["0xa"], "the held wallet is retried too"
+    acts, pos = _rows(n_won=20, n_lost=10)
+    def ok(url):
+        return pos if "/positions" in url else (acts if "offset=0" in url else [])
+    d = wf.scan(get=ok, send=None, now=NOW + wf.FORM_RETRY_MIN_S, wallets=wf.wallets_due_for_catchup(NOW + wf.FORM_RETRY_MIN_S))
+    assert "0xa" not in d["unread"] and d["wallets"]["0xa"]["ts"] == NOW + wf.FORM_RETRY_MIN_S

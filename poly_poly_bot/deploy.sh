@@ -167,7 +167,7 @@ gcloud compute ssh "$TARGET" \
         cd ~/app
 
         # Preserve data across deployments
-        mkdir -p data cache results logs sre
+        mkdir -p data cache results logs sre sre/logs
 
         # Force preview mode on every deploy: drop the persisted preview/live
         # toggle so the bot boots with PREVIEW_MODE from .env. Telegram
@@ -270,6 +270,8 @@ gcloud compute ssh "$TARGET" \
             --log-opt max-size=20m --log-opt max-file=3 \
             --env-file .env.sre \
             -e SRE_ROLE=sre \
+            -e LOGS_DIR=/app/sre/logs \
+            -e SRE_BOT_LOGS_DIR=/app/logs \
             -v ~/app/data:/app/data \
             -v ~/app/logs:/app/logs:ro \
             -v ~/app/sre:/app/sre \

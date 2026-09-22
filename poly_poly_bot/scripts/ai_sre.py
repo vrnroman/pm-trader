@@ -706,7 +706,10 @@ def cycle(now: Optional[float] = None, *, logs_dir: Optional[str] = None, runner
           send: Callable[[str], bool] = _send, apply=apply_fix, push=push_work, revert=revert_push) -> dict:
     """One tick. Returns a small summary dict for tests and the log."""
     now = time.time() if now is None else now
-    logs_dir = logs_dir or os.environ.get("LOGS_DIR") or "/app/logs"
+    # The BOT's logs (mounted read-only), never LOGS_DIR: that is where this
+    # process writes its own lines (/app/sre/logs); the first sidecar start
+    # died in a restart loop opening the bot's signals file for writing.
+    logs_dir = logs_dir or os.environ.get("SRE_BOT_LOGS_DIR") or "/app/logs"
     state = _read_json(_p(STATE_FILE))
     lines, raw = new_lines(state, logs_dir)
     table, wake = fpm.ingest(lines, now=now) if lines else (fpm.read(), [])

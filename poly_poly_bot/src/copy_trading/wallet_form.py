@@ -464,14 +464,20 @@ def wallets_without_record() -> list[str]:
 
 
 def wallets_due_for_catchup(now: Optional[float] = None) -> list[str]:
-    """The unmeasured wallets whose retry is due. A failed read schedules the
-    next try with a doubling backoff (FORM_RETRY_MIN_S .. FORM_RETRY_MAX_S);
-    before that the guard leaves the wallet alone instead of walking the same
-    pages into the same wall every pass."""
+    """The wallets whose retry is due: unmeasured ones, and ones holding a
+    kept verdict whose last read failed (their row says "next try HH:MM",
+    and that line was a lie while only record-less wallets were retried,
+    verifier s-qbzbrw). A failed read schedules the next try with a doubling
+    backoff (FORM_RETRY_MIN_S .. FORM_RETRY_MAX_S); before that the guard
+    leaves the wallet alone instead of walking the same pages into the same
+    wall every pass."""
+    from src.copy_trading import zset
     now = time.time() if now is None else now
     unread = _read().get("unread") or {}
-    return [w for w in wallets_without_record()
-            if float((unread.get(w) or {}).get("next") or 0) <= now]
+    z = zset.wallet_set()
+    due = set(wallets_without_record())
+    due |= {w for w in unread if w in z}
+    return sorted(w for w in due if float((unread.get(w) or {}).get("next") or 0) <= now)
 
 
 def _note_unread(d: dict, w: str, why: str, now: float) -> dict:

@@ -155,7 +155,19 @@ class OnchainSource:
 
     def _init_web3(self) -> None:
         """Initialize web3 provider and contract objects."""
-        self._w3 = Web3(Web3.HTTPProvider(CONFIG.rpc_url))
+        self._w3 = Web3(Web3.HTTPProvider(CONFIG.rpc_url, request_kwargs={"timeout": 30}))
+        # Polygon is proof-of-authority: its block headers carry more
+        # extraData than web3 accepts by default, and eth_getBlock raised
+        # ExtraDataLengthError on every call. The old helper swallowed that
+        # and stamped the WALL CLOCK as the block time, so the chain's lag
+        # read as seconds while the fill was minutes old (verifier, run
+        # s-qbzbrw). The middleware decodes the header; without it a fill
+        # has no time and is not stamped (see _get_block_timestamp).
+        try:
+            from web3.middleware import ExtraDataToPOAMiddleware
+            self._w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
+        except Exception as exc:  # noqa: BLE001
+            logger.error(f"Onchain: POA middleware not injected ({error_message(exc)}); block times unavailable")
         self._ctf_contract = self._w3.eth.contract(
             address=Web3.to_checksum_address(CTF_EXCHANGE),
             abi=ORDER_FILLED_ABI,
@@ -167,36 +179,40 @@ class OnchainSource:
         self._refresh_tracked()
 
     def _refresh_tracked(self) -> None:
-        """Set Z, read every poll so an admission or eviction takes effect on
-        the next pass without a restart (the data-api poll does the same).
-        The static env list rides along; the executor's own set-Z check is
-        what decides money, whatever source produced the trade."""
-        tracked: set[str] = {a.lower() for a in CONFIG.user_addresses}
+        """Set Z ONLY, read every poll so an admission or eviction takes effect
+        on the next pass without a restart: the same population the data-api
+        poll watches, so the two clocks compare the same fills (the static
+        env list made the chain stamp 21 wallets the api never sees, and
+        every one of them counted as "chain-only"). The executor's own set-Z
+        check still decides money, whatever source produced the trade."""
         try:
             from src.copy_trading import zset
-            tracked |= {a.lower() for a in zset.wallets() if a}
+            tracked = {a.lower() for a in zset.wallets() if a}
         except Exception as exc:
             logger.warn(f"Onchain: set Z unreadable this pass ({error_message(exc)}); keeping the last list")
             return
         self._tracked_addresses = tracked
 
-    def _get_block_timestamp(self, block_number: int) -> int:
-        """Fetch block timestamp with caching."""
+    def _get_block_timestamp(self, block_number: int) -> Optional[int]:
+        """The block's own timestamp, cached; None when the node cannot say.
+        Never the wall clock: a fill with no time is not stamped and not
+        copied, because every latency number and the executor's age gate
+        would otherwise read a minutes-old fill as brand new."""
         if block_number in self._block_ts_cache:
             return self._block_ts_cache[block_number]
         assert self._w3 is not None
         try:
             block = self._w3.eth.get_block(block_number)
             ts = int(block["timestamp"])
-            self._block_ts_cache[block_number] = ts
-            # Prune cache if too large
-            if len(self._block_ts_cache) > 500:
-                oldest = sorted(self._block_ts_cache.keys())[:250]
-                for k in oldest:
-                    del self._block_ts_cache[k]
-            return ts
-        except Exception:
-            return int(time.time())
+        except Exception as exc:  # noqa: BLE001
+            logger.warn(f"Onchain: block {block_number} time unavailable ({error_message(exc)[:120]}); fill not stamped")
+            return None
+        self._block_ts_cache[block_number] = ts
+        if len(self._block_ts_cache) > 500:
+            oldest = sorted(self._block_ts_cache.keys())[:250]
+            for k in oldest:
+                del self._block_ts_cache[k]
+        return ts
 
     def _process_events(
         self,
@@ -280,6 +296,8 @@ class OnchainSource:
             # Price: USDC / outcome tokens
             price = size / (_usdc_to_float(agg["outcome"]) or 1.0)
             block_ts = self._get_block_timestamp(agg["block_number"])
+            if block_ts is None:
+                continue
 
             from datetime import datetime, timezone
             timestamp = datetime.fromtimestamp(block_ts, tz=timezone.utc).isoformat()

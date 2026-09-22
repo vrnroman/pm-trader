@@ -121,3 +121,31 @@ def test_the_flip_happens_once_and_is_pinned_by_env(clocks_env, monkeypatch):
 def test_an_unreadable_flag_file_means_shadow(clocks_env):
     (clocks_env / tc.PRIMARY_FILE).write_text("{not json")
     assert tc.is_primary() is False
+
+
+def test_a_pinned_shadow_never_flips_nor_announces(clocks_env, monkeypatch):
+    """ONCHAIN_SHADOW=true is the rollback control deploy.yml advertises: with
+    it set, a ready fixture must not write the flag, post a receipt or send,
+    however many guard passes run."""
+    monkeypatch.setattr(tc, "SHADOW_MIN_MATCHED", 5)
+    for i in range(5):
+        _fill(i)
+    monkeypatch.setattr(tc, "_FORCE", "true")
+    sent: list = []
+    for _ in range(3):
+        assert tc.maybe_cutover(send=sent.append, now=NOW) is None
+    assert sent == [] and not (clocks_env / tc.PRIMARY_FILE).exists()
+    from src.copy_trading import ops_watch
+    assert [r["kind"] for r in ops_watch.ledger_rows()] == []
+
+
+def test_rows_from_an_older_meaning_count_for_nothing(clocks_env):
+    """The first day's chain rows carried the wall clock as the fill time;
+    they stay on disk and are ignored by every report and by the cutover."""
+    import json as _json
+    with open(clocks_env / tc.ROWS_FILE, "a", encoding="utf-8") as f:
+        f.write(_json.dumps({"ts": NOW, "source": "onchain", "id": "x", "their_ts": NOW, "seen_at": NOW + 1, "lag_s": 1.0}) + "\n")
+        f.write(_json.dumps({"v": 1, "ts": NOW, "source": "data-api", "id": "x", "their_ts": NOW, "seen_at": NOW + 2, "lag_s": 2.0}) + "\n")
+    assert tc.load_rows() == [] and tc.line() == "two clocks: no fills stamped yet"
+    _fill(1)
+    assert len(tc.load_rows()) == 2 and all(r["v"] == tc.ROW_VERSION for r in tc.load_rows())

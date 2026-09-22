@@ -30,6 +30,11 @@ from src.config import CONFIG
 
 ROWS_FILE = "two-clocks.jsonl"
 PRIMARY_FILE = "onchain-primary.json"
+# Rows written before the chain's block times were real (the Polygon POA
+# header, s-qbzbrw verifier finding 2) carried the wall clock as their_ts;
+# they stay in the file and count for nothing. Bump when a row's meaning
+# changes again.
+ROW_VERSION = 2
 
 
 def _env_f(name: str, default: float) -> float:
@@ -58,7 +63,7 @@ def note(source: str, trade_id: str, *, their_ts: float, seen_at: float,
          target: str = "", token_id: str = "") -> None:
     """One row per (source, trade id): the fill's own time and when this
     source first saw it. Never raises."""
-    row = {"ts": seen_at, "source": source, "id": trade_id, "their_ts": their_ts,
+    row = {"v": ROW_VERSION, "ts": seen_at, "source": source, "id": trade_id, "their_ts": their_ts,
            "seen_at": seen_at, "lag_s": (seen_at - their_ts) if their_ts else None,
            "target": (target or "").lower(), "token_id": token_id}
     try:
@@ -77,6 +82,8 @@ def load_rows(since_ts: float = 0.0) -> list[dict]:
                 try:
                     r = json.loads(ln)
                 except ValueError:
+                    continue
+                if int(r.get("v") or 0) != ROW_VERSION:
                     continue
                 if float(r.get("ts") or 0) >= since_ts:
                     out.append(r)
@@ -190,6 +197,11 @@ def set_primary(evidence: dict, now: Optional[float] = None) -> bool:
 def maybe_cutover(send=None, now: Optional[float] = None) -> Optional[dict]:
     """Called by the guard: flips once, says so once, never twice."""
     now = time.time() if now is None else now
+    if _FORCE in ("true", "1", "yes", "on"):
+        # The env pins the shadow: no evaluation, no flip, no receipt. Before
+        # this the guard re-flipped and re-announced every 300 s while the
+        # pin kept is_primary() False (verifier, s-qbzbrw).
+        return None
     if is_primary():
         return None
     ok, why, ev = cutover_ready(now)

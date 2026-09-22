@@ -172,17 +172,19 @@ def test_processed_events_carry_the_normalised_id():
     assert len(trades) == 1 and trades[0].id.startswith("0x") and trades[0].id.endswith("-123-BUY")
 
 
-def test_tracked_set_is_set_z_refreshed_each_poll(monkeypatch):
+def test_tracked_set_is_set_z_only_refreshed_each_poll(monkeypatch):
+    """The same population the data-api poll watches: the static env list
+    made the chain stamp 21 wallets the api never sees (verifier, s-qbzbrw)."""
     from src.copy_trading import zset
     from src.config import CONFIG
     monkeypatch.setattr(CONFIG, "user_addresses", ["0xSTATIC00000000000000000000000000000000ff"])
     monkeypatch.setattr(zset, "wallets", lambda: ["0xZZZZ00000000000000000000000000000000zzZZ"])
     s = OnchainSource()
     s._refresh_tracked()
-    assert s._tracked_addresses == {"0xstatic00000000000000000000000000000000ff", "0xzzzz00000000000000000000000000000000zzzz"}
+    assert s._tracked_addresses == {"0xzzzz00000000000000000000000000000000zzzz"}
     monkeypatch.setattr(zset, "wallets", lambda: [])
     s._refresh_tracked()
-    assert s._tracked_addresses == {"0xstatic00000000000000000000000000000000ff"}, "an eviction takes effect next pass"
+    assert s._tracked_addresses == set(), "an eviction takes effect next pass; the env list never rides along"
     def boom():
         raise OSError("disk")
     monkeypatch.setattr(zset, "wallets", boom)
@@ -343,3 +345,49 @@ def test_v1_shaped_logs_still_decode_through_the_same_rule():
     assert _legs_from_args({"makerAssetId": 0, "takerAssetId": 9, "makerAmountFilled": 5, "takerAmountFilled": 10}) == (0, 9, 5, 10)
     assert _legs_from_args({"side": 0, "tokenId": 9, "makerAmountFilled": 5, "takerAmountFilled": 10}) == (0, 9, 5, 10)
     assert _legs_from_args({"side": 1, "tokenId": 9, "makerAmountFilled": 10, "takerAmountFilled": 5}) == (9, 0, 10, 5)
+
+
+def test_polygon_block_times_come_from_the_header_never_the_wall_clock(monkeypatch):
+    """eth_getBlock raises ExtraDataLengthError on Polygon without the POA
+    middleware, and the old helper answered with time.time(): the chain lag
+    read as seconds while the fill was minutes old (verifier, s-qbzbrw). The
+    middleware is injected at init; a block the node cannot time leaves the
+    fill unstamped and uncopied."""
+    from src.copy_trading import onchain_source as mod
+    injected = []
+
+    from web3.middleware import ExtraDataToPOAMiddleware
+
+    class _Onion:
+        def inject(self, mw, layer=None):
+            injected.append((mw is ExtraDataToPOAMiddleware, layer))
+
+    class _W3:
+        middleware_onion = _Onion()
+        class eth:  # noqa: N801
+            @staticmethod
+            def contract(address, abi):
+                return object()
+    monkeypatch.setattr(mod, "Web3", type("W", (), {
+        "HTTPProvider": staticmethod(lambda *a, **k: None),
+        "to_checksum_address": staticmethod(lambda a: a),
+        "__new__": lambda cls, *a, **k: _W3(),
+    }))
+    s = OnchainSource()
+    monkeypatch.setattr(s, "_refresh_tracked", lambda: None)
+    s._init_web3()
+    assert injected == [(True, 0)], "the POA middleware, at layer 0, once"
+
+    # a block the node cannot time: no wall clock, no trade
+    s2 = _source()
+    class _Eth:
+        @staticmethod
+        def get_block(n):
+            raise ValueError("The field extraData is 97 bytes, but should be 32")
+    class _W3b:
+        eth = _Eth()
+    s2._w3 = _W3b()
+    s2._get_block_timestamp = OnchainSource._get_block_timestamp.__get__(s2)
+    assert s2._get_block_timestamp(5) is None
+    trades = s2._process_events([_Event(TRACKED, OTHER, 0, 123, 500_000, 1_000_000)], "CTF")
+    assert trades == [], "an untimed fill is not stamped and not copied"
