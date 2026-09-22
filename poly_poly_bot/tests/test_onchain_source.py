@@ -395,3 +395,17 @@ def test_polygon_block_times_come_from_the_header_never_the_wall_clock(monkeypat
     assert s2._get_block_timestamp(5) is None
     trades = s2._process_events([_Event(TRACKED, OTHER, 0, 123, 500_000, 1_000_000)], "CTF")
     assert trades == [], "an untimed fill is not stamped and not copied"
+
+
+def test_every_start_call_in_the_suite_keeps_its_fake_provider():
+    """Standing check (s-qbzbrw): start() rebuilds the real web3 provider, so
+    a test that runs it without patching _init_web3 hits the network and
+    passes on someone else's chain. Scan the suite for the pattern."""
+    import pathlib, re
+    root = pathlib.Path(__file__).resolve().parent
+    for path in root.glob("test_*.py"):
+        src = path.read_text(encoding="utf-8")
+        for m in re.finditer(r"def (test_\w+)\(.*?\n(?=def |\Z)", src, re.S):
+            body = m.group(0)
+            if "asyncio.run(s.start())" in body:
+                assert '"_init_web3"' in body, f"{path.name}::{m.group(1)} runs start() without keeping the fake provider"

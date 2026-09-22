@@ -134,3 +134,15 @@ def test_main_registers_the_observer_as_a_sink():
     import pathlib
     src = (pathlib.Path(__file__).resolve().parents[1] / "main.py").read_text()
     assert "shadow_quote.register_sink(fast_prober.make_shadow_sink(observer))" in src
+
+
+def test_paper_feed_quotes_are_not_the_two_clocks_population(lag_env):
+    """9,500 paper-feed quotes read as "api-only" on the box; only the fast
+    prober's and the chain's quotes are the two clocks."""
+    _write_shadow(lag_env, [
+        _shadow_row("0xAA11-tok9", our_price=0.5, detected_at=NOW + 300, their_ts=NOW, source="feed", token="tok9"),
+        _shadow_row("0xAB12-tok1", our_price=0.52, detected_at=NOW + 40, their_ts=NOW, source="fast-prober"),
+        _shadow_row("chain:0xab12-tok1", our_price=0.50, detected_at=NOW + 10, their_ts=NOW, source="onchain"),
+    ])
+    r = tc.lag_cost(0.0, stake_usd=6.4, now=NOW + 100)
+    assert (r["pairs"], r["api_only"], r["chain_only"]) == (1, 0, 0)

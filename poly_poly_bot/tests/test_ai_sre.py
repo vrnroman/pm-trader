@@ -277,3 +277,9 @@ def test_the_second_line_summarises_the_day(box):
     assert line.startswith("\U0001f916 watcher, last 24h: woke 2, acted 2, reverted 0, escalated 1, spent $1.00")
     assert "await missing" in line and "—" not in line
     assert ops_watch.watcher_line(NOW) == line, "the 08:00 line reads the same ledger"
+
+
+def test_the_deployed_sha_is_read_from_the_mounted_logs_dir(box, monkeypatch):
+    (box["logs"] / "hygiene.log").write_text("20260922T180315Z build-manifest sha=a77ab27 image=x\n")
+    monkeypatch.setenv("SRE_BOT_LOGS_DIR", str(box["logs"]))
+    assert sre.box_snapshot(NOW)["deployed_sha"] == "a77ab27"

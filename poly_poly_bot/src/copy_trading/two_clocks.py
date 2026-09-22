@@ -189,6 +189,11 @@ def lag_cost(since_ts: float = 0.0, *, stake_usd: float, now: Optional[float] = 
     rows = shadow_quote.load_rows(since_ts=since_ts) if since_ts else shadow_quote.load_rows()
     by: dict = {}
     for r in rows:
+        # Only the two clocks' own quotes: the fast prober (set Z at its
+        # detection speed) and the chain. The paper feeds' quotes are a
+        # different population and read as thousands of "api-only" fills.
+        if r.get("source") not in ("fast-prober", "onchain"):
+            continue
         key = _api_key(r.get("copy_id") or "")
         if not key:
             continue

@@ -278,7 +278,9 @@ def box_snapshot(now: float) -> dict:
     except Exception:  # noqa: BLE001
         pass
     try:
-        with open(os.path.join(os.path.expanduser("~"), "app", "logs", "hygiene.log"), encoding="utf-8") as f:
+        # The host's ~/app/logs is mounted at the bot logs dir in both containers.
+        logs_dir = os.environ.get("SRE_BOT_LOGS_DIR") or "/app/logs"
+        with open(os.path.join(logs_dir, "hygiene.log"), encoding="utf-8") as f:
             for ln in f:
                 if " build-manifest " in ln:
                     m = re.search(r"sha=(\w+)", ln)

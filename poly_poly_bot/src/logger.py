@@ -359,6 +359,26 @@ class BotLogger:
             imp_handler.addFilter(lambda rec: bool(_is_important(rec.getMessage())))
             imp_handler.addFilter(SecretScrubFilter())
             self._logger.addHandler(imp_handler)
+            # Third-party ERRORs too (manager ruling s-qbzbrw, DONE gate): the
+            # CLOB client logs to its own logger, which propagates to root,
+            # never to "poly_poly_bot", so its 400 lines could not reach this
+            # file whatever the grammar said. A twin handler on the root,
+            # gated by LEVEL (ERROR and up), no message grammar for foreign
+            # strings; records from our own tree are excluded so nothing is
+            # written twice.
+            root_handler = _DailyRotatingFileHandler(
+                logs_dir, "important",
+                on_rollover=lambda d: _purge_old_prefixed_logs(d, "important", 14))
+            root_handler.setLevel(logging.ERROR)
+            root_handler.setFormatter(formatter)
+            root_handler.addFilter(lambda rec: not (rec.name == "poly_poly_bot" or rec.name.startswith("poly_poly_bot.")))
+            root_handler.addFilter(SecretScrubFilter())
+            root = logging.getLogger()
+            for h in list(root.handlers):
+                if getattr(h, "_pm_trader_root_important", False):
+                    root.removeHandler(h)
+            root_handler._pm_trader_root_important = True
+            root.addHandler(root_handler)
             _purge_old_prefixed_logs(logs_dir, "important", 14)
 
         # Purge old operational logs on startup, then on every midnight rollover.

@@ -108,3 +108,34 @@ def test_exception_logs_at_error_level_with_traceback(caplog):
     # exc_info must be attached so the formatter can render the traceback;
     # this is what differentiates .exception() from .error().
     assert rec.exc_info is not None
+
+
+def test_a_third_party_error_reaches_the_important_file_once(tmp_path, monkeypatch):
+    """The CLOB client logs to its own logger (propagates to root, never to
+    poly_poly_bot), so its ERROR lines could not reach important-*.log by
+    construction, whatever the grammar said (verifier + manager, s-qbzbrw).
+    A level-gated twin handler on the root catches them; our own tree is
+    excluded so an ERROR of ours is written once."""
+    import glob
+    monkeypatch.setenv("LOGS_DIR", str(tmp_path))
+    from src import logger as logmod
+    bl = logmod.BotLogger()
+    foreign = logging.getLogger("py_clob_client_v2.http_helpers.helpers")
+    foreign.error("[py_clob_client_v2] request error status=400 url=x body=Could not create api key")
+    foreign.info("chatter that must not land")
+    bl.error("[exec] our own ERROR line")
+    for h in logging.getLogger().handlers + bl._logger.handlers:
+        try:
+            h.flush()
+        except Exception:
+            pass
+    files = glob.glob(str(tmp_path / "important-*.log"))
+    assert files, "no important file"
+    text = "".join(open(f, encoding="utf-8").read() for f in files)
+    assert text.count("Could not create api key") == 1
+    assert "chatter that must not land" not in text
+    assert text.count("our own ERROR line") == 1, "our tree is written by its own handler, not twice"
+    # rebuilding the logger replaces the root twin instead of stacking a second one
+    logmod.BotLogger()
+    twins = [h for h in logging.getLogger().handlers if getattr(h, "_pm_trader_root_important", False)]
+    assert len(twins) == 1
