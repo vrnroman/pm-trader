@@ -471,12 +471,15 @@ def maybe_rearm(*, arm: dict, guard_state: dict, condition_clear: bool,
         st[key] = now
         _write_json(_p(STATE_FILE), st)
         return None
-    if now - float(since) < REARM_CLEAR_S:
+    from src.copy_trading import live_limits
+    clear_s = float(live_limits.current("OPS_REARM_CLEAR_S") or REARM_CLEAR_S)
+    max_per_day = int(live_limits.current("OPS_REARM_MAX_PER_DAY") or REARM_MAX_PER_DAY)
+    if now - float(since) < clear_s:
         return None
     day = _day(now)
     counts = st.get("rearms") if isinstance(st.get("rearms"), dict) else {}
     n = int(counts.get(f"{day}:{sig}") or 0)
-    if n >= REARM_MAX_PER_DAY:
+    if n >= max_per_day:
         if st.get("rearm_cap_pushed") != f"{day}:{sig}":
             m = _push(send, f"🚨 <b>Re-armed {n} times today for '{sig}' and it keeps coming back.</b> "
                             f"Not re-arming again; send /live CONFIRM when you have looked.", "rearm_cap", now)
@@ -488,7 +491,7 @@ def maybe_rearm(*, arm: dict, guard_state: dict, condition_clear: bool,
     if arm_fn is None:
         from src.copy_trading import live_mode
         arm_fn = live_mode.arm
-    ok, detail = arm_fn(reason=f"watcher: '{sig}' clear for {REARM_CLEAR_S / 60:.0f} min", by=f"watcher:{sig[:24]}")
+    ok, detail = arm_fn(reason=f"watcher: '{sig}' clear for {clear_s / 60:.0f} min", by=f"watcher:{sig[:24]}")
     counts[f"{day}:{sig}"] = n + 1
     st["rearms"] = {k: v for k, v in counts.items() if k.startswith(day)}
     st.pop(key, None)

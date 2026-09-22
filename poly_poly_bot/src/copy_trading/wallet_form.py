@@ -508,10 +508,12 @@ def scan(*, get=None, send: Optional[Callable[[str], None]] = None,
     unread: dict = dict(prev.get("unread") or {})
     scratch = {"unread": unread}
     measured = 0
+    from src.copy_trading import live_limits
+    days = float(live_limits.current("FORM_DAYS", now) or FORM_DAYS)
     for w in ws:
         try:
-            acts, pos, cov = fetch_rows(w, get=get, now=now)
-            f = compute(w, acts, pos, now=now, coverage=cov)
+            acts, pos, cov = fetch_rows(w, get=get, now=now, days=days)
+            f = compute(w, acts, pos, now=now, coverage=cov, days=days)
         except Exception as exc:
             rec = _note_unread(scratch, w, str(exc), now)
             logger.warn(f"[form] could not read {w[:10]}: {exc} (try {rec['tries']}, "

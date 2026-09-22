@@ -755,6 +755,16 @@ def main() -> int:
         _receipt("sre_started", before="sidecar", after="no push path", detail="deploy key or git missing; fixes will be escalated only")
     else:
         _receipt("sre_started", before="sidecar", after="watching", detail=f"tick {TICK_S:.0f}s")
+    analyst = None
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("ai_analyst", os.path.join(ROOT, "scripts", "ai_analyst.py"))
+        analyst = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(analyst)
+        logger.info(f"[sre] analyst {'ENABLED' if analyst.enabled() else 'off (ANALYST_ENABLED=false)'}: "
+                    f"daily at {analyst.HOUR_UTC:02d}:00 UTC, at most {analyst.MAX_PROPOSALS} proposal(s), ${analyst.MAX_USD:.0f} a study")
+    except Exception as exc:  # noqa: BLE001
+        logger.error(f"[sre] analyst not loaded: {exc!r}")
     while True:
         try:
             s = cycle()
@@ -763,6 +773,13 @@ def main() -> int:
             prune_work()
         except Exception as exc:  # noqa: BLE001
             logger.error(f"[sre] cycle failed: {exc!r}")
+        if analyst is not None:
+            try:
+                r = analyst.maybe_run()
+                if r is not None:
+                    logger.info(f"[sre] analyst ran: {r}")
+            except Exception as exc:  # noqa: BLE001
+                logger.error(f"[sre] analyst failed: {exc!r}")
         time.sleep(TICK_S)
 
 

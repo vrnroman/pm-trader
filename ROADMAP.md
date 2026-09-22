@@ -1194,6 +1194,19 @@ In Telegram: `/zset candidates` (one card per passer, admit by tap),
   pushes over a write deploy key (`SRE_DEPLOY_KEY` secret, a file mounted
   read-only at `/run/sre_deploy_key`). Read it: `cat ~/app/data/ops-thoughts.jsonl`
   and `docker logs poly-poly-sre` on the VM.
+- **The analyst (run s-qbzbrw, 2026-09-22).** `scripts/ai_analyst.py` runs
+  once a day inside the sidecar (`ANALYST_ENABLED`, off until the watcher's
+  ledger shows a clean day). It prices the week's declined copies at their
+  price from book B (`counterfactual`: declined by reason, how many settled,
+  what they would have made at the live stake) and asks Claude for at most
+  `ANALYST_MAX_PROPOSALS`: a `limit` (one of the parameters in
+  `live_limits.TABLE`, moved inside its band for 24 h, money down only, the
+  owner's number is the ceiling and the fallback; the bot reads
+  `live_limits.current(...)` at the call sites), a `pr` (a diff applied to a
+  fresh clone, the full suite, pushed to `analyst/<day>-<slug>`, never main,
+  the compare link on the phone), or a `note`. Every run is a row in
+  `data/ops-thoughts.jsonl`; the digest prints the limits in force
+  (`live_limits.lines`).
 - **The leaderboard says where each wallet stands at the door.** `/wallets`
   ranks by all-time net PnL, a number the gate never reads, and its old row
   verdict (PROMOTE-READY on 15 settled and positive PnL) printed READY next

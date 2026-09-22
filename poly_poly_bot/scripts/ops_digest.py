@@ -113,6 +113,13 @@ def main() -> int:
         print(json.dumps({k: r.get(k) for k in ("ts", "kind", "woke_because", "concluded", "did", "proof", "cost_usd")
                           if r.get(k) not in (None, "")}, ensure_ascii=False)[:400])
     try:
+        from src.copy_trading import live_limits
+        print("## live limits (owner's number, and the analyst's where one is in force)")
+        for l in live_limits.lines(now):
+            print(l)
+    except Exception as exc:
+        print(f"(limits unavailable: {exc})")
+    try:
         from src.copy_trading import ops_fingerprint
         fps = ops_fingerprint.rows(now, limit=30)
         print(f"## fingerprints ({len(fps)} shown)")

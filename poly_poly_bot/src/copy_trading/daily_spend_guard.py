@@ -285,7 +285,10 @@ def can_copy_wallet(wallet: str) -> tuple[bool, str]:
     money one busy wallet can take, so the slower, stronger wallets still get
     their turn.
     """
-    cap = int(getattr(CONFIG, "live_max_per_wallet_day", 0) or 0)
+    # The analyst may lower this for a day inside its band (live_limits);
+    # the owner's number is the ceiling and the fallback.
+    from src.copy_trading import live_limits
+    cap = int(live_limits.current("LIVE_MAX_PER_WALLET_DAY") or getattr(CONFIG, "live_max_per_wallet_day", 0) or 0)
     # A wallet the bot admitted on its own is on probation: fewer copies a
     # day until its first live copies have settled (ops_watch).
     try:

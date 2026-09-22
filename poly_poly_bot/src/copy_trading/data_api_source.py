@@ -84,13 +84,15 @@ class DataApiSource:
                         f"Last: {error_message(err)}"
                     )
 
+            from src.copy_trading import live_limits
+            interval = float(live_limits.current("FETCH_INTERVAL") or CONFIG.fetch_interval)
             backoff = (
                 min(
-                    CONFIG.fetch_interval * (2 ** min(consecutive_failures, 6)),
+                    interval * (2 ** min(consecutive_failures, 6)),
                     300,
                 )
                 if consecutive_failures > 0
-                else CONFIG.fetch_interval
+                else interval
             )
             await asyncio.sleep(backoff)
 
