@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-22T00:41:19Z-5841",
-  "ts": 1790037679,
+  "id": "2026-09-22T06:40:58Z-23d5",
+  "ts": 1790059258,
   "kind": "nothing",
-  "message": "Digest at 00:06 UTC, armed by telegram, spend $0.00 of $32.00 cap today, equity $119.85 vs floor $56.00. Two live copies filled clean yesterday. 0x722abb54 toggled benched to in-form again per the bar, now 79% won vs 74% needed, net +9.1%. All in-form wallets clear the bar with no losing streak, none of mine to touch. No self-disarm, no guard failure, no Traceback; recurring 408, 429, and 404 no-orderbook errors continue at similar volume to prior days.",
+  "message": "Digest at 04:53 UTC, armed by telegram, spend $0.00 of $32.00 cap today, equity $119.85 vs floor $56.00. No self-disarm, no guard failure, no Traceback; recurring 408, 429, and 404 no-orderbook errors continue at similar volume to prior days. All in-form wallets still clear the bar with no new losing streak; 0x722abb54 held in form at 80% won vs 74% needed, net +9.3%, none of mine to touch.",
   "evidence": [
     "{\"cash\": 83.796533, \"open_cost\": 36.05, \"equity\": 119.85, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 32.0}, \"armed\": true}",
     "{\"armed\": true, \"ts\": 1789919410.9079125, \"by\": \"telegram\", \"reason\": \"\", \"floor_override\": false}",
-    "in form  0x722abb54: 99 settled, 79% won vs 74% needed, net +9.1% on $206,134, worst day -3,391",
-    "{\"ts\": 1790014996.3058822, \"day\": \"2026-09-21\", \"kind\": \"form\", \"before\": \"0x722abb54 benched\", \"after\": \"in form\", \"push\": \"WALLET\"}",
-    "2026-09-21 14:57:48 TRADE [verify] FILLED: BUY 10.49 shares on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100"
+    "in form  0x722abb54: 98 settled, 80% won vs 74% needed, net +9.3% on $205,753, worst day -3,391",
+    "in form  0xf9168343: 48 settled, 56% won vs 46% needed, net +7.9% on $127,913, worst day -6,320",
+    "2026-09-21 18:17:10 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00"
   ],
   "commit": null
 }
