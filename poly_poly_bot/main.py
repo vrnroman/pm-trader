@@ -356,6 +356,14 @@ def _live_guard_loop():
             except Exception as _exc:
                 logger.warn(f"[guard] self re-arm check failed: {_exc}")
             ops_watch.deliver_escalation(send=_send_bot)
+            # Two clocks: the chain runs as a shadow until its own evidence
+            # clears the cutover rule; the flip is applied here, once, and
+            # said once. Any exception keeps the shadow.
+            try:
+                from src.copy_trading import two_clocks
+                two_clocks.maybe_cutover(send=_send_bot, now=_now)
+            except Exception as _exc:
+                logger.warn(f"[guard] two-clocks cutover check failed: {_exc}")
             if _now - last_admit_scan >= admit_scan_every:
                 last_admit_scan = _now
                 ops_watch.note_admit_scan(_now)
@@ -377,9 +385,12 @@ def _live_guard_loop():
                     ops_watch._write_json(ops_watch._p(ops_watch.STATE_FILE), _st)
                     wallet_form.scan(send=_send_w)
                 else:
-                    _missing = wallet_form.wallets_without_record()
+                    # Only the unmeasured wallets whose retry is DUE: a failed
+                    # read backs off (15 min doubling to 6 h) instead of the
+                    # same page walk every pass into the same wall.
+                    _missing = wallet_form.wallets_due_for_catchup(_now)
                     if _missing:
-                        wallet_form.scan(send=_send_w, wallets=_missing[:3])
+                        wallet_form.scan(send=_send_w, wallets=_missing[:3], now=_now)
             except Exception as _exc:
                 logger.warn(f"[guard] form scan failed: {_exc}")
         except Exception as exc:

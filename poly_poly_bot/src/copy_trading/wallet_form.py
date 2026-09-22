@@ -56,8 +56,23 @@ FORM_OVERRIDE_S = _env_f("FORM_OVERRIDE_S", 24 * 3600.0)
 # window; FORM_MAX_ROWS is a hard stop on a runaway wallet, not the window.
 FORM_LOOKBACK_DAYS = _env_f("FORM_LOOKBACK_DAYS", 28.0)
 FORM_MAX_ROWS = int(_env_f("FORM_MAX_ROWS", 20000))
-FORM_STALE_S = _env_f("FORM_STALE_S", 4 * FORM_EVERY_S)   # a kept verdict this old is no verdict
-FORM_VERSION = 2   # bump when compute() changes: a table from an older compute is rescanned at boot
+FORM_STALE_S = _env_f("FORM_STALE_S", 4 * FORM_EVERY_S)   # a kept verdict this old is shown as stale
+# A read that failed is retried with this backoff (doubling, capped), never
+# every guard pass: 2026-09-19..22 the catch-up hit the same wall 342 times a
+# day for two wallets, one page walk from offset 0 each time.
+FORM_RETRY_MIN_S = _env_f("FORM_RETRY_MIN_S", 15 * 60.0)
+FORM_RETRY_MAX_S = _env_f("FORM_RETRY_MAX_S", 6 * 3600.0)
+# A set-Z wallet unreadable this long is said once, on the phone, not only in
+# a warning line among thousands.
+FORM_UNREAD_ALERT_S = _env_f("FORM_UNREAD_ALERT_S", 6 * 3600.0)
+# The data api refuses to page past this offset (HTTP 400 "max historical
+# activity offset of 5000 exceeded", measured 2026-09-20). With 500-row pages
+# the read ceiling is 5,500 rows, about 12 days of a wallet that trades 430
+# rows a day. A capped read is a SHORTER window, said so on the record, not a
+# failed read: the old code threw the 5,500 rows away, called it "throttled",
+# and benched the three best wallets in set Z on a record 172 hours old.
+DATA_API_MAX_OFFSET = 5000
+FORM_VERSION = 3   # bump when compute() changes: a table from an older compute is rescanned at boot
 
 
 @dataclass
@@ -72,6 +87,13 @@ class Form:
     ok: bool = False
     reason: str = ""
     ts: float = 0.0
+    # Coverage of the read behind this verdict (T1, 2026-09-22): how many
+    # rows, how many days they reach back, and whether the api's offset cap
+    # cut the window short. A verdict over 12.8 days says so; it never
+    # pretends to be 14.
+    rows: int = 0
+    covered_days: float = 0.0
+    capped: bool = False
 
     @property
     def hit(self) -> float:
@@ -82,11 +104,19 @@ class Form:
         return (self.back - self.cost) / self.cost * 100.0 if self.cost else 0.0
 
     def line(self) -> str:
+        cap = ""
+        if self.capped:
+            # The api's offset cap stopped the read. Either the window itself
+            # is short (the days say how short) or only the older lookback
+            # for the first-buy exclusion was cut.
+            cap = (f" (capped: {self.covered_days:.1f} of {FORM_DAYS:.0f} days read, {self.rows} rows)"
+                   if self.covered_days < FORM_DAYS - 0.05
+                   else f" (capped: window read in full, older lookback cut, {self.rows} rows)")
         if not self.n:
-            return f"{self.wallet[:10]}: no settled bets on our slice in {FORM_DAYS:.0f} days"
+            return f"{self.wallet[:10]}: no settled bets on our slice in {FORM_DAYS:.0f} days{cap}"
         return (f"{self.wallet[:10]}: {self.n} settled, {self.hit * 100:.0f}% won vs "
                 f"{self.avg_price * 100:.0f}% needed, net {self.net_pct:+.1f}% on ${self.cost:,.0f}"
-                f", worst day {self.worst_day:+,.0f}")
+                f", worst day {self.worst_day:+,.0f}{cap}")
 
 
 def _p() -> str:
@@ -117,42 +147,96 @@ def _write(d: dict) -> None:
 # The read: public data api, no key
 # --------------------------------------------------------------------------- #
 
+class ReadFailed(RuntimeError):
+    """A page could not be read: the reason names the HTTP status, never
+    "throttled" unless it was a 429. Tracked here, never through the
+    discovery sweep's shared failure list (issue #34.4b)."""
+
+
+@dataclass
+class Coverage:
+    rows: int = 0
+    pages: int = 0
+    oldest_ts: float = 0.0
+    capped: bool = False
+
+    def covered_days(self, now: float) -> float:
+        return max(0.0, (now - self.oldest_ts) / 86400.0) if self.oldest_ts else 0.0
+
+
+def _page_reader(wallet: str, page_size: int, get=None):
+    """The page function: ``get`` (tests) or the data api with its own retry.
+    Returns a list, or raises ReadFailed with the status in the message. A
+    400 past DATA_API_MAX_OFFSET raises ReadFailed("offset cap") and the
+    caller treats it as the end of what can be read, not as a failure."""
+    if get is not None:
+        def get_page(offset: int):
+            if offset > DATA_API_MAX_OFFSET:
+                raise ReadFailed("offset cap")
+            return get(f"{DATA_API}/activity?user={wallet}&limit={page_size}&offset={offset}")
+        return get_page
+    import requests
+    session = requests.Session()
+
+    def get_page(offset: int):
+        if offset > DATA_API_MAX_OFFSET:
+            raise ReadFailed("offset cap")
+        last = "no response"
+        for attempt in range(4):
+            try:
+                r = session.get(f"{DATA_API}/activity", params={"user": wallet, "limit": page_size, "offset": offset},
+                                timeout=30, headers={"User-Agent": "pm-trader-form"})
+            except requests.RequestException as exc:
+                last = f"network error ({type(exc).__name__})"
+                time.sleep(0.25 * (attempt + 1))
+                continue
+            if r.status_code == 200:
+                try:
+                    return r.json()
+                except ValueError:
+                    raise ReadFailed("HTTP 200 with a non-JSON body")
+            if r.status_code == 400 and "offset" in (r.text or "").lower():
+                raise ReadFailed("offset cap")
+            if r.status_code == 429:
+                try:
+                    wait = float(r.headers.get("Retry-After") or 0)
+                except ValueError:
+                    wait = 0.0
+                last = "HTTP 429 (throttled)"
+                time.sleep(max(wait, 1.0) * (attempt + 1))
+                continue
+            if 400 <= r.status_code < 500:
+                raise ReadFailed(f"HTTP {r.status_code}")
+            last = f"HTTP {r.status_code}"
+            time.sleep(0.5 * (attempt + 1))
+        raise ReadFailed(f"{last} after 4 attempts")
+    return get_page
+
+
 def fetch_rows(wallet: str, *, max_rows: int = FORM_MAX_ROWS, get=None,
-               now: Optional[float] = None, days: float = FORM_DAYS) -> tuple[list, list]:
-    """(activity rows newest first, positions) for a wallet. ``get`` is the
-    JSON fetcher (injected for tests).
+               now: Optional[float] = None, days: float = FORM_DAYS) -> tuple[list, list, Coverage]:
+    """(activity rows newest first, positions, coverage) for a wallet. ``get``
+    is the JSON fetcher (injected for tests).
 
     Pages newest-first and stops once a page reaches FORM_LOOKBACK_DAYS
-    before the window, or at ``max_rows``. The old read took the newest 1500
-    rows with no time bound: a wallet with more rows than that in the window
-    (about 107 a day, plausible for a followed whale) had its window silently
-    truncated, and the first-buy-before-the-window exclusion was computed on
-    the capped slice, so a large pre-window position redeemed in-window read
-    as a window market and its payout inflated the form (issue #34.4a).
+    before the window, at ``max_rows``, or at the api's offset cap. The old
+    read took the newest 1500 rows with no time bound: a wallet with more
+    rows than that in the window had its window silently truncated and a
+    large pre-window position redeemed in-window inflated the form (issue
+    #34.4a). The cap is the same shape, so it is never silent: the coverage
+    says how far back the rows reach, ``compute`` measures over exactly that
+    span, and the record prints it.
 
-    A throttled page is a failed read and raises. It is tracked here, never
-    through the discovery sweep's shared failure list: the old code deleted
-    its own entries from that list by index while the sweep thread was
-    appending to and reading it (issue #34.4b).
+    A page that cannot be read raises ReadFailed naming the status; the read
+    is then a failed read (the last verdict is kept and the retry backs off),
+    never a shorter window.
     """
     now = time.time() if now is None else now
     cutoff = now - (days + FORM_LOOKBACK_DAYS) * 86400
+    page_size = 500 if get is None else 100
+    get_page = _page_reader(wallet, page_size, get)
     if get is None:
-        from src.copy_trading import discovery_data as _dd
         import httpx
-        import requests
-        session = requests.Session()
-        page_size = 500
-
-        def get_page(offset: int):
-            # The discovery fetcher's page read: retries, and returns None once
-            # a page has exhausted its attempts, which is a failed read, not
-            # "no more trades".
-            page = _dd._get(session, DATA_API, "/activity", user=wallet,
-                            limit=page_size, offset=offset)
-            if page is None:
-                raise RuntimeError("activity read incomplete (throttled)")
-            return page
 
         def get_positions():
             r = httpx.get(f"{DATA_API}/positions?user={wallet}&sizeThreshold=1&limit=500",
@@ -160,28 +244,34 @@ def fetch_rows(wallet: str, *, max_rows: int = FORM_MAX_ROWS, get=None,
             r.raise_for_status()
             return r.json() or []
     else:
-        page_size = 100
-
-        def get_page(offset: int):
-            return get(f"{DATA_API}/activity?user={wallet}&limit={page_size}&offset={offset}")
-
         def get_positions():
             return get(f"{DATA_API}/positions?user={wallet}&sizeThreshold=1&limit=500") or []
 
     acts: list = []
+    cov = Coverage()
     offset = 0
     while offset < max_rows:
-        page = get_page(offset)
+        try:
+            page = get_page(offset)
+        except ReadFailed as exc:
+            if "offset cap" in str(exc) and acts:
+                cov.capped = True
+                break
+            raise
         if not page:
             break
         acts.extend(page)
+        cov.pages += 1
         offset += page_size
+        oldest = min((_ts(a) for a in page), default=0.0)
+        if oldest:
+            cov.oldest_ts = oldest if not cov.oldest_ts else min(cov.oldest_ts, oldest)
         if len(page) < page_size:
             break
-        oldest = min((_ts(a) for a in page), default=0.0)
         if oldest and oldest < cutoff:
             break
-    return acts, get_positions()
+    cov.rows = len(acts)
+    return acts, get_positions(), cov
 
 
 def _ts(row: dict) -> float:
@@ -192,7 +282,8 @@ def _ts(row: dict) -> float:
 
 
 def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
-            days: float = FORM_DAYS, min_bet: Optional[float] = None) -> Form:
+            days: float = FORM_DAYS, min_bet: Optional[float] = None,
+            coverage: Optional[Coverage] = None) -> Form:
     """Form from the rows. A market counts once, on the rows the bot would
     have copied (each BUY row of at least the slice minimum, the sink's own
     trigger); a market whose first buy predates the window is left out so a
@@ -201,6 +292,13 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
     the wallet still holds it; it is WON when it came out ahead."""
     now = time.time() if now is None else now
     since = now - days * 86400
+    capped = bool(coverage and coverage.capped)
+    if capped and coverage.oldest_ts > since:
+        # The api's cap cut the rows before the window's start: measure over
+        # the days actually read. A market whose first SEEN buy is before
+        # this point is left out exactly as before, so a payout without its
+        # cost in the rows cannot inflate the form (issue #34.4a's rule, kept).
+        since = coverage.oldest_ts
     floor = float(min_bet if min_bet is not None else getattr(CONFIG, "copy_paper_min_usd", 300.0) or 300.0)
     first_buy: dict = {}
     by_cond: dict = {}
@@ -238,7 +336,9 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
                 unclaimed[cid] = val
         elif val > 1 and 0.0 < cur < 1.0:
             open_c.add(cid)
-    f = Form(wallet=wallet.lower(), ts=now)
+    f = Form(wallet=wallet.lower(), ts=now, capped=capped,
+             rows=(coverage.rows if coverage else len(acts)),
+             covered_days=min(days, (now - since) / 86400.0) if capped else days)
     sh = 0.0
     per_day: dict = {}
     for cid, c in by_cond.items():
@@ -257,8 +357,9 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
     f.avg_price = (f.cost / sh) if sh else 0.0
     f.cost = round(f.cost, 2)
     f.back = round(f.back, 2)
+    span = f.covered_days if capped else days
     if f.n < FORM_MIN_N:
-        f.ok, f.reason = False, f"only {f.n} settled bets on our slice in {days:.0f} days (need {FORM_MIN_N})"
+        f.ok, f.reason = False, f"only {f.n} settled bets on our slice in {span:.0f} days (need {FORM_MIN_N})"
     else:
         edge = (f.hit - f.avg_price) * 100.0
         if edge < FORM_MIN_EDGE_PTS:
@@ -286,12 +387,20 @@ def is_benched(wallet: str, now: Optional[float] = None) -> tuple[bool, str]:
         return (True, f"routine bench: {str(ov.get('why') or '')[:80]}")
     rec = (d.get("wallets") or {}).get(w)
     if not rec:
+        un = (d.get("unread") or {}).get(w)
+        if un:
+            return (True, f"no form record: {str(un.get('why') or 'read failed')[:60]}, "
+                          f"{int(un.get('tries') or 0)} tries")
         return (True, "no form record yet (the scan runs every 6 hours)")
     age = now - float(rec.get("ts") or now)
+    verdict = (not bool(rec.get("ok")), str(rec.get("reason") or ""))
     if age >= FORM_STALE_S:
-        # Reads kept failing: the last verdict is not carried forever.
-        return (True, f"form record stale ({age / 3600:.0f} h, reads failing)")
-    return (not bool(rec.get("ok")), str(rec.get("reason") or ""))
+        # Reads kept failing. The last MEASURED verdict holds (manager ruling
+        # s-qbzbrw, 2026-09-22: the three best wallets in Z were benched for
+        # three days on a read bug, not on evidence), and the staleness is
+        # said on the row and pushed once by the scan, never hidden.
+        return (verdict[0], f"{verdict[1]} [stale {age / 3600:.0f} h, reads failing]")
+    return verdict
 
 
 def needs_rescan() -> bool:
@@ -348,10 +457,33 @@ def apply_override(wallet: str, action: str, why: str, now: Optional[float] = No
 
 def wallets_without_record() -> list[str]:
     """Set-Z wallets the table has never measured (admitted by another path,
-    or read failed on their first scan): the guard catches them up each pass."""
+    or read failed on their first scan)."""
     from src.copy_trading import zset
     have = set((_read().get("wallets") or {}).keys())
     return sorted(w for w in zset.wallet_set() if w not in have)
+
+
+def wallets_due_for_catchup(now: Optional[float] = None) -> list[str]:
+    """The unmeasured wallets whose retry is due. A failed read schedules the
+    next try with a doubling backoff (FORM_RETRY_MIN_S .. FORM_RETRY_MAX_S);
+    before that the guard leaves the wallet alone instead of walking the same
+    pages into the same wall every pass."""
+    now = time.time() if now is None else now
+    unread = _read().get("unread") or {}
+    return [w for w in wallets_without_record()
+            if float((unread.get(w) or {}).get("next") or 0) <= now]
+
+
+def _note_unread(d: dict, w: str, why: str, now: float) -> dict:
+    """Record a failed read: first failure, tries, and when to try again."""
+    un = d.setdefault("unread", {})
+    rec = dict(un.get(w) or {})
+    tries = int(rec.get("tries") or 0) + 1
+    backoff = min(FORM_RETRY_MAX_S, FORM_RETRY_MIN_S * (2 ** (tries - 1)))
+    rec.update({"since": float(rec.get("since") or now), "tries": tries,
+                "next": now + backoff, "why": str(why)[:120], "told": bool(rec.get("told"))})
+    un[w] = rec
+    return rec
 
 
 def scan(*, get=None, send: Optional[Callable[[str], None]] = None,
@@ -367,18 +499,34 @@ def scan(*, get=None, send: Optional[Callable[[str], None]] = None,
     prev_w = dict(prev.get("wallets") or {})
     ws = list(wallets) if wallets is not None else sorted(zset.wallet_set())
     table: dict = dict(prev_w) if wallets is not None else {}
+    unread: dict = dict(prev.get("unread") or {})
+    scratch = {"unread": unread}
     measured = 0
     for w in ws:
         try:
-            acts, pos = fetch_rows(w, get=get)
-            f = compute(w, acts, pos, now=now)
+            acts, pos, cov = fetch_rows(w, get=get, now=now)
+            f = compute(w, acts, pos, now=now, coverage=cov)
         except Exception as exc:
-            logger.warn(f"[form] could not read {w[:10]}: {exc}")
+            rec = _note_unread(scratch, w, str(exc), now)
+            logger.warn(f"[form] could not read {w[:10]}: {exc} (try {rec['tries']}, "
+                        f"next in {(rec['next'] - now) / 60:.0f} min)")
             old = prev_w.get(w)
             if old:
                 table[w] = old
+            # Said once per episode, on the phone, when a followed wallet has
+            # been unmeasurable for hours: a warning line among thousands is
+            # how the 2026-09-19 failure stayed invisible for three days.
+            if (now - float(rec["since"])) >= FORM_UNREAD_ALERT_S and not rec.get("told"):
+                held = "the last verdict holds" if old else "it is benched until a read succeeds"
+                delivered = _send(send, f"\U0001f4ed <b>Cannot measure</b> <code>{w}</code>: {rec['why'][:100]}; "
+                                        f"{rec['tries']} tries since {time.strftime('%m-%d %H:%M', time.gmtime(rec['since']))} UTC; {held}.")
+                ops_watch.receipt("form_unreadable", before=f"{w[:10]} {rec['tries']} failed reads",
+                                  after=held, detail=rec["why"][:120], now=now,
+                                  push="WALLET" if delivered else None, extra={"wallet": w})
+                rec["told"] = bool(delivered)
             continue
         measured += 1
+        unread.pop(w, None)
         table[w] = {**asdict(f), "hit": round(f.hit, 4), "net_pct": round(f.net_pct, 2)}
         was = prev_w.get(w, {}).get("ok")
         if was is not None and bool(was) != f.ok:
@@ -396,7 +544,10 @@ def scan(*, get=None, send: Optional[Callable[[str], None]] = None,
            if now - float(o.get("ts") or 0) < FORM_OVERRIDE_S and w in zs}
     # only a full scan vouches for the whole table's compute version
     ver = FORM_VERSION if wallets is None else int(prev.get("version") or 0)
-    d = {"ts": now, "version": ver, "wallets": table, "overrides": ovs,
+    # A wallet can hold a kept (stale) verdict AND be unreadable: both facts
+    # stay on the table, the row says so, the retry keeps its backoff.
+    unread = {w: r for w, r in unread.items() if w in zs}
+    d = {"ts": now, "version": ver, "wallets": table, "overrides": ovs, "unread": unread,
          "paused": bool(prev.get("paused")), "paused_told": bool(prev.get("paused_told"))}
     _write(d)
     active = in_form_wallets(now)
@@ -446,6 +597,9 @@ def lines() -> list[str]:
         f = _form_of(r)
         b, why = is_benched(w)
         out.append(("in form  " if not b else "benched  ") + f.line())
+    for w, r in sorted((d.get("unread") or {}).items()):
+        out.append(f"unread   {w[:10]}: {str(r.get('why') or '')[:60]}, {int(r.get('tries') or 0)} tries, "
+                   f"next try {time.strftime('%H:%M', time.gmtime(float(r.get('next') or 0)))} UTC")
     if not out:
         out.append("no form scan yet")
     elif d.get("paused"):
@@ -456,5 +610,5 @@ def lines() -> list[str]:
 if __name__ == "__main__":  # python -m src.copy_trading.wallet_form <wallet> [<wallet> ...]
     import sys as _sys
     for _w in _sys.argv[1:]:
-        _acts, _pos = fetch_rows(_w)
-        print(compute(_w, _acts, _pos).line())
+        _acts, _pos, _cov = fetch_rows(_w)
+        print(compute(_w, _acts, _pos, coverage=_cov).line())

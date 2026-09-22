@@ -97,6 +97,11 @@ def main() -> int:
             print(l)
     except Exception as exc:
         print(f"(form unavailable: {exc})")
+    try:
+        from src.copy_trading import two_clocks
+        print(two_clocks.line(since_ts=now - a.hours * 3600, now=now))
+    except Exception as exc:
+        print(f"(two clocks unavailable: {exc})")
     print()
     print(f"## ledger ({len(state['ledger_tail'])} rows)")
     for r in state["ledger_tail"]:

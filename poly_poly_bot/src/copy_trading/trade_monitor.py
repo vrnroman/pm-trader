@@ -22,8 +22,10 @@ _trader_cursors: dict[str, int] = {}
 
 
 def _canonical_trade_id(tx_hash: str, token_id: str, side: str) -> str:
-    """Canonical trade identifier: txHash-tokenId-side."""
-    return f"{tx_hash}-{token_id}-{side}"
+    """Canonical trade identifier: txHash-tokenId-side, the same string the
+    on-chain source builds (see trade_ids: the ``0x`` spelling differed)."""
+    from src.copy_trading.trade_ids import canonical_trade_id
+    return canonical_trade_id(tx_hash, token_id, side)
 
 
 def _parse_timestamp(raw: int | float | str) -> str:

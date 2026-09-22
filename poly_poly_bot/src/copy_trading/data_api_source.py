@@ -50,6 +50,15 @@ class DataApiSource:
                     # whether copying is fast enough to be worth real money,
                     # and until now it was recorded nowhere.
                     record_reaction_latency(received_ms - ts_ms)
+                    # The api's clock on this fill; the chain stamps its own
+                    # under the same id and the two-clocks report joins them.
+                    try:
+                        from src.copy_trading import two_clocks
+                        two_clocks.note("data-api", trade.id, their_ts=ts_ms / 1000.0,
+                                        seen_at=received_ms / 1000.0,
+                                        target=trade.trader_address, token_id=trade.token_id)
+                    except Exception as exc:  # measurement never blocks a copy
+                        logger.warn(f"two-clocks stamp failed: {error_message(exc)}")
                     enqueue_trade(QueuedTrade(
                         trade=trade,
                         enqueued_at=ts_ms,

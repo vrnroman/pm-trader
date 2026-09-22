@@ -135,7 +135,14 @@ jobs:
           # 0.40 of $80 is $32: exactly 5 copies at $6.40, the owner's "1 to 5
           # deals a day". And no single wallet may take more than 2 of them.
           ensure_env LIVE_BUDGET_DAILY_FRAC 0.40
-          ensure_env LIVE_MAX_PER_WALLET_DAY 2
+          # 3, not 2: the owner answered the s-kac3t7 guess with "3" on the
+          # Desk (ingested 2026-09-22); his number is the ruling.
+          ensure_env LIVE_MAX_PER_WALLET_DAY 3
+          # Two clocks (s-qbzbrw, 2026-09-22): the chain reader runs next to
+          # the data api as a SHADOW (stamps, never copies) until its own
+          # evidence clears the cutover rule in two_clocks.py; ONCHAIN_SHADOW
+          # pins either answer.
+          ensure_env TRADE_MONITOR_MODE hybrid
           ensure_env WALLET_DISCOVERY_CACHE_MAX_GB 3
           ensure_env WALLET_DISCOVERY_RES_CACHE_MAX_GB 1
           ensure_env LIVE_BUDGET_EXPOSURE_FRAC 0.80

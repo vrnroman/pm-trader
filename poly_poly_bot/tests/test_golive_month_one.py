@@ -1817,10 +1817,13 @@ def test_the_per_wallet_cap_binds_at_the_order_sink(tmp_path, monkeypatch):
     assert h.seen == {"t0", "t1", "t2", "t3"}
 
 
-def test_the_deploy_pins_five_deals_a_day_and_two_per_wallet():
+def test_the_deploy_pins_five_deals_a_day_and_three_per_wallet():
+    # 3 per wallet: the owner answered the s-kac3t7 guess with "3" on the
+    # Desk (ingested 2026-09-22); his number is the ruling.
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
     assert "ensure_env LIVE_BUDGET_DAILY_FRAC 0.40" in src
-    assert "ensure_env LIVE_MAX_PER_WALLET_DAY 2" in src
+    assert "ensure_env LIVE_MAX_PER_WALLET_DAY 3" in src
+    assert "ensure_env LIVE_MAX_PER_WALLET_DAY 2" not in src
     assert round(80 * 0.40 / (80 * 0.08)) == 5
 
 

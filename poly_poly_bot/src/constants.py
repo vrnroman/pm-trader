@@ -57,17 +57,25 @@ CTF_REDEEM_ABI = [
     {"inputs": [{"name": "collateralToken", "type": "address"}, {"name": "parentCollectionId", "type": "bytes32"}, {"name": "conditionId", "type": "bytes32"}, {"name": "indexSets", "type": "uint256[]"}], "name": "redeemPositions", "outputs": [], "stateMutability": "nonpayable", "type": "function"},
 ]
 
-ORDER_FILLED_ABI = [
-    {"anonymous": False, "inputs": [
-        {"indexed": False, "name": "orderHash", "type": "bytes32"},
-        {"indexed": True, "name": "maker", "type": "address"},
-        {"indexed": True, "name": "taker", "type": "address"},
-        {"indexed": False, "name": "makerAssetId", "type": "uint256"},
-        {"indexed": False, "name": "takerAssetId", "type": "uint256"},
-        {"indexed": False, "name": "makerAmountFilled", "type": "uint256"},
-        {"indexed": False, "name": "takerAmountFilled", "type": "uint256"},
-    ], "name": "OrderFilled", "type": "event"},
-]
+# The OrderFilled event of the exchanges that match orders TODAY, read from
+# the same client library as the addresses above. The hand-written fragment
+# this replaces (2026-09-22) described neither exchange: it lacked v1's
+# ``fee`` and v2's ``side``/``tokenId``/``builder``/``metadata``, so its
+# topic hash matched no log the chain has ever emitted and the on-chain
+# reader decoded nothing, silently, for as long as it existed. A copy is a
+# second way to know one fact, and the second way is the one that rots.
+from py_clob_client_v2.order_utils.abi import abis as _clob_abis
+
+
+def _order_filled_event(abi) -> dict:
+    for e in abi:
+        if isinstance(e, dict) and e.get("type") == "event" and e.get("name") == "OrderFilled":
+            return e
+    raise RuntimeError("py_clob_client_v2 exchange ABI carries no OrderFilled event")
+
+
+ORDER_FILLED_ABI = [_order_filled_event(_clob_abis.exchange_v2_abi)]
+ORDER_FILLED_ABI_V1 = [_order_filled_event(_clob_abis.exchange_v1_abi)]
 
 # Trading constants
 FILL_CHECK_DELAY_S = 3.0

@@ -24,6 +24,11 @@ from src.utils import error_message, short_address
 
 MAX_BLOCK_RANGE = 9
 MAX_BLOCKS_BEHIND = 10000
+# Stay this many blocks behind the reported head. The public RPC is a pool of
+# nodes: eth_getLogs up to the very block one node just reported fails on
+# another with "invalid block range params" (1 of 3 tries at the head, 0 of 3
+# one block back, measured 2026-09-22). One block is two seconds of latency.
+HEAD_MARGIN_BLOCKS = 1
 USDC_DECIMALS = 6
 POLL_INTERVAL_S = 2.0
 
@@ -58,8 +63,11 @@ def _save_cursor(block: int) -> None:
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _canonical_trade_id(tx_hash: str, token_id: str, side: str) -> str:
-    return f"{tx_hash}-{token_id}-{side}"
+def _canonical_trade_id(tx_hash, token_id: str, side: str) -> str:
+    """One id with the data api: web3 8 / hexbytes 2 ``.hex()`` has no ``0x``,
+    the api's ``transactionHash`` does; the leaf normaliser makes them one."""
+    from src.copy_trading.trade_ids import canonical_trade_id
+    return canonical_trade_id(tx_hash, token_id, side)
 
 
 def _determine_side(maker_asset_id: int, taker_asset_id: int) -> str:
@@ -98,6 +106,28 @@ def _trade_legs(maker_asset_id: int, taker_asset_id: int,
     return str(maker_asset_id), taker_amount, maker_amount
 
 
+def _legs_from_args(args) -> tuple[int, int, int, int]:
+    """(maker_asset_id, taker_asset_id, maker_amount, taker_amount) from either
+    exchange's OrderFilled.
+
+    The v2 exchanges (the only ones matching orders since 2026-09) emit
+    ``side`` (the MAKER order's side: 0 BUY, 1 SELL) and one ``tokenId``
+    instead of two asset ids. A maker BUY gives USDC (asset 0) and takes the
+    token; a maker SELL gives the token and takes USDC. Mapping that onto the
+    v1 asset-id pair keeps ``_tracked_side`` and ``_trade_legs`` one rule for
+    both shapes, and a log from a v1 contract still decodes.
+    """
+    maker_amount = int(args["makerAmountFilled"])
+    taker_amount = int(args["takerAmountFilled"])
+    if "makerAssetId" in args and "takerAssetId" in args:
+        return int(args["makerAssetId"]), int(args["takerAssetId"]), maker_amount, taker_amount
+    side = int(args["side"])
+    token = int(args["tokenId"])
+    if side == 0:
+        return 0, token, maker_amount, taker_amount
+    return token, 0, maker_amount, taker_amount
+
+
 def _usdc_to_float(amount: int) -> float:
     """Convert raw USDC amount (6 decimals) to float."""
     return amount / (10 ** USDC_DECIMALS)
@@ -127,9 +157,21 @@ class OnchainSource:
             address=Web3.to_checksum_address(NEG_RISK_CTF_EXCHANGE),
             abi=ORDER_FILLED_ABI,
         )
-        # Build tracked address set (lowercase)
-        for addr in CONFIG.user_addresses:
-            self._tracked_addresses.add(addr.lower())
+        self._refresh_tracked()
+
+    def _refresh_tracked(self) -> None:
+        """Set Z, read every poll so an admission or eviction takes effect on
+        the next pass without a restart (the data-api poll does the same).
+        The static env list rides along; the executor's own set-Z check is
+        what decides money, whatever source produced the trade."""
+        tracked: set[str] = {a.lower() for a in CONFIG.user_addresses}
+        try:
+            from src.copy_trading import zset
+            tracked |= {a.lower() for a in zset.wallets() if a}
+        except Exception as exc:
+            logger.warn(f"Onchain: set Z unreadable this pass ({error_message(exc)}); keeping the last list")
+            return
+        self._tracked_addresses = tracked
 
     def _get_block_timestamp(self, block_number: int) -> int:
         """Fetch block timestamp with caching."""
@@ -197,10 +239,7 @@ class OnchainSource:
             else:
                 continue
 
-            maker_asset_id = int(args["makerAssetId"])
-            taker_asset_id = int(args["takerAssetId"])
-            maker_amount = int(args["makerAmountFilled"])
-            taker_amount = int(args["takerAmountFilled"])
+            maker_asset_id, taker_asset_id, maker_amount, taker_amount = _legs_from_args(args)
 
             side = _tracked_side(maker_asset_id, tracked_is_maker)
 
@@ -283,11 +322,17 @@ class OnchainSource:
             (self._neg_risk_contract, "NEG_RISK_CTF"),
         ]:
             try:
-                event_filter = contract.events.OrderFilled.create_filter(
-                    fromBlock=from_block,
-                    toBlock=to_block,
+                # ``get_logs`` with web3 >= 7 keyword names. The old call,
+                # ``create_filter(fromBlock=..., toBlock=...)``, was the web3 6
+                # spelling: on the deployed web3 8 it raised "unexpected keyword
+                # argument 'fromBlock'" on every poll (found 2026-09-22 in a
+                # read-only dry run; this source had never worked in prod).
+                # ``get_logs`` also needs no server-side filter, which public
+                # RPCs often refuse.
+                events = contract.events.OrderFilled.get_logs(
+                    from_block=from_block,
+                    to_block=to_block,
                 )
-                events = event_filter.get_all_entries()
                 trades = self._process_events(events, name)
                 all_trades.extend(trades)
             except Exception as exc:
@@ -310,7 +355,8 @@ class OnchainSource:
 
         while self._running:
             try:
-                latest = self._w3.eth.block_number
+                self._refresh_tracked()
+                latest = self._w3.eth.block_number - HEAD_MARGIN_BLOCKS
                 # A successful chain read is this poller's heartbeat for the
                 # guard's stale-feed trigger (the data-api source stamps its own).
                 from src.copy_trading.trade_store import record_poll_ok
@@ -341,23 +387,33 @@ class OnchainSource:
                 )
 
                 if trades:
-                    logger.info(f"Onchain: {len(trades)} trades in blocks {from_block}-{to_block}")
+                    from src.copy_trading import two_clocks
+                    primary = two_clocks.is_primary()
+                    logger.info(f"Onchain: {len(trades)} trades in blocks {from_block}-{to_block}"
+                                + ("" if primary else " (shadow: stamped, not copied)"))
                     for trade in trades:
                         try:
+                            from datetime import datetime
                             from src.copy_trading.trade_store import is_seen_trade, is_max_retries
-                            from src.copy_trading.trade_queue import enqueue_trade
-                            from src.models import QueuedTrade
+                            ts_ms = datetime.fromisoformat(
+                                trade.timestamp.replace("Z", "+00:00")
+                            ).timestamp() * 1000
+                            seen_at = time.time()
+                            # The chain's clock on this fill, primary or not:
+                            # the shadow report joins it with the api's.
+                            two_clocks.note("onchain", trade.id, their_ts=ts_ms / 1000.0,
+                                            seen_at=seen_at, target=trade.trader_address,
+                                            token_id=trade.token_id)
+                            if not primary:
+                                continue
                             if not is_seen_trade(trade.id) and not is_max_retries(trade.id):
-                                from datetime import datetime
-                                from src.copy_trading.trade_store import (
-                                    record_reaction_latency)
-                                ts_ms = datetime.fromisoformat(
-                                    trade.timestamp.replace("Z", "+00:00")
-                                ).timestamp() * 1000
+                                from src.copy_trading.trade_queue import enqueue_trade
+                                from src.copy_trading.trade_store import record_reaction_latency
+                                from src.models import QueuedTrade
                                 # ts_ms = the target's trade time; now = when
                                 # we saw it. Same latency contract as the
                                 # data-api source (see QueuedTrade).
-                                received_ms = time.time() * 1000
+                                received_ms = seen_at * 1000
                                 record_reaction_latency(received_ms - ts_ms)
                                 enqueue_trade(QueuedTrade(
                                     trade=trade,

@@ -350,7 +350,8 @@ def test_main_wires_the_watcher_into_the_guard_loop_and_the_daily_line():
     src = (pathlib.Path(__file__).resolve().parents[1] / "main.py").read_text()
     for needle in ("ops_watch.record_settlements(", "ops_watch.check_bankroll(", "ops_watch.check_absences(",
                    "ops_watch.maybe_rearm(", "ops_watch.deliver_escalation(", "ops_watch.note_guard_pass(",
-                   "ops_admit.scan(", "ops_watch.write_money_state(", "_ow.daily_line()", "_ow.note_daily_line("):
+                   "ops_admit.scan(", "ops_watch.write_money_state(", "_ow.daily_line()", "_ow.note_daily_line(",
+                   "two_clocks.maybe_cutover(", "wallet_form.wallets_due_for_catchup("):
         assert needle in src, needle
     i = src.index("rows_out=released_rows"); j = src.index("ops_watch.record_settlements(")
     assert i < j, "settlements are booked from the rows the reconcile released"

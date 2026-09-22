@@ -1,0 +1,123 @@
+"""Two clocks on every followed fill (s-qbzbrw, 2026-09-22).
+
+The chain runs as a shadow next to the data api: both stamp the same trade
+id, the report joins them, and the bot flips the chain to primary only on
+its own evidence, once, and says so once.
+"""
+from __future__ import annotations
+
+import json
+
+import pytest
+
+from src.config import CONFIG
+from src.copy_trading import two_clocks as tc
+from src.copy_trading.trade_ids import canonical_trade_id, normalize_tx_hash
+
+NOW = 1_789_400_000.0
+
+
+@pytest.fixture
+def clocks_env(tmp_path, monkeypatch):
+    from src.copy_trading import ops_watch
+    monkeypatch.setattr(CONFIG, "data_dir", str(tmp_path))
+    monkeypatch.setattr(tc.CONFIG, "data_dir", str(tmp_path))
+    monkeypatch.setattr(ops_watch.CONFIG, "data_dir", str(tmp_path))
+    monkeypatch.setattr(tc, "_FORCE", "")
+    return tmp_path
+
+
+def _fill(i, api_lag=18.0, chain_lag=4.0, chain=True, api=True):
+    tid = f"0x{i:064x}-tok{i}-BUY"
+    their = NOW + i * 60
+    if chain:
+        tc.note("onchain", tid, their_ts=their, seen_at=their + chain_lag, target="0xZ", token_id=f"tok{i}")
+    if api:
+        tc.note("data-api", tid, their_ts=their, seen_at=their + api_lag, target="0xZ", token_id=f"tok{i}")
+    return tid
+
+
+def test_one_id_from_either_spelling_of_the_hash():
+    """web3 8 / hexbytes 2 hand back hex() without 0x; the api has it."""
+    class H:
+        def hex(self):
+            return "abc123"
+    assert normalize_tx_hash(H()) == "0xabc123"
+    assert normalize_tx_hash("0xABC123") == "0xabc123"
+    assert normalize_tx_hash(b"\xab\xc1\x23") == "0xabc123"
+    assert normalize_tx_hash("") == "" and normalize_tx_hash(None) == ""
+    assert canonical_trade_id(H(), "77", "buy") == canonical_trade_id("0xABC123", 77, "BUY") == "0xabc123-77-BUY"
+
+
+def test_the_report_joins_by_id_and_counts_what_did_not_match(clocks_env):
+    for i in range(6):
+        _fill(i)
+    _fill(10, chain=False)              # the chain missed one
+    _fill(11, api=False)                # the api missed one
+    tid = _fill(12)
+    tc.note("onchain", tid, their_ts=NOW, seen_at=NOW + 5)   # the same id twice from one source
+    r = tc.report(0.0, now=NOW + 3600)
+    assert (r["matched"], r["api_only"], r["chain_only"], r["dupes"]) == (7, 1, 1, 1)
+    assert r["api_lag_p50"] == 18.0 and r["chain_lag_p50"] == 4.0 and r["gain_p50"] == 14.0
+    assert r["missed_frac"] == pytest.approx(1 / 8)
+    assert "matched" in tc.line(0.0, now=NOW + 3600) and "shadow" in tc.line(0.0, now=NOW + 3600)
+
+
+def test_no_rows_is_said_plainly(clocks_env):
+    assert tc.line() == "two clocks: no fills stamped yet"
+    ok, why, _ = tc.cutover_ready(now=NOW)
+    assert ok is False and "0 matched" in why
+
+
+def test_cutover_needs_enough_matched_no_dupes_and_a_real_gain(clocks_env, monkeypatch):
+    monkeypatch.setattr(tc, "SHADOW_MIN_MATCHED", 5)
+    for i in range(4):
+        _fill(i)
+    assert tc.cutover_ready(now=NOW)[0] is False, "4 of 5 matched"
+    _fill(4)
+    ok, why, ev = tc.cutover_ready(now=NOW)
+    assert ok is True and "chain earlier by 14.0s" in why and ev["dupes"] == 0
+    # a duplicate id anywhere keeps the shadow: that is the double copy
+    tc.note("onchain", f"0x{0:064x}-tok0-BUY", their_ts=NOW, seen_at=NOW + 9)
+    ok, why, _ = tc.cutover_ready(now=NOW)
+    assert ok is False and "duplicate" in why
+
+
+def test_cutover_refuses_when_the_chain_misses_too_much_or_is_not_earlier(clocks_env, monkeypatch):
+    monkeypatch.setattr(tc, "SHADOW_MIN_MATCHED", 5)
+    for i in range(5):
+        _fill(i)
+    _fill(20, chain=False)
+    ok, why, _ = tc.cutover_ready(now=NOW)
+    assert ok is False and "missed" in why
+    # a chain that is not earlier is no win
+    for i in range(30, 36):
+        _fill(i, api_lag=3.0, chain_lag=9.0, chain=True, api=True)
+    # rebuild cleanly: only slow-chain fills
+    (clocks_env / tc.ROWS_FILE).unlink()
+    for i in range(30, 36):
+        _fill(i, api_lag=3.0, chain_lag=9.0)
+    ok, why, _ = tc.cutover_ready(now=NOW)
+    assert ok is False and "not earlier" in why
+
+
+def test_the_flip_happens_once_and_is_pinned_by_env(clocks_env, monkeypatch):
+    monkeypatch.setattr(tc, "SHADOW_MIN_MATCHED", 5)
+    for i in range(5):
+        _fill(i)
+    sent: list = []
+    assert tc.is_primary() is False
+    row = tc.maybe_cutover(send=sent.append, now=NOW)
+    assert row is not None and row["kind"] == "onchain_primary" and tc.is_primary() is True
+    assert len(sent) == 1 and "primary" in sent[0] and "—" not in sent[0]
+    assert tc.maybe_cutover(send=sent.append, now=NOW + 1) is None and len(sent) == 1, "once"
+    assert json.load(open(clocks_env / tc.PRIMARY_FILE))["primary"] is True
+    monkeypatch.setattr(tc, "_FORCE", "true")
+    assert tc.is_primary() is False, "ONCHAIN_SHADOW=true pins the shadow whatever the file says"
+    monkeypatch.setattr(tc, "_FORCE", "false")
+    assert tc.is_primary() is True
+
+
+def test_an_unreadable_flag_file_means_shadow(clocks_env):
+    (clocks_env / tc.PRIMARY_FILE).write_text("{not json")
+    assert tc.is_primary() is False

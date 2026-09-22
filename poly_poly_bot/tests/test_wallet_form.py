@@ -115,12 +115,137 @@ def test_scan_receipts_changes_and_pauses_once(form_env, monkeypatch):
 def test_a_failed_read_keeps_the_last_verdict(form_env):
     wf._write({"ts": 1.0, "wallets": {"0xa": {"ok": True, "reason": "fine", "wallet": "0xa", "n": 40, "won": 25, "cost": 1.0, "back": 2.0, "avg_price": 0.5, "ts": NOW - 3600}}})
     def get(url):
-        raise RuntimeError("429")
+        raise RuntimeError("HTTP 429 (throttled)")
     d = wf.scan(get=get, send=None, now=NOW, wallets=["0xa"])
     assert d["wallets"]["0xa"]["ok"] is True and d["paused"] is False
     assert wf.is_benched("0xa", now=NOW)[0] is False
-    # ...but not forever: a verdict older than FORM_STALE_S is no verdict
-    assert wf.is_benched("0xa", now=NOW - 3600 + wf.FORM_STALE_S) == (True, "form record stale (24 h, reads failing)")
+    # The last MEASURED verdict holds past FORM_STALE_S and says it is stale
+    # (manager ruling s-qbzbrw: the three best wallets in Z were benched for
+    # three days on a read bug, not on evidence).
+    benched, why = wf.is_benched("0xa", now=NOW - 3600 + wf.FORM_STALE_S)
+    assert benched is False and why == "fine [stale 24 h, reads failing]"
+    # ...and the failure is bookkept with a backoff, not retried every pass.
+    un = d["unread"]["0xa"]
+    assert un["tries"] == 1 and un["why"].startswith("HTTP 429") and un["next"] == NOW + wf.FORM_RETRY_MIN_S
+
+
+# --------------------------------------------------------------------------- #
+# The offset cap (2026-09-20): a shorter window said so, never a failed read
+# --------------------------------------------------------------------------- #
+
+def _busy_rows(now, days=20.0, per_day=120, cost=400.0, price=0.5):
+    """A wallet that trades more than the api will page: every market is a
+    same-day buy and redeem so the form is clean, oldest first in time."""
+    acts = []
+    n = int(days * per_day)
+    for i in range(n):
+        ts = now - (i / per_day) * 86400.0
+        cid = f"m{i}"
+        acts.append({"type": "REDEEM", "conditionId": cid, "usdcSize": cost / price, "timestamp": ts})
+        acts.append({"type": "TRADE", "side": "BUY", "conditionId": cid, "usdcSize": cost, "size": cost / price,
+                     "price": price, "timestamp": ts - 60})
+    return acts  # newest first, like the api
+
+
+def _paged(acts, page_size=100):
+    def get(url):
+        if "/positions" in url:
+            return []
+        off = int(url.split("offset=")[1])
+        return acts[off:off + page_size]
+    return get
+
+
+def test_a_capped_read_is_a_shorter_window_flagged_on_the_record(form_env):
+    acts = _busy_rows(NOW, per_day=500)          # 1,000 rows a day: the cap reaches back ~5 days
+    get = _paged(acts)
+    rows, pos, cov = wf.fetch_rows("0xbusy", get=get, now=NOW)
+    assert cov.capped is True and cov.rows == wf.DATA_API_MAX_OFFSET + 100 and cov.pages == 51
+    f = wf.compute("0xbusy", rows, pos, now=NOW, coverage=cov)
+    assert f.capped is True and 0 < f.covered_days < wf.FORM_DAYS
+    assert abs(f.covered_days - cov.covered_days(NOW)) < 0.05
+    assert f.n > 0 and f.ok is True, "5,100 rows of a clean wallet is a verdict, not a failure"
+    assert "capped:" in f.line() and f"of {wf.FORM_DAYS:.0f} days read" in f.line()
+    assert f"in {f.covered_days:.0f} days" in f.reason or f.ok, "a bar reason names the span actually read"
+    # busy but not THAT busy: the window is read in full, only the older
+    # lookback was cut; the record says which
+    acts2 = _busy_rows(NOW, per_day=150)         # 300 rows a day: 5,100 rows reach back 17 days
+    rows2, pos2, cov2 = wf.fetch_rows("0xbusy2", get=_paged(acts2), now=NOW)
+    f2 = wf.compute("0xbusy2", rows2, pos2, now=NOW, coverage=cov2)
+    assert cov2.capped is True and f2.covered_days == wf.FORM_DAYS and "window read in full" in f2.line()
+    # the record in the table carries the coverage, and the digest row shows it
+    d = wf.scan(get=get, send=None, now=NOW, wallets=["0xbusy"])
+    rec = d["wallets"]["0xbusy"]
+    assert rec["capped"] is True and rec["rows"] == cov.rows and "unread" in d and d["unread"] == {}
+    assert any("capped:" in l for l in wf.lines())
+
+
+def test_a_wallet_under_the_cap_is_not_flagged(form_env):
+    acts, pos = _rows(n_won=20, n_lost=10)
+    def get(url):
+        return pos if "/positions" in url else (acts if "offset=0" in url else [])
+    rows, _p, cov = wf.fetch_rows("0xa", get=get, now=NOW)
+    assert cov.capped is False and cov.rows == len(acts)
+    f = wf.compute("0xa", rows, _p, now=NOW, coverage=cov)
+    assert f.capped is False and f.covered_days == wf.FORM_DAYS and "capped" not in f.line()
+
+
+def test_the_injected_reader_refuses_to_page_past_the_cap(form_env):
+    calls = []
+    def get(url):
+        calls.append(url)
+        return [] if "/positions" in url else [{"timestamp": NOW, "conditionId": "c", "type": "TRADE",
+                                                 "side": "BUY", "usdcSize": 400.0, "size": 800.0}] * 100
+    rows, _p, cov = wf.fetch_rows("0xw", get=get, now=NOW, max_rows=20000)
+    assert cov.capped is True and max(int(u.split("offset=")[1]) for u in calls if "offset=" in u) == wf.DATA_API_MAX_OFFSET
+
+
+def test_a_failed_first_page_is_a_failed_read_not_a_capped_one(form_env):
+    def get(url):
+        raise wf.ReadFailed("offset cap")
+    with pytest.raises(wf.ReadFailed):
+        wf.fetch_rows("0xw", get=get, now=NOW)
+
+
+def test_catchup_backs_off_and_says_so_once(form_env, monkeypatch):
+    from src.copy_trading import zset
+    monkeypatch.setattr(zset, "wallet_set", lambda: {"0xnew"})
+    def get(url):
+        raise wf.ReadFailed("HTTP 400")
+    sent: list = []
+    d = wf.scan(get=get, send=sent.append, now=NOW, wallets=["0xnew"])
+    un = d["unread"]["0xnew"]
+    assert un["tries"] == 1 and un["next"] == NOW + wf.FORM_RETRY_MIN_S and sent == []
+    assert wf.wallets_due_for_catchup(NOW) == [], "not due before the backoff"
+    assert wf.wallets_due_for_catchup(NOW + wf.FORM_RETRY_MIN_S) == ["0xnew"]
+    benched, why = wf.is_benched("0xnew", now=NOW)
+    assert benched is True and "HTTP 400" in why and "1 tries" in why
+    # doubling, capped
+    t = NOW
+    for k in range(2, 8):
+        t = d["unread"]["0xnew"]["next"]
+        d = wf.scan(get=get, send=sent.append, now=t, wallets=["0xnew"])
+        assert d["unread"]["0xnew"]["tries"] == k
+        assert d["unread"]["0xnew"]["next"] - t == min(wf.FORM_RETRY_MAX_S, wf.FORM_RETRY_MIN_S * 2 ** (k - 1))
+    # said once on the phone after FORM_UNREAD_ALERT_S, with a receipt
+    assert len(sent) == 1 and "Cannot measure" in sent[0] and "0xnew" in sent[0] and "benched until" in sent[0]
+    assert all("\u2014" not in m for m in sent)
+    rows = [json.loads(l) for l in (form_env / "ops-ledger.jsonl").read_text().splitlines()]
+    assert [r["kind"] for r in rows].count("form_unreadable") == 1
+    assert any("unread   0xnew" in l for l in wf.lines())
+    # a successful read clears the bookkeeping
+    acts, pos = _rows(n_won=20, n_lost=10)
+    def ok(url):
+        return pos if "/positions" in url else (acts if "offset=0" in url else [])
+    d = wf.scan(get=ok, send=sent.append, now=t + 1, wallets=["0xnew"])
+    assert "0xnew" not in d["unread"] and d["wallets"]["0xnew"]["ok"] is True
+
+
+def test_the_compute_version_bumped_so_old_tables_rescan(form_env, monkeypatch):
+    from src.copy_trading import zset
+    monkeypatch.setattr(zset, "wallet_set", lambda: {"0xa"})
+    wf._write({"ts": 1.0, "version": 2, "wallets": {"0xa": {"wallet": "0xa", "ok": True, "reason": "old", "ts": 1.0}}})
+    assert wf.FORM_VERSION >= 3 and wf.needs_rescan() is True
 
 
 def test_a_table_from_an_older_compute_is_rescanned_at_boot(form_env, monkeypatch):
@@ -276,7 +401,7 @@ def test_the_read_covers_the_whole_window_and_stops_after_the_lookback(form_env)
         offset = int(url.rsplit("offset=", 1)[1])
         return rows[offset:offset + 100]
 
-    acts, pos = wf.fetch_rows("0xW", get=get, now=NOW)
+    acts, pos, _cov = wf.fetch_rows("0xW", get=get, now=NOW)
     in_window = [a for a in acts if a["timestamp"] >= NOW - wf.FORM_DAYS * 86400]
     assert len(in_window) == int(wf.FORM_DAYS * 24) + 1, "every row of the window, past the old 1500 cap"
     lookback_rows = int((wf.FORM_DAYS + wf.FORM_LOOKBACK_DAYS) * 24)
@@ -302,6 +427,6 @@ def test_a_pre_window_first_buy_past_the_old_cap_is_still_left_out(form_env):
         offset = int(url.rsplit("offset=", 1)[1])
         return rows[offset:offset + 100]
 
-    acts, pos = wf.fetch_rows("0xW", get=get, now=NOW)
+    acts, pos, _cov = wf.fetch_rows("0xW", get=get, now=NOW)
     f = wf.compute("0xW", acts, pos, now=NOW)
     assert f.n == 0 and f.back == 0.0, "the pre-window market is left out, its payout not counted"
