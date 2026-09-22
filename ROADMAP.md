@@ -293,8 +293,14 @@ Langfuse (run **on the VM** so keys stay there):
 ```bash
 $VM --command 'eval "$(docker exec poly-poly-bot env | grep -E "^LANGFUSE_" | sed "s/^/export /")"
 AUTH=$(printf "%s:%s" "$LANGFUSE_PUBLIC_KEY" "$LANGFUSE_SECRET_KEY" | base64 -w0)
-curl -s -H "Authorization: Basic $AUTH" "$LANGFUSE_HOST/api/public/traces?limit=100"'
+FROM=$(date -u -d "-7 days" +%Y-%m-%dT%H:%M:%SZ); TO=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+curl -s -H "Authorization: Basic $AUTH" "$LANGFUSE_HOST/api/public/v2/observations?type=GENERATION&limit=100&fields=core,basic,usage&fromStartTime=$FROM&toStartTime=$TO"'
 ```
+
+(Langfuse v4: the v1 `traces` list is removed on Cloud on 2026-11-16 — each gate
+call is one root `generation` observation, read through the Observations API
+v2. Always bound the window; page with `&cursor=<meta.cursor>` until none is
+returned.)
 
 ---
 

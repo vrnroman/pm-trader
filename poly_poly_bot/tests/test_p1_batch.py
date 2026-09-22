@@ -276,36 +276,50 @@ def test_build_dossier_drops_none_fields():
 
 def test_langfuse_error_rides_the_trace(monkeypatch):
     """§1.7a: ~13-15% of gate calls failed open with ZERO error traces — the
-    level only rode the generation. The trace itself must carry it."""
+    level only rode a child generation. Langfuse v4 has no trace entity: the
+    trace's level is its ROOT observation's. The one span we send must BE that
+    root, and carry the error in both the Langfuse level and the span status."""
     from src.copy_trading import langfuse_telemetry as lt
 
-    batches = []
+    bodies = []
 
     class _Resp:
-        status_code = 207
+        status_code = 200
+        text = ""
+
+        def json(self):
+            return {}
 
     monkeypatch.setattr(lt.requests, "post",
-                        lambda url, json=None, headers=None, timeout=None: batches.append(json) or _Resp())
+                        lambda url, json=None, headers=None, timeout=None: bodies.append(json) or _Resp())
     monkeypatch.setenv("LANGFUSE_PUBLIC_KEY", "pk")
     monkeypatch.setenv("LANGFUSE_SECRET_KEY", "sk")
     monkeypatch.setenv("LANGFUSE_HOST", "https://langfuse.example")
 
+    def _root(body):
+        (rs,) = body["resourceSpans"]
+        (ss,) = rs["scopeSpans"]
+        (span,) = ss["spans"]                 # exactly one observation...
+        assert "parentSpanId" not in span     # ...and it is the trace's root
+        return span, {a["key"]: a["value"] for a in span["attributes"]}
+
     lt.record_generation(name="wallet-gate", input="p", output="", model="m",
                          start=1.0, end=2.0, error="unparseable verdict")
-    (batch,) = batches
-    trace = next(e for e in batch["batch"] if e["type"] == "trace-create")
-    gen = next(e for e in batch["batch"] if e["type"] == "generation-create")
-    assert trace["body"]["level"] == "ERROR"
-    assert trace["body"]["statusMessage"] == "unparseable verdict"
-    assert gen["body"]["level"] == "ERROR"
+    (body,) = bodies
+    span, attrs = _root(body)
+    assert attrs["langfuse.observation.level"] == {"stringValue": "ERROR"}
+    assert attrs["langfuse.observation.status_message"] == {
+        "stringValue": "unparseable verdict"}
+    assert span["status"] == {"code": 2, "message": "unparseable verdict"}
 
-    batches.clear()
+    bodies.clear()
     lt.record_generation(name="wallet-gate", input="p", output="o", model="m",
                          start=1.0, end=2.0)
-    (batch,) = batches
-    trace = next(e for e in batch["batch"] if e["type"] == "trace-create")
-    assert trace["body"]["level"] == "DEFAULT"
-    assert "statusMessage" not in trace["body"]
+    (body,) = bodies
+    span, attrs = _root(body)
+    assert attrs["langfuse.observation.level"] == {"stringValue": "DEFAULT"}
+    assert "langfuse.observation.status_message" not in attrs
+    assert span["status"] == {"code": 1}
 
 
 def test_failopen_alert_fires_above_threshold(tmp_path):
