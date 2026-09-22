@@ -1,16 +1,16 @@
 {
- "generated": "2026-09-22T07:32:32.058109+00:00",
+ "generated": "2026-09-22T09:57:00.157906+00:00",
  "money": {
-  "cash": 77.233953,
+  "cash": 83.661393,
   "open_cost": 42.45,
-  "equity": 119.68,
+  "equity": 126.11,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-22",
-   "spent_usd": 6.4,
+   "spent_usd": 12.8,
    "cap_usd": 32.0,
-   "remaining_usd": 25.6,
+   "remaining_usd": 19.2,
    "closed_reason": ""
   },
   "armed": true,
@@ -20,7 +20,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1790062218.460961,
+  "ts": 1790070830.4511356,
   "day": "2026-09-22"
  },
  "arm": {
@@ -33,9 +33,10 @@
  },
  "spend": {
   "date": "2026-09-22",
-  "spent_usd": 6.4,
+  "spent_usd": 12.8,
   "wallet_copies": {
-   "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": 1
+   "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": 1,
+   "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": 1
   },
   "wallet_copies_yesterday": {
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
@@ -54,14 +55,14 @@
   "1b": {
    "open_total": 6.4,
    "daily_date": "2026-09-22",
-   "daily_volume": 6.4,
+   "daily_volume": 12.8,
    "placements": [
     {
-     "token_id": "3552308554122389354456599700460902408206897800445437886846916776167723235430",
+     "token_id": "7176164693333913912271980594552279937832227503542042198140094468727106225171",
      "cost": 6.4,
-     "ts": 1790055771.6507797,
-     "trader": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
-     "title": "Korea Open: Emerson Jones vs Yexin Ma"
+     "ts": 1790069304.6321359,
+     "trader": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
+     "title": "Dota 2:  Pipsqueak+4 vs Team Cobra - Game 1 Winner"
     }
    ]
   },
@@ -172,7 +173,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 119.68,
+  "last_equity": 126.11,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -192,9 +193,9 @@
    "96998131034687394987869300990474810645455355843214977734260368889207437752543"
   ],
   "form_scan_ts": 1790058288.2443283,
-  "daily_line_attempt_day": "2026-09-21",
+  "daily_line_attempt_day": "2026-09-22",
   "daily_line_sent": true,
-  "daily_line_day": "2026-09-21",
+  "daily_line_day": "2026-09-22",
   "guard_failing_pushed": false,
   "floor_near_day": "2026-09-19"
  },
@@ -253,7 +254,7 @@
   }
  },
  "form": {
-  "ts": 1790062218.9448347,
+  "ts": 1790070831.2803779,
   "version": 2,
   "wallets": {
    "0x05878ac343c1387d592042d788424412733ac40b": {
@@ -490,19 +491,6 @@
   }
  ],
  "important": [
-  "2026-09-21 07:35:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-21 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
-  "2026-09-21 08:22:13 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-21 09:00:35 ERROR Network error fetching 0x4980...5709: Server disconnected without sending a response.",
-  "2026-09-21 09:00:35 ERROR Network error fetching 0x1985...51ab: Server disconnected without sending a response.",
-  "2026-09-21 09:00:54 ERROR Network error fetching 0xd970...bbba: ",
-  "2026-09-21 09:00:54 ERROR Network error fetching 0xeef6...cd4c: ",
-  "2026-09-21 09:01:55 ERROR Network error fetching 0xf496...fe79: Server disconnected without sending a response.",
-  "2026-09-21 09:01:55 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.",
-  "2026-09-21 09:04:12 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-21 09:34:07 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-21 09:37:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-21 09:44:14 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-21 09:58:05 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-21 10:03:06 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-21 10:25:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
@@ -563,9 +551,25 @@
   "2026-09-22 06:57:20 ERROR HTTP 500 fetching activity for 0x722a...d6ed",
   "2026-09-22 07:20:10 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-22 07:30:26 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-22 07:37:18 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-22 07:37:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-22 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
+  "2026-09-22 08:02:23 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
+  "2026-09-22 08:04:39 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-22 08:24:25 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-22 08:53:28 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-22 09:09:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-22 09:13:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-22 09:20:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-22 09:28:23 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $32.00",
+  "2026-09-22 09:28:24 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $6.40 / $200.00",
+  "2026-09-22 09:38:17 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
+  "2026-09-22 09:42:50 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-21 14:57:44 TRADE [LIVE] BUY $6.40 on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100, order 0x6f49770a8b...",
   "2026-09-21 14:57:48 TRADE [verify] FILLED: BUY 10.49 shares on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100",
   "2026-09-22 05:42:51 TRADE [LIVE] BUY $6.40 on 'Korea Open: Emerson Jones vs Yexin Ma' @ 0.4900, order 0xc937b741ec...",
-  "2026-09-22 05:42:55 TRADE [verify] FILLED: BUY 13.06 shares on 'Korea Open: Emerson Jones vs Yexin Ma' @ 0.4900"
+  "2026-09-22 05:42:55 TRADE [verify] FILLED: BUY 13.06 shares on 'Korea Open: Emerson Jones vs Yexin Ma' @ 0.4900",
+  "2026-09-22 09:28:24 TRADE [LIVE] BUY $6.40 on 'Dota 2:  Pipsqueak+4 vs Team Cobra - Gam' @ 0.2700, order 0x65d0c69b42...",
+  "2026-09-22 09:28:25 TRADE [verify] FILLED: BUY 23.70 shares on 'Dota 2:  Pipsqueak+4 vs Team Cobra - Gam' @ 0.2700"
  ]
 }
