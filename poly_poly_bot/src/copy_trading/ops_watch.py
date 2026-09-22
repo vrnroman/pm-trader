@@ -745,8 +745,27 @@ def daily_line(now: Optional[float] = None) -> str:
     won = sum(1 for r in settled if r.get("won"))
     heals = [r for r in rows if r.get("kind") in ("rearm", "guard_recovered")]
     tail = watcher_line(now)
+    lag = lag_cost_line(now)
+    extra = "".join(("\n" + t) for t in (tail, lag) if t)
     if not rows:
-        return "📒 ledger: nothing happened in the last 24h" + (("\n" + tail) if tail else "")
+        return "📒 ledger: nothing happened in the last 24h" + extra
     return (f"📒 ledger, last 24h: {len(settled)} settled ({won} won) {pnl:+.2f}; "
             f"{len(heals)} self-heal(s); {sum(1 for r in rows if r.get('kind') == 'auto_admit')} auto-admission(s)"
-            + (("\n" + tail) if tail else ""))
+            + extra)
+
+
+def lag_cost_line(now: Optional[float] = None) -> str:
+    """Two clocks, priced (s-qbzbrw phase 2, "Lag Has a Price"): what the
+    api's delay cost over the last 7 days at the live stake, an estimate
+    from the shadow quotes, one line under the 08:00 line. Empty when the
+    chain reader is not running (nothing to pair)."""
+    now = time.time() if now is None else now
+    try:
+        from src.copy_trading import live_budget, two_clocks
+        caps = live_budget.caps(live=True)
+        stake = float(getattr(caps, "per_copy_usd", 0.0) or 0.0) if caps is not None else 0.0
+        line = two_clocks.lag_cost_line(now - 7 * 86400, stake_usd=stake or 6.4, now=now)
+        return "" if line == "api lag cost: collecting, n=0" else "\u23f1 " + line
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] lag cost line failed: {exc}")
+        return ""

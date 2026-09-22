@@ -212,13 +212,17 @@ def test_shadow_mode_stamps_the_clock_and_never_enqueues(tmp_path, monkeypatch):
     calls = {"n": 0}
 
     class _Eth:
-        block_number = 10
+        # two 200-block chunks from cursor 5: the fake fetch stops the loop on
+        # its second call; a head inside one chunk would spin at cursor >= head
+        block_number = 406
         def get_block(self, n):
             return {"timestamp": int(time.time())}
 
     class _W3:
         eth = _Eth()
     s._w3 = _W3()
+    # start() would rebuild the real provider and hit the network: keep the fake
+    monkeypatch.setattr(s, "_init_web3", lambda: None)
     monkeypatch.setattr("src.copy_trading.onchain_source._load_cursor", lambda: 5)
     monkeypatch.setattr("src.copy_trading.onchain_source._save_cursor", lambda b: None)
     monkeypatch.setattr(s, "_refresh_tracked", lambda: None)

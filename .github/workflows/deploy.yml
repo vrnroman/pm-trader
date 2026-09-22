@@ -163,6 +163,12 @@ jobs:
           # evidence clears the cutover rule in two_clocks.py; ONCHAIN_SHADOW
           # pins either answer.
           ensure_env TRADE_MONITOR_MODE hybrid
+          # The chain stays PINNED as a shadow (manager s-qbzbrw, round 2):
+          # the flip rule's numbers (30 matched or 7 days) are guesses the
+          # owner ratifies after reading a week of the two-clocks line. Set
+          # ONCHAIN_SHADOW=false in the ENV_FILE secret to let the bot flip on
+          # its own evidence; delete the key to force primary.
+          ensure_env ONCHAIN_SHADOW true
           # The AI analyst (scripts/ai_analyst.py, s-qbzbrw): off until the
           # SRE's ledger shows one clean day (manager sequencing). Flip to
           # true in the ENV_FILE secret to enable; it runs daily inside the

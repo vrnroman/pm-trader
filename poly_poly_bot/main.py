@@ -70,6 +70,10 @@ def _get_shadow_observer():
                 from src.copy_trading.shadow_quote import make_observer
                 observer, _stop = make_observer(create_clob_client)
                 _shadow_observer_cache = observer
+                # The chain reader hands its stamp of each fill through this
+                # registry (two clocks, s-qbzbrw), so the delay has a price.
+                from src.copy_trading import fast_prober, shadow_quote
+                shadow_quote.register_sink(fast_prober.make_shadow_sink(observer))
                 logger.info("[shadow] pre-flip quote observer started "
                             "(measurement only, never places an order)")
             except Exception as exc:

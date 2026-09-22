@@ -24,6 +24,7 @@ def clocks_env(tmp_path, monkeypatch):
     monkeypatch.setattr(tc.CONFIG, "data_dir", str(tmp_path))
     monkeypatch.setattr(ops_watch.CONFIG, "data_dir", str(tmp_path))
     monkeypatch.setattr(tc, "_FORCE", "")
+    monkeypatch.setattr(tc, "_noted", None)
     return tmp_path
 
 
@@ -55,9 +56,10 @@ def test_the_report_joins_by_id_and_counts_what_did_not_match(clocks_env):
     _fill(10, chain=False)              # the chain missed one
     _fill(11, api=False)                # the api missed one
     tid = _fill(12)
-    tc.note("onchain", tid, their_ts=NOW, seen_at=NOW + 5)   # the same id twice from one source
+    tc.note("onchain", tid, their_ts=NOW, seen_at=NOW + 5)   # the same id again from one source: not written
     r = tc.report(0.0, now=NOW + 3600)
-    assert (r["matched"], r["api_only"], r["chain_only"], r["dupes"]) == (7, 1, 1, 1)
+    assert (r["matched"], r["api_only"], r["chain_only"], r["dupes"]) == (7, 1, 1, 0)
+    assert sum(1 for x in tc.load_rows() if x["id"] == tid and x["source"] == "onchain") == 1, "note is idempotent"
     assert r["api_lag_p50"] == 18.0 and r["chain_lag_p50"] == 4.0 and r["gain_p50"] == 14.0
     assert r["missed_frac"] == pytest.approx(1 / 8)
     assert "matched" in tc.line(0.0, now=NOW + 3600) and "shadow" in tc.line(0.0, now=NOW + 3600)
@@ -77,10 +79,14 @@ def test_cutover_needs_enough_matched_no_dupes_and_a_real_gain(clocks_env, monke
     _fill(4)
     ok, why, ev = tc.cutover_ready(now=NOW)
     assert ok is True and "chain earlier by 14.0s" in why and ev["dupes"] == 0
-    # a duplicate id anywhere keeps the shadow: that is the double copy
-    tc.note("onchain", f"0x{0:064x}-tok0-BUY", their_ts=NOW, seen_at=NOW + 9)
-    ok, why, _ = tc.cutover_ready(now=NOW)
-    assert ok is False and "duplicate" in why
+    # a replayed row (a restart re-reading its last chunk) is counted, never a reason
+    import json as _json
+    with open(clocks_env / tc.ROWS_FILE, "a", encoding="utf-8") as f:
+        f.write(_json.dumps({"v": tc.ROW_VERSION, "ts": NOW, "source": "onchain", "id": f"0x{0:064x}-tok0-BUY",
+                             "their_ts": NOW, "seen_at": NOW + 9, "lag_s": 9.0}) + "\n")
+    r = tc.report(0.0, now=NOW)
+    assert r["dupes"] == 1 and tc.cutover_ready(now=NOW)[0] is True
+    assert "replayed rows 1" in tc.line(0.0, now=NOW)
 
 
 def test_cutover_refuses_when_the_chain_misses_too_much_or_is_not_earlier(clocks_env, monkeypatch):
@@ -93,8 +99,9 @@ def test_cutover_refuses_when_the_chain_misses_too_much_or_is_not_earlier(clocks
     # a chain that is not earlier is no win
     for i in range(30, 36):
         _fill(i, api_lag=3.0, chain_lag=9.0, chain=True, api=True)
-    # rebuild cleanly: only slow-chain fills
+    # rebuild cleanly: only slow-chain fills (the idempotency set follows the file)
     (clocks_env / tc.ROWS_FILE).unlink()
+    monkeypatch.setattr(tc, "_noted", None)
     for i in range(30, 36):
         _fill(i, api_lag=3.0, chain_lag=9.0)
     ok, why, _ = tc.cutover_ready(now=NOW)

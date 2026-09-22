@@ -76,6 +76,34 @@ def _path() -> str:
     return os.path.join(CONFIG.data_dir, "shadow-quotes.jsonl")
 
 
+# --------------------------------------------------------------------------- #
+# Sinks: who else may hand detected trades to the observer
+# --------------------------------------------------------------------------- #
+# The fast prober was the only feeder. The chain reader (two clocks, run
+# s-qbzbrw) hands its own stamp of the same fill here too, under its own
+# copy_id, so each fill gets a quote at BOTH detection times and the delay
+# between them has a price (two_clocks.lag_cost). A sink is a callable over a
+# list of detected-trade dicts; registering is idempotent; emit never raises.
+_sinks: list = []
+
+
+def register_sink(fn) -> None:
+    if fn is not None and fn not in _sinks:
+        _sinks.append(fn)
+
+
+def emit(rows: list) -> int:
+    """Hand rows to every registered sink. Returns how many sinks ran."""
+    n = 0
+    for fn in list(_sinks):
+        try:
+            fn(list(rows))
+            n += 1
+        except Exception as exc:  # noqa: BLE001
+            logger.warn(f"[shadow] sink failed: {exc}")
+    return n
+
+
 def _snapshot_dict(clob_client, token_id: str) -> Optional[dict]:
     """Live book for a token as the plain dict the pricing function takes."""
     from src.copy_trading.market_price import fetch_market_snapshot

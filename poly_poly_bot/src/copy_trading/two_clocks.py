@@ -59,10 +59,28 @@ def _primary_path() -> str:
     return os.path.join(CONFIG.data_dir, PRIMARY_FILE)
 
 
+_noted: Optional[set] = None
+
+
+def _seen_keys() -> set:
+    """(source, id) pairs already on disk, loaded once: a restart that
+    replays the chunk it was killed in must not write a fill twice (three
+    deploys in an hour wrote 4 replays on 2026-09-22, which the old dupes
+    gate read as the sources disagreeing)."""
+    global _noted
+    if _noted is None:
+        _noted = {(r.get("source"), r.get("id")) for r in load_rows()}
+    return _noted
+
+
 def note(source: str, trade_id: str, *, their_ts: float, seen_at: float,
          target: str = "", token_id: str = "") -> None:
     """One row per (source, trade id): the fill's own time and when this
-    source first saw it. Never raises."""
+    source first saw it. Idempotent; never raises."""
+    keys = _seen_keys()
+    if (source, trade_id) in keys:
+        return
+    keys.add((source, trade_id))
     row = {"v": ROW_VERSION, "ts": seen_at, "source": source, "id": trade_id, "their_ts": their_ts,
            "seen_at": seen_at, "lag_s": (seen_at - their_ts) if their_ts else None,
            "target": (target or "").lower(), "token_id": token_id}
@@ -92,11 +110,11 @@ def load_rows(since_ts: float = 0.0) -> list[dict]:
     return out
 
 
-def _pct(v: list, q: float) -> Optional[float]:
+def _pct(v: list, q: float, nd: int = 1) -> Optional[float]:
     if not v:
         return None
     v = sorted(v)
-    return round(v[min(len(v) - 1, int(q * len(v)))], 1)
+    return round(v[min(len(v) - 1, int(q * len(v)))], nd)
 
 
 def report(since_ts: float = 0.0, now: Optional[float] = None) -> dict:
@@ -144,8 +162,63 @@ def line(since_ts: float = 0.0, now: Optional[float] = None) -> str:
     return (f"two clocks: {r['matched']} matched fills over {r['days']:.1f} d, "
             f"api lag p50 {s(r['api_lag_p50'])}, chain lag p50 {s(r['chain_lag_p50'])}, "
             f"chain earlier by {s(r['gain_p50'])} at the median; api-only {r['api_only']}, "
-            f"chain-only {r['chain_only']}, duplicate ids {r['dupes']}; "
+            f"chain-only {r['chain_only']}, replayed rows {r['dupes']}; "
             f"{'CHAIN IS PRIMARY' if is_primary() else 'chain is a shadow'}")
+
+
+def _api_key(copy_id: str) -> Optional[str]:
+    """The fast prober's copy_id is ``<0xtx>-<token>``; the chain's is
+    ``chain:<0xtx>-<token>``. One key for both."""
+    from src.copy_trading.trade_ids import normalize_tx_hash
+    cid = (copy_id or "")
+    if cid.startswith("chain:"):
+        cid = cid[len("chain:"):]
+    tx, sep, token = cid.rpartition("-")
+    if not sep or not tx:
+        return None
+    return f"{normalize_tx_hash(tx)}-{token}"
+
+
+def lag_cost(since_ts: float = 0.0, *, stake_usd: float, now: Optional[float] = None) -> dict:
+    """What the api's delay cost, per fill, from the shadow quotes: the same
+    fill quoted at the chain's detection and at the api's. For a BUY, the
+    shares the live stake buys at the chain quote, times how much the ask
+    moved by the api quote. An ESTIMATE from two snapshots, never a
+    settlement; fills quoted only once are counted, not priced."""
+    from src.copy_trading import shadow_quote
+    rows = shadow_quote.load_rows(since_ts=since_ts) if since_ts else shadow_quote.load_rows()
+    by: dict = {}
+    for r in rows:
+        key = _api_key(r.get("copy_id") or "")
+        if not key:
+            continue
+        slot = by.setdefault(key, {})
+        src = "onchain" if str(r.get("copy_id") or "").startswith("chain:") else "api"
+        slot.setdefault(src, r)
+    pairs = [v for v in by.values() if "onchain" in v and "api" in v]
+    costs, saved = [], []
+    for v in pairs:
+        c, a = v["onchain"], v["api"]
+        pc = float(c.get("our_price") or 0)
+        pa = float(a.get("our_price") or 0)
+        if pc <= 0 or pa <= 0:
+            continue
+        shares = stake_usd / pc
+        costs.append(round((pa - pc) * shares, 4))
+        saved.append(float(a.get("detected_at") or 0) - float(c.get("detected_at") or 0))
+    return {"pairs": len(pairs), "priced": len(costs), "chain_only": sum(1 for v in by.values() if "onchain" in v and "api" not in v),
+            "api_only": sum(1 for v in by.values() if "api" in v and "onchain" not in v),
+            "cost_usd": round(sum(costs), 2), "cost_p50": _pct(costs, 0.5, nd=3), "saved_p50_s": _pct(saved, 0.5),
+            "stake_usd": stake_usd}
+
+
+def lag_cost_line(since_ts: float = 0.0, *, stake_usd: float, now: Optional[float] = None) -> str:
+    r = lag_cost(since_ts, stake_usd=stake_usd, now=now)
+    if not r["priced"]:
+        return (f"api lag cost: collecting, n=0 (chain-quoted {r['chain_only']}, api-quoted {r['api_only']}, paired {r['pairs']})"
+                if (r["chain_only"] or r["api_only"] or r["pairs"]) else "api lag cost: collecting, n=0")
+    return (f"api lag cost, last 7d (estimate): {r['cost_usd']:+.2f} USD over {r['priced']} fills at ${stake_usd:.2f} each, "
+            f"{r['cost_p50']:+.3f} USD a fill at the median, chain earlier by {r['saved_p50_s']:.1f}s")
 
 
 def is_primary() -> bool:
@@ -167,8 +240,10 @@ def cutover_ready(now: Optional[float] = None) -> tuple[bool, str, dict]:
     """The rule, with its evidence. Any missing number keeps the shadow."""
     now = time.time() if now is None else now
     r = report(0.0, now)
-    if r["dupes"] > 0:
-        return (False, f"{r['dupes']} duplicate id(s): the sources do not agree on one id yet", r)
+    # Replays (one source, one id, twice) are a restart artefact, counted
+    # and printed, never a reason: a source that spelled an id differently
+    # would show up as fills the other never matched, which the missed-fraction
+    # gate below refuses.
     enough = r["matched"] >= SHADOW_MIN_MATCHED or r["days"] >= SHADOW_DAYS
     if not enough:
         return (False, f"{r['matched']} matched of {SHADOW_MIN_MATCHED}, {r['days']:.1f} of {SHADOW_DAYS:.0f} days", r)

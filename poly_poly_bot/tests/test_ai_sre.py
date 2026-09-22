@@ -135,7 +135,8 @@ def _fakes():
     return calls, apply, push, revert
 
 
-def test_a_safe_fix_is_tested_pushed_to_main_and_announced(box):
+def test_a_safe_fix_is_tested_pushed_to_main_and_announced(box, monkeypatch):
+    monkeypatch.setattr(sre, "PUSH_MAIN", True)   # the owner's switch; off by default (next test)
     _append(box, LINE)
     calls, apply, push, revert = _fakes()
     send = _sender()
@@ -149,6 +150,38 @@ def test_a_safe_fix_is_tested_pushed_to_main_and_announced(box):
     st = sre._read_json(sre._p(sre.STATE_FILE))
     assert st["own_pushes"][fp]["sha"] == "abc1234" and st["markers"][fp] == "[exec] placed"
     assert fpm.proof(fp, NOW + 60)[0] == "unproven"
+
+
+def test_by_default_every_fix_goes_to_a_branch_even_off_the_money_path(box):
+    """Manager ruling s-qbzbrw round 2: a standing process pushing to main is
+    a self-graded deploy check on a live-money box; SRE_PUSH_MAIN is off."""
+    assert sre.PUSH_MAIN is False
+    _append(box, LINE)
+    calls, apply, push, revert = _fakes()
+    send = _sender()
+    s = sre.cycle(NOW, logs_dir=str(box["logs"]), send=send, apply=apply, push=push, revert=revert,
+                  runner=_runner_for({"kind": "fix", "reasoning": "x", "diff": SAFE_DIFF, "path_marker": "[exec] placed"}))
+    fp = s["wake"][0]
+    assert calls["push"] == [(fp, f"sre/{fp}")] and "owner asked to merge" in s["acted"]
+    assert any("SRE_PUSH_MAIN is off" in m and "compare/main..." in m for m in send.sent)
+
+
+def test_the_sre_has_no_arm_path_and_writes_no_bot_ledger():
+    """The envelope, pinned in CI (manager s-qbzbrw round 2): the sidecar's
+    data mount is read-write because disarm is the bot's own path, so the
+    file itself must prove it never arms and never writes a bot ledger."""
+    import pathlib, re
+    src = (pathlib.Path(__file__).resolve().parents[1] / "scripts" / "ai_sre.py").read_text()
+    assert "live_mode.arm(" not in src and ".arm(" not in src.replace("disarm(", "")
+    assert "hard_disarm" not in src or "hard_disarm(" not in src
+    for ledger in ("trade-history.jsonl", "ops-ledger.jsonl", "seen-trades.json", "inventory.json",
+                   "promoted_wallets_z.json", "copy_retired_z.json", "live_arm.json", "daily-spend.json"):
+        # named in prose is fine; opened, joined or resolved as a path is not
+        assert re.search(r"(open|os\.path\.join|_p)\([^\n]*" + re.escape(ledger), src) is None, \
+            f"the SRE touches {ledger} directly; it must go through the bot's own functions or not at all"
+    # its own files only, opened for append or write
+    for m in re.finditer(r'open\(([^,]+),\s*"(a|w)"', src):
+        assert "THOUGHTS_FILE" in m.group(1) or "tmp" in m.group(1) or "sre.patch" in m.group(1), m.group(0)
 
 
 def test_a_money_path_fix_goes_to_a_branch_and_the_owner(box):
@@ -208,7 +241,8 @@ def test_an_expensive_diagnosis_does_nothing(box, monkeypatch):
     assert sre.thoughts()[-1]["kind"] == "over-budget"
 
 
-def test_a_recurrence_reverts_the_own_push_once(box):
+def test_a_recurrence_reverts_the_own_push_once(box, monkeypatch):
+    monkeypatch.setattr(sre, "PUSH_MAIN", True)   # a revert only applies to its own push on main
     _append(box, LINE)
     calls, apply, push, revert = _fakes()
     send = _sender()

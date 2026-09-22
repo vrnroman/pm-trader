@@ -102,6 +102,7 @@ def main() -> int:
     try:
         from src.copy_trading import two_clocks
         print(two_clocks.line(since_ts=now - a.hours * 3600, now=now))
+        print(ops_watch.lag_cost_line(now) or "api lag cost: collecting, n=0")
     except Exception as exc:
         print(f"(two clocks unavailable: {exc})")
     print()

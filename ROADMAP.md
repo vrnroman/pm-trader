@@ -1207,6 +1207,20 @@ In Telegram: `/zset candidates` (one card per passer, admit by tap),
   the compare link on the phone), or a `note`. Every run is a row in
   `data/ops-thoughts.jsonl`; the digest prints the limits in force
   (`live_limits.lines`).
+- **Lag has a price (run s-qbzbrw, phase 2).** The chain reader hands its
+  stamp of each set-Z BUY fill through `shadow_quote.register_sink` under its
+  own copy_id (`chain:<0xtx>-<token>`), so the observer quotes the same fill
+  twice: at the chain's detection and at the api's. `two_clocks.lag_cost`
+  pairs the two quotes and prices the delay at the live stake (the shares the
+  stake buys at the chain quote, times how far the ask moved by the api
+  quote): an ESTIMATE from two snapshots, printed as one line under the 08:00
+  UTC message (`ops_watch.lag_cost_line`) and in the digest, "collecting,
+  n=0" until fills pair. Rulings of the same round: the SRE pushes fixes to
+  branches only unless `SRE_PUSH_MAIN=true` (a standing process on main is a
+  self-graded deploy check); the chain stays pinned as a shadow
+  (`ONCHAIN_SHADOW=true` in deploy.yml) until the owner reads a week of the
+  two-clocks line and unpins; two-clocks rows are written once per (source,
+  id), replays after a restart are counted and printed, never a reason.
 - **The leaderboard says where each wallet stands at the door.** `/wallets`
   ranks by all-time net PnL, a number the gate never reads, and its old row
   verdict (PROMOTE-READY on 15 settled and positive PnL) printed READY next

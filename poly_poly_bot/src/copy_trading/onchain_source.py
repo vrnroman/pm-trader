@@ -446,6 +446,26 @@ class OnchainSource:
                             two_clocks.note("onchain", trade.id, their_ts=ts_ms / 1000.0,
                                             seen_at=seen_at, target=trade.trader_address,
                                             token_id=trade.token_id)
+                            if trade.side == "BUY":
+                                # The same fill the fast prober quotes at the
+                                # api's detection time, quoted again at the
+                                # chain's, under its own copy_id (the observer
+                                # dedupes by copy_id). The delay then has a
+                                # price: two_clocks.lag_cost.
+                                try:
+                                    from src.copy_trading import shadow_quote
+                                    shadow_quote.emit([{
+                                        "copy_id": f"chain:{trade.id.rsplit('-', 1)[0]}",
+                                        "target": (trade.trader_address or "").lower(),
+                                        "condition_id": trade.condition_id, "token_id": trade.token_id,
+                                        "outcome_index": 0, "category": "", "title": trade.market or "",
+                                        "slug": "", "event_key": "", "their_price": trade.price,
+                                        "their_usd": trade.size, "their_ts": ts_ms / 1000.0,
+                                        "detected_at": seen_at, "age_s": seen_at - ts_ms / 1000.0,
+                                        "actionable": True, "source": "onchain",
+                                    }])
+                                except Exception as exc:  # noqa: BLE001
+                                    logger.warn(f"Onchain: shadow emit failed: {error_message(exc)}")
                             if not primary:
                                 continue
                             if not is_seen_trade(trade.id) and not is_max_retries(trade.id):

@@ -1828,6 +1828,7 @@ def test_the_deploy_pins_five_deals_a_day_and_three_per_wallet():
     # rewritten in place, since ensure_env never overrides a defined key.
     assert "s#^TRADE_MONITOR_MODE=.*#TRADE_MONITOR_MODE=hybrid#" in src
     assert "ensure_env TRADE_MONITOR_MODE hybrid" in src
+    assert "ensure_env ONCHAIN_SHADOW true" in src, "the chain is pinned as a shadow until the owner reads a week of the line"
     assert round(80 * 0.40 / (80 * 0.08)) == 5
 
 

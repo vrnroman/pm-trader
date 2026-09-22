@@ -89,6 +89,12 @@ def _env_f(name: str, default: float) -> float:
 
 
 TICK_S = _env_f("SRE_TICK_S", 120.0)
+# Off by default (manager ruling s-qbzbrw, round 2): a standing process
+# pushing to main is a self-graded deploy check on a live-money box with no
+# branch protection behind it. Every fix goes to a branch sre/<fingerprint>
+# with the compare link on the phone; the owner flips SRE_PUSH_MAIN=true in
+# the secret to let money-path-free fixes land on main by themselves.
+PUSH_MAIN = str(os.environ.get("SRE_PUSH_MAIN", "false")).strip().lower() in ("1", "true", "yes", "on")
 MAX_WAKES_PER_HOUR = int(_env_f("SRE_MAX_WAKES_PER_HOUR", 4))
 MAX_PUSHES_PER_DAY = int(_env_f("SRE_MAX_PUSHES_PER_DAY", 3))
 MAX_USD_PER_DIAGNOSIS = _env_f("SRE_MAX_USD_PER_DIAGNOSIS", 10.0)
@@ -240,11 +246,17 @@ def new_lines(state: dict, logs_dir: str) -> tuple[list[str], list[str]]:
 
 def box_snapshot(now: float) -> dict:
     """What the model gets to look at besides the fingerprints."""
-    from src.copy_trading import ops_watch
+    from src.copy_trading import live_guard, live_mode, ops_watch
+    # The bot's own readers for the bot's own files (the CI invariant test
+    # refuses a direct path to any ledger or the arm record from this file).
+    try:
+        guard_state = live_guard._read_state()
+    except Exception:  # noqa: BLE001
+        guard_state = {}
     snap = {
         "money": _read_json(_p(ops_watch.MONEY_STATE_FILE)),
-        "arm": _read_json(_p("live_arm.json")),
-        "guard": _read_json(_p("live_guard.json")),
+        "arm": live_mode.read_arm(),
+        "guard": guard_state,
         "form": [],
         "two_clocks": "",
         "receipts_tail": [],
@@ -637,7 +649,7 @@ def act(verdict: dict, wake: list, state: dict, now: float, *, send: Callable[[s
         row["did"] = f"fix not applied: {detail}"
         _receipt("sre_fix_failed", before=f"fingerprint {fp}", after="not applied", detail=detail[:160], now=now)
         return row
-    branch = None if cls == "safe" else f"sre/{fp}"
+    branch = None if (cls == "safe" and PUSH_MAIN) else f"sre/{fp}"
     pushed, where = push(fp, branch=branch)
     if not pushed:
         row["did"] = f"fix tested ({detail}) but push failed: {where}"
@@ -648,7 +660,8 @@ def act(verdict: dict, wake: list, state: dict, now: float, *, send: Callable[[s
     fpm.mark_action(fp, "fix", now=now, detail=f"{sha} -> {where}")
     if branch:
         link = f"{REPO_HTTPS}/compare/main...{branch}?expand=1"
-        msg = (f"\U0001f527 <b>AI SRE</b> ({fp}) has a fix on the money path, not pushed to main: "
+        why_branch = ("on the money path" if cls == "money" else "SRE_PUSH_MAIN is off")
+        msg = (f"\U0001f527 <b>AI SRE</b> ({fp}) has a fix, {why_branch}, not pushed to main: "
                f"{sha} on {branch} ({detail}). Open and merge it here: {link}")
         delivered = send(msg)
         row["did"] = f"fix pushed to {branch} ({sha}); owner asked to merge"
@@ -750,6 +763,7 @@ def second_line(now: Optional[float] = None) -> str:
 
 def main() -> int:
     logger.info(f"[sre] AI SRE started: tick {TICK_S:.0f}s, model {MODEL}, push path {'ready' if can_push() else 'ABSENT'}, "
+                f"fixes to {'main when off the money path' if PUSH_MAIN else 'branches only (SRE_PUSH_MAIN off)'}, "
                 f"limits {MAX_WAKES_PER_HOUR}/h wakes, {MAX_PUSHES_PER_DAY}/day pushes, ${MAX_USD_PER_DIAGNOSIS:.0f}/diagnosis")
     if not can_push():
         _receipt("sre_started", before="sidecar", after="no push path", detail="deploy key or git missing; fixes will be escalated only")
