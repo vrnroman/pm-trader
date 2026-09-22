@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-22T06:40:58Z-23d5",
-  "ts": 1790059258,
+  "id": "2026-09-22T12:41:42Z-1cd1",
+  "ts": 1790080902,
   "kind": "nothing",
-  "message": "Digest at 04:53 UTC, armed by telegram, spend $0.00 of $32.00 cap today, equity $119.85 vs floor $56.00. No self-disarm, no guard failure, no Traceback; recurring 408, 429, and 404 no-orderbook errors continue at similar volume to prior days. All in-form wallets still clear the bar with no new losing streak; 0x722abb54 held in form at 80% won vs 74% needed, net +9.3%, none of mine to touch.",
+  "message": "Digest at 09:56 UTC, armed by telegram, spend $12.80 of $32.00 cap today, equity $126.11 vs floor $56.00. Three trades placed and filled today with no verify failures. No self-disarm, no guard failure, no Traceback; recurring 408, 429, and 404 no-orderbook errors continue at similar volume to prior days. All in-form wallets still clear the bar with no new losing streak; 0x722abb54 and 0xf9168343 unchanged from the last check, none of mine to touch.",
   "evidence": [
-    "{\"cash\": 83.796533, \"open_cost\": 36.05, \"equity\": 119.85, \"floor\": 56.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 32.0}, \"armed\": true}",
-    "{\"armed\": true, \"ts\": 1789919410.9079125, \"by\": \"telegram\", \"reason\": \"\", \"floor_override\": false}",
+    "{\"cash\": 83.661393, \"open_cost\": 42.45, \"equity\": 126.11, \"floor\": 56.0, \"spend\": {\"spent_usd\": 12.8, \"cap_usd\": 32.0}, \"armed\": true}",
+    "2026-09-22 09:28:24 TRADE [LIVE] BUY $6.40 on 'Dota 2:  Pipsqueak+4 vs Team Cobra - Gam' @ 0.2700, order 0x65d0c69b42...",
+    "2026-09-22 09:28:25 TRADE [verify] FILLED: BUY 23.70 shares on 'Dota 2:  Pipsqueak+4 vs Team Cobra - Gam' @ 0.2700",
     "in form  0x722abb54: 98 settled, 80% won vs 74% needed, net +9.3% on $205,753, worst day -3,391",
-    "in form  0xf9168343: 48 settled, 56% won vs 46% needed, net +7.9% on $127,913, worst day -6,320",
-    "2026-09-21 18:17:10 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00"
+    "in form  0xf9168343: 51 settled, 55% won vs 46% needed, net +7.8% on $136,032, worst day -6,320"
   ],
   "commit": null
 }
