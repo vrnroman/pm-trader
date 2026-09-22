@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T17:44:30.907921+00:00",
+ "generated": "2026-09-22T18:54:52.186115+00:00",
  "money": {
   "cash": 77.195213,
   "open_cost": 42.45,
@@ -20,7 +20,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1790098960.735741,
+  "ts": 1790103137.9700778,
   "day": "2026-09-22"
  },
  "arm": {
@@ -181,7 +181,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1790079430.4497955,
+  "admit_scan_ts": 1790101159.5598354,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 6,
   "day_pnl": -6.4,
@@ -539,16 +539,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790014996.3058822,
-   "day": "2026-09-21",
-   "kind": "form",
-   "before": "0x722abb54 benched",
-   "after": "in form",
-   "detail": "0x722abb54: 99 settled, 79% won vs 74% needed, net +9.1% on $206,134, worst day -3,391",
-   "push": "WALLET",
-   "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"
-  },
-  {
    "ts": 1790073699.6289544,
    "day": "2026-09-22",
    "kind": "settled",
@@ -608,11 +598,27 @@
    "after": "watching",
    "detail": "tick 120s",
    "push": null
+  },
+  {
+   "ts": 1790100212.656724,
+   "day": "2026-09-22",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
+  },
+  {
+   "ts": 1790101842.6213722,
+   "day": "2026-09-22",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
   }
  ],
  "important": [
-  "2026-09-21 18:17:10 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
-  "2026-09-21 18:25:04 INFO  [ops] form: '0x722abb54 benched' -> 'in form' | 0x722abb54: 99 settled, 79% won vs 74% needed, net +9.1% on $206,134, worst day -3,391",
   "2026-09-21 19:13:19 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-21 19:20:10 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-21 22:12:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -731,6 +737,20 @@
   "2026-09-22 17:42:14 INFO  Received signal 15, shutting down...",
   "2026-09-22 17:42:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
   "2026-09-22 17:42:41 INFO  Bot started. Monitoring trades...",
+  "2026-09-22 18:03:01 INFO  Received signal 15, shutting down...",
+  "2026-09-22 18:03:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-22 18:03:34 INFO  Bot started. Monitoring trades...",
+  "2026-09-22 18:25:21 ERROR [inventory] API sync failed: ",
+  "2026-09-22 18:28:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-22 18:29:58 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
+  "2026-09-22 18:29:59 ERROR Network error fetching 0x3f3a...e8fd: ",
+  "2026-09-22 18:29:59 ERROR Network error fetching 0xfd3e...5a7a: ",
+  "2026-09-22 18:29:59 ERROR Network error fetching 0x0587...c40b: ",
+  "2026-09-22 18:30:00 ERROR Network error fetching 0x09b0...a3b6: ",
+  "2026-09-22 18:30:10 INFO  Received signal 15, shutting down...",
+  "2026-09-22 18:30:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-22 18:30:35 INFO  Bot started. Monitoring trades...",
+  "2026-09-22 18:49:42 ERROR Error fetching CTF events [94265251-94265254]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-22 05:42:51 TRADE [LIVE] BUY $6.40 on 'Korea Open: Emerson Jones vs Yexin Ma' @ 0.4900, order 0xc937b741ec...",
   "2026-09-22 05:42:55 TRADE [verify] FILLED: BUY 13.06 shares on 'Korea Open: Emerson Jones vs Yexin Ma' @ 0.4900",
   "2026-09-22 09:28:24 TRADE [LIVE] BUY $6.40 on 'Dota 2:  Pipsqueak+4 vs Team Cobra - Gam' @ 0.2700, order 0x65d0c69b42...",
@@ -742,7 +762,9 @@
   "2026-09-22 16:46:24 INFO  [recovery] No pending orders to recover",
   "2026-09-22 17:17:22 INFO  [recovery] No pending orders to recover",
   "2026-09-22 17:32:41 INFO  [recovery] No pending orders to recover",
-  "2026-09-22 17:42:41 INFO  [recovery] No pending orders to recover"
+  "2026-09-22 17:42:41 INFO  [recovery] No pending orders to recover",
+  "2026-09-22 18:03:34 INFO  [recovery] No pending orders to recover",
+  "2026-09-22 18:30:35 INFO  [recovery] No pending orders to recover"
  ],
  "watcher": [
   {
@@ -756,6 +778,20 @@
    "confidence": 0.62,
    "cost_usd": 0.3217425,
    "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790101843.0850005,
+   "day": "2026-09-22",
+   "woke_because": "9d8a6d2794ec",
+   "fingerprint": "9d8a6d2794ec",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "The cause is a benign restart: the bot took signal 15 at 18:30:10, restarted, and on startup the CLOB client tried to create an API key that already exists, so Polymarket returned 400 'Could not create api key'. This is the known py_clob_client create-then-derive path where the create call fails and the client falls back to deriving the existing credentials. The proof it recovered is the very next lines: recovery ran with no pending orders and 'Bot started. Monitoring trades...' printed one second later, and box state shows armed and normal spend. One hit, at startup only, no order path touche",
+   "confidence": 0.82,
+   "cost_usd": 0.1276575,
+   "did": "nothing",
    "proof": "",
    "question": ""
   }
@@ -927,8 +963,8 @@
   },
   "c47d62e70341": {
    "first": 1790098332.9559617,
-   "last": 1790098942.877346,
-   "count": 6,
+   "last": 1790101843.0850005,
+   "count": 8,
    "sample": "2026-09-22 14:25:08 INFO  Received signal 15, shutting down...",
    "norm": "INFO Received signal N, shutting down...",
    "recent": [
@@ -937,7 +973,9 @@
     1790098332.9559617,
     1790098332.9559617,
     1790098332.9559617,
-    1790098942.877346
+    1790098942.877346,
+    1790100212.8626142,
+    1790101843.0850005
    ],
    "action": null,
    "action_ts": null,
@@ -946,8 +984,8 @@
   },
   "6f12d4998994": {
    "first": 1790098332.9559617,
-   "last": 1790098967.4741774,
-   "count": 6,
+   "last": 1790101843.0850005,
+   "count": 8,
    "sample": "2026-09-22 14:25:37 INFO  [recovery] No pending orders to recover",
    "norm": "INFO [recovery] No pending orders to recover",
    "recent": [
@@ -956,7 +994,9 @@
     1790098332.9559617,
     1790098332.9559617,
     1790098582.4051566,
-    1790098967.4741774
+    1790098967.4741774,
+    1790100332.8660693,
+    1790101843.0850005
    ],
    "action": null,
    "action_ts": null,
@@ -965,8 +1005,8 @@
   },
   "6b829965c182": {
    "first": 1790098332.9559617,
-   "last": 1790098967.4741774,
-   "count": 6,
+   "last": 1790101843.0850005,
+   "count": 8,
    "sample": "2026-09-22 14:25:37 INFO  Bot started. Monitoring trades...",
    "norm": "INFO Bot started. Monitoring trades...",
    "recent": [
@@ -975,7 +1015,9 @@
     1790098332.9559617,
     1790098332.9559617,
     1790098582.4051566,
-    1790098967.4741774
+    1790098967.4741774,
+    1790100332.8660693,
+    1790101843.0850005
    ],
    "action": null,
    "action_ts": null,
@@ -1005,6 +1047,20 @@
    "norm": "INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N,N, worst day N (capped: window read in full, older lookback cut, N rows)",
    "recent": [
     1790098332.9559617
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "9d8a6d2794ec": {
+   "first": 1790101843.0850005,
+   "last": 1790101843.0850005,
+   "count": 1,
+   "sample": "2026-09-22 18:30:34 ERROR [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+   "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}",
+   "recent": [
+    1790101843.0850005
    ],
    "action": null,
    "action_ts": null,
