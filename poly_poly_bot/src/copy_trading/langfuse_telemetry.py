@@ -287,7 +287,13 @@ def record_generation(
             timeout=_TIMEOUT_S,
         )
         if not 200 <= resp.status_code < 300:
-            logger.debug("[LANGFUSE] otel %s: %s", resp.status_code, resp.text[:200])
+            # WARNING, not debug: the app logger's DEBUG reaches only the
+            # docker console, so a 401 (rotated key), a 404 (wrong host or
+            # path) or a 5xx storm after the 2026-11-16 cutover would be the
+            # exact "went dark silently" this rewrite exists to prevent — and
+            # the I4 watchdog cannot see it, it only reads rows that landed.
+            logger.warning("[LANGFUSE] Langfuse refused the %s span: HTTP %s %s",
+                           name, resp.status_code, resp.text[:200])
             return
         # OTLP answers 200 even when it refuses spans; the refusal rides the
         # body. An empty/unparseable body is a clean accept. A rejection is
@@ -301,5 +307,8 @@ def record_generation(
         if rejected > 0:
             logger.warning("[LANGFUSE] Langfuse rejected the %s span "
                            "(partialSuccess.rejectedSpans=%s)", name, rejected)
-    except Exception:  # telemetry must never break the gate
-        logger.debug("[LANGFUSE] telemetry post failed", exc_info=True)
+    except Exception as exc:  # telemetry must never break the gate
+        # Same reasoning as the non-2xx branch: a dead host or a serializer
+        # bug on every call is telemetry gone dark, and DEBUG would hide it.
+        logger.warning("[LANGFUSE] telemetry post failed for %s: %r", name, exc)
+        logger.debug("[LANGFUSE] telemetry post traceback", exc_info=True)

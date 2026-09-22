@@ -334,10 +334,28 @@ def test_clean_accept_is_silent(monkeypatch, caplog, body):
     assert not [r for r in caplog.records if r.levelname == "WARNING"]
 
 
-def test_non_2xx_never_raises_and_stays_at_debug(monkeypatch, caplog):
-    _respond(monkeypatch, SimpleNamespace(status_code=401, text="nope",
+@pytest.mark.parametrize("status", [401, 404, 500])
+def test_non_2xx_warns_and_never_raises(monkeypatch, caplog, status):
+    # A refused post is telemetry gone dark — the failure the v4 rewrite exists
+    # to prevent. DEBUG reaches only the docker console (bot-*.log is INFO+),
+    # and the zero-usage watchdog only reads rows that landed, so this is the
+    # one place a rotated key or a wrong host can be seen.
+    _respond(monkeypatch, SimpleNamespace(status_code=status, text="nope",
                                           json=_bad_json))
-    assert not [r for r in caplog.records if r.levelname == "WARNING"]
+    warned = [r for r in caplog.records if r.levelname == "WARNING"]
+    assert warned and "refused" in warned[0].message and str(status) in warned[0].message
+
+
+def test_a_raising_post_warns_and_never_raises(monkeypatch, caplog):
+    _enable(monkeypatch)
+
+    def boom(*a, **k):
+        raise ConnectionError("dns")
+    monkeypatch.setattr(lt.requests, "post", boom)
+    lt.record_generation(name="wallet-gate", input="p", output="o", model="m",
+                         start=1.0, end=2.0, usage=_ENVELOPE_USAGE, cost_usd=0.01)
+    assert any("post failed" in r.message and "dns" in r.message
+               for r in caplog.records if r.levelname == "WARNING")
 
 
 def test_record_generation_never_raises(monkeypatch):
