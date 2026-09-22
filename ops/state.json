@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-22T21:05:31.217309+00:00",
+ "generated": "2026-09-22T22:07:56.991522+00:00",
  "money": {
   "cash": 70.572863,
   "open_cost": 48.85,
@@ -17,10 +17,10 @@
   "resolved_unclaimed": 67,
   "tier": {
    "1a": 0,
-   "1b": 12.8,
+   "1b": 6.4,
    "1c": 0
   },
-  "ts": 1790110889.4157937,
+  "ts": 1790114809.7043116,
   "day": "2026-09-22"
  },
  "arm": {
@@ -54,17 +54,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 12.8,
+   "open_total": 6.4,
    "daily_date": "2026-09-22",
    "daily_volume": 25.6,
    "placements": [
-    {
-     "token_id": "82658866916752958892476418065411789531887950815969438303296479277372831270125",
-     "cost": 6.4,
-     "ts": 1790095328.0447528,
-     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Will FC Bayern München vs. Manchester City WFC end in a draw"
-    },
     {
      "token_id": "40707230897818725036710371242266758434994027469582533995923297583865725190049",
      "cost": 6.4,
@@ -768,6 +761,25 @@
   "2026-09-22 20:49:27 ERROR Error fetching NEG_RISK_CTF events [94270042-94270043]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-22 20:51:16 ERROR Error fetching CTF events [94270112-94270114]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-22 20:51:16 ERROR Error fetching NEG_RISK_CTF events [94270112-94270114]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:06:19 ERROR Error fetching CTF events [94270714-94270715]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:06:32 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
+  "2026-09-22 21:08:34 ERROR Error fetching NEG_RISK_CTF events [94270804-94270805]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:12:05 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-22 21:16:07 ERROR Error fetching CTF events [94271106-94271107]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:17:06 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-22 21:26:16 ERROR Error fetching CTF events [94271512-94271513]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:31:25 ERROR Error fetching CTF events [94271699-94271699]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-22 21:39:21 ERROR Error fetching NEG_RISK_CTF events [94272036-94272037]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:46:39 ERROR Error fetching CTF events [94272327-94272328]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:46:39 ERROR Error fetching NEG_RISK_CTF events [94272327-94272328]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:51:06 ERROR Error fetching CTF events [94272505-94272506]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:51:06 ERROR Error fetching NEG_RISK_CTF events [94272505-94272506]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:56:42 ERROR Error fetching CTF events [94272729-94272730]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 21:56:42 ERROR Error fetching NEG_RISK_CTF events [94272729-94272730]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 22:01:07 ERROR Error fetching CTF events [94272905-94272906]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 22:01:40 ERROR Error fetching CTF events [94272928-94272929]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 22:01:43 ERROR Error fetching CTF events [94272930-94272930]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-22 22:02:12 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-22 05:42:51 TRADE [LIVE] BUY $6.40 on 'Korea Open: Emerson Jones vs Yexin Ma' @ 0.4900, order 0xc937b741ec...",
   "2026-09-22 05:42:55 TRADE [verify] FILLED: BUY 13.06 shares on 'Korea Open: Emerson Jones vs Yexin Ma' @ 0.4900",
   "2026-09-22 09:28:24 TRADE [LIVE] BUY $6.40 on 'Dota 2:  Pipsqueak+4 vs Team Cobra - Gam' @ 0.2700, order 0x65d0c69b42...",
@@ -904,16 +916,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1790098332.9559617,
-   "count": 5,
+   "last": 1790111292.4488137,
+   "count": 6,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1790098332.9559617,
-    1790098332.9559617,
-    1790098332.9559617,
-    1790098332.9559617,
-    1790098332.9559617
+    1790111292.4488137
    ],
    "action": null,
    "action_ts": null,
