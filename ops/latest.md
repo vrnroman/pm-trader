@@ -1,7 +1,7 @@
-# ops digest 2026-09-22T01:32:20.260473+00:00 (last 24h)
+# ops digest 2026-09-22T04:53:11.510395+00:00 (last 24h)
 
 ## money state
-{"cash": 83.796533, "open_cost": 36.05, "equity": 119.85, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-22", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 66, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1790040556.2304237, "day": "2026-09-22"}
+{"cash": 83.796533, "open_cost": 36.05, "equity": 119.85, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-22", "spent_usd": 0.0, "cap_usd": 32.0, "remaining_usd": 32.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 66, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1790052644.0823622, "day": "2026-09-22"}
 
 ## arm: {"armed": true, "ts": 1789919410.9079125, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-22", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": 1}, "yesterday": "2026-09-21", "closed_reason": ""}
@@ -30,24 +30,6 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 {"ts": 1790014996.3058822, "day": "2026-09-21", "kind": "form", "before": "0x722abb54 benched", "after": "in form", "detail": "0x722abb54: 99 settled, 79% won vs 74% needed, net +9.1% on $206,134, worst day -3,391", "push": "WALLET", "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
 
 ## important lines (73)
-2026-09-21 01:38:07 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
-2026-09-21 01:47:44 ERROR HTTP 408 fetching activity for 0x57b2...9da2
-2026-09-21 01:47:59 ERROR HTTP 408 fetching activity for 0x57b2...9da2
-2026-09-21 02:20:09 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-21 02:20:20 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-21 02:28:48 ERROR HTTP 408 fetching activity for 0x57b2...9da2
-2026-09-21 03:10:09 ERROR HTTP 408 fetching activity for 0x57b2...9da2
-2026-09-21 03:12:09 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-21 03:38:23 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-21 03:38:29 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
-2026-09-21 03:39:20 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-21 03:43:30 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
-2026-09-21 03:49:27 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-21 03:49:37 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-21 03:49:52 ERROR HTTP 500 fetching activity for 0x722a...d6ed
-2026-09-21 03:55:23 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-21 04:08:33 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
-2026-09-21 04:33:27 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00
 2026-09-21 05:00:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-21 05:00:26 ERROR HTTP 500 fetching activity for 0x722a...d6ed
 2026-09-21 05:34:31 ERROR HTTP 408 fetching activity for 0x722a...d6ed
@@ -101,5 +83,23 @@ benched  0xfd3e6449: 15 settled, 73% won vs 76% needed, net +5.3% on $10,622, wo
 2026-09-22 00:47:09 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
 2026-09-22 01:07:57 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-22 01:08:59 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-22 01:57:17 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-22 02:33:26 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-22 02:33:42 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-22 02:33:52 ERROR HTTP 500 fetching activity for 0x722a...d6ed
+2026-09-22 02:35:18 ERROR HTTP 500 fetching activity for 0x0011...4333
+2026-09-22 02:41:07 ERROR Network error fetching 0x3f3a...e8fd: 
+2026-09-22 02:41:07 ERROR Network error fetching 0x9f15...bdb3: 
+2026-09-22 02:41:07 ERROR Network error fetching 0xfd3e...5a7a: 
+2026-09-22 02:41:07 ERROR Network error fetching 0x0587...c40b: 
+2026-09-22 02:41:07 ERROR Network error fetching 0x09b0...a3b6: 
+2026-09-22 02:41:19 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-22 03:14:25 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-22 03:30:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-22 04:00:17 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-22 04:10:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-09-22 04:16:10 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
+2026-09-22 04:45:31 ERROR HTTP 408 fetching activity for 0x722a...d6ed
+2026-09-22 04:45:42 ERROR HTTP 408 fetching activity for 0x722a...d6ed
 2026-09-21 14:57:44 TRADE [LIVE] BUY $6.40 on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100, order 0x6f49770a8b...
 2026-09-21 14:57:48 TRADE [verify] FILLED: BUY 10.49 shares on 'Dota 2: Team Yandex vs Natus Vincere (BO' @ 0.6100
