@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-23T00:42:38Z-f38d",
-    "ts": 1790124158,
+    "id": "2026-09-23T06:42:34Z-02b7",
+    "ts": 1790145754,
     "kind": "nothing",
-    "message": "Digest at 00:31 UTC, armed by telegram, spend $6.40 of $32.00 cap today, equity $119.38 vs floor $56.00. Two trades filled clean (Cincinnati Reds vs. Atlanta Braves, Connecticut Sun vs. Washington Mystics) with no verify failures. Eight restarts in the window, signal 15 each time from 14:25 to 18:30 UTC, each followed by a benign 'Could not create api key' 400 and then Bot started, consistent with deploys to main, not a crash loop. Chain OrderFilled fetch hit the RPC pool's 'invalid block range params' quirk 45 times but chain is only a shadow feed, no impact on live copies. Form bar moved 0x00110b8e and 0x9f15613e to in form and 0xf49614e6 to benched on its own; none of it mine to touch.",
+    "message": "Digest at 05:58 UTC, armed by telegram, spend $6.40 of $32.00 cap today, equity $134.67 vs floor $56.00. No restarts since 18:30 UTC yesterday, no new ERROR types beyond the known 'invalid block range params' chain-shadow quirk and the benign py_clob_client key-derive 400 already covered in the last verdict. One trade filled clean (Connecticut Sun vs. Washington Mystics) with no verify failures. Form table unchanged in shape: bar-run wallets in form or benched as before, no wallet showing a fresh losing streak worth overriding the bar, resolved_unclaimed steady at 67 (was 67 last digest).",
     "evidence": [
-        "{\"cash\": 64.129683, \"open_cost\": 55.25, \"equity\": 119.38, \"floor\": 56.0, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6}, \"armed\": true}",
-        "2026-09-23 00:12:12 TRADE [LIVE] BUY $6.40 on 'Connecticut Sun vs. Washington Mystics' @ 0.8600, order 0x0992fb17c7...",
-        "2026-09-22 18:30:10 INFO  Received signal 15, shutting down...",
-        "2026-09-22 22:51:39 ERROR Error fetching CTF events [94274927-94274928]: {'code': -32000, 'message': 'invalid block range params'}",
-        "2026-09-22 16:37:37 INFO  [ops] form: '0xf49614e6 unknown' -> 'benched' | 0xf49614e6: 77 settled, 51% won vs 50% needed, net +11.5% on $279,878, worst day -11,771 (capped: window read in full, older lookback cut, 5500 rows)"
+        "{\"cash\": 92.219683, \"open_cost\": 42.45, \"equity\": 134.67, \"floor\": 56.0, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6}, \"armed\": true}",
+        "2026-09-23 00:12:16 TRADE [verify] FILLED: BUY 7.44 shares on 'Connecticut Sun vs. Washington Mystics' @ 0.8600",
+        "in form  0x9f15613e: 359 settled, 52% won vs 48% needed, net +9.2% on $1,092,926, worst day -31,088 (capped: window read in full, older lookback cut, 5500 rows)",
+        "in form  0xf9168343: 55 settled, 55% won vs 47% needed, net +4.0% on $150,786, worst day -6,320",
+        "\"resolved_unclaimed\": 67"
     ],
     "commit": null
 }
