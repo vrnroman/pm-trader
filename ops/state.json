@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T11:34:29.255789+00:00",
+ "generated": "2026-09-23T14:22:39.301073+00:00",
  "money": {
   "cash": 85.588463,
   "open_cost": 48.85,
@@ -20,7 +20,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1790162998.6054702,
+  "ts": 1790173196.6910524,
   "day": "2026-09-23"
  },
  "arm": {
@@ -170,6 +170,12 @@
    "tier": "1b",
    "ts": 1789992497.9469755,
    "source": "telegram-gate"
+  },
+  "0xd25156e222c9b907b128e27c36821fdb41db4d37": {
+   "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+   "tier": "1b",
+   "ts": 1790166550.4519851,
+   "source": "telegram-gate"
   }
  },
  "watch": {
@@ -181,7 +187,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1790144810.7076411,
+  "admit_scan_ts": 1790166547.8478742,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 6,
   "day_pnl": -6.4,
@@ -253,10 +259,14 @@
   "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
    "since": 1789992496.5955625,
    "settled": 0
+  },
+  "0xd25156e222c9b907b128e27c36821fdb41db4d37": {
+   "since": 1790166548.6465027,
+   "settled": 0
   }
  },
  "form": {
-  "ts": 1790160181.4376059,
+  "ts": 1790166547.8478742,
   "version": 3,
   "wallets": {
    "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
@@ -530,6 +540,23 @@
     "capped": true,
     "hit": 0.6667,
     "net_pct": 1.59
+   },
+   "0xd25156e222c9b907b128e27c36821fdb41db4d37": {
+    "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+    "n": 55,
+    "won": 34,
+    "cost": 31992.2,
+    "back": 39507.01,
+    "avg_price": 0.5054541666449427,
+    "worst_day": -1487.95,
+    "ok": true,
+    "reason": "62% came out ahead vs 51% needed, net +23.5%",
+    "ts": 1790166547.8478742,
+    "rows": 5500,
+    "covered_days": 10.800669535580608,
+    "capped": true,
+    "hit": 0.6182,
+    "net_pct": 23.49
    }
   },
   "overrides": {},
@@ -613,18 +640,29 @@
    "detail": "Liquid USDC is down to 22.86 while the bot thinks it has 92 free; 67 dollars sits in resolved winnings unredeemed so orders now reject at the exchange, redeem t",
    "push": "BOT",
    "fingerprint": "534614711c15"
+  },
+  {
+   "ts": 1790166548.6465027,
+   "day": "2026-09-23",
+   "kind": "auto_admit",
+   "before": "0xd25156e2 not in Z",
+   "after": "in set Z, on probation",
+   "detail": "47 settled paper copies, paper ROI +11.2%, trimmed +0.6%, ideal +12.2%",
+   "push": "WALLET",
+   "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37"
+  },
+  {
+   "ts": 1790166547.8478742,
+   "day": "2026-09-23",
+   "kind": "form",
+   "before": "0xd25156e2 unknown",
+   "after": "in form",
+   "detail": "0xd25156e2: 55 settled, 62% won vs 51% needed, net +23.5% on $31,992, worst day -1,488 (capped: 10.8 of 14 days read, 5500 rows)",
+   "push": null,
+   "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37"
   }
  ],
  "important": [
-  "2026-09-22 11:47:10 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 11:47:20 ERROR HTTP 500 fetching activity for 0x722a...d6ed",
-  "2026-09-22 11:52:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 12:02:17 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-22 12:06:10 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 12:30:47 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 13:03:09 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 13:33:14 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 13:50:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-22 14:25:08 INFO  Received signal 15, shutting down...",
   "2026-09-22 14:25:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
   "2026-09-22 14:25:37 INFO  Bot started. Monitoring trades...",
@@ -859,6 +897,31 @@
   "2026-09-23 11:10:25 ERROR Error fetching CTF events [94304478-94304479]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 11:14:06 ERROR Error fetching CTF events [94304606-94304606]: {'code': -32002, 'message': 'request timed out'}",
   "2026-09-23 11:17:31 ERROR Error fetching NEG_RISK_CTF events [94304726-94304726]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 11:36:09 ERROR Error fetching CTF events [94305506-94305508]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 12:01:07 ERROR Error fetching CTF events [94306506-94306507]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 12:01:07 ERROR Error fetching NEG_RISK_CTF events [94306506-94306507]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 12:29:10 WARNING [zset] ADMITTED 0xd25156e222c9b907b128e27c36821fdb41db4d37 to set Z (+1% over 44 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-23 12:29:10 INFO  [ops] auto_admit: '0xd25156e2 not in Z' -> 'in set Z, on probation' | 47 settled paper copies, paper ROI +11.2%, trimmed +0.6%, ideal +12.2%",
+  "2026-09-23 12:29:20 INFO  [ops] form: '0xd25156e2 unknown' -> 'in form' | 0xd25156e2: 55 settled, 62% won vs 51% needed, net +23.5% on $31,992, worst day -1,488 (capped: 10.8 of 14 days read, 5500 rows)",
+  "2026-09-23 12:31:39 ERROR Error fetching CTF events [94307727-94307728]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 12:36:06 ERROR Error fetching CTF events [94307905-94307906]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 12:36:06 ERROR Error fetching NEG_RISK_CTF events [94307905-94307906]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 12:39:38 ERROR Error fetching NEG_RISK_CTF events [94308046-94308047]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 12:39:43 ERROR Error fetching NEG_RISK_CTF events [94308049-94308050]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 13:24:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-23 13:51:06 ERROR Error fetching CTF events [94310905-94310906]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 13:51:06 ERROR Error fetching NEG_RISK_CTF events [94310905-94310906]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 13:57:32 ERROR Error fetching CTF events [94311162-94311163]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 14:01:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-23 14:04:28 ERROR Error fetching NEG_RISK_CTF events [94311440-94311441]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 14:06:12 ERROR Error fetching CTF events [94311509-94311510]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 14:06:43 ERROR Error fetching CTF events [94311530-94311531]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 14:06:43 ERROR Error fetching NEG_RISK_CTF events [94311530-94311531]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 14:13:19 ERROR Error fetching NEG_RISK_CTF events [94311794-94311795]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 14:19:21 ERROR Error fetching NEG_RISK_CTF events [94312035-94312035]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 14:19:25 ERROR Error fetching NEG_RISK_CTF events [94312038-94312038]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 14:19:27 ERROR Error fetching CTF events [94312039-94312040]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 14:21:45 ERROR Error fetching CTF events [94312131-94312132]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-22 14:25:37 INFO  [recovery] No pending orders to recover",
   "2026-09-22 16:35:15 INFO  [recovery] No pending orders to recover",
   "2026-09-22 16:42:01 TRADE [LIVE] BUY $6.40 on 'Will FC Bayern München vs. Manchester Ci' @ 0.7900, order 0x16b2611e4b...",
@@ -930,6 +993,20 @@
    "confidence": 0.72,
    "cost_usd": 0.4009205,
    "did": "escalated",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790166658.6871643,
+   "day": "2026-09-23",
+   "woke_because": "c01c65915062",
+   "fingerprint": "c01c65915062",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "The new fingerprint is the ops form line for 0xd25156e2 whose 14 day form window was cut short at the 5500 row read cap, so only 10.8 of 14 days were actually read. This is a normal INFO transparency line: the reader is high volume and hit the row cap, and the code reports the truncation honestly rather than pretending it read the full window. The stats on the read window are strong (55 settled, 62% won vs 51% needed, net +23.5%, worst day -1,488) and this trader was just admitted to set Z on probation, so it is not yet a fully weighted real money follow. No order was placed, sized or doubled ",
+   "confidence": 0.72,
+   "cost_usd": 0.1592225,
+   "did": "noted",
    "proof": "",
    "question": ""
   }
@@ -1053,12 +1130,12 @@
   },
   "c3db66a087f7": {
    "first": 1790098332.9559617,
-   "last": 1790098332.9559617,
-   "count": 1,
+   "last": 1790166658.6871643,
+   "count": 2,
    "sample": "2026-09-21 12:08:17 WARNING [zset] ADMITTED 0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770 to set Z (+2% over 36 copies with its best 3 deleted). Real money may now follow it once armed.",
    "norm": "WARNING [zset] ADMITTED <hex> to set Z (N over N copies with its best N deleted). Real money may now follow it once armed.",
    "recent": [
-    1790098332.9559617
+    1790166658.6871643
    ],
    "action": null,
    "action_ts": null,
@@ -1067,12 +1144,12 @@
   },
   "790247505aab": {
    "first": 1790098332.9559617,
-   "last": 1790098332.9559617,
-   "count": 1,
+   "last": 1790166658.6871643,
+   "count": 2,
    "sample": "2026-09-21 12:08:18 INFO  [ops] auto_admit: '0xf9168343 not in Z' -> 'in set Z, on probation' | 39 settled paper copies, paper ROI +12.4%, trimmed +1.8%, ideal +13.4%",
    "norm": "INFO [ops] auto_admit: 'S' -> 'S' | N settled paper copies, paper ROI N, trimmed N, ideal N",
    "recent": [
-    1790098332.9559617
+    1790166658.6871643
    ],
    "action": null,
    "action_ts": null,
@@ -1187,12 +1264,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790135413.2028468,
-   "count": 5,
+   "last": 1790172113.146067,
+   "count": 7,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790135413.2028468
+    1790169953.0673854,
+    1790172113.146067
    ],
    "action": null,
    "action_ts": null,
@@ -1207,6 +1285,20 @@
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}",
    "recent": [
     1790149814.5631363
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "c01c65915062": {
+   "first": 1790166658.6871643,
+   "last": 1790166658.6871643,
+   "count": 1,
+   "sample": "2026-09-23 12:29:20 INFO  [ops] form: '0xd25156e2 unknown' -> 'in form' | 0xd25156e2: 55 settled, 62% won vs 51% needed, net +23.5% on $31,992, worst day -1,488 (capped: 10.8 of 14 days read, 5500 rows)",
+   "norm": "INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N (capped: N of N days read, N rows)",
+   "recent": [
+    1790166658.6871643
    ],
    "action": null,
    "action_ts": null,
