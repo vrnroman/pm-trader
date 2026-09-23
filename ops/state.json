@@ -1,26 +1,26 @@
 {
- "generated": "2026-09-23T16:56:31.116863+00:00",
+ "generated": "2026-09-23T18:34:04.578303+00:00",
  "money": {
-  "cash": 85.588463,
-  "open_cost": 48.85,
-  "equity": 134.44,
+  "cash": 79.031153,
+  "open_cost": 55.25,
+  "equity": 134.28,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-23",
-   "spent_usd": 19.2,
+   "spent_usd": 25.6,
    "cap_usd": 32.0,
-   "remaining_usd": 12.8,
+   "remaining_usd": 6.4,
    "closed_reason": ""
   },
   "armed": true,
   "resolved_unclaimed": 67,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790182392.7612765,
+  "ts": 1790188418.5888078,
   "day": "2026-09-23"
  },
  "arm": {
@@ -33,10 +33,10 @@
  },
  "spend": {
   "date": "2026-09-23",
-  "spent_usd": 19.2,
+  "spent_usd": 25.6,
   "wallet_copies": {
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
-   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 1,
+   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2,
    "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1
   },
   "wallet_copies_yesterday": {
@@ -55,9 +55,9 @@
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
+   "open_total": 12.8,
    "daily_date": "2026-09-23",
-   "daily_volume": 19.200000000000003,
+   "daily_volume": 25.6,
    "placements": [
     {
      "token_id": "87131648918137474349304257527344538579233235348393719175219550429557466113538",
@@ -65,6 +65,13 @@
      "ts": 1790149797.062317,
      "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
      "title": "Will Spain win on 2026-09-23?"
+    },
+    {
+     "token_id": "42649544122689565068243612832922901183079656180469863611088033786526273450522",
+     "cost": 6.4,
+     "ts": 1790185651.7394106,
+     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+     "title": "Arizona Diamondbacks vs. Colorado Rockies: O/U 11.5"
     }
    ]
   },
@@ -181,14 +188,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 134.44,
+  "last_equity": 134.28,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-15T12:42:32Z-a884",
-  "admit_scan_ts": 1790166547.8478742,
+  "admit_scan_ts": 1790188418.5902805,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 6,
   "day_pnl": -6.4,
@@ -567,42 +574,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790098332.8617203,
-   "day": "2026-09-22",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1790098966.9972584,
-   "day": "2026-09-22",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1790100212.656724,
-   "day": "2026-09-22",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1790101842.6213722,
-   "day": "2026-09-22",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
    "ts": 1790149814.5631363,
    "day": "2026-09-23",
    "kind": "sre_escalate",
@@ -634,28 +605,6 @@
   }
  ],
  "important": [
-  "2026-09-22 17:16:17 INFO  Received signal 15, shutting down...",
-  "2026-09-22 17:17:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-22 17:17:22 INFO  Bot started. Monitoring trades...",
-  "2026-09-22 17:31:54 INFO  Received signal 15, shutting down...",
-  "2026-09-22 17:32:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-22 17:32:41 INFO  Bot started. Monitoring trades...",
-  "2026-09-22 17:42:14 INFO  Received signal 15, shutting down...",
-  "2026-09-22 17:42:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-22 17:42:41 INFO  Bot started. Monitoring trades...",
-  "2026-09-22 18:03:01 INFO  Received signal 15, shutting down...",
-  "2026-09-22 18:03:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-22 18:03:34 INFO  Bot started. Monitoring trades...",
-  "2026-09-22 18:25:21 ERROR [inventory] API sync failed: ",
-  "2026-09-22 18:28:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-22 18:29:58 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
-  "2026-09-22 18:29:59 ERROR Network error fetching 0x3f3a...e8fd: ",
-  "2026-09-22 18:29:59 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-22 18:29:59 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-22 18:30:00 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-22 18:30:10 INFO  Received signal 15, shutting down...",
-  "2026-09-22 18:30:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-22 18:30:35 INFO  Bot started. Monitoring trades...",
   "2026-09-22 18:49:42 ERROR Error fetching CTF events [94265251-94265254]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-22 18:56:08 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
   "2026-09-22 18:57:15 ERROR Error fetching CTF events [94265554-94265557]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -914,11 +863,54 @@
   "2026-09-23 16:42:08 ERROR Error fetching NEG_RISK_CTF events [94317740-94317741]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 16:47:37 ERROR Error fetching CTF events [94317957-94317958]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 16:47:37 ERROR Error fetching NEG_RISK_CTF events [94317957-94317958]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-22 17:17:22 INFO  [recovery] No pending orders to recover",
-  "2026-09-22 17:32:41 INFO  [recovery] No pending orders to recover",
-  "2026-09-22 17:42:41 INFO  [recovery] No pending orders to recover",
-  "2026-09-22 18:03:34 INFO  [recovery] No pending orders to recover",
-  "2026-09-22 18:30:35 INFO  [recovery] No pending orders to recover",
+  "2026-09-23 16:57:27 ERROR Error fetching CTF events [94318345-94318346]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 16:57:27 ERROR Error fetching NEG_RISK_CTF events [94318345-94318346]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 16:57:31 ERROR Error fetching CTF events [94318348-94318349]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 16:57:33 ERROR Error fetching CTF events [94318350-94318350]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 16:57:34 ERROR Error fetching NEG_RISK_CTF events [94318350-94318350]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 16:57:36 ERROR Error fetching CTF events [94318351-94318352]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 16:57:36 ERROR Error fetching NEG_RISK_CTF events [94318351-94318352]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 16:57:38 ERROR Error fetching CTF events [94318353-94318353]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 16:57:38 ERROR Error fetching NEG_RISK_CTF events [94318353-94318353]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 16:57:40 ERROR Error fetching CTF events [94318354-94318354]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 17:01:04 ERROR Error fetching NEG_RISK_CTF events [94318451-94318451]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 17:08:20 ERROR Error fetching CTF events [94318761-94318761]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 17:11:06 ERROR Error fetching CTF events [94318891-94318892]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 17:11:06 ERROR Error fetching NEG_RISK_CTF events [94318891-94318892]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 17:24:23 ERROR Error fetching NEG_RISK_CTF events [94319423-94319424]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 17:28:00 ERROR Error fetching NEG_RISK_CTF events [94319548-94319548]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 17:30:56 ERROR Error fetching CTF events [94319665-94319665]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 17:39:00 ERROR Error fetching CTF events [94320008-94320008]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 17:45:10 ERROR Error fetching NEG_RISK_CTF events [94320254-94320255]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 17:47:30 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $25.60 / $32.00",
+  "2026-09-23 17:47:31 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
+  "2026-09-23 18:04:03 ERROR Error fetching NEG_RISK_CTF events [94321009-94321010]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:04:07 ERROR Error fetching CTF events [94321012-94321012]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:04:07 ERROR Error fetching NEG_RISK_CTF events [94321012-94321012]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:05:53 ERROR Error fetching CTF events [94321083-94321084]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:06:04 ERROR Error fetching CTF events [94321090-94321091]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:06:04 ERROR Error fetching NEG_RISK_CTF events [94321090-94321091]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:09:26 ERROR Error fetching CTF events [94321225-94321225]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:11:25 ERROR Error fetching NEG_RISK_CTF events [94321304-94321304]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:12:22 ERROR Error fetching NEG_RISK_CTF events [94321342-94321343]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:15:16 ERROR Error fetching NEG_RISK_CTF events [94321458-94321458]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:15:18 ERROR Error fetching CTF events [94321459-94321460]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:16:07 ERROR Error fetching CTF events [94321492-94321493]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:18:29 ERROR Error fetching CTF events [94321587-94321587]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:18:29 ERROR Error fetching NEG_RISK_CTF events [94321587-94321587]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:21:27 ERROR Error fetching CTF events [94321705-94321706]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:21:27 ERROR Error fetching NEG_RISK_CTF events [94321705-94321706]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:26:06 ERROR Error fetching CTF events [94321891-94321892]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:26:06 ERROR Error fetching NEG_RISK_CTF events [94321891-94321892]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:27:06 ERROR Error fetching CTF events [94321931-94321932]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:27:06 ERROR Error fetching NEG_RISK_CTF events [94321931-94321932]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:27:19 ERROR Error fetching NEG_RISK_CTF events [94321940-94321940]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:27:30 ERROR Error fetching CTF events [94321948-94321948]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:27:32 ERROR Error fetching CTF events [94321949-94321949]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:27:34 ERROR Error fetching NEG_RISK_CTF events [94321950-94321951]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:27:39 ERROR Error fetching CTF events [94321953-94321954]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:27:50 ERROR Error fetching CTF events [94321961-94321961]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:27:50 ERROR Error fetching NEG_RISK_CTF events [94321961-94321961]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-22 20:46:37 TRADE [LIVE] BUY $6.40 on 'Cincinnati Reds vs. Atlanta Braves' @ 0.3100, order 0x1bef95f43c...",
   "2026-09-22 20:46:40 TRADE [verify] FILLED: BUY 20.65 shares on 'Cincinnati Reds vs. Atlanta Braves' @ 0.3100",
   "2026-09-23 00:12:12 TRADE [LIVE] BUY $6.40 on 'Connecticut Sun vs. Washington Mystics' @ 0.8600, order 0x0992fb17c7...",
@@ -926,37 +918,11 @@
   "2026-09-23 07:49:56 TRADE [LIVE] BUY $6.40 on 'Will Spain win on 2026-09-23?' @ 0.2800, order 0x2d6c61457e...",
   "2026-09-23 07:49:57 TRADE [verify] FILLED: BUY 22.86 shares on 'Will Spain win on 2026-09-23?' @ 0.2800",
   "2026-09-23 14:51:30 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Austin b' @ 0.8800, order 0x241b6e95b8...",
-  "2026-09-23 14:51:31 INFO  [verify] UNFILLED, cancelled order 0x241b6e95b8..."
+  "2026-09-23 14:51:31 INFO  [verify] UNFILLED, cancelled order 0x241b6e95b8...",
+  "2026-09-23 17:47:31 TRADE [LIVE] BUY $6.40 on 'Arizona Diamondbacks vs. Colorado Rockie' @ 0.5100, order 0x97956b96d6...",
+  "2026-09-23 17:47:32 TRADE [verify] FILLED: BUY 12.55 shares on 'Arizona Diamondbacks vs. Colorado Rockie' @ 0.5100"
  ],
  "watcher": [
-  {
-   "ts": 1790098332.9559617,
-   "day": "2026-09-22",
-   "woke_because": "69fd3dc7d27e, eb7da12386c6, a77088f7944a, d7140f640d29, fe47bbb56041, c6d91d798e54, 2497cd50ff7d, 34253fa6334e, c3db66a087f7, 790247505aab, c47d62e70341, 6f12d4998994, 6b829965c182, 9252b71ae332, d96f",
-   "fingerprint": "c3db66a087f7",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The bot auto-admitted a new wallet 0xf9168343 to set Z, making it eligible for real-money copying while armed. This is the auto_admit path working as designed: the trader cleared the bar by only +2% after trimming its best 3 copies, with trimmed ROI +1.8% versus ideal +13.4% on just 39 settled paper copies, so its edge is fragile and outlier dependent, but it is on probation and passed the guardrail. The money path itself is intact and verifiable: every live BUY reserved under the daily cap, recorded tier exposure, and confirmed a fill, cap held at 19.20 of 32.00, and each restart recovered wi",
-   "confidence": 0.62,
-   "cost_usd": 0.3217425,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790101843.0850005,
-   "day": "2026-09-22",
-   "woke_because": "9d8a6d2794ec",
-   "fingerprint": "9d8a6d2794ec",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The cause is a benign restart: the bot took signal 15 at 18:30:10, restarted, and on startup the CLOB client tried to create an API key that already exists, so Polymarket returned 400 'Could not create api key'. This is the known py_clob_client create-then-derive path where the create call fails and the client falls back to deriving the existing credentials. The proof it recovered is the very next lines: recovery ran with no pending orders and 'Bot started. Monitoring trades...' printed one second later, and box state shows armed and normal spend. One hit, at startup only, no order path touche",
-   "confidence": 0.82,
-   "cost_usd": 0.1276575,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1790108373.9015973,
    "day": "2026-09-22",
@@ -1017,12 +983,12 @@
  "fingerprints": {
   "69fd3dc7d27e": {
    "first": 1790098332.9559617,
-   "last": 1790175113.2286055,
-   "count": 9,
+   "last": 1790185707.7143364,
+   "count": 10,
    "sample": "2026-09-21 00:06:09 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / $N",
    "recent": [
-    1790175113.2286055
+    1790185707.7143364
    ],
    "action": null,
    "action_ts": null,
@@ -1031,12 +997,12 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1790175113.2286055,
-   "count": 9,
+   "last": 1790185707.7143364,
+   "count": 10,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1790175113.2286055
+    1790185707.7143364
    ],
    "action": null,
    "action_ts": null,
@@ -1045,12 +1011,12 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1790175113.2286055,
-   "count": 9,
+   "last": 1790185707.7143364,
+   "count": 10,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1790175113.2286055
+    1790185707.7143364
    ],
    "action": null,
    "action_ts": null,
@@ -1059,12 +1025,12 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1790149814.5631363,
-   "count": 8,
+   "last": 1790185707.7143364,
+   "count": 9,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1790149814.5631363
+    1790185707.7143364
    ],
    "action": null,
    "action_ts": null,
