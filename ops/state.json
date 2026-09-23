@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-23T18:34:04.578303+00:00",
+ "generated": "2026-09-23T20:21:32.762468+00:00",
  "money": {
   "cash": 79.031153,
   "open_cost": 55.25,
@@ -20,7 +20,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790188418.5888078,
+  "ts": 1790194749.3622832,
   "day": "2026-09-23"
  },
  "arm": {
@@ -605,14 +605,6 @@
   }
  ],
  "important": [
-  "2026-09-22 18:49:42 ERROR Error fetching CTF events [94265251-94265254]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-22 18:56:08 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 18:57:15 ERROR Error fetching CTF events [94265554-94265557]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-22 19:03:20 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-22 19:03:44 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 19:14:15 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-22 19:53:10 ERROR Error fetching CTF events [94267793-94267793]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-22 20:18:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-22 20:46:36 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $25.60 / $32.00",
   "2026-09-22 20:46:39 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
   "2026-09-22 20:49:27 ERROR Error fetching NEG_RISK_CTF events [94270042-94270043]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -911,6 +903,21 @@
   "2026-09-23 18:27:39 ERROR Error fetching CTF events [94321953-94321954]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 18:27:50 ERROR Error fetching CTF events [94321961-94321961]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 18:27:50 ERROR Error fetching NEG_RISK_CTF events [94321961-94321961]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:41:13 ERROR Error fetching CTF events [94322496-94322497]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:47:53 ERROR Error fetching CTF events [94322763-94322764]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:48:19 ERROR Error fetching CTF events [94322780-94322781]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:48:26 ERROR Error fetching CTF events [94322785-94322785]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:48:34 ERROR Error fetching CTF events [94322790-94322791]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 18:55:46 ERROR Error fetching CTF events [94323058-94323058]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 19:02:52 ERROR Error fetching CTF events [94323362-94323363]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 19:05:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-23 19:10:40 ERROR Error fetching NEG_RISK_CTF events [94323674-94323675]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 19:11:53 ERROR Error fetching CTF events [94323723-94323723]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 19:33:03 ERROR Error fetching NEG_RISK_CTF events [94324570-94324570]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 19:46:07 ERROR Error fetching CTF events [94325091-94325093]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 19:53:02 ERROR Error fetching CTF events [94325369-94325370]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 19:57:40 ERROR Error fetching NEG_RISK_CTF events [94325554-94325554]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 20:03:27 ERROR Error fetching CTF events [94325785-94325786]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-22 20:46:37 TRADE [LIVE] BUY $6.40 on 'Cincinnati Reds vs. Atlanta Braves' @ 0.3100, order 0x1bef95f43c...",
   "2026-09-22 20:46:40 TRADE [verify] FILLED: BUY 20.65 shares on 'Cincinnati Reds vs. Atlanta Braves' @ 0.3100",
   "2026-09-23 00:12:12 TRADE [LIVE] BUY $6.40 on 'Connecticut Sun vs. Washington Mystics' @ 0.8600, order 0x0992fb17c7...",
@@ -923,20 +930,6 @@
   "2026-09-23 17:47:32 TRADE [verify] FILLED: BUY 12.55 shares on 'Arizona Diamondbacks vs. Colorado Rockie' @ 0.5100"
  ],
  "watcher": [
-  {
-   "ts": 1790108373.9015973,
-   "day": "2026-09-22",
-   "woke_because": "54ac26fb3ff1",
-   "fingerprint": "54ac26fb3ff1",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The CLOB price endpoint returned 404 with body 'No orderbook exists for the requested token id', which means the bot asked for a price on a token that has no live orderbook, typically a resolved or closed market. This is a single hit at INFO-worthy severity that the client logs as ERROR, and it is a normal transient condition when a market winds down. Nothing downstream shows a mis-sized or duplicated order: the trade, verify-fill, tiered-risk and daily-cap lines all look consistent, guards are clean, and the box is still armed and funded within its floor and cap. A price 404 makes the price l",
-   "confidence": 0.72,
-   "cost_usd": 0.1298225,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1790149814.5631363,
    "day": "2026-09-23",
@@ -975,6 +968,20 @@
    "concluded": "A live limit order (0x241b6e95b8 for $6.40 at 0.88) did not fill inside the verify window and the verify path cancelled it cleanly, which is the intended safety behavior and means no phantom position was taken. This is the box correctly verifying what it did, so no money was placed, sized, or doubled wrongly. The one open question is whether the $6.40 daily-cap reservation and the tier 1b placement recorded just before it get released now that the order was cancelled unfilled; box state still shows tier 1b at 6.4 and spent 12.8. Over-reserving fails safe (it only under-trades), so no action is",
    "confidence": 0.72,
    "cost_usd": 0.1467775,
+   "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790190387.8260055,
+   "day": "2026-09-23",
+   "woke_because": "6c813168939b",
+   "fingerprint": "6c813168939b",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "The cause is a transient connection drop from Polymarket's CLOB server closing a keepalive socket, surfaced by py_clob_client_v2 as a request-level 'Server disconnected'. Only 2 hits at the same second, no URL attached, which points at a low level socket close rather than a failed order acknowledgement on a specific endpoint. Normal trading is still flowing: recent TRADE [LIVE] BUY, verify FILLED, daily-cap and tiered-risk lines all show the pipeline healthy, and the guard flags are all clean with no stuck orders. The verify path (FILLED / UNFILLED cancelled) reconciles any placement whose HTT",
+   "confidence": 0.7,
+   "cost_usd": 0.1500525,
    "did": "noted",
    "proof": "",
    "question": ""
@@ -1283,6 +1290,21 @@
    "norm": "INFO [verify] UNFILLED, cancelled order <hex>...",
    "recent": [
     1790175113.2286055
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "6c813168939b": {
+   "first": 1790190387.8260055,
+   "last": 1790190387.8260055,
+   "count": 2,
+   "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
+   "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
+   "recent": [
+    1790190387.8260055,
+    1790190387.8260055
    ],
    "action": null,
    "action_ts": null,

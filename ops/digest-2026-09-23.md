@@ -1,7 +1,7 @@
-# ops digest 2026-09-23T18:33:51.038269+00:00 (last 24h)
+# ops digest 2026-09-23T20:21:19.400806+00:00 (last 24h)
 
 ## money state
-{"cash": 79.031153, "open_cost": 55.25, "equity": 134.28, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-23", "spent_usd": 25.6, "cap_usd": 32.0, "remaining_usd": 6.4, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 67, "tier": {"1a": 0, "1b": 12.8, "1c": 0}, "ts": 1790188418.5888078, "day": "2026-09-23"}
+{"cash": 79.031153, "open_cost": 55.25, "equity": 134.28, "floor": 56.0, "stated": 80.0, "spend": {"date": "2026-09-23", "spent_usd": 25.6, "cap_usd": 32.0, "remaining_usd": 6.4, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 67, "tier": {"1a": 0, "1b": 12.8, "1c": 0}, "ts": 1790194749.3622832, "day": "2026-09-23"}
 
 ## arm: {"armed": true, "ts": 1789919410.9079125, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-23", "spent_usd": 25.6, "wallet_copies": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2, "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1}, "wallet_copies_yesterday": {"0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": 1, "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": 1, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 2}, "yesterday": "2026-09-22", "closed_reason": ""}
@@ -26,56 +26,49 @@ benched  0xeef6ad0e: no settled bets on our slice in 14 days
 benched  0xf49614e6: 75 settled, 52% won vs 50% needed, net +14.5% on $265,241, worst day -11,771 (capped: window read in full, older lookback cut, 5500 rows)
 in form  0xf9168343: 55 settled, 55% won vs 47% needed, net +4.0% on $150,786, worst day -6,320
 benched  0xfd3e6449: 72 settled, 68% won vs 74% needed, net +1.7% on $53,741, worst day -2,632 (capped: window read in full, older lookback cut, 5500 rows)
-two clocks: 947 matched fills over 1.0 d, api lag p50 20.1s, chain lag p50 2.5s, chain earlier by 17.1s at the median; api-only 102, chain-only 0, replayed rows 0; chain is a shadow
-⏱ api lag cost, last 7d (estimate): +25.78 USD over 825 fills at $6.40 each, +0.000 USD a fill at the median, chain earlier by 14.4s
+two clocks: 983 matched fills over 1.0 d, api lag p50 19.0s, chain lag p50 2.3s, chain earlier by 15.9s at the median; api-only 100, chain-only 1, replayed rows 0; chain is a shadow
+⏱ api lag cost, last 7d (estimate): +18.38 USD over 946 fills at $6.40 each, +0.000 USD a fill at the median, chain earlier by 14.7s
 
 ## watcher (4 wakes in 24h)
-{"ts": 1790108373.9015973, "kind": "note", "woke_because": "54ac26fb3ff1", "concluded": "The CLOB price endpoint returned 404 with body 'No orderbook exists for the requested token id', which means the bot asked for a price on a token that has no live orderbook, typically a resolved or closed market. This is a single hit at INFO-worthy severity that the client logs as ERROR, and it is a normal tra
 {"ts": 1790149814.5631363, "kind": "escalate", "woke_because": "534614711c15", "concluded": "The bot's available cash counts 67 dollars of resolved but unredeemed winnings as spendable, so it approved a 23.70 order the wallet could not fund and the exchange rejected it with a 400. Liquid on chain USDC is only 22.86 while the box reports 92 cash, and equity minus open cost minus the 67 unclaimed ma
 {"ts": 1790166658.6871643, "kind": "note", "woke_because": "c01c65915062", "concluded": "The new fingerprint is the ops form line for 0xd25156e2 whose 14 day form window was cut short at the 5500 row read cap, so only 10.8 of 14 days were actually read. This is a normal INFO transparency line: the reader is high volume and hit the row cap, and the code reports the truncation honestly rather than p
 {"ts": 1790175113.2286055, "kind": "note", "woke_because": "eb6ff024b864", "concluded": "A live limit order (0x241b6e95b8 for $6.40 at 0.88) did not fill inside the verify window and the verify path cancelled it cleanly, which is the intended safety behavior and means no phantom position was taken. This is the box correctly verifying what it did, so no money was placed, sized, or doubled wrongly. 
+{"ts": 1790190387.8260055, "kind": "note", "woke_because": "6c813168939b", "concluded": "The cause is a transient connection drop from Polymarket's CLOB server closing a keepalive socket, surfaced by py_clob_client_v2 as a request-level 'Server disconnected'. Only 2 hits at the same second, no URL attached, which points at a low level socket close rather than a failed order acknowledgement on a sp
 ## live limits (owner's number, and the analyst's where one is in force)
 LIVE_MAX_PER_WALLET_DAY: 3 (owner) band 1..3
 FETCH_INTERVAL: 3.0 (owner) band 2..5
 OPS_REARM_CLEAR_S: 900.0 (owner) band 600.0..1800.0
 OPS_REARM_MAX_PER_DAY: 3 (owner) band 1..3
 FORM_DAYS: 14.0 (owner) band 7.0..21.0
-## fingerprints (20 shown)
-69fd3dc7d27e x10 last 0.8h ago [open: 10 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / $N
-eb7da12386c6 x10 last 0.8h ago [open: 10 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
-a77088f7944a x10 last 0.8h ago [open: 10 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
-d7140f640d29 x9 last 0.8h ago [open: 9 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
-54ac26fb3ff1 x9 last 3.6h ago [open: 9 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
-eb6ff024b864 x1 last 3.7h ago [open: 1 hits, no action yet] :: INFO [verify] UNFILLED, cancelled order <hex>...
-c3db66a087f7 x2 last 6.0h ago [open: 2 hits, no action yet] :: WARNING [zset] ADMITTED <hex> to set Z (N over N copies with its best N deleted). Real money may now follow it once arme
-790247505aab x2 last 6.0h ago [open: 2 hits, no action yet] :: INFO [ops] auto_admit: 'S' -> 'S' | N settled paper copies, paper ROI N, trimmed N, ideal N
-c01c65915062 x1 last 6.0h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N (capped: N of N days read, N
-34253fa6334e x3 last 10.5h ago [open: 3 hits, no action yet] :: INFO [AB-RACE] rehearsal line sent, real-money line sent
-534614711c15 x1 last 10.7h ago [open: 1 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}
-c6d91d798e54 x8 last 16.3h ago [open: 8 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
-c47d62e70341 x8 last 24.1h ago [open: 8 hits, no action yet] :: INFO Received signal N, shutting down...
-6f12d4998994 x8 last 24.1h ago [open: 8 hits, no action yet] :: INFO [recovery] No pending orders to recover
-6b829965c182 x8 last 24.1h ago [open: 8 hits, no action yet] :: INFO Bot started. Monitoring trades...
-9d8a6d2794ec x1 last 24.1h ago [open: 1 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
-fe47bbb56041 x3 last 25.0h ago [open: 3 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N
-2497cd50ff7d x2 last 25.0h ago [open: 2 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
-9252b71ae332 x2 last 25.0h ago [open: 2 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N (capped: window read in full
-d96f6949e1c9 x1 last 25.0h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N,N, worst day N (capped: window read in fu
+## fingerprints (21 shown)
+6c813168939b x2 last 1.2h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error: Server disconnected
+69fd3dc7d27e x10 last 2.5h ago [open: 10 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / $N
+eb7da12386c6 x10 last 2.5h ago [open: 10 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
+a77088f7944a x10 last 2.5h ago [open: 10 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
+d7140f640d29 x9 last 2.5h ago [open: 9 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
+54ac26fb3ff1 x9 last 5.4h ago [open: 9 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
+eb6ff024b864 x1 last 5.5h ago [open: 1 hits, no action yet] :: INFO [verify] UNFILLED, cancelled order <hex>...
+c3db66a087f7 x2 last 7.8h ago [open: 2 hits, no action yet] :: WARNING [zset] ADMITTED <hex> to set Z (N over N copies with its best N deleted). Real money may now follow it once arme
+790247505aab x2 last 7.8h ago [open: 2 hits, no action yet] :: INFO [ops] auto_admit: 'S' -> 'S' | N settled paper copies, paper ROI N, trimmed N, ideal N
+c01c65915062 x1 last 7.8h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N (capped: N of N days read, N
+34253fa6334e x3 last 12.3h ago [open: 3 hits, no action yet] :: INFO [AB-RACE] rehearsal line sent, real-money line sent
+534614711c15 x1 last 12.5h ago [open: 1 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}
+c6d91d798e54 x8 last 18.1h ago [open: 8 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
+c47d62e70341 x8 last 25.8h ago [open: 8 hits, no action yet] :: INFO Received signal N, shutting down...
+6f12d4998994 x8 last 25.8h ago [open: 8 hits, no action yet] :: INFO [recovery] No pending orders to recover
+6b829965c182 x8 last 25.8h ago [open: 8 hits, no action yet] :: INFO Bot started. Monitoring trades...
+9d8a6d2794ec x1 last 25.8h ago [open: 1 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
+fe47bbb56041 x3 last 26.8h ago [open: 3 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N
+2497cd50ff7d x2 last 26.8h ago [open: 2 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
+9252b71ae332 x2 last 26.8h ago [open: 2 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N (capped: window read in full
+d96f6949e1c9 x1 last 26.8h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N,N, worst day N (capped: window read in fu
 
 ## ledger (3 rows)
 {"ts": 1790149814.5631363, "day": "2026-09-23", "kind": "sre_escalate", "before": "fingerprint 534614711c15", "after": "owner told", "detail": "Liquid USDC is down to 22.86 while the bot thinks it has 92 free; 67 dollars sits in resolved winnings unredeemed so orders now reject at the exchange, redeem t", "push": "BOT", "fingerprint": "534614711c15"}
 {"ts": 1790166548.6465027, "day": "2026-09-23", "kind": "auto_admit", "before": "0xd25156e2 not in Z", "after": "in set Z, on probation", "detail": "47 settled paper copies, paper ROI +11.2%, trimmed +0.6%, ideal +12.2%", "push": "WALLET", "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37"}
 {"ts": 1790166547.8478742, "day": "2026-09-23", "kind": "form", "before": "0xd25156e2 unknown", "after": "in form", "detail": "0xd25156e2: 55 settled, 62% won vs 51% needed, net +23.5% on $31,992, worst day -1,488 (capped: 10.8 of 14 days read, 5500 rows)", "push": null, "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37"}
 
-## important lines (316)
-2026-09-22 18:49:42 ERROR Error fetching CTF events [94265251-94265254]: {'code': -32000, 'message': 'invalid block range params'}
-2026-09-22 18:56:08 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-22 18:57:15 ERROR Error fetching CTF events [94265554-94265557]: {'code': -32000, 'message': 'invalid block range params'}
-2026-09-22 19:03:20 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
-2026-09-22 19:03:44 ERROR HTTP 408 fetching activity for 0x722a...d6ed
-2026-09-22 19:14:15 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'
-2026-09-22 19:53:10 ERROR Error fetching CTF events [94267793-94267793]: {'code': -32000, 'message': 'invalid block range params'}
-2026-09-22 20:18:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+## important lines (323)
 2026-09-22 20:46:36 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $25.60 / $32.00
 2026-09-22 20:46:39 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00
 2026-09-22 20:49:27 ERROR Error fetching NEG_RISK_CTF events [94270042-94270043]: {'code': -32000, 'message': 'invalid block range params'}
@@ -374,6 +367,21 @@ d96f6949e1c9 x1 last 25.0h ago [open: 1 hits, no action yet] :: INFO [ops] form:
 2026-09-23 18:27:39 ERROR Error fetching CTF events [94321953-94321954]: {'code': -32000, 'message': 'invalid block range params'}
 2026-09-23 18:27:50 ERROR Error fetching CTF events [94321961-94321961]: {'code': -32000, 'message': 'invalid block range params'}
 2026-09-23 18:27:50 ERROR Error fetching NEG_RISK_CTF events [94321961-94321961]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 18:41:13 ERROR Error fetching CTF events [94322496-94322497]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 18:47:53 ERROR Error fetching CTF events [94322763-94322764]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 18:48:19 ERROR Error fetching CTF events [94322780-94322781]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 18:48:26 ERROR Error fetching CTF events [94322785-94322785]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 18:48:34 ERROR Error fetching CTF events [94322790-94322791]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 18:55:46 ERROR Error fetching CTF events [94323058-94323058]: {'code': -32002, 'message': 'request timed out'}
+2026-09-23 19:02:52 ERROR Error fetching CTF events [94323362-94323363]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 19:05:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected
+2026-09-23 19:10:40 ERROR Error fetching NEG_RISK_CTF events [94323674-94323675]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 19:11:53 ERROR Error fetching CTF events [94323723-94323723]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 19:33:03 ERROR Error fetching NEG_RISK_CTF events [94324570-94324570]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 19:46:07 ERROR Error fetching CTF events [94325091-94325093]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 19:53:02 ERROR Error fetching CTF events [94325369-94325370]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 19:57:40 ERROR Error fetching NEG_RISK_CTF events [94325554-94325554]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-23 20:03:27 ERROR Error fetching CTF events [94325785-94325786]: {'code': -32000, 'message': 'invalid block range params'}
 2026-09-22 20:46:37 TRADE [LIVE] BUY $6.40 on 'Cincinnati Reds vs. Atlanta Braves' @ 0.3100, order 0x1bef95f43c...
 2026-09-22 20:46:40 TRADE [verify] FILLED: BUY 20.65 shares on 'Cincinnati Reds vs. Atlanta Braves' @ 0.3100
 2026-09-23 00:12:12 TRADE [LIVE] BUY $6.40 on 'Connecticut Sun vs. Washington Mystics' @ 0.8600, order 0x0992fb17c7...
