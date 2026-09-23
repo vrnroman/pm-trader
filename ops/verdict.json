@@ -1,12 +1,12 @@
 {
-    "id": "2026-09-23T12:42:54Z-fa87",
-    "ts": 1790167374,
+    "id": "2026-09-23T18:41:46Z-3f83",
+    "ts": 1790188906,
     "kind": "nothing",
-    "message": "Digest at 11:33 UTC, armed by telegram, spend $12.80 of $32.00 cap today, equity $134.44 vs floor $56.00. The one order rejection (insufficient balance against the 67 dollars of unclaimed resolved winnings) was already pushed to the owner at 07:50 UTC and has not recurred. The 6-in-a-row losing streak has not moved since 2026-09-22 13:15 UTC (no settlement since), unchanged from the last check, and the owner was already told at streak 4. Form table unchanged in shape, no wallet showing a fresh losing streak worth overriding the bar, no self-disarm, no new ERROR types.",
+    "message": "Digest at 18:34 UTC, armed by telegram, spend $25.60 of $32.00 cap today, equity $134.28 vs floor $56.00. The 07:50 UTC order rejection against the 67 dollars of unclaimed resolved winnings has not recurred, still 1 hit. The 6-day losing streak has not moved since 2026-09-22, unchanged from the last check, owner already told at streak 4. Daily line sent. New admit 0xd25156e2 is a normal auto_admit already pushed to the owner. No self-disarm, no new ERROR types, no wallet meets the bar for override.",
     "evidence": [
-        "{\"cash\": 85.588463, \"open_cost\": 48.85, \"equity\": 134.44, \"floor\": 56.0, \"spend\": {\"spent_usd\": 12.8, \"cap_usd\": 32.0, \"remaining_usd\": 19.2}, \"armed\": true, \"resolved_unclaimed\": 67}",
-        "2026-09-23 07:49:59 ERROR [exec] Order placement failed: PolyApiException[status_code=400, error_message={'error': 'not enough balance / allowance: the balance is not enough -> balance: 22860000, order amount: 23700000'}]",
-        "{\"ts\": 1790149814.5631363, \"day\": \"2026-09-23\", \"kind\": \"sre_escalate\", \"detail\": \"Liquid USDC is down to 22.86 while the bot thinks it has 92 free; 67 dollars sits in resolved winnings unredeemed so orders now reject at the exchange\", \"push\": \"BOT\"}",
+        "{\"cash\": 79.031153, \"equity\": 134.28, \"floor\": 56.0, \"spend\": {\"spent_usd\": 25.6, \"cap_usd\": 32.0, \"remaining_usd\": 6.4}, \"armed\": true, \"resolved_unclaimed\": 67}",
+        "69fd3dc7d27e ... 54ac26fb3ff1 x9 last 3.6h ago [open: 9 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price",
+        "534614711c15 x1 last 10.7h ago [open: 1 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order",
         "watch: loss_streak=6, day_pnl=-6.4, day_pnl_day=2026-09-22 (unchanged since commit 17ed247 at 2026-09-22T13:15:54Z; pushed to owner at streak=4 on 2026-09-18)",
         "watch: daily_line_sent=true, guard_fail_streak=0, floor_near=false"
     ],
