@@ -1,14 +1,14 @@
 {
-  "id": "2026-09-22T18:43:15Z-10ca",
-  "ts": 1790102595,
-  "kind": "nothing",
-  "message": "Digest at 17:44 UTC, armed by telegram, spend $19.20 of $32.00 cap today, equity $119.65 vs floor $56.00. Two trades placed and filled today with no verify failures, one settled loss of $6.40. Six restarts today all line up with the owner's own deploy commits on main, not a crash loop; two 'fromBlock' onchain errors at 15:44 and 16:08 stopped after the owner's own onchain fix deployed and have not recurred. No self-disarm, no guard failure, no re-arm cap hit, no Traceback. Form bar moved 0x00110b8e and 0x9f15613e to in form and 0xf49614e6 to benched on its own; none of it mine to touch.",
-  "evidence": [
-    "{\"cash\": 77.195213, \"open_cost\": 42.45, \"equity\": 119.65, \"floor\": 56.0, \"spend\": {\"spent_usd\": 19.2, \"cap_usd\": 32.0}, \"armed\": true}",
-    "2026-09-22 16:42:01 TRADE [LIVE] BUY $6.40 on 'Will FC Bayern München vs. Manchester Ci' @ 0.7900, order 0x16b2611e4b...",
-    "2026-09-22 16:42:11 TRADE [verify] FILLED: BUY 8.10 shares on 'Will FC Bayern München vs. Manchester Ci' @ 0.7900",
-    "2026-09-22 15:44:13 ERROR Error fetching CTF events [94257796-94257836]: ContractEvent.create_filter() got an unexpected keyword argument 'fromBlock'",
-    "2026-09-22 16:37:37 INFO  [ops] form: '0xf49614e6 unknown' -> 'benched' | 0xf49614e6: 77 settled, 51% won vs 50% needed, net +11.5% on $279,878, worst day -11,771 (capped: window read in full, older lookback cut, 5500 rows)"
-  ],
-  "commit": null
+    "id": "2026-09-23T00:42:38Z-f38d",
+    "ts": 1790124158,
+    "kind": "nothing",
+    "message": "Digest at 00:31 UTC, armed by telegram, spend $6.40 of $32.00 cap today, equity $119.38 vs floor $56.00. Two trades filled clean (Cincinnati Reds vs. Atlanta Braves, Connecticut Sun vs. Washington Mystics) with no verify failures. Eight restarts in the window, signal 15 each time from 14:25 to 18:30 UTC, each followed by a benign 'Could not create api key' 400 and then Bot started, consistent with deploys to main, not a crash loop. Chain OrderFilled fetch hit the RPC pool's 'invalid block range params' quirk 45 times but chain is only a shadow feed, no impact on live copies. Form bar moved 0x00110b8e and 0x9f15613e to in form and 0xf49614e6 to benched on its own; none of it mine to touch.",
+    "evidence": [
+        "{\"cash\": 64.129683, \"open_cost\": 55.25, \"equity\": 119.38, \"floor\": 56.0, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6}, \"armed\": true}",
+        "2026-09-23 00:12:12 TRADE [LIVE] BUY $6.40 on 'Connecticut Sun vs. Washington Mystics' @ 0.8600, order 0x0992fb17c7...",
+        "2026-09-22 18:30:10 INFO  Received signal 15, shutting down...",
+        "2026-09-22 22:51:39 ERROR Error fetching CTF events [94274927-94274928]: {'code': -32000, 'message': 'invalid block range params'}",
+        "2026-09-22 16:37:37 INFO  [ops] form: '0xf49614e6 unknown' -> 'benched' | 0xf49614e6: 77 settled, 51% won vs 50% needed, net +11.5% on $279,878, worst day -11,771 (capped: window read in full, older lookback cut, 5500 rows)"
+    ],
+    "commit": null
 }
