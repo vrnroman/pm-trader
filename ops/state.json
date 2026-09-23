@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-23T00:31:36.726885+00:00",
+ "generated": "2026-09-23T04:05:46.460177+00:00",
  "money": {
-  "cash": 64.129683,
-  "open_cost": 55.25,
-  "equity": 119.38,
+  "cash": 92.219683,
+  "open_cost": 42.45,
+  "equity": 134.67,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
@@ -17,10 +17,10 @@
   "resolved_unclaimed": 67,
   "tier": {
    "1a": 0,
-   "1b": 12.8,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1790123331.8732784,
+  "ts": 1790136203.5588317,
   "day": "2026-09-23"
  },
  "arm": {
@@ -53,25 +53,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 12.8,
+   "open_total": 0,
    "daily_date": "2026-09-23",
    "daily_volume": 6.4,
-   "placements": [
-    {
-     "token_id": "40707230897818725036710371242266758434994027469582533995923297583865725190049",
-     "cost": 6.4,
-     "ts": 1790109999.095321,
-     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Cincinnati Reds vs. Atlanta Braves"
-    },
-    {
-     "token_id": "109030402832978595886836547077205753577926019474970897585722281388120021601865",
-     "cost": 6.4,
-     "ts": 1790122332.6677785,
-     "trader": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
-     "title": "Connecticut Sun vs. Washington Mystics"
-    }
-   ]
+   "placements": []
   },
   "1c": {
    "open_total": 0,
@@ -180,7 +165,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 119.38,
+  "last_equity": 134.67,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -625,23 +610,6 @@
   }
  ],
  "important": [
-  "2026-09-22 00:47:09 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-09-22 01:07:57 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 01:08:59 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 01:57:17 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 02:33:26 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 02:33:42 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 02:33:52 ERROR HTTP 500 fetching activity for 0x722a...d6ed",
-  "2026-09-22 02:35:18 ERROR HTTP 500 fetching activity for 0x0011...4333",
-  "2026-09-22 02:41:07 ERROR Network error fetching 0x3f3a...e8fd: ",
-  "2026-09-22 02:41:07 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-22 02:41:07 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-22 02:41:07 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-22 02:41:07 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-22 02:41:19 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 03:14:25 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 03:30:16 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
-  "2026-09-22 04:00:17 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-22 04:10:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-22 04:16:10 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-22 04:45:31 ERROR HTTP 408 fetching activity for 0x722a...d6ed",
@@ -816,6 +784,45 @@
   "2026-09-23 00:26:31 ERROR Error fetching CTF events [94278722-94278723]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 00:26:35 ERROR Error fetching CTF events [94278725-94278725]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 00:30:44 ERROR Error fetching CTF events [94278871-94278871]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 00:46:36 ERROR Error fetching NEG_RISK_CTF events [94279525-94279526]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 00:46:38 ERROR Error fetching CTF events [94279527-94279527]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 00:47:47 ERROR Error fetching NEG_RISK_CTF events [94279573-94279573]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 00:51:06 ERROR Error fetching CTF events [94279705-94279706]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 00:59:04 ERROR Error fetching CTF events [94280024-94280025]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 00:59:04 ERROR Error fetching NEG_RISK_CTF events [94280024-94280025]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 01:02:50 ERROR Error fetching NEG_RISK_CTF events [94280155-94280155]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 01:07:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-23 01:10:17 ERROR Error fetching NEG_RISK_CTF events [94280472-94280473]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 01:20:13 ERROR Error fetching NEG_RISK_CTF events [94280869-94280870]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 01:32:05 ERROR Error fetching NEG_RISK_CTF events [94281325-94281325]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 01:32:08 ERROR Error fetching NEG_RISK_CTF events [94281326-94281347]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 01:34:13 ERROR Error fetching NEG_RISK_CTF events [94281410-94281410]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 01:35:03 ERROR Error fetching CTF events [94281443-94281444]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 01:38:30 ERROR Error fetching NEG_RISK_CTF events [94281581-94281582]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 01:48:27 ERROR Error fetching CTF events [94281999-94282000]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 01:48:27 ERROR Error fetching NEG_RISK_CTF events [94281999-94282000]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 01:54:13 ERROR Error fetching CTF events [94282230-94282231]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 01:54:13 ERROR Error fetching NEG_RISK_CTF events [94282230-94282231]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 01:55:22 ERROR Error fetching NEG_RISK_CTF events [94282276-94282276]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 02:04:16 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
+  "2026-09-23 02:07:21 ERROR Error fetching CTF events [94282735-94282736]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 02:08:33 ERROR Error fetching CTF events [94282803-94282804]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 02:14:18 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
+  "2026-09-23 02:17:45 ERROR Error fetching CTF events [94283171-94283172]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 02:17:45 ERROR Error fetching NEG_RISK_CTF events [94283171-94283172]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 02:31:07 ERROR Error fetching CTF events [94283706-94283707]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 02:31:08 ERROR Error fetching NEG_RISK_CTF events [94283706-94283707]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 02:35:13 ERROR Error fetching CTF events [94283850-94283851]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 02:35:43 ERROR Error fetching NEG_RISK_CTF events [94283850-94283851]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-23 02:37:57 ERROR Error fetching NEG_RISK_CTF events [94283979-94283980]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 02:38:01 ERROR Error fetching CTF events [94283982-94283983]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-23 02:46:53 ERROR HTTP 500 fetching activity for 0x5213...6a35",
+  "2026-09-23 03:02:49 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-09-23 03:02:50 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.",
+  "2026-09-23 03:02:50 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
+  "2026-09-23 03:02:50 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
+  "2026-09-23 03:49:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-23 03:54:57 ERROR HTTP 408 fetching activity for 0x57b2...9da2",
   "2026-09-22 05:42:51 TRADE [LIVE] BUY $6.40 on 'Korea Open: Emerson Jones vs Yexin Ma' @ 0.4900, order 0xc937b741ec...",
   "2026-09-22 05:42:55 TRADE [verify] FILLED: BUY 13.06 shares on 'Korea Open: Emerson Jones vs Yexin Ma' @ 0.4900",
   "2026-09-22 09:28:24 TRADE [LIVE] BUY $6.40 on 'Dota 2:  Pipsqueak+4 vs Team Cobra - Gam' @ 0.2700, order 0x65d0c69b42...",
@@ -954,12 +961,13 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1790111292.4488137,
-   "count": 6,
+   "last": 1790129772.8328428,
+   "count": 8,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1790111292.4488137
+    1790129172.8223147,
+    1790129772.8328428
    ],
    "action": null,
    "action_ts": null,
@@ -1132,12 +1140,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790115012.514041,
-   "count": 2,
+   "last": 1790135413.2028468,
+   "count": 5,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790115012.514041
+    1790135413.2028468
    ],
    "action": null,
    "action_ts": null,
