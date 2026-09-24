@@ -306,7 +306,7 @@ def test_the_daily_check_wins_to_a_branch_for_the_owner_never_main(desk):
         an.win_branch = _orig
     assert calls["push"] == [] and calls["apply"] == [], "the WIN branch is written with git, not apply_fix"
     assert branches and branches[0][0] == "min150" and "ensure_env LIVE_MIN_TRADER_BET_USD 150" in branches[0][1]
-    assert any("WON" in m and "compare/main...analyst/exp-min150" in m and "LIVE_MIN_TRADER_BET_USD=150" in m and "merge it" in m for m in send.sent)
+    assert any("WON" in m and "compare/main...analyst/exp-min150" in m and "LIVE_MIN_TRADER_BET_USD=150" in m and "the primary book" in m and "floor 150" in m and "merge it" in m for m in send.sent)
     assert exp_cards.load("min150")["status"] == "win"
     rows_ = [r for r in ops_watch.watcher_thoughts() if r.get("proposal") == "experiment"]
     assert rows_ and "branch analyst/exp-min150 pushed" in rows_[-1]["did"]
