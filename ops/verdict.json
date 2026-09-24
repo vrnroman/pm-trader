@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-23T18:41:46Z-3f83",
-    "ts": 1790188906,
-    "kind": "nothing",
-    "message": "Digest at 18:34 UTC, armed by telegram, spend $25.60 of $32.00 cap today, equity $134.28 vs floor $56.00. The 07:50 UTC order rejection against the 67 dollars of unclaimed resolved winnings has not recurred, still 1 hit. The 6-day losing streak has not moved since 2026-09-22, unchanged from the last check, owner already told at streak 4. Daily line sent. New admit 0xd25156e2 is a normal auto_admit already pushed to the owner. No self-disarm, no new ERROR types, no wallet meets the bar for override.",
+    "id": "2026-09-24T00:41:30Z-81ac",
+    "ts": 1790210490,
+    "kind": "escalation",
+    "message": "Second order rejection today from the unclaimed winnings problem you were already told about. 07:49:59 UTC rejected a buy of 23.70 against balance 22.86. 23:18:14 UTC rejected a buy of 20.83 against balance 20.00, on Buenos Aires 2: Francisco Comesana vs Joaquin Aguilar. Fingerprint 534614711c15 is now at 2 hits, up from 1 at the last check. Resolved unclaimed still sits at 67. The bot pushed the first rejection to you. It has not pushed this second one. Equity is 134.06 against a floor of 56.00. Day spend hit its cap at 32.00 of 32.00. Redeeming the 67 would clear this on its own.",
     "evidence": [
-        "{\"cash\": 79.031153, \"equity\": 134.28, \"floor\": 56.0, \"spend\": {\"spent_usd\": 25.6, \"cap_usd\": 32.0, \"remaining_usd\": 6.4}, \"armed\": true, \"resolved_unclaimed\": 67}",
-        "69fd3dc7d27e ... 54ac26fb3ff1 x9 last 3.6h ago [open: 9 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price",
-        "534614711c15 x1 last 10.7h ago [open: 1 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order",
-        "watch: loss_streak=6, day_pnl=-6.4, day_pnl_day=2026-09-22 (unchanged since commit 17ed247 at 2026-09-22T13:15:54Z; pushed to owner at streak=4 on 2026-09-18)",
-        "watch: daily_line_sent=true, guard_fail_streak=0, floor_near=false"
+        "534614711c15 x2 last 0.4h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}",
+        "2026-09-23 23:18:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={\"error\":\"not enough balance / allowance: the balance is not enough -> balance: 20000000, order amount: 20830000\"}",
+        "2026-09-23 07:49:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={\"error\":\"not enough balance / allowance: the balance is not enough -> balance: 22860000, order amount: 23700000\"}",
+        "{\"cash\": 72.413553, \"equity\": 134.06, \"floor\": 56.0, \"resolved_unclaimed\": 67, \"spend\": {\"spent_usd\": 32.0, \"cap_usd\": 32.0}}",
+        "prior verdict 2026-09-23T18:41:46Z-3f83: the 07:50 UTC order rejection has not recurred, still 1 hit"
     ],
     "commit": null
 }
