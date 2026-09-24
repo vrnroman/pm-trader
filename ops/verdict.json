@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-24T12:41:35Z-f733",
-    "ts": 1790253695,
+    "id": "2026-09-24T18:42:21Z-588f",
+    "ts": 1790275341,
     "kind": "nothing",
-    "message": "Armed, spend 19.20 of 32.00 cap with 12.80 remaining, five copies attempted in the last 24h, four filled and one cleanly cancelled unfilled by the verify path, no self-disarm. Fingerprint 534614711c15 (unclaimed winnings related order rejection) unchanged at 2 hits, already escalated and delivered to the owner last check.",
+    "message": "Armed, spend $32.00 of $54.00 cap with $22.00 remaining, five copies filled in the last 24h, no self-disarm. Fingerprint 534614711c15 unchanged at 2 hits, already escalated and delivered to the owner.",
     "evidence": [
-        "{\"cash\": 95.133293, \"open_cost\": 61.65, \"equity\": 156.78, \"floor\": 56.0, \"spend\": {\"spent_usd\": 19.2, \"cap_usd\": 32.0, \"remaining_usd\": 12.8}, \"armed\": true, \"resolved_unclaimed\": 67}",
-        "534614711c15 x2 last 12.3h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}",
-        "2026-09-24 11:32:03 TRADE [verify] FILLED: BUY 13.06 shares on 'Game Spread: Elise Mertens (-3.5) vs Maj' @ 0.4900",
-        "2026-09-23 14:51:31 INFO  [verify] UNFILLED, cancelled order 0x241b6e95b8...",
-        "prior verdict 2026-09-24T06:41:12Z-a14f: fingerprint 534614711c15 was at 2 hits then, still 2 hits now, not worse"
+        "{\"cash\": 82.189123, \"open_cost\": 25.6, \"equity\": 107.79, \"floor\": 30.0, \"spend\": {\"spent_usd\": 32.0, \"cap_usd\": 54.0, \"remaining_usd\": 22.0}, \"armed\": true, \"resolved_unclaimed\": 67}",
+        "534614711c15 x2 last 17.5h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}",
+        "{\"ts\": 1790210841.5089324, \"kind\": \"escalation_delivered\", \"before\": \"routine escalation\", \"after\": \"sent\", \"detail\": \"Second order rejection today from the unclaimed winnings problem you were already told about. 07:49:59 UTC rejected a bu\"}",
+        "2026-09-24 13:03:57 TRADE [verify] FILLED: BUY 11.85 shares on 'Houston Astros vs. Athletics: 1st 5 Inni' @ 0.5400",
+        "prior verdict 2026-09-24T12:41:35Z-f733: fingerprint 534614711c15 was at 2 hits then, still 2 hits now, not worse"
     ],
     "commit": null
 }
