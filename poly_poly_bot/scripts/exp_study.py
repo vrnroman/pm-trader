@@ -200,11 +200,16 @@ def study_activity(kind: str, params: dict, *, now: float, wallets: list[str], f
         f_from = f_to = cur_floor
         d_from = d_to = cur_days
         from src.copy_trading.book_recipes import as_bool
-        fe_from, fe_to = True, as_bool(params.get("to", False))
+        fe_from, fe_to = bool(getattr(CONFIG, "copy_paper_first_entry_only", True)), as_bool(params.get("to", False))
     else:
         raise ValueError(kind)
     settings = {"from": {"floor": f_from, "days": d_from, "first_entry_only": fe_from},
                 "to": {"floor": f_to, "days": d_to, "first_entry_only": fe_to}}
+    if settings["from"] == settings["to"]:
+        # 2026-09-24: the model asked for first_entry "to: true" while the
+        # book already runs first-entry-only; ten minutes of reads compared
+        # a setting to itself. A study that varies nothing is refused.
+        raise ValueError(f"{kind} {json.dumps(params)} varies nothing: the setting is already {json.dumps(settings['to'])}")
     rows = []
     for w in wallets:
         try:
@@ -228,6 +233,8 @@ def study_wallet_cap(params: dict, *, b_rows: list[dict], wallets: list[str]) ->
     FALSIFY_MIN_N settled copies (the classifier, printed)."""
     cap_from = int(getattr(CONFIG, "copy_paper_b_max_per_wallet_day", 25) or 0) or 10 ** 6
     cap_to = int(params["to"])
+    if cap_to == cap_from:
+        raise ValueError(f"wallet_cap {cap_to} varies nothing: book B already caps at {cap_from}")
     by: dict[str, list] = {}
     for r in b_rows:
         if not r.get("closed"):
