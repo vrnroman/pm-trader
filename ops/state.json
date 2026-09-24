@@ -1,26 +1,26 @@
 {
- "generated": "2026-09-24T09:59:44.805239+00:00",
+ "generated": "2026-09-24T11:36:32.779350+00:00",
  "money": {
-  "cash": 101.695873,
-  "open_cost": 55.25,
-  "equity": 156.95,
+  "cash": 95.133293,
+  "open_cost": 61.65,
+  "equity": 156.78,
   "floor": 56.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-24",
-   "spent_usd": 12.8,
+   "spent_usd": 19.2,
    "cap_usd": 32.0,
-   "remaining_usd": 19.2,
+   "remaining_usd": 12.8,
    "closed_reason": ""
   },
   "armed": true,
   "resolved_unclaimed": 67,
   "tier": {
    "1a": 0,
-   "1b": 12.8,
+   "1b": 19.2,
    "1c": 0
   },
-  "ts": 1790243742.1818252,
+  "ts": 1790249578.2398398,
   "day": "2026-09-24"
  },
  "arm": {
@@ -33,10 +33,11 @@
  },
  "spend": {
   "date": "2026-09-24",
-  "spent_usd": 12.8,
+  "spent_usd": 19.2,
   "wallet_copies": {
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1,
-   "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1
+   "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1,
+   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 1
   },
   "wallet_copies_yesterday": {
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
@@ -54,9 +55,9 @@
    "placements": []
   },
   "1b": {
-   "open_total": 12.8,
+   "open_total": 19.2,
    "daily_date": "2026-09-24",
-   "daily_volume": 12.8,
+   "daily_volume": 19.200000000000003,
    "placements": [
     {
      "token_id": "87131648918137474349304257527344538579233235348393719175219550429557466113538",
@@ -71,6 +72,13 @@
      "ts": 1790237277.7395754,
      "trader": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
      "title": "Will the highest temperature in Dallas be between 88-89°F on"
+    },
+    {
+     "token_id": "28495630280687398065026848780319134100142003450577409162196538137658286450845",
+     "cost": 6.4,
+     "ts": 1790249523.279315,
+     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+     "title": "Game Spread: Elise Mertens (-3.5) vs Maja Chwalinska (+3.5)"
     }
    ]
   },
@@ -187,7 +195,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 156.95,
+  "last_equity": 156.78,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -207,7 +215,7 @@
    "96998131034687394987869300990474810645455355843214977734260368889207437752543",
    "7176164693333913912271980594552279937832227503542042198140094468727106225171"
   ],
-  "form_scan_ts": 1790225603.7845135,
+  "form_scan_ts": 1790247358.9610708,
   "daily_line_attempt_day": "2026-09-24",
   "daily_line_sent": true,
   "daily_line_day": "2026-09-24",
@@ -273,42 +281,42 @@
   }
  },
  "form": {
-  "ts": 1790225604.6871822,
+  "ts": 1790247359.7616093,
   "version": 3,
   "wallets": {
    "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
     "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
-    "n": 230,
-    "won": 197,
-    "cost": 204767.58,
-    "back": 239042.76,
-    "avg_price": 0.701718007687603,
+    "n": 231,
+    "won": 198,
+    "cost": 205568.43,
+    "back": 240045.96,
+    "avg_price": 0.7020488889050651,
     "worst_day": -2111.56,
     "ok": true,
-    "reason": "86% came out ahead vs 70% needed, net +16.7%",
-    "ts": 1790225604.6871822,
+    "reason": "86% came out ahead vs 70% needed, net +16.8%",
+    "ts": 1790247359.7616093,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
-    "hit": 0.8565,
-    "net_pct": 16.74
+    "hit": 0.8571,
+    "net_pct": 16.77
    },
    "0x05878ac343c1387d592042d788424412733ac40b": {
     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
-    "n": 130,
-    "won": 60,
-    "cost": 135404.09,
-    "back": 148094.1,
-    "avg_price": 0.4882205230142198,
+    "n": 127,
+    "won": 59,
+    "cost": 133190.36,
+    "back": 146093.57,
+    "avg_price": 0.489061071995679,
     "worst_day": -5040.48,
     "ok": false,
-    "reason": "46% came out ahead vs 49% needed (-3 points, need +3)",
-    "ts": 1790225604.6871822,
+    "reason": "46% came out ahead vs 49% needed (-2 points, need +3)",
+    "ts": 1790247359.7616093,
     "rows": 4963,
     "covered_days": 14.0,
     "capped": false,
-    "hit": 0.4615,
-    "net_pct": 9.37
+    "hit": 0.4646,
+    "net_pct": 9.69
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
@@ -320,7 +328,7 @@
     "worst_day": -332.99,
     "ok": true,
     "reason": "73% came out ahead vs 58% needed, net +11.4%",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 3000,
     "covered_days": 14.0,
     "capped": false,
@@ -337,7 +345,7 @@
     "worst_day": -535.02,
     "ok": true,
     "reason": "73% came out ahead vs 55% needed, net +17.3%",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 3000,
     "covered_days": 14.0,
     "capped": false,
@@ -346,20 +354,20 @@
    },
    "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": {
     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
-    "n": 225,
-    "won": 113,
-    "cost": 678870.47,
-    "back": 672595.82,
-    "avg_price": 0.5494627323670884,
+    "n": 227,
+    "won": 114,
+    "cost": 680186.39,
+    "back": 666624.82,
+    "avg_price": 0.5493728019169726,
     "worst_day": -39107.04,
     "ok": false,
     "reason": "50% came out ahead vs 55% needed (-5 points, need +3)",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "hit": 0.5022,
-    "net_pct": -0.92
+    "net_pct": -1.99
    },
    "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {
     "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
@@ -371,7 +379,7 @@
     "worst_day": -1358.43,
     "ok": false,
     "reason": "only 2 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 3500,
     "covered_days": 14.0,
     "capped": false,
@@ -380,20 +388,20 @@
    },
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-    "n": 84,
+    "n": 80,
     "won": 37,
-    "cost": 41656.05,
-    "back": 41088.13,
-    "avg_price": 0.3782855224155428,
+    "cost": 39159.83,
+    "back": 40047.92,
+    "avg_price": 0.37216715800580247,
     "worst_day": -2314.16,
-    "ok": false,
-    "reason": "net -1.4% (need +2%)",
-    "ts": 1790225604.6871822,
+    "ok": true,
+    "reason": "46% came out ahead vs 37% needed, net +2.3%",
+    "ts": 1790247359.7616093,
     "rows": 5000,
     "covered_days": 14.0,
     "capped": false,
-    "hit": 0.4405,
-    "net_pct": -1.36
+    "hit": 0.4625,
+    "net_pct": 2.27
    },
    "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2": {
     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
@@ -405,7 +413,7 @@
     "worst_day": -4569.62,
     "ok": false,
     "reason": "50% came out ahead vs 48% needed (+2 points, need +3)",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 3500,
     "covered_days": 14.0,
     "capped": false,
@@ -422,7 +430,7 @@
     "worst_day": -3391.19,
     "ok": true,
     "reason": "80% came out ahead vs 76% needed, net +9.6%",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 2000,
     "covered_days": 14.0,
     "capped": false,
@@ -439,7 +447,7 @@
     "worst_day": -329.83,
     "ok": false,
     "reason": "only 7 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 3000,
     "covered_days": 14.0,
     "capped": false,
@@ -448,37 +456,37 @@
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "n": 345,
-    "won": 181,
-    "cost": 1031209.78,
-    "back": 1134611.03,
-    "avg_price": 0.48065513134231663,
+    "n": 349,
+    "won": 184,
+    "cost": 1036463.67,
+    "back": 1148685.83,
+    "avg_price": 0.4804411080260931,
     "worst_day": -31087.56,
     "ok": true,
-    "reason": "52% came out ahead vs 48% needed, net +10.0%",
-    "ts": 1790225604.6871822,
+    "reason": "53% came out ahead vs 48% needed, net +10.8%",
+    "ts": 1790247359.7616093,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
-    "hit": 0.5246,
-    "net_pct": 10.03
+    "hit": 0.5272,
+    "net_pct": 10.83
    },
    "0xd25156e222c9b907b128e27c36821fdb41db4d37": {
     "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
-    "n": 58,
-    "won": 35,
-    "cost": 34555.56,
-    "back": 41338.49,
-    "avg_price": 0.5093149604117373,
+    "n": 60,
+    "won": 38,
+    "cost": 36223.37,
+    "back": 42776.42,
+    "avg_price": 0.49851136368015214,
     "worst_day": -1487.95,
     "ok": true,
-    "reason": "60% came out ahead vs 51% needed, net +19.6%",
-    "ts": 1790225604.6871822,
+    "reason": "63% came out ahead vs 50% needed, net +18.1%",
+    "ts": 1790247359.7616093,
     "rows": 5500,
-    "covered_days": 10.641003323867917,
+    "covered_days": 9.85635140751523,
     "capped": true,
-    "hit": 0.6034,
-    "net_pct": 19.63
+    "hit": 0.6333,
+    "net_pct": 18.09
    },
    "0xd970693a3384dc762b191707a4927ac3814bbbba": {
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
@@ -490,7 +498,7 @@
     "worst_day": -324.01,
     "ok": true,
     "reason": "69% came out ahead vs 58% needed, net +6.9%",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 3500,
     "covered_days": 14.0,
     "capped": false,
@@ -507,7 +515,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 2500,
     "covered_days": 14.0,
     "capped": false,
@@ -516,20 +524,20 @@
    },
    "0xf49614e63fb15383d4a9b717a1be03ad2410fe79": {
     "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
-    "n": 74,
-    "won": 38,
-    "cost": 251769.59,
-    "back": 286037.71,
-    "avg_price": 0.5010304128177546,
+    "n": 72,
+    "won": 37,
+    "cost": 248178.98,
+    "back": 276480.17,
+    "avg_price": 0.5025116505598162,
     "worst_day": -11770.62,
     "ok": false,
     "reason": "51% came out ahead vs 50% needed (+1 points, need +3)",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
-    "hit": 0.5135,
-    "net_pct": 13.61
+    "hit": 0.5139,
+    "net_pct": 11.4
    },
    "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
     "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
@@ -541,7 +549,7 @@
     "worst_day": -6319.64,
     "ok": true,
     "reason": "55% came out ahead vs 47% needed, net +4.0%",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
@@ -558,7 +566,7 @@
     "worst_day": -2631.81,
     "ok": false,
     "reason": "67% came out ahead vs 72% needed (-5 points, need +3)",
-    "ts": 1790225604.6871822,
+    "ts": 1790247359.7616093,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
@@ -650,20 +658,19 @@
    "detail": "0x9f15613e: 345 settled, 52% won vs 48% needed, net +10.0% on $1,031,210, worst day -31,088 (capped: window read in full, older lookback cut, 5500 rows)",
    "push": "WALLET",
    "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
+  },
+  {
+   "ts": 1790247359.7616093,
+   "day": "2026-09-24",
+   "kind": "form",
+   "before": "0x5213eb85 benched",
+   "after": "in form",
+   "detail": "0x5213eb85: 80 settled, 46% won vs 37% needed, net +2.3% on $39,160, worst day -2,314",
+   "push": "WALLET",
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
   }
  ],
  "important": [
-  "2026-09-23 10:06:06 ERROR Error fetching CTF events [94301905-94301906]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-23 10:15:55 ERROR Error fetching NEG_RISK_CTF events [94302278-94302278]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-23 10:16:29 ERROR Error fetching NEG_RISK_CTF events [94302301-94302301]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-23 10:21:08 ERROR Error fetching CTF events [94302506-94302507]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-23 10:49:49 ERROR Error fetching CTF events [94303634-94303635]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-23 10:51:48 ERROR Error fetching CTF events [94303714-94303714]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-23 10:52:37 ERROR Error fetching CTF events [94303746-94303747]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-23 11:10:25 ERROR Error fetching CTF events [94304478-94304479]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-23 11:14:06 ERROR Error fetching CTF events [94304606-94304606]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-23 11:17:31 ERROR Error fetching NEG_RISK_CTF events [94304726-94304726]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-23 11:36:09 ERROR Error fetching CTF events [94305506-94305508]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 12:01:07 ERROR Error fetching CTF events [94306506-94306507]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 12:01:07 ERROR Error fetching NEG_RISK_CTF events [94306506-94306507]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 12:29:10 WARNING [zset] ADMITTED 0xd25156e222c9b907b128e27c36821fdb41db4d37 to set Z (+1% over 44 copies with its best 3 deleted). Real money may now follow it once armed.",
@@ -922,6 +929,22 @@
   "2026-09-24 09:54:28 ERROR Error fetching CTF events [94359021-94359022]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 09:54:28 ERROR Error fetching NEG_RISK_CTF events [94359021-94359022]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 09:55:13 ERROR Error fetching CTF events [94359052-94359052]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 10:28:57 ERROR Error fetching CTF events [94360399-94360400]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 10:28:57 ERROR Error fetching NEG_RISK_CTF events [94360399-94360400]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 10:32:20 ERROR Error fetching CTF events [94360535-94360535]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 10:38:20 ERROR Error fetching CTF events [94360755-94360755]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-24 10:39:59 ERROR Error fetching NEG_RISK_CTF events [94360821-94360821]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-24 10:42:49 ERROR Error fetching CTF events [94360954-94360955]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 10:44:04 ERROR Error fetching CTF events [94361004-94361005]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 10:48:26 ERROR Error fetching NEG_RISK_CTF events [94361179-94361180]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 10:50:41 ERROR Error fetching CTF events [94361269-94361270]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 10:50:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-24 10:56:49 INFO  [ops] form: '0x5213eb85 benched' -> 'in form' | 0x5213eb85: 80 settled, 46% won vs 37% needed, net +2.3% on $39,160, worst day -2,314",
+  "2026-09-24 11:00:50 ERROR Error fetching NEG_RISK_CTF events [94361655-94361656]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-24 11:32:02 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $19.20 / $32.00",
+  "2026-09-24 11:32:03 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $19.20 / $200.00",
+  "2026-09-24 11:36:06 ERROR Error fetching CTF events [94363085-94363086]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 11:36:06 ERROR Error fetching NEG_RISK_CTF events [94363085-94363086]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 14:51:30 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Austin b' @ 0.8800, order 0x241b6e95b8...",
   "2026-09-23 14:51:31 INFO  [verify] UNFILLED, cancelled order 0x241b6e95b8...",
   "2026-09-23 17:47:31 TRADE [LIVE] BUY $6.40 on 'Arizona Diamondbacks vs. Colorado Rockie' @ 0.5100, order 0x97956b96d6...",
@@ -931,7 +954,9 @@
   "2026-09-24 02:55:26 TRADE [LIVE] BUY $6.40 on 'Korea Open: Yexin Ma vs Kimberly Birrell' @ 0.6600, order 0x41e2215ece...",
   "2026-09-24 02:55:27 TRADE [verify] FILLED: BUY 9.69 shares on 'Korea Open: Yexin Ma vs Kimberly Birrell' @ 0.6600",
   "2026-09-24 08:07:57 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Dallas b' @ 0.8200, order 0x3326b28d62...",
-  "2026-09-24 08:07:58 TRADE [verify] FILLED: BUY 7.80 shares on 'Will the highest temperature in Dallas b' @ 0.8200"
+  "2026-09-24 08:07:58 TRADE [verify] FILLED: BUY 7.80 shares on 'Will the highest temperature in Dallas b' @ 0.8200",
+  "2026-09-24 11:32:03 TRADE [LIVE] BUY $6.40 on 'Game Spread: Elise Mertens (-3.5) vs Maj' @ 0.4900, order 0x066ddaa713...",
+  "2026-09-24 11:32:03 TRADE [verify] FILLED: BUY 13.06 shares on 'Game Spread: Elise Mertens (-3.5) vs Maj' @ 0.4900"
  ],
  "watcher": [
   {
@@ -994,12 +1019,12 @@
  "fingerprints": {
   "69fd3dc7d27e": {
    "first": 1790098332.9559617,
-   "last": 1790237282.6246877,
-   "count": 13,
+   "last": 1790249522.95935,
+   "count": 14,
    "sample": "2026-09-21 00:06:09 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / $N",
    "recent": [
-    1790237282.6246877
+    1790249522.95935
    ],
    "action": null,
    "action_ts": null,
@@ -1008,12 +1033,12 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1790237282.6246877,
-   "count": 13,
+   "last": 1790249642.9624202,
+   "count": 14,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1790237282.6246877
+    1790249642.9624202
    ],
    "action": null,
    "action_ts": null,
@@ -1022,12 +1047,12 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1790237282.6246877,
-   "count": 13,
+   "last": 1790249642.9624202,
+   "count": 14,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1790237282.6246877
+    1790249642.9624202
    ],
    "action": null,
    "action_ts": null,
@@ -1036,12 +1061,12 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1790237282.6246877,
-   "count": 12,
+   "last": 1790249642.9624202,
+   "count": 13,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1790237282.6246877
+    1790249642.9624202
    ],
    "action": null,
    "action_ts": null,
@@ -1050,13 +1075,12 @@
   },
   "fe47bbb56041": {
    "first": 1790098332.9559617,
-   "last": 1790225761.1868672,
-   "count": 6,
+   "last": 1790247482.9220862,
+   "count": 7,
    "sample": "2026-09-21 00:18:31 INFO  [ops] form: '0x722abb54 in form' -> 'benched' | 0x722abb54: 101 settled, 76% won vs 74% needed, net +5.0% on $213,391, worst day -7,408",
    "norm": "INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N",
    "recent": [
-    1790225761.1868672,
-    1790225761.1868672
+    1790247482.9220862
    ],
    "action": null,
    "action_ts": null,
@@ -1243,13 +1267,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790238962.6548092,
-   "count": 22,
+   "last": 1790247122.8637679,
+   "count": 23,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790238602.6476035,
-    1790238962.6548092
+    1790247122.8637679
    ],
    "action": null,
    "action_ts": null,
