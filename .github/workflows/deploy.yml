@@ -169,12 +169,13 @@ jobs:
           # ONCHAIN_SHADOW=false in the ENV_FILE secret to let the bot flip on
           # its own evidence; delete the key to force primary.
           ensure_env ONCHAIN_SHADOW true
-          # The AI analyst (scripts/ai_analyst.py, s-qbzbrw): off until the
-          # SRE's ledger shows one clean day (manager sequencing). Flip to
-          # true in the ENV_FILE secret to enable; it runs daily inside the
-          # sidecar, moves live limits inside their bands for a day, and
-          # pushes code to analyst/* branches for the owner to merge.
-          ensure_env ANALYST_ENABLED false
+          # The AI analyst (scripts/ai_analyst.py, s-qbzbrw): ON since the
+          # owner's Desk verdict of 2026-09-24 (the SRE ledger had shown its
+          # clean day). It runs daily inside the sidecar, moves live limits
+          # inside their bands for a day, and pushes code to analyst/*
+          # branches for the owner to merge. Set ANALYST_ENABLED=false in the
+          # ENV_FILE secret to switch it off again.
+          ensure_env ANALYST_ENABLED true
           ensure_env WALLET_DISCOVERY_CACHE_MAX_GB 3
           ensure_env WALLET_DISCOVERY_RES_CACHE_MAX_GB 1
           ensure_env LIVE_BUDGET_EXPOSURE_FRAC 0.80
