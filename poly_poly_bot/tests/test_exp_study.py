@@ -102,3 +102,14 @@ def test_the_menu_is_closed(desk):
     with pytest.raises(ValueError):
         es.run("wallet_cap", {}, now=NOW, b_rows=[], zset_wallets=set())
     assert any(l.strip().startswith("min_usd:") for l in es.menu_lines())
+
+
+def test_a_study_that_varies_nothing_is_refused(desk, monkeypatch):
+    monkeypatch.setattr(CONFIG, "copy_paper_first_entry_only", True)
+    monkeypatch.setattr(CONFIG, "copy_paper_b_max_per_wallet_day", 25)
+    with pytest.raises(ValueError, match="varies nothing"):
+        es.run("first_entry", {"to": True}, now=NOW, fetch=lambda w: ([], [], None), resolve=lambda c: None, b_rows=[], zset_wallets=set())
+    with pytest.raises(ValueError, match="varies nothing"):
+        es.run("min_usd", {"from": 300, "to": 300}, now=NOW, fetch=lambda w: ([], [], None), resolve=lambda c: None, b_rows=[], zset_wallets=set())
+    with pytest.raises(ValueError, match="varies nothing"):
+        es.run("wallet_cap", {"to": 25}, now=NOW, b_rows=[], zset_wallets=set())

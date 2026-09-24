@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import time
 import pathlib
 
 import pytest
@@ -296,17 +297,22 @@ def test_the_daily_check_wins_to_a_branch_for_the_owner_never_main(desk):
     rows = [("0xw1" if i % 2 else "0xw2", 0.3 if i % 3 else -1.0, NOW + 8 * 3600 * i) for i in range(12)]
     _books(desk, "min150", rows, [(t, r + 0.2, o) for t, r, o in rows])
     day = NOW + 5 * 86400
-    s = an.maybe_run(day, runner=_runner_for({"proposals": [], "summary": "quiet"}), send=send, apply=apply, push=push)
-    assert calls["push"] == [("exp-min150-win", "analyst/exp-min150")]
-    fp, message = calls["apply"][0]
-    assert fp == "exp-min150-win" and "won its bars" in message
-    assert any("WON" in m and "compare/main...analyst/exp-min150" in m and "Merge it" in m for m in send.sent)
+    branches = []
+    monkeypatch_win = lambda card, md, *, sre, work_root=None: (branches.append((card["id"], md)) or (True, f"analyst/exp-{card['id']}", "pushed: record, deploy.yml"))
+    an.win_branch, _orig = monkeypatch_win, an.win_branch
+    try:
+        s = an.maybe_run(day, runner=_runner_for({"proposals": [], "summary": "quiet"}), send=send, apply=apply, push=push)
+    finally:
+        an.win_branch = _orig
+    assert calls["push"] == [] and calls["apply"] == [], "the WIN branch is written with git, not apply_fix"
+    assert branches and branches[0][0] == "min150" and "ensure_env COPY_PAPER_MIN_USD 150" in branches[0][1]
+    assert any("WON" in m and "compare/main...analyst/exp-min150" in m and "COPY_PAPER_MIN_USD=150" in m and "merge it" in m for m in send.sent)
     assert exp_cards.load("min150")["status"] == "win"
     rows_ = [r for r in ops_watch.watcher_thoughts() if r.get("proposal") == "experiment"]
     assert rows_ and "branch analyst/exp-min150 pushed" in rows_[-1]["did"]
     assert exp_cards.line(day + 60).startswith("\U0001f9ea exp min150 WIN")
     assert an.maybe_run(day + 3600, runner=_runner_for({"proposals": [], "summary": "q"}), send=send, apply=apply, push=push) is None
-    assert len(calls["push"]) == 1, "concluded once"
+    assert len(branches) == 1, "concluded once"
 
 
 def test_the_daily_check_kills_with_one_line_and_frees_the_queue(desk):
@@ -343,9 +349,10 @@ def test_the_supervisor_keeps_one_process_up_and_voids_a_card_that_will_not_stay
     t = NOW + 2 * an.SPAWN_MIN_GAP_S + an.HEARTBEAT_STALE_S + 10
     an.supervise(t, spawn=spawn, alive=alive, stop=stopped.append)
     assert stopped == [102] and len(spawned) == 3
-    # the fifth start in a day is the last: the card voids and the phone hears
-    monkeypatch.setattr(an, "MAX_SPAWNS_PER_DAY", 3)
+    # crashes count toward the day's cap; the card voids and the phone hears
+    monkeypatch.setattr(an, "MAX_SPAWNS_PER_DAY", 1)
     up["alive"] = False
+    an._exited.add(103)
     send = _sender()
     sv = an.supervise(t + an.SPAWN_MIN_GAP_S + 1, spawn=spawn, alive=alive, stop=stopped.append, send=send)
     assert "void" in sv["did"] and exp_cards.load("min150")["status"] == "void" and len(spawned) == 3
@@ -491,3 +498,71 @@ def test_the_child_environment_strips_every_credential(desk, monkeypatch):
         monkeypatch.setenv(k, "x")
     env = an._child_env({"id": "min150"}, str(desk / "exp" / "min150"))
     assert not any(k in env for k in ("CLAUDE_CODE_OAUTH_TOKEN", "LANGFUSE_SECRET_KEY", "ANTHROPIC_API_KEY", "ETHERSCAN_API_KEY"))
+
+
+# ---- verifier round 1 (s-ye5990): restarts are not crashes, WIN carries the change, studies vary something ----
+
+def test_a_container_restart_does_not_count_toward_the_five_starts(desk):
+    exp_cards.create({k: v for k, v in CARD.items() if k != "kind"}, NOW); exp_cards.launch("min150", NOW)
+    an._exited.clear()
+    spawned = []
+    spawn = lambda c: spawned.append(c["id"]) or 100 + len(spawned)
+    t = NOW
+    for i in range(7):          # seven "restarts": the pid is never one this supervisor held
+        an.supervise(t, spawn=spawn, alive=lambda p: False, stop=lambda p: None)
+        t += an.SPAWN_MIN_GAP_S + 1
+    assert len(spawned) == 7 and exp_cards.load("min150")["status"] == "live"
+    st = json.loads((desk / "ops-analyst-state.json").read_text())
+    assert st["exp"]["min150"]["spawns"].get(time.strftime("%Y-%m-%d", time.gmtime(NOW)), 0) == 0
+    # a child we held that died is a crash
+    an._exited.add(107)
+    an.supervise(t, spawn=spawn, alive=lambda p: False, stop=lambda p: None)
+    st = json.loads((desk / "ops-analyst-state.json").read_text())
+    assert st["exp"]["min150"]["spawns"][time.strftime("%Y-%m-%d", time.gmtime(t))] == 1
+
+
+def test_the_win_branch_carries_the_deploy_line_and_the_record(tmp_path, monkeypatch):
+    import subprocess
+    origin = tmp_path / "origin.git"; subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(origin)], check=True)
+    seed = tmp_path / "seed"; subprocess.run(["git", "clone", "-q", str(origin), str(seed)], check=True)
+    (seed / ".github" / "workflows").mkdir(parents=True)
+    (seed / ".github" / "workflows" / "deploy.yml").write_text("          ensure_env COPY_PAPER_ENABLED true\n          ensure_env COPY_PAPER_MIN_USD 300\n")
+    env = {"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@t", "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@t"}
+    subprocess.run(["git", "add", "-A"], cwd=seed, check=True)
+    subprocess.run(["git", "commit", "-q", "-m", "seed"], cwd=seed, check=True, env={**dict(__import__("os").environ), **env})
+    subprocess.run(["git", "push", "-q", "origin", "HEAD:main"], cwd=seed, check=True)
+    sre = an._sre()
+    monkeypatch.setattr(sre, "REPO_SSH", str(origin))
+    monkeypatch.setattr(sre, "DEPLOY_KEY", str(tmp_path / "nokey"))
+    card = {**{k: v for k, v in CARD.items() if k != "kind"}, "hypothesis": "h", "knobs": {"min_usd": 150.0}, "win_bar": CARD["win_bar"], "kill_bar": CARD["kill_bar"]}
+    ok, branch, detail = an.win_branch(card, "# record\n", sre=sre, work_root=str(tmp_path / "work"))
+    assert ok and branch == "analyst/exp-min150" and "deploy.yml" in detail, detail
+    out = tmp_path / "check"; subprocess.run(["git", "clone", "-q", "-b", branch, str(origin), str(out)], check=True)
+    assert (out / "poly_poly_bot" / "docs" / "experiments" / "min150.md").read_text() == "# record\n"
+    dy = (out / ".github" / "workflows" / "deploy.yml").read_text()
+    assert "ensure_env COPY_PAPER_MIN_USD 150\n" in dy and "COPY_PAPER_MIN_USD 300" not in dy
+    assert an.edit_deploy_yml("          ensure_env EXP_FLAGS_ON a\n", {"EXP_FLAGS_ON": "b"}) == "          ensure_env EXP_FLAGS_ON a,b\n"
+    assert an.edit_deploy_yml("x\n          ensure_env A 1\n", {"NEW": "v"}) == "x\n          ensure_env NEW v\n          ensure_env A 1\n"
+    assert an.deploy_lines_for({"knobs": {"first_entry_only": False}, "flag": "wide"}) == {"COPY_PAPER_FIRST_ENTRY_ONLY": "false", "EXP_FLAGS_ON": "wide"}
+
+
+def test_the_child_env_is_an_allowlist(desk, monkeypatch):
+    monkeypatch.setenv("RUNNER_SHARED_SECRET", "s"); monkeypatch.setenv("GITHUB_TOKEN", "g")
+    monkeypatch.setenv("COPY_PAPER_MIN_USD", "300"); monkeypatch.setenv("EXP_FLAGS_ON", "x"); monkeypatch.setenv("COPY_SECRET_KEY", "k")
+    env = an._child_env({"id": "min150"}, str(desk / "exp" / "min150"))
+    assert "RUNNER_SHARED_SECRET" not in env and "GITHUB_TOKEN" not in env and "COPY_SECRET_KEY" not in env
+    assert env["COPY_PAPER_MIN_USD"] == "300" and "EXP_FLAGS_ON" not in env and env["PREVIEW_MODE"] == "true"
+
+
+def test_a_flag_named_in_the_env_is_on_at_boot(monkeypatch):
+    import importlib
+
+    from src.copy_trading import exp_flag
+    monkeypatch.setenv("EXP_FLAGS_ON", "wide_band, other")
+    importlib.reload(exp_flag)
+    try:
+        assert exp_flag.on("wide_band") and exp_flag.on("other") and not exp_flag.on("x")
+    finally:
+        monkeypatch.delenv("EXP_FLAGS_ON")
+        importlib.reload(exp_flag)
+    assert not exp_flag.on("wide_band")

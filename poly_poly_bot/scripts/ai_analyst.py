@@ -57,6 +57,7 @@ import re
 import signal
 import subprocess
 import sys
+import tempfile
 import time
 from typing import Callable, Optional
 
@@ -612,17 +613,22 @@ def _record_markdown(card: dict) -> str:
     from src.copy_trading import book_recipes
     lines = [f"# experiment {card['id']}: {card['title']}", ""] + exp_cards.table(card) + [""]
     if card.get("knobs"):
-        lines += ["## to make it the bot's own", "In deploy.yml (the owner's ruling, never the analyst's):"]
+        lines += ["## what this branch changes", "deploy.yml (the line the owner's merge makes real):"]
         for k, v in card["knobs"].items():
             env = book_recipes.KNOB_ENV.get(k)
-            lines.append(f"- {k} = {v}" + (f": `ensure_env {env} {str(v).lower() if isinstance(v, bool) else v}`" if env else " (no env; a config change)"))
+            lines.append(f"- {k} = {v}" + (f": `ensure_env {env} {_env_value(v)}`" if env else " (no env; a config change)"))
         lines.append("")
     if card.get("branch"):
-        lines += ["## the code", f"Branch `{card['branch']}`, behind `exp_flag.on(\"{card.get('flag')}\")`; ships default-off. "
-                                f"Paths: {card.get('diff_class')} class." , ""]
+        lines += ["## the code", f"Branch `{card['branch']}`, behind `exp_flag.on(\"{card.get('flag')}\")`; "
+                                f"switched on at boot by `ensure_env EXP_FLAGS_ON {card.get('flag')}` in deploy.yml. "
+                                f"Paths: {card.get('diff_class')} class.", ""]
     lines += ["## caveat", "Paper books at their price with modeled costs; the control is book B's recipe run next to book B "
               "(the harness column says how far it strayed). Nothing here traded real money.", ""]
     return "\n".join(lines)
+
+
+def _env_value(v) -> str:
+    return str(v).lower() if isinstance(v, bool) else (str(int(v)) if isinstance(v, float) and float(v).is_integer() else str(v))
 
 
 def _new_file_diff(path: str, text: str) -> str:
@@ -631,34 +637,98 @@ def _new_file_diff(path: str, text: str) -> str:
     return "\n".join(out) + "\n"
 
 
-def conclude_win(card: dict, now: float, *, send, apply, push, sre) -> str:
-    """WIN: a branch analyst/exp-<id> carrying the record (and the code,
-    when the card had some); the compare link on the phone. The owner's
-    merge is the only way into real trades."""
+DEPLOY_YML = ".github/workflows/deploy.yml"
+
+
+def deploy_lines_for(card: dict) -> dict[str, str]:
+    """The ``ensure_env`` lines a WIN needs in deploy.yml: one per knob with
+    an env name, and EXP_FLAGS_ON for a code change."""
+    from src.copy_trading import book_recipes
+    out: dict[str, str] = {}
+    for k, v in (card.get("knobs") or {}).items():
+        env = book_recipes.KNOB_ENV.get(k)
+        if env:
+            out[env] = _env_value(v)
+    if card.get("flag"):
+        out["EXP_FLAGS_ON"] = str(card["flag"])
+    return out
+
+
+def edit_deploy_yml(text: str, lines: dict[str, str]) -> str:
+    """``ensure_env NAME VALUE`` replaced in place, or added after the
+    first ensure_env line; EXP_FLAGS_ON accumulates (comma-separated)."""
+    rows = text.split("\n")
+    for name, value in lines.items():
+        pat = re.compile(rf"^(\s*)ensure_env {re.escape(name)} (.*)$")
+        hit = next((i for i, r in enumerate(rows) if pat.match(r)), None)
+        if hit is not None:
+            m = pat.match(rows[hit])
+            cur = m.group(2).strip()
+            if name == "EXP_FLAGS_ON" and cur and value not in cur.split(","):
+                value = f"{cur},{value}"
+            rows[hit] = f"{m.group(1)}ensure_env {name} {value}"
+            continue
+        first = next((i for i, r in enumerate(rows) if re.match(r"^\s*ensure_env \S+ ", r)), None)
+        indent = re.match(r"^(\s*)", rows[first]).group(1) if first is not None else "          "
+        at = first if first is not None else len(rows)
+        rows.insert(at, f"{indent}ensure_env {name} {value}")
+    return "\n".join(rows)
+
+
+def win_branch(card: dict, md: str, *, sre, work_root: Optional[str] = None) -> tuple[bool, str, str]:
+    """The branch the owner merges: the record under docs/experiments/, the
+    deploy.yml lines that make the change real, and, for a code card, the
+    code itself (the clone of exp/<id>). ``(ok, branch, detail)``. Written
+    with git directly: this is the one place a branch for the owner may
+    touch .github/, and it goes nowhere without his merge."""
     exp_id = card["id"]
     branch = f"analyst/exp-{exp_id}"
     rel = f"poly_poly_bot/docs/experiments/{exp_id}.md"
-    md = _record_markdown(card)
     wd = card.get("workdir")
-    if wd and os.path.isdir(os.path.join(wd, ".git")):
-        try:
-            os.makedirs(os.path.dirname(os.path.join(wd, rel)), exist_ok=True)
-            with open(os.path.join(wd, rel), "w", encoding="utf-8") as f:
-                f.write(md)
-            sre._run(["git", "add", rel], cwd=wd)
-            r = sre._run(["git", "commit", "-q", "-m", f"exp({exp_id}): won its bars; the record\n\n{card['hypothesis']}"], cwd=wd)
-            ok = r.returncode == 0
-            if ok:
-                r = sre._run(["git", "push", "-q", "origin", f"HEAD:refs/heads/{branch}"], cwd=wd, timeout=300)
-                ok = r.returncode == 0
-            detail = "pushed" if ok else f"git failed: {(r.stderr or '')[-200:]}"
-        except OSError as exc:
-            ok, detail = False, f"{exc!r}"
-    else:
-        ok, sha, detail = apply(_new_file_diff(rel, md), fp=f"exp-{exp_id}-win", message=f"exp({exp_id}): won its bars; the record")
-        if ok:
-            ok, where = push(f"exp-{exp_id}-win", branch=branch)
-            detail = f"{detail}; {'pushed' if ok else where}"
+    if not (wd and os.path.isdir(os.path.join(wd, ".git"))):
+        root = work_root or WORK_ROOT
+        os.makedirs(root, exist_ok=True)
+        wd = tempfile.mkdtemp(prefix=f"fix-exp-{exp_id}-win-", dir=root)
+        r = sre._run(["git", "clone", "-q", "--depth", "50", "--branch", "main", sre.REPO_SSH, wd], cwd=root, timeout=300)
+        if r.returncode != 0:
+            return (False, branch, f"clone failed: {(r.stderr or '')[-200:]}")
+    try:
+        os.makedirs(os.path.dirname(os.path.join(wd, rel)), exist_ok=True)
+        with open(os.path.join(wd, rel), "w", encoding="utf-8") as f:
+            f.write(md)
+        lines = deploy_lines_for(card)
+        touched = [rel]
+        dy = os.path.join(wd, DEPLOY_YML)
+        if lines and os.path.exists(dy):
+            with open(dy, encoding="utf-8") as f:
+                before = f.read()
+            after = edit_deploy_yml(before, lines)
+            if after != before:
+                with open(dy, "w", encoding="utf-8") as f:
+                    f.write(after)
+                touched.append(DEPLOY_YML)
+        r = sre._run(["git", "add"] + touched, cwd=wd)
+        if r.returncode != 0:
+            return (False, branch, f"git add failed: {(r.stderr or '')[-200:]}")
+        msg = (f"exp({exp_id}): won its bars; the change for the owner's merge\n\n{card['hypothesis']}\n\n"
+               + ("\n".join(f"deploy.yml: ensure_env {k} {v}" for k, v in lines.items()) or "no deploy line"))
+        r = sre._run(["git", "commit", "-q", "-m", msg], cwd=wd)
+        if r.returncode != 0:
+            return (False, branch, f"commit failed: {(r.stderr or '')[-200:]}")
+        r = sre._run(["git", "push", "-q", "origin", f"HEAD:refs/heads/{branch}"], cwd=wd, timeout=300)
+        if r.returncode != 0:
+            return (False, branch, f"push failed: {(r.stderr or '')[-200:]}")
+        return (True, branch, "pushed: " + ", ".join(touched))
+    except OSError as exc:
+        return (False, branch, f"{exc!r}")
+
+
+def conclude_win(card: dict, now: float, *, send, apply=None, push=None, sre) -> str:
+    """WIN: a branch analyst/exp-<id> carrying the record AND the change
+    (deploy.yml lines, the code for a diff card); the compare link on the
+    phone. The owner's merge is the only way into real trades."""
+    exp_id = card["id"]
+    ok, branch, detail = win_branch(card, _record_markdown(card), sre=sre)
     from src.copy_trading import ops_watch
     if not ok:
         ops_watch.receipt("analyst_exp_pr_failed", before=exp_id, after="not pushed", detail=detail[:160], now=now)
@@ -666,11 +736,14 @@ def conclude_win(card: dict, now: float, *, send, apply, push, sre) -> str:
         return f"win, branch failed: {detail}"[:300]
     link = f"{sre.REPO_HTTPS}/compare/main...{branch}?expand=1"
     money = " Touches the money path." if card.get("diff_class") == "money" else ""
-    v = exp_cards.journal_rows(exp_id)[-1] if exp_cards.journal_rows(exp_id) else {}
+    lines = deploy_lines_for(card)
+    change = "; ".join(f"{k}={v}" for k, v in lines.items()) or "the record only"
+    rows_ = exp_cards.journal_rows(exp_id)
+    v = rows_[-1] if rows_ else {}
     delivered = send(f"\U0001f4dd <b>AI analyst</b> experiment <code>{exp_id}</code> WON: {html.escape(str(v.get('why') or ''))}.{money} "
-                     f"Merge it to bring it to real trades: {link}")
-    ops_watch.receipt("analyst_exp_pr", before=exp_id, after=branch, detail=card["title"][:160], now=now, push="BOT" if delivered else None)
-    return f"win: branch {branch} pushed; owner asked to merge"
+                     f"The branch sets {html.escape(change)} in deploy.yml; merge it to bring it to real trades: {link}")
+    ops_watch.receipt("analyst_exp_pr", before=exp_id, after=branch, detail=(card["title"] + " | " + change)[:160], now=now, push="BOT" if delivered else None)
+    return f"win: branch {branch} pushed ({change}); owner asked to merge"
 
 
 def journal_live(now: float, *, send, apply, push, sre) -> Optional[dict]:
@@ -700,17 +773,25 @@ def journal_live(now: float, *, send, apply, push, sre) -> Optional[dict]:
 _procs: dict[int, subprocess.Popen] = {}
 
 
+# What the child may see: the paper harness reads these and nothing else.
+# An allowlist, so a credential the sidecar gains later never reaches the
+# child by default (code review + verifier, s-ye5990).
+CHILD_ENV_KEYS = ("PATH", "HOME", "LANG", "LC_ALL", "TZ", "PYTHONPATH", "PYTHONUNBUFFERED", "VIRTUAL_ENV",
+                  "MALLOC_ARENA_MAX", "MALLOC_TRIM_THRESHOLD_", "DATA_API_URL", "GAMMA_API_URL", "CLOB_API_URL",
+                  "PREVIEW_MODE", "BOT_LOG_RETENTION_DAYS", "LOG_LEVEL")
+CHILD_ENV_PREFIXES = ("COPY_", "STRATEGY", "WALLET_DISCOVERY_", "FORM_", "EXP_", "AB_RACE_", "MAX_", "MIN_")
+
+
 def _child_env(card: dict, card_dir: str) -> dict:
-    env = os.environ.copy()
-    for k in ("PRIVATE_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "SRE_DEPLOY_KEY_PATH", "CLAUDE_CODE_OAUTH_TOKEN",
-              "ANTHROPIC_API_KEY", "LANGFUSE_SECRET_KEY", "LANGFUSE_PUBLIC_KEY", "ETHERSCAN_API_KEY"):
-        env.pop(k, None)
+    env = {k: v for k, v in os.environ.items()
+           if (k in CHILD_ENV_KEYS or k.startswith(CHILD_ENV_PREFIXES)) and "KEY" not in k and "TOKEN" not in k and "SECRET" not in k}
     env["DATA_DIR"] = os.path.join(card_dir, "scratch")
     env["LOGS_DIR"] = os.path.join(EXP_LOGS_DIR, "exp", card["id"])
     env["EXP_REAL_DATA_DIR"] = CONFIG.data_dir
     env["LIVE_ARM_ENABLED"] = "false"
     env["PREVIEW_MODE"] = "true"
     env["SRE_ROLE"] = "exp"
+    env.pop("EXP_FLAGS_ON", None)      # the treatment's flag is turned on by the driver, never by the env
     return env
 
 
@@ -727,6 +808,9 @@ def _spawn(card: dict) -> int:
     return proc.pid
 
 
+_exited: set = set()     # pids of children WE held that exited on their own
+
+
 def _alive(pid: int) -> bool:
     """Ours (a Popen we hold) by poll(); a pid from before a restart only
     when it still runs exp_book.py: after a container restart small pids
@@ -736,6 +820,7 @@ def _alive(pid: int) -> bool:
     if p is not None:
         if p.poll() is not None:
             _procs.pop(pid, None)
+            _exited.add(pid)
             return False
         return True
     if not pid:
@@ -752,6 +837,12 @@ def _alive(pid: int) -> bool:
         return True
     except OSError:
         return False
+
+
+def crashed_hint(pid: int) -> bool:
+    """A pid we did not hold (a previous supervisor's) tells nothing about
+    a crash: False. Tests may monkeypatch this to say a child died."""
+    return False
 
 
 def _stop(pid: int) -> None:
@@ -838,8 +929,12 @@ def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_
         # previous process (another pid) does not count either way.
         stale = up and (now - max(hb_ts, spawned)) > HEARTBEAT_STALE_S
         if (not up or stale) and now - float(rec.get("spawned_ts") or 0) >= SPAWN_MIN_GAP_S:
-            n_today = int((rec.get("spawns") or {}).get(day, 0))
-            if n_today >= MAX_SPAWNS_PER_DAY:
+            # A start counts toward the day's five only when a child THIS
+            # supervisor held died or hung: a container restart (every
+            # deploy) is not the experiment crashing (verifier, s-ye5990).
+            crashed = stale or (int(rec.get("pid") or 0) in _exited or crashed_hint(int(rec.get("pid") or 0)))
+            n_today = int((rec.get("spawns") or {}).get(day, 0)) + (1 if crashed else 0)
+            if n_today > MAX_SPAWNS_PER_DAY:
                 c = exp_cards.load(live["id"]) or live
                 exp_cards.apply_verdict(c, {"status": "void", "why": f"its process would not stay up ({n_today} starts today)"}, now)
                 did = f"{live['id']} void: process would not stay up"
@@ -855,9 +950,9 @@ def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_
                     did = f"spawn failed for {live['id']}: {exc!r}"[:200]
                 rec["pid"] = int(pid or 0)
                 rec["spawned_ts"] = now
-                rec.setdefault("spawns", {})[day] = n_today + 1
+                rec.setdefault("spawns", {})[day] = n_today
                 if pid:
-                    did = f"started {live['id']} (pid {pid}, start {n_today + 1} today)"
+                    did = f"started {live['id']} (pid {pid}, {'restart ' + str(n_today) + ' after a crash today' if crashed else 'first start since this supervisor came up'})"
                 if sre is not None and did:
                     sre.thought({"kind": "analyst", "proposal": "experiment", "woke_because": "supervise",
                                  "concluded": did, "did": did, "cost_usd": 0.0}, now)

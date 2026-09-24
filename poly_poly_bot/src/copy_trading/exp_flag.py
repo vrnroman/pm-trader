@@ -6,14 +6,22 @@ fills. The diff must therefore read its switch from here, not from the
 environment (one process has one environment): ``exp_flag.on("name")`` is
 False everywhere the bot runs and True only while the experiment driver
 turns it on around the treatment's cycle. A merged experiment ships
-default-off; the owner turns it on by a config knob of his own in the PR
-he merges. A leaf module: no imports.
+default-off; the WIN branch the owner merges adds ``ensure_env
+EXP_FLAGS_ON <flag>`` to deploy.yml, read here at boot. A leaf module.
 """
 from __future__ import annotations
 
 import contextlib
+import os
 
 _on: set[str] = set()
+
+# A merged experiment is switched on at boot by the deploy line its WIN
+# branch adds (``ensure_env EXP_FLAGS_ON <flag>``), never by the analyst:
+# the owner's merge is what brings it to real trades.
+for _f in os.environ.get("EXP_FLAGS_ON", "").split(","):
+    if _f.strip():
+        _on.add(_f.strip())
 
 
 def on(name: str) -> bool:
