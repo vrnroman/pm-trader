@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-24T00:41:30Z-81ac",
-    "ts": 1790210490,
-    "kind": "escalation",
-    "message": "Second order rejection today from the unclaimed winnings problem you were already told about. 07:49:59 UTC rejected a buy of 23.70 against balance 22.86. 23:18:14 UTC rejected a buy of 20.83 against balance 20.00, on Buenos Aires 2: Francisco Comesana vs Joaquin Aguilar. Fingerprint 534614711c15 is now at 2 hits, up from 1 at the last check. Resolved unclaimed still sits at 67. The bot pushed the first rejection to you. It has not pushed this second one. Equity is 134.06 against a floor of 56.00. Day spend hit its cap at 32.00 of 32.00. Redeeming the 67 would clear this on its own.",
+    "id": "2026-09-24T06:41:12Z-a14f",
+    "ts": 1790232072,
+    "kind": "nothing",
+    "message": "Armed, spend 6.40 of 32.00 cap, four copies filled in the last 24h, no self-disarm. Fingerprint 534614711c15 (unclaimed winnings order rejection) is unchanged at 2 hits, already escalated last check and already delivered to the owner.",
     "evidence": [
-        "534614711c15 x2 last 0.4h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}",
-        "2026-09-23 23:18:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={\"error\":\"not enough balance / allowance: the balance is not enough -> balance: 20000000, order amount: 20830000\"}",
-        "2026-09-23 07:49:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={\"error\":\"not enough balance / allowance: the balance is not enough -> balance: 22860000, order amount: 23700000\"}",
-        "{\"cash\": 72.413553, \"equity\": 134.06, \"floor\": 56.0, \"resolved_unclaimed\": 67, \"spend\": {\"spent_usd\": 32.0, \"cap_usd\": 32.0}}",
-        "prior verdict 2026-09-23T18:41:46Z-3f83: the 07:50 UTC order rejection has not recurred, still 1 hit"
+        "{\"cash\": 108.149433, \"open_cost\": 48.85, \"equity\": 157.0, \"floor\": 56.0, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 32.0, \"remaining_usd\": 25.6}, \"armed\": true, \"resolved_unclaimed\": 67}",
+        "534614711c15 x2 last 6.7h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}",
+        "2026-09-24 02:55:27 TRADE [verify] FILLED: BUY 9.69 shares on 'Korea Open: Yexin Ma vs Kimberly Birrell' @ 0.6600",
+        "{\"ts\": 1790210951.937275, \"kind\": \"nothing\", \"woke_because\": \"7984db4fdbb9\", \"concluded\": \"...the message itself says the owner was already told, and this is the routine escalation path w\"}",
+        "prior verdict 2026-09-24T00:41:30Z-81ac: fingerprint 534614711c15 was at 2 hits then; still 2 hits now, not worse"
     ],
     "commit": null
 }
