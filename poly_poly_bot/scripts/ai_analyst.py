@@ -94,10 +94,22 @@ EXP_LOGS_DIR = os.environ.get("LOGS_DIR", "/app/sre/logs")
 SPAWN_MIN_GAP_S = _env_f("EXP_SPAWN_MIN_GAP_S", 600.0)
 MAX_SPAWNS_PER_DAY = int(_env_f("EXP_MAX_SPAWNS_PER_DAY", 5))
 HEARTBEAT_STALE_S = _env_f("EXP_HEARTBEAT_STALE_S", 900.0)
-# Same image, no new dependencies, no deploy change: an experiment is code
-# and knobs, never the box. (The SRE's MONEY_PATH is allowed here: the
-# process is the fence, and the class is printed on the WIN message.)
-EXP_FORBIDDEN = ("poly_poly_bot/deploy.sh", "poly_poly_bot/Dockerfile", "poly_poly_bot/requirements.txt")
+# Same image, no new dependencies, no deploy change, and never the harness
+# itself: an experiment is code and knobs, never the box or the fence. (The
+# SRE's MONEY_PATH is allowed here: the child process is the fence, and the
+# class is printed on the WIN message.)
+EXP_FORBIDDEN = ("poly_poly_bot/deploy.sh", "poly_poly_bot/Dockerfile", "poly_poly_bot/requirements.txt",
+                 "poly_poly_bot/scripts/exp_book.py", "poly_poly_bot/scripts/exp_study.py",
+                 "poly_poly_bot/src/copy_trading/exp_flag.py", "poly_poly_bot/src/copy_trading/exp_cards.py",
+                 "poly_poly_bot/src/copy_trading/book_recipes.py", "poly_poly_bot/src/copy_trading/copy_paper_runner.py",
+                 "poly_poly_bot/src/copy_trading/live_mode.py", "poly_poly_bot/src/copy_trading/zset.py",
+                 "poly_poly_bot/src/config.py")
+# Words an experiment's diff may not contain: the child shares the sidecar's
+# uid and mounts, so the fence is the environment plus this screen plus the
+# harness check, not a kernel boundary (code review, s-ye5990). A real
+# boundary is a third container with the data dir read-only: the owner's.
+EXP_FORBIDDEN_WORDS = ("live_arm", "promoted_wallets", "sre_deploy_key", "subprocess", "os.system", "os.exec",
+                       "PRIVATE_KEY", "OAUTH_TOKEN", "git push", "shutil.rmtree")
 PROPOSAL_KINDS = ("limit", "pr", "note", "study", "experiment")
 
 
@@ -489,6 +501,11 @@ def start_experiment(card: dict, now: float, *, send, apply, push, sre, clone=No
         if cls == "forbidden" or any(p in EXP_FORBIDDEN for p in paths):
             row["did"] = f"experiment refused: forbidden path {paths[:3]}"
             return row
+        added = "\n".join(ln for ln in diff.splitlines() if ln.startswith("+"))
+        hit = next((w for w in EXP_FORBIDDEN_WORDS if w in added), None)
+        if hit:
+            row["did"] = f"experiment refused: the diff mentions {hit!r}"
+            return row
     ok, why, c = exp_cards.create(card, now)
     if not ok:
         row["did"] = f"experiment refused: {why}"
@@ -524,6 +541,19 @@ def start_experiment(card: dict, now: float, *, send, apply, push, sre, clone=No
     return row
 
 
+TELEGRAM_MAX = 4096
+
+
+def _fit(text: str, budget: int) -> str:
+    """Escaped text that fits ``budget`` characters after escaping (the
+    escape grows "->" to "-&gt;"; a 40-wallet table came out near 4,200)."""
+    out = html.escape(text)
+    while len(out) > max(budget, 0) and text:
+        text = text[: int(len(text) * 0.8)]
+        out = html.escape(text) + "\n..."
+    return out
+
+
 def run_study(p: dict, now: float, *, send, study) -> dict:
     """Run one study from the menu, freeze it, put the totals on the phone.
     Returns the ledger row (with the study id when it ran)."""
@@ -540,9 +570,10 @@ def run_study(p: dict, now: float, *, send, study) -> dict:
     row["did"] = f"study {rec['id']} {'frozen' if written else 'already on file'}: {rec['totals_line']}"[:400]
     from src.copy_trading import ops_watch
     table = _exp_module().markdown(rec)
-    body = html.escape(table[:3000])
-    delivered = send(f"\U0001f52c <b>AI analyst</b> study <code>{rec['id']}</code>: {html.escape(str(p.get('question') or kind))}\n"
-                     f"{html.escape(rec['totals_line'])}\n<blockquote expandable>{body}</blockquote>\n{html.escape(rec['caveat'])}\n{path}")
+    head = (f"\U0001f52c <b>AI analyst</b> study <code>{rec['id']}</code>: {html.escape(str(p.get('question') or kind))}\n"
+            f"{html.escape(rec['totals_line'])}\n")
+    tail = f"\n{html.escape(rec['caveat'])}\n{path}"
+    delivered = send(head + f"<blockquote expandable>{_fit(table, TELEGRAM_MAX - len(head) - len(tail) - 40)}</blockquote>" + tail)
     ops_watch.receipt("analyst_study", before=rec["id"], after=rec["totals_line"][:120], detail=rec["caveat"][:160], now=now,
                       push="BOT" if delivered else None)
     return row
@@ -595,7 +626,7 @@ def _record_markdown(card: dict) -> str:
 
 
 def _new_file_diff(path: str, text: str) -> str:
-    body = text.splitlines()
+    body = text.rstrip("\n").split("\n")     # never splitlines(): \u2028 would miscount the hunk
     out = [f"--- /dev/null", f"+++ b/{path}", f"@@ -0,0 +1,{len(body)} @@"] + ["+" + ln for ln in body]
     return "\n".join(out) + "\n"
 
@@ -671,7 +702,8 @@ _procs: dict[int, subprocess.Popen] = {}
 
 def _child_env(card: dict, card_dir: str) -> dict:
     env = os.environ.copy()
-    for k in ("PRIVATE_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "SRE_DEPLOY_KEY_PATH"):
+    for k in ("PRIVATE_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "SRE_DEPLOY_KEY_PATH", "CLAUDE_CODE_OAUTH_TOKEN",
+              "ANTHROPIC_API_KEY", "LANGFUSE_SECRET_KEY", "LANGFUSE_PUBLIC_KEY", "ETHERSCAN_API_KEY"):
         env.pop(k, None)
     env["DATA_DIR"] = os.path.join(card_dir, "scratch")
     env["LOGS_DIR"] = os.path.join(EXP_LOGS_DIR, "exp", card["id"])
@@ -696,6 +728,10 @@ def _spawn(card: dict) -> int:
 
 
 def _alive(pid: int) -> bool:
+    """Ours (a Popen we hold) by poll(); a pid from before a restart only
+    when it still runs exp_book.py: after a container restart small pids
+    are reused by the SRE's own git, pytest or claude children, and a
+    liveness check that trusted the number alone would SIGTERM them."""
     p = _procs.get(pid)
     if p is not None:
         if p.poll() is not None:
@@ -704,6 +740,13 @@ def _alive(pid: int) -> bool:
         return True
     if not pid:
         return False
+    try:
+        with open(f"/proc/{pid}/cmdline", "rb") as f:
+            return b"exp_book.py" in f.read()
+    except OSError:
+        pass
+    if os.path.isdir("/proc"):
+        return False        # no such pid on a /proc system
     try:
         os.kill(pid, 0)
         return True
@@ -731,9 +774,15 @@ def run_requests(now: float, *, send, study=None, sre=None) -> list[dict]:
     out = []
     for path, req in exp_cards.pending_requests():
         p = {"kind": "study", "study": req.get("kind"), "params": req.get("params") or {}, "question": req.get("question") or ""}
-        row = run_study(p, now, send=send, study=study or _default_study)
+        ok = False
+        try:
+            row = run_study(p, now, send=send, study=study or _default_study)
+            ok = bool(row.get("study_id"))
+        except Exception as exc:  # noqa: BLE001  a request runs once, whatever happened
+            row = {"kind": "analyst", "proposal": "study", "concluded": f"tapped study failed: {exc!r}"[:300], "did": "nothing", "cost_usd": 0.0}
+        finally:
+            exp_cards.finish_request(path, ok=ok)
         row["woke_because"] = f"owner tapped {req.get('preset')}"
-        exp_cards.finish_request(path, ok=bool(row.get("study_id")))
         out.append(sre.thought(row, now) if sre is not None else row)
     return out
 
@@ -744,12 +793,21 @@ def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_
     when nothing is live. A process that will not stay up
     (MAX_SPAWNS_PER_DAY) voids its card."""
     now = time.time() if now is None else now
-    if not enabled():
-        return {"live": None, "did": "off"}
     st = _read_json(_p(STATE_FILE))
     ex = st.setdefault("exp", {})
     day = time.strftime("%Y-%m-%d", time.gmtime(now))
     did = ""
+    if not enabled():
+        # Off is off: nothing starts, and a child still running from before
+        # the switch is stopped; the owner's taps stay queued (the tap
+        # itself says the analyst is off).
+        for exp_id, rec in ex.items():
+            if rec.get("pid") and alive(int(rec["pid"])):
+                stop(int(rec["pid"]))
+                rec["pid"] = 0
+                did = f"stopped {exp_id}: analyst off"
+        _write_json(_p(STATE_FILE), st)
+        return {"live": None, "did": did or "off"}
     if send is not None:
         ran = run_requests(now, send=send, study=study, sre=sre)
         if ran:
@@ -773,7 +831,12 @@ def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_
         rec = ex.setdefault(live["id"], {"pid": 0, "spawned_ts": 0.0, "spawns": {}})
         hb = exp_cards.heartbeat(live["id"])
         up = bool(rec.get("pid")) and alive(int(rec["pid"]))
-        stale = up and hb and (now - float(hb.get("ts") or 0)) > HEARTBEAT_STALE_S and float(hb.get("ts") or 0) > float(rec.get("spawned_ts") or 0)
+        spawned = float(rec.get("spawned_ts") or 0)
+        hb_ts = float(hb.get("ts") or 0) if hb and int(hb.get("pid") or 0) == int(rec.get("pid") or -1) else 0.0
+        # Stale: this process's own heartbeat is old, or it never wrote one
+        # within the window (hung in its first read). A heartbeat from the
+        # previous process (another pid) does not count either way.
+        stale = up and (now - max(hb_ts, spawned)) > HEARTBEAT_STALE_S
         if (not up or stale) and now - float(rec.get("spawned_ts") or 0) >= SPAWN_MIN_GAP_S:
             n_today = int((rec.get("spawns") or {}).get(day, 0))
             if n_today >= MAX_SPAWNS_PER_DAY:

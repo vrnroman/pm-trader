@@ -114,5 +114,6 @@ def test_main_refuses_a_key_in_the_environment(box, monkeypatch, capsys):
     # test process (a 0-byte RLIMIT_AS starved the CI runner's pytest).
     assert eb.main(["--card", str(box["card_dir"] / "card.json"), "--max-rss-mb", "0"]) == 2
     out = capsys.readouterr().out
-    assert "address space cap off" in out and "refusing to run with PRIVATE_KEY" in out and "deadbeef" not in out
+    assert "refusing to run with PRIVATE_KEY" in out and "deadbeef" not in out
+    assert "address space" not in out, "the key is refused before any fence is applied"
     assert eb.fence(0) == "address space cap off" and eb.fence(-1) == "address space cap off"

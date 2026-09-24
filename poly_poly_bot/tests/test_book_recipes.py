@@ -49,3 +49,9 @@ def test_every_knob_env_name_exists_in_config():
     src = (ROOT / "src" / "config.py").read_text(encoding="utf-8")
     for env in book_recipes.KNOB_ENV.values():
         assert re.search(rf'"{env}"', src), f"{env} is not a config env name"
+
+
+def test_a_cap_of_zero_is_not_a_knob_and_strings_are_read_as_booleans():
+    ok, why = book_recipes.coerce_knobs({"max_copies_per_wallet_day": 0})
+    assert ok == {} and "caps on a card are 1 or more" in why
+    assert book_recipes.as_bool("false") is False and book_recipes.as_bool("True") is True and book_recipes.as_bool(0) is False

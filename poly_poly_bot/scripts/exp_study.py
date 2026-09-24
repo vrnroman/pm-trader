@@ -199,7 +199,8 @@ def study_activity(kind: str, params: dict, *, now: float, wallets: list[str], f
     elif kind == "first_entry":
         f_from = f_to = cur_floor
         d_from = d_to = cur_days
-        fe_from, fe_to = True, bool(params.get("to", False))
+        from src.copy_trading.book_recipes import as_bool
+        fe_from, fe_to = True, as_bool(params.get("to", False))
     else:
         raise ValueError(kind)
     settings = {"from": {"floor": f_from, "days": d_from, "first_entry_only": fe_from},

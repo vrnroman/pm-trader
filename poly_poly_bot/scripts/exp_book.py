@@ -11,7 +11,11 @@ clone. The fence (manager, s-ye5990):
   the harness lands under the card, never in the bot's data dir; the real
   data dir is read for the watchlists, the gate history and B's blacklist;
 - an address-space limit (EXP_MAX_RSS_MB) so a runaway experiment dies
-  before the sidecar does;
+  before the sidecar does; the diff itself is screened for forbidden paths
+  and words before it lands (ai_analyst.EXP_FORBIDDEN*). This is an
+  environment fence, not a kernel one: the child shares the sidecar's uid
+  and mounts. A third container with the data dir read-only would be the
+  real boundary; that is the owner's call.
 - the control IS book B (``book_recipes.book_b_kwargs``); the treatment is
   the same recipe plus the card's knobs, and, for a code change, the card's
   flag turned on around its cycle only (``exp_flag``). Both read one
@@ -204,11 +208,11 @@ def main(argv: Optional[list] = None) -> int:
     ap.add_argument("--max-cycles", type=int, default=None)
     ap.add_argument("--interval", type=float, default=None)
     a = ap.parse_args(argv)
-    print(f"[exp] {fence(a.max_rss_mb)}", flush=True)
-    for k in ("PRIVATE_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID"):
+    for k in ("PRIVATE_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "CLAUDE_CODE_OAUTH_TOKEN"):
         if os.environ.get(k):
             print(f"[exp] refusing to run with {k} in the environment", flush=True)
             return 2
+    print(f"[exp] {fence(a.max_rss_mb)}", flush=True)
     from src.logger import logger
     run(a.card, real_data_dir=a.real_data_dir, max_cycles=a.max_cycles, interval_s=a.interval,
         log=lambda s: logger.info(s))

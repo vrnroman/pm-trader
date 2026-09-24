@@ -3092,6 +3092,10 @@ def test_a_study_tap_writes_a_request_and_the_daily_line_carries_the_buttons(tmp
     from src.copy_trading import exp_cards
     data = tmp_path / "data"; data.mkdir()
     monkeypatch.setattr(exp_cards.CONFIG, "data_dir", str(data))
+    monkeypatch.setenv("ANALYST_ENABLED", "false")
+    assert tb._handle_callback("study:form7") == ("the analyst is off (ANALYST_ENABLED); nothing will run this", None)
+    assert exp_cards.pending_requests() == []
+    monkeypatch.setenv("ANALYST_ENABLED", "true")
     toast, edited = tb._handle_callback("study:form7")
     assert toast.startswith("queued: form on 7 days") and edited is None
     assert len(exp_cards.pending_requests()) == 1 and exp_cards.pending_requests()[0][1]["by"] == "owner"

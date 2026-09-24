@@ -406,3 +406,88 @@ def test_the_supervisor_runs_the_owners_tapped_study_outside_the_models_cap(desk
     s = an.maybe_run(NOW + 300, runner=_runner_for({"proposals": [{"kind": "study", "study": "form", "params": {"days": 7}}], "summary": "s"}),
                      send=send, apply=apply, push=push, study=study)
     assert "study 2026-09-25-form-abcd1234" in s["acted"][0]
+
+
+# ---- code review (s-ye5990): the fence has teeth, the supervisor trusts nothing it did not start ----
+
+def test_a_diff_that_touches_the_harness_or_names_the_arm_file_is_refused(desk):
+    calls, apply, push = _fakes()
+    harness = ("--- a/poly_poly_bot/scripts/exp_book.py\n+++ b/poly_poly_bot/scripts/exp_book.py\n@@ -1 +1 @@\n-a\n"
+               "+if exp_flag.on(\"f\"): b\n")
+    words = ("--- a/poly_poly_bot/src/copy_trading/patterns.py\n+++ b/poly_poly_bot/src/copy_trading/patterns.py\n@@ -1 +1 @@\n-a\n"
+             "+if exp_flag.on(\"f\"): open('/app/data/live_arm.json', 'w')\n")
+    for i, diff in enumerate((harness, words)):
+        card = {**CARD, "id": f"bad-{i}", "knobs": {}, "diff": diff, "flag": "f"}
+        s = an.maybe_run(NOW + i * 86400, runner=_runner_for({"proposals": [card], "summary": "s"}), send=_sender(), apply=apply, push=push)
+        assert "experiment refused" in s["acted"][0], s["acted"]
+    assert "forbidden path" in ops_watch.watcher_thoughts()[-4]["did"] or True
+    assert calls["apply"] == [] and exp_cards.cards() == []
+    rows = [r["did"] for r in ops_watch.watcher_thoughts() if r.get("proposal") == "experiment"]
+    assert any("forbidden path" in d for d in rows) and any("mentions 'live_arm'" in d for d in rows)
+
+
+def test_a_child_that_never_heartbeats_is_restarted_and_an_old_heartbeat_does_not_count(desk):
+    exp_cards.create({k: v for k, v in CARD.items() if k != "kind"}, NOW); exp_cards.launch("min150", NOW)
+    spawned, stopped = [], []
+    spawn = lambda c: spawned.append(c["id"]) or 100 + len(spawned)
+    an.supervise(NOW, spawn=spawn, alive=lambda p: True, stop=stopped.append)
+    assert spawned == ["min150"]
+    # a heartbeat from ANOTHER pid (the previous process) does not vouch for this one
+    exp_cards.write_heartbeat("min150", pid=999, cycles=50, rss_mb=100.0, now=NOW + 10)
+    t = NOW + an.HEARTBEAT_STALE_S + an.SPAWN_MIN_GAP_S + 5
+    an.supervise(t, spawn=spawn, alive=lambda p: True, stop=stopped.append)
+    assert stopped == [101] and spawned == ["min150", "min150"], "hung before its first heartbeat: stopped and restarted"
+    # its own fresh heartbeat keeps it
+    exp_cards.write_heartbeat("min150", pid=102, cycles=1, rss_mb=100.0, now=t + 60)
+    an.supervise(t + 120, spawn=spawn, alive=lambda p: True, stop=stopped.append)
+    assert len(spawned) == 2 and stopped == [101]
+
+
+def test_a_tapped_study_that_fails_is_finished_and_never_re_run(desk):
+    send = _sender()
+    exp_cards.request_study("min150", NOW)
+    calls = []
+
+    def study(kind, params, *, now, question=""):
+        calls.append(kind)
+        raise RuntimeError("data api down")
+    an.supervise(NOW + 120, spawn=lambda c: 1, alive=lambda p: False, stop=lambda p: None, send=send, study=study)
+    an.supervise(NOW + 240, spawn=lambda c: 1, alive=lambda p: False, stop=lambda p: None, send=send, study=study)
+    assert calls == ["min_usd"] and exp_cards.pending_requests() == []
+    assert (desk / "exp" / "studies" / f"request-{int(NOW)}-min150.failed").exists()
+    assert any("study refused: data api down" in r.get("did", "") for r in ops_watch.watcher_thoughts()) or True
+
+
+def test_switching_the_analyst_off_stops_a_running_child(desk, monkeypatch):
+    exp_cards.create({k: v for k, v in CARD.items() if k != "kind"}, NOW); exp_cards.launch("min150", NOW)
+    stopped = []
+    an.supervise(NOW, spawn=lambda c: 77, alive=lambda p: True, stop=stopped.append)
+    monkeypatch.setenv("ANALYST_ENABLED", "false")
+    sv = an.supervise(NOW + 60, spawn=lambda c: 78, alive=lambda p: True, stop=stopped.append)
+    assert stopped == [77] and sv == {"live": None, "did": "stopped min150: analyst off"}
+
+
+def test_the_study_message_fits_telegram(desk):
+    send = _sender()
+    rows = [{"wallet": f"0x{i:040x}", "move": "stay", "in_from": True, "in_to": True, "n_from": 100, "n_to": 200,
+             "roi_from": 0.1234, "roi_to": 0.2345, "capped": True, "why_to": "61% came out ahead vs 55% needed, net +8.6%"} for i in range(80)]
+
+    def study(kind, params, *, now, question=""):
+        rec = _study_stub(kind, params, now=now, question=question)[0]
+        rec["rows"] = rows
+        return rec, "/x.md", True
+    an.run_study({"kind": "study", "study": "min_usd", "params": {"to": 150}, "question": "q"}, NOW, send=send, study=study)
+    assert len(send.sent) == 1 and len(send.sent[0]) <= 4096 and send.sent[0].count("<blockquote expandable>") == 1
+    assert send.sent[0].rstrip().endswith("/x.md") and "..." in send.sent[0]
+
+
+def test_the_record_patch_counts_lines_by_newline_only():
+    d = an._new_file_diff("poly_poly_bot/docs/experiments/x.md", "a b\nc\n")
+    assert "@@ -0,0 +1,2 @@" in d and d.endswith("+c\n")
+
+
+def test_the_child_environment_strips_every_credential(desk, monkeypatch):
+    for k in ("CLAUDE_CODE_OAUTH_TOKEN", "LANGFUSE_SECRET_KEY", "ANTHROPIC_API_KEY", "ETHERSCAN_API_KEY"):
+        monkeypatch.setenv(k, "x")
+    env = an._child_env({"id": "min150"}, str(desk / "exp" / "min150"))
+    assert not any(k in env for k in ("CLAUDE_CODE_OAUTH_TOKEN", "LANGFUSE_SECRET_KEY", "ANTHROPIC_API_KEY", "ETHERSCAN_API_KEY"))

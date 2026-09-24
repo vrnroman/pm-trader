@@ -2784,6 +2784,8 @@ def _handle_study_tap(preset: str) -> tuple[str, str | None]:
     """A one-tap study (s-ye5990): the request file is written here, the
     study runs in the sidecar next tick, never in this process."""
     from src.copy_trading import exp_cards
+    if str(os.environ.get("ANALYST_ENABLED", "false")).strip().lower() not in ("1", "true", "yes", "on"):
+        return ("the analyst is off (ANALYST_ENABLED); nothing will run this", None)
     ok, msg = exp_cards.request_study(preset, time.time(), by="owner")
     return (msg[:180], None)
 

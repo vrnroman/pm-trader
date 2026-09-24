@@ -136,11 +136,20 @@ def coerce_knobs(knobs: dict) -> tuple[dict, str]:
             return ({}, f"{k} is not a knob an experiment may change")
         try:
             if t is bool:
-                if isinstance(v, str):
-                    v = v.strip().lower() in ("1", "true", "yes", "on")
-                out[k] = bool(v)
+                out[k] = as_bool(v)
             else:
                 out[k] = t(v)
         except (TypeError, ValueError):
             return ({}, f"{k}: {v!r} is not a {t.__name__}")
+        if str(k).startswith("max_copies_") and out[k] <= 0:
+            # In the recipe 0 means "cap off" (_cap); on a card it would
+            # mean a treatment that opens nothing, which is not an
+            # experiment. Off is not a knob.
+            return ({}, f"{k}: {out[k]} is not a cap; caps on a card are 1 or more")
     return (out, "")
+
+
+def as_bool(v) -> bool:
+    if isinstance(v, str):
+        return v.strip().lower() in ("1", "true", "yes", "on")
+    return bool(v)
