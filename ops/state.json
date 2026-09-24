@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-24T22:23:28.624183+00:00",
+ "generated": "2026-09-24T23:21:13.828628+00:00",
  "money": {
-  "cash": 75.745943,
-  "open_cost": 32.0,
-  "equity": 107.75,
+  "cash": 83.185943,
+  "open_cost": 25.6,
+  "equity": 108.79,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
@@ -17,10 +17,10 @@
   "resolved_unclaimed": 67,
   "tier": {
    "1a": 0,
-   "1b": 38.4,
+   "1b": 32.0,
    "1c": 0
   },
-  "ts": 1790288561.6990767,
+  "ts": 1790291876.3712397,
   "day": "2026-09-24"
  },
  "arm": {
@@ -56,7 +56,7 @@
    "placements": []
   },
   "1b": {
-   "open_total": 38.4,
+   "open_total": 32.0,
    "daily_date": "2026-09-24",
    "daily_volume": 38.4,
    "placements": [
@@ -94,13 +94,6 @@
      "ts": 1790259847.2157698,
      "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
      "title": ""
-    },
-    {
-     "token_id": "24616637402268123895724172241365302052111299842982293300080310451982971177592",
-     "cost": 6.4,
-     "ts": 1790275734.3416998,
-     "trader": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
-     "title": "Will Portugal win on 2026-09-24?"
     }
    ]
   },
@@ -169,7 +162,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 107.75,
+  "last_equity": 108.79,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -413,26 +406,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1790203785.9754703,
-   "day": "2026-09-23",
-   "kind": "form",
-   "before": "0x5213eb85 benched",
-   "after": "in form",
-   "detail": "0x5213eb85: 81 settled, 46% won vs 37% needed, net +2.4% on $40,140, worst day -2,314",
-   "push": "WALLET",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
-  },
-  {
-   "ts": 1790203785.9754703,
-   "day": "2026-09-23",
-   "kind": "form",
-   "before": "0x9f15613e in form",
-   "after": "benched",
-   "detail": "0x9f15613e: 356 settled, 51% won vs 48% needed, net +8.4% on $1,065,336, worst day -31,088 (capped: window read in full, older lookback cut, 5500 rows)",
-   "push": "WALLET",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
   {
    "ts": 1790210841.5089324,
    "day": "2026-09-24",
@@ -864,14 +837,6 @@
   }
  ],
  "important": [
-  "2026-09-23 22:47:19 ERROR Error fetching CTF events [94332320-94332321]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-23 22:50:42 INFO  [ops] form: '0x5213eb85 benched' -> 'in form' | 0x5213eb85: 81 settled, 46% won vs 37% needed, net +2.4% on $40,140, worst day -2,314",
-  "2026-09-23 22:51:02 INFO  [ops] form: '0x9f15613e in form' -> 'benched' | 0x9f15613e: 356 settled, 51% won vs 48% needed, net +8.4% on $1,065,336, worst day -31,088 (capped: window read in full, older lookback cut, 5500 rows)",
-  "2026-09-23 23:01:04 ERROR Error fetching CTF events [94332889-94332891]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-23 23:01:04 ERROR Error fetching NEG_RISK_CTF events [94332889-94332891]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-23 23:18:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={\"error\":\"not enough balance / allowance: the balance is not enough -\\u003e balance: 20000000, order amount: 20830000\"}",
-  "2026-09-23 23:18:14 ERROR [exec] Order placement failed: PolyApiException[status_code=400, error_message={'error': 'not enough balance / allowance: the balance is not enough -> balance: 20000000, order amount: 20830000'}]",
-  "2026-09-23 23:18:14 ERROR [exec] Order placement returned None for 'Buenos Aires 2: Francisco Comesana vs Jo'",
   "2026-09-23 23:21:20 ERROR Error fetching CTF events [94333701-94333702]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-23 23:21:21 ERROR Error fetching NEG_RISK_CTF events [94333701-94333702]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 00:19:58 ERROR Error fetching NEG_RISK_CTF events [94336026-94336027]: {'code': -32002, 'message': 'request timed out'}",
@@ -1189,6 +1154,16 @@
   "2026-09-24 21:56:06 ERROR Error fetching NEG_RISK_CTF events [94387883-94387884]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 22:16:40 ERROR Error fetching CTF events [94388705-94388706]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 22:16:40 ERROR Error fetching NEG_RISK_CTF events [94388705-94388706]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 22:26:39 ERROR Error fetching CTF events [94389104-94389105]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 22:28:33 ERROR Error fetching NEG_RISK_CTF events [94389161-94389161]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-24 22:36:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-24 22:42:16 ERROR Error fetching CTF events [94389710-94389710]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-24 22:46:02 ERROR Error fetching CTF events [94389880-94389881]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 22:47:48 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $32.00",
+  "2026-09-24 23:06:07 ERROR Error fetching CTF events [94390683-94390684]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 23:11:04 ERROR Error fetching CTF events [94390881-94390882]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 23:13:31 ERROR Error fetching NEG_RISK_CTF events [94390979-94390980]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-24 23:21:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-24 02:55:26 TRADE [LIVE] BUY $6.40 on 'Korea Open: Yexin Ma vs Kimberly Birrell' @ 0.6600, order 0x41e2215ece...",
   "2026-09-24 02:55:27 TRADE [verify] FILLED: BUY 9.69 shares on 'Korea Open: Yexin Ma vs Kimberly Birrell' @ 0.6600",
   "2026-09-24 08:07:57 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Dallas b' @ 0.8200, order 0x3326b28d62...",
@@ -1462,13 +1437,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1790228521.526177,
-   "count": 11,
+   "last": 1790290138.6819065,
+   "count": 12,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1790227681.5090203,
-    1790228521.526177
+    1790290138.6819065
    ],
    "action": null,
    "action_ts": null,
@@ -1684,13 +1658,13 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1790282218.3113725,
-   "count": 6,
+   "last": 1790289418.5556953,
+   "count": 8,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1790282218.3113725,
-    1790282218.3113725
+    1790289418.5556953,
+    1790289418.5556953
    ],
    "action": null,
    "action_ts": null,
