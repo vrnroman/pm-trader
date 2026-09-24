@@ -651,7 +651,10 @@ class Config:
     chain_id: int = 137
 
     # --- Directories ---
-    data_dir: str = str(Path(__file__).resolve().parent.parent / "data")
+    # DATA_DIR: set only by the analyst's fenced experiment process (s-ye5990,
+    # scripts/exp_book.py) so every incidental write of the paper harness
+    # lands under data/exp/<id>/; the bot and the sidecar never set it.
+    data_dir: str = _optional("DATA_DIR", str(Path(__file__).resolve().parent.parent / "data"))
     cache_dir: str = str(Path(__file__).resolve().parent.parent / "cache")
     results_dir: str = str(Path(__file__).resolve().parent.parent / "results")
     logs_dir: str = str(Path(__file__).resolve().parent.parent / "logs")

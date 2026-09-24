@@ -121,6 +121,18 @@ def main() -> int:
     except Exception as exc:
         print(f"(limits unavailable: {exc})")
     try:
+        from src.copy_trading import exp_cards
+        print("## experiments (the analyst's cards; one live at a time)")
+        for l in exp_cards.rows(now, limit=12) or ["(none)"]:
+            print(l)
+        bl = exp_cards.backlog_rows(since_ts=now - a.hours * 3600)
+        for r in bl[-12:]:
+            print(json.dumps({k: r.get(k) for k in ("day", "id", "event", "why", "delta_pp", "n") if r.get(k) not in (None, "")}, ensure_ascii=False)[:300])
+        for d in exp_cards.studies(limit=6):
+            print(f"study {d.get('id')}: {d.get('totals_line')}")
+    except Exception as exc:
+        print(f"(experiments unavailable: {exc})")
+    try:
         from src.copy_trading import ops_fingerprint
         fps = ops_fingerprint.rows(now, limit=30)
         print(f"## fingerprints ({len(fps)} shown)")

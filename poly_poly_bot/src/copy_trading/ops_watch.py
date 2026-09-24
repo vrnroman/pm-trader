@@ -746,12 +746,25 @@ def daily_line(now: Optional[float] = None) -> str:
     heals = [r for r in rows if r.get("kind") in ("rearm", "guard_recovered")]
     tail = watcher_line(now)
     lag = lag_cost_line(now)
-    extra = "".join(("\n" + t) for t in (tail, lag) if t)
+    exp = experiment_line(now)
+    extra = "".join(("\n" + t) for t in (tail, lag, exp) if t)
     if not rows:
         return "📒 ledger: nothing happened in the last 24h" + extra
     return (f"📒 ledger, last 24h: {len(settled)} settled ({won} won) {pnl:+.2f}; "
             f"{len(heals)} self-heal(s); {sum(1 for r in rows if r.get('kind') == 'auto_admit')} auto-admission(s)"
             + extra)
+
+
+def experiment_line(now: Optional[float] = None) -> str:
+    """The analyst's experiment (s-ye5990): the live card from its last
+    journal row, a card concluded in the last 24 h once, nothing when
+    nothing runs. Read from disk; the sidecar writes it."""
+    try:
+        from src.copy_trading import exp_cards
+        return exp_cards.line(now)
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] experiment line failed: {exc}")
+        return ""
 
 
 def lag_cost_line(now: Optional[float] = None) -> str:

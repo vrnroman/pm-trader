@@ -869,6 +869,7 @@ def _copy_paper_b_loop():
     from src.copy_trading.copy_paper_live import (
         TradeFeed, make_feed_detector, make_feed_exit_detector)
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
+    from src.copy_trading import book_recipes
     from src.copy_trading.outcome_names import DEFAULT_RESOLVER
 
     # One-time seed of the extras watchlist (A-demoted wallets that are B-fit).
@@ -996,9 +997,6 @@ def _copy_paper_b_loop():
             f"in {stalled_h:.0f}h with {n_watch} wallets watched. The A-vs-B "
             f"comparison window is compromised while B starves.")
 
-    def _cap(v):
-        return v if v and v > 0 else None
-
     def _on_cycle(summary, ledger):
         if summary.opened or summary.resolved:
             logger.info(
@@ -1040,55 +1038,11 @@ def _copy_paper_b_loop():
                                            feed=_feed, feed_min_usd=_feed_min)
 
     runner = CopyPaperRunner(
-        ledger_path=CONFIG.copy_paper_b_ledger,
-        watchlist_path=CONFIG.copy_paper_watchlist,
-        extra_watchlist_paths=[CONFIG.copy_paper_b_extra_watchlist],
-        max_copy_usd=CONFIG.copy_paper_max_usd,
-        copy_pct=CONFIG.copy_paper_copy_pct,
-        max_slippage_bps=CONFIG.copy_paper_max_slippage_bps,
-        max_age_s=CONFIG.copy_paper_max_age_s,
-        min_usd=CONFIG.copy_paper_min_usd,
-        cycle_interval_s=CONFIG.copy_paper_interval_s,
-        # B's thesis: NO fill-gate censoring; fills at the target's own price.
-        fill_gate_bps=None,
-        fill_at_their_price_bps=CONFIG.copy_paper_b_slippage_bps,
-        first_entry_only=CONFIG.copy_paper_first_entry_only,
-        max_copies_per_wallet_day=_cap(CONFIG.copy_paper_b_max_per_wallet_day),
-        max_copies_per_category_day=_cap(CONFIG.copy_paper_b_max_per_category_day),
-        # same event cap + stake tiering as A (identical across books, so the
-        # race variable stays lagged-vs-instant).
-        max_copies_per_wallet_event=_cap(CONFIG.copy_paper_b_max_per_wallet_event),
-        low_conf_stake_frac=CONFIG.copy_paper_low_conf_stake_frac,
-        low_conf_until_n=CONFIG.copy_paper_low_conf_until_n,
-        gate_history_path=os.path.join(
-            # SAME derivation as the writer (discovery_runner puts gate-history
-            # beside the discovery state file) — deriving from data_dir instead
-            # would silently read a never-written path if the state file is
-            # relocated, disabling the stake tiering with no warning.
-            os.path.dirname(CONFIG.wallet_discovery_state), "gate-history.jsonl"),
-        starved_priority=CONFIG.copy_paper_starved_priority,
-        relief_evidence_n=None,   # caps already sized for take-all; no relief lane
-        relief_max_per_category_day=None,
-        category_gate=CONFIG.copy_paper_category_gate,
-        # P1-6 book-evidence gates + P1-7 modeled costs — identical to A's, so
-        # the race variable stays lagged-vs-instant. B's own ledger feeds its
-        # evidence gates (its losing slices are its own: §1.5's −8.8% sports
-        # and −61.5% 0.2-0.4 bucket are B-book records).
-        category_evidence_min_n=_cap(CONFIG.copy_paper_category_evidence_min_n),
-        category_evidence_era_only=CONFIG.copy_paper_category_evidence_era_only,
-        era_state_path=os.path.join(CONFIG.data_dir, "ab_race_state.json"),
-        costs_enabled=CONFIG.copy_paper_costs_enabled,
-        gas_usd_per_trade=CONFIG.copy_paper_gas_usd,
-        trade_fee_bps=CONFIG.copy_paper_trade_fee_bps,
-        conviction_base_usd=(CONFIG.copy_paper_conviction_base_usd
-                             if CONFIG.copy_paper_conviction_base_usd > 0 else None),
-        conviction_min=CONFIG.copy_paper_conviction_min,
-        conviction_max=CONFIG.copy_paper_conviction_max,
-        max_horizon_days=(CONFIG.strategy_4_long_horizon_days
-                          if CONFIG.strategy_4_enabled else None),
+        # B's knobs live in one place (book_recipes.book_b_kwargs) so the
+        # analyst's experiments (s-ye5990) run a control that IS this book.
+        **book_recipes.book_b_kwargs(CONFIG),
         # B's OWN blacklist — never A's. A-demoted wallets are B's thesis edge.
         blacklist_provider=lambda: promotion_state.active_blacklist(scope="b"),
-        strategy="B",
         detector_factory=detector_factory,
         exit_detector_factory=exit_detector_factory,
         on_cycle=_on_cycle,

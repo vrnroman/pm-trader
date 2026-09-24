@@ -178,8 +178,10 @@ jobs:
           # branches for the owner to merge. Set ANALYST_ENABLED=false in the
           # ENV_FILE secret to switch it off again.
           ensure_env ANALYST_ENABLED true
-          # Owner, 2026-09-24: the analyst may spend up to $50 a study.
-          ensure_env ANALYST_MAX_USD 50
+          # 150 a day for the experimenting analyst (owner, 2026-09-24: "budget
+          # should go up to 150 for run"); at most 60 a single model call.
+          ensure_env ANALYST_MAX_USD 150
+          ensure_env ANALYST_MAX_USD_PER_CALL 60
           # Owner, 2026-09-24: SRE fixes go to main directly unless the fix
           # changes the risk profile (money-path files, or the model's own
           # risk_change line); those go to a branch with the change in risk

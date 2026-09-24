@@ -1207,6 +1207,35 @@ In Telegram: `/zset candidates` (one card per passer, admit by tap),
   the compare link on the phone), or a `note`. Every run is a row in
   `data/ops-thoughts.jsonl`; the digest prints the limits in force
   (`live_limits.lines`).
+- **The experimenting analyst (run s-ye5990, 2026-09-24).** Owner: "analyst
+  should change code for experiments (but paper run), write experiment
+  somewhere, then every day ... see how experiment is going, adjust if
+  needed, then after some time conclude experiment results and reject idea
+  or offer me PR ... some ideas ... can be explored based on historical
+  data". Two new proposal kinds. A `study` is a what-if from a fixed menu
+  (`scripts/exp_study.py`: `min_usd`, `form`, `first_entry`, `wallet_cap`)
+  computed by code over the box's own rows as a who-stays / who-enters /
+  who-leaves table, frozen once at `data/exp/studies/<id>.md` with an inputs
+  hash and a caveat line the script prints itself; the model reads it back
+  once and may hand in a card. An `experiment` is a card
+  (`src/copy_trading/exp_cards.py`: hypothesis, knobs from
+  `book_recipes.KNOBS` or a diff behind `exp_flag.on(<flag>)`, win and kill
+  bars in numbers, max days) that a fenced child of the sidecar runs
+  (`scripts/exp_book.py`: a control that IS book B via
+  `book_recipes.book_b_kwargs`, the treatment next to it on one trade feed,
+  no key, no Telegram, `DATA_DIR` under the card, an address-space cap).
+  Every day code applies the bars to `strategy_compare.compare` (WIN, KILL,
+  VOID on the 48 h stall rule or a control that strays from book B, one
+  7-day EXTEND when starved); the model cannot move them. WIN pushes
+  `analyst/exp-<id>` with the record under `docs/experiments/`; the owner's
+  merge is the only way into real trades. KILL and VOID are a backlog row
+  and one line on the phone. One experiment at a time, the rest queue;
+  `data/exp` is capped (`EXP_MAX_MB`); `ANALYST_MAX_USD` 150 a day,
+  `ANALYST_MAX_USD_PER_CALL` 60. The 08:00 message carries
+  `exp_cards.line`; the digest prints the cards, the backlog and the
+  studies. Cut on purpose: a twin bot container (no RAM on the e2-small), a
+  feed archive, replay as a gate before every experiment, a WIN moving a
+  live limit, a per-topic cap.
 - **Lag has a price (run s-qbzbrw, phase 2).** The chain reader hands its
   stamp of each set-Z BUY fill through `shadow_quote.register_sink` under its
   own copy_id (`chain:<0xtx>-<token>`), so the observer quotes the same fill

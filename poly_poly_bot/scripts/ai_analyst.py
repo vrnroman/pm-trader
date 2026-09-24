@@ -24,17 +24,38 @@ proposals, each one of:
   compare link; the owner merges from the phone.
 - ``note``: a ledger row, nothing else.
 
+- ``study`` (s-ye5990): a what-if over the box's own data from a fixed
+  menu (``scripts/exp_study.py``), frozen as a who-stays/enters/leaves
+  table, read back by the model once for a conclusion and, if it earns
+  one, an experiment card.
+- ``experiment`` (s-ye5990): a card (hypothesis, knobs or a diff behind an
+  ``exp_flag``, win/kill bars in numbers, max days). A control that IS book
+  B and a treatment run side by side in a fenced child process
+  (``scripts/exp_book.py``); every day CODE applies the card's bars
+  (``exp_cards.check``); on WIN a branch ``analyst/exp-<id>`` for the owner
+  to merge, on KILL or VOID a backlog row and one phone line. One
+  experiment at a time; the rest queue.
+
+Owner (2026-09-24): "analyst should change code for experiments (but paper
+run), write experiment somewhere, then every day ... see how experiment is
+going, adjust if needed, then after some time conclude experiment results
+and reject idea or offer me PR ... budget should go up to 150 for run."
+
 It runs at most once a day (ANALYST_HOUR_UTC), spends at most
-ANALYST_MAX_USD a run, and is OFF unless ANALYST_ENABLED=true (the manager
-sequenced it after the SRE ledger shows one clean day). Every run writes a
-row to the same thought ledger the SRE writes (kind "analyst"), so the
-08:00 line and the digest show it.
+ANALYST_MAX_USD a day and ANALYST_MAX_USD_PER_CALL a call, and is OFF
+unless ANALYST_ENABLED=true. Every run writes a row to the same thought
+ledger the SRE writes (kind "analyst"), so the 08:00 line and the digest
+show it. ``supervise`` runs every SRE tick and keeps the live
+experiment's process up.
 """
 from __future__ import annotations
 
+import html
 import json
 import os
 import re
+import signal
+import subprocess
 import sys
 import time
 from typing import Callable, Optional
@@ -44,7 +65,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from src.config import CONFIG  # noqa: E402
-from src.copy_trading import live_limits  # noqa: E402
+from src.copy_trading import exp_cards, live_limits  # noqa: E402
 from src.logger import logger  # noqa: E402
 
 STATE_FILE = "ops-analyst-state.json"
@@ -64,9 +85,20 @@ def enabled() -> bool:
 
 HOUR_UTC = int(_env_f("ANALYST_HOUR_UTC", 6))
 MAX_PROPOSALS = int(_env_f("ANALYST_MAX_PROPOSALS", 2))
-MAX_USD = _env_f("ANALYST_MAX_USD", 10.0)
+MAX_USD = _env_f("ANALYST_MAX_USD", 150.0)            # the day (owner: 150 for the experimenting analyst)
+MAX_USD_PER_CALL = _env_f("ANALYST_MAX_USD_PER_CALL", 60.0)
 LOOKBACK_S = _env_f("ANALYST_LOOKBACK_S", 7 * 86400.0)
 CLAUDE_TIMEOUT_S = int(_env_f("ANALYST_CLAUDE_TIMEOUT_S", 900))
+WORK_ROOT = os.environ.get("SRE_WORK_ROOT", "/app/sre")   # experiment clones live at <WORK_ROOT>/exp/<id>
+EXP_LOGS_DIR = os.environ.get("LOGS_DIR", "/app/sre/logs")
+SPAWN_MIN_GAP_S = _env_f("EXP_SPAWN_MIN_GAP_S", 600.0)
+MAX_SPAWNS_PER_DAY = int(_env_f("EXP_MAX_SPAWNS_PER_DAY", 5))
+HEARTBEAT_STALE_S = _env_f("EXP_HEARTBEAT_STALE_S", 900.0)
+# Same image, no new dependencies, no deploy change: an experiment is code
+# and knobs, never the box. (The SRE's MONEY_PATH is allowed here: the
+# process is the fence, and the class is printed on the WIN message.)
+EXP_FORBIDDEN = ("poly_poly_bot/deploy.sh", "poly_poly_bot/Dockerfile", "poly_poly_bot/requirements.txt")
+PROPOSAL_KINDS = ("limit", "pr", "note", "study", "experiment")
 
 
 def _p(name: str) -> str:
@@ -199,13 +231,45 @@ Every proposal must be one of:
   ops_grammar.py, ops_fingerprint.py.
   {"kind": "pr", "title": "<conventional title>", "diff": "<unified diff>",
    "why": "<2-4 sentences>", "counterfactual": "<what it would have been worth, from the evidence>"}
+- "study": a what-if over the box's own data, computed by code and frozen as a
+  who-stays / who-enters / who-leaves table you will read back once. Menu:
+{study_menu}
+  {"kind": "study", "study": "<menu name>", "params": {...}, "question": "<the question, one line>"}
+- "experiment": a paper experiment. A control that IS book B and a treatment
+  (book B plus your change) run side by side on the same fills for max_days; the
+  code applies your bars every day (WIN, KILL, VOID, or one 7-day EXTEND when
+  starved) and you cannot move them afterwards. Knobs you may change:
+  {knobs}. A code change is a unified diff (same path rules as "pr", plus
+  never deploy.sh, Dockerfile, requirements.txt) whose new behaviour is read
+  through exp_flag.on("<flag>") from src/copy_trading/exp_flag.py, so the
+  control runs with it off and the treatment with it on. On WIN the owner gets
+  a branch to merge; nothing reaches real trades without his merge.
+  {"kind": "experiment", "id": "<2..32 chars of a-z 0-9 ->", "title": "<title>",
+   "hypothesis": "<what you expect and why, from the evidence>", "knobs": {"<knob>": <value>},
+   "diff": "<optional unified diff>", "flag": "<required with a diff>",
+   "win_bar": {"roi_pp": <at least 2.0: treatment minus control, net ROI at their price, percentage points>, "min_n": <at least {min_n} settled treatment copies>},
+   "kill_bar": {"roi_pp": <0 or below>, "min_n": <at least 10>}, "max_days": <3..30>,
+   "parent_id": "<optional: the experiment this follows>", "study_ref": "<optional: the study that argued for it>"}
 - "note": {"kind": "note", "why": "<one line worth the owner's minute>"}
 
 Rules: only what the evidence supports; the first sentence of each "why" is
 the number; no em-dashes or en-dashes; never propose raising exposure (budget,
-floor, set Z, stakes or caps above the owner's value): that is his alone.
+floor, set Z, stakes or caps above the owner's value): that is his alone. At
+most ONE study or ONE experiment a day; one experiment runs at a time, a second
+queues behind it. Prefer a study before an experiment when the data on the box
+can answer the question. Ideas that were killed stay in the backlog: a new card
+that follows one names it in parent_id and says what it changes.
 
 Answer shape: {"proposals": [ ... ], "summary": "<one line for the phone>"}
+
+# Experiment in flight
+{experiment}
+
+# Experiments so far (backlog, newest last)
+{backlog}
+
+# Studies on file
+{studies}
 
 # Declined copies, priced at their price from the paper book (last {days:.0f} days)
 {counterfactual}
@@ -232,9 +296,57 @@ Answer shape: {"proposals": [ ... ], "summary": "<one line for the phone>"}
 {money}
 """
 
+STUDY_PROMPT = """You are the AI analyst of poly_poly_bot. Earlier today you asked for the study
+below; the code ran it and froze the table. Read it and answer with ONE JSON
+object, nothing else:
+
+{"conclusion": "<two sentences at most: the number first, then what it means for the bot>",
+ "card": <null, or an experiment card exactly as in the daily rules, with "study_ref": "{study_id}">}
+
+A card is worth writing only when the table argues for a change the paper books
+can test; its bars are numbers (win_bar.roi_pp at least 2.0, win_bar.min_n at
+least {min_n}, kill_bar.roi_pp at or below 0, max_days 3..30). Knobs you may
+change: {knobs}. No em-dashes or en-dashes. Never propose raising exposure.
+
+# The study
+{table}
+"""
+
+
+def _exp_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("exp_study", os.path.join(ROOT, "scripts", "exp_study.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def experiment_lines(now: float) -> list[str]:
+    live = exp_cards.live_card()
+    if live is None:
+        q = exp_cards.next_queued()
+        return [f"(none live; queued: {q['id']}: {q['title']})" if q else "(none)"]
+    return exp_cards.table(live)
+
+
+def backlog_lines(limit: int = 12) -> list[str]:
+    rows = exp_cards.backlog_rows()[-limit:]
+    if not rows:
+        return ["(empty)"]
+    return [f"{r.get('day')} {r.get('id')}: {r.get('event')}" + (f" ({r.get('why')})" if r.get("why") else "")
+            + (f" [follows {r.get('parent_id')}]" if r.get("parent_id") else "") for r in rows]
+
+
+def study_lines(limit: int = 8) -> list[str]:
+    st = exp_cards.studies(limit=limit)
+    if not st:
+        return ["(none)"]
+    return [f"{d.get('id')}: {d.get('question') or d.get('kind')}: {d.get('totals_line')}" for d in st]
+
 
 def build_prompt(now: float, cf: dict) -> str:
-    from src.copy_trading import ops_watch, ops_fingerprint, two_clocks, wallet_form
+    from src.copy_trading import ops_watch, ops_fingerprint, two_clocks, wallet_form, book_recipes
+    from src.copy_trading.promotion_gate import FALSIFY_MIN_N
     days = LOOKBACK_S / 86400.0
     try:
         form = "\n".join(wallet_form.lines()[:20])
@@ -244,6 +356,10 @@ def build_prompt(now: float, cf: dict) -> str:
         clocks = two_clocks.line(since_ts=now - LOOKBACK_S, now=now)
     except Exception as exc:  # noqa: BLE001
         clocks = f"(two clocks unavailable: {exc})"
+    try:
+        menu = "\n".join(_exp_module().menu_lines())
+    except Exception as exc:  # noqa: BLE001
+        menu = f"  (menu unavailable: {exc})"
     watcher = "\n".join(json.dumps({k: r.get(k) for k in ("day", "kind", "woke_because", "concluded", "did")
                                     if r.get(k)}, ensure_ascii=False)[:300]
                         for r in ops_watch.watcher_thoughts(since_ts=now - LOOKBACK_S)[-30:])
@@ -251,7 +367,13 @@ def build_prompt(now: float, cf: dict) -> str:
     fields = {
         "max_proposals": str(MAX_PROPOSALS),
         "limits_table": "\n".join(f"  {n}: band {s['band'][0]}..{s['band'][1]} ({s['kind']})" for n, s in live_limits.TABLE.items()),
+        "study_menu": menu,
+        "knobs": ", ".join(f"{k} ({t.__name__})" for k, t in book_recipes.KNOBS.items()),
+        "min_n": str(FALSIFY_MIN_N),
         "days": f"{days:.0f}",
+        "experiment": "\n".join(experiment_lines(now)),
+        "backlog": "\n".join(backlog_lines()),
+        "studies": "\n".join(study_lines()),
         "counterfactual": "\n".join(counterfactual_lines(cf)),
         "limits": "\n".join(live_limits.lines(now)),
         "form": form,
@@ -267,19 +389,34 @@ def build_prompt(now: float, cf: dict) -> str:
     return out
 
 
-def _runner(prompt: str) -> Optional[dict]:
-    """Reuse the SRE's claude -p runner: one shape, one auth."""
+def build_study_prompt(record: dict, table_md: str) -> str:
+    from src.copy_trading import book_recipes
+    from src.copy_trading.promotion_gate import FALSIFY_MIN_N
+    out = STUDY_PROMPT
+    for k, v in {"study_id": record.get("id", ""), "min_n": str(FALSIFY_MIN_N),
+                 "knobs": ", ".join(f"{k} ({t.__name__})" for k, t in book_recipes.KNOBS.items()),
+                 "table": table_md[:12000]}.items():
+        out = out.replace("{" + k + "}", str(v))
+    return out
+
+
+def _sre():
     import importlib.util
     spec = importlib.util.spec_from_file_location("ai_sre", os.path.join(ROOT, "scripts", "ai_sre.py"))
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    return mod._claude_runner(prompt, model=MODEL, timeout_s=CLAUDE_TIMEOUT_S)
+    return mod
+
+
+def _runner(prompt: str) -> Optional[dict]:
+    """Reuse the SRE's claude -p runner: one shape, one auth."""
+    return _sre()._claude_runner(prompt, model=MODEL, timeout_s=CLAUDE_TIMEOUT_S)
 
 
 _JSON_RE = re.compile(r"\{.*\}", re.S)
 
 
-def parse(envelope: Optional[dict]) -> Optional[dict]:
+def _json_of(envelope: Optional[dict]) -> Optional[dict]:
     if not envelope:
         return None
     text = envelope.get("result") if isinstance(envelope.get("result"), str) else json.dumps(envelope.get("result"))
@@ -290,21 +427,364 @@ def parse(envelope: Optional[dict]) -> Optional[dict]:
         v = json.loads(m.group(0))
     except ValueError:
         return None
-    if not isinstance(v, dict) or not isinstance(v.get("proposals"), list):
+    return v if isinstance(v, dict) else None
+
+
+def parse(envelope: Optional[dict]) -> Optional[dict]:
+    v = _json_of(envelope)
+    if v is None or not isinstance(v.get("proposals"), list):
         return None
     props = []
+    seen_big = False
     for p in v["proposals"][:MAX_PROPOSALS]:
-        if isinstance(p, dict) and p.get("kind") in ("limit", "pr", "note"):
-            props.append({**p, "why": _sanitize(str(p.get("why") or "")), "counterfactual": _sanitize(str(p.get("counterfactual") or ""))})
+        if not isinstance(p, dict) or p.get("kind") not in PROPOSAL_KINDS:
+            continue
+        if p["kind"] in ("study", "experiment"):
+            if seen_big:
+                continue            # at most one study or experiment a day
+            seen_big = True
+        props.append({**p, "why": _sanitize(str(p.get("why") or "")), "counterfactual": _sanitize(str(p.get("counterfactual") or ""))})
     return {"proposals": props, "summary": _sanitize(str(v.get("summary") or ""))[:300],
             "cost_usd": float(envelope.get("total_cost_usd") or 0.0)}
+
+
+def parse_conclusion(envelope: Optional[dict]) -> Optional[dict]:
+    v = _json_of(envelope)
+    if v is None or "conclusion" not in v:
+        return None
+    card = v.get("card") if isinstance(v.get("card"), dict) else None
+    return {"conclusion": _sanitize(str(v.get("conclusion") or ""))[:400], "card": card,
+            "cost_usd": float(envelope.get("total_cost_usd") or 0.0)}
+
+
+# --------------------------------------------------------------------------- #
+# Experiments: start, keep alive, check daily, conclude
+# --------------------------------------------------------------------------- #
+
+def _clone_branch(branch: str, dest: str, sre) -> tuple[bool, str]:
+    """Clone one branch into ``dest`` (the experiment process's cwd)."""
+    if os.path.isdir(os.path.join(dest, ".git")):
+        r = sre._run(["git", "pull", "-q", "--ff-only"], cwd=dest, timeout=300)
+        return (r.returncode == 0, "updated" if r.returncode == 0 else f"pull failed: {(r.stderr or '')[-200:]}")
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    r = sre._run(["git", "clone", "-q", "--depth", "50", "--branch", branch, sre.REPO_SSH, dest], cwd=os.path.dirname(dest), timeout=300)
+    return (r.returncode == 0, "cloned" if r.returncode == 0 else f"clone failed: {(r.stderr or '')[-200:]}")
+
+
+def start_experiment(card: dict, now: float, *, send, apply, push, sre, clone=None) -> dict:
+    """Write the card, push its code (if any) to exp/<id>, launch it when
+    nothing else is live. Returns the ledger row."""
+    row = {"kind": "analyst", "proposal": "experiment", "woke_because": "daily study",
+           "concluded": str(card.get("hypothesis") or "")[:400], "did": "", "cost_usd": 0.0}
+    # the proposal's "kind" is "experiment"; a card's kind (live/replay) is its own key
+    card = {k: v for k, v in card.items() if k != "kind"}
+    if card.get("card_kind"):
+        card["kind"] = card.pop("card_kind")
+    diff = str(card.get("diff") or "")
+    if diff:
+        cls, paths = sre.classify_diff(diff)
+        if cls == "forbidden" or any(p in EXP_FORBIDDEN for p in paths):
+            row["did"] = f"experiment refused: forbidden path {paths[:3]}"
+            return row
+    ok, why, c = exp_cards.create(card, now)
+    if not ok:
+        row["did"] = f"experiment refused: {why}"
+        return row
+    exp_id = c["id"]
+    if diff:
+        fp = f"exp-{exp_id}"
+        branch = f"exp/{exp_id}"
+        ok, sha, detail = apply(diff, fp=fp, message=f"exp({exp_id}): {c['title']}\n\n{c['hypothesis']}\n\nBehind exp_flag {c['flag']}; control off, treatment on.")
+        if ok:
+            ok, where = push(fp, branch=branch)
+            detail = where if not ok else f"{detail}; pushed {branch}"
+        if ok:
+            dest = os.path.join(WORK_ROOT, "exp", exp_id)
+            ok, msg = (clone or (lambda b, d: _clone_branch(b, d, sre)))(branch, dest)
+            detail = f"{detail}; {msg}"
+            if ok:
+                exp_cards.set_branch(exp_id, branch=branch, workdir=dest, diff_class=cls)
+        if not ok:
+            c = exp_cards.load(exp_id) or c
+            exp_cards.apply_verdict(c, {"status": "void", "why": f"code did not land: {detail}"[:300]}, now)
+            row["did"] = f"experiment {exp_id} void: {detail}"[:300]
+            return row
+    launched, msg = exp_cards.launch(exp_id, now)
+    state = "live" if launched else "queued"
+    row["did"] = f"experiment {exp_id} {state}: {msg if launched else msg}"[:300]
+    from src.copy_trading import ops_watch
+    lines = exp_cards.table(exp_cards.load(exp_id) or c)
+    delivered = send(f"\U0001f9ea <b>AI analyst</b> experiment <code>{exp_id}</code> {state}: {html.escape(c['title'])}\n"
+                     f"<blockquote expandable>{html.escape(chr(10).join(lines[1:6]))}</blockquote>")
+    ops_watch.receipt("analyst_experiment", before=exp_id, after=state, detail=c["title"][:160], now=now,
+                      push="BOT" if delivered else None)
+    return row
+
+
+def run_study(p: dict, now: float, *, send, study) -> dict:
+    """Run one study from the menu, freeze it, put the totals on the phone.
+    Returns the ledger row (with the study id when it ran)."""
+    row = {"kind": "analyst", "proposal": "study", "woke_because": "daily study",
+           "concluded": str(p.get("question") or "")[:300], "did": "", "cost_usd": 0.0}
+    kind = str(p.get("study") or "")
+    params = p.get("params") if isinstance(p.get("params"), dict) else {}
+    try:
+        rec, path, written = study(kind, params, now=now, question=str(p.get("question") or ""))
+    except Exception as exc:  # noqa: BLE001
+        row["did"] = f"study refused: {exc!s}"[:300]
+        return row
+    row["study_id"] = rec["id"]
+    row["did"] = f"study {rec['id']} {'frozen' if written else 'already on file'}: {rec['totals_line']}"[:400]
+    from src.copy_trading import ops_watch
+    table = _exp_module().markdown(rec)
+    body = html.escape(table[:3000])
+    delivered = send(f"\U0001f52c <b>AI analyst</b> study <code>{rec['id']}</code>: {html.escape(str(p.get('question') or kind))}\n"
+                     f"{html.escape(rec['totals_line'])}\n<blockquote expandable>{body}</blockquote>\n{html.escape(rec['caveat'])}\n{path}")
+    ops_watch.receipt("analyst_study", before=rec["id"], after=rec["totals_line"][:120], detail=rec["caveat"][:160], now=now,
+                      push="BOT" if delivered else None)
+    return row
+
+
+def conclude_study(study_id: str, now: float, *, runner, send, apply, push, sre, clone=None) -> tuple[Optional[dict], float]:
+    """The one read-back: the model concludes on the frozen table and may
+    hand in a card. ``(ledger row, cost)``."""
+    rec = next((d for d in exp_cards.studies(limit=50) if d.get("id") == study_id), None)
+    if rec is None:
+        return (None, 0.0)
+    v = parse_conclusion(runner(build_study_prompt(rec, _exp_module().markdown(rec))))
+    if v is None:
+        return (sre.thought({"kind": "analyst", "proposal": "study", "woke_because": f"study {study_id}",
+                             "concluded": "no usable conclusion", "did": "nothing", "cost_usd": 0.0}, now), 0.0)
+    if v["cost_usd"] > MAX_USD_PER_CALL:
+        return (sre.thought({"kind": "analyst", "proposal": "study", "woke_because": f"study {study_id}",
+                             "concluded": f"conclusion cost ${v['cost_usd']:.2f} > ${MAX_USD_PER_CALL:.0f}", "did": "nothing",
+                             "cost_usd": v["cost_usd"]}, now), v["cost_usd"])
+    did = "concluded"
+    if v["card"]:
+        card = {**v["card"], "study_ref": study_id}
+        r = start_experiment(card, now, send=send, apply=apply, push=push, sre=sre, clone=clone)
+        did = r["did"]
+    send(f"\U0001f52c <b>AI analyst</b> on study <code>{study_id}</code>: {html.escape(v['conclusion'])}")
+    return (sre.thought({"kind": "analyst", "proposal": "study", "woke_because": f"study {study_id}",
+                         "concluded": v["conclusion"], "did": did, "cost_usd": v["cost_usd"]}, now), v["cost_usd"])
+
+
+def _record_markdown(card: dict) -> str:
+    from src.copy_trading import book_recipes
+    lines = [f"# experiment {card['id']}: {card['title']}", ""] + exp_cards.table(card) + [""]
+    if card.get("knobs"):
+        lines += ["## to make it the bot's own", "In deploy.yml (the owner's ruling, never the analyst's):"]
+        for k, v in card["knobs"].items():
+            env = book_recipes.KNOB_ENV.get(k)
+            lines.append(f"- {k} = {v}" + (f": `ensure_env {env} {str(v).lower() if isinstance(v, bool) else v}`" if env else " (no env; a config change)"))
+        lines.append("")
+    if card.get("branch"):
+        lines += ["## the code", f"Branch `{card['branch']}`, behind `exp_flag.on(\"{card.get('flag')}\")`; ships default-off. "
+                                f"Paths: {card.get('diff_class')} class." , ""]
+    lines += ["## caveat", "Paper books at their price with modeled costs; the control is book B's recipe run next to book B "
+              "(the harness column says how far it strayed). Nothing here traded real money.", ""]
+    return "\n".join(lines)
+
+
+def _new_file_diff(path: str, text: str) -> str:
+    body = text.splitlines()
+    out = [f"--- /dev/null", f"+++ b/{path}", f"@@ -0,0 +1,{len(body)} @@"] + ["+" + ln for ln in body]
+    return "\n".join(out) + "\n"
+
+
+def conclude_win(card: dict, now: float, *, send, apply, push, sre) -> str:
+    """WIN: a branch analyst/exp-<id> carrying the record (and the code,
+    when the card had some); the compare link on the phone. The owner's
+    merge is the only way into real trades."""
+    exp_id = card["id"]
+    branch = f"analyst/exp-{exp_id}"
+    rel = f"poly_poly_bot/docs/experiments/{exp_id}.md"
+    md = _record_markdown(card)
+    wd = card.get("workdir")
+    if wd and os.path.isdir(os.path.join(wd, ".git")):
+        try:
+            os.makedirs(os.path.dirname(os.path.join(wd, rel)), exist_ok=True)
+            with open(os.path.join(wd, rel), "w", encoding="utf-8") as f:
+                f.write(md)
+            sre._run(["git", "add", rel], cwd=wd)
+            r = sre._run(["git", "commit", "-q", "-m", f"exp({exp_id}): won its bars; the record\n\n{card['hypothesis']}"], cwd=wd)
+            ok = r.returncode == 0
+            if ok:
+                r = sre._run(["git", "push", "-q", "origin", f"HEAD:refs/heads/{branch}"], cwd=wd, timeout=300)
+                ok = r.returncode == 0
+            detail = "pushed" if ok else f"git failed: {(r.stderr or '')[-200:]}"
+        except OSError as exc:
+            ok, detail = False, f"{exc!r}"
+    else:
+        ok, sha, detail = apply(_new_file_diff(rel, md), fp=f"exp-{exp_id}-win", message=f"exp({exp_id}): won its bars; the record")
+        if ok:
+            ok, where = push(f"exp-{exp_id}-win", branch=branch)
+            detail = f"{detail}; {'pushed' if ok else where}"
+    from src.copy_trading import ops_watch
+    if not ok:
+        ops_watch.receipt("analyst_exp_pr_failed", before=exp_id, after="not pushed", detail=detail[:160], now=now)
+        send(f"\U0001f9ea <b>AI analyst</b> experiment <code>{exp_id}</code> WON its bars but the branch failed: {html.escape(detail[:200])}")
+        return f"win, branch failed: {detail}"[:300]
+    link = f"{sre.REPO_HTTPS}/compare/main...{branch}?expand=1"
+    money = " Touches the money path." if card.get("diff_class") == "money" else ""
+    v = exp_cards.journal_rows(exp_id)[-1] if exp_cards.journal_rows(exp_id) else {}
+    delivered = send(f"\U0001f4dd <b>AI analyst</b> experiment <code>{exp_id}</code> WON: {html.escape(str(v.get('why') or ''))}.{money} "
+                     f"Merge it to bring it to real trades: {link}")
+    ops_watch.receipt("analyst_exp_pr", before=exp_id, after=branch, detail=card["title"][:160], now=now, push="BOT" if delivered else None)
+    return f"win: branch {branch} pushed; owner asked to merge"
+
+
+def journal_live(now: float, *, send, apply, push, sre) -> Optional[dict]:
+    """The daily check of the live experiment: compare, verdict by code,
+    journal row; then the conclusion's consequences. Once a day."""
+    live = exp_cards.live_card()
+    if live is None:
+        return None
+    day = time.strftime("%Y-%m-%d", time.gmtime(now))
+    if exp_cards.journaled_on(live["id"], day):
+        return None
+    row = exp_cards.check(live, now)
+    card = exp_cards.load(live["id"]) or live
+    st = row.get("status")
+    did = f"exp {card['id']} {st}: {row.get('why', '')}"[:300]
+    if st == "win":
+        did = conclude_win(card, now, send=send, apply=apply, push=push, sre=sre)
+    elif st in ("kill", "void"):
+        send(f"\U0001f9ea <b>AI analyst</b> experiment <code>{card['id']}</code> {st.upper()}: {html.escape(str(row.get('why') or ''))}")
+    elif st == "extend":
+        send(f"\U0001f9ea <b>AI analyst</b> experiment <code>{card['id']}</code> extended: {html.escape(str(row.get('why') or ''))}")
+    sre.thought({"kind": "analyst", "proposal": "experiment", "woke_because": f"daily check of {card['id']}",
+                 "concluded": str(row.get("why") or "")[:300], "did": did, "cost_usd": 0.0}, now)
+    return row
+
+
+_procs: dict[int, subprocess.Popen] = {}
+
+
+def _child_env(card: dict, card_dir: str) -> dict:
+    env = os.environ.copy()
+    for k in ("PRIVATE_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "SRE_DEPLOY_KEY_PATH"):
+        env.pop(k, None)
+    env["DATA_DIR"] = os.path.join(card_dir, "scratch")
+    env["LOGS_DIR"] = os.path.join(EXP_LOGS_DIR, "exp", card["id"])
+    env["EXP_REAL_DATA_DIR"] = CONFIG.data_dir
+    env["LIVE_ARM_ENABLED"] = "false"
+    env["PREVIEW_MODE"] = "true"
+    env["SRE_ROLE"] = "exp"
+    return env
+
+
+def _spawn(card: dict) -> int:
+    card_dir = exp_cards.card_dir(card["id"])
+    wd = card.get("workdir")
+    cwd = os.path.join(wd, "poly_poly_bot") if wd and os.path.isdir(os.path.join(wd, "poly_poly_bot")) else ROOT
+    os.makedirs(os.path.join(card_dir, "scratch"), exist_ok=True)
+    out = open(os.path.join(card_dir, "process.log"), "a", encoding="utf-8")
+    proc = subprocess.Popen([sys.executable, os.path.join(cwd, "scripts", "exp_book.py"), "--card",
+                             os.path.join(card_dir, exp_cards.CARD_FILE), "--real-data-dir", CONFIG.data_dir],
+                            cwd=cwd, env=_child_env(card, card_dir), stdout=out, stderr=subprocess.STDOUT)
+    _procs[proc.pid] = proc
+    return proc.pid
+
+
+def _alive(pid: int) -> bool:
+    p = _procs.get(pid)
+    if p is not None:
+        if p.poll() is not None:
+            _procs.pop(pid, None)
+            return False
+        return True
+    if not pid:
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+def _stop(pid: int) -> None:
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError:
+        pass
+    p = _procs.pop(pid, None)
+    if p is not None:
+        try:
+            p.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            p.kill()
+
+
+def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_stop, send=None, sre=None) -> dict:
+    """Every tick: the live card's process is up, concluded cards' processes
+    are down, the next queued card starts when nothing is live. A process
+    that will not stay up (MAX_SPAWNS_PER_DAY) voids its card."""
+    now = time.time() if now is None else now
+    if not enabled():
+        return {"live": None, "did": "off"}
+    st = _read_json(_p(STATE_FILE))
+    ex = st.setdefault("exp", {})
+    day = time.strftime("%Y-%m-%d", time.gmtime(now))
+    did = ""
+    for c in exp_cards.cards():
+        rec = ex.get(c["id"]) or {}
+        if c.get("status") in exp_cards.CONCLUDED and rec.get("pid") and alive(int(rec["pid"])):
+            stop(int(rec["pid"]))
+            rec["pid"] = 0
+            ex[c["id"]] = rec
+            did = f"stopped {c['id']}"
+    live = exp_cards.live_card()
+    if live is None:
+        q = exp_cards.next_queued()
+        if q is not None:
+            ok, msg = exp_cards.launch(q["id"], now)
+            if ok:
+                live = exp_cards.load(q["id"])
+                did = f"launched {q['id']}"
+    if live is not None:
+        rec = ex.setdefault(live["id"], {"pid": 0, "spawned_ts": 0.0, "spawns": {}})
+        hb = exp_cards.heartbeat(live["id"])
+        up = bool(rec.get("pid")) and alive(int(rec["pid"]))
+        stale = up and hb and (now - float(hb.get("ts") or 0)) > HEARTBEAT_STALE_S and float(hb.get("ts") or 0) > float(rec.get("spawned_ts") or 0)
+        if (not up or stale) and now - float(rec.get("spawned_ts") or 0) >= SPAWN_MIN_GAP_S:
+            n_today = int((rec.get("spawns") or {}).get(day, 0))
+            if n_today >= MAX_SPAWNS_PER_DAY:
+                c = exp_cards.load(live["id"]) or live
+                exp_cards.apply_verdict(c, {"status": "void", "why": f"its process would not stay up ({n_today} starts today)"}, now)
+                did = f"{live['id']} void: process would not stay up"
+                if send:
+                    send(f"\U0001f9ea <b>AI analyst</b> experiment <code>{live['id']}</code> VOID: its process would not stay up ({n_today} starts today); see {exp_cards.card_dir(live['id'])}/process.log")
+            else:
+                if up and stale:
+                    stop(int(rec["pid"]))
+                try:
+                    pid = spawn(live)
+                except Exception as exc:  # noqa: BLE001
+                    pid = 0
+                    did = f"spawn failed for {live['id']}: {exc!r}"[:200]
+                rec["pid"] = int(pid or 0)
+                rec["spawned_ts"] = now
+                rec.setdefault("spawns", {})[day] = n_today + 1
+                if pid:
+                    did = f"started {live['id']} (pid {pid}, start {n_today + 1} today)"
+                if sre is not None and did:
+                    sre.thought({"kind": "analyst", "proposal": "experiment", "woke_because": "supervise",
+                                 "concluded": did, "did": did, "cost_usd": 0.0}, now)
+    st["exp"] = ex
+    _write_json(_p(STATE_FILE), st)
+    return {"live": live["id"] if live else None, "did": did}
 
 
 # --------------------------------------------------------------------------- #
 # Acting
 # --------------------------------------------------------------------------- #
 
-def act(verdict: dict, now: float, *, send: Callable[[str], bool], apply, push, sre) -> list[dict]:
+def _default_study(kind: str, params: dict, *, now: float, question: str = ""):
+    return _exp_module().run_and_freeze(kind, params, now=now, question=question)
+
+
+def act(verdict: dict, now: float, *, send: Callable[[str], bool], apply, push, sre, study=None, clone=None) -> list[dict]:
     """Each proposal inside its envelope. Returns the ledger rows written."""
     from src.copy_trading import ops_watch
     rows: list[dict] = []
@@ -315,6 +795,10 @@ def act(verdict: dict, now: float, *, send: Callable[[str], bool], apply, push, 
                "counterfactual": p.get("counterfactual", "")[:300], "did": "", "cost_usd": 0.0}
         if kind == "note":
             row["did"] = "noted"
+        elif kind == "study":
+            row = run_study(p, now, send=send, study=study or _default_study)
+        elif kind == "experiment":
+            row = start_experiment(p, now, send=send, apply=apply, push=push, sre=sre, clone=clone)
         elif kind == "limit":
             ok, why = live_limits.propose(str(p.get("name") or ""), p.get("value"), why=p.get("why", ""), now=now)
             row["did"] = ("limit applied: " if ok else "limit refused: ") + why
@@ -355,7 +839,24 @@ def act(verdict: dict, now: float, *, send: Callable[[str], bool], apply, push, 
     return rows
 
 
-def maybe_run(now: Optional[float] = None, *, runner=_runner, send=None, apply=None, push=None, force: bool = False) -> Optional[dict]:
+def spent_today(st: dict, day: str) -> float:
+    try:
+        return float((st.get("spent") or {}).get(day) or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _spend(st: dict, day: str, usd: float) -> None:
+    sp = st.setdefault("spent", {})
+    sp[day] = round(spent_today(st, day) + float(usd or 0.0), 4)
+    for k in list(sp):
+        if k != day and len(sp) > 7:
+            sp.pop(k, None)
+    _write_json(_p(STATE_FILE), st)
+
+
+def maybe_run(now: Optional[float] = None, *, runner=_runner, send=None, apply=None, push=None, force: bool = False,
+              study=None, clone=None) -> Optional[dict]:
     """Once a day at HOUR_UTC when enabled. Returns a summary or None."""
     now = time.time() if now is None else now
     if not enabled() and not force:
@@ -367,15 +868,19 @@ def maybe_run(now: Optional[float] = None, *, runner=_runner, send=None, apply=N
         return None
     if hour < HOUR_UTC and not force:
         return None
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("ai_sre", os.path.join(ROOT, "scripts", "ai_sre.py"))
-    sre = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(sre)
+    sre = _sre()
     send = send or sre._send
     apply = apply or sre.apply_fix
     push = push or sre.push_work
     st["last_day"] = day
     _write_json(_p(STATE_FILE), st)   # stamped first: a crash below never re-runs the day
+    # 1. the live experiment's daily check (code, no model, no cost)
+    try:
+        journal_live(now, send=send, apply=apply, push=push, sre=sre)
+        exp_cards.prune(now)
+    except Exception as exc:  # noqa: BLE001
+        logger.error(f"[analyst] experiment check failed: {exc!r}")
+    # 2. the study of the day
     try:
         from src.copy_trading import live_budget
         caps = live_budget.caps(live=True)
@@ -388,13 +893,26 @@ def maybe_run(now: Optional[float] = None, *, runner=_runner, send=None, apply=N
     if verdict is None:
         sre.thought({"kind": "analyst", "woke_because": "daily study", "concluded": "no usable answer", "did": "nothing", "cost_usd": 0.0}, now)
         return {"proposals": 0, "acted": [], "cost_usd": 0.0}
-    if verdict["cost_usd"] > MAX_USD:
-        sre.thought({"kind": "analyst", "woke_because": "daily study", "concluded": f"study cost ${verdict['cost_usd']:.2f} > ${MAX_USD:.0f}",
-                     "did": "nothing", "cost_usd": verdict["cost_usd"]}, now)
-        return {"proposals": 0, "acted": [], "cost_usd": verdict["cost_usd"]}
-    rows = act(verdict, now, send=send, apply=apply, push=push, sre=sre)
+    cost = verdict["cost_usd"]
+    if cost > MAX_USD_PER_CALL or spent_today(st, day) + cost > MAX_USD:
+        _spend(st, day, cost)
+        sre.thought({"kind": "analyst", "woke_because": "daily study",
+                     "concluded": f"study cost ${cost:.2f} over the cap (${MAX_USD_PER_CALL:.0f} a call, ${MAX_USD:.0f} a day, ${spent_today(st, day):.2f} spent)",
+                     "did": "nothing", "cost_usd": cost}, now)
+        return {"proposals": 0, "acted": [], "cost_usd": cost}
+    _spend(st, day, cost)
+    rows = act(verdict, now, send=send, apply=apply, push=push, sre=sre, study=study, clone=clone)
+    # 3. a study that ran is read back once, when the day's budget leaves room
+    #    for a call at the per-call cap (the cost is only known afterwards)
+    for r in rows:
+        if r.get("study_id") and spent_today(st, day) + MAX_USD_PER_CALL <= MAX_USD:
+            _row, c2 = conclude_study(r["study_id"], now, runner=runner, send=send, apply=apply, push=push, sre=sre, clone=clone)
+            _spend(st, day, c2)
+            cost += c2
+            if _row is not None:
+                rows.append(_row)
     if rows:
-        rows[-1]["cost_usd"] = verdict["cost_usd"]
+        rows[-1]["cost_usd"] = cost
     sre.thought({"kind": "analyst", "woke_because": "daily study", "concluded": verdict["summary"] or "studied the week",
-                 "did": f"{len(rows)} proposal(s): " + "; ".join(r.get("did", "")[:60] for r in rows), "cost_usd": verdict["cost_usd"]}, now)
-    return {"proposals": len(rows), "acted": [r.get("did") for r in rows], "cost_usd": verdict["cost_usd"]}
+                 "did": f"{len(rows)} proposal(s): " + "; ".join(r.get("did", "")[:60] for r in rows), "cost_usd": cost}, now)
+    return {"proposals": len(rows), "acted": [r.get("did") for r in rows], "cost_usd": cost}

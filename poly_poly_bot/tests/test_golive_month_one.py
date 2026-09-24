@@ -1829,7 +1829,9 @@ def test_the_deploy_pins_five_deals_a_day_and_three_per_wallet():
     assert "s#^TRADE_MONITOR_MODE=.*#TRADE_MONITOR_MODE=hybrid#" in src
     assert "ensure_env TRADE_MONITOR_MODE hybrid" in src
     assert "ensure_env ONCHAIN_SHADOW false" in src, "the chain is primary since the owner's go-live word of 2026-09-24"
-    assert "ensure_env SRE_PUSH_MAIN true" in src and "ensure_env ANALYST_MAX_USD 50" in src
+    assert "ensure_env SRE_PUSH_MAIN true" in src
+    # 150 a day: the owner's number for the experimenting analyst (2026-09-24).
+    assert "ensure_env ANALYST_MAX_USD 150" in src and "ensure_env ANALYST_MAX_USD 50" not in src
     assert round(80 * 0.40 / (80 * 0.08)) == 5
 
 

@@ -791,7 +791,8 @@ def main() -> int:
         analyst = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(analyst)
         logger.info(f"[sre] analyst {'ENABLED' if analyst.enabled() else 'off (ANALYST_ENABLED=false)'}: "
-                    f"daily at {analyst.HOUR_UTC:02d}:00 UTC, at most {analyst.MAX_PROPOSALS} proposal(s), ${analyst.MAX_USD:.0f} a study")
+                    f"daily at {analyst.HOUR_UTC:02d}:00 UTC, at most {analyst.MAX_PROPOSALS} proposal(s), "
+                    f"${analyst.MAX_USD:.0f} a day, ${analyst.MAX_USD_PER_CALL:.0f} a call; experiments one at a time")
     except Exception as exc:  # noqa: BLE001
         logger.error(f"[sre] analyst not loaded: {exc!r}")
     while True:
@@ -809,6 +810,15 @@ def main() -> int:
                     logger.info(f"[sre] analyst ran: {r}")
             except Exception as exc:  # noqa: BLE001
                 logger.error(f"[sre] analyst failed: {exc!r}")
+            try:
+                # The live experiment's process (scripts/exp_book.py) is kept
+                # up from here, one tick at a time; a card that will not
+                # stay up voids itself.
+                sv = analyst.supervise(send=_send, sre=sys.modules[__name__])
+                if sv.get("did"):
+                    logger.info(f"[sre] experiments: {sv}")
+            except Exception as exc:  # noqa: BLE001
+                logger.error(f"[sre] experiment supervisor failed: {exc!r}")
         time.sleep(TICK_S)
 
 
