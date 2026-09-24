@@ -449,3 +449,22 @@ def test_a_held_verdict_with_a_failed_read_is_retried_on_its_backoff(form_env, m
         return pos if "/positions" in url else (acts if "offset=0" in url else [])
     d = wf.scan(get=ok, send=None, now=NOW + wf.FORM_RETRY_MIN_S, wallets=wf.wallets_due_for_catchup(NOW + wf.FORM_RETRY_MIN_S))
     assert "0xa" not in d["unread"] and d["wallets"]["0xa"]["ts"] == NOW + wf.FORM_RETRY_MIN_S
+
+
+# --------------------------------------------------------------------------- #
+# part 2 D2 (2026-09-24): a scalper is benched by the form, whatever its ROI
+# --------------------------------------------------------------------------- #
+
+def test_a_scalper_is_benched_by_the_form_and_the_record_carries_the_exits(form_env):
+    from src.copy_trading import wallet_form as wf
+    now = 1_790_300_000.0
+    acts = []
+    for i in range(40):
+        ts = now - 5 * 86400 + i * 1800
+        acts.append({"type": "TRADE", "side": "BUY", "conditionId": f"c{i}", "timestamp": ts, "usdcSize": 400, "size": 800, "price": 0.5})
+        acts.append({"type": "TRADE", "side": "SELL", "conditionId": f"c{i}", "timestamp": ts + 60, "usdcSize": 500, "size": 800, "price": 0.62})
+    f = wf.compute("0xScalp", acts, [], now=now)
+    assert f.exits == 40 and f.flips == 40 and f.ok is False
+    assert f.reason == "scalper: 100% of exits within 10 min; uncopyable at our latency"
+    assert "40 of 40 exits under 10 min" in f.line()
+    assert wf.FORM_VERSION == 4

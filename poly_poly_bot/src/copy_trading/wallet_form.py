@@ -72,7 +72,7 @@ FORM_UNREAD_ALERT_S = _env_f("FORM_UNREAD_ALERT_S", 6 * 3600.0)
 # failed read: the old code threw the 5,500 rows away, called it "throttled",
 # and benched the three best wallets in set Z on a record 172 hours old.
 DATA_API_MAX_OFFSET = 5000
-FORM_VERSION = 3   # bump when compute() changes: a table from an older compute is rescanned at boot
+FORM_VERSION = 4   # bump when compute() changes: a table from an older compute is rescanned at boot
 
 
 @dataclass
@@ -94,6 +94,10 @@ class Form:
     rows: int = 0
     covered_days: float = 0.0
     capped: bool = False
+    # The scalper rail (2026-09-24, part 2 D2): exits in the window, and how
+    # many followed their entry within COPY_FLIP_WINDOW_S.
+    exits: int = 0
+    flips: int = 0
 
     @property
     def hit(self) -> float:
@@ -112,11 +116,12 @@ class Form:
             cap = (f" (capped: {self.covered_days:.1f} of {FORM_DAYS:.0f} days read, {self.rows} rows)"
                    if self.covered_days < FORM_DAYS - 0.05
                    else f" (capped: window read in full, older lookback cut, {self.rows} rows)")
+        flips = f", {self.flips} of {self.exits} exits under 10 min" if self.exits else ""
         if not self.n:
-            return f"{self.wallet[:10]}: no settled bets on our slice in {FORM_DAYS:.0f} days{cap}"
+            return f"{self.wallet[:10]}: no settled bets on our slice in {FORM_DAYS:.0f} days{flips}{cap}"
         return (f"{self.wallet[:10]}: {self.n} settled, {self.hit * 100:.0f}% won vs "
                 f"{self.avg_price * 100:.0f}% needed, net {self.net_pct:+.1f}% on ${self.cost:,.0f}"
-                f", worst day {self.worst_day:+,.0f}{cap}")
+                f", worst day {self.worst_day:+,.0f}{flips}{cap}")
 
 
 def _p() -> str:
@@ -358,7 +363,13 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
     f.cost = round(f.cost, 2)
     f.back = round(f.back, 2)
     span = f.covered_days if capped else days
-    if f.n < FORM_MIN_N:
+    from src.copy_trading import scalper
+    f.exits, f.flips = scalper.flip_stats_from_acts(acts, since=since, floor=floor)
+    scalp, why_s = scalper.is_scalper(f.exits, f.flips)
+    if scalp:
+        # Uncopyable at our latency whatever the ROI says (part 2 D2).
+        f.ok, f.reason = False, why_s
+    elif f.n < FORM_MIN_N:
         f.ok, f.reason = False, f"only {f.n} settled bets on our slice in {span:.0f} days (need {FORM_MIN_N})"
     else:
         edge = (f.hit - f.avg_price) * 100.0
@@ -375,6 +386,12 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
 # --------------------------------------------------------------------------- #
 # The bench
 # --------------------------------------------------------------------------- #
+
+def record(wallet: str) -> Optional[dict]:
+    """The stored form record for a wallet (the last measured verdict), or
+    None when it was never measured."""
+    return ((_read().get("wallets") or {}).get((wallet or "").lower())) or None
+
 
 def is_benched(wallet: str, now: Optional[float] = None) -> tuple[bool, str]:
     """May the sink copy this wallet? Benched until the first scan says it is

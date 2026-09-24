@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from src.copy_trading import scalper
 from src.copy_trading.copy_replay import proven_negative, proven_positive
 
 
@@ -158,6 +159,9 @@ class Eval:
     copy_tstat: float = 0.0
     copy_n: int = 0
     copy_hit: float = 0.0
+    # the scalper rail (2026-09-24, part 2 D2): exits and the ones inside the window
+    flip_exits: int = 0
+    flip_n: int = 0
     exit_roi: float = 0.0
     exit_n: int = 0
     fade: bool = False
@@ -372,6 +376,12 @@ def run_discovery_cycle(
         if e.tail_ratio > cfg.max_tail_ratio:
             # tail-dominated buy flow — un-copyable, skip regardless of theory
             culled[w] = f"tail-ratio ({e.tail_ratio:.3f} > {cfg.max_tail_ratio:.3f})"
+            continue
+        # the scalper rail: exits that follow their entries within minutes
+        # are uncopyable at our latency whatever theory 1f says (2026-09-24)
+        scalp, why_s = scalper.is_scalper(e.flip_exits, e.flip_n)
+        if scalp:
+            culled[w] = why_s
             continue
         # money-curve gates (RCA fix): reject the scooper anti-pattern the legacy
         # t-stat bar was letting through. Guarded by min_curve_n so a thin book is

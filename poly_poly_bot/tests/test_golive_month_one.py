@@ -3243,3 +3243,36 @@ def test_absolute_floor_and_daily_override_the_fractions(monkeypatch, budget):
     assert live_budget.caps(live=False).daily_usd == round(80.0 * live_budget.DAILY_FRAC, 2)
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
     assert "ensure_env LIVE_FLOOR_USD 30" in src and "ensure_env LIVE_DAILY_USD 54" in src
+
+
+# --------------------------------------------------------------------------- #
+# part 2 D1: the flip gate at the live sink; D2 at the Z gate
+# --------------------------------------------------------------------------- #
+
+def test_a_buy_the_target_already_left_is_skipped_with_the_reason_before_any_post(tmp_path, monkeypatch):
+    from src.copy_trading import flip_gate
+    flip_gate.clear()
+    h = _Harness(tmp_path, monkeypatch)
+    trades = h.trades(1)
+    t = trades[0].trade
+    flip_gate.note_detected(t.trader_address, t.token_id, "BUY", t.size / t.price, t.timestamp)
+    flip_gate.note_detected(t.trader_address, t.token_id, "SELL", t.size / t.price, t.timestamp)
+    placed = h.run(trades)
+    assert placed == 0 and h.posted == [], "never posted"
+    skipped = [r for r in h.history if r.status == "SKIPPED"]
+    assert skipped and skipped[-1].reason.startswith("target already sold 100% of this buy")
+    assert h.seen == {"t0"}
+    flip_gate.clear()
+    h2 = _Harness(tmp_path, monkeypatch)
+    assert h2.run(h2.trades(1)) == 1, "with no sell on record the buy posts"
+
+
+def test_the_z_gate_refuses_a_measured_scalper_and_passes_an_unmeasured_wallet(tmp_path, monkeypatch):
+    from src.copy_trading import wallet_form, zset_candidates
+    monkeypatch.setattr(wallet_form.CONFIG, "data_dir", str(tmp_path))
+    assert zset_candidates.scalper_check("0xNew") == (True, "unmeasured (no form record yet)")
+    wallet_form._write({"ts": 1.0, "wallets": {"0xscalp": {"ok": False, "exits": 30, "flips": 25, "reason": "x"},
+                                                "0xfine": {"ok": True, "exits": 30, "flips": 2, "reason": "y"}}})
+    ok, why = zset_candidates.scalper_check("0xScalp")
+    assert not ok and why.startswith("scalper: 83% of exits within 10 min")
+    assert zset_candidates.scalper_check("0xFine") == (True, "7% of 30 exits within 10 min")
