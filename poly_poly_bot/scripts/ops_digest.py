@@ -121,6 +121,24 @@ def main() -> int:
     except Exception as exc:
         print(f"(limits unavailable: {exc})")
     try:
+        from src.copy_trading import book_tiers
+        print("## book B at each slice floor (raw numbers; the gate reads the one marked)")
+        for l in book_tiers.lines(now):
+            print(l)
+    except Exception as exc:
+        print(f"(book tiers unavailable: {exc})")
+    try:
+        from src.copy_trading import zset, zset_candidates as zc
+        era, b_pos, a_pos = zc.load_books()
+        passers, near, _ = zc.candidates(b_pos, a_pos, era=era, now=now)
+        in_z = zset.wallet_set()
+        print(f"## near the Z door ({len(near)} wallets within 2 fails; {len([c for c in passers if c.wallet.lower() not in in_z])} pass and wait)")
+        for c in sorted(near, key=lambda c: c.n_fail)[:12]:
+            fails = zc.distinct_fails([(lab, det) for lab, ok, det in c.checks if not ok])
+            print(f"{c.wallet[:10]}: {c.n_fail} fail(s): " + "; ".join(f"{lab} ({det})" for lab, det in fails[:3]))
+    except Exception as exc:
+        print(f"(near misses unavailable: {exc})")
+    try:
         from src.copy_trading import exp_cards
         print("## experiments (the analyst's cards; one live at a time)")
         for l in exp_cards.rows(now, limit=12) or ["(none)"]:

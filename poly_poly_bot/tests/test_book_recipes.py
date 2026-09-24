@@ -19,7 +19,7 @@ def test_main_builds_book_b_from_the_recipe_and_nowhere_else():
                    'strategy="B"'):
         assert needle not in b, f"{needle} must come from the recipe, not main.py"
     # the callables stay with the process
-    assert "blacklist_provider=lambda: promotion_state.active_blacklist(scope=\"b\")" in b
+    assert "blacklist_provider=lambda: promotion_state.active_blacklist(scope=_scope)" in b
     assert "detector_factory=detector_factory" in b and "observer=_get_shadow_observer()" in b
 
 

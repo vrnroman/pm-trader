@@ -336,6 +336,14 @@ class Config:
         "COPY_PAPER_B_LEDGER",
         str(Path(__file__).resolve().parent.parent / "data" / "copy_paper_ledger_b.jsonl"))
     copy_paper_b_slippage_bps: int = _opt_int("COPY_PAPER_B_SLIPPAGE_BPS", 100)
+    # Book B at more than one slice floor (2026-09-24, part 3 §3.4): the first
+    # is the primary (today's files); each other runs its own ledger and
+    # governance scope. The Z gate reads ZSET_GATE_BOOK (default the primary).
+    copy_paper_b_books: str = _optional("COPY_PAPER_B_BOOKS", "b300:300")
+    zset_gate_book: str = _optional("ZSET_GATE_BOOK", "b300")
+    # Real money copies target buys from this floor; default the paper floor.
+    # Decoupled so a lower paper book never lowers what real money copies.
+    live_min_trader_bet_usd: float = _opt_float("LIVE_MIN_TRADER_BET_USD", 0.0)
     # B's slate caps: looser than A's 3/8 because take-all IS the B thesis (the
     # counterfactual: capped B re-runs A's +6% regime; uncapped B is the +8%
     # regime whose gains concentrate in high-frequency wallets). Not unlimited —

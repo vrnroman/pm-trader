@@ -200,6 +200,11 @@ jobs:
           # still says 30 (ensure_env never overrides a defined key).
           sed -i 's#^COPY_GOLIVE_MIN_SETTLED=.*#COPY_GOLIVE_MIN_SETTLED=15#' .env
           ensure_env COPY_GOLIVE_MIN_SETTLED 15
+          # Owner, 2026-09-24 (part 3 §3.4): B300 keeps running unchanged while
+          # B150 and B100 run next to it as paper books; real money keeps
+          # copying from $300 whatever the paper books do.
+          ensure_env COPY_PAPER_B_BOOKS b300:300,b150:150,b100:100
+          ensure_env LIVE_MIN_TRADER_BET_USD 300
           ensure_env LIVE_DAILY_USD 54
 
           # ---- GO LIVE. Merging this PR is turning the owner's key. ----
