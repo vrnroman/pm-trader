@@ -11,6 +11,8 @@ Plus crash recovery via recover_pending_orders.
 
 from __future__ import annotations
 
+import math
+import re
 import time
 from typing import Optional
 
@@ -88,6 +90,22 @@ def _skip_row(record_trade_history, trade, qt, reason: str) -> None:
             received_at_ms=getattr(qt, "received_at_ms", None)))
     except Exception as exc:
         logger.warn(f"[exec] skip row not written: {exc}")
+
+
+def _failed_row(record_trade_history, trade, qt, copy_size: float, why: str, submitted_ms: Optional[float]) -> None:
+    """A post the exchange did not take is a FAILED row with its reason
+    (part 2 C). Never raises."""
+    try:
+        record_trade_history(TradeRecord(
+            timestamp=trade.timestamp, trader_address=trade.trader_address, market=trade.market,
+            side=trade.side, trader_size=trade.size, copy_size=copy_size, price=trade.price,
+            status="FAILED", reason=str(why)[:200], source=getattr(qt, "source", None),
+            source_detected_at=getattr(qt, "source_detected_at", None),
+            enqueued_at=getattr(qt, "enqueued_at", None), order_submitted_at=submitted_ms,
+            condition_id=trade.condition_id, token_id=trade.token_id,
+            outcome=getattr(trade, "outcome", None), received_at_ms=getattr(qt, "received_at_ms", None)))
+    except Exception as exc:
+        logger.warn(f"[exec] failed row not written: {exc}")
 
 
 def _tiered_risk():
@@ -286,6 +304,42 @@ def _book_preview_exit(trade, sell_shares: float) -> None:
 # Order execution
 # ---------------------------------------------------------------------------
 
+# Why the last post for a trade id returned None: ``(reason, definite)``.
+# ``definite`` is True when the exchange REFUSED the order (a 4xx with a
+# body), so the caller may release the day's reservation; False when the
+# reply was lost and the order may be live (the reservation is kept). Read
+# once by the caller through ``post_failure``. The two "[LIVE] Failed"
+# messages of 2026-09-23 carried none of this; the CLOB's answer ("not
+# enough balance: balance 20000000, order amount 20830000") sat in the log.
+_post_failures: dict = {}
+
+
+def post_failure(trade_id: str) -> tuple[str, bool]:
+    return _post_failures.pop(trade_id, ("order placement returned no result", False))
+
+
+def _note_failure(trade_id: str, why: str, *, definite: bool) -> None:
+    _post_failures[trade_id] = (str(why)[:300], bool(definite))
+
+
+def _clob_reason(exc: BaseException, *, held: Optional[float] = None) -> tuple[str, bool]:
+    """The exchange's own words, and whether the refusal is definite. A
+    "not enough balance" body is read into shares (6-decimal units)."""
+    status = getattr(exc, "status_code", None)
+    body = getattr(exc, "error_msg", None)
+    if status is None and body is None:
+        return (f"order placement failed: {error_message(exc)[:160]}", False)
+    text = body.get("error") if isinstance(body, dict) and body.get("error") else str(body)
+    m = re.search(r"balance:\s*(\d+),\s*order amount:\s*(\d+)", text or "")
+    if m:
+        have, asked = int(m.group(1)) / 1e6, int(m.group(2)) / 1e6
+        text = f"not enough balance: we hold {have:.2f} shares, the order asked for {asked:.2f}"
+    elif held is not None:
+        text = f"{text[:160]} (we hold {held:.2f} shares)"
+    definite = status is not None and 400 <= int(status) < 500
+    return (f"exchange refused (HTTP {status}): {text[:200]}" if status else f"exchange error: {text[:200]}", definite)
+
+
 async def _execute_copy_order(
     clob_client: ClobClient,
     trade: DetectedTrade,
@@ -295,10 +349,15 @@ async def _execute_copy_order(
     """Place a copy order on the CLOB.
 
     For BUY: limit order at best_ask (or trader price if no snapshot).
-    For SELL: limit order at best_bid (or trader price if no snapshot).
+    For SELL: limit order at best_bid (or trader price if no snapshot),
+    sized in SHARES from what we hold, never in dollars: ``$6.40 / bid``
+    asked for 20.83 shares of a 20.00 position on 2026-09-23 and the CLOB
+    refused the whole exit (docs/REQUIREMENTS-2026-09-24.md, part 2 A).
 
-    Returns OrderResult or None on failure.
+    Returns OrderResult or None on failure; the reason is left for the
+    caller in ``post_failure(trade.id)``.
     """
+    held: Optional[float] = None
     try:
         # One pricing rule for the whole repo (see order_executor's docstring):
         # the same function the shadow-quote measurement runs, so "what we'd
@@ -308,10 +367,23 @@ async def _execute_copy_order(
         order_price = quote_copy_order(trade.side, trade.price, snapshot)
         if order_price is None:
             logger.warn(f"[exec] Invalid order price for {trade.market}")
+            _note_failure(trade.id, "no valid order price", definite=True)
             return None
 
         shares = shares_for(copy_size, order_price)
+        if trade.side == "SELL":
+            from src.copy_trading import inventory
+            pos = inventory.get_position(trade.token_id) or {}
+            held = float(pos.get("shares") or 0.0)
+            if held <= 0:
+                _note_failure(trade.id, "SELL: no shares held", definite=True)
+                return None
+            # Hard rule: a live SELL never asks for more than we hold. Rounded
+            # DOWN to the exchange's two decimals, so 22.86 held is 22.86
+            # asked, never 22.87.
+            shares = math.floor(min(shares, held) * 100.0) / 100.0
         if shares <= 0:
+            _note_failure(trade.id, "order size rounds to zero shares", definite=True)
             return None
 
         from py_clob_client_v2 import OrderArgs
@@ -336,6 +408,7 @@ async def _execute_copy_order(
 
         if not order_id:
             logger.warn(f"[exec] No order ID returned: {resp}")
+            _note_failure(trade.id, f"the exchange returned no order id: {str(resp)[:120]}", definite=False)
             return None
 
         return OrderResult(
@@ -345,7 +418,9 @@ async def _execute_copy_order(
         )
 
     except Exception as exc:
+        why, definite = _clob_reason(exc, held=held)
         logger.error(f"[exec] Order placement failed: {error_message(exc)}")
+        _note_failure(trade.id, why, definite=definite)
         return None
 
 
@@ -881,17 +956,26 @@ async def place_trade_orders(
                 raise
 
             if result is None:
-                # The reservation is KEPT: _execute_copy_order swallows every
-                # exception, so None can be a timeout after the CLOB accepted
-                # the order (code review, finding 4). Fewer deals beats a
-                # second ticket against a live orphan; the day rolls over.
-                if reserved:
+                why, definite = post_failure(trade.id)
+                # The reservation is KEPT unless the exchange definitely
+                # refused: None can be a timeout after the CLOB accepted the
+                # order (code review, finding 4). Fewer deals beats a second
+                # ticket against a live orphan; the day rolls over.
+                if reserved and definite:
+                    release_spend(copy_size, source=f"copy:{tier or 'legacy'}")
+                    logger.info(f"[daily-cap] ${copy_size:.2f} reservation released: the "
+                                f"exchange refused the order")
+                elif reserved:
                     logger.info(f"[daily-cap] ${copy_size:.2f} reservation kept: the post's "
                                 f"fate is ambiguous (no order id)")
-                logger.error(f"[exec] Order placement returned None for '{trade.market[:40]}'")
-                await tg.trade_failed(trade.market, "Order placement returned no result")
+                logger.error(f"[exec] Order placement returned None for '{trade.market[:40]}': {why}")
+                # The exchange's words reach the phone and the audit trail
+                # (part 2 C): a FAILED row, so /pnl, /real and the no-copy
+                # clock see it; today there was no row at all.
+                _failed_row(record_trade_history, trade, qt, copy_size, why, order_submitted_at)
+                await tg.trade_failed(trade.market, f"{trade.side} not placed: {why}")
                 if canary_shot:
-                    canary.record_post_failed("order placement returned no result")
+                    canary.record_post_failed(why)
                     try:
                         from src.copy_trading.telegram_notifier import _send_message
                         await _send_message(canary.report_text())
@@ -908,9 +992,14 @@ async def place_trade_orders(
                 mark_trade_as_seen(trade.id)
                 continue
 
+            if trade.side == "SELL":
+                # Sized in shares from what we hold; the dollar figure the
+                # ledgers and the line carry is what those shares fetch.
+                copy_size = round(float(result.shares) * float(result.order_price), 2)
             logger.trade(
                 f"[LIVE] {trade.side} ${copy_size:.2f} on '{trade.market[:40]}' "
                 f"@ {result.order_price:.4f}, order {result.order_id[:12]}..."
+                + (f" ({result.shares:.2f} shares, all we hold)" if trade.side == "SELL" else "")
             )
             if canary_shot:
                 canary.record_fired(order_id=result.order_id, order_price=result.order_price)

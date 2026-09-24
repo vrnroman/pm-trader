@@ -200,7 +200,11 @@ def _live_guard_loop():
             # The redeemer's own source. The inventory store holds OPEN
             # positions and knows nothing about resolution, so it could never
             # answer "what failed to redeem".
-            redeemable = live_guard.redeemable_positions(CONFIG.proxy_wallet)
+            # One fetch, two views: EVERY resolved position for the
+            # equity (a resolved loser is worth nothing, neg-risk or not);
+            # the redeemer's own subset for the stuck-redemption trigger.
+            resolved = live_guard.resolved_positions(CONFIG.proxy_wallet)
+            redeemable = live_guard.without_neg_risk(resolved)
         except Exception as exc:
             read_failed = True
             logger.error(f"[guard] could not read redeemable positions: {exc}")
@@ -245,10 +249,11 @@ def _live_guard_loop():
                 # this box carried dozens of resolved losers whose cost basis
                 # dwarfed the month's budget, which held the computed bankroll
                 # far above the floor and made the floor unable to fire with
-                # zero USDC on chain. `redeemable` is the same list the
-                # unredeemed trigger uses, so one read serves both.
+                # zero USDC on chain. The FULL resolved set, neg-risk
+                # included: eight resolved neg-risk losers counted at cost
+                # read $48.85 of phantom equity on 2026-09-24.
                 open_cost, n_done, known = live_budget.live_open_cost(
-                    inventory.get_inventory_summary(), redeemable)
+                    inventory.get_inventory_summary(), resolved)
                 if n_done:
                     logger.info(f"[guard] equity excludes {n_done} resolved "
                                 f"position(s) still awaiting redemption")
@@ -260,9 +265,12 @@ def _live_guard_loop():
                     # The governor sizes on cash plus these numbers; only a
                     # KNOWN set is handed over, an unknown one sizes on cash.
                     from src.copy_trading.auto_redeemer import DUST_VALUE_USD, _position_value
-                    _rows = [p for p in (redeemable or []) if isinstance(p, dict)]
+                    # Worth: every resolved row (a neg-risk winner's payout
+                    # is real equity; Polymarket auto-claims it). Collectable
+                    # by OUR redeemer: only its own subset.
+                    _rows = [p for p in (resolved or []) if isinstance(p, dict)]
                     _resolved = round(sum(_position_value(p) for p in _rows), 2)
-                    _winners = [p for p in _rows if _position_value(p) >= DUST_VALUE_USD]
+                    _winners = [p for p in (redeemable or []) if isinstance(p, dict) and _position_value(p) >= DUST_VALUE_USD]
                     live_budget.note_open_cost(open_cost + _resolved)
                     live_budget.note_collectable(
                         len(_winners), sum(_position_value(p) for p in _winners))

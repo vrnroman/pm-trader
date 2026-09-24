@@ -1196,13 +1196,13 @@ def test_the_real_money_line_excludes_resolved_positions(monkeypatch, budget):
         "total_cost_basis_usd": 130.0,
         "positions": {"live": {"cost_basis": 30.0}, "dead": {"cost_basis": 100.0}}})
     monkeypatch.setattr(pnl, "load_realized", lambda: [])
-    monkeypatch.setattr(live_guard, "redeemable_positions",
+    monkeypatch.setattr(live_guard, "resolved_positions",
                         lambda w: [{"tokenId": "dead"}])
     line = rehearsal.real_money_line()
     assert "bankroll $280.00" in line, "the $100 resolved loser is not bankroll"
     assert "1 resolved position(s) worth under $1 each: nothing to collect" in line, line
 
-    monkeypatch.setattr(live_guard, "redeemable_positions", lambda w: None)
+    monkeypatch.setattr(live_guard, "resolved_positions", lambda w: None)
     line = rehearsal.real_money_line()
     assert "bankroll $380.00" in line
     assert "could not be read" in line and "can read high" in line
@@ -3102,3 +3102,144 @@ def test_a_study_tap_writes_a_request_and_the_daily_line_carries_the_buttons(tmp
     assert tb._handle_callback("study:nope") == ("no study preset 'nope'", None)
     src = open("main.py", encoding="utf-8").read()
     assert "reply_markup=_kb" in src and "_ec.study_keyboard()" in src
+
+
+# --------------------------------------------------------------------------- #
+# docs/REQUIREMENTS-2026-09-24.md, part 2 A + C: a live SELL never asks for
+# more than we hold; the exchange's words reach the phone and the audit trail
+# --------------------------------------------------------------------------- #
+
+def _sell_trade(token="tok-sell"):
+    from datetime import datetime, timezone
+
+    from src.models import DetectedTrade
+    return DetectedTrade(id="s1", trader_address=W1, timestamp=datetime.now(timezone.utc).isoformat(),
+                         market="Buenos Aires 2: Comesana vs Aguilar", token_id=token, condition_id="c",
+                         side="SELL", size=3.34, price=0.24)
+
+
+def test_a_live_sell_is_sized_from_the_shares_we_hold_never_from_dollars(monkeypatch):
+    from src.copy_trading import inventory, trade_executor
+    seen = {}
+
+    class _Clob:
+        def create_and_post_order(self, order_args, *a, **k):
+            seen["size"], seen["price"], seen["side"] = order_args.size, order_args.price, order_args.side
+            return {"orderID": "0xsell"}
+    monkeypatch.setattr(inventory, "get_position", lambda t: {"shares": 22.86, "avg_price": 0.28})
+    snap = {"best_bid": 0.27, "best_ask": 0.29, "midpoint": 0.28, "spread_bps": 700}
+    res = _run(trade_executor._execute_copy_order(_Clob(), _sell_trade(), 6.40, snap))
+    # $6.40 / 0.27 = 23.70 shares: that is what the CLOB refused on 09-23
+    assert res is not None and seen["side"] == "SELL" and seen["price"] == 0.27
+    assert seen["size"] == 22.86 and res.shares == 22.86, "capped at what we hold, rounded down"
+    monkeypatch.setattr(inventory, "get_position", lambda t: {"shares": 200.0})
+    res = _run(trade_executor._execute_copy_order(_Clob(), _sell_trade(), 6.40, snap))
+    assert seen["size"] == round(6.40 / 0.27, 2) - 0.0 or abs(seen["size"] - 23.70) < 0.011, "a big position sells the dollar size"
+    monkeypatch.setattr(inventory, "get_position", lambda t: None)
+    assert _run(trade_executor._execute_copy_order(_Clob(), _sell_trade(), 6.40, snap)) is None
+    assert trade_executor.post_failure("s1") == ("SELL: no shares held", True)
+
+
+def test_the_clob_refusal_is_read_into_shares_and_marked_definite():
+    from py_clob_client_v2.exceptions import PolyApiException
+    from src.copy_trading import trade_executor
+    exc = PolyApiException(error_msg={"error": "not enough balance / allowance: the balance is not enough -> balance: 20000000, order amount: 20830000"})
+    exc.status_code = 400
+    why, definite = trade_executor._clob_reason(exc, held=20.0)
+    assert why == "exchange refused (HTTP 400): not enough balance: we hold 20.00 shares, the order asked for 20.83" and definite
+    why, definite = trade_executor._clob_reason(RuntimeError("timed out"))
+    assert why.startswith("order placement failed: timed out") and not definite
+    assert "—" not in why
+
+
+def test_a_refused_post_reaches_the_phone_with_the_reason_and_writes_a_failed_row(tmp_path, monkeypatch):
+    from src.copy_trading import daily_spend_guard
+    h = _Harness(tmp_path, monkeypatch)
+
+    async def post(client, trade, copy_size, snapshot):
+        h.posted.append(copy_size)
+        trade_executor_mod._note_failure(trade.id, "exchange refused (HTTP 400): not enough balance: we hold 20.00 shares, the order asked for 20.83", definite=True)
+        return None
+    from src.copy_trading import trade_executor as trade_executor_mod
+    monkeypatch.setattr(trade_executor_mod, "_execute_copy_order", post)
+    placed = h.run(h.trades(1))
+    assert placed == 0 and len(h.posted) == 1
+    assert h.failed_msgs and "we hold 20.00 shares, the order asked for 20.83" in h.failed_msgs[0][1]
+    assert h.failed_msgs[0][1].startswith("BUY not placed: exchange refused (HTTP 400)")
+    failed = [r for r in h.history if r.status == "FAILED"]
+    assert len(failed) == 1 and "we hold 20.00 shares" in failed[0].reason and failed[0].copy_size > 0
+    assert daily_spend_guard.status().get("spent_today", daily_spend_guard.status().get("spent", 0)) in (0, 0.0), "a definite refusal gives the day's reservation back"
+    assert h.seen == {"t0"}
+
+
+def test_an_ambiguous_post_keeps_its_reservation_and_still_writes_the_row(tmp_path, monkeypatch):
+    from src.copy_trading import daily_spend_guard
+    h = _Harness(tmp_path, monkeypatch)
+    h.post_result = "fail"
+    h.run(h.trades(1))
+    assert h.failed_msgs[0][1] == "BUY not placed: order placement returned no result"
+    assert [r.status for r in h.history if r.status == "FAILED"] == ["FAILED"]
+    st = daily_spend_guard.status()
+    spent = st.get("spent_today", st.get("spent", None))
+    assert spent is None or spent > 0, "an ambiguous post keeps the reservation"
+
+
+# --------------------------------------------------------------------------- #
+# part 1 A-C: equity excludes EVERY resolved position; the redeemer keeps its view
+# --------------------------------------------------------------------------- #
+
+def test_the_equity_set_keeps_neg_risk_losers_and_the_redeemer_view_drops_them(monkeypatch):
+    rows = [{"tokenId": "T", "negRisk": True, "currentValue": 0.0}, {"tokenId": "W", "negRisk": False, "currentValue": 9.69}]
+
+    async def fetch(w, **k):
+        return rows
+    monkeypatch.setattr("src.copy_trading.auto_redeemer._fetch_redeemable_positions", fetch)
+    assert live_guard.resolved_positions("0xproxy") == rows
+    assert live_guard.without_neg_risk(rows) == [rows[1]] and live_guard.without_neg_risk(None) is None
+    assert live_guard.redeemable_positions("0xproxy") == [rows[1]]
+
+    async def boom(w, **k):
+        raise RuntimeError("api down")
+    monkeypatch.setattr("src.copy_trading.auto_redeemer._fetch_redeemable_positions", boom)
+    assert live_guard.resolved_positions("0xproxy") is None and live_guard.redeemable_positions("0xproxy") is None
+    # the loser is excluded from the live cost only when the FULL set is handed over
+    summary = {"total_cost_basis_usd": 12.80, "positions": {"T": {"cost_basis": 6.40}, "U": {"cost_basis": 6.40}}}
+    assert live_budget.live_open_cost(summary, rows) == (6.40, 1, True)
+    assert live_budget.live_open_cost(summary, live_guard.without_neg_risk(rows)) == (12.80, 0, True), "the old wiring: the bug"
+    from src.copy_trading import rehearsal
+    src = open("main.py", encoding="utf-8").read()
+    assert "live_budget.live_open_cost(\n                    inventory.get_inventory_summary(), resolved)" in src
+    assert "redeemable = live_guard.without_neg_risk(resolved)" in src
+    assert "live_guard.resolved_positions(CONFIG.proxy_wallet)" in inspect.getsource(rehearsal.real_money_line)
+
+
+def test_the_daily_line_reads_the_true_bankroll_with_eight_dead_neg_risk_tickets(tmp_path, monkeypatch, budget):
+    from src.copy_trading import inventory, pnl, rehearsal
+    budget(80.0)
+    monkeypatch.setattr(live_budget, "FLOOR_ABS", 30.0)
+    monkeypatch.setattr(live_mode, "read_arm", lambda: {"armed": True, "first_armed_ts": 1.0})
+    monkeypatch.setattr(live_budget, "_read_balance", lambda now=None: 108.15)
+    costs = [5.50, 5.98, 6.40, 6.40, 5.37, 6.40, 6.40, 6.40]
+    positions = {f"neg{i}": {"cost_basis": c} for i, c in enumerate(costs)}
+    monkeypatch.setattr(inventory, "get_inventory_summary", lambda: {"total_cost_basis_usd": round(sum(costs), 2), "positions": positions})
+    monkeypatch.setattr(live_guard, "resolved_positions", lambda w: [{"tokenId": f"neg{i}", "negRisk": True, "currentValue": 0.0} for i in range(8)])
+    monkeypatch.setattr(pnl, "load_realized", lambda: [])
+    line = rehearsal.real_money_line(now=time.time())
+    assert "bankroll $108.15 (USDC $108.15 + open at cost $0.00)" in line
+    assert "floor $30" in line and "distance $+78.15" in line
+
+
+def test_absolute_floor_and_daily_override_the_fractions(monkeypatch, budget):
+    budget(80.0)
+    monkeypatch.setattr(live_budget, "FLOOR_ABS", 30.0)
+    monkeypatch.setattr(live_budget, "DAILY_ABS", 54.0)
+    assert live_budget.floor_usd() == 30.0 and live_budget.caps(live=False).daily_usd == 54.0
+    monkeypatch.setattr(live_budget, "FLOOR_ABS", 100.0)      # above the budget: the fraction rules
+    monkeypatch.setattr(live_budget, "DAILY_ABS", 500.0)      # above the bankroll: the bankroll rules
+    assert live_budget.floor_usd() == 56.0 and live_budget.caps(live=False).daily_usd == 80.0
+    monkeypatch.setattr(live_budget, "FLOOR_ABS", None)
+    monkeypatch.setattr(live_budget, "DAILY_ABS", None)
+    assert live_budget.floor_usd() == 56.0
+    assert live_budget.caps(live=False).daily_usd == round(80.0 * live_budget.DAILY_FRAC, 2)
+    src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
+    assert "ensure_env LIVE_FLOOR_USD 30" in src and "ensure_env LIVE_DAILY_USD 54" in src
