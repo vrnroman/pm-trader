@@ -283,3 +283,23 @@ def test_the_deployed_sha_is_read_from_the_mounted_logs_dir(box, monkeypatch):
     (box["logs"] / "hygiene.log").write_text("20260922T180315Z build-manifest sha=a77ab27 image=x\n")
     monkeypatch.setenv("SRE_BOT_LOGS_DIR", str(box["logs"]))
     assert sre.box_snapshot(NOW)["deployed_sha"] == "a77ab27"
+
+
+def test_a_fix_that_changes_the_risk_profile_goes_to_a_branch_even_with_main_open(box, monkeypatch):
+    """Owner ruling 2026-09-24: main directly, unless the fix significantly
+    changes the risk profile; then a PR and the change in risk to read."""
+    monkeypatch.setattr(sre, "PUSH_MAIN", True)
+    _append(box, LINE)
+    calls, apply, push, revert = _fakes()
+    send = _sender()
+    s = sre.cycle(NOW, logs_dir=str(box["logs"]), send=send, apply=apply, push=push, revert=revert,
+                  runner=_runner_for({"kind": "fix", "reasoning": "x", "diff": SAFE_DIFF,
+                                      "risk_change": "copies now go out at twice the stake when the book is thin"}))
+    fp = s["wake"][0]
+    assert calls["push"] == [(fp, f"sre/{fp}")]
+    assert any("it changes the risk profile" in m and "Risk change: copies now go out at twice" in m for m in send.sent)
+    # "none" is not a risk change: main
+    _append(box, "2026-09-22 12:30:00 ERROR [y] other fault")
+    s2 = sre.cycle(NOW + 60, logs_dir=str(box["logs"]), send=send, apply=apply, push=push, revert=revert,
+                   runner=_runner_for({"kind": "fix", "reasoning": "x", "diff": SAFE_DIFF, "risk_change": "none"}))
+    assert calls["push"][-1] == (s2["wake"][0], None)

@@ -320,8 +320,13 @@ for more):
   marker appearing while the fingerprint does not).
   A diff touching the money path (executor, order placement, sizing, arm,
   guard, budget, set Z, redeemer, config, deploy files) will NOT be pushed to
-  main by you; it goes to a branch and to the owner. Prefer diagnosis over a
-  speculative diff: an "escalate" with the right sentence beats a wrong fix.
+  main by you; it goes to a branch and to the owner. Name "risk_change": one
+  plain line on what the fix changes for real money (what trades, when, how
+  much, what stops), or exactly "none" when nothing about money behaviour
+  changes. A fix whose risk_change is not "none" also goes to a branch, with
+  that line on the owner's phone, so he can read the change in risk before
+  merging. Prefer diagnosis over a speculative diff: an "escalate" with the
+  right sentence beats a wrong fix.
 
 Rules: no em-dashes or en-dashes in anything you write; plain sentences; the
 first sentence of "reasoning" states the cause.
@@ -330,7 +335,8 @@ Answer shape:
 {"kind": "nothing|note|escalate|disarm|fix", "fingerprint": "<id>",
  "reasoning": "<2-6 sentences>", "message": "<one line for the phone or empty>",
  "reason": "<disarm reason or empty>", "diff": "<unified diff or empty>",
- "path_marker": "<substring or empty>", "confidence": 0.0-1.0}
+ "path_marker": "<substring or empty>", "risk_change": "none|<one line>",
+ "confidence": 0.0-1.0}
 
 # Fingerprints that woke you (id, count, last seen, proof state, normalised line)
 {wake_rows}
@@ -423,7 +429,7 @@ def parse_verdict(envelope: Optional[dict]) -> Optional[dict]:
         return None
     if not isinstance(v, dict) or v.get("kind") not in ("nothing", "note", "escalate", "disarm", "fix"):
         return None
-    for k in ("reasoning", "message", "reason", "diff", "path_marker", "fingerprint"):
+    for k in ("reasoning", "message", "reason", "diff", "path_marker", "fingerprint", "risk_change"):
         v[k] = str(v.get(k) or "")
     try:
         v["confidence"] = float(v.get("confidence") or 0.0)
@@ -651,7 +657,13 @@ def act(verdict: dict, wake: list, state: dict, now: float, *, send: Callable[[s
         row["did"] = f"fix not applied: {detail}"
         _receipt("sre_fix_failed", before=f"fingerprint {fp}", after="not applied", detail=detail[:160], now=now)
         return row
-    branch = None if (cls == "safe" and PUSH_MAIN) else f"sre/{fp}"
+    # Owner ruling 2026-09-24: fixes go to main directly unless the fix
+    # changes the risk profile; then a branch, and the change in risk on his
+    # phone. The money-path list is the code's reading of "risk profile"; the
+    # model's own risk_change line is the second, and either one is enough.
+    risk = _sanitize(verdict.get("risk_change") or "").strip()
+    risky = bool(risk) and risk.lower() != "none"
+    branch = None if (cls == "safe" and PUSH_MAIN and not risky) else f"sre/{fp}"
     pushed, where = push(fp, branch=branch)
     if not pushed:
         row["did"] = f"fix tested ({detail}) but push failed: {where}"
@@ -662,9 +674,10 @@ def act(verdict: dict, wake: list, state: dict, now: float, *, send: Callable[[s
     fpm.mark_action(fp, "fix", now=now, detail=f"{sha} -> {where}")
     if branch:
         link = f"{REPO_HTTPS}/compare/main...{branch}?expand=1"
-        why_branch = ("on the money path" if cls == "money" else "SRE_PUSH_MAIN is off")
+        why_branch = ("on the money path" if cls == "money" else ("it changes the risk profile" if risky else "SRE_PUSH_MAIN is off"))
         msg = (f"\U0001f527 <b>AI SRE</b> ({fp}) has a fix, {why_branch}, not pushed to main: "
-               f"{sha} on {branch} ({detail}). Open and merge it here: {link}")
+               f"{sha} on {branch} ({detail}). Risk change: {risk if risky else 'none stated'}. "
+               f"Open and merge it here: {link}")
         delivered = send(msg)
         row["did"] = f"fix pushed to {branch} ({sha}); owner asked to merge"
         _receipt("sre_fix_branch", before=f"fingerprint {fp}", after=f"{branch} {sha}", detail=detail[:160],

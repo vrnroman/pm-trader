@@ -163,12 +163,14 @@ jobs:
           # evidence clears the cutover rule in two_clocks.py; ONCHAIN_SHADOW
           # pins either answer.
           ensure_env TRADE_MONITOR_MODE hybrid
-          # The chain stays PINNED as a shadow (manager s-qbzbrw, round 2):
-          # the flip rule's numbers (30 matched or 7 days) are guesses the
-          # owner ratifies after reading a week of the two-clocks line. Set
-          # ONCHAIN_SHADOW=false in the ENV_FILE secret to let the bot flip on
-          # its own evidence; delete the key to force primary.
-          ensure_env ONCHAIN_SHADOW true
+          # The chain is PRIMARY (owner, 2026-09-24: "whatever you did, go live
+          # now, dont wait"). ONCHAIN_SHADOW=false forces primary; =true pins the
+          # shadow; unset lets the bot flip on its own evidence (two_clocks).
+          # At the flip the evidence read: 2,342 matched fills over 1.8 days,
+          # chain lag 2.4 s vs api 18.7 s at the median, chain-only 2, api-only
+          # 143 (5.75% missed, the seven restart gaps; the rule's 5% would have
+          # refused). The data api stays as the deduplicated fallback.
+          ensure_env ONCHAIN_SHADOW false
           # The AI analyst (scripts/ai_analyst.py, s-qbzbrw): ON since the
           # owner's Desk verdict of 2026-09-24 (the SRE ledger had shown its
           # clean day). It runs daily inside the sidecar, moves live limits
@@ -176,6 +178,13 @@ jobs:
           # branches for the owner to merge. Set ANALYST_ENABLED=false in the
           # ENV_FILE secret to switch it off again.
           ensure_env ANALYST_ENABLED true
+          # Owner, 2026-09-24: the analyst may spend up to $50 a study.
+          ensure_env ANALYST_MAX_USD 50
+          # Owner, 2026-09-24: SRE fixes go to main directly unless the fix
+          # changes the risk profile (money-path files, or the model's own
+          # risk_change line); those go to a branch with the change in risk
+          # on his phone.
+          ensure_env SRE_PUSH_MAIN true
           ensure_env WALLET_DISCOVERY_CACHE_MAX_GB 3
           ensure_env WALLET_DISCOVERY_RES_CACHE_MAX_GB 1
           ensure_env LIVE_BUDGET_EXPOSURE_FRAC 0.80
