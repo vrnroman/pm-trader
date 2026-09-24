@@ -130,6 +130,11 @@ def main() -> int:
             print(json.dumps({k: r.get(k) for k in ("day", "id", "event", "why", "delta_pp", "n") if r.get(k) not in (None, "")}, ensure_ascii=False)[:300])
         for d in exp_cards.studies(limit=6):
             print(f"study {d.get('id')}: {d.get('totals_line')}")
+        un = exp_cards.unanswered_rows(since_ts=now - 7 * 86400)
+        if un:
+            print("## questions the study menu could not compute (last 7 days)")
+            for r in un[-8:]:
+                print(f"{r.get('day')} after study {r.get('study')}: {r.get('wanted')} (missing: {r.get('why_not')})")
     except Exception as exc:
         print(f"(experiments unavailable: {exc})")
     try:

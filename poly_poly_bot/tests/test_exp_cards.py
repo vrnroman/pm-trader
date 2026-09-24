@@ -178,3 +178,41 @@ def test_prune_drops_old_ledgers_and_keeps_the_record(desk):
     assert exp_cards.prune(NOW + 2 * 86400) == [], "too soon"
     gone = exp_cards.prune(NOW + 40 * 86400)
     assert len(gone) == 2 and not (d / "control.jsonl").exists() and (d / "card.json").exists() and (d / "verdict.json").exists()
+
+
+# ---- phase 2 (s-ye5990): no replay kind, one-tap presets, the unanswered ledger, the chain ----
+
+def test_a_replay_card_is_refused_as_a_study(desk):
+    ok, why, _ = exp_cards.validate(card(kind="replay"))
+    assert not ok and why == "replay over history is a study: use kind study"
+
+
+def test_a_tap_writes_a_request_the_sidecar_picks_up_and_renames(desk):
+    kb = exp_cards.study_keyboard()["inline_keyboard"][0]
+    assert [b["callback_data"] for b in kb] == ["study:min150", "study:form7", "study:cap3"]
+    assert all(b["text"].startswith("study: ") and "—" not in b["text"] for b in kb)
+    ok, msg = exp_cards.request_study("min150", NOW)
+    assert ok and msg == "queued: floor 300 -> 150; the table lands here when it is done"
+    assert exp_cards.request_study("stake", NOW) == (False, "no study preset 'stake'")
+    reqs = exp_cards.pending_requests()
+    assert len(reqs) == 1 and reqs[0][1]["kind"] == "min_usd" and reqs[0][1]["params"] == {"from": 300, "to": 150} and reqs[0][1]["by"] == "owner"
+    exp_cards.finish_request(reqs[0][0], ok=True)
+    assert exp_cards.pending_requests() == [] and (desk / "exp" / "studies" / f"request-{int(NOW)}-min150.done").exists()
+
+
+def test_the_unanswered_ledger_is_plain_and_capped(desk, monkeypatch):
+    monkeypatch.setattr(exp_cards, "UNANSWERED_KEEP", 3)
+    for i in range(5):
+        exp_cards.unanswered_add({"study": "s1", "wanted": f"q{i}", "why_not": "no feed archive"}, NOW + i)
+    rows = exp_cards.unanswered_rows()
+    assert [r["wanted"] for r in rows] == ["q2", "q3", "q4"] and rows[0]["day"] == "2026-09-25"
+    assert set(rows[0]) == {"ts", "day", "study", "wanted", "why_not"}, "no score, no count"
+
+
+def test_the_chain_is_one_computed_phrase(desk):
+    exp_cards.create(card(), NOW)
+    exp_cards.create(card(id="min150-first", parent_id="min150", study_ref="2026-09-25-min_usd-ab12"), NOW + 1)
+    assert exp_cards.chain(exp_cards.load("min150")) == ""
+    assert exp_cards.chain(exp_cards.load("min150-first")) == "min150-first <- min150, study 2026-09-25-min_usd-ab12"
+    assert any("(min150-first <- min150, study 2026-09-25-min_usd-ab12)" in l for l in exp_cards.rows(NOW + 2))
+    assert exp_cards.backlog_rows()[-1]["study_ref"] == "2026-09-25-min_usd-ab12"

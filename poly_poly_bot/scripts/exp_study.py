@@ -41,7 +41,10 @@ from src.config import CONFIG  # noqa: E402
 from src.copy_trading.entry_profile import is_copyable_entry  # noqa: E402
 from src.copy_trading.promotion_gate import FALSIFY_MIN_N  # noqa: E402
 
-STUDY_MAX_WALLETS = int(float(os.environ.get("STUDY_MAX_WALLETS", 60)))
+# 40 wallets at up to 11 pages each is a few minutes of reads; the sidecar's
+# watch is paused while a study runs, so the population is capped and the
+# caveat line says how many were read.
+STUDY_MAX_WALLETS = int(float(os.environ.get("STUDY_MAX_WALLETS", 40)))
 STUDY_DAYS = float(os.environ.get("STUDY_DAYS", 28))
 MIN_B_SETTLED = 10
 

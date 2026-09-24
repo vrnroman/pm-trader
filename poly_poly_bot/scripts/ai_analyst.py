@@ -301,7 +301,9 @@ below; the code ran it and froze the table. Read it and answer with ONE JSON
 object, nothing else:
 
 {"conclusion": "<two sentences at most: the number first, then what it means for the bot>",
- "card": <null, or an experiment card exactly as in the daily rules, with "study_ref": "{study_id}">}
+ "card": <null, or an experiment card exactly as in the daily rules, with "study_ref": "{study_id}">,
+ "wanted": "<optional: one follow-up question this menu cannot compute>",
+ "why_not": "<with wanted: what is missing to compute it>"}
 
 A card is worth writing only when the table argues for a change the paper books
 can test; its bars are numbers (win_bar.roi_pp at least 2.0, win_bar.min_n at
@@ -454,6 +456,7 @@ def parse_conclusion(envelope: Optional[dict]) -> Optional[dict]:
         return None
     card = v.get("card") if isinstance(v.get("card"), dict) else None
     return {"conclusion": _sanitize(str(v.get("conclusion") or ""))[:400], "card": card,
+            "wanted": _sanitize(str(v.get("wanted") or ""))[:300], "why_not": _sanitize(str(v.get("why_not") or ""))[:300],
             "cost_usd": float(envelope.get("total_cost_usd") or 0.0)}
 
 
@@ -560,6 +563,11 @@ def conclude_study(study_id: str, now: float, *, runner, send, apply, push, sre,
                              "concluded": f"conclusion cost ${v['cost_usd']:.2f} > ${MAX_USD_PER_CALL:.0f}", "did": "nothing",
                              "cost_usd": v["cost_usd"]}, now), v["cost_usd"])
     did = "concluded"
+    if v.get("wanted"):
+        # What the menu could not compute, written down plain: the menu
+        # grows from real asks, not guesses.
+        exp_cards.unanswered_add({"study": study_id, "wanted": v["wanted"], "why_not": v.get("why_not", "")}, now)
+        did = "concluded; one question the menu cannot compute noted"
     if v["card"]:
         card = {**v["card"], "study_ref": study_id}
         r = start_experiment(card, now, send=send, apply=apply, push=push, sre=sre, clone=clone)
@@ -716,10 +724,25 @@ def _stop(pid: int) -> None:
             p.kill()
 
 
-def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_stop, send=None, sre=None) -> dict:
-    """Every tick: the live card's process is up, concluded cards' processes
-    are down, the next queued card starts when nothing is live. A process
-    that will not stay up (MAX_SPAWNS_PER_DAY) voids its card."""
+def run_requests(now: float, *, send, study=None, sre=None) -> list[dict]:
+    """The owner's one-tap studies (request files under studies/): run
+    each, the table to the phone, the request renamed. No model call, no
+    cap of the model's; the day's dollar caps are untouched."""
+    out = []
+    for path, req in exp_cards.pending_requests():
+        p = {"kind": "study", "study": req.get("kind"), "params": req.get("params") or {}, "question": req.get("question") or ""}
+        row = run_study(p, now, send=send, study=study or _default_study)
+        row["woke_because"] = f"owner tapped {req.get('preset')}"
+        exp_cards.finish_request(path, ok=bool(row.get("study_id")))
+        out.append(sre.thought(row, now) if sre is not None else row)
+    return out
+
+
+def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_stop, send=None, sre=None, study=None) -> dict:
+    """Every tick: the owner's tapped studies run, the live card's process
+    is up, concluded cards' processes are down, the next queued card starts
+    when nothing is live. A process that will not stay up
+    (MAX_SPAWNS_PER_DAY) voids its card."""
     now = time.time() if now is None else now
     if not enabled():
         return {"live": None, "did": "off"}
@@ -727,6 +750,10 @@ def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_
     ex = st.setdefault("exp", {})
     day = time.strftime("%Y-%m-%d", time.gmtime(now))
     did = ""
+    if send is not None:
+        ran = run_requests(now, send=send, study=study, sre=sre)
+        if ran:
+            did = f"ran {len(ran)} tapped study(ies)"
     for c in exp_cards.cards():
         rec = ex.get(c["id"]) or {}
         if c.get("status") in exp_cards.CONCLUDED and rec.get("pid") and alive(int(rec["pid"])):

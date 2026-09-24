@@ -167,8 +167,11 @@ def validate(card: dict) -> tuple[bool, str, dict]:
     if not title or not hyp:
         return (False, "title and hypothesis are required", {})
     kind = str(card.get("kind") or "live")
-    if kind not in ("live", "replay"):
-        return (False, f"kind {kind!r} must be live or replay", {})
+    if kind != "live":
+        # A card is a paper trial; a look at history is a study (manager,
+        # s-ye5990 phase 2: a kind the code accepts and never runs is a
+        # false green).
+        return (False, "replay over history is a study: use kind study", {})
     knobs, why = book_recipes.coerce_knobs(card.get("knobs") or {})
     if why:
         return (False, why, {})
@@ -261,7 +264,8 @@ def create(card: dict, now: float) -> tuple[bool, str, Optional[dict]]:
     c["created_ts"] = now
     if not save(c):
         return (False, "could not write the card", None)
-    backlog_add({"id": c["id"], "event": "queued", "title": c["title"], "parent_id": c.get("parent_id")}, now)
+    backlog_add({"id": c["id"], "event": "queued", "title": c["title"], "parent_id": c.get("parent_id"),
+                 "study_ref": c.get("study_ref")}, now)
     return (True, "", c)
 
 
@@ -495,6 +499,18 @@ def line(now: Optional[float] = None) -> str:
     return ("\U0001f9ea " + " | ".join(parts)) if parts else ""
 
 
+def chain(card: dict) -> str:
+    """The card's lineage as one computed phrase: "min150 <- study
+    2026-09-25-min_usd-ab12" or "min150-first <- min150". Empty when it has
+    none. No diagram: a line the digest and the phone can carry."""
+    parts = []
+    if card.get("parent_id"):
+        parts.append(str(card["parent_id"]))
+    if card.get("study_ref"):
+        parts.append(f"study {card['study_ref']}")
+    return f"{card['id']} <- " + ", ".join(parts) if parts else ""
+
+
 def rows(now: Optional[float] = None, limit: int = 20) -> list[str]:
     """For the digest: every card, one line, newest first."""
     now = time.time() if now is None else now
@@ -504,8 +520,93 @@ def rows(now: Optional[float] = None, limit: int = 20) -> list[str]:
         last = j[-1] if j else {}
         out.append(f"{c['id']:16} {c['status']:6} {c['title'][:50]:50} "
                    f"{'n ' + str(last.get('n')) + ' ' + f'{last.get('delta_pp', 0):+.1f} pp' if last else 'no check'}"
-                   + (f"  branch {c['branch']}" if c.get("branch") else ""))
+                   + (f"  branch {c['branch']}" if c.get("branch") else "")
+                   + (f"  ({chain(c)})" if chain(c) else ""))
     return out
+
+
+# --------------------------------------------------------------------------- #
+# The owner's one-tap studies, and the questions nobody could compute
+# --------------------------------------------------------------------------- #
+
+# Three presets on the 08:00 line (manager, s-ye5990 phase 2): a tap writes a
+# request file; the sidecar runs it next tick and the table lands on the
+# phone. The menu is fixed; what it cannot answer goes to the unanswered
+# ledger, never to free text.
+STUDY_PRESETS: dict[str, dict] = {
+    "min150": {"label": "floor 300 -> 150", "kind": "min_usd", "params": {"from": 300, "to": 150},
+               "question": "slice floor 300 -> 150: who stays in form, who enters, who leaves, what the copies earn"},
+    "form7": {"label": "form on 7 days", "kind": "form", "params": {"days": 7},
+              "question": "the form rail on 7 days instead of 14: who is in, who is out"},
+    "cap3": {"label": "cap 3 a wallet-day", "kind": "wallet_cap", "params": {"to": 3},
+             "question": "3 copies a wallet a day in book B: which wallets keep their edge"},
+}
+REQUEST_PREFIX = "request-"
+UNANSWERED_FILE = "unanswered.jsonl"
+UNANSWERED_KEEP = 200
+
+
+def study_keyboard() -> dict:
+    """Inline buttons for the 08:00 line, one per preset."""
+    return {"inline_keyboard": [[{"text": f"study: {v['label']}", "callback_data": f"study:{k}"}
+                                 for k, v in STUDY_PRESETS.items()]]}
+
+
+def request_study(preset: str, now: float, *, by: str = "owner") -> tuple[bool, str]:
+    """A tap: one request file under studies/. ``(ok, message for the toast)``."""
+    spec = STUDY_PRESETS.get(str(preset or ""))
+    if spec is None:
+        return (False, f"no study preset {preset!r}")
+    req = {"preset": preset, "kind": spec["kind"], "params": spec["params"], "question": spec["question"], "by": by, "ts": now}
+    p = os.path.join(studies_dir(), f"{REQUEST_PREFIX}{int(now)}-{preset}.json")
+    if not _write_json(p, req):
+        return (False, "could not write the request")
+    return (True, f"queued: {spec['label']}; the table lands here when it is done")
+
+
+def pending_requests() -> list[tuple[str, dict]]:
+    out = []
+    try:
+        names = sorted(n for n in os.listdir(studies_dir()) if n.startswith(REQUEST_PREFIX) and n.endswith(".json"))
+    except OSError:
+        return out
+    for n in names:
+        d = _read_json(os.path.join(studies_dir(), n))
+        if d.get("kind"):
+            out.append((os.path.join(studies_dir(), n), d))
+    return out
+
+
+def finish_request(path: str, *, ok: bool) -> None:
+    """The request is renamed, never deleted: what was asked stays visible."""
+    try:
+        os.replace(path, path[:-5] + (".done" if ok else ".failed"))
+    except OSError:
+        pass
+
+
+def unanswered_add(row: dict, now: float) -> dict:
+    """A question the menu could not compute: one plain row. Capped at
+    UNANSWERED_KEEP rows; no count, no score."""
+    r = {"ts": now, "day": time.strftime("%Y-%m-%d", time.gmtime(now)), **row}
+    p = os.path.join(root(), UNANSWERED_FILE)
+    rows_ = _rows(p) + [r]
+    if len(rows_) > UNANSWERED_KEEP:
+        rows_ = rows_[-UNANSWERED_KEEP:]
+        try:
+            with open(p + ".tmp", "w", encoding="utf-8") as f:
+                for x in rows_:
+                    f.write(json.dumps(x, ensure_ascii=False) + "\n")
+            os.replace(p + ".tmp", p)
+        except OSError:
+            pass
+    else:
+        _append(p, r)
+    return r
+
+
+def unanswered_rows(since_ts: float = 0.0) -> list[dict]:
+    return [r for r in _rows(os.path.join(root(), UNANSWERED_FILE)) if float(r.get("ts") or 0) >= since_ts]
 
 
 # --------------------------------------------------------------------------- #

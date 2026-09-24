@@ -1180,7 +1180,14 @@ def _ab_race_reporter_loop():
                         deal_text += "\n" + _ow.weekly_line()
                 except Exception as _exc:
                     logger.warn(f"[AB-RACE] ledger lines failed: {_exc}")
-                sent_deal = telegram_bot.send_message(deal_text, kind=telegram_bot.KIND_DEAL)
+                # Three one-tap studies under the line (s-ye5990): a tap writes
+                # a request the sidecar runs; the table lands on the phone.
+                try:
+                    from src.copy_trading import exp_cards as _ec
+                    _kb = _ec.study_keyboard()
+                except Exception:
+                    _kb = None
+                sent_deal = telegram_bot.send_message(deal_text, kind=telegram_bot.KIND_DEAL, reply_markup=_kb)
                 try:
                     from src.copy_trading import ops_watch as _ow
                     _ow.note_daily_line(bool(sent_deal))

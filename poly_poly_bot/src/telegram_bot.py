@@ -2775,7 +2775,17 @@ def _handle_callback(data: str) -> tuple[str, str | None]:
         return _handle_zset_admit_tap(data[len("zadm:"):])
     if data.startswith("zevict:"):
         return _handle_zset_evict_tap(data[len("zevict:"):])
+    if data.startswith("study:"):
+        return _handle_study_tap(data[len("study:"):])
     return ("Unknown action", None)
+
+
+def _handle_study_tap(preset: str) -> tuple[str, str | None]:
+    """A one-tap study (s-ye5990): the request file is written here, the
+    study runs in the sidecar next tick, never in this process."""
+    from src.copy_trading import exp_cards
+    ok, msg = exp_cards.request_study(preset, time.time(), by="owner")
+    return (msg[:180], None)
 
 
 def _handle_zset_evict_tap(wallet: str) -> tuple[str, str | None]:

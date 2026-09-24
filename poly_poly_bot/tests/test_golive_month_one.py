@@ -3082,3 +3082,19 @@ def test_the_verifier_releases_on_a_filled_sell(monkeypatch):
     _run(trade_executor.process_verifications([_sell_po(copy_size=10.0)], clob_client=None))
     assert sold == [("tokS", 20.0)]
     assert released == [("1b", 20.0, "tokS")], "the $10 reservation and the $10 of buy row it closed"
+
+
+def test_a_study_tap_writes_a_request_and_the_daily_line_carries_the_buttons(tmp_path, monkeypatch):
+    # s-ye5990: the owner's one-tap studies. The bot only writes the
+    # request; the sidecar runs it. main.py hangs the keyboard on the
+    # 08:00 DEAL line.
+    import src.telegram_bot as tb
+    from src.copy_trading import exp_cards
+    data = tmp_path / "data"; data.mkdir()
+    monkeypatch.setattr(exp_cards.CONFIG, "data_dir", str(data))
+    toast, edited = tb._handle_callback("study:form7")
+    assert toast.startswith("queued: form on 7 days") and edited is None
+    assert len(exp_cards.pending_requests()) == 1 and exp_cards.pending_requests()[0][1]["by"] == "owner"
+    assert tb._handle_callback("study:nope") == ("no study preset 'nope'", None)
+    src = open("main.py", encoding="utf-8").read()
+    assert "reply_markup=_kb" in src and "_ec.study_keyboard()" in src

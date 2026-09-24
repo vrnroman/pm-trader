@@ -370,3 +370,39 @@ def test_the_child_environment_has_no_key_and_writes_under_the_card(desk, monkey
     assert "PRIVATE_KEY" not in env and "TELEGRAM_BOT_TOKEN" not in env
     assert env["DATA_DIR"] == str(desk / "exp" / "min150" / "scratch") and env["LIVE_ARM_ENABLED"] == "false"
     assert env["EXP_REAL_DATA_DIR"] == str(desk) and env["LOGS_DIR"].endswith("/exp/min150")
+
+
+def test_the_read_back_writes_what_the_menu_could_not_compute(desk):
+    calls, apply, push = _fakes()
+    answers = [{"proposals": [{"kind": "study", "study": "min_usd", "params": {"to": 150}}], "summary": "s"},
+               {"conclusion": "19 wallets at 150.", "card": None, "wanted": "the same at 200 with exits followed",
+                "why_not": "the menu has no follow-exits switch"}]
+    n = {"i": 0}
+
+    def runner(prompt):
+        n["i"] += 1
+        return {"result": json.dumps(answers[n["i"] - 1]), "total_cost_usd": 1.0, "subtype": "success"}
+    s = an.maybe_run(NOW, runner=runner, send=_sender(), apply=apply, push=push, study=_study_stub)
+    rows = exp_cards.unanswered_rows()
+    assert len(rows) == 1 and rows[0]["wanted"] == "the same at 200 with exits followed" and rows[0]["study"].endswith("abcd1234")
+    assert "one question the menu cannot compute noted" in s["acted"][-1]
+
+
+def test_the_supervisor_runs_the_owners_tapped_study_outside_the_models_cap(desk):
+    send = _sender()
+    exp_cards.request_study("cap3", NOW)
+    ran = []
+
+    def study(kind, params, *, now, question=""):
+        ran.append((kind, params))
+        return _study_stub(kind, params, now=now, question=question)
+    sv = an.supervise(NOW + 120, spawn=lambda c: 1, alive=lambda p: False, stop=lambda p: None, send=send, study=study)
+    assert ran == [("wallet_cap", {"to": 3})] and sv["did"] == "ran 1 tapped study(ies)"
+    assert exp_cards.pending_requests() == [] and any("study <code>" in m and "wallets in 11 -&gt; 19" in m for m in send.sent)
+    assert an.supervise(NOW + 240, spawn=lambda c: 1, alive=lambda p: False, stop=lambda p: None, send=send, study=study)["did"] == ""
+    assert len(ran) == 1, "a request runs once"
+    # the model's own 1-a-day cap is untouched: a study proposal still runs today
+    calls, apply, push = _fakes()
+    s = an.maybe_run(NOW + 300, runner=_runner_for({"proposals": [{"kind": "study", "study": "form", "params": {"days": 7}}], "summary": "s"}),
+                     send=send, apply=apply, push=push, study=study)
+    assert "study 2026-09-25-form-abcd1234" in s["acted"][0]
