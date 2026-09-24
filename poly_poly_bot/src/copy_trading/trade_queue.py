@@ -53,6 +53,15 @@ _pending_trades: list[QueuedTrade] = []
 def enqueue_trade(trade: QueuedTrade) -> None:
     """Add a detected trade to the execution queue."""
     _pending_trades.append(trade)
+    try:
+        # Every detected row, both sides, on the flip gate's record: by the
+        # time the executor reaches a BUY the target's SELL is usually here.
+        from src.copy_trading import flip_gate
+        t = trade.trade
+        shares = float(t.size) / float(t.price) if t.price and t.price > 0 else 0.0
+        flip_gate.note_detected(t.trader_address, t.token_id, t.side, shares, t.timestamp)
+    except Exception:  # noqa: BLE001  the record never blocks the queue
+        pass
     logger.debug(
         f"[queue] Enqueued trade {trade.trade.id[:12]}... | "
         f"queue depth: {len(_pending_trades)}"

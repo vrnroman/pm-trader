@@ -194,6 +194,9 @@ class Config:
     # lagged-vs-instant). The feed floor (COPY_PAPER_FEED_MIN_USD=100) already
     # sits below, so detection needs no change.
     copy_paper_min_usd: float = _opt_float("COPY_PAPER_MIN_USD", 300.0)
+    # A buy the target has already sold this share of (a flip) is refused,
+    # preview and live alike (2026-09-24 requirements, part 2 D1).
+    copy_flip_exit_frac: float = _opt_float("COPY_FLIP_EXIT_FRAC", 0.5)
     # Poll cadence for the near-term copier. Dropped 120s -> 60s now that
     # detection runs off the shared global /trades feed (fixed cost regardless of
     # how many wallets are watched — see copy_paper_feed_detection), so we can

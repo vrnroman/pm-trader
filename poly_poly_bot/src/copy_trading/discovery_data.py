@@ -24,6 +24,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 
 from src.copy_trading.copy_cost import CostModel
+from src.copy_trading import scalper
 from src.copy_trading.copy_replay import (
     approved_category_set,
     proven_negative,
@@ -821,6 +822,7 @@ def _evaluate_sweep(
         # takes — so selection measures what we actually do, not the wallet's
         # own closed-position ROI. exit_* is the two-horizon diagnostic.
         crs = score_copy_replay(ctx.buys, ctx.round_trips, min_usd=cfg.min_usd)
+        _flip = scalper.flip_stats_from_trips(ctx.round_trips)
         fade = crs.fade_label(min_n=cfg.min_copy_replay_n, fade_roi=cfg.fade_roi) is not None
         # winning-markets-only (item A): score copy-and-hold per category and keep
         # only the categories whose net-of-cost edge clears the floor on enough
@@ -860,6 +862,7 @@ def _evaluate_sweep(
             n_closed=(getattr(m, "n_closed", 0) if m else 0),
             copy_roi=crs.mean_roi, copy_tstat=crs.tstat, copy_n=crs.n,
             copy_hit=crs.hit_rate, exit_roi=crs.exit_mean_roi, exit_n=crs.exit_n, fade=fade,
+            flip_exits=_flip[0], flip_n=_flip[1],
             approved_categories=approved_cats, category_edges=cat_edge_rows,
             median_usd=median_usd,
             flagged_by=tuple(f.theory for f in flags),

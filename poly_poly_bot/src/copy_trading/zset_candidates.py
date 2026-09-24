@@ -128,10 +128,12 @@ def evaluate(wallet: str, b_positions, a_positions, *, era: Optional[float],
     conc_ok, conc_detail = zset.concentration_check(settled, min_opened_ts=era)
     contra_ok, contra_detail = zset.contradiction_check(a_roi, a_n, CONTRADICTION_MIN_N)
     bl = zset._blacklist_block(wallet)
+    scalp_ok, scalp_detail = scalper_check(wallet)
     all_checks = list(checks) + [
         ("still positive with its best 3 copies deleted", conc_ok, conc_detail),
         ("the other book does not contradict it", contra_ok, contra_detail),
         ("not under the bot's own auto-demote", bl is None, bl or "no active demotion"),
+        ("not a scalper at our latency", scalp_ok, scalp_detail),
     ]
     trimmed, kept, dropped = zset.trimmed_roi(settled, min_opened_ts=era)
     key = wallet.lower()
@@ -139,11 +141,26 @@ def evaluate(wallet: str, b_positions, a_positions, *, era: Optional[float],
                  if (getattr(p, "target", "") or "").lower() == key
                  and not getattr(p, "closed", False))
     return Candidate(
-        wallet=wallet, ok=bool(ready and conc_ok and contra_ok and bl is None),
+        wallet=wallet, ok=bool(ready and conc_ok and contra_ok and bl is None and scalp_ok),
         gate_ready=bool(ready), checks=all_checks, gate_checks=list(checks),
         ideal_roi=ideal_roi, n_ideal=n_ideal, paper_roi=stats.roi,
         trimmed_roi=trimmed, n_trimmed_kept=kept, n_trimmed_dropped=dropped,
         settled=settled, a_roi=a_roi, a_n=a_n, last_ts=last_ts, n_open=n_open)
+
+
+def scalper_check(wallet: str) -> tuple[bool, str]:
+    """The scalper rail at the door (2026-09-24, part 2 D2): the wallet's
+    own exits from its form record. Unmeasured is not a fail: the form scan
+    after admission benches a scalper on its first read."""
+    try:
+        from src.copy_trading import scalper, wallet_form
+        rec = wallet_form.record(wallet)
+    except Exception:  # noqa: BLE001
+        return (True, "unmeasured (form unreadable)")
+    if not rec or "exits" not in rec:
+        return (True, "unmeasured (no form record yet)")
+    scalp, why = scalper.is_scalper(int(rec.get("exits") or 0), int(rec.get("flips") or 0))
+    return (not scalp, why)
 
 
 def load_books():

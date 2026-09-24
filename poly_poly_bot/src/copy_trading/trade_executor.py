@@ -706,6 +706,23 @@ async def place_trade_orders(
                 increment_retry(trade.id)
                 continue
 
+            # --- The flip gate (owner, 2026-09-24): a buy the target has
+            # already left is not traded, in preview and live alike. ---
+            if trade.side == "BUY":
+                try:
+                    from src.copy_trading import flip_gate
+                    _shares = float(trade.size) / float(trade.price) if trade.price and trade.price > 0 else 0.0
+                    _exited, _why_f = flip_gate.target_already_exited(
+                        trade.trader_address, trade.token_id, trade.timestamp, _shares)
+                except Exception as exc:  # noqa: BLE001  a gate that cannot read does not refuse
+                    _exited, _why_f = False, ""
+                    logger.warn(f"[exec] flip gate could not read {trade.trader_address[:10]}: {exc}")
+                if _exited:
+                    logger.skip(f"[exec] {trade.trader_address[:10]} {_why_f}: not copied")
+                    _skip_row(record_trade_history, trade, qt, _why_f)
+                    mark_trade_as_seen(trade.id)
+                    continue
+
             # --- Preview mode ---
             # The single gate between this loop and real money. It reads the
             # two-key interlock (live_mode), not CONFIG.preview_mode directly:

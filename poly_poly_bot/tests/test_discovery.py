@@ -425,3 +425,13 @@ def test_meta_serializes_winning_markets_fields():
     assert m["approved_categories"] == ["crypto", "research"]
     assert m["category_edges"] == [["crypto", 12, 0.40, True]]
     assert m["median_usd"] == 1500.0
+
+
+def test_a_scalper_is_culled_from_discovery_whatever_theory_1f_says():
+    # theory 1f rewards the early-exit swing profile; at our latency it is uncopyable
+    good = Eval(wallet="0xG", capture_cents=2.0, tstat=12.0, flip_exits=20, flip_n=2)
+    scalp = Eval(wallet="0xS", capture_cents=2.0, tstat=12.0, flip_exits=246, flip_n=246)
+    thin = Eval(wallet="0xT", capture_cents=2.0, tstat=12.0, flip_exits=5, flip_n=5)
+    r = run_discovery_cycle({"0xG": good, "0xS": scalp, "0xT": thin}, DiscoveryState(), CFG)
+    assert [e.wallet for e in r.watchlist] == ["0xG", "0xT"], "under 10 exits nothing is said"
+    assert r.culled["0xS"].startswith("scalper: 100% of exits within 10 min")
