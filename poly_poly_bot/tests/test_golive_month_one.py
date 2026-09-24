@@ -3276,3 +3276,22 @@ def test_the_z_gate_refuses_a_measured_scalper_and_passes_an_unmeasured_wallet(t
     ok, why = zset_candidates.scalper_check("0xScalp")
     assert not ok and why.startswith("scalper: 83% of exits within 10 min")
     assert zset_candidates.scalper_check("0xFine") == (True, "7% of 30 exits within 10 min")
+
+
+# --------------------------------------------------------------------------- #
+# part 3 R1-R2 (2026-09-24): the gate opens at 15, three admissions every 3 h
+# --------------------------------------------------------------------------- #
+
+def test_the_gate_opens_at_fifteen_settled_and_admits_three_every_three_hours():
+    import os as _os
+    from src.config import Config
+    assert Config.copy_golive_min_settled == 15 or _os.environ.get("COPY_GOLIVE_MIN_SETTLED"), "default 15 (owner, 2026-09-24)"
+    assert CONFIG.copy_promote_min_roi == 0.10 or _os.environ.get("COPY_PROMOTE_MIN_ROI"), "the +10% floor stays"
+    src = open("main.py", encoding="utf-8").read()
+    assert 'os.environ.get("ZSET_AUTO_ADMIT_EVERY_S", 3 * 3600)' in src
+    assert 'ZSET_AUTO_ADMIT_LIMIT", 3' in src and "ops_admit.scan(send=_send_wallet_kb, limit=admit_scan_limit)" in src
+    assert "ops_watch.probation_check(now=_now)" in src
+    dy = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
+    assert "ensure_env COPY_GOLIVE_MIN_SETTLED 15" in dy and "s#^COPY_GOLIVE_MIN_SETTLED=.*#COPY_GOLIVE_MIN_SETTLED=15#" in dy
+    from src.copy_trading import ops_watch
+    assert ops_watch.PROBATION_TOTAL_PER_DAY == 4 or _os.environ.get("ZSET_PROBATION_TOTAL_PER_DAY")

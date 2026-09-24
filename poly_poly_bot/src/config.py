@@ -420,7 +420,10 @@ class Config:
     # and real money. `/golive <wallet>` re-checks the wallet live before that flip:
     # a DOUBLED settled bar, still-positive paper ROI now, recent activity, and the
     # promotion floor still holding. Advisory — it prints READY/HOLD, it never flips.
-    copy_golive_min_settled: int = _opt_int("COPY_GOLIVE_MIN_SETTLED", 30)
+    # 30 -> 15 (owner, 2026-09-24, docs/REQUIREMENTS-2026-09-24.md part 3 R1):
+    # the count was never the brake for active wallets (median 14 days to
+    # 30 settles); the +10% ROI floor stays. Probation is the real test.
+    copy_golive_min_settled: int = _opt_int("COPY_GOLIVE_MIN_SETTLED", 15)
     copy_golive_max_idle_days: float = _opt_float("COPY_GOLIVE_MAX_IDLE_DAYS", 14.0)
     copy_golive_min_roi: float = _opt_float("COPY_GOLIVE_MIN_ROI", 0.0)
     # Honest-metrics go-live floors (owner ruling 2026-07-25, desk item from the

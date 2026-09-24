@@ -195,6 +195,11 @@ jobs:
           # floor is $30 and the daily cap $54, in dollars. These absolute
           # overrides win over the two fractions above.
           ensure_env LIVE_FLOOR_USD 30
+          # Owner, 2026-09-24 (part 3 R1): 15 settled copies open the Z gate; the
+          # +10% ROI floor stays. Rewritten in place too, in case the secret
+          # still says 30 (ensure_env never overrides a defined key).
+          sed -i 's#^COPY_GOLIVE_MIN_SETTLED=.*#COPY_GOLIVE_MIN_SETTLED=15#' .env
+          ensure_env COPY_GOLIVE_MIN_SETTLED 15
           ensure_env LIVE_DAILY_USD 54
 
           # ---- GO LIVE. Merging this PR is turning the owner's key. ----

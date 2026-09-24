@@ -172,7 +172,10 @@ def _live_guard_loop():
     guard_started = time.time()
     # The scan cadence survives restarts: a deploy every ten minutes admitted
     # two wallets per restart on 2026-09-12 because the clock started at 0.
-    admit_scan_every = float(os.environ.get("ZSET_AUTO_ADMIT_EVERY_S", 6 * 3600))
+    # Every 3 h, up to ZSET_AUTO_ADMIT_LIMIT wallets a scan (owner, 2026-09-24,
+    # part 3 R2): ten eligible wallets enter within a day, not a week.
+    admit_scan_every = float(os.environ.get("ZSET_AUTO_ADMIT_EVERY_S", 3 * 3600))
+    admit_scan_limit = int(float(os.environ.get("ZSET_AUTO_ADMIT_LIMIT", 3)))
     try:
         from src.copy_trading import ops_watch as _ow0
         last_admit_scan = float(_ow0._read_json(_ow0._p(_ow0.STATE_FILE)).get("admit_scan_ts") or 0.0)
@@ -376,12 +379,18 @@ def _live_guard_loop():
                 two_clocks.maybe_cutover(send=_send_bot, now=_now)
             except Exception as _exc:
                 logger.warn(f"[guard] two-clocks cutover check failed: {_exc}")
+            try:
+                # Probation is pass/fail (part 3 R3): the calendar clock here,
+                # the settled count where settlements are booked.
+                ops_watch.probation_check(now=_now)
+            except Exception as _exc:
+                logger.warn(f"[guard] probation check failed: {_exc}")
             if _now - last_admit_scan >= admit_scan_every:
                 last_admit_scan = _now
                 ops_watch.note_admit_scan(_now)
                 try:
                     from src.copy_trading import ops_admit
-                    ops_admit.scan(send=_send_wallet_kb)
+                    ops_admit.scan(send=_send_wallet_kb, limit=admit_scan_limit)
                 except Exception as _exc:
                     logger.warn(f"[guard] auto-admit scan failed: {_exc}")
             # The form scan on its own persisted clock (FORM_EVERY_S), plus a
