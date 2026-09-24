@@ -39,7 +39,11 @@ DEFAULT_REAL_DATA_DIR = os.environ.get("EXP_REAL_DATA_DIR", "/app/data")
 
 
 def fence(max_mb: float) -> str:
-    """Cap the address space. Returns what happened (some platforms refuse)."""
+    """Cap the address space. Returns what happened (some platforms refuse).
+    Zero or less is no cap: a cap of 0 bytes would starve this very process
+    (it did, to the CI runner's pytest, on 2026-09-24)."""
+    if max_mb <= 0:
+        return "address space cap off"
     try:
         import resource
         lim = int(max_mb * 1024 * 1024)

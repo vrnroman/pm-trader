@@ -110,6 +110,9 @@ def test_run_stops_when_the_card_is_no_longer_live_and_writes_only_under_the_car
 
 def test_main_refuses_a_key_in_the_environment(box, monkeypatch, capsys):
     monkeypatch.setenv("PRIVATE_KEY", "0xdeadbeef")
+    # --max-rss-mb 0 is "no cap": the fence must never be applied to the
+    # test process (a 0-byte RLIMIT_AS starved the CI runner's pytest).
     assert eb.main(["--card", str(box["card_dir"] / "card.json"), "--max-rss-mb", "0"]) == 2
     out = capsys.readouterr().out
-    assert "refusing to run with PRIVATE_KEY" in out and "deadbeef" not in out
+    assert "address space cap off" in out and "refusing to run with PRIVATE_KEY" in out and "deadbeef" not in out
+    assert eb.fence(0) == "address space cap off" and eb.fence(-1) == "address space cap off"
