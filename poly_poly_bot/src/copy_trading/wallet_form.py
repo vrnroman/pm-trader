@@ -98,6 +98,7 @@ class Form:
     # many followed their entry within COPY_FLIP_WINDOW_S.
     exits: int = 0
     flips: int = 0
+    last_trade_ts: float = 0.0        # the wallet's own newest trade (R4: activity, not our copies)
 
     @property
     def hit(self) -> float:
@@ -309,6 +310,7 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
     by_cond: dict = {}
     inflow: dict = {}
     day_of: dict = {}
+    last_trade = 0.0
     for a in acts:
         try:
             ts = float(a.get("timestamp") or 0)
@@ -318,6 +320,8 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
         if not cid:
             continue
         t = a.get("type")
+        if t == "TRADE":
+            last_trade = max(last_trade, ts)
         if t == "TRADE" and a.get("side") == "BUY":
             first_buy[cid] = min(first_buy.get(cid, ts), ts)
             usd = float(a.get("usdcSize") or 0)
@@ -343,7 +347,8 @@ def compute(wallet: str, acts: list, pos: list, *, now: Optional[float] = None,
             open_c.add(cid)
     f = Form(wallet=wallet.lower(), ts=now, capped=capped,
              rows=(coverage.rows if coverage else len(acts)),
-             covered_days=min(days, (now - since) / 86400.0) if capped else days)
+             covered_days=min(days, (now - since) / 86400.0) if capped else days,
+             last_trade_ts=last_trade)
     sh = 0.0
     per_day: dict = {}
     for cid, c in by_cond.items():

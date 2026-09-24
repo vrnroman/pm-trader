@@ -403,8 +403,9 @@ def test_the_graduation_receipt_carries_its_trial(ops_env):
         ow.record_settlements([ow.Settlement(f"t{i}", "0xNEW", 5.0, 9.0 if i % 2 == 0 else 0.0, "1b", f"m{i}")],
                               equity=67.0, stated=80.0, floor=56.0, send=None, now=10.0 + i)
     row = [r for r in _ledger(ops_env) if r["kind"] == "probation_over"][-1]
-    assert row["after"] == "5 settled live copies: 3 won, +2.00" and len(row["trial"]) == 5
+    assert row["after"] == "passed: 3 of 5 won, realized +8.0% on $25.00 (pass needs 2 won and -10%)" and len(row["trial"]) == 5
     assert row["trial"][0]["token_id"] == "t0" and row["trial"][1]["won"] is False
+    assert row["before"] == "0xnew on probation (5 live copies settled)"
 
 
 def test_the_admit_scan_clock_survives_a_restart(ops_env):
@@ -418,6 +419,7 @@ def test_the_admit_scan_clock_survives_a_restart(ops_env):
 def test_probationers_share_two_copies_a_day_between_them(ops_env, monkeypatch):
     """Manager r3: seven probationers at one copy a day each could take every
     slot of a four-copy day from the proven wallets; together they get two."""
+    monkeypatch.setattr(ow, "PROBATION_TOTAL_PER_DAY", 2)   # the share this test is about; the default is 4 since 2026-09-24
     from src.copy_trading import daily_spend_guard as g
     monkeypatch.setattr(g, "_STATE_FILE", str(ops_env / "d.json"))
     monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 2)
@@ -520,6 +522,7 @@ def test_a_corrupt_escalation_file_goes_aside_and_is_logged(ops_env, caplog):
 
 
 def test_the_probation_share_applies_even_when_the_per_wallet_cap_is_one(ops_env, monkeypatch):
+    monkeypatch.setattr(ow, "PROBATION_TOTAL_PER_DAY", 2)   # the share this test is about; the default is 4 since 2026-09-24
     from src.copy_trading import daily_spend_guard as g
     monkeypatch.setattr(g, "_STATE_FILE", str(ops_env / "d.json"))
     monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 1)
@@ -599,3 +602,60 @@ def test_eviction_ends_probation_and_a_second_tap_is_not_a_failure(ops_env, monk
     toast2, text2 = tb._handle_callback("zevict:0xabc")
     assert toast2 == "Already evicted" and "Could not" not in text2
     assert sum(1 for r in _ledger(ops_env) if r["kind"] == "evict") == 1
+
+
+# --------------------------------------------------------------------------- #
+# part 3 R3 (2026-09-24): probation is pass/fail
+# --------------------------------------------------------------------------- #
+
+def _evict_recorder(monkeypatch):
+    from src.copy_trading import zset
+    calls = []
+    monkeypatch.setattr(zset, "evict", lambda w, reason="": calls.append((w, reason)) or True)
+    return calls
+
+
+def test_a_probationer_that_loses_is_evicted_with_the_numbers(ops_env, monkeypatch):
+    evicted = _evict_recorder(monkeypatch)
+    ow.probation_start("0xNEW", now=1.0)
+    for i in range(5):   # 1 won of 5, realized -60%
+        ow.record_settlements([ow.Settlement(f"t{i}", "0xNEW", 5.0, 10.0 if i == 0 else 0.0, "1b", f"m{i}")],
+                              equity=67.0, stated=80.0, floor=56.0, send=None, now=10.0 + i)
+    assert evicted == [("0xnew", "probation failed: 1 of 5 won, realized -60.0% on $25.00 (pass needs 2 won and -10%)")]
+    row = [r for r in _ledger(ops_env) if r["kind"] == "probation_failed"][-1]
+    assert row["after"].startswith("evicted: 1 of 5 won") and "readmit" in row["detail"] and row["push"] == "WALLET"
+    assert ow.probation_cap("0xnew") is None and "0xnew" not in ow.probation_wallets()
+
+
+def test_two_won_but_a_deep_loss_still_fails_and_a_shallow_one_passes(ops_env, monkeypatch):
+    evicted = _evict_recorder(monkeypatch)
+    ow.probation_start("0xA", now=1.0)
+    for i in range(5):   # 2 won (+1 each), 3 lost (-5 each): -13 on 25 = -52%
+        ow.record_settlements([ow.Settlement(f"a{i}", "0xA", 5.0, 6.0 if i < 2 else 0.0)], equity=67.0, stated=80.0, floor=56.0, send=None, now=10.0 + i)
+    assert evicted and evicted[-1][0] == "0xa"
+    ow.probation_start("0xB", now=1.0)
+    for i in range(5):   # 2 won (+7 each), 3 lost (-5 each): -1 on 25 = -4%
+        ow.record_settlements([ow.Settlement(f"b{i}", "0xB", 5.0, 12.0 if i < 2 else 0.0)], equity=67.0, stated=80.0, floor=56.0, send=None, now=20.0 + i)
+    assert [w for w, _ in evicted] == ["0xa"] and any(r["kind"] == "probation_over" and r["wallet"] == "0xb" for r in _ledger(ops_env))
+
+
+def test_the_ten_day_clock_concludes_on_what_settled(ops_env, monkeypatch):
+    evicted = _evict_recorder(monkeypatch)
+    ow.probation_start("0xSLOW", now=1.0)
+    ow.probation_start("0xFRESH", now=5 * 86400.0)
+    ow.record_settlements([ow.Settlement("s0", "0xSLOW", 5.0, 9.0)], equity=67.0, stated=80.0, floor=56.0, send=None, now=100.0)
+    assert ow.probation_check(now=9 * 86400.0) == [], "not yet"
+    assert ow.probation_check(now=10 * 86400.0 + 1) == ["0xslow"]
+    assert evicted == [("0xslow", "probation failed: 1 of 1 won, realized +80.0% on $5.00 (pass needs 2 won and -10%)")]
+    row = [r for r in _ledger(ops_env) if r["kind"] == "probation_failed"][-1]
+    assert row["before"] == "0xslow on probation (10 days on probation)"
+    assert ow.probation_wallets() == {"0xfresh"}
+    assert ow.probation_check(now=10 * 86400.0 + 2) == [], "concluded once"
+
+
+def test_older_settled_rows_still_price_the_trial(ops_env):
+    assert ow._row_cost({"before": "open $5.50", "cost": None}) == 5.5
+    assert ow._row_cost({"before": "open $5.50", "cost": 6.4}) == 6.4
+    assert ow._row_cost({"before": "x"}) == 0.0
+    t = ow.probation_trial("0xnone", since=0.0)
+    assert t["n"] == 0 and t["roi"] == 0.0 and ow.probation_verdict(t)[0] is False

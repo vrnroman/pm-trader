@@ -74,7 +74,16 @@ PROBATION_COPIES_PER_DAY = _env_i("ZSET_PROBATION_COPIES_PER_DAY", 1)
 # All probationers together take at most this many of the day's copies, so
 # seven new wallets cannot crowd the proven ones out of a four-copy day
 # (manager s-g8int5 r3, LOW-CONFIDENCE on the number, env-tunable).
-PROBATION_TOTAL_PER_DAY = _env_i("ZSET_PROBATION_TOTAL_PER_DAY", 2)
+# 2 -> 4 (owner, 2026-09-24, part 3 R3): with three admissions a scan the
+# probationers would queue behind each other and the 10-day clock run out.
+PROBATION_TOTAL_PER_DAY = _env_i("ZSET_PROBATION_TOTAL_PER_DAY", 4)
+# Probation is pass/fail: PROBATION_SETTLED_N live settles OR PROBATION_DAYS
+# calendar days, whichever first; pass = at least PROBATION_MIN_WON won AND
+# the live copies' realized ROI at or above PROBATION_MIN_ROI; fail evicts
+# (reversible: /zset readmit). Proposed numbers, stated on the line.
+PROBATION_DAYS = _env_f("ZSET_PROBATION_DAYS", 10.0)
+PROBATION_MIN_WON = _env_i("ZSET_PROBATION_MIN_WON", 2)
+PROBATION_MIN_ROI = _env_f("ZSET_PROBATION_MIN_ROI", -0.10)
 
 
 def auto_admit_enabled() -> bool:
@@ -241,7 +250,7 @@ def record_settlements(settled: list[Settlement], *, equity: Optional[float],
         receipt("settled", before=f"open ${s.cost:.2f}", after=f"paid ${s.payout:.2f}",
                 detail=f"{'won' if s.won else 'lost'} {s.pnl:+.2f} on '{s.title[:40]}' "
                        f"({s.wallet[:10]}, tier {s.tier or '?'})", now=now,
-                extra={"token_id": s.token_id, "wallet": s.wallet, "pnl": s.pnl, "won": s.won})
+                extra={"token_id": s.token_id, "wallet": s.wallet, "pnl": s.pnl, "won": s.won, "cost": s.cost})
         day_pnl = round(day_pnl + s.pnl, 2)
         streak = 0 if s.won else streak + 1
         _probation_settled(s.wallet, now)
@@ -624,19 +633,81 @@ def _probation_settled(wallet: str, now: float) -> None:
     w = (wallet or "").lower()
     if w in d:
         d[w]["settled"] = int(d[w].get("settled") or 0) + 1
-        if d[w]["settled"] >= PROBATION_SETTLED_N:
-            # The graduation shows its work: the trial's own settled rows.
-            since = float(d[w].get("since") or 0.0)
-            trial = [r for r in ledger_rows(since_ts=since, kinds={"settled"})
-                     if str(r.get("wallet") or "").lower() == w][-PROBATION_SETTLED_N:]
-            pnl = round(sum(float(r.get("pnl") or 0) for r in trial), 2)
-            won = sum(1 for r in trial if r.get("won"))
-            receipt("probation_over", before=f"{w[:10]} on probation",
-                    after=f"{d[w]['settled']} settled live copies: {won} won, {pnl:+.2f}",
-                    detail="; ".join(f"{str(r.get('detail') or '')[:38]}" for r in trial), now=now,
-                    extra={"wallet": w, "trial": [{"token_id": r.get("token_id"), "pnl": r.get("pnl"), "won": r.get("won")} for r in trial]})
-            d.pop(w, None)
         _write_json(_p(PROBATION_FILE), d)
+        if d[w]["settled"] >= PROBATION_SETTLED_N:
+            probation_conclude(w, now, why=f"{d[w]['settled']} live copies settled")
+
+
+def _row_cost(r: dict) -> float:
+    """The copy's cost from a settled receipt: the extra (rows since
+    2026-09-24) or the "open $X" the older rows printed."""
+    try:
+        c = float(r.get("cost") or 0.0)
+    except (TypeError, ValueError):
+        c = 0.0
+    if c > 0:
+        return c
+    m = re.search(r"open \$([0-9.]+)", str(r.get("before") or ""))
+    return float(m.group(1)) if m else 0.0
+
+
+def probation_trial(wallet: str, since: float) -> dict:
+    """The trial's own settled rows: n, won, pnl, cost, realized ROI."""
+    w = (wallet or "").lower()
+    rows = [r for r in ledger_rows(since_ts=since, kinds={"settled"}) if str(r.get("wallet") or "").lower() == w]
+    pnl = round(sum(float(r.get("pnl") or 0) for r in rows), 2)
+    cost = round(sum(_row_cost(r) for r in rows), 2)
+    won = sum(1 for r in rows if r.get("won"))
+    return {"n": len(rows), "won": won, "pnl": pnl, "cost": cost, "roi": (pnl / cost) if cost > 0 else 0.0,
+            "rows": rows[-PROBATION_SETTLED_N:]}
+
+
+def probation_verdict(trial: dict) -> tuple[bool, str]:
+    """Pass or fail, by the numbers on the line. Realized ROI of the live
+    copies, not at their price: what the money actually did."""
+    won, n, roi = trial["won"], trial["n"], trial["roi"]
+    ok = won >= PROBATION_MIN_WON and roi >= PROBATION_MIN_ROI
+    return (ok, f"{won} of {n} won, realized {roi * 100:+.1f}% on ${trial['cost']:.2f} "
+                f"(pass needs {PROBATION_MIN_WON} won and {PROBATION_MIN_ROI * 100:+.0f}%)")
+
+
+def probation_conclude(wallet: str, now: float, *, why: str) -> Optional[bool]:
+    """Pass keeps the wallet in Z; fail evicts it (reversible from the
+    phone). The receipt shows its work: the trial's own rows."""
+    d = _read_json(_p(PROBATION_FILE))
+    w = (wallet or "").lower()
+    if w not in d:
+        return None
+    since = float(d[w].get("since") or 0.0)
+    trial = probation_trial(w, since)
+    ok, verdict = probation_verdict(trial)
+    extra = {"wallet": w, "trial": [{"token_id": r.get("token_id"), "pnl": r.get("pnl"), "won": r.get("won")} for r in trial["rows"]]}
+    detail = "; ".join(f"{str(r.get('detail') or '')[:38]}" for r in trial["rows"])
+    d.pop(w, None)
+    _write_json(_p(PROBATION_FILE), d)
+    if ok:
+        receipt("probation_over", before=f"{w[:10]} on probation ({why})", after=f"passed: {verdict}",
+                detail=detail, now=now, push="WALLET", extra=extra)
+        return True
+    from src.copy_trading import zset
+    evicted = zset.evict(w, reason=f"probation failed: {verdict}")
+    receipt("probation_failed", before=f"{w[:10]} on probation ({why})",
+            after=("evicted: " if evicted else "eviction failed: ") + verdict,
+            detail=detail + " | Evict is reversible: /zset readmit", now=now, push="WALLET", extra=extra)
+    return False
+
+
+def probation_check(now: Optional[float] = None) -> list[str]:
+    """The calendar half of the rule: a wallet PROBATION_DAYS on probation
+    is concluded on what settled. Returns the wallets concluded."""
+    now = time.time() if now is None else now
+    out = []
+    for w, rec in list(_read_json(_p(PROBATION_FILE)).items()):
+        since = float((rec or {}).get("since") or 0.0)
+        if since and now - since >= PROBATION_DAYS * 86400:
+            probation_conclude(w, now, why=f"{PROBATION_DAYS:.0f} days on probation")
+            out.append(w)
+    return out
 
 
 def probation_cap(wallet: str) -> Optional[int]:

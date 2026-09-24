@@ -41,7 +41,7 @@ from dataclasses import dataclass, replace
 from typing import Optional
 
 from src.config import CONFIG
-from src.copy_trading import live_mode
+from src.copy_trading import book_tiers, live_mode
 from src.logger import logger
 
 
@@ -250,7 +250,7 @@ def caps(*, live: Optional[bool] = None, balance: Optional[float] = None,
         # effective bankroll.
         daily_usd=round(min(effective, DAILY_ABS) if DAILY_ABS else effective * DAILY_FRAC, 2),
         exposure_usd=round(effective * EXPOSURE_FRAC, 2),
-        min_trader_bet_usd=float(CONFIG.copy_paper_min_usd),
+        min_trader_bet_usd=book_tiers.live_min_trader_bet(CONFIG),
         live=live,
     )
 

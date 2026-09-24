@@ -172,7 +172,10 @@ def _live_guard_loop():
     guard_started = time.time()
     # The scan cadence survives restarts: a deploy every ten minutes admitted
     # two wallets per restart on 2026-09-12 because the clock started at 0.
-    admit_scan_every = float(os.environ.get("ZSET_AUTO_ADMIT_EVERY_S", 6 * 3600))
+    # Every 3 h, up to ZSET_AUTO_ADMIT_LIMIT wallets a scan (owner, 2026-09-24,
+    # part 3 R2): ten eligible wallets enter within a day, not a week.
+    admit_scan_every = float(os.environ.get("ZSET_AUTO_ADMIT_EVERY_S", 3 * 3600))
+    admit_scan_limit = int(float(os.environ.get("ZSET_AUTO_ADMIT_LIMIT", 3)))
     try:
         from src.copy_trading import ops_watch as _ow0
         last_admit_scan = float(_ow0._read_json(_ow0._p(_ow0.STATE_FILE)).get("admit_scan_ts") or 0.0)
@@ -376,12 +379,18 @@ def _live_guard_loop():
                 two_clocks.maybe_cutover(send=_send_bot, now=_now)
             except Exception as _exc:
                 logger.warn(f"[guard] two-clocks cutover check failed: {_exc}")
+            try:
+                # Probation is pass/fail (part 3 R3): the calendar clock here,
+                # the settled count where settlements are booked.
+                ops_watch.probation_check(now=_now)
+            except Exception as _exc:
+                logger.warn(f"[guard] probation check failed: {_exc}")
             if _now - last_admit_scan >= admit_scan_every:
                 last_admit_scan = _now
                 ops_watch.note_admit_scan(_now)
                 try:
                     from src.copy_trading import ops_admit
-                    ops_admit.scan(send=_send_wallet_kb)
+                    ops_admit.scan(send=_send_wallet_kb, limit=admit_scan_limit)
                 except Exception as _exc:
                     logger.warn(f"[guard] auto-admit scan failed: {_exc}")
             # The form scan on its own persisted clock (FORM_EVERY_S), plus a
@@ -859,8 +868,12 @@ def _cross_route_a_exit(wallet: str, ev=None, reason: str = "") -> None:
         logger.warning(f"[COPY-PAPER-B] cross-route failed for {wallet}: {e}")
 
 
-def _copy_paper_b_loop():
+def _copy_paper_b_loop(book=None):
     """Strategy B: the borrowed-clock (instant-copy) paper book — A-vs-B race.
+
+    ``book`` (book_tiers.Book) runs the same recipe at another slice floor
+    with its own ledger and governance scope (2026-09-24, part 3 §3.4):
+    B150 and B100 next to B300. The primary book is today's, file for file.
 
     Same feed detection and sizing as strategy A, ONE variable changed: every
     admitted copy fills at the TARGET'S OWN price (+COPY_PAPER_B_SLIPPAGE_BPS),
@@ -877,22 +890,25 @@ def _copy_paper_b_loop():
     from src.copy_trading.copy_paper_live import (
         TradeFeed, make_feed_detector, make_feed_exit_detector)
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
-    from src.copy_trading import book_recipes
+    from src.copy_trading import book_recipes, book_tiers
     from src.copy_trading.outcome_names import DEFAULT_RESOLVER
 
+    book = book or book_tiers.primary(CONFIG)
+    _scope = book.scope
+    _tag = book.tag
+
     # One-time seed of the extras watchlist (A-demoted wallets that are B-fit).
-    try:
-        cross_route.seed_extras(CONFIG.copy_paper_b_extra_watchlist,
-                                CONFIG.copy_paper_b_seed_wallets)
-    except Exception as e:  # pragma: no cover - seeding must never kill the book
-        logger.warning(f"[COPY-PAPER-B] extras seeding failed: {e}")
+    if book.primary:
+        try:
+            cross_route.seed_extras(CONFIG.copy_paper_b_extra_watchlist,
+                                    CONFIG.copy_paper_b_seed_wallets)
+        except Exception as e:  # pragma: no cover - seeding must never kill the book
+            logger.warning(f"[{_tag}] extras seeding failed: {e}")
 
     _promo_review = None
     if CONFIG.copy_promote_llm_review:
         from src.copy_trading.llm_review import review_promotion as _promo_review
-    _promo_history_b = os.path.join(
-        os.path.dirname(CONFIG.wallet_discovery_state),
-        "promotion-gate-history_b.jsonl")
+    _promo_history_b = book_tiers.gate_history_path(book, CONFIG)
     _review_memo: dict = {}  # same memo as strategy A's, B's own evidence
 
     def _load_replay_by_wallet():
@@ -952,8 +968,11 @@ def _copy_paper_b_loop():
                 review_memo=_review_memo,
                 llm_model=CONFIG.wallet_discovery_llm_model,
                 history_path=_promo_history_b,
-                state_scope="b",
-                send_offer=lambda o: telegram_bot.research_outcome(_send_offer_b(o)),
+                state_scope=_scope,
+                # Only the primary book offers on the phone; a lower book's
+                # offers would triple the research messages for a book that
+                # feeds nothing yet. Its state still records them.
+                send_offer=(lambda o: telegram_bot.research_outcome(_send_offer_b(o))) if book.primary else (lambda o: False),
                 send_demotion=lambda d: telegram_bot.send_message(kind=telegram_bot.KIND_RESEARCH, text=
                     f"🅱️⛔ <b>B auto-demoted</b> <code>{d['wallet']}</code>: "
                     f"{d['n_closed']} settled instant-copies, ROI "
@@ -975,7 +994,7 @@ def _copy_paper_b_loop():
                     f"(re-discoverable), not blacklisted."),
             )
         except Exception as e:
-            logger.warning(f"[COPY-PAPER-B] governance cycle failed: {e}")
+            logger.warning(f"[{_tag}] governance cycle failed: {e}")
 
     _stall = {"last_alert": 0.0, "boot": time.time()}
 
@@ -997,7 +1016,7 @@ def _copy_paper_b_loop():
         _stall["last_alert"] = now
         stalled_h = (now - baseline) / 3600.0
         logger.warning(
-            f"[COPY-PAPER-B] FUNNEL STALLED — no B opens in {stalled_h:.0f}h "
+            f"[{_tag}] FUNNEL STALLED — no B opens in {stalled_h:.0f}h "
             f"with {n_watch} wallets watched; the A-vs-B race is not accruing "
             f"B evidence (verdict window at risk)")
         telegram_bot.send_message(kind=telegram_bot.KIND_RESEARCH, text=
@@ -1008,10 +1027,10 @@ def _copy_paper_b_loop():
     def _on_cycle(summary, ledger):
         if summary.opened or summary.resolved:
             logger.info(
-                f"[COPY-PAPER-B] opened={summary.opened} resolved={summary.resolved} "
+                f"[{_tag}] opened={summary.opened} resolved={summary.resolved} "
                 f"open={len(ledger.open_positions())} closed={len(ledger.closed_positions())}"
             )
-        _log_copy_cycle_diagnostics("COPY-PAPER-B", summary)
+        _log_copy_cycle_diagnostics(_tag, summary)
         if summary.slate_cap_binds:
             # cap-bind autopsy (manager amendment): WHO the cap bound, per kind —
             # if B's caps bind non-degenerately they re-create A's censoring and
@@ -1019,8 +1038,8 @@ def _copy_paper_b_loop():
             binds = Counter((t, kind) for t, _cat, kind in summary.slate_cap_binds)
             detail = ", ".join(f"{w[:8]}…×{n} ({kind})"
                                for (w, kind), n in binds.most_common())
-            logger.info(f"[COPY-PAPER-B] cap-bind: {detail}")
-        if summary.resolved:
+            logger.info(f"[{_tag}] cap-bind: {detail}")
+        if summary.resolved and book.primary:
             telegram_bot.send_message(kind=telegram_bot.KIND_RESEARCH, text=
                 "🅱️ " + format_resolution_telegram(
                     summary.resolved_positions, report(ledger),
@@ -1028,7 +1047,7 @@ def _copy_paper_b_loop():
         try:
             _stall_check(ledger)
         except Exception as e:
-            logger.debug(f"[COPY-PAPER-B] stall check failed ({e})")
+            logger.debug(f"[{_tag}] stall check failed ({e})")
         _governance_b(ledger)
 
     detector_factory = None
@@ -1045,12 +1064,16 @@ def _copy_paper_b_loop():
             return make_feed_exit_detector(wallets, max_age_s,
                                            feed=_feed, feed_min_usd=_feed_min)
 
+    _kw = book_recipes.book_b_kwargs(CONFIG)
+    if not book.primary:
+        _kw.update(min_usd=book.min_usd, ledger_path=book_tiers.ledger_path(book, CONFIG),
+                   gate_history_path=_promo_history_b)
     runner = CopyPaperRunner(
         # B's knobs live in one place (book_recipes.book_b_kwargs) so the
         # analyst's experiments (s-ye5990) run a control that IS this book.
-        **book_recipes.book_b_kwargs(CONFIG),
+        **_kw,
         # B's OWN blacklist — never A's. A-demoted wallets are B's thesis edge.
-        blacklist_provider=lambda: promotion_state.active_blacklist(scope="b"),
+        blacklist_provider=lambda: promotion_state.active_blacklist(scope=_scope),
         detector_factory=detector_factory,
         exit_detector_factory=exit_detector_factory,
         on_cycle=_on_cycle,
@@ -1061,11 +1084,13 @@ def _copy_paper_b_loop():
         # data instead of the books' modeled fills. Never places an order,
         # runs on its own thread, and is None-safe: with it off the book is
         # bit-for-bit unchanged.
-        observer=_get_shadow_observer(),
+        # Only the primary book is shadow-quoted: the observer's 40 quotes
+        # a sweep would be swamped by a $100 book's extra detections.
+        observer=_get_shadow_observer() if book.primary else None,
     )
     n = len(runner.wallets())
     logger.info(
-        f"Strategy-B paper book started (wallets={n}, "
+        f"Strategy-B paper book {book.id} started (floor ${book.min_usd:.0f}, scope {_scope}, wallets={n}, "
         f"interval={CONFIG.copy_paper_interval_s}s, fill=their-price"
         f"+{CONFIG.copy_paper_b_slippage_bps}bps, caps "
         f"{CONFIG.copy_paper_b_max_per_wallet_day}/wallet-day "
@@ -1259,6 +1284,10 @@ def _discovery_loop():
         enabled_theories=frozenset(
             t.strip() for t in CONFIG.wallet_discovery_theories.split(",") if t.strip()),
         res_cache_dir=CONFIG.wallet_discovery_res_cache,
+        # R5 (2026-09-24): discovery scores wallets on the SAME slice the book
+        # it feeds copies (the replay's min_usd was $500 while B copies from
+        # $300: the watchlist was chosen on a different population of bets).
+        min_usd=float(CONFIG.copy_paper_min_usd),
         copy_replay_gate=CONFIG.wallet_discovery_copy_replay_gate,
         min_copy_replay_n=CONFIG.wallet_discovery_min_copy_replay_n,
         min_copy_replay_roi=CONFIG.wallet_discovery_min_copy_replay_roi,
@@ -1474,11 +1503,15 @@ async def main():
         # near-term copier above — same measurement-only guarantee, own ledger
         # and governance state. Gated on both books being enabled.
         if CONFIG.copy_paper_b_enabled:
-            b_paper_thread = threading.Thread(
-                target=_copy_paper_b_loop, daemon=True, name="copy-paper-b"
-            )
-            b_paper_thread.start()
-            logger.info("Strategy-B paper book thread started")
+            # One thread per book in COPY_PAPER_B_BOOKS (part 3 §3.4): the
+            # primary is today's B300, the others run at lower floors.
+            from src.copy_trading import book_tiers as _bt
+            for _book in _bt.books(CONFIG):
+                threading.Thread(
+                    target=_copy_paper_b_loop, args=(_book,), daemon=True,
+                    name=f"copy-paper-{_book.id}",
+                ).start()
+            logger.info(f"Strategy-B paper book thread(s) started: {[b.id for b in _bt.books(CONFIG)]}")
 
             ab_reporter_thread = threading.Thread(
                 target=_ab_race_reporter_loop, daemon=True, name="ab-race-reporter"

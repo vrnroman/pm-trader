@@ -111,6 +111,17 @@ def evaluate(wallet: str, b_positions, a_positions, *, era: Optional[float],
     settled, last_ts = wallet_rows(b_positions, wallet)
     if not settled:
         return None
+    # R4 (2026-09-24): "active within 14 d" reads the wallet's OWN trades
+    # when the form rail has read them, not only our copies: 69 wallets
+    # failed it while active, producing no $300 bets or hitting the caps.
+    try:
+        from src.copy_trading import wallet_form
+        rec = wallet_form.record(wallet) or {}
+        own = float(rec.get("last_trade_ts") or 0.0)
+        if own > float(last_ts or 0.0):
+            last_ts = own
+    except Exception:  # noqa: BLE001
+        pass
     honest = promotion_gate.honest_kwargs_from(CONFIG)
     floor_kwargs = promotion_gate.floor_kwargs_from(CONFIG)
     stats = promotion_gate.compute_stats(wallet, settled)
@@ -166,7 +177,8 @@ def scalper_check(wallet: str) -> tuple[bool, str]:
 def load_books():
     """Both paper books and the clean-era floor, from the data dir."""
     era = era_state.era_floor_ts(os.path.join(CONFIG.data_dir, "ab_race_state.json"))
-    b_positions = list(PaperCopyLedger(CONFIG.copy_paper_b_ledger).positions.values())
+    from src.copy_trading import book_tiers
+    b_positions = list(PaperCopyLedger(book_tiers.gate_ledger_path(CONFIG)).positions.values())
     a_positions = list(PaperCopyLedger(CONFIG.copy_paper_ledger).positions.values())
     return era, b_positions, a_positions
 

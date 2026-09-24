@@ -197,6 +197,12 @@ class Config:
     # A buy the target has already sold this share of (a flip) is refused,
     # preview and live alike (2026-09-24 requirements, part 2 D1).
     copy_flip_exit_frac: float = _opt_float("COPY_FLIP_EXIT_FRAC", 0.5)
+    # Mirrored exits are proportional (part 2 B): the share of THEIR position
+    # the target just sold. Under the trim fraction it is not an exit (a
+    # 0.1% trim used to dump our whole position); at or above the full
+    # fraction we sell everything we hold; between, that share of ours.
+    copy_exit_trim_frac: float = _opt_float("COPY_EXIT_TRIM_FRAC", 0.10)
+    copy_exit_full_frac: float = _opt_float("COPY_EXIT_FULL_FRAC", 0.90)
     # Poll cadence for the near-term copier. Dropped 120s -> 60s now that
     # detection runs off the shared global /trades feed (fixed cost regardless of
     # how many wallets are watched — see copy_paper_feed_detection), so we can
@@ -330,6 +336,14 @@ class Config:
         "COPY_PAPER_B_LEDGER",
         str(Path(__file__).resolve().parent.parent / "data" / "copy_paper_ledger_b.jsonl"))
     copy_paper_b_slippage_bps: int = _opt_int("COPY_PAPER_B_SLIPPAGE_BPS", 100)
+    # Book B at more than one slice floor (2026-09-24, part 3 §3.4): the first
+    # is the primary (today's files); each other runs its own ledger and
+    # governance scope. The Z gate reads ZSET_GATE_BOOK (default the primary).
+    copy_paper_b_books: str = _optional("COPY_PAPER_B_BOOKS", "b300:300")
+    zset_gate_book: str = _optional("ZSET_GATE_BOOK", "b300")
+    # Real money copies target buys from this floor; default the paper floor.
+    # Decoupled so a lower paper book never lowers what real money copies.
+    live_min_trader_bet_usd: float = _opt_float("LIVE_MIN_TRADER_BET_USD", 0.0)
     # B's slate caps: looser than A's 3/8 because take-all IS the B thesis (the
     # counterfactual: capped B re-runs A's +6% regime; uncapped B is the +8%
     # regime whose gains concentrate in high-frequency wallets). Not unlimited —
@@ -420,7 +434,10 @@ class Config:
     # and real money. `/golive <wallet>` re-checks the wallet live before that flip:
     # a DOUBLED settled bar, still-positive paper ROI now, recent activity, and the
     # promotion floor still holding. Advisory — it prints READY/HOLD, it never flips.
-    copy_golive_min_settled: int = _opt_int("COPY_GOLIVE_MIN_SETTLED", 30)
+    # 30 -> 15 (owner, 2026-09-24, docs/REQUIREMENTS-2026-09-24.md part 3 R1):
+    # the count was never the brake for active wallets (median 14 days to
+    # 30 settles); the +10% ROI floor stays. Probation is the real test.
+    copy_golive_min_settled: int = _opt_int("COPY_GOLIVE_MIN_SETTLED", 15)
     copy_golive_max_idle_days: float = _opt_float("COPY_GOLIVE_MAX_IDLE_DAYS", 14.0)
     copy_golive_min_roi: float = _opt_float("COPY_GOLIVE_MIN_ROI", 0.0)
     # Honest-metrics go-live floors (owner ruling 2026-07-25, desk item from the
