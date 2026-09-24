@@ -3297,6 +3297,7 @@ def test_the_gate_opens_at_fifteen_settled_and_admits_three_every_three_hours():
     assert "ensure_env COPY_GOLIVE_MIN_SETTLED 15" in dy and "s#^COPY_GOLIVE_MIN_SETTLED=.*#COPY_GOLIVE_MIN_SETTLED=15#" in dy
     from src.copy_trading import ops_watch
     assert ops_watch.PROBATION_TOTAL_PER_DAY == 4 or _os.environ.get("ZSET_PROBATION_TOTAL_PER_DAY")
+    assert "ensure_env ZSET_AUTO_ADMIT_LIMIT 3" in dy and "ensure_env ZSET_PROBATION_TOTAL_PER_DAY 4" in dy
 
 
 # --------------------------------------------------------------------------- #
