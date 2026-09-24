@@ -182,39 +182,50 @@ def _is_neg_risk(p) -> bool:
     return bool(_field(p, "negRisk", False))
 
 
-def redeemable_positions(proxy_wallet: str) -> list:
-    """Positions the chain says are redeemable RIGHT NOW.
+def resolved_positions(proxy_wallet: str) -> Optional[list]:
+    """EVERY position the data-api marks redeemable, neg-risk included: the
+    "no longer worth its cost" set the equity needs. None on a failed read,
+    never [] (an empty list means nothing is resolved; None means unknown).
 
     The inventory store holds OPEN positions and knows nothing about
     resolution, so asking it about unredeemed capital was asking the wrong
-    source. This asks the same source the redeemer itself uses. Read-only;
-    returns [] rather than raising, since a guard that dies on a bad read
-    is worse than one that reports nothing.
-    """
+    source. This asks the same source the redeemer itself uses."""
     if not proxy_wallet:
         return []
     try:
         import asyncio
 
         from src.copy_trading.auto_redeemer import _fetch_redeemable_positions
-        rows = list(asyncio.run(_fetch_redeemable_positions(proxy_wallet)) or [])
-        # The redeemer itself SKIPS neg-risk positions (they use a different
-        # redemption mechanism), so they sit in this list forever. Counting
-        # them as "failed to redeem" meant three of them would self-disarm a
-        # live session permanently, for something the redeemer was never going
-        # to do. Excluded here, mirroring the redeemer's own rule.
-        kept = [p for p in rows if not _is_neg_risk(p)]
-        skipped = len(rows) - len(kept)
-        if skipped:
-            logger.info(f"[guard] {skipped} neg-risk position(s) excluded: the "
-                        f"redeemer skips them by design")
-        return kept
+        return list(asyncio.run(_fetch_redeemable_positions(proxy_wallet)) or [])
     except Exception as exc:
-        # None, not []. An empty list means "nothing is stuck"; a failed read
-        # means we do not know, and reporting the second as the first sends a
-        # "resolved" message for a condition nobody confirmed cleared.
         logger.warn(f"[guard] redeemable lookup failed: {exc}")
         return None
+
+
+def without_neg_risk(rows: Optional[list]) -> Optional[list]:
+    """The redeemer's view: the rows it will actually try to redeem. The
+    stuck-redemption trigger must use THIS set, never the full one: the
+    redeemer SKIPS neg-risk positions (a different redemption mechanism),
+    so they sit in the full list forever and counting them as "failed to
+    redeem" self-disarmed a live session for something the redeemer was
+    never going to do."""
+    if rows is None:
+        return None
+    kept = [p for p in rows if not _is_neg_risk(p)]
+    skipped = len(rows) - len(kept)
+    if skipped:
+        logger.info(f"[guard] {skipped} neg-risk position(s) excluded from the "
+                    f"redeemer's view: it skips them by design")
+    return kept
+
+
+def redeemable_positions(proxy_wallet: str) -> Optional[list]:
+    """Positions the redeemer will try to redeem RIGHT NOW (neg-risk
+    excluded). For equity use ``resolved_positions``: a resolved neg-risk
+    LOSER is worth nothing too, and counting it at cost held the bankroll
+    $48.85 above the truth on 2026-09-24 (docs/REQUIREMENTS-2026-09-24.md,
+    part 1)."""
+    return without_neg_risk(resolved_positions(proxy_wallet))
 
 
 # NOTE: there was a fourth trigger here, balance drift. It is deleted rather

@@ -500,7 +500,7 @@ def test_the_guard_loop_reads_functions_that_exist():
 
     from src.copy_trading import live_guard, trade_queue
     assert hasattr(trade_queue, "peek_pending_orders")
-    assert hasattr(live_guard, "redeemable_positions")
+    assert hasattr(live_guard, "resolved_positions") and hasattr(live_guard, "without_neg_risk")
 
     import main
     src = inspect.getsource(main._live_guard_loop)
@@ -509,7 +509,7 @@ def test_the_guard_loop_reads_functions_that_exist():
     # The redeemer's own source, not the inventory store: inventory holds OPEN
     # positions and knows nothing about resolution, so it could never answer
     # "what failed to redeem".
-    assert "redeemable_positions" in src
+    assert "resolved_positions" in src and "without_neg_risk(resolved)" in src
     # a failed read must be logged AND must count toward the crash streak,
     # or the guard keeps passing on empty inputs forever
     assert "could not read pending orders" in src
@@ -614,11 +614,14 @@ def test_neg_risk_positions_do_not_disarm_the_session(monkeypatch, tmp_path):
         None, raising=False)
     negs = [{"negRisk": True, "title": "n"} for _ in range(5)]
     assert all(live_guard._is_neg_risk(p) for p in negs)
-    # run_once counts what it is given; the exclusion happens at the source,
-    # so assert the source filter rather than the counter
+    # run_once counts what it is given; the exclusion happens in the
+    # redeemer's view (without_neg_risk), which redeemable_positions applies
+    # to the full resolved set (2026-09-24: the equity reads the full set,
+    # the stuck-redemption trigger this one).
+    assert live_guard.without_neg_risk(negs) == []
     import inspect
     src = inspect.getsource(live_guard.redeemable_positions)
-    assert "_is_neg_risk" in src
+    assert "without_neg_risk(resolved_positions(" in src
 
 
 def test_the_drills_themselves_still_run(tmp_path, monkeypatch, capsys):

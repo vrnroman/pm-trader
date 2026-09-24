@@ -191,6 +191,11 @@ jobs:
           ensure_env WALLET_DISCOVERY_RES_CACHE_MAX_GB 1
           ensure_env LIVE_BUDGET_EXPOSURE_FRAC 0.80
           ensure_env LIVE_BUDGET_DRAWDOWN_FRAC 0.30
+          # Owner, 2026-09-24 (docs/REQUIREMENTS-2026-09-24.md, part 1): the
+          # floor is $30 and the daily cap $54, in dollars. These absolute
+          # overrides win over the two fractions above.
+          ensure_env LIVE_FLOOR_USD 30
+          ensure_env LIVE_DAILY_USD 54
 
           # ---- GO LIVE. Merging this PR is turning the owner's key. ----
           # Together these take the bot off paper on the next deploy: the

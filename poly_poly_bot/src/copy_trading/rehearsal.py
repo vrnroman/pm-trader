@@ -365,9 +365,10 @@ def real_money_line(now: Optional[float] = None) -> str:
     try:
         from src.copy_trading import inventory, live_guard, pnl
         bal = live_budget._read_balance(now)
-        # Same rule the floor uses: a resolved position is not worth its cost.
+        # Same rule the floor uses: a resolved position is not worth its
+        # cost, neg-risk included (part 1 of the 2026-09-24 requirements).
         try:
-            redeemable = live_guard.redeemable_positions(CONFIG.proxy_wallet)
+            redeemable = live_guard.resolved_positions(CONFIG.proxy_wallet)
         except Exception:
             redeemable = None
         open_cost, n_done, known = live_budget.live_open_cost(

@@ -64,6 +64,22 @@ EXPOSURE_FRAC = _frac("LIVE_BUDGET_EXPOSURE_FRAC", 0.80)
 # default, not a measured optimum.
 DRAWDOWN_FRAC = _frac("LIVE_BUDGET_DRAWDOWN_FRAC", 0.30)
 
+
+def _abs(name: str) -> Optional[float]:
+    """An absolute dollar override, or None. The owner states dollars
+    (2026-09-24: floor $30, daily $54) instead of solving for a fraction
+    each time the budget moves."""
+    raw = os.environ.get(name, "").strip()
+    try:
+        v = float(raw) if raw else 0.0
+    except ValueError:
+        v = 0.0
+    return v if v > 0 else None
+
+
+FLOOR_ABS = _abs("LIVE_FLOOR_USD")
+DAILY_ABS = _abs("LIVE_DAILY_USD")
+
 # The chain is read by the guard thread (every pass, ~300s) and by the
 # Telegram thread on demand; the executor's asyncio loop only ever reads the
 # cache, because a blocking web3 call there stalls detection, verification
@@ -230,7 +246,9 @@ def caps(*, live: Optional[bool] = None, balance: Optional[float] = None,
         open_cost_usd=round(open_cost, 2),
         effective_usd=effective, per_copy_usd=per_copy,
         per_market_usd=per_market,
-        daily_usd=round(effective * DAILY_FRAC, 2),
+        # An absolute daily cap wins over the fraction, never over the
+        # effective bankroll.
+        daily_usd=round(min(effective, DAILY_ABS) if DAILY_ABS else effective * DAILY_FRAC, 2),
         exposure_usd=round(effective * EXPOSURE_FRAC, 2),
         min_trader_bet_usd=float(CONFIG.copy_paper_min_usd),
         live=live,
@@ -281,6 +299,8 @@ def floor_usd() -> Optional[float]:
     stated = stated_budget()
     if stated is None:
         return None
+    if FLOOR_ABS is not None and FLOOR_ABS < stated:
+        return round(FLOOR_ABS, 2)
     return round(stated * (1.0 - DRAWDOWN_FRAC), 2)
 
 
