@@ -659,3 +659,14 @@ def test_older_settled_rows_still_price_the_trial(ops_env):
     assert ow._row_cost({"before": "x"}) == 0.0
     t = ow.probation_trial("0xnone", since=0.0)
     assert t["n"] == 0 and t["roi"] == 0.0 and ow.probation_verdict(t)[0] is False
+
+
+def test_an_untested_probationer_is_held_not_failed(ops_env, monkeypatch):
+    evicted = _evict_recorder(monkeypatch)
+    ow.probation_start("0xIDLE", now=1.0)
+    assert ow.probation_check(now=10 * 86400.0 + 1) == ["0xidle"] and evicted == []
+    assert ow.probation_wallets() == {"0xidle"}, "still on probation"
+    held = [r for r in _ledger(ops_env) if r["kind"] == "probation_held"]
+    assert len(held) == 1 and held[0]["after"] == "held: no live copy settled yet"
+    ow.probation_check(now=11 * 86400.0)
+    assert len([r for r in _ledger(ops_env) if r["kind"] == "probation_held"]) == 1, "said once"

@@ -680,6 +680,17 @@ def probation_conclude(wallet: str, now: float, *, why: str) -> Optional[bool]:
         return None
     since = float(d[w].get("since") or 0.0)
     trial = probation_trial(w, since)
+    if trial["n"] == 0:
+        # Untested is not failed: five of six probationers had 0 settled
+        # copies at day 10 (the caps, few $300 bets). Held on the record,
+        # said once, checked again next pass. The owner's letter is "fail";
+        # this deviation is reported to him (s-ye5990, verifier round 2).
+        if not d[w].get("held_said"):
+            d[w]["held_said"] = True
+            _write_json(_p(PROBATION_FILE), d)
+            receipt("probation_held", before=f"{w[:10]} on probation ({why})", after="held: no live copy settled yet",
+                    detail="untested is not failed; the clock keeps running", now=now, extra={"wallet": w})
+        return None
     ok, verdict = probation_verdict(trial)
     extra = {"wallet": w, "trial": [{"token_id": r.get("token_id"), "pnl": r.get("pnl"), "won": r.get("won")} for r in trial["rows"]]}
     detail = "; ".join(f"{str(r.get('detail') or '')[:38]}" for r in trial["rows"])

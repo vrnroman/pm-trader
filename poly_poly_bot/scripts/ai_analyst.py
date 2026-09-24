@@ -613,10 +613,9 @@ def _record_markdown(card: dict) -> str:
     from src.copy_trading import book_recipes
     lines = [f"# experiment {card['id']}: {card['title']}", ""] + exp_cards.table(card) + [""]
     if card.get("knobs"):
-        lines += ["## what this branch changes", "deploy.yml (the line the owner's merge makes real):"]
-        for k, v in card["knobs"].items():
-            env = book_recipes.KNOB_ENV.get(k)
-            lines.append(f"- {k} = {v}" + (f": `ensure_env {env} {_env_value(v)}`" if env else " (no env; a config change)"))
+        lines += ["## what this branch changes", "deploy.yml (the lines the owner's merge makes real):"]
+        for k, v in deploy_lines_for({"knobs": card["knobs"]}).items():
+            lines.append(f"- `ensure_env {k} {v}`" if "." not in k else f"- the primary book's floor in `COPY_PAPER_B_BOOKS` becomes {v}")
         lines.append("")
     if card.get("branch"):
         lines += ["## the code", f"Branch `{card['branch']}`, behind `exp_flag.on(\"{card.get('flag')}\")`; "
@@ -649,6 +648,13 @@ def deploy_lines_for(card: dict) -> dict[str, str]:
         env = book_recipes.KNOB_ENV.get(k)
         if env:
             out[env] = _env_value(v)
+        if k == "min_usd":
+            # Real money copies from LIVE_MIN_TRADER_BET_USD and the primary
+            # paper book from its COPY_PAPER_B_BOOKS entry (PR #44), so the
+            # line that brings a floor to real trades is those two, not the
+            # recipe default alone (verifier round 2, s-ye5990).
+            out["LIVE_MIN_TRADER_BET_USD"] = _env_value(v)
+            out["COPY_PAPER_B_BOOKS.primary_floor"] = _env_value(v)
     if card.get("flag"):
         out["EXP_FLAGS_ON"] = str(card["flag"])
     return out
@@ -659,6 +665,17 @@ def edit_deploy_yml(text: str, lines: dict[str, str]) -> str:
     first ensure_env line; EXP_FLAGS_ON accumulates (comma-separated)."""
     rows = text.split("\n")
     for name, value in lines.items():
+        if name == "COPY_PAPER_B_BOOKS.primary_floor":
+            # the primary book's floor inside the spec: "b300:300,b150:150" -> "b300:150,b150:150"
+            pat = re.compile(r"^(\s*)ensure_env COPY_PAPER_B_BOOKS (\S+)(.*)$")
+            hit = next((i for i, r in enumerate(rows) if pat.match(r)), None)
+            if hit is not None:
+                m = pat.match(rows[hit])
+                parts = m.group(2).split(",")
+                pid = parts[0].split(":")[0]
+                parts[0] = f"{pid}:{value}"
+                rows[hit] = f"{m.group(1)}ensure_env COPY_PAPER_B_BOOKS {','.join(parts)}{m.group(3)}"
+            continue
         pat = re.compile(rf"^(\s*)ensure_env {re.escape(name)} (.*)$")
         hit = next((i for i, r in enumerate(rows) if pat.match(r)), None)
         if hit is not None:
@@ -711,7 +728,7 @@ def win_branch(card: dict, md: str, *, sre, work_root: Optional[str] = None) -> 
         if r.returncode != 0:
             return (False, branch, f"git add failed: {(r.stderr or '')[-200:]}")
         msg = (f"exp({exp_id}): won its bars; the change for the owner's merge\n\n{card['hypothesis']}\n\n"
-               + ("\n".join(f"deploy.yml: ensure_env {k} {v}" for k, v in lines.items()) or "no deploy line"))
+               + ("\n".join(f"deploy.yml: ensure_env {k} {v}" for k, v in lines.items() if "." not in k) or "no deploy line"))
         r = sre._run(["git", "commit", "-q", "-m", msg], cwd=wd)
         if r.returncode != 0:
             return (False, branch, f"commit failed: {(r.stderr or '')[-200:]}")
@@ -737,7 +754,7 @@ def conclude_win(card: dict, now: float, *, send, apply=None, push=None, sre) ->
     link = f"{sre.REPO_HTTPS}/compare/main...{branch}?expand=1"
     money = " Touches the money path." if card.get("diff_class") == "money" else ""
     lines = deploy_lines_for(card)
-    change = "; ".join(f"{k}={v}" for k, v in lines.items()) or "the record only"
+    change = "; ".join(f"{k}={v}" for k, v in lines.items() if "." not in k) or "the record only"
     rows_ = exp_cards.journal_rows(exp_id)
     v = rows_[-1] if rows_ else {}
     delivered = send(f"\U0001f4dd <b>AI analyst</b> experiment <code>{exp_id}</code> WON: {html.escape(str(v.get('why') or ''))}.{money} "

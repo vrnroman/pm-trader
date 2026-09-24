@@ -305,8 +305,8 @@ def test_the_daily_check_wins_to_a_branch_for_the_owner_never_main(desk):
     finally:
         an.win_branch = _orig
     assert calls["push"] == [] and calls["apply"] == [], "the WIN branch is written with git, not apply_fix"
-    assert branches and branches[0][0] == "min150" and "ensure_env COPY_PAPER_MIN_USD 150" in branches[0][1]
-    assert any("WON" in m and "compare/main...analyst/exp-min150" in m and "COPY_PAPER_MIN_USD=150" in m and "merge it" in m for m in send.sent)
+    assert branches and branches[0][0] == "min150" and "ensure_env LIVE_MIN_TRADER_BET_USD 150" in branches[0][1]
+    assert any("WON" in m and "compare/main...analyst/exp-min150" in m and "LIVE_MIN_TRADER_BET_USD=150" in m and "merge it" in m for m in send.sent)
     assert exp_cards.load("min150")["status"] == "win"
     rows_ = [r for r in ops_watch.watcher_thoughts() if r.get("proposal") == "experiment"]
     assert rows_ and "branch analyst/exp-min150 pushed" in rows_[-1]["did"]
@@ -544,6 +544,12 @@ def test_the_win_branch_carries_the_deploy_line_and_the_record(tmp_path, monkeyp
     assert an.edit_deploy_yml("          ensure_env EXP_FLAGS_ON a\n", {"EXP_FLAGS_ON": "b"}) == "          ensure_env EXP_FLAGS_ON a,b\n"
     assert an.edit_deploy_yml("x\n          ensure_env A 1\n", {"NEW": "v"}) == "x\n          ensure_env NEW v\n          ensure_env A 1\n"
     assert an.deploy_lines_for({"knobs": {"first_entry_only": False}, "flag": "wide"}) == {"COPY_PAPER_FIRST_ENTRY_ONLY": "false", "EXP_FLAGS_ON": "wide"}
+    # a floor reaches real money through LIVE_MIN_TRADER_BET_USD and the primary book's spec (verifier round 2)
+    assert an.deploy_lines_for({"knobs": {"min_usd": 150.0}}) == {"COPY_PAPER_MIN_USD": "150", "LIVE_MIN_TRADER_BET_USD": "150", "COPY_PAPER_B_BOOKS.primary_floor": "150"}
+    real = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
+    edited = an.edit_deploy_yml(real, an.deploy_lines_for({"knobs": {"min_usd": 150.0}}))
+    assert "ensure_env LIVE_MIN_TRADER_BET_USD 150\n" in edited and "LIVE_MIN_TRADER_BET_USD 300" not in edited
+    assert "ensure_env COPY_PAPER_B_BOOKS b300:150,b150:150,b100:100" in edited and "ensure_env COPY_PAPER_MIN_USD 150" in edited
 
 
 def test_the_child_env_is_an_allowlist(desk, monkeypatch):
