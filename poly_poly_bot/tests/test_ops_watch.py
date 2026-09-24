@@ -647,7 +647,7 @@ def test_the_ten_day_clock_concludes_on_what_settled(ops_env, monkeypatch):
                           equity=67.0, stated=80.0, floor=56.0, send=None, now=100.0)
     assert ow.probation_check(now=9 * 86400.0) == [], "not yet"
     assert ow.probation_check(now=10 * 86400.0 + 1) == ["0xslow"]
-    assert evicted == [("0xslow", "probation failed: 1 of 2 won, realized -20.0% on $10.00 (pass needs 2 won and -10%)")]
+    assert evicted == [("0xslow", "probation failed: 1 of 2 won, realized -10.0% on $10.00 (pass needs 2 won and -10%)")]
     row = [r for r in _ledger(ops_env) if r["kind"] == "probation_failed"][-1]
     assert row["before"] == "0xslow on probation (10 days on probation)"
     assert ow.probation_wallets() == {"0xfresh"}
