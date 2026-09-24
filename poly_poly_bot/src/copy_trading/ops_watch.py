@@ -680,15 +680,18 @@ def probation_conclude(wallet: str, now: float, *, why: str) -> Optional[bool]:
         return None
     since = float(d[w].get("since") or 0.0)
     trial = probation_trial(w, since)
-    if trial["n"] == 0:
+    if trial["n"] < PROBATION_MIN_WON and trial["won"] == trial["n"]:
         # Untested is not failed: five of six probationers had 0 settled
-        # copies at day 10 (the caps, few $300 bets). Held on the record,
+        # copies at day 10 (the caps, few $300 bets), and one settled row
+        # can never meet a two-won bar. Held on the record while every
+        # settled copy so far won and there are fewer than the bar needs;
         # said once, checked again next pass. The owner's letter is "fail";
-        # this deviation is reported to him (s-ye5990, verifier round 2).
+        # this deviation is reported to him (s-ye5990, verifier rounds 2, 3).
         if not d[w].get("held_said"):
             d[w]["held_said"] = True
             _write_json(_p(PROBATION_FILE), d)
-            receipt("probation_held", before=f"{w[:10]} on probation ({why})", after="held: no live copy settled yet",
+            receipt("probation_held", before=f"{w[:10]} on probation ({why})",
+                    after=f"held: {trial['n']} live copy(ies) settled, under the {PROBATION_MIN_WON} the bar needs",
                     detail="untested is not failed; the clock keeps running", now=now, extra={"wallet": w})
         return None
     ok, verdict = probation_verdict(trial)

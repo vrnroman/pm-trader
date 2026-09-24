@@ -754,7 +754,7 @@ def conclude_win(card: dict, now: float, *, send, apply=None, push=None, sre) ->
     link = f"{sre.REPO_HTTPS}/compare/main...{branch}?expand=1"
     money = " Touches the money path." if card.get("diff_class") == "money" else ""
     lines = deploy_lines_for(card)
-    change = "; ".join(f"{k}={v}" for k, v in lines.items() if "." not in k) or "the record only"
+    change = "; ".join((f"{k}={v}" if "." not in k else f"the primary book's floor {v}") for k, v in lines.items()) or "the record only"
     rows_ = exp_cards.journal_rows(exp_id)
     v = rows_[-1] if rows_ else {}
     delivered = send(f"\U0001f4dd <b>AI analyst</b> experiment <code>{exp_id}</code> WON: {html.escape(str(v.get('why') or ''))}.{money} "

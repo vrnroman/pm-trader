@@ -643,10 +643,11 @@ def test_the_ten_day_clock_concludes_on_what_settled(ops_env, monkeypatch):
     evicted = _evict_recorder(monkeypatch)
     ow.probation_start("0xSLOW", now=1.0)
     ow.probation_start("0xFRESH", now=5 * 86400.0)
-    ow.record_settlements([ow.Settlement("s0", "0xSLOW", 5.0, 9.0)], equity=67.0, stated=80.0, floor=56.0, send=None, now=100.0)
+    ow.record_settlements([ow.Settlement("s0", "0xSLOW", 5.0, 9.0), ow.Settlement("s1", "0xSLOW", 5.0, 0.0)],
+                          equity=67.0, stated=80.0, floor=56.0, send=None, now=100.0)
     assert ow.probation_check(now=9 * 86400.0) == [], "not yet"
     assert ow.probation_check(now=10 * 86400.0 + 1) == ["0xslow"]
-    assert evicted == [("0xslow", "probation failed: 1 of 1 won, realized +80.0% on $5.00 (pass needs 2 won and -10%)")]
+    assert evicted == [("0xslow", "probation failed: 1 of 2 won, realized -20.0% on $10.00 (pass needs 2 won and -10%)")]
     row = [r for r in _ledger(ops_env) if r["kind"] == "probation_failed"][-1]
     assert row["before"] == "0xslow on probation (10 days on probation)"
     assert ow.probation_wallets() == {"0xfresh"}
@@ -667,6 +668,14 @@ def test_an_untested_probationer_is_held_not_failed(ops_env, monkeypatch):
     assert ow.probation_check(now=10 * 86400.0 + 1) == ["0xidle"] and evicted == []
     assert ow.probation_wallets() == {"0xidle"}, "still on probation"
     held = [r for r in _ledger(ops_env) if r["kind"] == "probation_held"]
-    assert len(held) == 1 and held[0]["after"] == "held: no live copy settled yet"
+    assert len(held) == 1 and held[0]["after"] == "held: 0 live copy(ies) settled, under the 2 the bar needs"
     ow.probation_check(now=11 * 86400.0)
     assert len([r for r in _ledger(ops_env) if r["kind"] == "probation_held"]) == 1, "said once"
+    # one settled row that WON still cannot meet a two-won bar: held, not failed
+    ow.record_settlements([ow.Settlement("i0", "0xIDLE", 5.0, 9.0)], equity=67.0, stated=80.0, floor=56.0, send=None, now=11 * 86400.0 + 5)
+    ow.probation_check(now=12 * 86400.0)
+    assert evicted == [] and ow.probation_wallets() == {"0xidle"}
+    # a lost one is a verdict
+    ow.record_settlements([ow.Settlement("i1", "0xIDLE", 5.0, 0.0)], equity=67.0, stated=80.0, floor=56.0, send=None, now=12 * 86400.0 + 5)
+    ow.probation_check(now=13 * 86400.0)
+    assert evicted and evicted[-1][0] == "0xidle"
