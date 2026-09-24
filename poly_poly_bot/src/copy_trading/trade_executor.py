@@ -312,6 +312,9 @@ def _book_preview_exit(trade, sell_shares: float) -> None:
 # messages of 2026-09-23 carried none of this; the CLOB's answer ("not
 # enough balance: balance 20000000, order amount 20830000") sat in the log.
 _post_failures: dict = {}
+# The share of OUR position a mirrored SELL sells (part 2 B), decided in the
+# loop from the share of THEIR position the target sold; 1.0 = all we hold.
+_exit_fracs: dict = {}
 
 
 def post_failure(trade_id: str) -> tuple[str, bool]:
@@ -380,8 +383,15 @@ async def _execute_copy_order(
                 return None
             # Hard rule: a live SELL never asks for more than we hold. Rounded
             # DOWN to the exchange's two decimals, so 22.86 held is 22.86
-            # asked, never 22.87.
-            shares = math.floor(min(shares, held) * 100.0) / 100.0
+            # asked, never 22.87. A proportional exit sells that share of
+            # what we hold (part 2 B); the exchange minimum applies.
+            frac = float(_exit_fracs.pop(trade.id, 1.0))
+            want = held * frac if frac < 1.0 else held
+            shares = math.floor(min(shares, want) * 100.0) / 100.0
+            if frac < 1.0 and shares * order_price < float(CONFIG.min_order_size_usd):
+                _note_failure(trade.id, f"a {frac:.0%} exit is ${shares * order_price:.2f}, under the "
+                                        f"${float(CONFIG.min_order_size_usd):.0f} order minimum", definite=True)
+                return None
         if shares <= 0:
             _note_failure(trade.id, "order size rounds to zero shares", definite=True)
             return None
@@ -696,6 +706,25 @@ async def place_trade_orders(
                     logger.skip(f"[exec] SELL skipped: no position after sync for {trade.token_id[:12]}...")
                     mark_trade_as_seen(trade.id)
                     continue
+
+            # --- Mirrored exits are proportional (part 2 B): a trim of their
+            # position is not an exit; a real exit sells that share of ours. ---
+            if trade.side == "SELL":
+                try:
+                    from src.copy_trading import flip_gate
+                    _sold = float(trade.size) / float(trade.price) if trade.price and trade.price > 0 else 0.0
+                    _frac, _how = flip_gate.exit_share(trade.trader_address, trade.token_id, _sold, trade.timestamp)
+                except Exception as exc:  # noqa: BLE001
+                    _frac, _how = None, f"exit share unreadable: {exc}"
+                if _frac is not None and _frac < float(CONFIG.copy_exit_trim_frac):
+                    _why_t = f"target trimmed {_frac:.1%} of its position: not an exit ({_how})"
+                    logger.skip(f"[exec] {trade.trader_address[:10]} {_why_t}")
+                    _skip_row(record_trade_history, trade, qt, _why_t)
+                    mark_trade_as_seen(trade.id)
+                    continue
+                _exit_fracs[trade.id] = 1.0 if (_frac is None or _frac >= float(CONFIG.copy_exit_full_frac)) else float(_frac)
+                logger.info(f"[exec] exit share for {trade.token_id[:12]}: "
+                            f"{'full' if _exit_fracs[trade.id] >= 1.0 else f'{_exit_fracs[trade.id]:.0%}'} ({_how})")
 
             # --- Market quality check ---
             snapshot = await _get_market_snapshot(clob_client, trade.token_id)

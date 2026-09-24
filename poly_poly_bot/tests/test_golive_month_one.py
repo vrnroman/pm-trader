@@ -826,9 +826,11 @@ def test_real_money_line_counts_only_redeemer_rows(tmp_path, monkeypatch, budget
         {"timestamp": today, "pnl": -100.0},                       # preview row, no source
         {"timestamp": "2020-01-01T00:00:00+00:00", "pnl": 9.0, "source": "redeemer"},
     ])
+    monkeypatch.setattr(rehearsal, "paid_out_today_text", lambda now: "paid out today $+42.24 (3 claim(s), Polymarket's own)")
     line = rehearsal.real_money_line(now=now)
     assert "bankroll $280.00" in line and "floor $217" in line
-    assert "distance $+63.00" in line and "realized today $+4.00 (1 redeem(s))" in line
+    assert "distance $+63.00" in line and "realized by the bot $+4.00 (1 redeem(s))" in line
+    assert "paid out today $+42.24 (3 claim(s), Polymarket's own)" in line
 
 
 def test_the_daily_block_sends_the_rehearsal_line():
@@ -3295,3 +3297,82 @@ def test_the_gate_opens_at_fifteen_settled_and_admits_three_every_three_hours():
     assert "ensure_env COPY_GOLIVE_MIN_SETTLED 15" in dy and "s#^COPY_GOLIVE_MIN_SETTLED=.*#COPY_GOLIVE_MIN_SETTLED=15#" in dy
     from src.copy_trading import ops_watch
     assert ops_watch.PROBATION_TOTAL_PER_DAY == 4 or _os.environ.get("ZSET_PROBATION_TOTAL_PER_DAY")
+
+
+# --------------------------------------------------------------------------- #
+# part 1 E: paid out today from Polymarket's own claims; part 2 B: proportional exits
+# --------------------------------------------------------------------------- #
+
+def test_paid_out_today_reads_polymarket_claims_and_says_when_it_cannot(monkeypatch):
+    from src.copy_trading import real_money, rehearsal
+    now = 1_790_300_000.0
+    day0 = int(now - now % 86400)
+    monkeypatch.setattr(rehearsal.CONFIG, "proxy_wallet", "0xproxy")
+    seen = {}
+
+    def fetch(w, *, since_ts=0, **k):
+        seen["since"] = since_ts
+        return [{"type": "REDEEM", "timestamp": day0 + 100, "usdcSize": 20.0, "conditionId": "a", "title": "x"},
+                {"type": "REDEEM", "timestamp": day0 + 200, "usdcSize": 9.69, "conditionId": "b", "title": "y"},
+                {"type": "REDEEM", "timestamp": day0 + 300, "usdcSize": 12.55, "conditionId": "c", "title": "z"},
+                {"type": "TRADE", "side": "BUY", "timestamp": day0 + 400, "usdcSize": 6.4, "size": 20, "price": 0.32, "conditionId": "d", "asset": "t"}]
+    monkeypatch.setattr(real_money, "fetch_activity", fetch)
+    txt = rehearsal.paid_out_today_text(now)
+    assert txt == "paid out today $+42.24 (3 claim(s), Polymarket's own)" and seen["since"] == day0
+    monkeypatch.setattr(real_money, "fetch_activity", lambda w, **k: None)
+    assert rehearsal.paid_out_today_text(now) == "paid out today: could not read"
+
+
+def test_a_mirrored_exit_follows_the_share_the_target_sold(monkeypatch):
+    from src.copy_trading import flip_gate
+    flip_gate.clear()
+    T0 = 1_790_300_000.0
+    flip_gate.note_detected("0xW", "tok", "BUY", 2870.0, T0)
+    frac, how = flip_gate.exit_share("0xW", "tok", 3.34, T0 + 100, fetch_positions=lambda w: pytest.fail("record suffices"))
+    assert abs(frac - 3.34 / 2870.0) < 1e-6 and how.startswith("from the record")
+    frac, _ = flip_gate.exit_share("0xW", "tok", 2870.0, T0 + 100, fetch_positions=lambda w: pytest.fail("x"))
+    assert frac == 1.0
+    flip_gate.clear()
+    frac, how = flip_gate.exit_share("0xW", "tok", 500.0, T0, fetch_positions=lambda w: [{"token": "tok", "shares": 1500.0}])
+    assert frac == 0.25 and how.startswith("from their positions")
+    assert flip_gate.exit_share("0xW", "tok", 500.0, T0, fetch_positions=lambda w: None) == (None, "their position unknown")
+
+
+def test_a_trim_is_not_an_exit_and_a_half_exit_sells_half_of_ours(tmp_path, monkeypatch):
+    from src.copy_trading import flip_gate, inventory, trade_executor
+    flip_gate.clear()
+    monkeypatch.setattr(CONFIG, "copy_exit_trim_frac", 0.10)
+    monkeypatch.setattr(CONFIG, "copy_exit_full_frac", 0.90)
+    monkeypatch.setattr(CONFIG, "min_order_size_usd", 1.0)
+    seen = {}
+
+    class _Clob:
+        def create_and_post_order(self, order_args, *a, **k):
+            seen["size"] = order_args.size
+            return {"orderID": "0xsell"}
+    monkeypatch.setattr(inventory, "get_position", lambda t: {"shares": 20.0})
+    snap = {"best_bid": 0.30, "best_ask": 0.32, "midpoint": 0.31, "spread_bps": 600}
+    # half of theirs sold: half of ours
+    trade_executor._exit_fracs["s1"] = 0.5
+    res = _run(trade_executor._execute_copy_order(_Clob(), _sell_trade(), 6.40, snap))
+    assert res is not None and seen["size"] == 10.0 and "s1" not in trade_executor._exit_fracs
+    # full exit: all we hold
+    trade_executor._exit_fracs["s1"] = 1.0
+    _run(trade_executor._execute_copy_order(_Clob(), _sell_trade(), 6.40, snap))
+    assert seen["size"] == 20.0
+    # a share under the exchange minimum is refused with a reason, never rounded up
+    monkeypatch.setattr(CONFIG, "min_order_size_usd", 5.0)
+    trade_executor._exit_fracs["s1"] = 0.2
+    assert _run(trade_executor._execute_copy_order(_Clob(), _sell_trade(), 6.40, snap)) is None
+    why, definite = trade_executor.post_failure("s1")
+    assert why.startswith("a 20% exit is $1.20, under the $5 order minimum") and definite
+    # the loop: a 0.1% trim is a SKIPPED row, no post
+    h = _Harness(tmp_path, monkeypatch)
+    monkeypatch.setattr(trade_executor, "_inventory", lambda: (lambda *a, **k: None, lambda *a, **k: None, lambda t: True, _noop_async))
+    trades = h.trades(1)
+    t = trades[0].trade
+    sell = t.model_copy(update={"side": "SELL", "size": 0.77, "price": 0.24, "id": "sell-1"})
+    flip_gate.note_detected(t.trader_address, t.token_id, "BUY", 2870.0, t.timestamp)
+    trades[0] = trades[0].model_copy(update={"trade": sell})
+    assert h.run(trades) == 0 and h.posted == []
+    assert any(r.status == "SKIPPED" and r.reason.startswith("target trimmed 0.1% of its position: not an exit") for r in h.history)

@@ -197,6 +197,12 @@ class Config:
     # A buy the target has already sold this share of (a flip) is refused,
     # preview and live alike (2026-09-24 requirements, part 2 D1).
     copy_flip_exit_frac: float = _opt_float("COPY_FLIP_EXIT_FRAC", 0.5)
+    # Mirrored exits are proportional (part 2 B): the share of THEIR position
+    # the target just sold. Under the trim fraction it is not an exit (a
+    # 0.1% trim used to dump our whole position); at or above the full
+    # fraction we sell everything we hold; between, that share of ours.
+    copy_exit_trim_frac: float = _opt_float("COPY_EXIT_TRIM_FRAC", 0.10)
+    copy_exit_full_frac: float = _opt_float("COPY_EXIT_FULL_FRAC", 0.90)
     # Poll cadence for the near-term copier. Dropped 120s -> 60s now that
     # detection runs off the shared global /trades feed (fixed cost regardless of
     # how many wallets are watched — see copy_paper_feed_detection), so we can

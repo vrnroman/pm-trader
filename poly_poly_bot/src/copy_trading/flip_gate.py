@@ -131,3 +131,52 @@ def target_already_exited(trader: str, token_id: str, buy_ts, buy_shares: float,
         delay = max(0.0, max(r["ts"] for r in sells) - t0)
         return (True, f"target already sold {min(frac, 9.99):.0%} of this buy {delay:.0f}s later")
     return (False, "")
+
+
+# --------------------------------------------------------------------------- #
+# Their position before a sell (part 2 B): what share of it did they sell?
+# --------------------------------------------------------------------------- #
+
+def _fetch_positions(trader: str) -> Optional[list]:
+    """The data-api's open positions for the wallet: ``(token, shares)`` rows."""
+    try:
+        import requests
+
+        from src.copy_trading.discovery_data import DATA_API, _get
+        rows = _get(requests.Session(), DATA_API, "/positions", user=trader, sizeThreshold=1, limit=500)
+    except Exception:  # noqa: BLE001
+        return None
+    if rows is None:
+        return None
+    out = []
+    for p in rows:
+        try:
+            out.append({"token": str(p.get("asset") or ""), "shares": float(p.get("size") or 0.0)})
+        except (TypeError, ValueError):
+            continue
+    return out
+
+
+def exit_share(trader: str, token_id: str, sold_shares: float, sell_ts, *, now: Optional[float] = None,
+               fetch_positions: Optional[Callable] = None) -> tuple[Optional[float], str]:
+    """The share of THEIR position the target sold: ``sold / held before``.
+    Held-before from the local record (buys minus earlier sells of the
+    token), else the data-api's current position plus the sale. None when
+    nothing says (then the caller treats the sell as a full exit, the old
+    behaviour, and says so)."""
+    now = time.time() if now is None else now
+    t0 = _ts(sell_ts)
+    rows = [r for r in local_rows(trader) if r["token"] == str(token_id) and r["ts"] < t0 + 0.5]
+    bought = sum(r["shares"] for r in rows if r["side"] == "BUY")
+    sold_before = sum(r["shares"] for r in rows if r["side"] == "SELL" and r["ts"] < t0)
+    held_before = bought - sold_before
+    if held_before >= sold_shares > 0 and bought > 0:
+        return (min(1.0, sold_shares / held_before), f"from the record: sold {sold_shares:.2f} of {held_before:.2f}")
+    pos = (fetch_positions or _fetch_positions)(trader)
+    if pos is None:
+        return (None, "their position unknown")
+    left = sum(p["shares"] for p in pos if p["token"] == str(token_id))
+    before = left + sold_shares
+    if before <= 0 or sold_shares <= 0:
+        return (None, "their position unknown")
+    return (min(1.0, sold_shares / before), f"from their positions: sold {sold_shares:.2f} of {before:.2f}")

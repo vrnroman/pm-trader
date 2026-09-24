@@ -335,6 +335,25 @@ def followed_wallets_line() -> str:
         return f"👛 followed wallets: could not compute ({exc})"
 
 
+def paid_out_today_text(now: float) -> str:
+    """Polymarket's own payouts to the proxy wallet since 00:00 UTC today,
+    from the data api (the source /real uses). "could not read" on a
+    failed read, never $0."""
+    try:
+        from src.copy_trading import real_money
+        day0 = int(now - (now % 86400))
+        rows = real_money.fetch_activity(CONFIG.proxy_wallet, since_ts=day0)
+        if rows is None:
+            return "paid out today: could not read"
+        deals, _ = real_money.parse_deals(rows, since_ts=day0)
+        payouts = [d for d in deals if d.kind == "PAYOUT" and float(getattr(d, "ts", day0) or day0) >= day0]
+        paid = round(sum(float(d.usd) for d in payouts), 2)
+        return f"paid out today ${paid:+,.2f} ({len(payouts)} claim(s), Polymarket's own)"
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[rehearsal] paid-out read failed: {exc}")
+        return "paid out today: could not read"
+
+
 def resolved_positions_line(redeemable, n_done: int) -> str:
     """The winners, apart from the dust: what is worth claiming by hand."""
     from src.copy_trading.auto_redeemer import DUST_VALUE_USD, _position_value
@@ -379,14 +398,20 @@ def real_money_line(now: Optional[float] = None) -> str:
                 if r.get("source") == "redeemer"
                 and str(r.get("timestamp", ""))[:10] == today]
         realized = round(sum(_num(r.get("pnl")) for r in rows), 2)
+        # Polymarket claims wins hours before our redeemer sees them (three
+        # on 2026-09-24, $42.24, before 05:35 UTC), so the redeemer's number
+        # read $0.00 on a winning day. Both numbers, neither over-claimed:
+        # what Polymarket paid out today (gross, not P&L) and what the bot
+        # itself redeemed (part 1 E of the 2026-09-24 requirements).
+        paid_txt = paid_out_today_text(now)
         if bal is None:
             return (f"💵 real money: balance unreadable · open at cost ${open_cost:,.2f} · "
-                    f"realized today ${realized:+,.2f} ({len(rows)} redeem(s))")
+                    f"{paid_txt} · realized by the bot ${realized:+,.2f} ({len(rows)} redeem(s))")
         equity = live_budget.equity_usd(bal, open_cost)
         floor_txt = (f" · floor ${floor:,.0f} · distance ${equity - floor:+,.2f}"
                      if floor is not None else " · no floor (LIVE_BUDGET_USD unset)")
         line = (f"💵 real money: bankroll ${equity:,.2f} (USDC ${bal:,.2f} + open at cost "
-                f"${open_cost:,.2f}){floor_txt} · realized today ${realized:+,.2f} "
+                f"${open_cost:,.2f}){floor_txt} · {paid_txt} · realized by the bot ${realized:+,.2f} "
                 f"({len(rows)} redeem(s))")
         if n_done:
             line += "\n   " + resolved_positions_line(redeemable, n_done)
