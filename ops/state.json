@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T17:52:35.168422+00:00",
+ "generated": "2026-09-25T18:36:47.690394+00:00",
  "money": {
   "cash": 112.890933,
   "open_cost": 6.4,
@@ -20,7 +20,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790358684.916188,
+  "ts": 1790361397.1604505,
   "day": "2026-09-25"
  },
  "arm": {
@@ -467,19 +467,6 @@
   }
  ],
  "important": [
-  "2026-09-24 17:53:23 ERROR Error fetching NEG_RISK_CTF events [94378147-94378153]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 17:53:53 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-24 17:53:53 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-24 17:53:54 ERROR Network error fetching 0x722a...d6ed: ",
-  "2026-09-24 18:02:17 ERROR Error fetching CTF events [94378530-94378531]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 18:06:04 ERROR Error fetching CTF events [94378681-94378682]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 18:06:04 ERROR Error fetching NEG_RISK_CTF events [94378681-94378682]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 18:07:00 ERROR Error fetching NEG_RISK_CTF events [94378719-94378719]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 18:07:05 ERROR Error fetching CTF events [94378722-94378722]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 18:29:00 ERROR Error fetching NEG_RISK_CTF events [94379574-94379579]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 18:31:19 ERROR Error fetching CTF events [94379666-94379672]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 18:35:15 ERROR Error fetching NEG_RISK_CTF events [94379847-94379848]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 18:35:18 ERROR Error fetching NEG_RISK_CTF events [94379849-94379852]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 18:43:13 ERROR Error fetching NEG_RISK_CTF events [94380167-94380168]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 18:48:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-24 18:48:53 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $38.40 / $54.00",
@@ -815,6 +802,17 @@
   "2026-09-25 17:50:28 ERROR Error fetching NEG_RISK_CTF events [94435657-94435658]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 17:50:41 ERROR Error fetching CTF events [94435666-94435666]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 17:50:41 ERROR Error fetching NEG_RISK_CTF events [94435666-94435666]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 17:57:13 ERROR Error fetching CTF events [94435907-94435908]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-25 18:04:23 ERROR Error fetching CTF events [94436214-94436215]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 18:06:27 ERROR Error fetching CTF events [94436297-94436298]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 18:10:22 ERROR Error fetching CTF events [94436453-94436454]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 18:10:22 ERROR Error fetching NEG_RISK_CTF events [94436453-94436454]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 18:16:05 ERROR Error fetching CTF events [94436682-94436683]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 18:16:05 ERROR Error fetching NEG_RISK_CTF events [94436682-94436683]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 18:36:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-25 18:36:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-25 18:36:18 ERROR Error fetching CTF events [94437491-94437492]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 18:36:19 ERROR Error fetching NEG_RISK_CTF events [94437491-94437492]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 18:48:54 TRADE [LIVE] BUY $6.40 on 'Will Portugal win on 2026-09-24?' @ 0.8600, order 0xed1fc1a749...",
   "2026-09-24 18:48:54 TRADE [verify] FILLED: BUY 7.44 shares on 'Will Portugal win on 2026-09-24?' @ 0.8600",
   "2026-09-25 02:26:10 TRADE [LIVE] BUY $6.40 on '' @ 0.8500, order 0x5540f913e6...",
@@ -1350,17 +1348,13 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1790357549.0552135,
-   "count": 32,
+   "last": 1790361389.2777584,
+   "count": 34,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1790355098.2081316,
-    1790355098.2081316,
-    1790356709.0092494,
-    1790356709.0092494,
-    1790357549.0552135,
-    1790357549.0552135
+    1790361389.2777584,
+    1790361389.2777584
    ],
    "action": null,
    "action_ts": null,
@@ -1608,15 +1602,18 @@
   },
   "6fbcddbc9dfb": {
    "first": 1790347551.8864553,
-   "last": 1790358749.1513362,
-   "count": 13,
+   "last": 1790361389.2777584,
+   "count": 16,
    "sample": "2026-09-25 14:44:13 ERROR Error fetching NEG_RISK_CTF events [94428207-94428208]: {'code': -32000, 'message': 'invalid block range params'}",
    "norm": "ERROR Error fetching NEG_RISK_CTF events [NN]: {'S': N, 'S': 'S'}",
    "recent": [
     1790358509.1402233,
     1790358629.1449716,
     1790358629.1449716,
-    1790358749.1513362
+    1790358749.1513362,
+    1790359829.1909935,
+    1790360189.2055786,
+    1790361389.2777584
    ],
    "action": null,
    "action_ts": null,
@@ -1625,17 +1622,22 @@
   },
   "dcba498fc237": {
    "first": 1790348314.5935838,
-   "last": 1790358749.1513362,
-   "count": 15,
+   "last": 1790361389.2777584,
+   "count": 21,
    "sample": "2026-09-25 14:56:40 ERROR Error fetching CTF events [94428704-94428706]: {'code': -32000, 'message': 'invalid block range params'}",
    "norm": "ERROR Error fetching CTF events [NN]: {'S': N, 'S': 'S'}",
    "recent": [
-    1790356949.0368574,
     1790358389.13514,
     1790358629.1449716,
     1790358629.1449716,
     1790358629.1449716,
-    1790358749.1513362
+    1790358749.1513362,
+    1790359109.1634881,
+    1790359469.1764119,
+    1790359589.181148,
+    1790359829.1909935,
+    1790360189.2055786,
+    1790361389.2777584
    ],
    "action": null,
    "action_ts": null,
@@ -1644,14 +1646,12 @@
   },
   "41cab7e764a5": {
    "first": 1790351832.0916538,
-   "last": 1790357549.0552135,
-   "count": 4,
+   "last": 1790361389.2777584,
+   "count": 5,
    "sample": "2026-09-25 15:57:06 ERROR [py_clob_client_v2] request error: The read operation timed out",
    "norm": "ERROR [py_clob_client_v2] request error: The read operation timed out",
    "recent": [
-    1790355098.2081316,
-    1790356709.0092494,
-    1790357549.0552135
+    1790361389.2777584
    ],
    "action": null,
    "action_ts": null,
