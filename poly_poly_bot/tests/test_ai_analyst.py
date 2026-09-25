@@ -284,7 +284,7 @@ def _books(desk, exp_id, rows_c, rows_t):
     for name, rows in (("control.jsonl", rows_c), ("treatment.jsonl", rows_t), ("../../book_b.jsonl", rows_c)):
         with open(d / name, "w", encoding="utf-8") as f:
             for i, (target, roi, opened) in enumerate(rows):
-                f.write(json.dumps({"copy_id": f"{name}-{i}", "target": target, "condition_id": f"c{i}", "token_id": f"t{i}",
+                f.write(json.dumps({"copy_id": f"cp-{i}", "target": target, "condition_id": f"c{i}", "token_id": f"t{i}",
                                     "outcome_index": 0, "category": "sports", "their_price": 0.5, "entry_price": 0.5, "shares": 40.0,
                                     "spent": 20.0, "drag_bps": 100, "opened_ts": opened, "closed": True, "won": roi > 0,
                                     "pnl": roi * 20, "ideal_pnl": roi * 20, "closed_ts": opened + 7200}) + "\n")
@@ -404,7 +404,7 @@ def test_the_supervisor_runs_the_owners_tapped_study_outside_the_models_cap(desk
         ran.append((kind, params))
         return _study_stub(kind, params, now=now, question=question)
     sv = an.supervise(NOW + 120, spawn=lambda c: 1, alive=lambda p: False, stop=lambda p: None, send=send, study=study)
-    assert ran == [("wallet_cap", {"to": 3})] and sv["did"] == "ran 1 tapped study(ies)"
+    assert ran == [("wallet_cap", {"from": 25, "to": 3})] and sv["did"] == "ran 1 tapped study(ies)"
     assert exp_cards.pending_requests() == [] and any("study <code>" in m and "wallets in 11 -&gt; 19" in m for m in send.sent)
     assert an.supervise(NOW + 240, spawn=lambda c: 1, alive=lambda p: False, stop=lambda p: None, send=send, study=study)["did"] == ""
     assert len(ran) == 1, "a request runs once"
@@ -572,3 +572,16 @@ def test_a_flag_named_in_the_env_is_on_at_boot(monkeypatch):
         monkeypatch.delenv("EXP_FLAGS_ON")
         importlib.reload(exp_flag)
     assert not exp_flag.on("wide_band")
+
+
+def test_the_supervisor_reruns_a_harness_void_and_says_so(desk):
+    """The owner never restarts an experiment from the Mac: min150's void
+    (the retired whole-book rule) runs again as min150-r1 on the next tick."""
+    exp_cards.create({k: v for k, v in CARD.items() if k != "kind"}, NOW); exp_cards.launch("min150", NOW)
+    exp_cards.apply_verdict(exp_cards.load("min150"), {"status": "void", "why": "control differs from book B by -7.5 pp on 65 copies (tolerance 1.5): the harness, not the idea, is what moved"}, NOW + 3600)
+    send = _sender()
+    started = []
+    sv = an.supervise(NOW + 7200, spawn=lambda c: started.append(c["id"]) or 42, alive=lambda p: False, stop=lambda p: None, send=send)
+    assert sv["live"] == "min150-r1" and started == ["min150-r1"]
+    assert any("runs again as <code>min150-r1</code>" in m for m in send.sent)
+    assert exp_cards.load("min150")["status"] == "void", "the old card keeps its record"

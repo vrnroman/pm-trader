@@ -31,9 +31,11 @@ from __future__ import annotations
 
 import json
 import os
+import random
 import re
 import shutil
 import time
+import zlib
 from typing import Optional
 
 from src.config import CONFIG
@@ -56,11 +58,31 @@ MIN_WIN_PP = 2.0
 MIN_DAYS, MAX_DAYS_DEFAULT, MAX_DAYS_CAP = 3, 14, 30
 EXTEND_DAYS = 7
 KILL_MIN_N_DEFAULT = 20
-# The control runs book B's recipe on the same feed as book B. When the two
-# disagree by more than this on enough copies, the harness, not the idea,
-# is what the treatment is being measured against: VOID.
-HARNESS_TOL_PP = 1.5
+# The harness check: the control runs book B's recipe, so on the copies BOTH
+# took (same copy_id: their trade, their token) the two must agree on price
+# and outcome. Which copies each takes differs by design: book B carries
+# weeks of state (per-wallet-day counts, open events) the control starts
+# without. Until 2026-09-25 the check compared whole-book ROI at a 1.5 pp
+# tolerance; two books of 65 copies differ by chance with a 95% band near
+# +-31 pp (per-copy sd ~90 pp), so min150 voided on day 0.6 while its 48
+# matched copies agreed to the cent. Now a matched copy disagrees when its
+# ROI differs by more than HARNESS_TOL_PP (exit timing may move it a little),
+# and the card voids only when more than HARNESS_MAX_MISMATCH of at least
+# HARNESS_MIN_N matched settled copies disagree: the harness is broken.
+HARNESS_TOL_PP = 2.0
+HARNESS_MAX_MISMATCH = 0.2
 HARNESS_MIN_N = 20
+# The bars are checked against noise too: a win or a kill needs the gap to
+# clear SIG_Z standard errors of the delta, from a paired bootstrap over the
+# union of copies (a copy both books took moves both sides together). The
+# seed is the card id, so the same ledgers give the same verdict.
+SIG_Z = 2.0
+BOOT_N = 400
+# A void the code can blame on the harness or the process (not on the idea
+# being starved) is requeued by the supervisor as <id>-r<k>, at most this
+# many times, so a broken run does not need the owner's Mac to restart.
+MAX_RETRIES = 2
+LEGACY_RETRY_WHY = "control differs from book B by"   # the whole-book rule, retired 2026-09-25
 STATUSES = ("queued", "live", "win", "kill", "void")
 CONCLUDED = ("win", "kill", "void")
 _ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,31}$")
@@ -344,35 +366,40 @@ def _pp(cmp: dict) -> tuple[float, int, int]:
 
 
 def verdict(card: dict, cmp: dict, now: float, *, harness_pp: Optional[float] = None,
-            harness_n: int = 0) -> dict:
+            harness_n: int = 0, harness_mismatch: Optional[int] = None, se_pp: Optional[float] = None) -> dict:
     """Pure. ``{"status": live|win|kill|void|extend, "why", "delta_pp", "n",
-    "n_control", "days"}``. The order is the card's: a harness that
-    disagrees with book B voids first; the kill bar is checked before the
-    win bar; the clock is checked last."""
+    "n_control", "days", "se_pp"}``. The order is the card's: a harness
+    whose matched copies disagree voids first; the kill bar is checked
+    before the win bar; the clock is checked last. With ``se_pp`` a bar
+    counts only when the gap also clears SIG_Z standard errors. A void
+    carries ``retry``: True when the harness or a stall is to blame."""
     delta, n, n_c = _pp(cmp)
     started = float(card.get("started_ts") or now)
     days = round((now - started) / 86400.0, 1)
     win, kill = card["win_bar"], card["kill_bar"]
     base = {"delta_pp": delta, "n": n, "n_control": n_c, "days": days,
-            "harness_pp": harness_pp, "harness_n": harness_n}
-    if harness_pp is not None and harness_n >= HARNESS_MIN_N and abs(harness_pp) > HARNESS_TOL_PP:
-        return {**base, "status": "void",
-                "why": f"control differs from book B by {harness_pp:+.1f} pp on {harness_n} copies (tolerance {HARNESS_TOL_PP:.1f}): the harness, not the idea, is what moved"}
+            "harness_pp": harness_pp, "harness_n": harness_n, "harness_mismatch": harness_mismatch, "se_pp": se_pp}
+    if harness_mismatch is not None and harness_n >= HARNESS_MIN_N and harness_mismatch > HARNESS_MAX_MISMATCH * harness_n:
+        return {**base, "status": "void", "retry": True,
+                "why": f"{harness_mismatch} of {harness_n} copies the control and book B both took disagree by more than "
+                       f"{HARNESS_TOL_PP:.1f} pp: the harness, not the idea, is what moved"}
     validity = cmp.get("validity") or {}
     if not validity.get("valid", True) and days >= 2 and n > 0:
-        return {**base, "status": "void", "why": "; ".join(validity.get("reasons") or ["a book stalled"])}
-    if n >= kill["min_n"] and delta <= kill["roi_pp"]:
+        return {**base, "status": "void", "retry": True, "why": "; ".join(validity.get("reasons") or ["a book stalled"])}
+    noise = SIG_Z * float(se_pp) if se_pp is not None else 0.0
+    sig = f" (noise {SIG_Z:.0f}x se {se_pp:.1f} pp)" if se_pp is not None else ""
+    if n >= kill["min_n"] and delta <= kill["roi_pp"] and delta <= -noise:
         return {**base, "status": "kill",
-                "why": f"{delta:+.1f} pp vs control on {n} settled copies, kill bar {kill['roi_pp']:+.1f} pp at n>={kill['min_n']}"}
-    if n >= win["min_n"] and delta >= win["roi_pp"]:
+                "why": f"{delta:+.1f} pp vs control on {n} settled copies, kill bar {kill['roi_pp']:+.1f} pp at n>={kill['min_n']}{sig}"}
+    if n >= win["min_n"] and delta >= win["roi_pp"] and delta >= noise:
         return {**base, "status": "win",
-                "why": f"{delta:+.1f} pp vs control on {n} settled copies, win bar {win['roi_pp']:+.1f} pp at n>={win['min_n']}"}
+                "why": f"{delta:+.1f} pp vs control on {n} settled copies, win bar {win['roi_pp']:+.1f} pp at n>={win['min_n']}{sig}"}
     if days >= float(card.get("max_days") or MAX_DAYS_DEFAULT):
         if n < win["min_n"] and not card.get("extended"):
             return {**base, "status": "extend",
                     "why": f"{n} of {win['min_n']} settled copies after {days:.0f} days: extended once by {EXTEND_DAYS} days"}
         if n < win["min_n"]:
-            return {**base, "status": "void",
+            return {**base, "status": "void", "retry": False,
                     "why": f"{n} of {win['min_n']} settled copies after {days:.0f} days, already extended: starved"}
         return {**base, "status": "kill",
                 "why": f"{delta:+.1f} pp vs control on {n} settled copies after {days:.0f} days: did not clear the win bar {win['roi_pp']:+.1f} pp"}
@@ -399,20 +426,81 @@ def apply_verdict(card: dict, v: dict, now: float) -> dict:
     return card
 
 
+def _settled(path_: str, floor: float) -> dict[str, dict]:
+    """Settled rows opened at or after ``floor``, by copy_id."""
+    out: dict[str, dict] = {}
+    for r in _rows(path_):
+        if r.get("closed") and float(r.get("opened_ts") or 0.0) >= floor and float(r.get("spent") or 0.0) > 0:
+            out[str(r.get("copy_id") or id(r))] = r
+    return out
+
+
+def _net_pair(r: dict) -> tuple[float, float]:
+    """``(net pnl at their price, spent)`` for one settled row, with the
+    modeled costs ``strategy_compare`` derives, so the pieces sum to its
+    ideal_roi_net."""
+    from src.copy_trading.strategy_compare import _cost_env, _row_costs
+    cm, gas, fee = _cost_env()
+    _, icost = _row_costs(r, cm, gas, fee)
+    return (float(r.get("ideal_pnl") or 0.0) - icost, float(r.get("spent") or 0.0))
+
+
+def harness_check(control: dict[str, dict], book_b: dict[str, dict]) -> dict:
+    """The control against book B on the copies both took. ``{"n": matched
+    settled, "mismatch": how many differ by more than HARNESS_TOL_PP of ROI,
+    "pp": mean control-minus-B ROI on them, "overlap": matched share of the
+    control's copies}``. Pure."""
+    ids = [k for k in control if k in book_b]
+    diffs = []
+    for k in ids:
+        (pc, sc), (pb, sb) = _net_pair(control[k]), _net_pair(book_b[k])
+        diffs.append((pc / sc - pb / sb) * 100.0)
+    return {"n": len(ids), "mismatch": sum(1 for d in diffs if abs(d) > HARNESS_TOL_PP),
+            "pp": round(sum(diffs) / len(diffs), 2) if diffs else None,
+            "overlap": round(len(ids) / len(control), 2) if control else 0.0}
+
+
+def delta_se(control: dict[str, dict], treatment: dict[str, dict], *, seed: str, n_boot: int = BOOT_N) -> Optional[float]:
+    """Standard error, in pp, of treatment-minus-control net ROI: a paired
+    bootstrap over the union of copies (a copy both books took is drawn
+    once and moves both sides). None under 10 copies a side. Deterministic
+    for a given seed."""
+    if len(control) < 10 or len(treatment) < 10:
+        return None
+    ids = sorted(set(control) | set(treatment))
+    z = (0.0, 0.0)
+    pairs = [(_net_pair(control[k]) if k in control else z, _net_pair(treatment[k]) if k in treatment else z) for k in ids]
+    rng = random.Random(zlib.crc32(seed.encode("utf-8")))
+    deltas = []
+    for _ in range(n_boot):
+        cp = cs = tp = ts = 0.0
+        for _ in range(len(pairs)):
+            (a, b), (c, d) = pairs[rng.randrange(len(pairs))]
+            cp += a; cs += b; tp += c; ts += d
+        if cs > 0 and ts > 0:
+            deltas.append((tp / ts - cp / cs) * 100.0)
+    if len(deltas) < n_boot // 2:
+        return None
+    m = sum(deltas) / len(deltas)
+    return round((sum((x - m) ** 2 for x in deltas) / len(deltas)) ** 0.5, 2)
+
+
 def compare_card(card: dict, now: float, *, b_ledger: Optional[str] = None) -> tuple[dict, dict]:
     """``(cmp, harness)``: the treatment against the control, and the
-    control against the real book B (the harness check), both from the
-    card's start. Reads ledgers only."""
+    control against the real book B on the copies both took (the harness
+    check), both from the card's start. ``harness`` also carries ``se_pp``,
+    the noise on the treatment-minus-control gap. Reads ledgers only."""
     from src.copy_trading.strategy_compare import compare
     exp_id = card["id"]
     floor = float(card.get("started_ts") or now)
     cmp = compare(path(exp_id, CONTROL_LEDGER), path(exp_id, TREATMENT_LEDGER), now=now, era_floor=floor)
+    control = _settled(path(exp_id, CONTROL_LEDGER), floor)
+    treatment = _settled(path(exp_id, TREATMENT_LEDGER), floor)
+    harness: dict = {"pp": None, "n": 0, "mismatch": None, "overlap": None}
     b_path = b_ledger or CONFIG.copy_paper_b_ledger
-    harness: dict = {"pp": None, "n": 0}
-    if b_path and os.path.exists(b_path) and os.path.exists(path(exp_id, CONTROL_LEDGER)):
-        h = compare(b_path, path(exp_id, CONTROL_LEDGER), now=now, era_floor=floor)
-        pp, n, _ = _pp(h)
-        harness = {"pp": pp, "n": n}
+    if b_path and os.path.exists(b_path) and control:
+        harness = harness_check(control, _settled(b_path, floor))
+    harness["se_pp"] = delta_se(control, treatment, seed=exp_id)
     return (cmp, harness)
 
 
@@ -423,12 +511,62 @@ def check(card: dict, now: float, *, b_ledger: Optional[str] = None) -> dict:
     if journaled_on(card["id"], day):
         return journal_rows(card["id"])[-1]
     cmp, harness = compare_card(card, now, b_ledger=b_ledger)
-    v = verdict(card, cmp, now, harness_pp=harness["pp"], harness_n=harness["n"])
+    v = verdict(card, cmp, now, harness_pp=harness["pp"], harness_n=harness["n"],
+                harness_mismatch=harness["mismatch"], se_pp=harness["se_pp"])
     row = journal(card["id"], {"status": v["status"], "why": v["why"], "delta_pp": v["delta_pp"], "n": v["n"],
                                "n_control": v["n_control"], "days": v["days"], "harness_pp": harness["pp"],
+                               "harness_n": harness["n"], "harness_mismatch": harness["mismatch"],
+                               "overlap": harness["overlap"], "se_pp": harness["se_pp"],
                                "treatment": _slim(cmp.get("b") or {}), "control": _slim(cmp.get("a") or {})}, now)
     apply_verdict(card, v, now)
     return row
+
+
+# --------------------------------------------------------------------------- #
+# Requeue: a run the harness or the process spoiled starts again by itself
+# --------------------------------------------------------------------------- #
+
+def retryable(card: dict) -> bool:
+    """A void the code blames on the harness, a stall or the process. A
+    verdict without the flag (written before 2026-09-25) is retryable when
+    the retired whole-book harness rule voided it."""
+    if card.get("status") != "void":
+        return False
+    v = _read_json(path(card["id"], VERDICT_FILE))
+    if "retry" in v:
+        return bool(v["retry"])
+    return str(v.get("why") or "").startswith(LEGACY_RETRY_WHY)
+
+
+def requeue_next(now: float) -> Optional[dict]:
+    """When nothing is live or queued: the most recent retryable void, as a
+    fresh card ``<base>-r<k>`` with the same change and bars, once per void
+    and at most MAX_RETRIES times per idea. Returns the new card or None."""
+    cs = cards()
+    if any(c.get("status") in ("live", "queued") for c in cs):
+        return None
+    retried = {c.get("retry_of") for c in cs if c.get("retry_of")}
+    cand = [c for c in cs if retryable(c) and c["id"] not in retried and int(c.get("attempt") or 0) < MAX_RETRIES]
+    if not cand:
+        return None
+    old = max(cand, key=lambda c: float(c.get("concluded_ts") or 0))
+    attempt = int(old.get("attempt") or 0) + 1
+    base = re.sub(r"-r\d+$", "", old["id"])[:32 - len(f"-r{attempt}")]
+    new_id = f"{base}-r{attempt}"
+    why = str(_read_json(path(old["id"], VERDICT_FILE)).get("why") or "void")
+    spec = {k: old.get(k) for k in ("title", "knobs", "diff", "flag", "win_bar", "kill_bar", "max_days", "study_ref")}
+    spec.update({"id": new_id, "kind": "live", "parent_id": old["id"],
+                 "hypothesis": (f"Rerun {attempt} of {old['id']}, voided by the harness or the process, not the idea. "
+                                + str(old.get("hypothesis") or ""))[:600]})
+    ok, err, c = create(spec, now)
+    if not ok or c is None:
+        backlog_add({"id": old["id"], "event": "requeue refused", "why": err}, now)
+        return None
+    c.update({"retry_of": old["id"], "attempt": attempt, "branch": old.get("branch"),
+              "workdir": old.get("workdir"), "diff_class": old.get("diff_class")})
+    save(c)
+    backlog_add({"id": new_id, "event": "requeued", "retry_of": old["id"], "why": why[:200]}, now)
+    return c
 
 
 def _slim(s: dict) -> dict:
@@ -538,7 +676,7 @@ STUDY_PRESETS: dict[str, dict] = {
                "question": "slice floor 300 -> 150: who stays in form, who enters, who leaves, what the copies earn"},
     "form7": {"label": "form on 7 days", "kind": "form", "params": {"days": 7},
               "question": "the form rail on 7 days instead of 14: who is in, who is out"},
-    "cap3": {"label": "cap 3 a wallet-day", "kind": "wallet_cap", "params": {"to": 3},
+    "cap3": {"label": "cap 3 a wallet-day", "kind": "wallet_cap", "params": {"from": 25, "to": 3},
              "question": "3 copies a wallet a day in book B: which wallets keep their edge"},
 }
 REQUEST_PREFIX = "request-"

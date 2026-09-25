@@ -356,7 +356,11 @@ class BotLogger:
                 on_rollover=lambda d: _purge_old_prefixed_logs(d, "important", 14))
             imp_handler.setLevel(logging.INFO)
             imp_handler.setFormatter(formatter)
-            imp_handler.addFilter(lambda rec: bool(_is_important(rec.getMessage())))
+            # By LEVEL as well as by grammar: the grammar's ERROR pattern reads
+            # the message text, so an error() whose words lack "ERROR"
+            # ("Error fetching CTF events", 400+ a day on 2026-09-25 from the
+            # primary chain reader) never reached the watcher.
+            imp_handler.addFilter(lambda rec: rec.levelno >= logging.ERROR or bool(_is_important(rec.getMessage())))
             imp_handler.addFilter(SecretScrubFilter())
             self._logger.addHandler(imp_handler)
             # Third-party ERRORs too (manager ruling s-qbzbrw, DONE gate): the

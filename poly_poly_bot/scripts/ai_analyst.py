@@ -262,6 +262,8 @@ Every proposal must be one of:
    "diff": "<optional unified diff>", "flag": "<required with a diff>",
    "win_bar": {"roi_pp": <at least 2.0: treatment minus control, net ROI at their price, percentage points>, "min_n": <at least {min_n} settled treatment copies>},
    "kill_bar": {"roi_pp": <0 or below>, "min_n": <at least 10>}, "max_days": <3..30>,
+   (a bar counts only when the gap also clears 2 standard errors from a paired bootstrap;
+    one settled copy swings about 90 pp, so a +2 pp edge needs hundreds of copies: size min_n and max_days for it)
    "parent_id": "<optional: the experiment this follows>", "study_ref": "<optional: the study that argued for it>"}
 - "note": {"kind": "note", "why": "<one line worth the owner's minute>"}
 
@@ -320,7 +322,8 @@ object, nothing else:
 
 A card is worth writing only when the table argues for a change the paper books
 can test; its bars are numbers (win_bar.roi_pp at least 2.0, win_bar.min_n at
-least {min_n}, kill_bar.roi_pp at or below 0, max_days 3..30). Knobs you may
+least {min_n}, kill_bar.roi_pp at or below 0, max_days 3..30; a bar also has to
+clear 2 standard errors of noise, so hundreds of copies, not tens). Knobs you may
 change: {knobs}. No em-dashes or en-dashes. Never propose raising exposure.
 
 # The study
@@ -928,6 +931,19 @@ def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_
             ex[c["id"]] = rec
             did = f"stopped {c['id']}"
     live = exp_cards.live_card()
+    if live is None and exp_cards.next_queued() is None:
+        # A run the harness or the process spoiled starts again by itself
+        # (at most MAX_RETRIES times): the owner never restarts one by hand.
+        r = exp_cards.requeue_next(now)
+        if r is not None:
+            did = f"requeued {r['retry_of']} as {r['id']}"
+            if send:
+                send(f"\U0001f9ea <b>AI analyst</b> experiment <code>{r['retry_of']}</code> runs again as "
+                     f"<code>{r['id']}</code>: the void was the harness or the process, not the idea "
+                     f"(rerun {r['attempt']} of {exp_cards.MAX_RETRIES})")
+            if sre is not None:
+                sre.thought({"kind": "analyst", "proposal": "experiment", "woke_because": "supervise",
+                             "concluded": did, "did": did, "cost_usd": 0.0}, now)
     if live is None:
         q = exp_cards.next_queued()
         if q is not None:
@@ -953,7 +969,7 @@ def supervise(now: Optional[float] = None, *, spawn=_spawn, alive=_alive, stop=_
             n_today = int((rec.get("spawns") or {}).get(day, 0)) + (1 if crashed else 0)
             if n_today > MAX_SPAWNS_PER_DAY:
                 c = exp_cards.load(live["id"]) or live
-                exp_cards.apply_verdict(c, {"status": "void", "why": f"its process would not stay up ({n_today} starts today)"}, now)
+                exp_cards.apply_verdict(c, {"status": "void", "retry": True, "why": f"its process would not stay up ({n_today} starts today)"}, now)
                 did = f"{live['id']} void: process would not stay up"
                 if send:
                     send(f"\U0001f9ea <b>AI analyst</b> experiment <code>{live['id']}</code> VOID: its process would not stay up ({n_today} starts today); see {exp_cards.card_dir(live['id'])}/process.log")

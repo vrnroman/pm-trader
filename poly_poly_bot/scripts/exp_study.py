@@ -55,8 +55,9 @@ MENU: dict[str, dict] = {
              "doc": "the form rail's window and floor vs the current FORM_DAYS and slice floor"},
     "first_entry": {"params": {"to": "bool"},
                     "doc": "copy only a wallet's first entry per market (true) or every buy (false)"},
-    "wallet_cap": {"params": {"to": "integer"},
-                   "doc": "copies per wallet per UTC day over book B's own rows: the current cap vs to"},
+    "wallet_cap": {"params": {"from": "integer", "to": "integer"},
+                   "doc": "copies per wallet per UTC day over book B's own rows: from (default the LIVE cap) vs to; "
+                          "both at or under book B's own cap, which is the most its rows can show"},
 }
 
 
@@ -231,10 +232,19 @@ def study_wallet_cap(params: dict, *, b_rows: list[dict], wallets: list[str]) ->
     """Copies per wallet per UTC day over book B's settled rows: the first
     ``to`` opens of a day stay. In = positive at their price on at least
     FALSIFY_MIN_N settled copies (the classifier, printed)."""
-    cap_from = int(getattr(CONFIG, "copy_paper_b_max_per_wallet_day", 25) or 0) or 10 ** 6
+    # The baseline is the cap real money runs at (2026-09-25: asked "3 vs 5",
+    # the study silently ran book B's 25 vs 5 and could not answer). Book B's
+    # own cap is the ceiling: its rows hold nothing past it.
+    cap_b = int(getattr(CONFIG, "copy_paper_b_max_per_wallet_day", 25) or 0) or 10 ** 6
+    cap_live = int(getattr(CONFIG, "live_max_per_wallet_day", 0) or 0) or cap_b
+    cap_from = int(params.get("from", cap_live))
     cap_to = int(params["to"])
     if cap_to == cap_from:
-        raise ValueError(f"wallet_cap {cap_to} varies nothing: book B already caps at {cap_from}")
+        raise ValueError(f"wallet_cap {cap_from} -> {cap_to} varies nothing (live cap {cap_live}, book B {cap_b})")
+    if max(cap_from, cap_to) > cap_b:
+        raise ValueError(f"wallet_cap {cap_from} -> {cap_to}: book B caps at {cap_b}, its rows cannot show more")
+    if min(cap_from, cap_to) < 1:
+        raise ValueError("wallet_cap must be at least 1")
     by: dict[str, list] = {}
     for r in b_rows:
         if not r.get("closed"):
@@ -327,7 +337,7 @@ def run(kind: str, params: dict, *, now: float, question: str = "", fetch=None, 
     if kind not in MENU:
         raise ValueError(f"{kind} is not on the menu")
     for p, typ in MENU[kind]["params"].items():
-        if p not in params and not (kind in ("min_usd",) and p == "from") and not (kind == "form"):
+        if p not in params and not (kind in ("min_usd", "wallet_cap") and p == "from") and not (kind == "form"):
             raise ValueError(f"{kind} needs {p}")
     b_rows = b_rows if b_rows is not None else b_rows_from_disk()
     if zset_wallets is None:

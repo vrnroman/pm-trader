@@ -84,10 +84,17 @@ def test_the_bars_decide_in_the_cards_order(desk):
     # kill is checked before win: a bar that is both is a kill
     both = exp_cards.verdict({**c, "kill_bar": {"roi_pp": 5.0 * -1, "min_n": 10}}, cmp_of(t_roi=-0.06, c_roi=0.0, n=30), NOW)
     assert both["status"] == "kill"
-    # the harness voids first, whatever the treatment says
-    h = v(c, cmp_of(t_roi=0.10, c_roi=0.01, n=40), NOW + 86400, harness_pp=2.0, harness_n=25)
-    assert h["status"] == "void" and "harness" in h["why"]
-    assert v(c, cmp_of(t_roi=0.10, c_roi=0.01, n=40), NOW + 86400, harness_pp=2.0, harness_n=5)["status"] == "win", "too few to judge the harness"
+    # the harness voids first, whatever the treatment says: matched copies that disagree
+    h = v(c, cmp_of(t_roi=0.10, c_roi=0.01, n=40), NOW + 86400, harness_pp=5.0, harness_n=25, harness_mismatch=10)
+    assert h["status"] == "void" and "harness" in h["why"] and h["retry"] is True
+    assert v(c, cmp_of(t_roi=0.10, c_roi=0.01, n=40), NOW + 86400, harness_pp=5.0, harness_n=5, harness_mismatch=5)["status"] == "win", "too few to judge the harness"
+    # a whole-book gap is not a harness fault when the matched copies agree (min150, 2026-09-25)
+    assert v(c, cmp_of(t_roi=0.10, c_roi=0.01, n=40), NOW + 86400, harness_pp=0.0, harness_n=48, harness_mismatch=0)["status"] == "win"
+    # the noise bar: a +4 pp gap with a 5 pp standard error is neither a win nor a kill
+    assert v(c, cmp_of(t_roi=0.05, c_roi=0.01, n=300), NOW + 86400, se_pp=5.0)["status"] == "live"
+    assert v(c, cmp_of(t_roi=-0.04, c_roi=0.0, n=300), NOW + 86400, se_pp=5.0)["status"] == "live"
+    w = v(c, cmp_of(t_roi=0.13, c_roi=0.01, n=300), NOW + 86400, se_pp=5.0)
+    assert w["status"] == "win" and "se 5.0 pp" in w["why"]
     # a stalled book voids after day 2, not on day 1
     assert v(c, cmp_of(t_roi=0.0, c_roi=0.0, n=5, valid=False), NOW + 86400)["status"] == "live"
     assert v(c, cmp_of(t_roi=0.0, c_roi=0.0, n=5, valid=False), NOW + 3 * 86400)["status"] == "void"
@@ -120,7 +127,7 @@ def _ledger(path, rows):
     with open(path, "w", encoding="utf-8") as f:
         for i, (target, roi, opened, closed) in enumerate(rows):
             spent = 20.0
-            f.write(json.dumps({"copy_id": f"{path.name}-{i}", "target": target, "condition_id": f"c{i}", "token_id": f"t{i}",
+            f.write(json.dumps({"copy_id": f"cp-{i}", "target": target, "condition_id": f"c{i}", "token_id": f"t{i}",
                                 "outcome_index": 0, "category": "sports", "their_price": 0.5, "entry_price": 0.5,
                                 "shares": 40.0, "spent": spent, "drag_bps": 100, "opened_ts": opened, "closed": True,
                                 "won": roi > 0, "pnl": roi * spent, "ideal_pnl": roi * spent, "closed_ts": closed}) + "\n")
@@ -216,3 +223,63 @@ def test_the_chain_is_one_computed_phrase(desk):
     assert exp_cards.chain(exp_cards.load("min150-first")) == "min150-first <- min150, study 2026-09-25-min_usd-ab12"
     assert any("(min150-first <- min150, study 2026-09-25-min_usd-ab12)" in l for l in exp_cards.rows(NOW + 2))
     assert exp_cards.backlog_rows()[-1]["study_ref"] == "2026-09-25-min_usd-ab12"
+
+
+def _rows_for(n, *, roi_of, opened0=NOW + 3600, prefix="cp"):
+    return [{"copy_id": f"{prefix}-{i}", "target": "0xw1", "condition_id": f"c{i}", "token_id": f"t{i}", "their_price": 0.5,
+             "entry_price": 0.5, "spent": 20.0, "opened_ts": opened0 + i, "closed": True, "won": roi_of(i) > 0,
+             "pnl": roi_of(i) * 20, "ideal_pnl": roi_of(i) * 20} for i in range(n)]
+
+
+def test_the_harness_reads_matched_copies_not_the_whole_book(desk):
+    """min150 on 2026-09-25: control -16%, book B -6% over the same hours,
+    yet the 48 copies both took agreed to the cent. Different copies is the
+    design (book B carries weeks of caps); different prices is a fault."""
+    ctrl = {r["copy_id"]: r for r in _rows_for(40, roi_of=lambda i: 0.8 if i % 2 else -1.0)}
+    b = {r["copy_id"]: r for r in _rows_for(40, roi_of=lambda i: 0.8 if i % 2 else -1.0)[:20]}
+    b.update({r["copy_id"]: r for r in _rows_for(30, roi_of=lambda i: 0.8, prefix="b-only")})
+    h = exp_cards.harness_check(ctrl, b)
+    assert h == {"n": 20, "mismatch": 0, "pp": 0.0, "overlap": 0.5}
+    broken = {k: {**r, "ideal_pnl": r["ideal_pnl"] - 2.0} for k, r in b.items()}   # B filled 10 pp better
+    assert exp_cards.harness_check(ctrl, broken)["mismatch"] == 20
+
+
+def test_the_noise_on_the_gap_is_paired_and_repeatable(desk):
+    ctrl = {r["copy_id"]: r for r in _rows_for(200, roi_of=lambda i: 0.9 if i % 2 else -1.0)}
+    same = {k: {**r, "ideal_pnl": r["ideal_pnl"] + 0.4} for k, r in ctrl.items()}   # +2 pp on every shared copy
+    apart = {r["copy_id"]: r for r in _rows_for(200, roi_of=lambda i: 0.9 if i % 2 else -1.0, prefix="t")}
+    se_paired = exp_cards.delta_se(ctrl, same, seed="x")
+    se_apart = exp_cards.delta_se(ctrl, apart, seed="x")
+    assert se_paired < 0.5 < 5.0 < se_apart, (se_paired, se_apart)
+    assert exp_cards.delta_se(ctrl, apart, seed="x") == se_apart, "same ledgers, same seed, same answer"
+    assert exp_cards.delta_se(dict(list(ctrl.items())[:5]), same, seed="x") is None
+
+
+def _void(exp_id, why, *, retry=None, now=NOW):
+    exp_cards.create(card(id=exp_id), now); exp_cards.launch(exp_id, now)
+    v = {"status": "void", "why": why}
+    if retry is not None:
+        v["retry"] = retry
+    exp_cards.apply_verdict(exp_cards.load(exp_id), v, now + 3600)
+
+
+def test_a_harness_void_runs_again_by_itself_at_most_twice(desk):
+    # the real min150 verdict: written before the flag existed, by the retired rule
+    _void("min150", "control differs from book B by -7.5 pp on 65 copies (tolerance 1.5): the harness, not the idea, is what moved")
+    r1 = exp_cards.requeue_next(NOW + 7200)
+    assert r1["id"] == "min150-r1" and r1["retry_of"] == "min150" and r1["attempt"] == 1 and r1["status"] == "queued"
+    assert r1["knobs"] == {"min_usd": 150.0} and r1["win_bar"] == exp_cards.load("min150")["win_bar"]
+    assert exp_cards.requeue_next(NOW + 7300) is None, "one queued card: nothing else is requeued"
+    exp_cards.launch("min150-r1", NOW + 7400)
+    exp_cards.apply_verdict(exp_cards.load("min150-r1"), {"status": "void", "retry": True, "why": "its process would not stay up"}, NOW + 9000)
+    assert exp_cards.requeue_next(NOW + 9100)["id"] == "min150-r2"
+    exp_cards.launch("min150-r2", NOW + 9200)
+    exp_cards.apply_verdict(exp_cards.load("min150-r2"), {"status": "void", "retry": True, "why": "again"}, NOW + 9900)
+    assert exp_cards.requeue_next(NOW + 10000) is None, "two reruns, then the owner hears it stays void"
+    assert [r["event"] for r in exp_cards.backlog_rows() if r["event"] == "requeued"] == ["requeued", "requeued"]
+
+
+def test_a_starved_or_refused_void_stays_void(desk):
+    _void("starve", "12 of 30 settled copies after 21 days, already extended: starved", retry=False)
+    _void("landed", "code did not land: conflict")
+    assert exp_cards.requeue_next(NOW + 7200) is None

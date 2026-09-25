@@ -89,7 +89,7 @@ def test_the_wallet_cap_study_reads_book_b_only(desk, monkeypatch):
     for i in range(30):    # one wallet, 30 copies on one day, the later ones lose
         b_rows.append({"target": "0xw1", "closed": True, "opened_ts": NOW + i * 60, "spent": 10.0,
                        "ideal_pnl": 5.0 if i < 5 else -10.0})
-    rec = es.run("wallet_cap", {"to": 3}, now=NOW, b_rows=b_rows, zset_wallets=set())
+    rec = es.run("wallet_cap", {"from": 25, "to": 3}, now=NOW, b_rows=b_rows, zset_wallets=set())
     r = rec["rows"][0]
     assert r["n_from"] == 25 and r["n_to"] == 3 and r["roi_to"] == pytest.approx(0.5) and r["roi_from"] < 0
     assert r["move"] == "out", "3 copies is under the classifier's floor, and the script says so"
@@ -111,5 +111,22 @@ def test_a_study_that_varies_nothing_is_refused(desk, monkeypatch):
         es.run("first_entry", {"to": True}, now=NOW, fetch=lambda w: ([], [], None), resolve=lambda c: None, b_rows=[], zset_wallets=set())
     with pytest.raises(ValueError, match="varies nothing"):
         es.run("min_usd", {"from": 300, "to": 300}, now=NOW, fetch=lambda w: ([], [], None), resolve=lambda c: None, b_rows=[], zset_wallets=set())
+    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 3)
     with pytest.raises(ValueError, match="varies nothing"):
-        es.run("wallet_cap", {"to": 25}, now=NOW, b_rows=[], zset_wallets=set())
+        es.run("wallet_cap", {"to": 3}, now=NOW, b_rows=[], zset_wallets=set())
+
+
+def test_the_wallet_cap_study_starts_from_the_live_cap(desk, monkeypatch):
+    """2026-09-25: the analyst asked "3 vs 5"; the study ran book B's 25 vs 5
+    and could not answer. The baseline is the cap real money runs at, and
+    nothing past book B's own cap can be read from its rows."""
+    monkeypatch.setattr(CONFIG, "copy_paper_b_max_per_wallet_day", 25)
+    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 3)
+    b_rows = [{"target": "0xw1", "closed": True, "opened_ts": NOW + i * 60, "spent": 10.0,
+               "ideal_pnl": 5.0 if i < 3 else -10.0} for i in range(30)]
+    rec = es.run("wallet_cap", {"to": 5}, now=NOW, b_rows=b_rows, zset_wallets=set())
+    assert rec["settings"] == {"from": {"cap": 3}, "to": {"cap": 5}}
+    r = rec["rows"][0]
+    assert r["n_from"] == 3 and r["n_to"] == 5 and r["roi_from"] == pytest.approx(0.5) and r["roi_to"] < 0
+    with pytest.raises(ValueError, match="book B caps at 25"):
+        es.run("wallet_cap", {"to": 30}, now=NOW, b_rows=b_rows, zset_wallets=set())

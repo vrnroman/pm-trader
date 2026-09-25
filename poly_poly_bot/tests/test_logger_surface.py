@@ -139,3 +139,23 @@ def test_a_third_party_error_reaches_the_important_file_once(tmp_path, monkeypat
     logmod.BotLogger()
     twins = [h for h in logging.getLogger().handlers if getattr(h, "_pm_trader_root_important", False)]
     assert len(twins) == 1
+
+
+def test_our_own_error_reaches_the_important_file_whatever_its_words(tmp_path, monkeypatch):
+    """2026-09-25: the primary chain reader logged "Error fetching CTF events"
+    400+ times a day at ERROR, and the SRE never saw one: the grammar's ERROR
+    pattern reads the message text. The level decides too."""
+    import glob
+    monkeypatch.setenv("LOGS_DIR", str(tmp_path))
+    from src import logger as logmod
+    bl = logmod.BotLogger()
+    bl.error("Error fetching CTF events [1-2]: invalid block range params")
+    bl.warning("Timeout fetching activity for 0xabc")
+    for h in bl._logger.handlers:
+        try:
+            h.flush()
+        except Exception:
+            pass
+    text = "".join(open(f, encoding="utf-8").read() for f in glob.glob(str(tmp_path / "important-*.log")))
+    assert text.count("invalid block range params") == 1
+    assert "Timeout fetching activity" not in text, "a warning still goes by the grammar"
