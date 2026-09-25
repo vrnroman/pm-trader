@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T12:55:43.171163+00:00",
+ "generated": "2026-09-25T13:46:58.960877+00:00",
  "money": {
   "cash": 109.250143,
   "open_cost": 6.4,
@@ -8,9 +8,9 @@
   "stated": 80.0,
   "spend": {
    "date": "2026-09-25",
-   "spent_usd": 12.8,
+   "spent_usd": 19.2,
    "cap_usd": 54.0,
-   "remaining_usd": 41.2,
+   "remaining_usd": 34.8,
    "closed_reason": ""
   },
   "armed": true,
@@ -20,7 +20,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790340796.100946,
+  "ts": 1790343846.4286377,
   "day": "2026-09-25"
  },
  "arm": {
@@ -33,7 +33,7 @@
  },
  "spend": {
   "date": "2026-09-25",
-  "spent_usd": 12.8,
+  "spent_usd": 19.2,
   "wallet_copies": {
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1
   },
@@ -145,8 +145,8 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
-  "last_escalation_id": "2026-09-24T00:41:30Z-81ac",
-  "admit_scan_ts": 1790331883.6539786,
+  "last_escalation_id": "2026-09-25T12:43:56Z-d6e4",
+  "admit_scan_ts": 1790342977.001134,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 7,
   "day_pnl": -6.4,
@@ -384,15 +384,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1790255604.3749578,
-   "day": "2026-09-24",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
   {
    "ts": 1790260564.5466104,
    "day": "2026-09-24",
@@ -777,36 +768,45 @@
    "after": "wallets in 32 -> 34 (stay 32, enter 2, leave 0); copies 3840 -> 2956; ROI at their price +9.0% -> +11.8%",
    "detail": "estimate: 40 of 183 wallets studied (most settled first); over book B's own settled rows at their price; in = positive at their price on at least 10 settled cop",
    "push": "BOT"
+  },
+  {
+   "ts": 1790341080.423772,
+   "day": "2026-09-25",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
+  },
+  {
+   "ts": 1790341088.5600715,
+   "day": "2026-09-25",
+   "kind": "escalation_delivered",
+   "before": "routine escalation",
+   "after": "sent",
+   "detail": "Loss streak is 7 losing copies in a row, up from 4 a week ago. The bot's only alert fired once, at 4, on Sep 18 (bankrol",
+   "push": "BOT"
+  },
+  {
+   "ts": 1790342643.4500165,
+   "day": "2026-09-25",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
+  },
+  {
+   "ts": 1790343524.3963003,
+   "day": "2026-09-25",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
   }
  ],
  "important": [
-  "2026-09-24 13:18:29 ERROR Error fetching CTF events [94367176-94367178]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 13:29:42 ERROR Error fetching NEG_RISK_CTF events [94367602-94367607]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 13:34:03 ERROR Error fetching NEG_RISK_CTF events [94367777-94367781]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 13:35:21 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
-  "2026-09-24 13:39:55 ERROR Error fetching CTF events [94368033-94368036]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 13:46:54 ERROR Error fetching NEG_RISK_CTF events [94368292-94368294]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 14:22:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-24 14:22:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-24 14:24:06 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $32.00 / $32.00",
-  "2026-09-24 14:24:07 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $32.00 / $200.00",
-  "2026-09-24 14:26:25 ERROR Error fetching CTF events [94369896-94369896]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 14:26:25 ERROR Error fetching NEG_RISK_CTF events [94369896-94369896]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 14:33:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-24 14:35:26 INFO  Received signal 15, shutting down...",
-  "2026-09-24 14:36:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-24 14:36:18 INFO  Bot started. Monitoring trades...",
-  "2026-09-24 14:38:27 ERROR Error fetching CTF events [94370357-94370357]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 14:39:14 ERROR Error fetching CTF events [94370382-94370388]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 15:01:42 INFO  Received signal 15, shutting down...",
-  "2026-09-24 15:02:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-24 15:02:07 INFO  Bot started. Monitoring trades...",
-  "2026-09-24 15:10:46 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-24 15:10:46 ERROR Network error fetching 0x0587...c40b: ",
-  "2026-09-24 15:10:46 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-24 15:10:46 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-24 15:10:46 ERROR Network error fetching 0x3f3a...e8fd: ",
-  "2026-09-24 15:14:03 ERROR Error fetching NEG_RISK_CTF events [94371769-94371781]: {'code': -32002, 'message': 'request timed out'}",
   "2026-09-24 15:15:30 INFO  Received signal 15, shutting down...",
   "2026-09-24 15:16:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
   "2026-09-24 15:16:13 INFO  Bot started. Monitoring trades...",
@@ -1160,9 +1160,33 @@
   "2026-09-25 12:41:38 ERROR Error fetching CTF events [94423304-94423305]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 12:41:38 ERROR Error fetching NEG_RISK_CTF events [94423304-94423305]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 12:44:24 ERROR Error fetching CTF events [94423414-94423415]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 13:03:57 TRADE [LIVE] BUY $6.40 on 'Houston Astros vs. Athletics: 1st 5 Inni' @ 0.5400, order 0x1bc7a24c2b...",
-  "2026-09-24 13:03:57 TRADE [verify] FILLED: BUY 11.85 shares on 'Houston Astros vs. Athletics: 1st 5 Inni' @ 0.5400",
-  "2026-09-24 13:13:23 INFO  [recovery] No pending orders to recover",
+  "2026-09-25 12:57:29 INFO  Received signal 15, shutting down...",
+  "2026-09-25 12:57:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-25 12:57:54 INFO  Bot started. Monitoring trades...",
+  "2026-09-25 12:58:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-25 12:58:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-25 12:58:09 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 7 losing copies in a row, up from 4 a week ago. The bot's only alert fired once, at 4, on Sep 18 (bankrol",
+  "2026-09-25 13:02:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-25 13:02:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-25 13:03:05 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $19.20 / $54.00",
+  "2026-09-25 13:03:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-25 13:03:07 ERROR [exec] Order placement failed: PolyApiException[status_code=None, error_message=Request exception!]",
+  "2026-09-25 13:03:07 INFO  [daily-cap] $6.40 reservation kept: the post's fate is ambiguous (no order id)",
+  "2026-09-25 13:03:07 ERROR [exec] Order placement returned None for '': exchange error: Request exception!",
+  "2026-09-25 13:07:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-25 13:13:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-25 13:13:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-25 13:19:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
+  "2026-09-25 13:21:41 ERROR Network error fetching 0xf916...e770: Server disconnected without sending a response.",
+  "2026-09-25 13:21:41 ERROR Network error fetching 0x984f...9a43: Server disconnected without sending a response.",
+  "2026-09-25 13:23:28 INFO  Received signal 15, shutting down...",
+  "2026-09-25 13:24:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-25 13:24:06 INFO  Bot started. Monitoring trades...",
+  "2026-09-25 13:27:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-25 13:38:12 INFO  Received signal 15, shutting down...",
+  "2026-09-25 13:38:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-25 13:38:50 INFO  Bot started. Monitoring trades...",
   "2026-09-24 14:24:06 TRADE [LIVE] BUY $6.40 on '' @ 0.7000, order 0x1f54129ff6...",
   "2026-09-24 14:24:07 TRADE [verify] FILLED: BUY 9.14 shares on '' @ 0.7000",
   "2026-09-24 14:36:18 INFO  [recovery] No pending orders to recover",
@@ -1179,7 +1203,10 @@
   "2026-09-25 02:26:10 TRADE [LIVE] BUY $6.40 on '' @ 0.8500, order 0x5540f913e6...",
   "2026-09-25 02:26:14 TRADE [verify] FILLED: BUY 7.53 shares on '' @ 0.8500",
   "2026-09-25 08:27:59 ERROR Error fetching CTF events [94413158-94413159]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 10:16:24 ERROR Error fetching NEG_RISK_CTF events [94417468-94417474]: {'code': -32002, 'message': 'request timed out'}"
+  "2026-09-25 10:16:24 ERROR Error fetching NEG_RISK_CTF events [94417468-94417474]: {'code': -32002, 'message': 'request timed out'}",
+  "2026-09-25 12:57:54 INFO  [recovery] No pending orders to recover",
+  "2026-09-25 13:24:06 INFO  [recovery] No pending orders to recover",
+  "2026-09-25 13:38:50 INFO  [recovery] No pending orders to recover"
  ],
  "watcher": [
   {
@@ -1375,17 +1402,96 @@
    "did": "noted",
    "proof": "",
    "question": ""
+  },
+  {
+   "ts": 1790341080.59767,
+   "day": "2026-09-25",
+   "kind": "analyst",
+   "proposal": "experiment",
+   "woke_because": "supervise",
+   "concluded": "requeued min150 as min150-r1",
+   "did": "requeued min150 as min150-r1",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790341080.59767,
+   "day": "2026-09-25",
+   "kind": "analyst",
+   "proposal": "experiment",
+   "woke_because": "supervise",
+   "concluded": "started min150-r1 (pid 7, first start since this supervisor came up)",
+   "did": "started min150-r1 (pid 7, first start since this supervisor came up)",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790341202.3576975,
+   "day": "2026-09-25",
+   "woke_because": "962fd1d59e01",
+   "fingerprint": "962fd1d59e01",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "The line that woke me is the bot's own routine loss-streak escalation being delivered successfully, an INFO event, not an error. The bot detected the streak grew from 4 to 7 losing copies and its alert path already sent that to the owner (escalation_delivered: sent), so he already knows. A losing streak is strategy performance, a P&L and risk call that belongs to the owner, not a bot malfunction. Nothing in order placement, sizing, arming, budget or fill verification is broken: guard is clean, spend is 12.8 of 54, and the box can still verify its fills (chain primary, 130 matched). The copies ",
+   "confidence": 0.8,
+   "cost_usd": 0.18920750000000003,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790341504.9359877,
+   "day": "2026-09-25",
+   "woke_because": "1d84f68e4a14, 705df184a49d",
+   "fingerprint": "1d84f68e4a14",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "A transient Polymarket API network failure caused this: the client logged 'Server disconnected' twice, so the order POST raised a PolyApiException with status_code=None and the executor got None back. This landed in the middle of a broader API rough patch right now (Server disconnected x24, request error status=N x64, auth x12), so it is exchange side, not a bot bug. The money path handled it conservatively: the daily-cap kept the $6.40 copy:1b reservation because the fate is ambiguous with no order id, so budget was not freed and no second order was placed, and no tier placement was recorded.",
+   "confidence": 0.72,
+   "cost_usd": 0.1955925,
+   "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790342643.9407513,
+   "day": "2026-09-25",
+   "kind": "analyst",
+   "proposal": "experiment",
+   "woke_because": "supervise",
+   "concluded": "started min150-r1 (pid 6, first start since this supervisor came up)",
+   "did": "started min150-r1 (pid 6, first start since this supervisor came up)",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790343245.2721663,
+   "day": "2026-09-25",
+   "kind": "analyst",
+   "proposal": "experiment",
+   "woke_because": "supervise",
+   "concluded": "started min150-r1 (pid 7, first start since this supervisor came up)",
+   "did": "started min150-r1 (pid 7, first start since this supervisor came up)",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790343885.1950855,
+   "day": "2026-09-25",
+   "kind": "analyst",
+   "proposal": "experiment",
+   "woke_because": "supervise",
+   "concluded": "started min150-r1 (pid 67, first start since this supervisor came up)",
+   "did": "started min150-r1 (pid 67, first start since this supervisor came up)",
+   "cost_usd": 0.0
   }
  ],
  "fingerprints": {
   "69fd3dc7d27e": {
    "first": 1790098332.9559617,
-   "last": 1790338890.2227454,
-   "count": 19,
+   "last": 1790341504.9359877,
+   "count": 20,
    "sample": "2026-09-21 00:06:09 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / $32.00",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / $N",
    "recent": [
-    1790338890.2227454
+    1790338890.2227454,
+    1790341504.9359877
    ],
    "action": null,
    "action_ts": null,
@@ -1520,14 +1626,14 @@
   },
   "c47d62e70341": {
    "first": 1790098332.9559617,
-   "last": 1790269134.749423,
-   "count": 18,
+   "last": 1790343524.8922174,
+   "count": 21,
    "sample": "2026-09-22 14:25:08 INFO  Received signal 15, shutting down...",
    "norm": "INFO Received signal N, shutting down...",
    "recent": [
-    1790266294.9340603,
-    1790267813.0622764,
-    1790269134.749423
+    1790341080.5944724,
+    1790342643.9186833,
+    1790343524.8922174
    ],
    "action": null,
    "action_ts": null,
@@ -1536,14 +1642,14 @@
   },
   "6f12d4998994": {
    "first": 1790098332.9559617,
-   "last": 1790269254.973627,
-   "count": 18,
+   "last": 1790343644.8981104,
+   "count": 21,
    "sample": "2026-09-22 14:25:37 INFO  [recovery] No pending orders to recover",
    "norm": "INFO [recovery] No pending orders to recover",
    "recent": [
-    1790266414.9428663,
-    1790267933.0749032,
-    1790269254.973627
+    1790341080.5944724,
+    1790342764.4929385,
+    1790343644.8981104
    ],
    "action": null,
    "action_ts": null,
@@ -1552,14 +1658,14 @@
   },
   "6b829965c182": {
    "first": 1790098332.9559617,
-   "last": 1790269254.973627,
-   "count": 18,
+   "last": 1790343644.8981104,
+   "count": 21,
    "sample": "2026-09-22 14:25:37 INFO  Bot started. Monitoring trades...",
    "norm": "INFO Bot started. Monitoring trades...",
    "recent": [
-    1790266414.9428663,
-    1790267933.0749032,
-    1790269254.973627
+    1790341080.5944724,
+    1790342764.4929385,
+    1790343644.8981104
    ],
    "action": null,
    "action_ts": null,
@@ -1597,14 +1703,15 @@
   },
   "9d8a6d2794ec": {
    "first": 1790101843.0850005,
-   "last": 1790269134.749423,
-   "count": 11,
+   "last": 1790343644.8981104,
+   "count": 15,
    "sample": "2026-09-22 18:30:34 ERROR [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}",
    "recent": [
-    1790266294.9340603,
-    1790267933.0749032,
-    1790269134.749423
+    1790341080.5944724,
+    1790342764.4929385,
+    1790343005.2600672,
+    1790343644.8981104
    ],
    "action": null,
    "action_ts": null,
@@ -1613,13 +1720,22 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790338410.2089672,
-   "count": 60,
+   "last": 1790342885.254197,
+   "count": 71,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790338050.1620023,
-    1790338410.2089672
+    1790341202.3576975,
+    1790341202.3576975,
+    1790341384.8827214,
+    1790341384.8827214,
+    1790341704.693564,
+    1790342064.7168572,
+    1790342064.7168572,
+    1790342064.7168572,
+    1790342424.7478147,
+    1790342424.7478147,
+    1790342885.254197
    ],
    "action": null,
    "action_ts": null,
@@ -1670,13 +1786,15 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1790338890.2227454,
-   "count": 22,
+   "last": 1790341504.9359877,
+   "count": 24,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
     1790338890.2227454,
-    1790338890.2227454
+    1790338890.2227454,
+    1790341504.9359877,
+    1790341504.9359877
    ],
    "action": null,
    "action_ts": null,
@@ -1836,12 +1954,74 @@
   },
   "5f7bb5f89b09": {
    "first": 1790338890.2227454,
-   "last": 1790338890.2227454,
-   "count": 1,
+   "last": 1790341504.9359877,
+   "count": 2,
    "sample": "2026-09-25 12:19:41 INFO  [daily-cap] $6.40 reservation kept: the post's fate is ambiguous (no order id)",
    "norm": "INFO [daily-cap] $N reservation kept: the post's fate is ambiguous (no order id)",
    "recent": [
-    1790338890.2227454
+    1790338890.2227454,
+    1790341504.9359877
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "962fd1d59e01": {
+   "first": 1790341202.3576975,
+   "last": 1790341202.3576975,
+   "count": 1,
+   "sample": "2026-09-25 12:58:09 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 7 losing copies in a row, up from 4 a week ago. The bot's only alert fired once, at 4, on Sep 18 (bankrol",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Loss streak is N losing copies in a row, up from N a week ago. The bot's only alert fired once, at N, on Sep N (bankrol",
+   "recent": [
+    1790341202.3576975
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "1d84f68e4a14": {
+   "first": 1790341504.9359877,
+   "last": 1790341504.9359877,
+   "count": 1,
+   "sample": "2026-09-25 13:03:07 ERROR [exec] Order placement failed: PolyApiException[status_code=None, error_message=Request exception!]",
+   "norm": "ERROR [exec] Order placement failed: PolyApiException[status_code=None, error_message=Request exception!]",
+   "recent": [
+    1790341504.9359877
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "705df184a49d": {
+   "first": 1790341504.9359877,
+   "last": 1790341504.9359877,
+   "count": 1,
+   "sample": "2026-09-25 13:03:07 ERROR [exec] Order placement returned None for '': exchange error: Request exception!",
+   "norm": "ERROR [exec] Order placement returned None for 'S': exchange error: Request exception!",
+   "recent": [
+    1790341504.9359877
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "6eca45f47973": {
+   "first": 1790342544.7724473,
+   "last": 1790342643.9186833,
+   "count": 6,
+   "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
+   "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
+   "recent": [
+    1790342544.7724473,
+    1790342544.7724473,
+    1790342544.7724473,
+    1790342643.9186833,
+    1790342643.9186833,
+    1790342643.9186833
    ],
    "action": null,
    "action_ts": null,
