@@ -1,7 +1,7 @@
-# ops digest 2026-09-25T07:24:43.149997+00:00 (last 24h)
+# ops digest 2026-09-25T07:46:41.484407+00:00 (last 24h)
 
 ## money state
-{"cash": 109.250143, "open_cost": 6.4, "equity": 115.65, "floor": 30.0, "stated": 80.0, "spend": {"date": "2026-09-25", "spent_usd": 6.4, "cap_usd": 54.0, "remaining_usd": 47.6, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 12.8, "1c": 0}, "ts": 1790321081.638075, "day": "2026-09-25"}
+{"cash": 109.250143, "open_cost": 6.4, "equity": 115.65, "floor": 30.0, "stated": 80.0, "spend": {"date": "2026-09-25", "spent_usd": 6.4, "cap_usd": 54.0, "remaining_usd": 47.6, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 68, "tier": {"1a": 0, "1b": 12.8, "1c": 0}, "ts": 1790322287.5735145, "day": "2026-09-25"}
 
 ## arm: {"armed": true, "ts": 1789919410.9079125, "by": "telegram", "reason": "", "first_armed_ts": 1788617432.0499406, "floor_override": false}
 ## spend today: {"date": "2026-09-25", "spent_usd": 6.4, "wallet_copies": {"0x722abb5460060870d46728bf45f66a6b1635d6ed": 1}, "wallet_copies_yesterday": {"0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1, "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1, "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 3, "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1}, "yesterday": "2026-09-24", "closed_reason": ""}
@@ -18,7 +18,7 @@ in form  0xd25156e2: 60 settled, 65% won vs 50% needed, net +34.2% on $32,970, w
 benched  0xf49614e6: 72 settled, 51% won vs 50% needed, net +11.4% on $248,179, worst day -11,771, 4 of 10 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
 in form  0xf9168343: 55 settled, 55% won vs 47% needed, net +4.0% on $150,786, worst day -6,320, 2 of 34 exits under 10 min
 benched  0xfd3e6449: 67 settled, 67% won vs 72% needed, net +2.4% on $48,073, worst day -2,632, 18 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
-two clocks: 821 matched fills over 1.0 d, api lag p50 17.6s, chain lag p50 2.4s, chain earlier by 14.6s at the median; api-only 110, chain-only 645, replayed rows 0; CHAIN IS PRIMARY
+two clocks: 745 matched fills over 1.0 d, api lag p50 17.6s, chain lag p50 2.5s, chain earlier by 14.3s at the median; api-only 109, chain-only 645, replayed rows 0; CHAIN IS PRIMARY
 ⏱ api lag cost, last 7d (estimate): +7.25 USD over 2661 fills at $6.40 each, +0.000 USD a fill at the median, chain earlier by 13.4s
 
 ## watcher (20 wakes in 24h)
@@ -49,9 +49,9 @@ OPS_REARM_CLEAR_S: 900.0 (owner) band 600.0..1800.0
 OPS_REARM_MAX_PER_DAY: 3 (owner) band 1..3
 FORM_DAYS: 14.0 (owner) band 7.0..21.0
 ## book B at each slice floor (raw numbers; the gate reads the one marked)
-b300 (floor $300): 7317 settled, 251 open, realized +1.9%, at their price +2.9% (net -7.9%), win rate 57%, feeds the Z gate
-b150 (floor $150): 129 settled, 60 open, realized -2.8%, at their price -1.8% (net -12.4%), win rate 52%
-b100 (floor $100): 164 settled, 76 open, realized +2.3%, at their price +3.2% (net -6.9%), win rate 51%
+b300 (floor $300): 7319 settled, 250 open, realized +1.9%, at their price +2.9% (net -7.9%), win rate 57%, feeds the Z gate
+b150 (floor $150): 131 settled, 63 open, realized -2.4%, at their price -1.4% (net -12.1%), win rate 53%
+b100 (floor $100): 166 settled, 79 open, realized +2.5%, at their price +3.5% (net -6.7%), win rate 51%
 ## near the Z door (29 wallets within 2 fails; 8 pass and wait)
 0x00110b8e: 1 fail(s): not a scalper at our latency (scalper: 47% of exits within 10 min; uncopyable at our latency)
 0x10658d37: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (23 clean (of 23 all-time))
@@ -77,36 +77,36 @@ study 2026-09-25-wallet_cap-178163d7: wallets in 32 -> 34 (stay 32, enter 2, lea
 2026-09-24 after study 2026-09-24-first_entry-152981e2: With first_entry_only=false as the baseline (copying every buy), how many copies collapse to one per market when we switch it on, and does the +3.5% ROI hold? (missing: This run set both the from and to arms to first_entry_only=true, so there is no every-buy baseline in the frozen table to difference against.)
 2026-09-25 after study 2026-09-25-wallet_cap-178163d7: What do the copies in wallet-day slots 4 and 5 actually earn, the ones the live cap of 3 turns away but a cap of 5 would admit? (missing: This run baselined at cap 25 rather than the live 3, so its rows cannot isolate the marginal ROI of the slot 4 and 5 copies; that needs a study framed from {cap:3} to {cap:5}.)
 ## fingerprints (30 shown)
-c6d91d798e54 x16 last 0.2h ago [open: 16 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
-6c813168939b x16 last 2.3h ago [open: 16 hits, no action yet] :: ERROR [py_clob_client_v2] request error: Server disconnected
-2497cd50ff7d x3 last 3.8h ago [open: 3 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
-54ac26fb3ff1 x49 last 4.7h ago [open: 49 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
-69fd3dc7d27e x18 last 5.0h ago [open: 18 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / $N
-eb7da12386c6 x18 last 5.0h ago [open: 18 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
-a77088f7944a x18 last 5.0h ago [open: 18 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
-d7140f640d29 x17 last 5.0h ago [open: 17 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
-6f12d4998994 x18 last 14.4h ago [open: 18 hits, no action yet] :: INFO [recovery] No pending orders to recover
-6b829965c182 x18 last 14.4h ago [open: 18 hits, no action yet] :: INFO Bot started. Monitoring trades...
-c47d62e70341 x18 last 14.4h ago [open: 18 hits, no action yet] :: INFO Received signal N, shutting down...
-9d8a6d2794ec x11 last 14.4h ago [open: 11 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
-c3db66a087f7 x3 last 15.2h ago [open: 3 hits, no action yet] :: WARNING [zset] ADMITTED <hex> to set Z (N over N copies with its best N deleted). Real money may now follow it once arme
-790247505aab x3 last 15.2h ago [open: 3 hits, no action yet] :: INFO [ops] auto_admit: 'S' -> 'S' | N settled paper copies, paper ROI N, trimmed N, ideal N
-9d498e122ffb x4 last 15.2h ago [open: 4 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
-b04bf1a60c1d x9 last 15.2h ago [open: 9 hits, no action yet] :: WARNING [zset] EVICTED <hex> from set Z: probation failed: N of N won, realized N on $N (pass needs N won and N)
-89a855d4a192 x9 last 15.2h ago [open: 9 hits, no action yet] :: INFO [ops] evict: 'S' -> 'S' | probation failed: N of N won, realized N on $N (pass needs N won and N)
-cf4709ce7c00 x1 last 15.2h ago [open: 1 hits, no action yet] :: INFO [ops] probation_failed: 'S' -> 'S' | lost N on 'S'LoL: Team WE vs JD Gami | Evict is reversible: /zset readmit
-852039760707 x7 last 15.2h ago [open: 7 hits, no action yet] :: INFO [ops] probation_failed: 'S' -> 'S' | | Evict is reversible: /zset readmit
-9713155b03b8 x1 last 15.2h ago [open: 1 hits, no action yet] :: INFO [ops] probation_failed: 'S' -> 'S' | lost N on 'S'Dota N: Pipsqueak+N vs | Evict is reversible: /zset readmit
-ab787115fd71 x1 last 15.4h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min (c
-680493f22dc3 x1 last 15.4h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N,N, worst day N, N of N exits under N min 
-fe47bbb56041 x7 last 20.4h ago [open: 7 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N
-34253fa6334e x4 last 23.4h ago [open: 4 hits, no action yet] :: INFO [AB-RACE] rehearsal line sent, real-money line sent
-d96f6949e1c9 x3 last 26.5h ago [open: 3 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N,N, worst day N (capped: window read in fu
-7984db4fdbb9 x1 last 30.6h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Second order rejection today from the unclaimed winnings problem you were 
-534614711c15 x2 last 32.1h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}
-eb6ff024b864 x1 last 40.5h ago [open: 1 hits, no action yet] :: INFO [verify] UNFILLED, cancelled order <hex>...
-c01c65915062 x1 last 42.9h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N (capped: N of N days read, N
-9252b71ae332 x2 last 61.9h ago [open: 2 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N (capped: window read in full
+54ac26fb3ff1 x50 last 0.0h ago [open: 50 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
+c6d91d798e54 x16 last 0.5h ago [open: 16 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
+6c813168939b x16 last 2.7h ago [open: 16 hits, no action yet] :: ERROR [py_clob_client_v2] request error: Server disconnected
+2497cd50ff7d x3 last 4.1h ago [open: 3 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
+69fd3dc7d27e x18 last 5.3h ago [open: 18 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / $N
+eb7da12386c6 x18 last 5.3h ago [open: 18 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
+a77088f7944a x18 last 5.3h ago [open: 18 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
+d7140f640d29 x17 last 5.3h ago [open: 17 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
+6f12d4998994 x18 last 14.8h ago [open: 18 hits, no action yet] :: INFO [recovery] No pending orders to recover
+6b829965c182 x18 last 14.8h ago [open: 18 hits, no action yet] :: INFO Bot started. Monitoring trades...
+c47d62e70341 x18 last 14.8h ago [open: 18 hits, no action yet] :: INFO Received signal N, shutting down...
+9d8a6d2794ec x11 last 14.8h ago [open: 11 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
+c3db66a087f7 x3 last 15.6h ago [open: 3 hits, no action yet] :: WARNING [zset] ADMITTED <hex> to set Z (N over N copies with its best N deleted). Real money may now follow it once arme
+790247505aab x3 last 15.6h ago [open: 3 hits, no action yet] :: INFO [ops] auto_admit: 'S' -> 'S' | N settled paper copies, paper ROI N, trimmed N, ideal N
+9d498e122ffb x4 last 15.6h ago [open: 4 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
+b04bf1a60c1d x9 last 15.6h ago [open: 9 hits, no action yet] :: WARNING [zset] EVICTED <hex> from set Z: probation failed: N of N won, realized N on $N (pass needs N won and N)
+89a855d4a192 x9 last 15.6h ago [open: 9 hits, no action yet] :: INFO [ops] evict: 'S' -> 'S' | probation failed: N of N won, realized N on $N (pass needs N won and N)
+cf4709ce7c00 x1 last 15.6h ago [open: 1 hits, no action yet] :: INFO [ops] probation_failed: 'S' -> 'S' | lost N on 'S'LoL: Team WE vs JD Gami | Evict is reversible: /zset readmit
+852039760707 x7 last 15.6h ago [open: 7 hits, no action yet] :: INFO [ops] probation_failed: 'S' -> 'S' | | Evict is reversible: /zset readmit
+9713155b03b8 x1 last 15.6h ago [open: 1 hits, no action yet] :: INFO [ops] probation_failed: 'S' -> 'S' | lost N on 'S'Dota N: Pipsqueak+N vs | Evict is reversible: /zset readmit
+ab787115fd71 x1 last 15.8h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min (c
+680493f22dc3 x1 last 15.8h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N,N, worst day N, N of N exits under N min 
+fe47bbb56041 x7 last 20.8h ago [open: 7 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N
+34253fa6334e x4 last 23.7h ago [open: 4 hits, no action yet] :: INFO [AB-RACE] rehearsal line sent, real-money line sent
+d96f6949e1c9 x3 last 26.8h ago [open: 3 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N,N, worst day N (capped: window read in fu
+7984db4fdbb9 x1 last 31.0h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Second order rejection today from the unclaimed winnings problem you were 
+534614711c15 x2 last 32.5h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}
+eb6ff024b864 x1 last 40.9h ago [open: 1 hits, no action yet] :: INFO [verify] UNFILLED, cancelled order <hex>...
+c01c65915062 x1 last 43.3h ago [open: 1 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N (capped: N of N days read, N
+9252b71ae332 x2 last 62.2h ago [open: 2 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N (capped: window read in full
 
 ## ledger (39 rows)
 {"ts": 1790247359.7616093, "day": "2026-09-24", "kind": "form", "before": "0x5213eb85 benched", "after": "in form", "detail": "0x5213eb85: 80 settled, 46% won vs 37% needed, net +2.3% on $39,160, worst day -2,314", "push": "WALLET", "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"}
@@ -149,7 +149,7 @@ c01c65915062 x1 last 42.9h ago [open: 1 hits, no action yet] :: INFO [ops] form:
 {"ts": 1790307460.8944914, "day": "2026-09-25", "kind": "settled", "before": "open $6.40", "after": "paid $0.00", "detail": "lost -6.40 on 'Falcons vs. Packers' (0x9f15613e, tier 1b)", "push": null, "token_id": "114415763702250973760299499587430450894909671709658162852834453684441658587440", "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3", "pnl": -6.4, "won": false, "cost": 6.4}
 {"ts": 1790316060.064088, "day": "2026-09-25", "kind": "analyst_study", "before": "2026-09-25-wallet_cap-178163d7", "after": "wallets in 32 -> 34 (stay 32, enter 2, leave 0); copies 3840 -> 2956; ROI at their price +9.0% -> +11.8%", "detail": "estimate: 40 of 183 wallets studied (most settled first); over book B's own settled rows at their price; in = positive at their price on at least 10 settled cop", "push": "BOT"}
 
-## important lines (395)
+## important lines (399)
 2026-09-24 08:00:10 INFO  [AB-RACE] rehearsal line sent, real-money line sent
 2026-09-24 08:01:42 ERROR Error fetching CTF events [94354510-94354511]: {'code': -32000, 'message': 'invalid block range params'}
 2026-09-24 08:01:42 ERROR Error fetching NEG_RISK_CTF events [94354510-94354511]: {'code': -32000, 'message': 'invalid block range params'}
@@ -522,6 +522,10 @@ c01c65915062 x1 last 42.9h ago [open: 1 hits, no action yet] :: INFO [ops] form:
 2026-09-25 07:01:40 ERROR Error fetching NEG_RISK_CTF events [94409705-94409706]: {'code': -32000, 'message': 'invalid block range params'}
 2026-09-25 07:13:40 ERROR Error fetching CTF events [94410185-94410186]: {'code': -32000, 'message': 'invalid block range params'}
 2026-09-25 07:14:35 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80
+2026-09-25 07:26:39 ERROR Error fetching CTF events [94410705-94410706]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-25 07:26:39 ERROR Error fetching NEG_RISK_CTF events [94410705-94410706]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-25 07:34:29 ERROR Error fetching NEG_RISK_CTF events [94411018-94411019]: {'code': -32000, 'message': 'invalid block range params'}
+2026-09-25 07:44:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-09-24 08:07:57 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Dallas b' @ 0.8200, order 0x3326b28d62...
 2026-09-24 08:07:58 TRADE [verify] FILLED: BUY 7.80 shares on 'Will the highest temperature in Dallas b' @ 0.8200
 2026-09-24 11:32:03 TRADE [LIVE] BUY $6.40 on 'Game Spread: Elise Mertens (-3.5) vs Maj' @ 0.4900, order 0x066ddaa713...

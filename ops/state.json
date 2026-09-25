@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T07:24:57.377333+00:00",
+ "generated": "2026-09-25T07:46:55.128339+00:00",
  "money": {
   "cash": 109.250143,
   "open_cost": 6.4,
@@ -20,7 +20,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790321081.638075,
+  "ts": 1790322287.5735145,
   "day": "2026-09-25"
  },
  "arm": {
@@ -1171,6 +1171,10 @@
   "2026-09-25 07:01:40 ERROR Error fetching NEG_RISK_CTF events [94409705-94409706]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 07:13:40 ERROR Error fetching CTF events [94410185-94410186]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 07:14:35 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80",
+  "2026-09-25 07:26:39 ERROR Error fetching CTF events [94410705-94410706]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 07:26:39 ERROR Error fetching NEG_RISK_CTF events [94410705-94410706]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 07:34:29 ERROR Error fetching NEG_RISK_CTF events [94411018-94411019]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 07:44:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-24 08:07:57 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Dallas b' @ 0.8200, order 0x3326b28d62...",
   "2026-09-24 08:07:58 TRADE [verify] FILLED: BUY 7.80 shares on 'Will the highest temperature in Dallas b' @ 0.8200",
   "2026-09-24 11:32:03 TRADE [LIVE] BUY $6.40 on 'Game Spread: Elise Mertens (-3.5) vs Maj' @ 0.4900, order 0x066ddaa713...",
@@ -1644,12 +1648,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790304059.535551,
-   "count": 49,
+   "last": 1790322328.4501042,
+   "count": 50,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790304059.535551
+    1790322328.4501042
    ],
    "action": null,
    "action_ts": null,
