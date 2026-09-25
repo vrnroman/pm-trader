@@ -50,6 +50,11 @@ CONTROL_LEDGER = "control.jsonl"
 TREATMENT_LEDGER = "treatment.jsonl"
 HEARTBEAT_FILE = "heartbeat.json"
 VERDICT_FILE = "verdict.json"
+POSTMORTEM_FILE = "postmortem.json"
+# Causes a post-mortem may name. The first is the idea failing on its merits;
+# the rest are the machinery, which a rerun (after a fix) can answer.
+POSTMORTEM_CAUSES = ("idea", "harness", "process", "rule", "data")
+MACHINERY_CAUSES = ("harness", "process", "rule", "data")
 
 # The floor under the win bar: the treatment must beat the control by this
 # many percentage points of net ROI at their price. The analyst may set a
@@ -526,13 +531,34 @@ def check(card: dict, now: float, *, b_ledger: Optional[str] = None) -> dict:
 # Requeue: a run the harness or the process spoiled starts again by itself
 # --------------------------------------------------------------------------- #
 
+def postmortem(exp_id: str) -> dict:
+    return _read_json(path(exp_id, POSTMORTEM_FILE))
+
+
+def write_postmortem(exp_id: str, row: dict, now: float) -> bool:
+    return _write_json(path(exp_id, POSTMORTEM_FILE), {**row, "ts": now})
+
+
+def pending_postmortems() -> list[dict]:
+    """Voided cards nobody has explained yet, oldest first."""
+    out = [c for c in cards() if c.get("status") == "void" and not postmortem(c["id"])]
+    return sorted(out, key=lambda c: float(c.get("concluded_ts") or 0))
+
+
 def retryable(card: dict) -> bool:
-    """A void the code blames on the harness, a stall or the process. A
-    verdict without the flag (written before 2026-09-25) is retryable when
-    the retired whole-book harness rule voided it."""
+    """A void the code blames on the harness, a stall or the process, or
+    one the analyst's post-mortem blamed on the machinery. A verdict without
+    the flag (written before 2026-09-25) is retryable when the retired
+    whole-book harness rule voided it."""
     if card.get("status") != "void":
         return False
     v = _read_json(path(card["id"], VERDICT_FILE))
+    if v.get("retry") is True:
+        return True
+    # The analyst's post-mortem blamed the machinery (a rule, the harness,
+    # the process, the data), not the idea: the idea gets another run.
+    if postmortem(card["id"]).get("cause") in MACHINERY_CAUSES:
+        return True
     if "retry" in v:
         return bool(v["retry"])
     return str(v.get("why") or "").startswith(LEGACY_RETRY_WHY)

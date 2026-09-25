@@ -267,6 +267,14 @@ Every proposal must be one of:
    "parent_id": "<optional: the experiment this follows>", "study_ref": "<optional: the study that argued for it>"}
 - "note": {"kind": "note", "why": "<one line worth the owner's minute>"}
 
+Your own machinery can be wrong: the harness check, the verdict bars, a study
+the menu computed. When a number it printed cannot be right, or answers a
+different question than the one asked, do not stop at a note: hand in a "pr"
+that fixes the machinery (poly_poly_bot/src/copy_trading/exp_cards.py,
+poly_poly_bot/scripts/exp_study.py) with a NEW test file that pins the fault.
+On 2026-09-25 a note said "make the control deterministic" while the fault was
+a 1.5 pp tolerance on a gap whose chance band was +-31 pp; the owner fixed it by hand.
+
 Rules: only what the evidence supports; the first sentence of each "why" is
 the number; no em-dashes or en-dashes; never propose raising exposure (budget,
 floor, set Z, stakes or caps above the owner's value): that is his alone. At
@@ -317,6 +325,9 @@ object, nothing else:
 
 {"conclusion": "<two sentences at most: the number first, then what it means for the bot>",
  "card": <null, or an experiment card exactly as in the daily rules, with "study_ref": "{study_id}">,
+ "pr": <null, or when the table answers a different question than yours because of how the menu
+        computed it (a baseline, a range, a filter): {"title", "diff", "why", "counterfactual"}, a unified
+        diff fixing poly_poly_bot/scripts/exp_study.py plus a NEW test file, to a branch for the owner>,
  "wanted": "<optional: one follow-up question this menu cannot compute>",
  "why_not": "<with wanted: what is missing to compute it>"}
 
@@ -471,7 +482,8 @@ def parse_conclusion(envelope: Optional[dict]) -> Optional[dict]:
     if v is None or "conclusion" not in v:
         return None
     card = v.get("card") if isinstance(v.get("card"), dict) else None
-    return {"conclusion": _sanitize(str(v.get("conclusion") or ""))[:400], "card": card,
+    pr = v.get("pr") if isinstance(v.get("pr"), dict) and v["pr"].get("diff") else None
+    return {"conclusion": _sanitize(str(v.get("conclusion") or ""))[:400], "card": card, "pr": pr,
             "wanted": _sanitize(str(v.get("wanted") or ""))[:300], "why_not": _sanitize(str(v.get("why_not") or ""))[:300],
             "cost_usd": float(envelope.get("total_cost_usd") or 0.0)}
 
@@ -607,9 +619,139 @@ def conclude_study(study_id: str, now: float, *, runner, send, apply, push, sre,
         card = {**v["card"], "study_ref": study_id}
         r = start_experiment(card, now, send=send, apply=apply, push=push, sre=sre, clone=clone)
         did = r["did"]
+    if v.get("pr"):
+        # The table answered a different question: the menu itself is fixed,
+        # on a branch the owner merges.
+        pr_rows = act({"proposals": [{**v["pr"], "kind": "pr"}]}, now, send=send, apply=apply, push=push, sre=sre)
+        did += "; " + (pr_rows[0].get("did", "") if pr_rows else "pr not handled")
     send(f"\U0001f52c <b>AI analyst</b> on study <code>{study_id}</code>: {html.escape(v['conclusion'])}")
     return (sre.thought({"kind": "analyst", "proposal": "study", "woke_because": f"study {study_id}",
                          "concluded": v["conclusion"], "did": did, "cost_usd": v["cost_usd"]}, now), v["cost_usd"])
+
+
+POSTMORTEM_PROMPT = """You are the AI analyst of poly_poly_bot. A paper experiment you ran was VOIDED
+by code. Before anything else happens, find out WHY, from the evidence below, and
+answer with ONE JSON object, nothing else:
+
+{"cause": "<one of: idea, harness, process, rule, data>",
+ "evidence": "<two sentences at most, the number first: what in the evidence shows the cause>",
+ "pr": <null, or when the cause is the machinery and you can fix it: {"title", "diff", "why",
+        "counterfactual"}: a unified diff against poly_poly_bot/src/copy_trading/exp_cards.py,
+        poly_poly_bot/scripts/exp_book.py or poly_poly_bot/scripts/exp_study.py plus a NEW test
+        file under poly_poly_bot/tests/ that fails before and passes after>}
+
+Causes: "idea" = the change itself is why (it never gets a rerun); "harness" = the
+control and book B disagree on copies both took; "process" = the child died, hung or
+read stale data; "rule" = a verdict rule is wrong for this data (a tolerance inside
+the noise, a bar no realistic sample can reach, a clock too short); "data" = an input
+was missing or corrupt. A machinery cause makes the card eligible for a rerun (at
+most {max_retries}); the owner merges any pr from his phone, never main directly.
+Be skeptical of the rules: they were written by a model too. Compare each number
+the rule used with the noise printed below. No em-dashes or en-dashes.
+
+# The card
+{card}
+
+# The verdict
+{verdict}
+
+# The journal (one row per daily check)
+{journal}
+
+# Harness and noise, recomputed now
+{harness}
+
+# The experiment process log, last lines
+{process_log}
+
+# The rules that judged it (source)
+{rules}
+"""
+
+
+def _tail(p: str, n: int = 40) -> str:
+    try:
+        with open(p, encoding="utf-8", errors="replace") as f:
+            return "".join(f.readlines()[-n:])[-6000:]
+    except OSError:
+        return "(no process log)"
+
+
+def _rules_source() -> str:
+    import inspect
+    parts = []
+    src = inspect.getsource(exp_cards)
+    m = re.search(r"# The harness check.*?LEGACY_RETRY_WHY[^\n]*\n", src, re.S)
+    if m:
+        parts.append(m.group(0))
+    for fn in (exp_cards.verdict, exp_cards.harness_check, exp_cards.delta_se):
+        try:
+            parts.append(inspect.getsource(fn))
+        except (OSError, TypeError):
+            pass
+    return "\n".join(parts)[:14000]
+
+
+def build_postmortem_prompt(card: dict, now: float) -> str:
+    exp_id = card["id"]
+    try:
+        _cmp, harness = exp_cards.compare_card(card, float(card.get("concluded_ts") or now))
+    except Exception as exc:  # noqa: BLE001  the post-mortem still runs on what is on disk
+        harness = {"error": repr(exc)[:200]}
+    fields = {
+        "card": json.dumps({k: card.get(k) for k in ("id", "title", "hypothesis", "knobs", "flag", "win_bar", "kill_bar",
+                                                     "max_days", "started_ts", "concluded_ts", "attempt", "retry_of")},
+                           ensure_ascii=False)[:3000],
+        "verdict": json.dumps(_read_json(exp_cards.path(exp_id, exp_cards.VERDICT_FILE)), ensure_ascii=False)[:2000],
+        "journal": "\n".join(json.dumps(r, ensure_ascii=False)[:800] for r in exp_cards.journal_rows(exp_id)[-10:]) or "(none)",
+        "harness": json.dumps(harness, ensure_ascii=False)[:1000],
+        "process_log": _tail(exp_cards.path(exp_id, "process.log")),
+        "rules": _rules_source(),
+        "max_retries": str(exp_cards.MAX_RETRIES),
+    }
+    out = POSTMORTEM_PROMPT
+    for k, v in fields.items():
+        out = out.replace("{" + k + "}", v)
+    return out
+
+
+def parse_postmortem(envelope: Optional[dict]) -> Optional[dict]:
+    v = _json_of(envelope)
+    if v is None or v.get("cause") not in exp_cards.POSTMORTEM_CAUSES:
+        return None
+    pr = v.get("pr") if isinstance(v.get("pr"), dict) and v["pr"].get("diff") else None
+    return {"cause": v["cause"], "evidence": _sanitize(str(v.get("evidence") or ""))[:400], "pr": pr,
+            "cost_usd": float(envelope.get("total_cost_usd") or 0.0)}
+
+
+def run_postmortem(card: dict, now: float, *, runner, send, apply, push, sre) -> tuple[dict, float]:
+    """Once per voided card: the cause named, written down, told to the
+    phone; a machinery cause makes the card eligible for a rerun
+    (exp_cards.retryable) and may carry a fix to a branch. ``(row, cost)``."""
+    exp_id = card["id"]
+    v = parse_postmortem(runner(build_postmortem_prompt(card, now)))
+    if v is None:
+        exp_cards.write_postmortem(exp_id, {"cause": "unknown", "evidence": "no usable answer"}, now)
+        return (sre.thought({"kind": "analyst", "proposal": "postmortem", "woke_because": f"void of {exp_id}",
+                             "concluded": "no usable post-mortem", "did": "nothing", "cost_usd": 0.0}, now), 0.0)
+    cost = v["cost_usd"]
+    if cost > MAX_USD_PER_CALL:
+        exp_cards.write_postmortem(exp_id, {"cause": "unknown", "evidence": f"answer cost ${cost:.2f} over the cap"}, now)
+        return (sre.thought({"kind": "analyst", "proposal": "postmortem", "woke_because": f"void of {exp_id}",
+                             "concluded": f"post-mortem cost ${cost:.2f} > ${MAX_USD_PER_CALL:.0f}", "did": "nothing",
+                             "cost_usd": cost}, now), cost)
+    machinery = v["cause"] in exp_cards.MACHINERY_CAUSES
+    did = f"post-mortem: {v['cause']}"
+    if v["pr"] and machinery:
+        pr_rows = act({"proposals": [{**v["pr"], "kind": "pr"}]}, now, send=send, apply=apply, push=push, sre=sre)
+        did += "; " + (pr_rows[0].get("did", "") if pr_rows else "pr not handled")
+    exp_cards.write_postmortem(exp_id, {"cause": v["cause"], "evidence": v["evidence"], "pr": bool(v["pr"] and machinery),
+                                        "did": did[:300]}, now)
+    rerun = "it runs again" if machinery and exp_cards.retryable(exp_cards.load(exp_id) or card) else "no rerun"
+    send(f"\U0001fa7a <b>AI analyst</b> post-mortem of <code>{exp_id}</code>: {v['cause']} ({rerun}). "
+         f"{html.escape(v['evidence'])}")
+    return (sre.thought({"kind": "analyst", "proposal": "postmortem", "woke_because": f"void of {exp_id}",
+                         "concluded": v["evidence"], "did": did, "cost_usd": cost}, now), cost)
 
 
 def _record_markdown(card: dict) -> str:
@@ -1098,6 +1240,16 @@ def maybe_run(now: Optional[float] = None, *, runner=_runner, send=None, apply=N
         exp_cards.prune(now)
     except Exception as exc:  # noqa: BLE001
         logger.error(f"[analyst] experiment check failed: {exc!r}")
+    # 1b. a void is explained before anything else runs: one post-mortem a
+    #     day, the oldest first, within the day's money
+    pm_cost = 0.0
+    try:
+        for c in exp_cards.pending_postmortems()[:1]:
+            if spent_today(st, day) + MAX_USD_PER_CALL <= MAX_USD:
+                _row, pm_cost = run_postmortem(c, now, runner=runner, send=send, apply=apply, push=push, sre=sre)
+                _spend(st, day, pm_cost)
+    except Exception as exc:  # noqa: BLE001
+        logger.error(f"[analyst] post-mortem failed: {exc!r}")
     # 2. the study of the day
     try:
         from src.copy_trading import live_budget
