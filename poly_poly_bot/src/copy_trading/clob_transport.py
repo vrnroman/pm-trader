@@ -71,6 +71,7 @@ def install(helpers: Any = None, *, factory: Callable[[], Any] = lambda: httpx.C
             fresh_client(helpers, factory)
             return original(endpoint, method, headers, data, params)
 
+    helpers._pm_original_request = original
     helpers.request = request
     helpers._pm_transport_retry = True
     return True

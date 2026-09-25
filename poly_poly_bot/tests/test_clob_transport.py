@@ -40,7 +40,8 @@ def _helpers(first_client):
     mod.PolyApiException = PolyApiException
     mod.logger = real.logger
     mod._overload_headers = real._overload_headers
-    mod.request = types.FunctionType(real.request.__code__, mod.__dict__, "request")
+    orig = getattr(real, "_pm_original_request", real.request)    # the library's own, even once wrapped
+    mod.request = types.FunctionType(orig.__code__, mod.__dict__, "request")
     return mod
 
 
