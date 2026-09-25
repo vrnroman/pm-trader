@@ -12,6 +12,11 @@ from typing import Optional
 from py_clob_client_v2 import ClobClient, ApiCreds
 from src.config import CONFIG, get_private_key
 from src.logger import logger
+from src.copy_trading import clob_transport
+
+# A dropped CLOB connection is replaced and the request sent once more
+# (clob_transport: 2026-09-25, "BUY not placed: Request exception!").
+clob_transport.install()
 
 _client: Optional[ClobClient] = None
 
