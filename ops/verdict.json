@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-25T00:41:27Z-6848",
-    "ts": 1790296887,
+    "id": "2026-09-25T06:42:07Z-539d",
+    "ts": 1790318527,
     "kind": "nothing",
-    "message": "Armed, spend $38.40 of $54.00 cap with $15.60 remaining, five copies filled in the last 24h, no self-disarm. Fingerprint 534614711c15 unchanged at 2 hits, already escalated and delivered to the owner.",
+    "message": "Armed, spend $0.00 of $54.00 cap fresh for the day, equity $108.79, cash $83.19. Copies kept landing through the last 24h with none rejected beyond the already known issue. Fingerprint 534614711c15 unchanged at 2 hits, already escalated and delivered to the owner.",
     "evidence": [
-        "{\"cash\": 83.185943, \"open_cost\": 25.6, \"equity\": 108.79, \"floor\": 30.0, \"spend\": {\"spent_usd\": 38.4, \"cap_usd\": 54.0, \"remaining_usd\": 15.6, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 67}",
-        "534614711c15 x2 last 24.0h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}",
-        "{\"ts\": 1790210841.5089324, \"kind\": \"escalation_delivered\", \"before\": \"routine escalation\", \"after\": \"sent\", \"detail\": \"Second order rejection today from the unclaimed winnings problem you were already told about. 07:49:59 UTC rejected a bu\"}",
+        "{\"cash\": 83.185943, \"equity\": 108.79, \"floor\": 30.0, \"spend\": {\"spent_usd\": 0.0, \"cap_usd\": 54.0, \"remaining_usd\": 54.0}, \"armed\": true, \"day\": \"2026-09-25\"}",
+        "## arm: {\"armed\": true, \"ts\": 1789919410.9079125, \"by\": \"telegram\", \"reason\": \"\", \"first_armed_ts\": 1788617432.0499406, \"floor_override\": false}",
+        "534614711c15 x2 last 26.5h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}",
         "2026-09-24 18:48:54 TRADE [verify] FILLED: BUY 7.44 shares on 'Will Portugal win on 2026-09-24?' @ 0.8600",
-        "prior verdict 2026-09-24T18:42:21Z-588f: fingerprint 534614711c15 was at 2 hits then, still 2 hits now, not worse"
+        "prior verdict 2026-09-25T00:41:27Z-6848: fingerprint 534614711c15 was at 2 hits then, still 2 hits now, not worse"
     ],
     "commit": null
 }
