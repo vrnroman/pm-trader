@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-25T12:43:56Z-d6e4",
-    "ts": 1790340236,
-    "kind": "escalation",
-    "message": "Loss streak is 7 losing copies in a row, up from 4 a week ago. The bot's only alert fired once, at 4, on Sep 18 (bankroll 106.86 then). No win has reset it since. 3 more losses landed with no new alert, because that push fires only when the count equals 4, never again after. Latest loss: -6.40 on Falcons vs. Packers (0x9f15613e, tier 1b), settled today. Day pnl -6.40. Equity 115.65. Spend 6.40 of 54.00 cap. Armed.",
+    "id": "2026-09-25T18:41:58Z-f53a",
+    "ts": 1790361718,
+    "kind": "nothing",
+    "message": "Armed, copying, spend and losses within known bounds; the loss streak escalation from this morning already went out and has not worsened.",
     "evidence": [
-        "watch: {\"loss_streak\": 7, \"day_pnl\": -6.4, \"day_pnl_day\": \"2026-09-25\"}",
-        "digest-2026-09-18.md ledger: {\"ts\": 1789734225.1441488, \"day\": \"2026-09-18\", \"kind\": \"push:loss_streak\", \"after\": \"\\ud83d\\udcc9 <b>4 losing copies in a row</b>, day -6.40. Bankroll $106.86.\", \"push\": \"DEAL\"}",
-        "{\"ts\": 1790307460.7616093, \"day\": \"2026-09-25\", \"kind\": \"settled\", \"before\": \"open $6.40\", \"after\": \"paid $0.00\", \"detail\": \"lost -6.40 on 'Falcons vs. Packers' (0x9f15613e, tier 1b)\"}",
-        "## money state (excerpt): {\"cash\": 109.250143, \"equity\": 115.65, \"armed\": true, \"spend\": {\"spent_usd\": 6.4, \"cap_usd\": 54.0}}",
-        "## arm: {\"armed\": true, \"ts\": 1789919410.9079125, \"by\": \"telegram\"}"
+        "## arm: {\"armed\": true, ...}",
+        "## money state: {\"cash\": 112.890933, \"equity\": 119.29, \"spend\": {\"spent_usd\": 25.6, \"cap_usd\": 54.0}, \"armed\": true}",
+        "watch: {\"loss_streak\": 7, \"day_pnl\": -6.4, \"last_escalation_id\": \"2026-09-25T12:43:56Z-d6e4\", \"guard_fail_streak\": 0, \"daily_line_sent\": true}",
+        "in form  0x984ffef1: 31 settled, 71% won vs 53% needed, net +58.5% on $23,145, worst day -87",
+        "in form  0xd25156e2: 65 settled, 68% won vs 50% needed, net +38.2% on $35,891, worst day -1,488"
     ],
     "commit": null
 }
