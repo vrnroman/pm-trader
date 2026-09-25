@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T01:30:08.919164+00:00",
+ "generated": "2026-09-25T01:49:05.316901+00:00",
  "money": {
   "cash": 83.185943,
   "open_cost": 25.6,
@@ -20,7 +20,7 @@
    "1b": 32.0,
    "1c": 0
   },
-  "ts": 1790299713.9995477,
+  "ts": 1790300668.529093,
   "day": "2026-09-25"
  },
  "arm": {
@@ -824,11 +824,6 @@
   }
  ],
  "important": [
-  "2026-09-24 01:36:03 ERROR Error fetching CTF events [94339089-94339090]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 01:36:03 ERROR Error fetching NEG_RISK_CTF events [94339089-94339090]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 01:47:04 ERROR Error fetching CTF events [94339530-94339531]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 01:47:07 ERROR Error fetching NEG_RISK_CTF events [94339532-94339532]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 01:48:39 ERROR Error fetching CTF events [94339593-94339594]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 01:53:07 ERROR Error fetching NEG_RISK_CTF events [94339772-94339773]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 01:58:40 ERROR Error fetching CTF events [94339994-94339995]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-24 01:58:40 ERROR Error fetching NEG_RISK_CTF events [94339994-94339995]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -1148,6 +1143,8 @@
   "2026-09-25 00:33:43 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-09-25 01:01:18 ERROR Error fetching CTF events [94395291-94395291]: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-09-25 01:16:10 ERROR Error fetching CTF events [94395884-94395886]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 01:33:40 ERROR Error fetching NEG_RISK_CTF events [94396581-94396586]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 01:36:58 ERROR Error fetching NEG_RISK_CTF events [94396689-94396691]: {'code': -32002, 'message': 'request timed out'}",
   "2026-09-24 02:55:26 TRADE [LIVE] BUY $6.40 on 'Korea Open: Yexin Ma vs Kimberly Birrell' @ 0.6600, order 0x41e2215ece...",
   "2026-09-24 02:55:27 TRADE [verify] FILLED: BUY 9.69 shares on 'Korea Open: Yexin Ma vs Kimberly Birrell' @ 0.6600",
   "2026-09-24 08:07:57 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Dallas b' @ 0.8200, order 0x3326b28d62...",
