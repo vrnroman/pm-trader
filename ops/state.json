@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-26T17:09:57.216967+00:00",
+ "generated": "2026-09-26T18:28:33.020163+00:00",
  "money": {
-  "cash": 114.302403,
-  "open_cost": 10.9,
-  "equity": 125.2,
+  "cash": 126.852403,
+  "open_cost": 4.5,
+  "equity": 131.35,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 68,
   "tier": {
    "1a": 0,
-   "1b": 19.2,
+   "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790442511.1608975,
+  "ts": 1790447036.0816042,
   "day": "2026-09-26"
  },
  "arm": {
@@ -56,7 +56,7 @@
    "placements": []
   },
   "1b": {
-   "open_total": 19.2,
+   "open_total": 12.8,
    "daily_date": "2026-09-26",
    "daily_volume": 19.200000000000003,
    "placements": [
@@ -73,13 +73,6 @@
      "ts": 1790415555.8161044,
      "trader": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
      "title": ""
-    },
-    {
-     "token_id": "92536838434496120066336867329720712347011757598910765112207122349920164573458",
-     "cost": 6.4,
-     "ts": 1790425332.16572,
-     "trader": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
-     "title": "Map Handicap: HERO (-1.5) vs Sangal (+1.5)"
     }
    ]
   },
@@ -784,7 +777,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 125.2,
+  "last_equity": 131.35,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -1431,11 +1424,6 @@
   }
  ],
  "important": [
-  "2026-09-26 01:24:04 ERROR Error fetching NEG_RISK_CTF events [94453801-94453802]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 01:24:06 ERROR Error fetching CTF events [94453803-94453803]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 01:25:25 ERROR Error fetching NEG_RISK_CTF events [94453855-94453856]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 01:25:50 ERROR Error fetching NEG_RISK_CTF events [94453872-94453873]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 01:27:44 ERROR Error fetching CTF events [94453948-94453949]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 01:28:36 ERROR Error fetching NEG_RISK_CTF events [94453982-94453983]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 01:28:52 ERROR Error fetching CTF events [94453994-94453994]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 01:28:52 ERROR Error fetching NEG_RISK_CTF events [94453994-94453994]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -1807,6 +1795,11 @@
   "2026-09-26 17:03:29 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $19.20",
   "2026-09-26 17:03:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-26 17:08:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 17:18:35 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80",
+  "2026-09-26 17:19:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 17:24:56 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 17:57:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 18:24:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-25 23:18:18 ERROR Error fetching CTF events [94448771-94448772]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
   "2026-09-26 06:06:27 INFO  [recovery] No pending orders to recover",
@@ -2260,12 +2253,13 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1790442217.3976295,
-   "count": 19,
+   "last": 1790443177.6521616,
+   "count": 20,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1790442217.3976295
+    1790442217.3976295,
+    1790443177.6521616
    ],
    "action": null,
    "action_ts": null,
@@ -2417,15 +2411,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790442577.6215625,
-   "count": 140,
+   "last": 1790447138.076776,
+   "count": 144,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790440297.08084,
-    1790442337.4510927,
-    1790442577.6215625,
-    1790442577.6215625
+    1790445457.9052393,
+    1790447138.076776
    ],
    "action": null,
    "action_ts": null,
