@@ -12,10 +12,15 @@ says why. No verdict, no improvement claim.
 Read-only. Run inside the bot container:
 
     python -m scripts.floor_truth_receipt [--out docs/floor-truth-<date>.md]
+    (or python scripts/floor_truth_receipt.py)
 """
 from __future__ import annotations
 
 import argparse
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import sys
 import time
 
@@ -23,7 +28,6 @@ from src.config import CONFIG
 from src.copy_trading import book_tiers, era_state, shadow_quote, virtual_ledger, wallet_floor, zset
 from src.copy_trading.copy_paper import PaperCopyLedger
 
-import os
 
 
 def _slice(wallet: str, positions, quotes: dict, era) -> dict:

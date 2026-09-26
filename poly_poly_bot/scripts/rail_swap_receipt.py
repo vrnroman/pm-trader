@@ -14,13 +14,17 @@ gate it replaces, and never as a "gate improved" claim:
 Read-only. Run inside the bot container after the deploy:
 
     python -m scripts.rail_swap_receipt [--out docs/rail-swap-<date>.md]
+    (or python scripts/rail_swap_receipt.py)
 
 The output is a dated record, committed next to the requirements doc.
 """
 from __future__ import annotations
 
 import argparse
+import os
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import time
 
 from src.copy_trading import zset
