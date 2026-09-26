@@ -226,11 +226,16 @@ def _evaluate_tiered_trade_with_state(
     # target trimming $150 of a position we hold left us holding it. Book B,
     # whose record is the evidence for going live, mirrors exits from $100 and
     # takes its edge there; an entry filter must not quietly switch that off.
-    if (trade.side == "BUY" and cfg.min_trader_bet > 0
-            and trade.size < cfg.min_trader_bet):
-        return skip(
-            f"Trader bet ${trade.size:.2f} < min_trader_bet ${cfg.min_trader_bet:.2f} for tier {tier}"
-        )
+    if trade.side == "BUY" and cfg.min_trader_bet > 0:
+        # The wallet's own floor when LIVE_PER_WALLET_MIN_USD is on (the Z
+        # record carries it); the tier's floor otherwise. One answer here and
+        # in the executor, or the earlier of the two checks would win.
+        from src.copy_trading import wallet_floor
+        floor, why = wallet_floor.live_floor_why(trade.trader_address, cfg.min_trader_bet)
+        if trade.size < floor:
+            return skip(
+                f"Trader bet ${trade.size:.2f} < min_trader_bet ${floor:.2f} for tier {tier} ({why})"
+            )
 
     # 4. Price bounds
     if trade.price < cfg.min_price:

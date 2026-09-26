@@ -170,6 +170,26 @@ def add_promoted(wallet: str, tier: str = "1b", source: str = "telegram",
     return rec
 
 
+def update_promoted(wallet: str, fields: dict, scope: str = "") -> bool:
+    """Merge ``fields`` into an EXISTING promoted record. No record, no
+    write, False: this can annotate a wallet the gate admitted, never
+    admit one. The gate's own keys (tier, source, ts) are not touched."""
+    key = (wallet or "").strip().lower()
+    if not key or not fields:
+        return False
+    clean = {k: v for k, v in fields.items() if k not in ("wallet", "tier", "source", "ts")}
+    if not clean:
+        return False
+    with _LOCK:
+        data = dict(_read(promoted_path(scope)))
+        rec = data.get(key)
+        if not isinstance(rec, dict):
+            return False
+        data[key] = {**rec, **clean}
+        _write(promoted_path(scope), data)
+    return True
+
+
 def remove_promoted(wallet: str, scope: str = "") -> bool:
     """Drop a wallet from the promoted store. Returns True if it was present."""
     key = (wallet or "").lower()

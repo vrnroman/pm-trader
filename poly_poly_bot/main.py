@@ -49,6 +49,16 @@ _shadow_observer_cache = None
 _shadow_observer_lock = threading.Lock()
 
 
+def _lower_book_observer(book_id: str):
+    """The shared observer under a lower-floor book's budget, or None."""
+    try:
+        from src.copy_trading import shadow_quote
+        return shadow_quote.budgeted(_get_shadow_observer(), shadow_quote.LOWER_BOOK_BUDGET, book_id)
+    except Exception as exc:
+        logger.warn(f"[shadow] lower-book observer unavailable for {book_id}: {exc}")
+        return None
+
+
 def _get_shadow_observer():
     """One shared shadow-quote observer for BOTH paper books, or None if off.
 
@@ -74,6 +84,10 @@ def _get_shadow_observer():
                 # registry (two clocks, s-qbzbrw), so the delay has a price.
                 from src.copy_trading import fast_prober, shadow_quote
                 shadow_quote.register_sink(fast_prober.make_shadow_sink(observer))
+                # Set Z and the gate's near misses are quoted first when a
+                # sweep exceeds the cap: their slices feed the execution rail.
+                from src.copy_trading import zset_candidates
+                shadow_quote.set_priority_provider(zset_candidates.priority_wallets)
                 logger.info("[shadow] pre-flip quote observer started "
                             "(measurement only, never places an order)")
             except Exception as exc:
@@ -1084,9 +1098,11 @@ def _copy_paper_b_loop(book=None):
         # data instead of the books' modeled fills. Never places an order,
         # runs on its own thread, and is None-safe: with it off the book is
         # bit-for-bit unchanged.
-        # Only the primary book is shadow-quoted: the observer's 40 quotes
-        # a sweep would be swamped by a $100 book's extra detections.
-        observer=_get_shadow_observer() if book.primary else None,
+        # The primary book is shadow-quoted at the full cap; a lower-floor
+        # book gets its own smaller budget (SHADOW_LOWER_BOOK_BUDGET, 0 =
+        # off) so its extra small-bet detections never swamp the primary's
+        # quotes, and the same trade seen by two books is quoted once.
+        observer=_get_shadow_observer() if book.primary else _lower_book_observer(book.id),
     )
     n = len(runner.wallets())
     logger.info(
@@ -1402,9 +1418,33 @@ def _setup_logging():
     root.addHandler(fh)
 
 
+# How long a stop may take before the process ends itself. docker stop sends
+# SIGTERM and force-kills after 10 s; on 2026-09-24 both containers were
+# force-killed on every deploy ("Container failed to exit within 10s of
+# signal 15"), because a paper cycle or a blocking read outlives the grace
+# period. Every state file here is written atomically, so ending the
+# process is safe; ending it OURSELVES, with the still-running threads
+# named in the log, is what makes the next stop readable.
+SHUTDOWN_DEADLINE_S = float(os.environ.get("SHUTDOWN_DEADLINE_S", "8") or 8)
+
+
+def _hard_exit() -> None:
+    alive = sorted(t.name for t in threading.enumerate() if t is not threading.current_thread())
+    logger.warning(f"[shutdown] {SHUTDOWN_DEADLINE_S:.0f}s deadline reached; ending the process "
+                   f"with these threads still running: {', '.join(alive) or 'none'}")
+    try:
+        logging.shutdown()
+    except Exception:
+        pass
+    os._exit(0)
+
+
 def _signal_handler(sig, frame):
     logger.info(f"Received signal {sig}, shutting down...")
     _shutdown_event.set()
+    t = threading.Timer(SHUTDOWN_DEADLINE_S, _hard_exit)
+    t.daemon = True
+    t.start()
 
 
 def _consume_claude_drift_marker() -> None:

@@ -17,6 +17,13 @@ from typing import Callable, Optional
 
 from src.logger import logger
 
+# A Z wallet judged by book A (the slice still thin) for this long is said
+# on an [ops] line, which the important-lines file and the sidecar's
+# fingerprint table read: the thin-slice path is an event the box can
+# name, not a quiet default. Seven days, the manager's number (s-wo3xsp).
+FALLBACK_SAID_AFTER_DAYS = 7.0
+RAIL_STATE_FILE = "zset-rail-state.json"
+
 
 def scan(*, send: Optional[Callable[[str, dict], None]] = None,
          now: Optional[float] = None, limit: int = 1) -> list[str]:
@@ -55,17 +62,103 @@ def scan(*, send: Optional[Callable[[str, dict], None]] = None,
         admitted.append(w)
         ops_watch.probation_start(w, now=now)
         detail = _card_line(cand)
+        floor_line = _floor_line_on_admit(w, era=era, now=now)
         ops_watch.receipt("auto_admit", before=f"{w[:10]} not in Z", after="in set Z, on probation",
-                          detail=detail, push="WALLET", now=now, extra={"wallet": w})
+                          detail=detail, push="WALLET", now=now,
+                          extra={"wallet": w, "rail": getattr(cand, "exec_rail", ""), "floor": floor_line})
         if send is not None:
             try:
-                send(f"🟢 <b>Admitted to set Z on its own</b> <code>{w}</code>\n{detail}\n"
+                send(f"🟢 <b>Admitted to set Z on its own</b> <code>{w}</code>\n{detail}\n{floor_line}\n"
                      f"On probation: one copy a day until five live copies settle. "
                      f"Tap Evict to take it out; the eviction sticks.",
                      {"inline_keyboard": [[{"text": "Evict from set Z", "callback_data": f"zevict:{w}"}]]})
             except Exception as exc:
                 logger.warn(f"[ops] auto-admit message failed: {exc}")
+    try:
+        rail_watch(passers + near, in_z=in_z | set(admitted), now=now)
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] rail watch failed: {exc}")
+    try:
+        refresh_floors(in_z | set(admitted), skip=set(admitted), era=era, now=now, send=send)
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] floor rows failed: {exc}")
     return admitted
+
+
+def _floor_line_on_admit(w: str, *, era, now: float) -> str:
+    """The wallet's floor row, computed at admission so the card carries it."""
+    from src.copy_trading import wallet_floor
+    try:
+        r = wallet_floor.refresh(w, now=now, era=era, force=True)
+        return wallet_floor.line(r[0] if r else None)
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] floor row for {w[:10]} failed: {exc}")
+        return "floor row: not measured (read failed)"
+
+
+def refresh_floors(wallets: set, *, skip: set, era, now: float, send=None) -> list[str]:
+    """Each Z wallet's four-way floor row, at most once a day per wallet.
+    A row whose chosen floor MOVED is one line on the phone; an unchanged
+    row is a ledger row only. Returns the wallets whose floor moved."""
+    from src.copy_trading import ops_watch, wallet_floor
+    moved: list[str] = []
+    for w in sorted(wallets):
+        if w in skip:
+            continue
+        r = wallet_floor.refresh(w, now=now, era=era)
+        if r is None:
+            continue
+        row, before, after = r
+        changed = (before or 0) != (after or 0)
+        line = wallet_floor.line(row)
+        ops_watch.receipt("floor_row", before=f"{w[:10]} floor {before or 'global'}",
+                          after=f"floor {after or 'global'}" + (" (moved)" if changed else " (same)"),
+                          detail=line[:300], push=("WALLET" if changed else None), now=now,
+                          extra={"wallet": w, "floor_before": before, "floor_after": after,
+                                 "live": wallet_floor.enabled()})
+        if changed:
+            moved.append(w)
+            if send is not None:
+                try:
+                    on, why = wallet_floor.applies_to(w)
+                    live = (f"real money copies it from there ({why})" if on
+                            else f"evidence only ({why}): real money keeps the global floor; LIVE_PER_WALLET_MIN_USD moves it")
+                    send(f"📏 <b>Floor moved</b> <code>{w}</code>: ${before or 0:.0f} to ${after or 0:.0f}\n{line}\n{live}", None)
+                except Exception as exc:  # noqa: BLE001
+                    logger.warn(f"[ops] floor message failed: {exc}")
+    return moved
+
+
+def rail_watch(cands: list, *, in_z: set, now: float) -> dict:
+    """Which rail judged each Z wallet at this scan, with the day it went
+    on the fallback. A wallet on book A for FALLBACK_SAID_AFTER_DAYS is said
+    on an [ops] line the sidecar's fingerprint table reads."""
+    from src.copy_trading import ops_watch, zset
+    d = ops_watch._read_json(ops_watch._p(RAIL_STATE_FILE))
+    seen = set()
+    for c in cands:
+        w = (getattr(c, "wallet", "") or "").lower()
+        if not w or w not in in_z:
+            continue
+        seen.add(w)
+        rail = getattr(c, "exec_rail", "") or ""
+        rec = d.get(w) if isinstance(d.get(w), dict) else None
+        if rec is None or rec.get("rail") != rail:
+            rec = {"rail": rail, "since": now, "said": False}
+        rec["n_matched"] = int(getattr(c, "real_n", 0) or 0)
+        rec["last"] = now
+        if rail == zset.RAIL_BOOK_A:
+            days = (now - float(rec.get("since") or now)) / 86400.0
+            if days >= FALLBACK_SAID_AFTER_DAYS and not rec.get("said"):
+                logger.warning(f"[ops] {w[:10]} judged by book A for {days:.0f} days: the real-quote "
+                               f"slice is still thin ({rec['n_matched']} of {zset.REAL_QUOTE_MIN_N} matched)")
+                rec["said"] = True
+        d[w] = rec
+    for w in list(d):
+        if w not in seen and w not in in_z:
+            d.pop(w, None)
+    ops_watch._write_json(ops_watch._p(RAIL_STATE_FILE), d)
+    return d
 
 
 def _card_line(c) -> str:
@@ -76,6 +169,14 @@ def _card_line(c) -> str:
             v = getattr(c, attr, None)
             if v is not None:
                 parts.append(f"{label} {float(v) * 100:+.1f}%")
+        # Which rail answered the execution question, with its sample: the
+        # slice's n, or book A because the slice is thin.
+        from src.copy_trading import zset
+        rail, rn, rr = getattr(c, "exec_rail", ""), int(getattr(c, "real_n", 0) or 0), getattr(c, "real_roi", None)
+        if rail == zset.RAIL_SLICE and rr is not None:
+            parts.append(f"real quotes {float(rr) * 100:+.1f}% over {rn} matched")
+        elif rail:
+            parts.append(f"execution judged by book A (slice thin, {rn} of {zset.REAL_QUOTE_MIN_N} matched)")
         return ", ".join(parts)
     except Exception:
         return "gate passed"

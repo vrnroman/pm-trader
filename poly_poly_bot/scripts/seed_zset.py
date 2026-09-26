@@ -94,9 +94,14 @@ def main(argv=None) -> int:
                            if not c[0].startswith("still positive with its best")]
             a_settled, _ = _wallet_rows(a_positions, w)
             a_roi, a_n = _clean_roi(a_settled, era)
+            # The execution rail reads the real-quote slice first (owner's
+            # ruling 2026-09-26); the seed hands it the same evidence the
+            # cards and the scan do, so this stays the one gate.
+            rq = zset_candidates.real_quote_slice(w, b_positions, zset_candidates.load_quotes(), era)
             zset.admit(w, ready=True, checks=gate_checks, settled=settled,
                        era_floor=era, other_book_roi=a_roi,
-                       other_book_n=a_n, rails_supplied=True)
+                       other_book_n=a_n, real_roi=rq.get("real_roi"),
+                       real_n=int(rq.get("n_matched") or 0), rails_supplied=True)
 
     print(f"=== ADMITTED TO SET Z: {len(admitted)} ===")
     for w, ok, nf, nt, checks, roi, n, trimmed, _s in admitted:

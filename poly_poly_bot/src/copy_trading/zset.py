@@ -25,6 +25,16 @@ p-value attached, not an edge, and no amount of sample size fixes it because
 the sample size is exactly what makes it look fine. So Z additionally requires
 that a wallet still clears its ROI floor after its three best copies are
 deleted. Cheap, blunt, and it is the one test the concentrated candidate fails.
+
+**The execution rail** (the owner's ruling of 2026-09-26 on his own doc,
+part 3 §3.1). Book B fills at the target's price; real money fills at the
+best ask after our detection lag, and that gap is the one thing that has
+actually hurt real money. The rail is the real-quote slice: every paper copy
+of the wallet re-priced at the quote the shadow observer captured with the
+same function live uses, refused when it loses over at least
+``REAL_QUOTE_MIN_N`` matched copies. While the slice is thin, book A's
+contradiction check (the same question, sampled three copies a day) stands
+in, exactly as before the ruling. Book A keeps running.
 """
 
 from __future__ import annotations
@@ -217,11 +227,62 @@ def contradiction_check(a_roi: Optional[float], a_n: int,
     return (True, f"the other book agrees at {a_roi * 100:+.0f}% over {a_n} copies")
 
 
+# The execution rail's own sample bar: below this many matched real quotes
+# the slice is thin and book A's contradiction check stands in. One number,
+# the same one the candidates card calls thin (virtual_ledger.THIN_MATCHED_N).
+REAL_QUOTE_MIN_N = 15
+
+# What the slice must clear: at the prices we would really pay, the wallet's
+# copies do not lose. Zero, like the trimmed rail: the question is "does
+# execution eat the whole edge", not "is it still as good as on paper".
+REAL_QUOTE_MIN_ROI = 0.0
+
+RAIL_SLICE = "real quotes"
+RAIL_BOOK_A = "book A"
+
+# The label each rail prints in the check list. Two labels, not one, so a
+# refusal on the phone says which evidence refused it.
+SLICE_LABEL = "does not lose at the prices we would really pay"
+BOOK_A_LABEL = "the other book does not contradict it"
+
+
+def execution_check(real_roi: Optional[float], real_n: int,
+                    a_roi: Optional[float], a_n: int, *,
+                    min_real_n: int = REAL_QUOTE_MIN_N,
+                    min_a_n: int = 10) -> tuple[bool, str, str]:
+    """The execution rail (owner's ruling 2026-09-26 on his doc's part 3
+    §3.1): the real-quote slice when it covers the wallet, book A's
+    contradiction check while the slice is thin.
+
+    The slice re-prices each of the wallet's paper copies at the price the
+    shadow observer captured with the same quote function live uses, so it
+    is per-copy and at our own detection lag; book A is the same question
+    answered by a 3-a-day sample. Returns ``(ok, detail, rail)`` where rail
+    names which evidence answered, so a card and a refusal can say so.
+    """
+    n = int(real_n or 0)
+    if n >= min_real_n and real_roi is not None:
+        roi = float(real_roi)
+        if roi < REAL_QUOTE_MIN_ROI:
+            return (False, f"{roi * 100:+.0f}% at real quotes over {n} matched copies",
+                    RAIL_SLICE)
+        return (True, f"{roi * 100:+.0f}% at real quotes over {n} matched copies",
+                RAIL_SLICE)
+    ok, detail = contradiction_check(a_roi, a_n, min_a_n)
+    return (ok, f"slice thin ({n} matched, needs {min_real_n}); {detail}", RAIL_BOOK_A)
+
+
+def execution_label(rail: str) -> str:
+    return SLICE_LABEL if rail == RAIL_SLICE else BOOK_A_LABEL
+
+
 def admit(wallet: str, *, ready: bool, checks: list, settled: Iterable,
           era_floor: Optional[float] = None, tier: str = "1b",
           source: str = "gate",
           other_book_roi: Optional[float] = None,
           other_book_n: int = 0,
+          real_roi: Optional[float] = None,
+          real_n: int = 0,
           rails_supplied: bool = False) -> tuple[bool, list]:
     """Admit a wallet to Z, but ONLY if the gate passed it and the rail holds.
 
@@ -242,12 +303,16 @@ def admit(wallet: str, *, ready: bool, checks: list, settled: Iterable,
             ("rail evidence supplied by the caller", False,
              "admit() was called without era_floor and other-book evidence")])
     conc_ok, conc_detail = concentration_check(settled, min_opened_ts=era_floor)
-    contra_ok, contra_detail = contradiction_check(other_book_roi, other_book_n)
+    # The execution rail: the real-quote slice when it covers the wallet,
+    # book A while it is thin (the owner's ruling, 2026-09-26). A caller
+    # that supplies no slice gets book A, never a pass: (None, 0) is thin.
+    contra_ok, contra_detail, rail = execution_check(
+        real_roi, real_n, other_book_roi, other_book_n)
     bl = _blacklist_block(wallet)
     all_checks = list(checks) + [
         (f"still positive with its best {DROP_TOP_N} copies deleted",
          conc_ok, conc_detail),
-        ("the other book does not contradict it", contra_ok, contra_detail),
+        (execution_label(rail), contra_ok, contra_detail),
         ("not under the bot's own auto-demote", bl is None,
          bl or "no active demotion"),
     ]
@@ -265,7 +330,7 @@ def admit(wallet: str, *, ready: bool, checks: list, settled: Iterable,
         logger.warn(f"[zset] {wallet[:12]} NOT admitted, {bl}")
         return (False, all_checks)
     if not contra_ok:
-        logger.info(f"[zset] {wallet[:12]} NOT admitted, contradiction: "
+        logger.info(f"[zset] {wallet[:12]} NOT admitted, execution rail ({rail}): "
                     f"{contra_detail}")
         return (False, all_checks)
     if not ready:
