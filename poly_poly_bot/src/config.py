@@ -319,9 +319,23 @@ class Config:
     # states a number. 400 SGD, the stated first budget, is about 310 USD.
     live_budget_usd: float = _opt_float("LIVE_BUDGET_USD", 0.0)
     # Copies per followed wallet per UTC day on the LIVE path (0 = no cap).
-    # One wallet at ~8 signals a day would otherwise take the whole daily cap
-    # first-come, before the slower, stronger wallets fire.
-    live_max_per_wallet_day: int = _opt_int("LIVE_MAX_PER_WALLET_DAY", 2)
+    # 20 is the owner's number (2026-09-26: "other non-new wallets, limit
+    # should be 20"); it replaced the 3 that bounded a busy wallet's share of
+    # a capped day, because the day is no longer capped by spend (see
+    # live_daily_loss_usd).
+    live_max_per_wallet_day: int = _opt_int("LIVE_MAX_PER_WALLET_DAY", 20)
+    # A wallet is NEW for this many days after its set-Z admission and is
+    # copied at most zset_new_wallet_copies_per_day times a UTC day in that
+    # window (owner, 2026-09-26: "1 trade per day per new wallets for 7 days").
+    zset_new_wallet_days: float = _opt_float("ZSET_NEW_WALLET_DAYS", 7.0)
+    zset_new_wallet_copies_per_day: int = _opt_int("ZSET_NEW_WALLET_COPIES_PER_DAY", 1)
+    # The owner's daily stop, in dollars LOST, not bet (2026-09-26: "no limit
+    # for how much per day bet, only how much per day lost; more than 45 a
+    # day, disarm and wait for my instructions"). When set (> 0) the daily
+    # SPEND cap is off entirely and the guard disarms once the day's equity
+    # has fallen by more than this since 00:00 UTC; only /live CONFIRM arms
+    # again. 0 (default) keeps the spend cap and no loss stop.
+    live_daily_loss_usd: float = _opt_float("LIVE_DAILY_LOSS_USD", 0.0)
 
     # --- Strategy B: the borrowed-clock (instant-copy) paper book ---
     # A SECOND paper book racing the one above (the 2026-07 A-vs-B experiment).

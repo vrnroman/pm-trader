@@ -30,7 +30,9 @@ ANALYST_TTL_S = 24 * 3600.0
 # ``lo``/``hi`` are absolute; the analyst may only move DOWN from the owner
 # value for money parameters ("money"), either way for timing ("timing").
 TABLE = {
-    "LIVE_MAX_PER_WALLET_DAY": {"env": "LIVE_MAX_PER_WALLET_DAY", "attr": "live_max_per_wallet_day", "default": 3, "band": (1, 3), "kind": "money", "type": int},
+    # 20 is the owner's number (2026-09-26); new wallets are capped at 1 a
+    # day for their first days by the rule in daily_spend_guard, not here.
+    "LIVE_MAX_PER_WALLET_DAY": {"env": "LIVE_MAX_PER_WALLET_DAY", "attr": "live_max_per_wallet_day", "default": 20, "band": (1, 20), "kind": "money", "type": int},
     # Not the per-copy fraction: at the current budget a lower fraction puts a
     # copy under Polymarket's $5 order minimum and the governor refuses to
     # trade at all, so "reduce the stake" would read as "stop trading" with

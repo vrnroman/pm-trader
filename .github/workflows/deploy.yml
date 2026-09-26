@@ -155,9 +155,22 @@ jobs:
           # 0.40 of $80 is $32: exactly 5 copies at $6.40, the owner's "1 to 5
           # deals a day". And no single wallet may take more than 2 of them.
           ensure_env LIVE_BUDGET_DAILY_FRAC 0.40
-          # 3, not 2: the owner answered the s-kac3t7 guess with "3" on the
-          # Desk (ingested 2026-09-22); his number is the ruling.
-          ensure_env LIVE_MAX_PER_WALLET_DAY 3
+          # The owner's limits, 2026-09-26 ("remove the 3 trades per address;
+          # 1 a day for a wallet's first 7 days in Z, 20 for the others; no
+          # limit on how much per day is bet, only on how much is lost: more
+          # than 45 a day, disarm and wait for my instructions"). The
+          # ENV_FILE secret still pins the old 3 and the $54 daily spend cap,
+          # so these are rewritten in place, the same way as RPC_URL above.
+          sed -i -E 's#^LIVE_MAX_PER_WALLET_DAY=.*#LIVE_MAX_PER_WALLET_DAY=20#' .env
+          ensure_env LIVE_MAX_PER_WALLET_DAY 20
+          ensure_env ZSET_NEW_WALLET_DAYS 7
+          ensure_env ZSET_NEW_WALLET_COPIES_PER_DAY 1
+          # The daily spend cap is OFF under the loss stop (live_budget reads
+          # LIVE_DAILY_LOSS_USD and returns no cap); the pinned $54 is
+          # removed so no panel prints a ceiling that nothing enforces.
+          sed -i -E '/^LIVE_DAILY_USD=/d' .env
+          sed -i -E '/^ZSET_PROBATION_TOTAL_PER_DAY=/d' .env
+          ensure_env LIVE_DAILY_LOSS_USD 45
           # Two clocks (s-qbzbrw, 2026-09-22): the chain reader runs next to
           # the data api as a SHADOW (stamps, never copies) until its own
           # evidence clears the cutover rule in two_clocks.py; ONCHAIN_SHADOW
@@ -204,12 +217,11 @@ jobs:
           # B150 and B100 run next to it as paper books; real money keeps
           # copying from $300 whatever the paper books do.
           ensure_env COPY_PAPER_B_BOOKS b300:300,b150:150,b100:100
-          # Part 3 R2/R3, explicit: three admissions every 3 h, four probation copies a day.
+          # Part 3 R2, explicit: three admissions every 3 h. (The probation share
+          # of the day went with the owner's 2026-09-26 limits; see above.)
           ensure_env ZSET_AUTO_ADMIT_EVERY_S 10800
           ensure_env ZSET_AUTO_ADMIT_LIMIT 3
-          ensure_env ZSET_PROBATION_TOTAL_PER_DAY 4
           ensure_env LIVE_MIN_TRADER_BET_USD 300
-          ensure_env LIVE_DAILY_USD 54
 
           # ---- GO LIVE. Merging this PR is turning the owner's key. ----
           # Together these take the bot off paper on the next deploy: the

@@ -57,6 +57,7 @@ import glob
 import json
 import os
 import re
+import calendar
 import shutil
 import subprocess
 import sys
@@ -244,7 +245,70 @@ def new_lines(state: dict, logs_dir: str) -> tuple[list[str], list[str]]:
     return out, raw
 
 
-def box_snapshot(now: float) -> dict:
+CENSUS_MINUTES = int(_env_f("SRE_CENSUS_MINUTES", 60))
+_LOG_LINE_RE = re.compile(r"^(\d{4}-\d\d-\d\d) (\d\d:\d\d:\d\d)\s+(\S+)\s+(.*)$")
+
+
+def log_files(logs_dir: str, now: float) -> list[str]:
+    """Today's and yesterday's bot log names, newest first, that exist."""
+    out = []
+    for back in (0, 1):
+        day = time.strftime("%Y-%m-%d", time.gmtime(now - back * 86400))
+        name = f"bot-{day}.log"
+        if os.path.isfile(os.path.join(logs_dir, name)):
+            out.append(name)
+    return out
+
+
+def _census_key(level: str, msg: str) -> str:
+    words = re.sub(r"0x[0-9a-fA-F]{6,}", "0x…", msg)
+    words = re.sub(r"\d+(\.\d+)?", "N", words)
+    return f"{level} {' '.join(words.split()[:4])}"
+
+
+def log_census(logs_dir: str, now: float, minutes: int = CENSUS_MINUTES,
+               tail_bytes: int = 6_000_000, limit: int = 40) -> list[str]:
+    """The last ``minutes`` of the bot's full log as counts per kind of line:
+    level plus the first words of the message, numbers and addresses
+    folded. Deterministic, cheap, and the one thing the fingerprints never
+    carried: how much went RIGHT next to what went wrong."""
+    names = log_files(logs_dir, now)
+    if not names:
+        return ["(no bot-YYYY-MM-DD.log in the logs dir)"]
+    since = now - minutes * 60
+    counts: dict[str, int] = {}
+    total = 0
+    for name in names:
+        path = os.path.join(logs_dir, name)
+        try:
+            size = os.path.getsize(path)
+            with open(path, "rb") as f:
+                f.seek(max(0, size - tail_bytes))
+                chunk = f.read().decode("utf-8", errors="replace")
+        except OSError:
+            continue
+        for ln in chunk.splitlines():
+            m = _LOG_LINE_RE.match(ln)
+            if not m:
+                continue
+            try:
+                ts = calendar.timegm(time.strptime(f"{m.group(1)} {m.group(2)}", "%Y-%m-%d %H:%M:%S"))
+            except ValueError:
+                continue
+            if ts < since or ts > now + 60:
+                continue
+            total += 1
+            key = _census_key(m.group(3), m.group(4))
+            counts[key] = counts.get(key, 0) + 1
+    if not total:
+        return [f"(no lines in the last {minutes} min of {', '.join(names)})"]
+    rows = sorted(counts.items(), key=lambda kv: -kv[1])[:limit]
+    out = [f"{total} lines in the last {minutes} min; {len(counts)} kinds; top {len(rows)}:"]
+    out += [f"  {n:6d}  {k}" for k, n in rows]
+    return out
+
+
+def box_snapshot(now: float, logs_dir: Optional[str] = None) -> dict:
     """What the model gets to look at besides the fingerprints."""
     from src.copy_trading import live_guard, live_mode, ops_watch
     # The bot's own readers for the bot's own files (the CI invariant test
@@ -280,6 +344,16 @@ def box_snapshot(now: float) -> dict:
         snap["chain"] = onchain_source.health_line(now)
     except Exception as exc:  # noqa: BLE001
         snap["chain"] = f"(chain reader health unavailable: {exc})"
+    try:
+        # The whole log, counted: what worked in the last hour next to what
+        # failed, before the model reads any of it.
+        ldir = logs_dir or bot_logs_dir()
+        snap["logs_dir"] = ldir
+        snap["log_files"] = log_files(ldir, now)
+        snap["census"] = log_census(ldir, now)
+        snap["census_minutes"] = CENSUS_MINUTES
+    except Exception as exc:  # noqa: BLE001
+        snap["census"] = [f"(bot log census unavailable: {exc})"]
     try:
         snap["receipts_tail"] = [json.dumps(r, ensure_ascii=False)[:200]
                                  for r in ops_watch.ledger_rows(since_ts=now - 6 * 3600)[-30:]]
@@ -372,6 +446,20 @@ retries from the same cursor; it is not an outage. An outage is a STALE last
 good read or a growing lag on the line above.)
 receipts (6h):
 {receipts}
+
+# The whole bot log, last {census_minutes} min, by kind of line (count, level, first words)
+{census}
+
+# Look further before you conclude
+You have Read, Grep and read-only Bash over {logs_dir}. bot-YYYY-MM-DD.log
+carries EVERY line, INFO included (the successes the important log never
+shows); important-*.log holds only the lines that wake you; signals-*.log the
+detections; hygiene.log the deploys. Today's files: {log_files}. Before you
+call a component down, grep its own INFO cadence in the minutes around the
+wake and count what worked next to what failed: a component still logging
+progress is not down, and an error that recurs at a low rate next to steady
+progress is a nuisance, not an outage. Quote the counts you found in
+"reasoning". A "disarm" or an "escalate" without such a count is a guess.
 """
 
 
@@ -393,11 +481,42 @@ def build_prompt(wake: list, table: dict, tail: list, snap: dict, now: float) ->
         "two_clocks": snap.get("two_clocks") or "",
         "chain": snap.get("chain") or "chain reader: no health line",
         "receipts": "\n".join(snap.get("receipts_tail") or [])[:3000],
+        "census": "\n".join(snap.get("census") or ["(no bot log read)"])[:4000],
+        "census_minutes": str(int(snap.get("census_minutes") or CENSUS_MINUTES)),
+        "logs_dir": snap.get("logs_dir") or bot_logs_dir(),
+        "log_files": ", ".join(snap.get("log_files") or []) or "(none found)",
     }
     out = PROMPT
     for k, v in fields.items():
         out = out.replace("{" + k + "}", str(v))
     return out
+
+
+# The model may READ the bot's logs (mounted read-only in the sidecar) and
+# nothing else: the tools are file reads and read-only shell filters, and
+# every fix still arrives as a diff in the verdict, never as an edit. Before
+# this the model saw only the important lines (errors, never the successes
+# next to them) and called a 2% head race "the chain feed is fully down",
+# disarming real money twice (2026-09-26).
+READ_TOOLS = ("Read,Grep,Glob,Bash(grep:*),Bash(zgrep:*),Bash(tail:*),Bash(head:*),"
+              "Bash(wc:*),Bash(ls:*),Bash(cat:*),Bash(sed:*),Bash(awk:*),Bash(sort:*),"
+              "Bash(uniq:*),Bash(cut:*),Bash(date:*)")
+MAX_TURNS = int(_env_f("SRE_MAX_TURNS", 40))
+
+
+def bot_logs_dir() -> str:
+    return os.environ.get("SRE_BOT_LOGS_DIR") or "/app/logs"
+
+
+def runner_cmd(exe: str, prompt: str, *, model: str = MODEL, logs_dir: Optional[str] = None) -> list:
+    """The `claude -p` command line: JSON out, the read tools, a turn cap,
+    and the bot's log directory added when it exists."""
+    cmd = [exe, "-p", prompt, "--output-format", "json", "--model", model,
+           "--max-turns", str(MAX_TURNS), "--allowedTools", READ_TOOLS]
+    logs_dir = logs_dir or bot_logs_dir()
+    if os.path.isdir(logs_dir):
+        cmd += ["--add-dir", logs_dir]
+    return cmd
 
 
 def _claude_runner(prompt: str, *, model: str = MODEL, timeout_s: int = CLAUDE_TIMEOUT_S) -> Optional[dict]:
@@ -407,7 +526,7 @@ def _claude_runner(prompt: str, *, model: str = MODEL, timeout_s: int = CLAUDE_T
     if not exe:
         logger.warning("[sre] `claude` CLI not found on PATH")
         return None
-    cmd = [exe, "-p", prompt, "--output-format", "json", "--model", model]
+    cmd = runner_cmd(exe, prompt, model=model)
     try:
         with tempfile.TemporaryDirectory(prefix="ai-sre-") as cwd:
             proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_s,
@@ -627,7 +746,7 @@ def act(verdict: dict, wake: list, state: dict, now: float, *, send: Callable[[s
     kind = verdict["kind"]
     fp = verdict.get("fingerprint") or (wake[0] if wake else "")
     row = {"woke_because": ", ".join(wake)[:200], "fingerprint": fp, "kind": kind,
-           "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+           "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
            "concluded": _sanitize(verdict.get("reasoning", ""))[:600],
            "confidence": verdict.get("confidence", 0.0), "cost_usd": verdict.get("cost_usd", 0.0),
            "did": "", "proof": "", "question": ""}
@@ -767,7 +886,7 @@ def cycle(now: Optional[float] = None, *, logs_dir: Optional[str] = None, runner
     elif wake:
         state.setdefault("wakes", []).append(now)
         state["wakes"] = [t for t in state["wakes"] if now - float(t) < 86400]
-        snap = box_snapshot(now)
+        snap = box_snapshot(now, logs_dir=logs_dir)
         prompt = build_prompt(wake, table, lines, snap, now)
         verdict = parse_verdict(runner(prompt))
         if verdict is None:

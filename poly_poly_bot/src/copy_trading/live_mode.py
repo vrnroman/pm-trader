@@ -134,7 +134,13 @@ def is_preview() -> bool:
         return True
 
 
-def arm(reason: str = "", by: str = "telegram") -> tuple[bool, str]:
+# The guard's name on a daily-loss disarm (live_guard). Here, not there:
+# live_guard imports this module, and arm() needs the name to carry the
+# owner's override for the day.
+DAILY_LOSS_DISARM_BY = "live-guard:daily-loss"
+
+
+def arm(reason: str = "", by: str = "telegram", now: Optional[float] = None) -> tuple[bool, str]:
     """Turn the moment's key. Returns (ok, human-readable detail).
 
     Refuses when the owner's env key is not set — which is the state this
@@ -153,15 +159,22 @@ def arm(reason: str = "", by: str = "telegram") -> tuple[bool, str]:
         # that blames the feed.
         return (False, "Strategy 1 is disabled: there is no live poller or "
                        "executor to arm.")
+    now = time.time() if now is None else float(now)
     prev = read_arm()
-    rec = {"armed": True, "ts": time.time(), "by": by, "reason": reason,
+    rec = {"armed": True, "ts": now, "by": by, "reason": reason,
            # Kept forever once set: the daily real-money line renders only
            # after the first arm, so it needs to know one ever happened.
-           "first_armed_ts": prev.get("first_armed_ts") or time.time(),
+           "first_armed_ts": prev.get("first_armed_ts") or now,
            # The owner's override of the bankroll floor, for THIS arm session
            # only: set when the disarm this arm follows was the floor's, and
            # gone with the next disarm of any kind.
-           "floor_override": prev.get("by") == "live-guard:floor"}
+           "floor_override": prev.get("by") == "live-guard:floor",
+           # The owner's answer to a daily-loss stop is this arm (2026-09-26:
+           # "disarm and wait for my instructions"): the stop does not fire
+           # again for the rest of THAT UTC day. Tomorrow's loss is counted
+           # from tomorrow's 00:00 equity.
+           "daily_loss_override_day": (time.strftime("%Y-%m-%d", time.gmtime(now))
+                                       if prev.get("by") == DAILY_LOSS_DISARM_BY else None)}
     try:
         os.makedirs(os.path.dirname(_path()), exist_ok=True)
         tmp = _path() + ".tmp"

@@ -39,8 +39,10 @@ def test_money_moves_down_only_inside_the_band_and_expires(limits_env):
     ok, why = ll.propose("LIVE_MAX_PER_WALLET_DAY", 2, why="fewer copies while form is thin", now=NOW)
     assert ok and ll.current("LIVE_MAX_PER_WALLET_DAY", NOW + 60) == 2
     assert ll.current("LIVE_MAX_PER_WALLET_DAY", NOW + ll.ANALYST_TTL_S) == 3, "snaps back to the owner"
+    ok, why = ll.propose("LIVE_MAX_PER_WALLET_DAY", 21, why="more", now=NOW)
+    assert not ok and "outside the band" in why, "the band tops out at the owner's 20 (2026-09-26)"
     ok, why = ll.propose("LIVE_MAX_PER_WALLET_DAY", 4, why="more", now=NOW)
-    assert not ok and "outside the band" in why
+    assert not ok and "exceeds the owner's 3" in why
     ok, why = ll.propose("LIVE_MAX_PER_WALLET_DAY", 3, why="same", now=NOW)
     assert ok, "equal to the owner's is allowed"
     ok, why = ll.propose("LIVE_BUDGET_PER_COPY_FRAC", 0.05, why="less", now=NOW)

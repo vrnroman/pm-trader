@@ -115,7 +115,7 @@ def test_the_prompt_carries_the_counterfactual_and_the_bands(desk):
     runner = _runner_for({"proposals": [], "summary": "s"})
     an.maybe_run(NOW, runner=runner, send=_sender())
     p = runner.calls[0]
-    assert "LIVE_MAX_PER_WALLET_DAY: band 1..3 (money)" in p and "declined BUY signals" in p
+    assert "LIVE_MAX_PER_WALLET_DAY: band 1..20 (money)" in p and "declined BUY signals" in p
     assert "never propose raising exposure" in p and "—" not in p
 
 

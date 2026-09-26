@@ -1810,22 +1810,54 @@ def test_one_busy_wallet_cannot_take_the_whole_day(tmp_path, monkeypatch):
 
 
 def test_the_per_wallet_cap_binds_at_the_order_sink(tmp_path, monkeypatch):
-    from src.copy_trading import daily_spend_guard as g
+    from src.copy_trading import daily_spend_guard as g, zset
     monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 2)
     h = _Harness(tmp_path, monkeypatch)
+    # The harness admits W1 to Z at test time, which makes it NEW (one a
+    # day, 2026-09-26); this test is about the ordinary cap.
+    monkeypatch.setattr(zset, "is_new", lambda w, now=None: False)
     g._state.date = ""
     placed = h.run(h.trades(4))
     assert placed == 2 and len(h.posted) == 2, "third and fourth copies from the same wallet are refused"
     assert h.seen == {"t0", "t1", "t2", "t3"}
 
 
+def test_a_wallet_in_its_first_week_of_z_gets_one_copy_a_day_at_the_sink(tmp_path, monkeypatch):
+    """Owner, 2026-09-26: 1 trade a day per new wallet for 7 days, 20 for the
+    rest. The harness admits W1 at test time, so it is new; the second copy
+    of the day is refused at the sink with the rule's own name."""
+    from src.copy_trading import daily_spend_guard as g, zset
+    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 20)
+    h = _Harness(tmp_path, monkeypatch)
+    g._state.date = ""
+    assert zset.is_new(W1), "admitted moments ago"
+    placed = h.run(h.trades(3))
+    assert placed == 1 and len(h.posted) == 1
+    rows = [r for r in h.history if r.status == "SKIPPED"]
+    assert rows and "new-wallet cap (first 7 days in set Z): 1 of 1" in (rows[-1].reason or "")
+    # eight days on, the ordinary cap
+    real_ts = zset.admitted_ts(W1)
+    monkeypatch.setattr(zset, "admitted_ts", lambda w: real_ts - 8 * 86400)
+    assert not zset.is_new(W1)
+    g._state.date = ""
+    h.seen.clear()  # the same three ids again: the dedupe is not what this measures
+    assert h.run(h.trades(3)) == 3
+
+
 def test_the_deploy_pins_five_deals_a_day_and_three_per_wallet():
-    # 3 per wallet: the owner answered the s-kac3t7 guess with "3" on the
-    # Desk (ingested 2026-09-22); his number is the ruling.
+    # 20 per wallet, 1 a day for a wallet's first 7 days in Z, no daily spend
+    # cap and a $45 daily LOSS stop (owner, 2026-09-26). The secret still
+    # pins 3 and $54, so the deploy rewrites them in place.
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
     assert "ensure_env LIVE_BUDGET_DAILY_FRAC 0.40" in src
-    assert "ensure_env LIVE_MAX_PER_WALLET_DAY 3" in src
-    assert "ensure_env LIVE_MAX_PER_WALLET_DAY 2" not in src
+    assert "s#^LIVE_MAX_PER_WALLET_DAY=.*#LIVE_MAX_PER_WALLET_DAY=20#" in src
+    assert "ensure_env LIVE_MAX_PER_WALLET_DAY 20" in src
+    import re as _re
+    assert not _re.search(r"ensure_env LIVE_MAX_PER_WALLET_DAY [23]\s*$", src, _re.M), "the old 2 and 3 are gone"
+    assert "ensure_env ZSET_NEW_WALLET_DAYS 7" in src and "ensure_env ZSET_NEW_WALLET_COPIES_PER_DAY 1" in src
+    assert "/^LIVE_DAILY_USD=/d" in src and "ensure_env LIVE_DAILY_USD" not in src
+    assert "ensure_env LIVE_DAILY_LOSS_USD 45" in src
+    assert "/^ZSET_PROBATION_TOTAL_PER_DAY=/d" in src and "ensure_env ZSET_PROBATION_TOTAL_PER_DAY" not in src
     # The chain reader rides as a shadow: the secret's data-api value is
     # rewritten in place, since ensure_env never overrides a defined key.
     assert "s#^TRADE_MONITOR_MODE=.*#TRADE_MONITOR_MODE=hybrid#" in src
@@ -2817,16 +2849,16 @@ def test_the_sink_reserves_before_the_post_keeps_an_ambiguous_one_and_refuses_at
 def test_the_no_copy_clock_sees_sink_refusals(tmp_path, monkeypatch):
     """Code review finding 7: refusals at the live sink wrote no history row,
     so the 'no copy in 3 days' clock could not see them."""
-    from src.copy_trading import daily_spend_guard as g, ops_watch
+    from src.copy_trading import daily_spend_guard as g
     h = _Harness(tmp_path, monkeypatch)
-    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 2)
-    ops_watch.probation_start(W1, now=1.0)
-    monkeypatch.setattr(ops_watch, "PROBATION_TOTAL_PER_DAY", 1)
-    g.record_wallet_copy("0xother-probationer")
-    ops_watch.probation_start("0xother-probationer", now=1.0)
+    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 20)
+    # W1 is new in Z (the harness admitted it just now): one a day. The
+    # day's one copy is already on the book, so the sink refuses.
+    g._state.date = ""
+    g.record_wallet_copy(W1)
     assert h.run(h.trades(1)) == 0 and h.posted == []
     rows = [r for r in h.history if r.status == "SKIPPED"]
-    assert rows and "probation share" in (rows[-1].reason or "") and rows[-1].trader_address == W1
+    assert rows and "new-wallet cap" in (rows[-1].reason or "") and rows[-1].trader_address == W1
 
 
 def test_a_refused_reservation_after_the_canary_consumed_says_so():
@@ -3244,7 +3276,10 @@ def test_absolute_floor_and_daily_override_the_fractions(monkeypatch, budget):
     assert live_budget.floor_usd() == 56.0
     assert live_budget.caps(live=False).daily_usd == round(80.0 * live_budget.DAILY_FRAC, 2)
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
-    assert "ensure_env LIVE_FLOOR_USD 30" in src and "ensure_env LIVE_DAILY_USD 54" in src
+    assert "ensure_env LIVE_FLOOR_USD 30" in src
+    # The $54 daily spend cap is gone (owner, 2026-09-26): the day is bounded
+    # by dollars lost, and the deploy deletes the secret's pinned value.
+    assert "ensure_env LIVE_DAILY_USD" not in src and "/^LIVE_DAILY_USD=/d" in src
 
 
 # --------------------------------------------------------------------------- #
@@ -3296,8 +3331,8 @@ def test_the_gate_opens_at_fifteen_settled_and_admits_three_every_three_hours():
     dy = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
     assert "ensure_env COPY_GOLIVE_MIN_SETTLED 15" in dy and "s#^COPY_GOLIVE_MIN_SETTLED=.*#COPY_GOLIVE_MIN_SETTLED=15#" in dy
     from src.copy_trading import ops_watch
-    assert ops_watch.PROBATION_TOTAL_PER_DAY == 4 or _os.environ.get("ZSET_PROBATION_TOTAL_PER_DAY")
-    assert "ensure_env ZSET_AUTO_ADMIT_LIMIT 3" in dy and "ensure_env ZSET_PROBATION_TOTAL_PER_DAY 4" in dy
+    assert not hasattr(ops_watch, "PROBATION_TOTAL_PER_DAY"), "probation no longer counts copies (2026-09-26)"
+    assert "ensure_env ZSET_AUTO_ADMIT_LIMIT 3" in dy and "ensure_env ZSET_PROBATION_TOTAL_PER_DAY" not in dy
 
 
 # --------------------------------------------------------------------------- #
