@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-26T06:43:00Z-4a77",
-    "ts": 1790404980,
-    "kind": "escalation",
-    "message": "Chain RPC is still failing. CTF and NEG_RISK_CTF getLogs have hit invalid block range params without a clean stretch since 2026-09-25 11:31 UTC. The bot self-disarmed at 04:33 UTC for this, chain is the primary fill and inventory channel. You rearmed by telegram at 05:12 UTC. The same error hit again at 05:13, 05:14, and 05:15 UTC, right after the rearm. As of the 05:21 UTC digest the bot is armed for real orders with that channel still broken.",
+    "id": "2026-09-26T12:42:33Z-37b5",
+    "ts": 1790426553,
+    "kind": "nothing",
+    "message": "Armed since 09:23 UTC under the new limits; the chain RPC invalid-block-range errors from earlier stopped at 08:35 UTC and have not recurred. A live copy filled clean at 09:39 UTC. Spend today $6.40 against the $45 daily-loss stop, no cap hit.",
     "evidence": [
-        "2026-09-26 04:33:32 sre_disarm: Chain CTF and NEG_RISK_CTF event reads are fully down (RPC -32000 invalid block range params) and chain is the primary fill and inventory channel",
-        "2026-09-26 05:12:24 WARNING [live] ARMED for real orders by telegram: no reason given",
-        "2026-09-26 05:13:35 ERROR Error fetching NEG_RISK_CTF events [94462982-94462983]: {'code': -32000, 'message': 'invalid block range params'}",
-        "2026-09-26 05:14:45 ERROR Error fetching NEG_RISK_CTF events [94463029-94463029]: {'code': -32000, 'message': 'invalid block range params'}",
-        "6fbcddbc9dfb x133 last 0.1h ago [recurred: 16 hit(s) since the disarm 0.8 h ago] :: ERROR Error fetching NEG_RISK_CTF events"
+        "2026-09-26 09:23:34 WARNING [live] ARMED for real orders by owner:claude-session: owner instruction 2026-09-26 via Claude session",
+        "2026-09-26 09:39:17 TRADE [verify] FILLED: BUY 5.00 shares on '' @ 0.9000",
+        "2026-09-26 08:35:14 ERROR Error fetching CTF events [94471048-94471048]: invalid block range params (last one seen)",
+        "6fbcddbc9dfb x175 last 1.6h ago [recurred: 11 hit(s) since the disarm 5.6 h ago]",
+        "spend today: spent_usd 6.4, daily_loss_stop_usd 45.0, cap_usd null"
     ],
     "commit": null
 }
