@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-25T22:19:28.197355+00:00",
+ "generated": "2026-09-26T00:04:16.313670+00:00",
  "money": {
   "cash": 112.890933,
   "open_cost": 6.4,
@@ -7,10 +7,10 @@
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
-   "date": "2026-09-25",
-   "spent_usd": 25.6,
+   "date": "2026-09-26",
+   "spent_usd": 0.0,
    "cap_usd": 54.0,
-   "remaining_usd": 28.4,
+   "remaining_usd": 54.0,
    "closed_reason": ""
   },
   "armed": true,
@@ -20,8 +20,8 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790374704.6040668,
-  "day": "2026-09-25"
+  "ts": 1790381025.6531575,
+  "day": "2026-09-26"
  },
  "arm": {
   "armed": true,
@@ -32,19 +32,14 @@
   "floor_override": false
  },
  "spend": {
-  "date": "2026-09-25",
-  "spent_usd": 25.6,
-  "wallet_copies": {
+  "date": "2026-09-26",
+  "spent_usd": 0.0,
+  "wallet_copies": {},
+  "wallet_copies_yesterday": {
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
    "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43": 1
   },
-  "wallet_copies_yesterday": {
-   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1,
-   "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1,
-   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 3,
-   "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1
-  },
-  "yesterday": "2026-09-24",
+  "yesterday": "2026-09-25",
   "closed_reason": ""
  },
  "tier": {
@@ -147,7 +142,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-25T12:43:56Z-d6e4",
-  "admit_scan_ts": 1790364713.9867966,
+  "admit_scan_ts": 1790375640.2482708,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 7,
   "day_pnl": -6.4,
@@ -467,23 +462,6 @@
   }
  ],
  "important": [
-  "2026-09-24 22:26:39 ERROR Error fetching CTF events [94389104-94389105]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 22:28:33 ERROR Error fetching NEG_RISK_CTF events [94389161-94389161]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 22:36:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-24 22:42:16 ERROR Error fetching CTF events [94389710-94389710]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 22:46:02 ERROR Error fetching CTF events [94389880-94389881]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 22:47:48 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $32.00",
-  "2026-09-24 23:06:07 ERROR Error fetching CTF events [94390683-94390684]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 23:11:04 ERROR Error fetching CTF events [94390881-94390882]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 23:13:31 ERROR Error fetching NEG_RISK_CTF events [94390979-94390980]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 23:21:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-24 23:21:31 ERROR Error fetching CTF events [94391299-94391300]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 23:21:31 ERROR Error fetching NEG_RISK_CTF events [94391299-94391300]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 23:22:48 ERROR Error fetching CTF events [94391326-94391331]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-24 23:40:17 ERROR Error fetching NEG_RISK_CTF events [94392050-94392051]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 23:54:04 ERROR Error fetching CTF events [94392601-94392602]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 23:56:38 ERROR Error fetching CTF events [94392704-94392705]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-24 23:56:38 ERROR Error fetching NEG_RISK_CTF events [94392704-94392705]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 00:14:52 ERROR Error fetching NEG_RISK_CTF events [94393414-94393414]: {'code': -32002, 'message': 'request timed out'}",
   "2026-09-25 00:31:55 ERROR Error fetching CTF events [94394115-94394116]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 00:33:43 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
@@ -805,6 +783,33 @@
   "2026-09-25 22:11:04 ERROR Error fetching NEG_RISK_CTF events [94446081-94446082]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 22:18:44 ERROR Error fetching CTF events [94446388-94446389]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 22:19:29 ERROR Error fetching CTF events [94446418-94446419]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 22:35:23 ERROR Network error fetching 0x3f3a...e8fd: ",
+  "2026-09-25 22:35:24 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-09-25 22:35:24 ERROR Network error fetching 0x722a...d6ed: ",
+  "2026-09-25 22:35:24 ERROR Network error fetching 0xfd3e...5a7a: ",
+  "2026-09-25 22:35:24 ERROR Network error fetching 0x0011...4333: ",
+  "2026-09-25 22:40:56 ERROR Network error fetching 0xf916...e770: Server disconnected without sending a response.",
+  "2026-09-25 22:50:04 ERROR Error fetching CTF events [94447639-94447642]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:13:05 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
+  "2026-09-25 23:18:19 ERROR Error fetching CTF events [94448771-94448772]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:18:50 ERROR Error fetching CTF events [94448792-94448793]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:19:16 ERROR Error fetching NEG_RISK_CTF events [94448809-94448810]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:20:31 ERROR Error fetching NEG_RISK_CTF events [94448859-94448860]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:25:32 ERROR Error fetching CTF events [94449060-94449061]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:25:51 ERROR Error fetching NEG_RISK_CTF events [94449073-94449074]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:26:19 ERROR Error fetching NEG_RISK_CTF events [94449091-94449092]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:29:20 ERROR Error fetching NEG_RISK_CTF events [94449212-94449213]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:36:23 ERROR Error fetching CTF events [94449494-94449495]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:40:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-25 23:47:23 ERROR Error fetching NEG_RISK_CTF events [94449934-94449935]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:49:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-25 23:49:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-25 23:55:10 ERROR Error fetching CTF events [94450245-94450246]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:57:00 ERROR Error fetching CTF events [94450319-94450320]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:57:00 ERROR Error fetching NEG_RISK_CTF events [94450319-94450320]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 00:00:14 ERROR Error fetching CTF events [94450448-94450449]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 00:00:14 ERROR Error fetching NEG_RISK_CTF events [94450448-94450449]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 00:02:22 ERROR Error fetching NEG_RISK_CTF events [94450533-94450534]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 02:26:10 TRADE [LIVE] BUY $6.40 on '' @ 0.8500, order 0x5540f913e6...",
   "2026-09-25 02:26:14 TRADE [verify] FILLED: BUY 7.53 shares on '' @ 0.8500",
   "2026-09-25 08:27:59 ERROR Error fetching CTF events [94413158-94413159]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -814,7 +819,8 @@
   "2026-09-25 13:38:50 INFO  [recovery] No pending orders to recover",
   "2026-09-25 14:52:53 TRADE [LIVE] BUY $6.40 on '' @ 0.6300, order 0x557fb8a720...",
   "2026-09-25 14:52:54 TRADE [verify] FILLED: BUY 10.16 shares on '' @ 0.6300",
-  "2026-09-25 16:30:57 ERROR Error fetching NEG_RISK_CTF events [94432477-94432478]: {'code': -32000, 'message': 'invalid block range params'}"
+  "2026-09-25 16:30:57 ERROR Error fetching NEG_RISK_CTF events [94432477-94432478]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-25 23:18:18 ERROR Error fetching CTF events [94448771-94448772]: {'code': -32000, 'message': 'invalid block range params'}"
  ],
  "watcher": [
   {
@@ -1054,6 +1060,20 @@
    "concluded": "The cause is a single transient RemoteDisconnected on the onchain poll, one blip inside a wider network storm hitting every Polymarket endpoint at the same minute (CTF events, clob price, auth, negrisk all show RemoteDisconnected or timeouts in the same window). This is remote infrastructure closing connections, not a bug in our code, and the poll logs the error and retries on the next tick. Chain verification is healthy overall: chain lag p50 3.7s and 709 chain events seen, so the box can still verify fills. One missed poll tick places, sizes or doubles nothing and is caught by the next tick,",
    "confidence": 0.8,
    "cost_usd": 0.1330725,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790378100.0295238,
+   "day": "2026-09-25",
+   "woke_because": "13ad3e5ddfe8",
+   "fingerprint": "13ad3e5ddfe8",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "A single upstream disconnect caused one inventory API sync to fail. This is one hit of the same 'Server disconnected without sending a response' wave hitting every path right now (6eca45f47973 x8, 6c813168939b x37, 54ac26fb3ff1 x76), so it is transient Polymarket API flakiness, not a bot fault. Inventory sync retries on the next cycle and chain is primary for position truth (chain-only 680 rows, CHAIN IS PRIMARY), so one stale API sync cannot mis-size or double an order. No money-path exposure from a single skipped read.",
+   "confidence": 0.8,
+   "cost_usd": 0.1272225,
    "did": "nothing",
    "proof": "",
    "question": ""
@@ -1352,14 +1372,16 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1790365138.7947345,
-   "count": 37,
+   "last": 1790380179.8486264,
+   "count": 42,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1790365138.7947345,
-    1790365138.7947345,
-    1790365138.7947345
+    1790379699.828116,
+    1790379699.828116,
+    1790379699.828116,
+    1790380179.8486264,
+    1790380179.8486264
    ],
    "action": null,
    "action_ts": null,
@@ -1573,18 +1595,12 @@
   },
   "6eca45f47973": {
    "first": 1790342544.7724473,
-   "last": 1790346046.2132301,
-   "count": 7,
+   "last": 1790376059.554813,
+   "count": 8,
    "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
    "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
    "recent": [
-    1790342544.7724473,
-    1790342544.7724473,
-    1790342544.7724473,
-    1790342643.9186833,
-    1790342643.9186833,
-    1790342643.9186833,
-    1790346046.2132301
+    1790376059.554813
    ],
    "action": null,
    "action_ts": null,
@@ -1593,12 +1609,16 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1790346046.2132301,
-   "count": 1,
+   "last": 1790375819.5205553,
+   "count": 6,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1790346046.2132301
+    1790375819.5205553,
+    1790375819.5205553,
+    1790375819.5205553,
+    1790375819.5205553,
+    1790375819.5205553
    ],
    "action": null,
    "action_ts": null,
@@ -1607,15 +1627,20 @@
   },
   "6fbcddbc9dfb": {
    "first": 1790347551.8864553,
-   "last": 1790374379.3303683,
-   "count": 29,
+   "last": 1790381019.8829722,
+   "count": 38,
    "sample": "2026-09-25 14:44:13 ERROR Error fetching NEG_RISK_CTF events [94428207-94428208]: {'code': -32000, 'message': 'invalid block range params'}",
    "norm": "ERROR Error fetching NEG_RISK_CTF events [NN]: {'S': N, 'S': 'S'}",
    "recent": [
-    1790371019.0760508,
-    1790372219.1177037,
-    1790373899.263835,
-    1790374379.3303683
+    1790378379.6469128,
+    1790378499.6541164,
+    1790378859.6666558,
+    1790378859.6666558,
+    1790378979.6820965,
+    1790380059.8410556,
+    1790380659.8686204,
+    1790380899.8775692,
+    1790381019.8829722
    ],
    "action": null,
    "action_ts": null,
@@ -1624,16 +1649,18 @@
   },
   "dcba498fc237": {
    "first": 1790348314.5935838,
-   "last": 1790374739.3482256,
-   "count": 48,
+   "last": 1790380899.8775692,
+   "count": 57,
    "sample": "2026-09-25 14:56:40 ERROR Error fetching CTF events [94428704-94428706]: {'code': -32000, 'message': 'invalid block range params'}",
    "norm": "ERROR Error fetching CTF events [NN]: {'S': N, 'S': 'S'}",
    "recent": [
-    1790371379.088372,
-    1790372579.1717932,
-    1790373899.263835,
-    1790374379.3303683,
-    1790374739.3482256
+    1790378379.6469128,
+    1790378379.6469128,
+    1790378739.6616569,
+    1790379459.8169823,
+    1790380539.8633664,
+    1790380659.8686204,
+    1790380899.8775692
    ],
    "action": null,
    "action_ts": null,
@@ -1642,12 +1669,12 @@
   },
   "41cab7e764a5": {
    "first": 1790351832.0916538,
-   "last": 1790361389.2777584,
-   "count": 5,
+   "last": 1790380179.8486264,
+   "count": 6,
    "sample": "2026-09-25 15:57:06 ERROR [py_clob_client_v2] request error: The read operation timed out",
    "norm": "ERROR [py_clob_client_v2] request error: The read operation timed out",
    "recent": [
-    1790361389.2777584
+    1790380179.8486264
    ],
    "action": null,
    "action_ts": null,
@@ -1693,6 +1720,20 @@
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
     1790372699.1773167
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "13ad3e5ddfe8": {
+   "first": 1790378100.0295238,
+   "last": 1790378100.0295238,
+   "count": 1,
+   "sample": "2026-09-25 23:13:05 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
+   "norm": "ERROR [inventory] API sync failed: Server disconnected without sending a response.",
+   "recent": [
+    1790378100.0295238
    ],
    "action": null,
    "action_ts": null,
