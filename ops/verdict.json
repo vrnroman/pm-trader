@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-26T00:19:00Z-7c31",
-    "ts": 1790381940,
-    "kind": "nothing",
-    "message": "Armed, spend reset for the new day with no self-disarm or guard failure; the loss streak escalation already sent has not worsened and the errors are the same known transient API flakiness as prior cycles.",
+    "id": "2026-09-26T06:43:00Z-4a77",
+    "ts": 1790404980,
+    "kind": "escalation",
+    "message": "Chain RPC is still failing. CTF and NEG_RISK_CTF getLogs have hit invalid block range params without a clean stretch since 2026-09-25 11:31 UTC. The bot self-disarmed at 04:33 UTC for this, chain is the primary fill and inventory channel. You rearmed by telegram at 05:12 UTC. The same error hit again at 05:13, 05:14, and 05:15 UTC, right after the rearm. As of the 05:21 UTC digest the bot is armed for real orders with that channel still broken.",
     "evidence": [
-        "## money state: {\"armed\": true, \"spend\": {\"date\": \"2026-09-26\", \"spent_usd\": 0.0, \"cap_usd\": 54.0, \"remaining_usd\": 54.0}}",
-        "watch: {\"loss_streak\": 7, \"day_pnl\": -6.4, \"guard_fail_streak\": 0, \"last_escalation_id\": \"2026-09-25T12:43:56Z-d6e4\", \"daily_line_sent\": true}",
-        "in form  0x984ffef1: 32 settled, 72% won vs 53% needed, net +56.3% on $23,930, worst day -87",
-        "in form  0xd25156e2: 66 settled, 67% won vs 50% needed, net +36.8% on $36,266, worst day -1,488",
-        "in form  0xf9168343: 53 settled, 55% won vs 48% needed, net +2.8% on $146,637, worst day -6,320"
+        "2026-09-26 04:33:32 sre_disarm: Chain CTF and NEG_RISK_CTF event reads are fully down (RPC -32000 invalid block range params) and chain is the primary fill and inventory channel",
+        "2026-09-26 05:12:24 WARNING [live] ARMED for real orders by telegram: no reason given",
+        "2026-09-26 05:13:35 ERROR Error fetching NEG_RISK_CTF events [94462982-94462983]: {'code': -32000, 'message': 'invalid block range params'}",
+        "2026-09-26 05:14:45 ERROR Error fetching NEG_RISK_CTF events [94463029-94463029]: {'code': -32000, 'message': 'invalid block range params'}",
+        "6fbcddbc9dfb x133 last 0.1h ago [recurred: 16 hit(s) since the disarm 0.8 h ago] :: ERROR Error fetching NEG_RISK_CTF events"
     ],
     "commit": null
 }
