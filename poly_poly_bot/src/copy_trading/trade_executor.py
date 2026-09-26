@@ -682,7 +682,9 @@ async def place_trade_orders(
                 copy_size = decision.copy_size
 
             # --- Duplicate bet check ---
-            market_key = trade.market or trade.condition_id
+            # An on-chain trade whose market could not be named must not
+            # share one empty bucket with every other such trade.
+            market_key = trade.market or trade.condition_id or trade.token_id
             dup_count = get_duplicate_count(market_key, trade.side)
             if dup_count >= CONFIG.max_copies_per_market_side:
                 logger.skip(
@@ -845,7 +847,8 @@ async def place_trade_orders(
                     outcome=trade.outcome,
                 ))
 
-                await tg.trade_placed(trade.market, trade.side, copy_size, trade.price)
+                await tg.trade_placed(trade.market, trade.side, copy_size, trade.price,
+                                      outcome=trade.outcome)
                 mark_trade_as_seen(trade.id)
                 placed += 1
                 continue
@@ -1112,7 +1115,8 @@ async def place_trade_orders(
                              f"its accounting failed: {error_message(exc)}. The daily cap "
                              f"and tier ledgers may under-count until the next reconcile.")
 
-            await tg.trade_placed(trade.market, trade.side, copy_size, result.order_price)
+            await tg.trade_placed(trade.market, trade.side, copy_size, result.order_price,
+                                  outcome=trade.outcome)
 
             record_trade_history(TradeRecord(
                 timestamp=trade.timestamp,
@@ -1278,7 +1282,8 @@ async def process_verifications(
                     outcome=trade.outcome,
                 ))
 
-                await tg.trade_filled(trade.market, fill.filled_shares, fill.fill_price)
+                await tg.trade_filled(trade.market, fill.filled_shares, fill.fill_price,
+                                      outcome=trade.outcome)
                 remove_pending_order(po.order_id)
 
             elif fill.status == "PARTIAL":

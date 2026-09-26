@@ -13,6 +13,17 @@ def _escape_html(s: str) -> str:
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
 
+def _bet_label(market: str, outcome: str = "") -> str:
+    """What was bet, for the phone: the market title and the side taken.
+
+    A trade whose market could not be named shows ``(market unnamed)`` rather
+    than a bare ``""`` — an empty quote told the owner nothing on 2026-09-26.
+    """
+    title = _escape_html(market) if market else "(market unnamed)"
+    side = f" — {_escape_html(outcome)}" if outcome else ""
+    return f'"{title}"{side}' if market else f"{title}{side}"
+
+
 def _plain(text: str) -> str:
     """Drop the HTML tags and unescape entities, for the plain-text retry."""
     import re
@@ -57,13 +68,15 @@ async def _send_message(text: str, kind: str | None = "deal") -> bool:
 
 
 class TelegramNotifier:
-    async def trade_placed(self, market: str, side: str, size: float, price: float) -> None:
+    async def trade_placed(self, market: str, side: str, size: float, price: float,
+                           outcome: str = "") -> None:
         prefix = "🔵 [PREVIEW]" if CONFIG.preview_mode else "🟢 [LIVE]"
-        await _send_message(f'{prefix} <b>Order Placed</b>\n{side} ${size:.2f} on "{_escape_html(market)}" @ {price}')
+        await _send_message(f'{prefix} <b>Order Placed</b>\n{side} ${size:.2f} on {_bet_label(market, outcome)} @ {price}')
 
-    async def trade_filled(self, market: str, shares: float, price: float) -> None:
+    async def trade_filled(self, market: str, shares: float, price: float,
+                           outcome: str = "") -> None:
         prefix = "🔵 [PREVIEW]" if CONFIG.preview_mode else "✅ [LIVE]"
-        await _send_message(f'{prefix} <b>Filled</b>\n{shares} shares (${shares * price:.2f}) on "{_escape_html(market)}" @ {price}')
+        await _send_message(f'{prefix} <b>Filled</b>\n{shares} shares (${shares * price:.2f}) on {_bet_label(market, outcome)} @ {price}')
 
     async def trade_unfilled(self, market: str) -> None:
         prefix = "🔵 [PREVIEW]" if CONFIG.preview_mode else "⚪ [LIVE]"
