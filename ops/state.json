@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T13:04:50.042311+00:00",
+ "generated": "2026-09-26T14:43:02.684499+00:00",
  "money": {
   "cash": 103.072403,
   "open_cost": 17.3,
@@ -21,7 +21,7 @@
    "1b": 25.6,
    "1c": 0
   },
-  "ts": 1790427822.8154614,
+  "ts": 1790433496.5594132,
   "day": "2026-09-26"
  },
  "arm": {
@@ -798,7 +798,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-26T06:43:00Z-4a77",
-  "admit_scan_ts": 1790419320.2807124,
+  "admit_scan_ts": 1790430234.0557082,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 7,
   "day_pnl": -6.4,
@@ -1182,24 +1182,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790342643.4500165,
-   "day": "2026-09-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1790343524.3963003,
-   "day": "2026-09-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
    "ts": 1790352581.6513798,
    "day": "2026-09-25",
    "kind": "form",
@@ -1444,28 +1426,18 @@
    "detail": "0xeef6ad0e: no settled bets on our slice in 14 days",
    "push": null,
    "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c"
+  },
+  {
+   "ts": 1790430933.542596,
+   "day": "2026-09-26",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
   }
  ],
  "important": [
-  "2026-09-26 00:05:54 ERROR Error fetching CTF events [94450675-94450675]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:06:49 ERROR Error fetching CTF events [94450711-94450712]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:16:40 ERROR Error fetching CTF events [94451105-94451106]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:28:05 ERROR Error fetching CTF events [94451562-94451563]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:28:05 ERROR Error fetching NEG_RISK_CTF events [94451562-94451563]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:28:16 ERROR Error fetching NEG_RISK_CTF events [94451569-94451570]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:33:57 ERROR Error fetching CTF events [94451796-94451797]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:36:17 ERROR Error fetching CTF events [94451890-94451891]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:37:50 ERROR Error fetching CTF events [94451952-94451953]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:37:50 ERROR Error fetching NEG_RISK_CTF events [94451952-94451953]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:41:39 ERROR Error fetching CTF events [94452104-94452105]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:41:39 ERROR Error fetching NEG_RISK_CTF events [94452104-94452105]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:44:22 ERROR Error fetching NEG_RISK_CTF events [94452213-94452214]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:49:08 ERROR Error fetching CTF events [94452404-94452405]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:53:00 ERROR Error fetching CTF events [94452559-94452560]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:54:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-26 00:54:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-26 00:55:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 01:00:51 ERROR Error fetching CTF events [94452873-94452873]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 01:00:51 ERROR Error fetching NEG_RISK_CTF events [94452873-94452873]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 01:04:14 ERROR Error fetching NEG_RISK_CTF events [94453008-94453008]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 01:04:37 ERROR Error fetching CTF events [94453024-94453024]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -1819,8 +1791,26 @@
   "2026-09-26 12:55:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-26 12:55:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
   "2026-09-26 13:03:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 13:24:06 INFO  [recovery] No pending orders to recover",
-  "2026-09-25 13:38:50 INFO  [recovery] No pending orders to recover",
+  "2026-09-26 13:30:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-26 13:30:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-26 13:43:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-26 13:43:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-26 13:55:20 INFO  Received signal 15, shutting down...",
+  "2026-09-26 13:55:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-26 13:55:48 INFO  Bot started. Monitoring trades...",
+  "2026-09-26 14:08:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 14:09:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/book body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 14:09:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 14:10:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 14:13:47 ERROR Network error fetching 0x0011...4333: ",
+  "2026-09-26 14:13:47 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-09-26 14:13:49 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.",
+  "2026-09-26 14:13:49 ERROR Network error fetching 0x722a...d6ed: Server disconnected without sending a response.",
+  "2026-09-26 14:16:16 ERROR Network error fetching 0xf496...fe79: Server disconnected without sending a response.",
+  "2026-09-26 14:16:16 ERROR Network error fetching 0x984f...9a43: Server disconnected without sending a response.",
+  "2026-09-26 14:16:16 ERROR Network error fetching 0xf916...e770: Server disconnected without sending a response.",
+  "2026-09-26 14:17:45 ERROR [inventory] API sync failed: ",
+  "2026-09-26 14:39:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-25 14:52:53 TRADE [LIVE] BUY $6.40 on '' @ 0.6300, order 0x557fb8a720...",
   "2026-09-25 14:52:54 TRADE [verify] FILLED: BUY 10.16 shares on '' @ 0.6300",
   "2026-09-25 16:30:57 ERROR Error fetching NEG_RISK_CTF events [94432477-94432478]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -1846,67 +1836,10 @@
   "2026-09-26 12:22:11 TRADE [LIVE] BUY $6.40 on 'Map Handicap: HERO (-1.5) vs Sangal (+1.' @ 0.5100, order 0xdee08e5f50...",
   "2026-09-26 12:22:12 TRADE [verify] FILLED: BUY 12.55 shares on 'Map Handicap: HERO (-1.5) vs Sangal (+1.' @ 0.5100",
   "2026-09-26 12:45:21 TRADE [LIVE] BUY $6.40 on '' @ 0.5700, order 0x99c8fab930...",
-  "2026-09-26 12:45:22 TRADE [verify] FILLED: BUY 11.23 shares on '' @ 0.5700"
+  "2026-09-26 12:45:22 TRADE [verify] FILLED: BUY 11.23 shares on '' @ 0.5700",
+  "2026-09-26 13:55:48 INFO  [recovery] No pending orders to recover"
  ],
  "watcher": [
-  {
-   "ts": 1790341504.9359877,
-   "day": "2026-09-25",
-   "woke_because": "1d84f68e4a14, 705df184a49d",
-   "fingerprint": "1d84f68e4a14",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "A transient Polymarket API network failure caused this: the client logged 'Server disconnected' twice, so the order POST raised a PolyApiException with status_code=None and the executor got None back. This landed in the middle of a broader API rough patch right now (Server disconnected x24, request error status=N x64, auth x12), so it is exchange side, not a bot bug. The money path handled it conservatively: the daily-cap kept the $6.40 copy:1b reservation because the fate is ambiguous with no order id, so budget was not freed and no second order was placed, and no tier placement was recorded.",
-   "confidence": 0.72,
-   "cost_usd": 0.1955925,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790342643.9407513,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "proposal": "experiment",
-   "woke_because": "supervise",
-   "concluded": "started min150-r1 (pid 6, first start since this supervisor came up)",
-   "did": "started min150-r1 (pid 6, first start since this supervisor came up)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790343245.2721663,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "proposal": "experiment",
-   "woke_because": "supervise",
-   "concluded": "started min150-r1 (pid 7, first start since this supervisor came up)",
-   "did": "started min150-r1 (pid 7, first start since this supervisor came up)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790343885.1950855,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "proposal": "experiment",
-   "woke_because": "supervise",
-   "concluded": "started min150-r1 (pid 67, first start since this supervisor came up)",
-   "did": "started min150-r1 (pid 67, first start since this supervisor came up)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790346046.2132301,
-   "day": "2026-09-25",
-   "woke_because": "7a8d58f20915",
-   "fingerprint": "7a8d58f20915",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The cause is a transient network read error while fetching a trader address, logged with an empty exception string so str(e) rendered nothing after the colon. It is the same family as the known 6eca45f47973 'Server disconnected' errors, which are hitting the flaky Polymarket API right now alongside the price and auth request errors. This is a read path, not order placement or sizing, so no money behaviour depends on it and the bot continues. A single hit with a blank message is benign network noise, not a new failure mode.",
-   "confidence": 0.85,
-   "cost_usd": 0.17572300000000002,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1790347551.8864553,
    "day": "2026-09-25",
@@ -2476,13 +2409,12 @@
   },
   "c47d62e70341": {
    "first": 1790098332.9559617,
-   "last": 1790414500.0935237,
-   "count": 26,
+   "last": 1790430933.646444,
+   "count": 27,
    "sample": "2026-09-22 14:25:08 INFO  Received signal 15, shutting down...",
    "norm": "INFO Received signal N, shutting down...",
    "recent": [
-    1790412285.2674332,
-    1790414500.0935237
+    1790430933.646444
    ],
    "action": null,
    "action_ts": null,
@@ -2491,13 +2423,12 @@
   },
   "6f12d4998994": {
    "first": 1790098332.9559617,
-   "last": 1790414620.1020496,
-   "count": 26,
+   "last": 1790431053.6542916,
+   "count": 27,
    "sample": "2026-09-22 14:25:37 INFO  [recovery] No pending orders to recover",
    "norm": "INFO [recovery] No pending orders to recover",
    "recent": [
-    1790412405.2808135,
-    1790414620.1020496
+    1790431053.6542916
    ],
    "action": null,
    "action_ts": null,
@@ -2506,13 +2437,12 @@
   },
   "6b829965c182": {
    "first": 1790098332.9559617,
-   "last": 1790414620.1020496,
-   "count": 26,
+   "last": 1790431053.6542916,
+   "count": 27,
    "sample": "2026-09-22 14:25:37 INFO  Bot started. Monitoring trades...",
    "norm": "INFO Bot started. Monitoring trades...",
    "recent": [
-    1790412405.2808135,
-    1790414620.1020496
+    1790431053.6542916
    ],
    "action": null,
    "action_ts": null,
@@ -2550,13 +2480,12 @@
   },
   "9d8a6d2794ec": {
    "first": 1790101843.0850005,
-   "last": 1790414620.1020496,
-   "count": 20,
+   "last": 1790431053.6542916,
+   "count": 21,
    "sample": "2026-09-22 18:30:34 ERROR [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}",
    "recent": [
-    1790412405.2808135,
-    1790414620.1020496
+    1790431053.6542916
    ],
    "action": null,
    "action_ts": null,
@@ -2565,13 +2494,16 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790427833.0374768,
-   "count": 126,
+   "last": 1790433695.1668944,
+   "count": 131,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790427233.0066578,
-    1790427833.0374768
+    1790431774.539402,
+    1790431774.539402,
+    1790431894.5485945,
+    1790433695.1668944,
+    1790433695.1668944
    ],
    "action": null,
    "action_ts": null,
@@ -2622,19 +2554,17 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1790427353.014497,
-   "count": 58,
+   "last": 1790430233.1654708,
+   "count": 62,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1790424592.737286,
-    1790424592.737286,
-    1790425912.909263,
-    1790425912.909263,
-    1790426632.9823363,
-    1790426632.9823363,
     1790427353.014497,
-    1790427353.014497
+    1790427353.014497,
+    1790429513.104133,
+    1790429513.104133,
+    1790430233.1654708,
+    1790430233.1654708
    ],
    "action": null,
    "action_ts": null,
@@ -2849,12 +2779,16 @@
   },
   "6eca45f47973": {
    "first": 1790342544.7724473,
-   "last": 1790416310.5940151,
-   "count": 9,
+   "last": 1790432254.796433,
+   "count": 14,
    "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
    "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
    "recent": [
-    1790416310.5940151
+    1790432134.5597966,
+    1790432134.5597966,
+    1790432254.796433,
+    1790432254.796433,
+    1790432254.796433
    ],
    "action": null,
    "action_ts": null,
@@ -2863,15 +2797,13 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1790416310.5940151,
-   "count": 10,
+   "last": 1790432134.5597966,
+   "count": 12,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1790416310.5940151,
-    1790416310.5940151,
-    1790416310.5940151,
-    1790416310.5940151
+    1790432134.5597966,
+    1790432134.5597966
    ],
    "action": null,
    "action_ts": null,
@@ -2927,15 +2859,14 @@
   },
   "41cab7e764a5": {
    "first": 1790351832.0916538,
-   "last": 1790427353.014497,
-   "count": 14,
+   "last": 1790430233.1654708,
+   "count": 16,
    "sample": "2026-09-25 15:57:06 ERROR [py_clob_client_v2] request error: The read operation timed out",
    "norm": "ERROR [py_clob_client_v2] request error: The read operation timed out",
    "recent": [
-    1790424592.737286,
-    1790425912.909263,
-    1790426632.9823363,
-    1790427353.014497
+    1790427353.014497,
+    1790429513.104133,
+    1790430233.1654708
    ],
    "action": null,
    "action_ts": null,
@@ -3031,14 +2962,12 @@
   },
   "51c53b9cd7c8": {
    "first": 1790404291.371484,
-   "last": 1790404291.371484,
-   "count": 3,
+   "last": 1790431774.539402,
+   "count": 4,
    "sample": "2026-09-26 06:30:36 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/book body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/book body={'S':'S'}",
    "recent": [
-    1790404291.371484,
-    1790404291.371484,
-    1790404291.371484
+    1790431774.539402
    ],
    "action": null,
    "action_ts": null,
@@ -3047,12 +2976,12 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1790413726.8660784,
-   "count": 3,
+   "last": 1790432374.80359,
+   "count": 4,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1790413726.8660784
+    1790432374.80359
    ],
    "action": null,
    "action_ts": null,
