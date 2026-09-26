@@ -303,3 +303,18 @@ def test_a_fix_that_changes_the_risk_profile_goes_to_a_branch_even_with_main_ope
     s2 = sre.cycle(NOW + 60, logs_dir=str(box["logs"]), send=send, apply=apply, push=push, revert=revert,
                    runner=_runner_for({"kind": "fix", "reasoning": "x", "diff": SAFE_DIFF, "risk_change": "none"}))
     assert calls["push"][-1] == (s2["wake"][0], None)
+
+
+def test_the_prompt_carries_the_chain_readers_own_health_line(box):
+    """The SRE saw only the refused-chunk ERROR lines (a good chunk logs
+    nothing it reads) and disarmed real money twice for a 2% head race
+    (2026-09-26). The reader's health line and its role ride in the prompt."""
+    from src.copy_trading import onchain_source
+    onchain_source._save_health({"ts": NOW, "ok_ts": NOW - 5, "cursor": 100, "head": 100, "lag": 0,
+                                 "retries_1h": 4, "skipped_1h": 0, "tracked": 12})
+    _append(box, "2026-09-22 12:00:00 ERROR Error fetching CTF events [94469969-94469969]: {'code': -32000, 'message': 'invalid block range params'}")
+    runner = _runner_for({"kind": "nothing", "reasoning": "a head race, retried"})
+    sre.cycle(NOW, logs_dir=str(box["logs"]), runner=runner, send=_sender())
+    p = runner.calls[0]
+    assert "chain reader: reading, last good read 5s ago" in p and "4 refused chunk(s) retried" in p
+    assert "head race" in p and "not an outage" in p and "confirmed through the CLOB" in p

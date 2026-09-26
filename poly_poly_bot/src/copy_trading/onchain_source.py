@@ -38,8 +38,39 @@ LAG_LOG_EVERY = 30
 HEAD_MARGIN_BLOCKS = 1
 USDC_DECIMALS = 6
 POLL_INTERVAL_S = 2.0
+# A chunk the node refused is read again from the SAME cursor, this many
+# times, before the reader gives those blocks up to the data-api fallback.
+# One block back still races the pool about 2% of the time (229 refused
+# chunks in 12,240 on 2026-09-26, every one at the head) and each refusal used
+# to advance the cursor past the blocks it never read: a fill in them reached
+# the bot only through the api, 18 s later, and the ERROR line woke the AI SRE,
+# which read 184 of them as "the chain feed is fully down" and disarmed real
+# money twice. A retry two seconds later lands on a node that has the block.
+CHUNK_RETRIES = int(float(os.environ.get("ONCHAIN_CHUNK_RETRIES", 5)))
+CHUNK_RETRY_DELAY_S = 2.0
+# The health record is stale when the last good read is older than this.
+HEALTH_STALE_S = 180.0
 
 _CURSOR_PATH = Path(CONFIG.data_dir) / "onchain-cursor.json"
+
+
+class ChunkReadError(Exception):
+    """A block range the node would not read (either exchange). The chunk is
+    whole or nothing: a range half read and then advanced past would lose
+    the other exchange's fills for good."""
+
+    def __init__(self, contract: str, from_block: int, to_block: int, exc: BaseException) -> None:
+        self.contract = contract
+        self.from_block = from_block
+        self.to_block = to_block
+        self.message = error_message(exc)
+        super().__init__(f"{contract} [{from_block}-{to_block}]: {self.message}")
+
+    @property
+    def head_race(self) -> bool:
+        """The pool's own inconsistency: one node reported the head, another
+        has not got the block yet. Not an outage; a retry reads it."""
+        return "invalid block range" in self.message.lower()
 
 
 # ---------------------------------------------------------------------------
@@ -64,6 +95,49 @@ def _save_cursor(block: int) -> None:
         _CURSOR_PATH.write_text(json.dumps({"lastBlock": block}))
     except Exception as exc:
         logger.warn(f"Failed to save onchain cursor: {error_message(exc)}")
+
+
+# ---------------------------------------------------------------------------
+# Health record: what the reader is doing, for the AI SRE and the owner
+# ---------------------------------------------------------------------------
+
+def _health_path() -> Path:
+    # Read at call time: the SRE sidecar and the tests point CONFIG elsewhere.
+    return Path(CONFIG.data_dir) / "onchain-health.json"
+
+
+def _save_health(d: dict) -> None:
+    try:
+        p = _health_path()
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(d))
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"Failed to save onchain health: {error_message(exc)}")
+
+
+def health(now: Optional[float] = None) -> Optional[dict]:
+    """The last health record, or None before the first chunk."""
+    try:
+        return json.loads(_health_path().read_text())
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def health_line(now: Optional[float] = None) -> str:
+    """One line the SRE prompt carries: a refused chunk at the head is a
+    retry, an outage is a stale last good read or a growing lag. Without it
+    the SRE saw only the ERROR lines (successful chunks log nothing it reads)
+    and called 2% refusals a dead feed (2026-09-26)."""
+    now = time.time() if now is None else now
+    h = health(now)
+    if not h:
+        return "chain reader: no health record yet (not started, or an older build)"
+    ok_age = now - float(h.get("ok_ts") or 0.0)
+    state = "STALE" if ok_age > HEALTH_STALE_S else "reading"
+    return (f"chain reader: {state}, last good read {ok_age:.0f}s ago, cursor {h.get('cursor')}, "
+            f"head {h.get('head')}, lag {h.get('lag')} block(s); last hour: "
+            f"{h.get('retries_1h', 0)} refused chunk(s) retried, {h.get('skipped_1h', 0)} chunk(s) skipped "
+            f"to the data-api fallback; {h.get('tracked', 0)} tracked")
 
 
 # ---------------------------------------------------------------------------
@@ -336,7 +410,12 @@ class OnchainSource:
         from_block: int,
         to_block: int,
     ) -> list[DetectedTrade]:
-        """Fetch OrderFilled events for a block range from both exchanges."""
+        """Fetch OrderFilled events for a block range from both exchanges.
+
+        Raises ChunkReadError when either exchange's read fails: nothing is
+        processed from a half-read chunk, so the caller can read the same
+        range again (the two-clocks rows and the shadow quotes would
+        otherwise carry the good half twice)."""
         assert self._ctf_contract is not None
         assert self._neg_risk_contract is not None
 
@@ -346,6 +425,7 @@ class OnchainSource:
             return all_trades
         checksummed = [Web3.to_checksum_address(a) for a in tracked]
 
+        read: list[tuple[list, str]] = []
         for contract, name in [
             (self._ctf_contract, "CTF"),
             (self._neg_risk_contract, "NEG_RISK_CTF"),
@@ -372,11 +452,12 @@ class OnchainSource:
                             continue
                         seen.add(key)
                         events.append(ev)
-                trades = self._process_events(events, name)
-                all_trades.extend(trades)
+                read.append((events, name))
             except Exception as exc:
-                logger.error(f"Error fetching {name} events [{from_block}-{to_block}]: {error_message(exc)}")
+                raise ChunkReadError(name, from_block, to_block, exc) from exc
 
+        for events, name in read:
+            all_trades.extend(self._process_events(events, name))
         return all_trades
 
     async def start(self) -> None:
@@ -394,15 +475,32 @@ class OnchainSource:
         iterations = 0
         t_started = time.time()
         blocks_done = 0
+        # Refusals on the chunk at the cursor, in a row; the health record's
+        # hour of retries and skips.
+        chunk_failures = 0
+        retry_ts: list[float] = []
+        skip_ts: list[float] = []
+        last_ok_ts = 0.0
+
+        def _health_record(head: int, cur: int, now: float) -> None:
+            del retry_ts[:max(0, len(retry_ts) - 10000)]
+            _save_health({
+                "ts": now, "ok_ts": last_ok_ts, "cursor": cur, "head": head, "lag": head - cur,
+                "retries_1h": sum(1 for t in retry_ts if now - t < 3600),
+                "skipped_1h": sum(1 for t in skip_ts if now - t < 3600),
+                "tracked": len(self._tracked_addresses),
+            })
 
         while self._running:
             try:
                 self._refresh_tracked()
                 latest = self._w3.eth.block_number - HEAD_MARGIN_BLOCKS
-                # A successful chain read is this poller's heartbeat for the
-                # guard's stale-feed trigger (the data-api source stamps its own).
+                # A read the chain answered is this poller's heartbeat for the
+                # guard's stale-feed trigger (the data-api source stamps its
+                # own). Stamped at the head, or after a chunk actually read:
+                # a head that answers while every getLogs is refused is not a
+                # live feed.
                 from src.copy_trading.trade_store import record_poll_ok
-                record_poll_ok()
 
                 # Skip if cursor is too far behind
                 if latest - cursor > MAX_BLOCKS_BEHIND:
@@ -414,6 +512,8 @@ class OnchainSource:
                     _save_cursor(cursor)
 
                 if cursor >= latest:
+                    record_poll_ok()
+                    last_ok_ts = time.time()
                     await asyncio.sleep(POLL_INTERVAL_S)
                     continue
 
@@ -421,12 +521,40 @@ class OnchainSource:
                 from_block = cursor + 1
                 to_block = min(from_block + MAX_BLOCK_RANGE - 1, latest)
 
-                trades = await asyncio.get_event_loop().run_in_executor(
-                    None,
-                    self._fetch_events_range,
-                    from_block,
-                    to_block,
-                )
+                try:
+                    trades = await asyncio.get_event_loop().run_in_executor(
+                        None,
+                        self._fetch_events_range,
+                        from_block,
+                        to_block,
+                    )
+                except ChunkReadError as exc:
+                    # The cursor HOLDS: the same range is read again after a
+                    # breath. Before this the cursor advanced past a refused
+                    # chunk and its fills were the data api's to find.
+                    chunk_failures += 1
+                    now = time.time()
+                    what = "head race" if exc.head_race else "read refused"
+                    if chunk_failures < CHUNK_RETRIES:
+                        retry_ts.append(now)
+                        logger.warn(f"Onchain: chunk {from_block}-{to_block} not read ({what}: {exc}); "
+                                    f"retry {chunk_failures} of {CHUNK_RETRIES - 1} in {CHUNK_RETRY_DELAY_S:.0f}s, "
+                                    f"cursor holds at {cursor}")
+                        _health_record(latest, cursor, now)
+                        await asyncio.sleep(CHUNK_RETRY_DELAY_S)
+                        continue
+                    skip_ts.append(now)
+                    chunk_failures = 0
+                    logger.error(f"Onchain: chunk {from_block}-{to_block} SKIPPED after {CHUNK_RETRIES} refused reads "
+                                 f"({what}: {exc}); a set-Z fill in those blocks reaches the bot through the "
+                                 f"data api only")
+                    cursor = to_block
+                    _save_cursor(cursor)
+                    _health_record(latest, cursor, now)
+                    continue
+                chunk_failures = 0
+                last_ok_ts = time.time()
+                record_poll_ok()
 
                 if trades:
                     from src.copy_trading import two_clocks
@@ -490,6 +618,7 @@ class OnchainSource:
                 blocks_done += to_block - cursor
                 cursor = to_block
                 _save_cursor(cursor)
+                _health_record(latest, cursor, last_ok_ts)
                 iterations += 1
                 if iterations % LAG_LOG_EVERY == 0:
                     rate = blocks_done / max(1.0, time.time() - t_started)
