@@ -409,3 +409,152 @@ def test_every_start_call_in_the_suite_keeps_its_fake_provider():
             body = m.group(0)
             if "asyncio.run(s.start())" in body:
                 assert '"_init_web3"' in body, f"{path.name}::{m.group(1)} runs start() without keeping the fake provider"
+
+
+# ---------------------------------------------------------------------------
+# A refused chunk holds the cursor (2026-09-26): the public RPC pool refuses
+# about 2% of chunks at the head with "invalid block range params". Each one
+# used to advance the cursor past blocks never read, and the ERROR line woke
+# the AI SRE, which disarmed real money twice for a feed that was reading fine.
+# ---------------------------------------------------------------------------
+
+def _driven_source(monkeypatch, tmp_path, fetch):
+    """start() on a fake chain: head 406, cursor 5, no sleeps, no network."""
+    from src.config import CONFIG
+    from src.copy_trading import onchain_source as mod, trade_store
+    monkeypatch.setattr(CONFIG, "data_dir", str(tmp_path))
+    s = _source()
+    s._running = True
+
+    class _Eth:
+        block_number = 406
+        def get_block(self, n):
+            return {"timestamp": int(time.time())}
+
+    class _W3:
+        eth = _Eth()
+    s._w3 = _W3()
+    monkeypatch.setattr(s, "_init_web3", lambda: None)
+    monkeypatch.setattr(mod, "_load_cursor", lambda: 5)
+    saved: list = []
+    monkeypatch.setattr(mod, "_save_cursor", lambda b: saved.append(b))
+    monkeypatch.setattr(s, "_refresh_tracked", lambda: None)
+    monkeypatch.setattr(s, "_fetch_events_range", fetch)
+    monkeypatch.setattr(mod, "POLL_INTERVAL_S", 0.0)
+    monkeypatch.setattr(mod, "CHUNK_RETRY_DELAY_S", 0.0)
+    polls: list = []
+    monkeypatch.setattr(trade_store, "record_poll_ok", lambda: polls.append(1))
+    logged = {"warn": [], "error": []}
+    monkeypatch.setattr(mod.logger, "warn", lambda m: logged["warn"].append(m))
+    monkeypatch.setattr(mod.logger, "error", lambda m: logged["error"].append(m))
+    return s, saved, polls, logged
+
+
+def test_a_refused_chunk_holds_the_cursor_and_is_read_again(tmp_path, monkeypatch):
+    from src.copy_trading import onchain_source as mod
+    calls: list = []
+
+    def fetch(from_block, to_block):
+        calls.append((from_block, to_block))
+        if len(calls) == 1:
+            raise mod.ChunkReadError("CTF", from_block, to_block,
+                                     ValueError({'code': -32000, 'message': 'invalid block range params'}))
+        return []
+    s, saved, polls, logged = _driven_source(monkeypatch, tmp_path, fetch)
+
+    async def run():
+        import asyncio
+        t = asyncio.ensure_future(s.start())
+        for _ in range(200):
+            await asyncio.sleep(0)
+            if len(calls) >= 2:
+                break
+        s._running = False
+        await t
+    import asyncio
+    asyncio.run(run())
+    assert calls[0] == (6, 205) and calls[1] == (6, 205), "the SAME range, read again: the cursor held"
+    assert saved and saved[0] == 205 and 5 not in saved, "the cursor moved only after the read"
+    assert len(logged["error"]) == 0, "a head race is a WARNING (it is not an ERROR the SRE wakes on)"
+    assert len(logged["warn"]) == 1 and "head race" in logged["warn"][0] and "cursor holds at 5" in logged["warn"][0]
+    assert polls == [1], "the heartbeat is the chunk actually read, not the head that answered"
+    h = mod.health()
+    assert h["retries_1h"] == 1 and h["skipped_1h"] == 0 and h["cursor"] == 205
+    assert "reading" in mod.health_line(h["ok_ts"] + 1) and "1 refused chunk(s) retried" in mod.health_line(h["ok_ts"] + 1)
+
+
+def test_a_chunk_refused_every_time_is_skipped_once_with_one_error(tmp_path, monkeypatch):
+    """Liveness: a range the pool never reads must not pin the reader for
+    ever. After CHUNK_RETRIES refusals it is given up, once, out loud, and
+    the data api (deduplicated) is the only detector for those blocks."""
+    from src.copy_trading import onchain_source as mod
+    calls: list = []
+
+    def fetch(from_block, to_block):
+        calls.append((from_block, to_block))
+        raise mod.ChunkReadError("NEG_RISK_CTF", from_block, to_block, RuntimeError("Server disconnected"))
+    s, saved, polls, logged = _driven_source(monkeypatch, tmp_path, fetch)
+
+    async def run():
+        import asyncio
+        t = asyncio.ensure_future(s.start())
+        for _ in range(400):
+            await asyncio.sleep(0)
+            if len(calls) > mod.CHUNK_RETRIES:
+                break
+        s._running = False
+        await t
+    import asyncio
+    asyncio.run(run())
+    assert calls[:mod.CHUNK_RETRIES] == [(6, 205)] * mod.CHUNK_RETRIES, "the same range until it is given up"
+    assert calls[mod.CHUNK_RETRIES] == (206, 405), "then the next range"
+    assert saved[0] == 205, "the skip advances the cursor past the refused range"
+    assert len(logged["error"]) == 1 and "SKIPPED" in logged["error"][0] and "read refused" in logged["error"][0]
+    assert len([w for w in logged["warn"] if "6-205" in w]) == mod.CHUNK_RETRIES - 1
+    assert polls == [], "nothing read, no heartbeat"
+    h = mod.health()
+    assert h["skipped_1h"] == 1 and h["retries_1h"] >= mod.CHUNK_RETRIES - 1
+
+
+def test_a_half_read_chunk_is_whole_or_nothing():
+    """CTF reads, NEG_RISK_CTF is refused: no trade is processed from the
+    good half (a retry would stamp it twice) and the error names the race."""
+    from src.copy_trading import onchain_source as mod
+
+    class _Filled:
+        class events:  # noqa: N801
+            class OrderFilled:  # noqa: N801
+                @staticmethod
+                def get_logs(*, from_block, to_block, argument_filters):
+                    return [_Event(TRACKED, OTHER, 0, 123, 500_000, 1_000_000)]
+
+    class _Refused:
+        class events:  # noqa: N801
+            class OrderFilled:  # noqa: N801
+                @staticmethod
+                def get_logs(*, from_block, to_block, argument_filters):
+                    raise ValueError({'code': -32000, 'message': 'invalid block range params'})
+    s = _source()
+    processed: list = []
+    s._process_events = lambda events, name: processed.append(name) or []
+    s._ctf_contract = _Filled()
+    s._neg_risk_contract = _Refused()
+    import pytest
+    with pytest.raises(mod.ChunkReadError) as ei:
+        s._fetch_events_range(100, 101)
+    assert ei.value.head_race and ei.value.contract == "NEG_RISK_CTF" and "[100-101]" in str(ei.value)
+    assert processed == [], "nothing from the half that read"
+    other = mod.ChunkReadError("CTF", 1, 2, RuntimeError("Server disconnected"))
+    assert not other.head_race
+
+
+def test_health_line_says_stale_when_the_last_good_read_is_old(tmp_path, monkeypatch):
+    from src.config import CONFIG
+    from src.copy_trading import onchain_source as mod
+    monkeypatch.setattr(CONFIG, "data_dir", str(tmp_path))
+    assert "no health record" in mod.health_line(1000.0)
+    mod._save_health({"ts": 1000.0, "ok_ts": 1000.0, "cursor": 10, "head": 10, "lag": 0,
+                      "retries_1h": 3, "skipped_1h": 0, "tracked": 12})
+    line = mod.health_line(1000.0 + 60)
+    assert line.startswith("chain reader: reading, last good read 60s ago") and "3 refused chunk(s) retried" in line
+    assert mod.health_line(1000.0 + mod.HEALTH_STALE_S + 1).startswith("chain reader: STALE")

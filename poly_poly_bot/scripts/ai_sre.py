@@ -273,6 +273,14 @@ def box_snapshot(now: float) -> dict:
     except Exception as exc:  # noqa: BLE001
         snap["two_clocks"] = f"(two clocks unavailable: {exc})"
     try:
+        # The reader's own account of itself. Without it the model saw the
+        # refused-chunk ERROR lines and nothing from the chunks that read
+        # fine, and disarmed real money twice for a 2% head race (2026-09-26).
+        from src.copy_trading import onchain_source
+        snap["chain"] = onchain_source.health_line(now)
+    except Exception as exc:  # noqa: BLE001
+        snap["chain"] = f"(chain reader health unavailable: {exc})"
+    try:
         snap["receipts_tail"] = [json.dumps(r, ensure_ascii=False)[:200]
                                  for r in ops_watch.ledger_rows(since_ts=now - 6 * 3600)[-30:]]
     except Exception:  # noqa: BLE001
@@ -355,6 +363,13 @@ deployed sha: {sha}
 form:
 {form}
 {two_clocks}
+{chain}
+(The chain reader DETECTS set-Z fills to copy; the data api detects the same
+fills and the two are deduplicated by fill id, so a chunk one misses the
+other copies, once. Our own orders are confirmed through the CLOB, never by
+this reader. A refused chunk at the newest block is a head race the reader
+retries from the same cursor; it is not an outage. An outage is a STALE last
+good read or a growing lag on the line above.)
 receipts (6h):
 {receipts}
 """
@@ -376,6 +391,7 @@ def build_prompt(wake: list, table: dict, tail: list, snap: dict, now: float) ->
         "sha": snap.get("deployed_sha") or "unknown",
         "form": "\n".join(snap.get("form") or [])[:2400],
         "two_clocks": snap.get("two_clocks") or "",
+        "chain": snap.get("chain") or "chain reader: no health line",
         "receipts": "\n".join(snap.get("receipts_tail") or [])[:3000],
     }
     out = PROMPT
