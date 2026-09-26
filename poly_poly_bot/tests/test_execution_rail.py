@@ -334,11 +334,12 @@ def test_the_live_floor_is_the_global_until_the_owner_flips_the_switch(monkeypat
     zset.admit(W1, ready=True, checks=[], settled=_rows(W1, 20), era_floor=1.0,
                real_roi=0.2, real_n=20, rails_supplied=True)
     assert zset.promotion_state.update_promoted(W1, {wallet_floor.FLOOR_KEY: 150.0, wallet_floor.ROW_KEY: {"chosen": 150.0}}, scope=zset.SCOPE)
-    monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", False)
+    monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", "false")
     assert wallet_floor.live_floor(W1, 300.0) == 300.0, "off: the global floor, whatever the record says"
-    monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", True)
+    monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", "true")
     assert wallet_floor.live_floor(W1, 300.0) == 150.0
     assert wallet_floor.live_floor(W2, 300.0) == 300.0, "a wallet with no chosen floor keeps the global"
+    assert wallet_floor.live_floor_why(W1, 300.0)[1] == "this wallet's own floor (all Z wallets)"
     # The annotation never admits: a wallet outside Z gets no record.
     assert zset.promotion_state.update_promoted(W2, {wallet_floor.FLOOR_KEY: 100.0}, scope=zset.SCOPE) is False
     assert W2 not in zset.wallet_set()
@@ -347,23 +348,77 @@ def test_the_live_floor_is_the_global_until_the_owner_flips_the_switch(monkeypat
     assert rec["source"] == "gate" and rec["tier"] == "1b"
 
 
+def test_the_switch_takes_a_wallet_list_as_a_canary_and_fails_closed_on_a_typo(monkeypatch, caplog):
+    from src.copy_trading import wallet_floor
+    zset.admit(W1, ready=True, checks=[], settled=_rows(W1, 20), era_floor=1.0,
+               real_roi=0.2, real_n=20, rails_supplied=True)
+    zset.admit(W2, ready=True, checks=[], settled=_rows(W2, 20), era_floor=1.0,
+               real_roi=0.2, real_n=20, rails_supplied=True)
+    for w in (W1, W2):
+        zset.promotion_state.update_promoted(w, {wallet_floor.FLOOR_KEY: 150.0, wallet_floor.ROW_KEY: {"chosen": 150.0}}, scope=zset.SCOPE)
+    # The list: only the listed wallet moves; the other keeps the global.
+    monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", f" {W1.upper()} ,")
+    assert wallet_floor.mode()[0] == wallet_floor.MODE_LIST
+    assert wallet_floor.live_floor_why(W1, 300.0) == (150.0, "this wallet's own floor (listed wallet)")
+    assert wallet_floor.live_floor_why(W2, 300.0) == (300.0, "the global floor (not listed)")
+    assert wallet_floor.enabled() is True
+    # A typo is none, said once, never true by accident.
+    wallet_floor._mode_said.clear()
+    for bad in ("ture", f"{W1},0xnotawallet", "1,2"):
+        monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", bad)
+        assert wallet_floor.mode()[0] == wallet_floor.MODE_NONE, bad
+        assert wallet_floor.live_floor(W1, 300.0) == 300.0
+    said = [r for r in caplog.records if "LIVE_PER_WALLET_MIN_USD=" in r.getMessage()]
+    assert len(said) == 3 and all("read as false" in r.getMessage() for r in said)
+    monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", "ture")
+    wallet_floor.mode()
+    assert len([r for r in caplog.records if "LIVE_PER_WALLET_MIN_USD=" in r.getMessage()]) == 3, "said once per value"
+    for off in ("", "false", "0", "off", None):
+        monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", off)
+        assert wallet_floor.mode()[0] == wallet_floor.MODE_NONE and wallet_floor.enabled() is False
+
+
 def test_the_live_path_asks_the_floor_module_at_both_checks():
     """The seam: a per-wallet floor that only one of the two min-bet checks
     knew about would be refused by the other one first."""
     ex = open("src/copy_trading/trade_executor.py", encoding="utf-8").read()
     tr = open("src/copy_trading/tiered_risk_manager.py", encoding="utf-8").read()
-    assert "wallet_floor.live_floor(trade.trader_address, gov.min_trader_bet_usd)" in ex
-    assert "wallet_floor.live_floor(trade.trader_address, cfg.min_trader_bet)" in tr
-    assert "min_trader_bet_usd" not in ex[ex.index("wallet_floor.live_floor"):ex.index("wallet_floor.live_floor") + 400].split("_floor:")[0].split("trade.size <")[-1]
+    assert "wallet_floor.live_floor_why(trade.trader_address, gov.min_trader_bet_usd)" in ex
+    assert "wallet_floor.live_floor_why(trade.trader_address, cfg.min_trader_bet)" in tr
+    assert "trade.size < _floor" in ex and "trade.size < floor" in tr, "both checks compare against the wallet's floor"
 
 
 def test_the_tiered_check_uses_the_wallets_floor_when_on(monkeypatch):
-    from src.copy_trading import tiered_risk_manager as trm, wallet_floor
-    monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", True)
+    from src.copy_trading import wallet_floor
+    monkeypatch.setattr(CONFIG, "live_per_wallet_min_usd", "true")
     monkeypatch.setattr(wallet_floor, "stored_floor", lambda w: 150.0 if w.lower() == W1 else None)
     src = open("src/copy_trading/tiered_risk_manager.py", encoding="utf-8").read()
-    assert "(this wallet's own floor)" in src
+    assert "for tier {tier} ({why})" in src, "the skip line says which floor applied and why"
     assert wallet_floor.live_floor(W1, 300.0) == 150.0 and wallet_floor.live_floor(W2, 300.0) == 300.0
+    assert wallet_floor.live_floor_why(W2, 300.0)[1].startswith("the global floor (no chosen floor")
+
+
+def test_the_floor_truth_receipt_reads_the_row_against_the_forward_book(tmp_path, monkeypatch):
+    from scripts import floor_truth_receipt as ft
+    from src.copy_trading import book_tiers, wallet_floor
+    zset.admit(W1, ready=True, checks=[], settled=_rows(W1, 20), era_floor=1.0,
+               real_roi=0.2, real_n=20, rails_supplied=True)
+    zset.promotion_state.update_promoted(W1, {wallet_floor.FLOOR_KEY: 150.0, wallet_floor.ROW_KEY: {
+        "chosen": 150.0, "at": {"150": {"n": 22, "roi": 0.16, "trimmed": 0.09, "ok": True}}}}, scope=zset.SCOPE)
+    b150 = _rows(W1, 20)
+    for p in b150[10:]:
+        p.won = False
+        p.pnl = p.ideal_pnl = -p.spent
+    quotes = {p.copy_id: 0.99 if p.won else 0.5 for p in b150}
+    monkeypatch.setattr(CONFIG, "copy_paper_b_books", "b300:300,b150:150")
+    monkeypatch.setattr(ft, "PaperCopyLedger", lambda path: type("L", (), {"positions": {p.copy_id: p for p in (b150 if "b150" in path else [])}})())
+    monkeypatch.setattr(ft.virtual_ledger, "quote_map", lambda rows: quotes)
+    monkeypatch.setattr(ft.shadow_quote, "load_rows", lambda: [])
+    monkeypatch.setattr(ft.era_state, "era_floor_ts", lambda p: 1.0)
+    text, summary = ft.receipt(now=time.time())
+    assert summary["z"] == 1 and summary["disagree"] == 1, (summary, text)
+    assert "backward at $150: +16% (trimmed +9%, n=22)" in text and "forward b150 at real quotes" in text and "DISAGREE" in text
+    assert "A retained baseline, not a verdict" in text
 
 
 def test_refresh_stores_the_row_on_the_record_once_a_day_and_reports_a_move(tmp_path, monkeypatch):
@@ -404,7 +459,7 @@ def test_the_scan_writes_the_floor_row_and_says_when_it_moves(tmp_path, monkeypa
     sent = []
     moved = ops_admit.refresh_floors({W1}, skip=set(), era=1.0, now=1000.0, send=lambda t, k: sent.append(t))
     assert moved == [W1] and calls["n"] == 1
-    assert sent and "Floor moved" in sent[0] and "LIVE_PER_WALLET_MIN_USD is off" in sent[0]
+    assert sent and "Floor moved" in sent[0] and "(switch off): real money keeps the global floor" in sent[0]
     rows = [r for r in ops_watch.ledger_rows(kinds={"floor_row"})]
     assert rows and rows[-1]["wallet"] == W1 and rows[-1]["floor_after"] == 150.0 and rows[-1]["push"] == "WALLET"
 

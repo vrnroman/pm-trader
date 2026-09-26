@@ -17,14 +17,16 @@ effect of the floor, not the absolute answer (no mirrored exits, no
 execution drag); the forward books B150 and B100 give that. The row says
 so on every line.
 
-What moves real money: nothing, until the owner flips
-``LIVE_PER_WALLET_MIN_USD=true``. With it off, the row is evidence on the
+What moves real money: nothing, until the owner sets
+``LIVE_PER_WALLET_MIN_USD``. Off (the default), the row is evidence on the
 record and on the phone and the live path keeps the global floor
-(``LIVE_MIN_TRADER_BET_USD``, else the paper floor). With it on, a wallet
+(``LIVE_MIN_TRADER_BET_USD``, else the paper floor). ``true``: a Z wallet
 whose record carries a chosen floor is copied from THAT floor, and a wallet
-with no chosen floor keeps the global. The switch ships off because a
-limit that changes what real money copies is his to move (the merge and
-the env), never the run's.
+with no chosen floor keeps the global. A comma-separated wallet list: only
+those wallets, the canary shape, so his first flip can be one wallet read
+on the DEAL lines. Anything else reads as off and is said once. The switch
+ships off because a limit that changes what real money copies is his to
+move (the merge and the env), never the run's.
 
 A leaf: config, promotion_state and the replay helpers; no logger writes
 of its own beyond what the callers say.
@@ -59,9 +61,56 @@ REFRESH_S = 24 * 3600.0
 DROP_TOP_N = 3
 
 
+MODE_NONE, MODE_ALL, MODE_LIST = "none", "all", "list"
+_TRUE = ("true", "1", "yes", "on", "all")
+_FALSE = ("", "false", "0", "no", "off", "none")
+_mode_said: set = set()
+
+
+def mode(raw=None) -> tuple[str, frozenset]:
+    """``LIVE_PER_WALLET_MIN_USD`` read fail-closed: ``(mode, wallets)``.
+
+    ``true`` is every Z wallet with a chosen floor; a comma-separated list of
+    addresses is those wallets only (the canary shape: one wallet's floor
+    moves while the rest keep the global); ``false`` or unset is none. A
+    value that is neither, or a list with a token that is not an address,
+    reads as none and is said once on an [ops] line: a floor that moves
+    real money must never switch on by a typo.
+    """
+    v = getattr(CONFIG, "live_per_wallet_min_usd", "false") if raw is None else raw
+    text = str(v if v is not None else "").strip().lower()
+    if text in _TRUE:
+        return (MODE_ALL, frozenset())
+    if text in _FALSE:
+        return (MODE_NONE, frozenset())
+    toks = [t.strip() for t in text.split(",") if t.strip()]
+    good = [t for t in toks if t.startswith("0x") and len(t) == 42 and all(c in "0123456789abcdef" for c in t[2:])]
+    if toks and len(good) == len(toks):
+        return (MODE_LIST, frozenset(good))
+    if text not in _mode_said:
+        _mode_said.add(text)
+        logger.warning(f"[ops] LIVE_PER_WALLET_MIN_USD={text[:60]!r} is neither true, false nor a wallet list: "
+                       f"read as false, real money keeps the global floor")
+    return (MODE_NONE, frozenset())
+
+
 def enabled() -> bool:
-    """Does a chosen floor move real money? Off unless the owner says so."""
-    return bool(getattr(CONFIG, "live_per_wallet_min_usd", False))
+    """Does a chosen floor move real money for anyone? False unless the
+    owner set the switch to true or to a wallet list."""
+    return mode()[0] != MODE_NONE
+
+
+def applies_to(wallet: str) -> tuple[bool, str]:
+    """Whether this wallet's chosen floor is live, and why in three words."""
+    m, wallets = mode()
+    key = (wallet or "").lower()
+    if m == MODE_ALL:
+        return (True, "all Z wallets")
+    if m == MODE_LIST and key in wallets:
+        return (True, "listed wallet")
+    if m == MODE_LIST:
+        return (False, "not listed")
+    return (False, "switch off")
 
 
 # --------------------------------------------------------------------------- #
@@ -171,11 +220,19 @@ def stored_floor(wallet: str) -> Optional[float]:
 
 def live_floor(wallet: str, default: float) -> float:
     """What real money copies this wallet from. The global floor unless the
-    owner flipped the switch AND the record carries a chosen floor."""
-    if not enabled():
-        return float(default)
+    owner's switch covers this wallet AND the record carries a chosen floor."""
+    return live_floor_why(wallet, default)[0]
+
+
+def live_floor_why(wallet: str, default: float) -> tuple[float, str]:
+    """``(floor, why)``: the floor and the reason it applies, for the phone."""
+    on, why = applies_to(wallet)
+    if not on:
+        return (float(default), f"the global floor ({why})")
     v = stored_floor(wallet)
-    return float(v) if v else float(default)
+    if not v:
+        return (float(default), f"the global floor (no chosen floor on the record; {why})")
+    return (float(v), f"this wallet's own floor ({why})")
 
 
 def _activity(wallet: str) -> Optional[list[dict]]:

@@ -120,8 +120,9 @@ def refresh_floors(wallets: set, *, skip: set, era, now: float, send=None) -> li
             moved.append(w)
             if send is not None:
                 try:
-                    live = ("real money copies it from there" if wallet_floor.enabled()
-                            else "evidence only: LIVE_PER_WALLET_MIN_USD is off, real money keeps the global floor")
+                    on, why = wallet_floor.applies_to(w)
+                    live = (f"real money copies it from there ({why})" if on
+                            else f"evidence only ({why}): real money keeps the global floor; LIVE_PER_WALLET_MIN_USD moves it")
                     send(f"📏 <b>Floor moved</b> <code>{w}</code>: ${before or 0:.0f} to ${after or 0:.0f}\n{line}\n{live}", None)
                 except Exception as exc:  # noqa: BLE001
                     logger.warn(f"[ops] floor message failed: {exc}")

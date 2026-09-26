@@ -883,10 +883,9 @@ async def place_trade_orders(
                 # The wallet's own floor when the owner flipped the switch
                 # (LIVE_PER_WALLET_MIN_USD); the global floor otherwise.
                 from src.copy_trading import wallet_floor
-                _floor = wallet_floor.live_floor(trade.trader_address, gov.min_trader_bet_usd)
+                _floor, _why_f = wallet_floor.live_floor_why(trade.trader_address, gov.min_trader_bet_usd)
                 if trade.size < _floor:
-                    _own = "this wallet's" if _floor != gov.min_trader_bet_usd else "the evidence base's"
-                    logger.skip(f"[exec] target bet ${trade.size:.0f} is under {_own} "
+                    logger.skip(f"[exec] target bet ${trade.size:.0f} is under {_why_f} "
                                 f"${_floor:.0f}: not copied")
                     mark_trade_as_seen(trade.id)
                     continue

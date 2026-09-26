@@ -231,11 +231,10 @@ def _evaluate_tiered_trade_with_state(
         # record carries it); the tier's floor otherwise. One answer here and
         # in the executor, or the earlier of the two checks would win.
         from src.copy_trading import wallet_floor
-        floor = wallet_floor.live_floor(trade.trader_address, cfg.min_trader_bet)
+        floor, why = wallet_floor.live_floor_why(trade.trader_address, cfg.min_trader_bet)
         if trade.size < floor:
             return skip(
-                f"Trader bet ${trade.size:.2f} < min_trader_bet ${floor:.2f} for tier {tier}"
-                + (" (this wallet's own floor)" if floor != cfg.min_trader_bet else "")
+                f"Trader bet ${trade.size:.2f} < min_trader_bet ${floor:.2f} for tier {tier} ({why})"
             )
 
     # 4. Price bounds
