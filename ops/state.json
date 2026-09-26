@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-26T05:21:14.364105+00:00",
+ "generated": "2026-09-26T07:40:27.133858+00:00",
  "money": {
   "cash": 112.890933,
   "open_cost": 6.4,
@@ -20,16 +20,15 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790399779.7867594,
+  "ts": 1790401890.3418005,
   "day": "2026-09-26"
  },
  "arm": {
-  "armed": true,
-  "ts": 1790399544.217656,
-  "by": "telegram",
-  "reason": "",
-  "first_armed_ts": 1788617432.0499406,
-  "floor_override": false
+  "armed": false,
+  "ts": 1790402016.6157641,
+  "by": "ai-sre",
+  "reason": "Chain fill reconciliation is fully down (RPC -32000 invalid block range) while armed, so the bot can still place copy orders it cannot confirm on chain; back to paper until you loo",
+  "first_armed_ts": 1788617432.0499406
  },
  "spend": {
   "date": "2026-09-26",
@@ -82,54 +81,466 @@
    "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
    "tier": "1b",
    "ts": 1786889554.1197178,
-   "source": "gate"
+   "source": "gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790402937.394338,
+    "n_acts": 4000,
+    "n_resolved_markets": 646,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 380,
+      "roi": 0.0146,
+      "trimmed": -0.0135,
+      "ok": false
+     },
+     "200": {
+      "n": 430,
+      "roi": 0.0297,
+      "trimmed": 0.0034,
+      "ok": false
+     },
+     "150": {
+      "n": 446,
+      "roi": 0.037,
+      "trimmed": 0.0102,
+      "ok": false
+     },
+     "100": {
+      "n": 481,
+      "roi": 0.0445,
+      "trimmed": 0.0198,
+      "ok": false
+     }
+    },
+    "chosen": null
+   },
+   "floor_usd": null
   },
   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
    "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
    "tier": "1b",
    "ts": 1788698181.3515182,
-   "source": "telegram-gate"
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790402951.5675707,
+    "n_acts": 4000,
+    "n_resolved_markets": 1144,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 437,
+      "roi": 0.0376,
+      "trimmed": 0.0147,
+      "ok": false
+     },
+     "200": {
+      "n": 504,
+      "roi": 0.0448,
+      "trimmed": 0.0246,
+      "ok": false
+     },
+     "150": {
+      "n": 546,
+      "roi": 0.0412,
+      "trimmed": 0.0225,
+      "ok": false
+     },
+     "100": {
+      "n": 622,
+      "roi": 0.0392,
+      "trimmed": 0.0228,
+      "ok": false
+     }
+    },
+    "chosen": null
+   },
+   "floor_usd": null
   },
   "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a": {
    "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
    "tier": "1b",
    "ts": 1788698182.8017697,
-   "source": "telegram-gate"
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790402964.3429935,
+    "n_acts": 4000,
+    "n_resolved_markets": 1415,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 47,
+      "roi": 0.0214,
+      "trimmed": -0.069,
+      "ok": false
+     },
+     "200": {
+      "n": 77,
+      "roi": 0.0166,
+      "trimmed": -0.0646,
+      "ok": false
+     },
+     "150": {
+      "n": 104,
+      "roi": 0.0244,
+      "trimmed": -0.0456,
+      "ok": false
+     },
+     "100": {
+      "n": 159,
+      "roi": 0.039,
+      "trimmed": -0.0107,
+      "ok": false
+     }
+    },
+    "chosen": null
+   },
+   "floor_usd": null
   },
   "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
    "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
    "tier": "1b",
    "ts": 1789491938.939273,
-   "source": "telegram-gate"
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790403012.1562374,
+    "n_acts": 4000,
+    "n_resolved_markets": 946,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 163,
+      "roi": 0.09,
+      "trimmed": 0.0548,
+      "ok": false
+     },
+     "200": {
+      "n": 178,
+      "roi": 0.0519,
+      "trimmed": 0.0191,
+      "ok": false
+     },
+     "150": {
+      "n": 204,
+      "roi": 0.0252,
+      "trimmed": -0.0038,
+      "ok": false
+     },
+     "100": {
+      "n": 246,
+      "roi": 0.0515,
+      "trimmed": 0.0226,
+      "ok": false
+     }
+    },
+    "chosen": null
+   },
+   "floor_usd": null
   },
   "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
    "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
    "tier": "1b",
    "ts": 1789752841.6491823,
-   "source": "telegram-gate"
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790403034.1411688,
+    "n_acts": 4000,
+    "n_resolved_markets": 1673,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 296,
+      "roi": 0.2121,
+      "trimmed": 0.1773,
+      "ok": true
+     },
+     "200": {
+      "n": 373,
+      "roi": 0.2017,
+      "trimmed": 0.1682,
+      "ok": true
+     },
+     "150": {
+      "n": 428,
+      "roi": 0.2023,
+      "trimmed": 0.1731,
+      "ok": true
+     },
+     "100": {
+      "n": 511,
+      "roi": 0.1979,
+      "trimmed": 0.1693,
+      "ok": true
+     }
+    },
+    "chosen": 300.0
+   },
+   "floor_usd": 300.0
   },
   "0xf49614e63fb15383d4a9b717a1be03ad2410fe79": {
    "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
    "tier": "1b",
    "ts": 1789827877.6900246,
-   "source": "telegram-gate"
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790403074.6571865,
+    "n_acts": 4000,
+    "n_resolved_markets": 173,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 179,
+      "roi": 0.0772,
+      "trimmed": 0.0067,
+      "ok": false
+     },
+     "200": {
+      "n": 214,
+      "roi": 0.0199,
+      "trimmed": -0.0409,
+      "ok": false
+     },
+     "150": {
+      "n": 224,
+      "roi": 0.0251,
+      "trimmed": -0.0329,
+      "ok": false
+     },
+     "100": {
+      "n": 229,
+      "roi": 0.0273,
+      "trimmed": -0.0293,
+      "ok": false
+     }
+    },
+    "chosen": null
+   },
+   "floor_usd": null
   },
   "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
    "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
    "tier": "1b",
    "ts": 1789992497.9469755,
-   "source": "telegram-gate"
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790403083.8554258,
+    "n_acts": 1065,
+    "n_resolved_markets": 174,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 100,
+      "roi": 0.116,
+      "trimmed": 0.0063,
+      "ok": true
+     },
+     "200": {
+      "n": 100,
+      "roi": 0.116,
+      "trimmed": 0.0063,
+      "ok": true
+     },
+     "150": {
+      "n": 100,
+      "roi": 0.1132,
+      "trimmed": 0.0034,
+      "ok": true
+     },
+     "100": {
+      "n": 100,
+      "roi": 0.1132,
+      "trimmed": 0.0034,
+      "ok": true
+     }
+    },
+    "chosen": 300.0
+   },
+   "floor_usd": 300.0
   },
   "0xd25156e222c9b907b128e27c36821fdb41db4d37": {
    "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
    "tier": "1b",
    "ts": 1790166550.4519851,
-   "source": "telegram-gate"
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790403093.1450658,
+    "n_acts": 4000,
+    "n_resolved_markets": 232,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 43,
+      "roi": 0.2283,
+      "trimmed": 0.0469,
+      "ok": true
+     },
+     "200": {
+      "n": 69,
+      "roi": 0.1561,
+      "trimmed": 0.0428,
+      "ok": true
+     },
+     "150": {
+      "n": 93,
+      "roi": 0.1034,
+      "trimmed": 0.0186,
+      "ok": true
+     },
+     "100": {
+      "n": 111,
+      "roi": 0.1021,
+      "trimmed": 0.0079,
+      "ok": true
+     }
+    },
+    "chosen": 300.0
+   },
+   "floor_usd": 300.0
   },
   "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43": {
    "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
    "tier": "1b",
    "ts": 1790266340.2195778,
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790403109.883757,
+    "n_acts": 2191,
+    "n_resolved_markets": 306,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 118,
+      "roi": 0.2493,
+      "trimmed": 0.1965,
+      "ok": true
+     },
+     "200": {
+      "n": 164,
+      "roi": 0.2549,
+      "trimmed": 0.2121,
+      "ok": true
+     },
+     "150": {
+      "n": 182,
+      "roi": 0.2872,
+      "trimmed": 0.2351,
+      "ok": true
+     },
+     "100": {
+      "n": 209,
+      "roi": 0.219,
+      "trimmed": 0.1727,
+      "ok": true
+     }
+    },
+    "chosen": 150.0
+   },
+   "floor_usd": 150.0
+  },
+  "0x09b045baad1fbe115c70785635a261411774a3b6": {
+   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+   "tier": "1b",
+   "ts": 1790408391.9935262,
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790408379.9945147,
+    "n_acts": 4000,
+    "n_resolved_markets": 1090,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 189,
+      "roi": 0.3047,
+      "trimmed": 0.255,
+      "ok": true
+     },
+     "200": {
+      "n": 252,
+      "roi": 0.4401,
+      "trimmed": 0.3501,
+      "ok": true
+     },
+     "150": {
+      "n": 288,
+      "roi": 0.4479,
+      "trimmed": 0.3461,
+      "ok": true
+     },
+     "100": {
+      "n": 328,
+      "roi": 0.4889,
+      "trimmed": 0.4001,
+      "ok": true
+     }
+    },
+    "chosen": 100.0
+   },
+   "floor_usd": 100.0
+  },
+  "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
+   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+   "tier": "1b",
+   "ts": 1790408419.3071265,
    "source": "telegram-gate"
   }
  },
@@ -142,7 +553,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-25T12:43:56Z-d6e4",
-  "admit_scan_ts": 1790397364.3330123,
+  "admit_scan_ts": 1790408373.9709096,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 7,
   "day_pnl": -6.4,
@@ -187,6 +598,14 @@
   },
   "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43": {
    "since": 1790266317.6788435,
+   "settled": 0
+  },
+  "0x09b045baad1fbe115c70785635a261411774a3b6": {
+   "since": 1790408379.9945147,
+   "settled": 0
+  },
+  "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
+   "since": 1790408379.9945147,
    "settled": 0
   }
  },
@@ -382,15 +801,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790316060.064088,
-   "day": "2026-09-25",
-   "kind": "analyst_study",
-   "before": "2026-09-25-wallet_cap-178163d7",
-   "after": "wallets in 32 -> 34 (stay 32, enter 2, leave 0); copies 3840 -> 2956; ROI at their price +9.0% -> +11.8%",
-   "detail": "estimate: 40 of 183 wallets studied (most settled first); over book B's own settled rows at their price; in = positive at their price on at least 10 settled cop",
-   "push": "BOT"
-  },
-  {
    "ts": 1790341080.423772,
    "day": "2026-09-25",
    "kind": "sre_started",
@@ -465,115 +875,68 @@
    "detail": "Chain CTF and NEG_RISK_CTF event reads are fully down (RPC -32000 invalid block range params) and chain is the primary fill and inventory channel, so an armed b",
    "push": "DEAL",
    "fingerprint": "6fbcddbc9dfb"
+  },
+  {
+   "ts": 1790400803.4656682,
+   "day": "2026-09-26",
+   "kind": "sre_escalate",
+   "before": "fingerprint dcba498fc237",
+   "after": "owner told",
+   "detail": "Still 164 chain read errors since you re-armed 40 min ago: the CTF feed the bot trades on is fully down, so it is live but blind, 0 traded today and 68 position",
+   "push": "BOT",
+   "fingerprint": "dcba498fc237"
+  },
+  {
+   "ts": 1790401865.099971,
+   "day": "2026-09-26",
+   "kind": "sre_disarm",
+   "before": "armed",
+   "after": "disarmed",
+   "detail": "Chain fill reconciliation is fully down (RPC -32000 invalid block range) while armed, so the bot can still place copy orders it cannot confirm on chain; back to",
+   "push": "DEAL",
+   "fingerprint": "dcba498fc237"
+  },
+  {
+   "ts": 1790402790.9767268,
+   "day": "2026-09-26",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
+  },
+  {
+   "ts": 1790404170.876388,
+   "day": "2026-09-26",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
+  },
+  {
+   "ts": 1790405122.9200625,
+   "day": "2026-09-26",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
+  },
+  {
+   "ts": 1790408379.9945147,
+   "day": "2026-09-26",
+   "kind": "auto_admit",
+   "before": "0x09b045ba not in Z",
+   "after": "in set Z, on probation",
+   "detail": "49 settled paper copies, paper ROI +36.9%, trimmed +28.0%, ideal +37.9%, real quotes +1.1% over 30 matched",
+   "push": "WALLET",
+   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+   "rail": "real quotes",
+   "floor": "copies at $100: 300 yes +30% (n=189, trimmed +26%) · 200 yes +44% (n=252, trimmed +35%) · 150 yes +45% (n=288, trimmed +35%) · 100 YES +49% (n=328, trimmed +40%); backward replay (copy-and-hold at their price, first entry, clean era)"
   }
  ],
  "important": [
-  "2026-09-25 11:31:06 ERROR Error fetching CTF events [94420482-94420483]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 11:31:06 ERROR Error fetching NEG_RISK_CTF events [94420482-94420483]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 11:56:06 ERROR Error fetching NEG_RISK_CTF events [94421482-94421483]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 11:59:24 ERROR Error fetching CTF events [94421594-94421595]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-25 12:05:41 ERROR Error fetching CTF events [94421846-94421846]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-25 12:07:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 12:12:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 12:19:29 ERROR Error fetching NEG_RISK_CTF events [94422418-94422419]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:19:41 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / $54.00",
-  "2026-09-25 12:19:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-25 12:19:41 ERROR [exec] Order placement failed: PolyApiException[status_code=None, error_message=Request exception!]",
-  "2026-09-25 12:19:41 INFO  [daily-cap] $6.40 reservation kept: the post's fate is ambiguous (no order id)",
-  "2026-09-25 12:19:41 ERROR [exec] Order placement returned None for '': exchange error: Request exception!",
-  "2026-09-25 12:21:06 ERROR Error fetching CTF events [94422482-94422483]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:21:06 ERROR Error fetching NEG_RISK_CTF events [94422482-94422483]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:31:07 ERROR Error fetching CTF events [94422879-94422884]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:31:07 ERROR Error fetching NEG_RISK_CTF events [94422879-94422884]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:31:42 ERROR Error fetching NEG_RISK_CTF events [94422907-94422908]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:36:05 ERROR Error fetching NEG_RISK_CTF events [94423082-94423083]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:40:00 ERROR Error fetching NEG_RISK_CTF events [94423219-94423219]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-25 12:41:38 ERROR Error fetching CTF events [94423304-94423305]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:41:38 ERROR Error fetching NEG_RISK_CTF events [94423304-94423305]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:44:24 ERROR Error fetching CTF events [94423414-94423415]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 12:57:29 INFO  Received signal 15, shutting down...",
-  "2026-09-25 12:57:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-25 12:57:54 INFO  Bot started. Monitoring trades...",
-  "2026-09-25 12:58:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 12:58:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 12:58:09 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 7 losing copies in a row, up from 4 a week ago. The bot's only alert fired once, at 4, on Sep 18 (bankrol",
-  "2026-09-25 13:02:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 13:02:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 13:03:05 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $19.20 / $54.00",
-  "2026-09-25 13:03:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-25 13:03:07 ERROR [exec] Order placement failed: PolyApiException[status_code=None, error_message=Request exception!]",
-  "2026-09-25 13:03:07 INFO  [daily-cap] $6.40 reservation kept: the post's fate is ambiguous (no order id)",
-  "2026-09-25 13:03:07 ERROR [exec] Order placement returned None for '': exchange error: Request exception!",
-  "2026-09-25 13:07:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 13:13:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 13:13:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 13:19:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
-  "2026-09-25 13:21:41 ERROR Network error fetching 0xf916...e770: Server disconnected without sending a response.",
-  "2026-09-25 13:21:41 ERROR Network error fetching 0x984f...9a43: Server disconnected without sending a response.",
-  "2026-09-25 13:23:28 INFO  Received signal 15, shutting down...",
-  "2026-09-25 13:24:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-25 13:24:06 INFO  Bot started. Monitoring trades...",
-  "2026-09-25 13:27:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 13:38:12 INFO  Received signal 15, shutting down...",
-  "2026-09-25 13:38:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-25 13:38:50 INFO  Bot started. Monitoring trades...",
-  "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43: ",
-  "2026-09-25 14:19:33 ERROR Network error fetching 0xf496...fe79: Server disconnected without sending a response.",
-  "2026-09-25 14:44:13 ERROR Error fetching NEG_RISK_CTF events [94428207-94428208]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 14:49:59 ERROR Error fetching NEG_RISK_CTF events [94428438-94428439]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 14:52:53 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $25.60 / $54.00",
-  "2026-09-25 14:52:54 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $19.20 / $200.00",
-  "2026-09-25 14:56:40 ERROR Error fetching CTF events [94428704-94428706]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 14:56:40 ERROR Error fetching NEG_RISK_CTF events [94428704-94428706]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 15:26:38 ERROR Error fetching CTF events [94429904-94429905]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 15:26:38 ERROR Error fetching NEG_RISK_CTF events [94429904-94429905]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 15:34:57 ERROR Error fetching CTF events [94430217-94430217]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-25 15:57:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-25 15:57:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-25 15:57:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-25 16:10:06 INFO  [ops] form: '0x722abb54 in form' -> 'benched' | 0x722abb54: 86 settled, 78% won vs 75% needed, net +6.1% on $164,749, worst day -3,391, 7 of 70 exits under 10 min",
-  "2026-09-25 16:11:09 ERROR Error fetching CTF events [94431684-94431685]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:11:09 ERROR Error fetching NEG_RISK_CTF events [94431684-94431685]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:14:30 ERROR Error fetching CTF events [94431819-94431820]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:14:30 ERROR Error fetching NEG_RISK_CTF events [94431819-94431820]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:21:06 ERROR Error fetching CTF events [94432082-94432083]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:23:40 ERROR Error fetching NEG_RISK_CTF events [94432186-94432186]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:23:53 ERROR Error fetching CTF events [94432194-94432194]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:30:58 ERROR Error fetching NEG_RISK_CTF events [94432477-94432478]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:33:58 ERROR Error fetching CTF events [94432597-94432598]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:44:14 ERROR Error fetching CTF events [94433008-94433009]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:44:14 ERROR Error fetching NEG_RISK_CTF events [94433008-94433009]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 16:50:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-25 16:51:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-25 17:01:56 ERROR Error fetching CTF events [94433716-94433716]: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-09-25 17:02:00 ERROR Error fetching CTF events [94433719-94433719]: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-09-25 17:06:12 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80",
-  "2026-09-25 17:06:12 INFO  [ops] probation_held: '0x722abb54 on probation (10 days on probation)' -> 'held: 0 live copy(ies) settled, under the 2 the bar needs' | untested is not failed; the clock keeps running",
-  "2026-09-25 17:17:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-25 17:17:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-25 17:21:05 ERROR Error fetching CTF events [94434482-94434483]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 17:32:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-25 17:32:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-25 17:44:41 ERROR Error fetching CTF events [94435406-94435406]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-25 17:47:47 ERROR Error fetching NEG_RISK_CTF events [94435530-94435530]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-25 17:50:02 ERROR Error fetching CTF events [94435640-94435641]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 17:50:09 ERROR Error fetching NEG_RISK_CTF events [94435645-94435645]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 17:50:22 ERROR Error fetching CTF events [94435653-94435654]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 17:50:28 ERROR Error fetching CTF events [94435657-94435658]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 17:50:28 ERROR Error fetching NEG_RISK_CTF events [94435657-94435658]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 17:50:41 ERROR Error fetching CTF events [94435666-94435666]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 17:50:41 ERROR Error fetching NEG_RISK_CTF events [94435666-94435666]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 17:57:13 ERROR Error fetching CTF events [94435907-94435908]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-25 18:04:23 ERROR Error fetching CTF events [94436214-94436215]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 18:06:27 ERROR Error fetching CTF events [94436297-94436298]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 18:10:22 ERROR Error fetching CTF events [94436453-94436454]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 18:10:22 ERROR Error fetching NEG_RISK_CTF events [94436453-94436454]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 18:16:05 ERROR Error fetching CTF events [94436682-94436683]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 18:16:05 ERROR Error fetching NEG_RISK_CTF events [94436682-94436683]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 18:36:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-25 18:36:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-25 18:36:18 ERROR Error fetching CTF events [94437491-94437492]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 18:36:19 ERROR Error fetching NEG_RISK_CTF events [94437491-94437492]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 18:41:06 ERROR Error fetching CTF events [94437682-94437683]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 18:41:06 ERROR Error fetching NEG_RISK_CTF events [94437682-94437683]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -858,6 +1221,100 @@
   "2026-09-26 05:13:35 ERROR Error fetching NEG_RISK_CTF events [94462982-94462983]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 05:14:45 ERROR Error fetching NEG_RISK_CTF events [94463029-94463029]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 05:15:02 ERROR Error fetching NEG_RISK_CTF events [94463040-94463041]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:24:55 ERROR Error fetching CTF events [94463436-94463436]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:25:23 ERROR Error fetching NEG_RISK_CTF events [94463454-94463455]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:26:04 ERROR Error fetching CTF events [94463481-94463482]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:26:29 ERROR Error fetching CTF events [94463498-94463499]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:26:29 ERROR Error fetching NEG_RISK_CTF events [94463498-94463499]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:26:56 ERROR Error fetching CTF events [94463516-94463517]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:28:52 ERROR Error fetching CTF events [94463593-94463594]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:29:28 ERROR Error fetching NEG_RISK_CTF events [94463617-94463618]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:29:53 ERROR Error fetching NEG_RISK_CTF events [94463634-94463635]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:29:58 ERROR Error fetching NEG_RISK_CTF events [94463637-94463638]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:31:08 ERROR Error fetching NEG_RISK_CTF events [94463684-94463685]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:31:33 ERROR Error fetching CTF events [94463701-94463702]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:31:40 ERROR Error fetching CTF events [94463705-94463706]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:31:40 ERROR Error fetching NEG_RISK_CTF events [94463705-94463706]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:33:01 ERROR Error fetching NEG_RISK_CTF events [94463759-94463760]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:33:07 ERROR Error fetching CTF events [94463764-94463764]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:33:37 ERROR Error fetching CTF events [94463783-94463784]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:34:47 ERROR Error fetching CTF events [94463830-94463831]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:40:12 ERROR Error fetching NEG_RISK_CTF events [94464047-94464048]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:40:48 ERROR Error fetching NEG_RISK_CTF events [94464071-94464072]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:40:55 ERROR Error fetching CTF events [94464075-94464076]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:41:05 ERROR Error fetching NEG_RISK_CTF events [94464082-94464083]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:42:57 ERROR Error fetching CTF events [94464157-94464157]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:44:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-26 05:44:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-26 05:46:10 ERROR Error fetching CTF events [94464285-94464286]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:47:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-26 05:47:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-26 05:47:33 ERROR Error fetching NEG_RISK_CTF events [94464341-94464342]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:49:31 ERROR Error fetching NEG_RISK_CTF events [94464419-94464420]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:49:39 ERROR Error fetching NEG_RISK_CTF events [94464425-94464426]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:50:48 ERROR Error fetching CTF events [94464471-94464472]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:51:41 ERROR Error fetching NEG_RISK_CTF events [94464506-94464507]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:55:59 ERROR Error fetching CTF events [94464678-94464679]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:57:24 ERROR Error fetching NEG_RISK_CTF events [94464735-94464735]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:58:05 ERROR Error fetching NEG_RISK_CTF events [94464762-94464763]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:58:15 ERROR Error fetching CTF events [94464769-94464770]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:58:18 ERROR Error fetching CTF events [94464771-94464771]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:58:18 ERROR Error fetching NEG_RISK_CTF events [94464771-94464771]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 05:59:05 ERROR Error fetching NEG_RISK_CTF events [94464802-94464803]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:00:54 ERROR Error fetching NEG_RISK_CTF events [94464875-94464875]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:01:01 ERROR Error fetching NEG_RISK_CTF events [94464879-94464880]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:01:40 ERROR Error fetching CTF events [94464905-94464906]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:01:40 ERROR Error fetching NEG_RISK_CTF events [94464905-94464906]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:02:44 ERROR Error fetching NEG_RISK_CTF events [94464948-94464949]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:04:20 ERROR Error fetching NEG_RISK_CTF events [94465012-94465013]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:05:13 ERROR Error fetching CTF events [94465047-94465048]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:06:00 INFO  Received signal 15, shutting down...",
+  "2026-09-26 06:06:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-26 06:06:27 INFO  Bot started. Monitoring trades...",
+  "2026-09-26 06:09:10 ERROR Error fetching NEG_RISK_CTF events [94465206-94465206]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:09:13 ERROR Error fetching NEG_RISK_CTF events [94465207-94465208]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:13:01 ERROR Error fetching CTF events [94465350-94465359]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:17:41 ERROR Error fetching NEG_RISK_CTF events [94465544-94465546]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:17:59 ERROR Error fetching NEG_RISK_CTF events [94465555-94465558]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:20:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:20:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:20:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:25:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:26:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:26:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:26:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:26:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:29:07 INFO  Received signal 15, shutting down...",
+  "2026-09-26 06:29:08 ERROR Error fetching CTF events [94465999-94466005]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:29:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-26 06:29:55 INFO  Bot started. Monitoring trades...",
+  "2026-09-26 06:30:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/book body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:30:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/book body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:31:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/book body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 06:31:39 ERROR Error fetching CTF events [94466105-94466105]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:31:39 ERROR Error fetching NEG_RISK_CTF events [94466105-94466105]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 06:45:05 INFO  Received signal 15, shutting down...",
+  "2026-09-26 06:45:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-09-26 06:45:48 INFO  Bot started. Monitoring trades...",
+  "2026-09-26 07:07:13 ERROR Error fetching CTF events [94467524-94467528]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 07:07:13 ERROR Error fetching NEG_RISK_CTF events [94467524-94467528]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 07:18:16 ERROR Error fetching NEG_RISK_CTF events [94467966-94467969]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 07:23:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 07:23:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 07:24:14 ERROR Error fetching CTF events [94468195-94468208]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 07:24:32 ERROR [inventory] API sync failed: ",
+  "2026-09-26 07:30:15 ERROR [inventory] API sync failed: ",
+  "2026-09-26 07:37:14 ERROR Error fetching NEG_RISK_CTF events [94468728-94468728]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 07:37:16 ERROR Error fetching NEG_RISK_CTF events [94468729-94468730]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 07:37:18 ERROR Error fetching NEG_RISK_CTF events [94468731-94468731]: {'code': -32000, 'message': 'invalid block range params'}",
+  "2026-09-26 07:39:52 WARNING [zset] ADMITTED 0x09b045baad1fbe115c70785635a261411774a3b6 to set Z (+28% over 46 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-26 07:39:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 07:39:56 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 07:40:18 INFO  [ops] auto_admit: '0x09b045ba not in Z' -> 'in set Z, on probation' | 49 settled paper copies, paper ROI +36.9%, trimmed +28.0%, ideal +37.9%, real quotes +1.1% over 30 matched",
+  "2026-09-26 07:40:19 WARNING [zset] ADMITTED 0x1985327e5782c62362dbbdf714c423d40d8f51ab to set Z (+34% over 33 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-26 07:40:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 07:40:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 07:40:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-25 08:27:59 ERROR Error fetching CTF events [94413158-94413159]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 10:16:24 ERROR Error fetching NEG_RISK_CTF events [94417468-94417474]: {'code': -32002, 'message': 'request timed out'}",
   "2026-09-25 12:57:54 INFO  [recovery] No pending orders to recover",
@@ -867,60 +1324,21 @@
   "2026-09-25 14:52:54 TRADE [verify] FILLED: BUY 10.16 shares on '' @ 0.6300",
   "2026-09-25 16:30:57 ERROR Error fetching NEG_RISK_CTF events [94432477-94432478]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-25 23:18:18 ERROR Error fetching CTF events [94448771-94448772]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off"
+  "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
+  "2026-09-26 06:06:27 INFO  [recovery] No pending orders to recover",
+  "2026-09-26 06:11:25 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5300 (from 0x3f3a...e8fd); the arm is off",
+  "2026-09-26 06:22:03 TRADE [DISARMED] would BUY $6.40 on '' @ 0.3700 (from 0x9f15...bdb3); the arm is off",
+  "2026-09-26 06:29:10 TRADE [DISARMED] would BUY $6.40 on '' @ 0.4400 (from 0x3f3a...e8fd); the arm is off",
+  "2026-09-26 06:29:55 INFO  [recovery] No pending orders to recover",
+  "2026-09-26 06:30:43 TRADE [DISARMED] would BUY $6.40 on 'North Macedonia vs. Switzerland: O/U 2.5' @ 0.4400 (from 0x3f3a...e8fd); the arm is off",
+  "2026-09-26 06:42:58 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5800 (from 0x3f3a...e8fd); the arm is off",
+  "2026-09-26 06:45:48 INFO  [recovery] No pending orders to recover",
+  "2026-09-26 06:56:56 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5800 (from 0x3f3a...e8fd); the arm is off",
+  "2026-09-26 07:08:56 TRADE [DISARMED] would BUY $6.40 on '' @ 0.6300 (from 0x3f3a...e8fd); the arm is off",
+  "2026-09-26 07:23:43 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5000 (from 0x3f3a...e8fd); the arm is off",
+  "2026-09-26 07:23:54 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5000 (from 0x3f3a...e8fd); the arm is off"
  ],
  "watcher": [
-  {
-   "ts": 1790316060.064088,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "proposal": "experiment",
-   "woke_because": "daily check of min150",
-   "concluded": "control differs from book B by -7.5 pp on 65 copies (tolerance 1.5): the harness, not the idea, is what moved",
-   "did": "exp min150 void: control differs from book B by -7.5 pp on 65 copies (tolerance 1.5): the harness, not the idea, is what moved",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790316060.064088,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "proposal": "study",
-   "woke_because": "daily study",
-   "concluded": "At a 5 per day wallet cap versus the live 3, over book B's own rows, how many extra copies enter and what do the ones the 3 cap turned away actually earn?",
-   "did": "study 2026-09-25-wallet_cap-178163d7 frozen: wallets in 32 -> 34 (stay 32, enter 2, leave 0); copies 3840 -> 2956; ROI at their price +9.0% -> +11.8%",
-   "cost_usd": 0.0,
-   "study_id": "2026-09-25-wallet_cap-178163d7"
-  },
-  {
-   "ts": 1790316060.064088,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "proposal": "note",
-   "woke_because": "daily study",
-   "concluded": "-7.5pp is how far min150's control drifted from book B on 65 copies at a 1.5pp tolerance, so the paper experiment harness cannot reproduce its own control and no experiment verdict is trustworthy until the control replay is made deterministic; hold new experiments until it is fixed.",
-   "counterfactual": "",
-   "did": "noted",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790316060.064088,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "proposal": "study",
-   "woke_because": "study 2026-09-25-wallet_cap-178163d7",
-   "concluded": "Cutting the wallet cap from 25 to 5 drops 884 copies (3840 to 2956) and lifts ROI at their price by +2.8pp (+9.0% to +11.8%), so the late daily tail is dilutive. But live is already 3, tighter than both arms, so this run says nothing about the 3 vs 5 copies the question asked and any move to 5 would only raise exposure.",
-   "did": "concluded; one question the menu cannot compute noted",
-   "cost_usd": 0.16329749999999998
-  },
-  {
-   "ts": 1790316060.064088,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "woke_because": "daily study",
-   "concluded": "Study wallet cap 3 vs 5 (the 3 cap turned away +32.93 of winners); hold experiments, the harness control drifted -7.5pp from book B.",
-   "did": "3 proposal(s): study 2026-09-25-wallet_cap-178163d7 frozen: wallets in 32 -; noted; concluded; one question the menu cannot compute noted",
-   "cost_usd": 0.50288
-  },
   {
    "ts": 1790338890.2227454,
    "day": "2026-09-25",
@@ -1240,6 +1658,142 @@
    "concluded": "1 wake(s) held: 4 already this hour",
    "did": "nothing (rate)",
    "cost_usd": 0.0
+  },
+  {
+   "ts": 1790400443.427056,
+   "day": "2026-09-26",
+   "woke_because": "6fbcddbc9dfb",
+   "kind": "held",
+   "concluded": "1 wake(s) held: 4 already this hour",
+   "did": "nothing (rate)",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790400803.4656682,
+   "day": "2026-09-26",
+   "woke_because": "dcba498fc237",
+   "fingerprint": "dcba498fc237",
+   "kind": "escalate",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "The chain RPC is rejecting CTF and NEG_RISK_CTF event reads with -32000 invalid block range params, so the bot's primary on-chain trade feed is fully down. This is the same fault the SRE already escalated and disarmed for one hour ago, but the owner re-armed via telegram 0.3h ago with no reason while the errors kept coming (164 hits on CTF plus 24 on the neg-risk twin since the disarm). Because chain is the primary signal and it is down, the bot has placed nothing today (spent_usd 0.0), so it is idle and blind rather than placing, sizing or doubling orders wrongly, which is why I am not overri",
+   "confidence": 0.72,
+   "cost_usd": 0.27710250000000003,
+   "did": "escalated",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790401280.8729014,
+   "day": "2026-09-26",
+   "woke_because": "6fbcddbc9dfb",
+   "fingerprint": "6fbcddbc9dfb",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "The Polygon RPC is returning -32000 invalid block range params on live CTF and NEG_RISK_CTF head polls, so the primary chain read path is down while the deploy at d5be6a3 is unchanged, which points to an RPC or node sync fault and not a code bug. I already disarmed for this 1.1h ago, the owner deliberately re-armed via telegram, and I escalated the persistence to his phone about 3 minutes ago, so the human has looked and chosen to hold it armed. No money has been spent today and no live orders have gone out since the re-arm, and the degraded API verify path still exists as backup, so there is ",
+   "confidence": 0.6,
+   "cost_usd": 0.5585935000000001,
+   "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790401624.9833918,
+   "day": "2026-09-26",
+   "woke_because": "dcba498fc237",
+   "kind": "held",
+   "concluded": "1 wake(s) held: 4 already this hour",
+   "did": "nothing (rate)",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790401865.099971,
+   "day": "2026-09-26",
+   "woke_because": "dcba498fc237",
+   "fingerprint": "dcba498fc237",
+   "kind": "disarm",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "The chain event reader is fully down because the RPC returns -32000 invalid block range params for CTF and NEG_RISK_CTF block polls, and chain is the primary fill reconciliation path (chain-only 656 vs api-only 8, CHAIN IS PRIMARY). The bot is armed and can still take copy signals from the API path, but it can no longer confirm those fills on chain, so a fill it cannot see could be re-placed or mis-stated. A prior SRE already disarmed for this exact cause; the owner re-armed with no reason and was escalated to again 40 minutes ago, yet the errors kept coming (170 more hits, last 0 min ago). Th",
+   "confidence": 0.6,
+   "cost_usd": 0.33603249999999996,
+   "did": "disarmed",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790402257.5439508,
+   "day": "2026-09-26",
+   "woke_because": "dcba498fc237",
+   "kind": "held",
+   "concluded": "1 wake(s) held: 4 already this hour",
+   "did": "nothing (rate)",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790402497.5712512,
+   "day": "2026-09-26",
+   "kind": "analyst",
+   "proposal": "experiment",
+   "woke_because": "daily check of min150-r1",
+   "concluded": "+10.6 pp vs control on 138 settled copies, day 1 of 14",
+   "did": "exp min150-r1 live: +10.6 pp vs control on 138 settled copies, day 1 of 14",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790402497.5712512,
+   "day": "2026-09-26",
+   "kind": "analyst",
+   "proposal": "postmortem",
+   "woke_because": "void of min150",
+   "concluded": "harness_pp -7.49 on 65 copies is within one standard error (recomputed se 7.9 pp; per-copy sd ~90 pp gives a chance band near +-31 pp), while the 48 matched copies both books took agreed to the cent (recomputed mismatch 0 of 30). The 1.5 pp whole-book tolerance that voided it (legacy why, not the harness_mismatch path) sits deep inside the noise, so a bad rule ended it, not a real harness disagree",
+   "did": "post-mortem: rule",
+   "cost_usd": 0.36878750000000005
+  },
+  {
+   "ts": 1790402791.4233766,
+   "day": "2026-09-26",
+   "kind": "analyst",
+   "proposal": "experiment",
+   "woke_because": "supervise",
+   "concluded": "started min150-r1 (pid 7, first start since this supervisor came up)",
+   "did": "started min150-r1 (pid 7, first start since this supervisor came up)",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790403272.3858454,
+   "day": "2026-09-26",
+   "woke_because": "dcba498fc237",
+   "fingerprint": "dcba498fc237",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "An external RPC node is returning -32000 invalid block range params on CTF and NEG_RISK_CTF event reads, which is the primary chain path for fill reconciliation. The bot is already disarmed to paper by a prior ai-sre action, so the 6 recurrences since the disarm place no real orders and cannot mis-confirm fills; they are harmless log noise while the outage persists. The owner was already escalated about this same fingerprint 33 minutes ago and the disarm is 15 minutes old, so a fresh escalate would only repeat. The source tree is not present on this box, so no verifiable fix is possible and th",
+   "confidence": 0.82,
+   "cost_usd": 0.336927,
+   "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790404291.371484,
+   "day": "2026-09-26",
+   "woke_because": "51c53b9cd7c8",
+   "kind": "held",
+   "concluded": "1 wake(s) held: 4 already this hour",
+   "did": "nothing (rate)",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790407524.410194,
+   "day": "2026-09-26",
+   "woke_because": "907b728a6b72",
+   "fingerprint": "907b728a6b72",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
+   "concluded": "The inventory API sync failed with an empty error string, which is the same Polymarket API and RPC outage that is already throwing 404 price errors, CTF invalid-block-range errors and the earlier 'API sync failed: Server disconnected' line (13ad3e5ddfe8). The bot is already disarmed by ai-sre for that outage, so it is in paper mode and no real money is at risk from stale inventory. The owner has already been told twice about the outage and there have been two disarms, so re-escalating this symptom would be noise. Worth one ledger line because it is a new fingerprint and the empty message means",
+   "confidence": 0.72,
+   "cost_usd": 0.1543575,
+   "did": "noted",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -1385,14 +1939,14 @@
   },
   "c47d62e70341": {
    "first": 1790098332.9559617,
-   "last": 1790343524.8922174,
-   "count": 21,
+   "last": 1790405123.1650474,
+   "count": 24,
    "sample": "2026-09-22 14:25:08 INFO  Received signal 15, shutting down...",
    "norm": "INFO Received signal N, shutting down...",
    "recent": [
-    1790341080.5944724,
-    1790342643.9186833,
-    1790343524.8922174
+    1790402791.0714102,
+    1790404171.1510243,
+    1790405123.1650474
    ],
    "action": null,
    "action_ts": null,
@@ -1401,14 +1955,14 @@
   },
   "6f12d4998994": {
    "first": 1790098332.9559617,
-   "last": 1790343644.8981104,
-   "count": 21,
+   "last": 1790405243.2329834,
+   "count": 24,
    "sample": "2026-09-22 14:25:37 INFO  [recovery] No pending orders to recover",
    "norm": "INFO [recovery] No pending orders to recover",
    "recent": [
-    1790341080.5944724,
-    1790342764.4929385,
-    1790343644.8981104
+    1790402791.0714102,
+    1790404291.371484,
+    1790405243.2329834
    ],
    "action": null,
    "action_ts": null,
@@ -1417,14 +1971,14 @@
   },
   "6b829965c182": {
    "first": 1790098332.9559617,
-   "last": 1790343644.8981104,
-   "count": 21,
+   "last": 1790405243.2329834,
+   "count": 24,
    "sample": "2026-09-22 14:25:37 INFO  Bot started. Monitoring trades...",
    "norm": "INFO Bot started. Monitoring trades...",
    "recent": [
-    1790341080.5944724,
-    1790342764.4929385,
-    1790343644.8981104
+    1790402791.0714102,
+    1790404291.371484,
+    1790405243.2329834
    ],
    "action": null,
    "action_ts": null,
@@ -1462,15 +2016,14 @@
   },
   "9d8a6d2794ec": {
    "first": 1790101843.0850005,
-   "last": 1790343644.8981104,
-   "count": 15,
+   "last": 1790405243.2329834,
+   "count": 18,
    "sample": "2026-09-22 18:30:34 ERROR [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}",
    "recent": [
-    1790341080.5944724,
-    1790342764.4929385,
-    1790343005.2600672,
-    1790343644.8981104
+    1790402791.0714102,
+    1790404291.371484,
+    1790405243.2329834
    ],
    "action": null,
    "action_ts": null,
@@ -1479,12 +2032,18 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790395833.4108055,
-   "count": 81,
+   "last": 1790407524.410194,
+   "count": 94,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790395833.4108055
+    1790403990.111836,
+    1790403990.111836,
+    1790403990.111836,
+    1790403990.111836,
+    1790403990.111836,
+    1790407524.410194,
+    1790407524.410194
    ],
    "action": null,
    "action_ts": null,
@@ -1535,13 +2094,15 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1790389650.7910197,
-   "count": 46,
+   "last": 1790401745.0927324,
+   "count": 50,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1790389650.7910197,
-    1790389650.7910197
+    1790401624.9833918,
+    1790401624.9833918,
+    1790401745.0927324,
+    1790401745.0927324
    ],
    "action": null,
    "action_ts": null,
@@ -1787,31 +2348,16 @@
   },
   "6fbcddbc9dfb": {
    "first": 1790347551.8864553,
-   "last": 1790399723.400475,
-   "count": 133,
+   "last": 1790408310.9690204,
+   "count": 167,
    "sample": "2026-09-25 14:44:13 ERROR Error fetching NEG_RISK_CTF events [94428207-94428208]: {'code': -32000, 'message': 'invalid block range params'}",
    "norm": "ERROR Error fetching NEG_RISK_CTF events [NN]: {'S': N, 'S': 'S'}",
    "recent": [
-    1790396433.460865,
-    1790397212.3620746,
-    1790397212.3620746,
-    1790397212.3620746,
-    1790397464.2797563,
-    1790397464.2797563,
-    1790397464.2797563,
-    1790397464.2797563,
-    1790397584.2853136,
-    1790398184.407604,
-    1790398184.407604,
-    1790398615.3606365,
-    1790399003.1840796,
-    1790399123.1909885,
-    1790399243.1962066,
-    1790399363.201164,
-    1790399363.201164,
-    1790399723.400475,
-    1790399723.400475,
-    1790399723.400475
+    1790406444.2975142,
+    1790407164.3411674,
+    1790408310.9690204,
+    1790408310.9690204,
+    1790408310.9690204
    ],
    "action": "disarm",
    "action_ts": 1790397212.3620746,
@@ -1821,42 +2367,31 @@
   },
   "dcba498fc237": {
    "first": 1790348314.5935838,
-   "last": 1790399483.2084332,
-   "count": 156,
+   "last": 1790407524.410194,
+   "count": 180,
    "sample": "2026-09-25 14:56:40 ERROR Error fetching CTF events [94428704-94428706]: {'code': -32000, 'message': 'invalid block range params'}",
    "norm": "ERROR Error fetching CTF events [NN]: {'S': N, 'S': 'S'}",
    "recent": [
-    1790395953.4385414,
-    1790395953.4385414,
-    1790396193.4501302,
-    1790396793.472252,
-    1790397033.480417,
-    1790397212.3620746,
-    1790397212.3620746,
-    1790397212.3620746,
-    1790397464.2797563,
-    1790397704.290714,
-    1790398064.4023864,
-    1790398375.3406417,
-    1790398855.3686247,
-    1790399003.1840796,
-    1790399363.201164,
-    1790399483.2084332,
-    1790399483.2084332
+    1790404171.1510243,
+    1790404412.3575783,
+    1790406444.2975142,
+    1790407524.410194
    ],
-   "action": null,
-   "action_ts": null,
+   "action": "disarm",
+   "action_ts": 1790401865.099971,
    "path_runs": 0,
-   "path_runs_ts": null
+   "path_runs_ts": null,
+   "action_detail": "Chain fill reconciliation is fully down (RPC -32000 invalid block range) while armed, so the bot can still place copy orders it cannot confirm on chain; back to paper until you loo"
   },
   "41cab7e764a5": {
    "first": 1790351832.0916538,
-   "last": 1790389650.7910197,
-   "count": 8,
+   "last": 1790401745.0927324,
+   "count": 10,
    "sample": "2026-09-25 15:57:06 ERROR [py_clob_client_v2] request error: The read operation timed out",
    "norm": "ERROR [py_clob_client_v2] request error: The read operation timed out",
    "recent": [
-    1790389650.7910197
+    1790401624.9833918,
+    1790401745.0927324
    ],
    "action": null,
    "action_ts": null,
@@ -1924,12 +2459,18 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1790398855.3686247,
-   "count": 1,
+   "last": 1790407524.410194,
+   "count": 10,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1790398855.3686247
+    1790404171.1510243,
+    1790404291.371484,
+    1790405012.4081237,
+    1790405844.0219681,
+    1790406564.3126051,
+    1790407524.410194,
+    1790407524.410194
    ],
    "action": null,
    "action_ts": null,
@@ -1944,6 +2485,37 @@
    "norm": "WARNING [live] ARMED for real orders by telegram: no reason given",
    "recent": [
     1790399603.2158184
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "51c53b9cd7c8": {
+   "first": 1790404291.371484,
+   "last": 1790404291.371484,
+   "count": 3,
+   "sample": "2026-09-26 06:30:36 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/book body={\"error\":\"No orderbook exists for the requested token id\"}",
+   "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/book body={'S':'S'}",
+   "recent": [
+    1790404291.371484,
+    1790404291.371484,
+    1790404291.371484
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "907b728a6b72": {
+   "first": 1790407524.410194,
+   "last": 1790407830.9301527,
+   "count": 2,
+   "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
+   "norm": "ERROR [inventory] API sync failed:",
+   "recent": [
+    1790407524.410194,
+    1790407830.9301527
    ],
    "action": null,
    "action_ts": null,
