@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-25T18:41:58Z-f53a",
-    "ts": 1790361718,
+    "id": "2026-09-26T00:19:00Z-7c31",
+    "ts": 1790381940,
     "kind": "nothing",
-    "message": "Armed, copying, spend and losses within known bounds; the loss streak escalation from this morning already went out and has not worsened.",
+    "message": "Armed, spend reset for the new day with no self-disarm or guard failure; the loss streak escalation already sent has not worsened and the errors are the same known transient API flakiness as prior cycles.",
     "evidence": [
-        "## arm: {\"armed\": true, ...}",
-        "## money state: {\"cash\": 112.890933, \"equity\": 119.29, \"spend\": {\"spent_usd\": 25.6, \"cap_usd\": 54.0}, \"armed\": true}",
-        "watch: {\"loss_streak\": 7, \"day_pnl\": -6.4, \"last_escalation_id\": \"2026-09-25T12:43:56Z-d6e4\", \"guard_fail_streak\": 0, \"daily_line_sent\": true}",
-        "in form  0x984ffef1: 31 settled, 71% won vs 53% needed, net +58.5% on $23,145, worst day -87",
-        "in form  0xd25156e2: 65 settled, 68% won vs 50% needed, net +38.2% on $35,891, worst day -1,488"
+        "## money state: {\"armed\": true, \"spend\": {\"date\": \"2026-09-26\", \"spent_usd\": 0.0, \"cap_usd\": 54.0, \"remaining_usd\": 54.0}}",
+        "watch: {\"loss_streak\": 7, \"day_pnl\": -6.4, \"guard_fail_streak\": 0, \"last_escalation_id\": \"2026-09-25T12:43:56Z-d6e4\", \"daily_line_sent\": true}",
+        "in form  0x984ffef1: 32 settled, 72% won vs 53% needed, net +56.3% on $23,930, worst day -87",
+        "in form  0xd25156e2: 66 settled, 67% won vs 50% needed, net +36.8% on $36,266, worst day -1,488",
+        "in form  0xf9168343: 53 settled, 55% won vs 48% needed, net +2.8% on $146,637, worst day -6,320"
     ],
     "commit": null
 }
