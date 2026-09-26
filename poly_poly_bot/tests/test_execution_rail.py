@@ -254,6 +254,35 @@ def test_a_lower_book_rides_the_same_observer_on_its_own_budget_and_a_zero_budge
     assert "b150: 1 quoted of 2 new, 1 dropped at the cap" in line and "primary: 1 quoted of 1 new" in line
 
 
+def test_a_trade_a_lower_book_dropped_at_its_budget_is_still_quoted_by_the_primary(monkeypatch):
+    """The verifier's reproduction (s-wo3xsp): b150 sweeps first with a budget
+    of 1 over two trades; the primary, with room for forty, must quote the
+    second, not read it as already seen."""
+    observer, stop, queued = _observer(monkeypatch, cap=40)
+    try:
+        b150 = shadow_quote.budgeted(observer, 1, "b150")
+        b150([{"copy_id": "x1", "target": W1}, {"copy_id": "x2", "target": W1}])
+        observer([{"copy_id": "x1", "target": W1}, {"copy_id": "x2", "target": W1}])
+        deadline = time.time() + 3
+        while len(queued) < 2 and time.time() < deadline:
+            time.sleep(0.05)
+    finally:
+        stop()
+    assert sorted(queued) == ["x1", "x2"], queued
+    books = {r["book"]: r for r in shadow_quote.coverage_rows()}
+    assert books["b150"]["dropped"] == 1 and books["primary"]["queued"] == 1 and books["primary"]["already"] == 1
+
+
+def test_the_receipt_scripts_run_as_plain_files_too(tmp_path):
+    import subprocess
+    import sys as _sys
+    for name in ("rail_swap_receipt", "floor_truth_receipt"):
+        r = subprocess.run([_sys.executable, "-c",
+                            f"import runpy, sys; sys.argv=['x','--help']; runpy.run_path('scripts/{name}.py', run_name='__main__')"],
+                           capture_output=True, text=True, timeout=60)
+        assert r.returncode == 0 and "--out" in r.stdout, (name, r.stdout[-300:], r.stderr[-300:])
+
+
 def test_the_cap_and_the_lower_budget_come_from_the_environment(monkeypatch):
     monkeypatch.setenv("SHADOW_MAX_SAMPLES_PER_SWEEP", "75")
     monkeypatch.setenv("SHADOW_LOWER_BOOK_BUDGET", "0")
@@ -504,6 +533,7 @@ def test_the_bot_ends_itself_before_docker_force_kills_it():
     assert 'SHUTDOWN_DEADLINE_S = float(os.environ.get("SHUTDOWN_DEADLINE_S", "8") or 8)' in src
     hard = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_hard_exit")
     assert "os._exit(0)" in ast.unparse(hard) and "threads still running" in ast.unparse(hard)
+    assert "MainThread" in ast.unparse(hard), "the main thread is not 'still running'; it is the one being ended"
 
 
 def test_the_sidecar_traps_sigterm_because_pid_1_ignores_the_default():

@@ -1429,7 +1429,8 @@ SHUTDOWN_DEADLINE_S = float(os.environ.get("SHUTDOWN_DEADLINE_S", "8") or 8)
 
 
 def _hard_exit() -> None:
-    alive = sorted(t.name for t in threading.enumerate() if t is not threading.current_thread())
+    alive = sorted(t.name for t in threading.enumerate()
+                   if t is not threading.current_thread() and t.name != "MainThread")
     logger.warning(f"[shutdown] {SHUTDOWN_DEADLINE_S:.0f}s deadline reached; ending the process "
                    f"with these threads still running: {', '.join(alive) or 'none'}")
     try:

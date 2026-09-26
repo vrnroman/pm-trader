@@ -514,7 +514,13 @@ def make_observer(clob_client_factory, queue_max: int = 500):
             # and mark the skipped ones seen, so what is measured stays a
             # clean per-sweep head rather than an ever-lagging tail.
             if queued >= cap:
-                if cid:
+                # Under the PRIMARY's cap the skipped trade is marked seen, so
+                # what is measured stays a clean per-sweep head. Under a lower
+                # book's budget it is NOT: the primary, with room for forty,
+                # must still get to quote it. Marking it seen here made a
+                # lower book's budget of ten the primary's effective cap
+                # whenever the lower book swept first (verifier, s-wo3xsp).
+                if cid and budget is None:
                     seen.add(cid)
                 dropped += 1
                 continue
