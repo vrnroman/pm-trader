@@ -1,14 +1,14 @@
 {
- "generated": "2026-09-26T10:09:50.591309+00:00",
+ "generated": "2026-09-26T13:04:50.042311+00:00",
  "money": {
-  "cash": 116.168433,
-  "open_cost": 4.5,
-  "equity": 120.67,
+  "cash": 103.072403,
+  "open_cost": 17.3,
+  "equity": 120.37,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-26",
-   "spent_usd": 6.4,
+   "spent_usd": 19.2,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 68,
   "tier": {
    "1a": 0,
-   "1b": 12.8,
+   "1b": 25.6,
    "1c": 0
   },
-  "ts": 1790417110.8416793,
+  "ts": 1790427822.8154614,
   "day": "2026-09-26"
  },
  "arm": {
@@ -35,9 +35,11 @@
  },
  "spend": {
   "date": "2026-09-26",
-  "spent_usd": 6.4,
+  "spent_usd": 19.2,
   "wallet_copies": {
-   "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1
+   "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1,
+   "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43": 1,
+   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1
   },
   "wallet_copies_yesterday": {
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
@@ -54,9 +56,9 @@
    "placements": []
   },
   "1b": {
-   "open_total": 12.8,
+   "open_total": 25.6,
    "daily_date": "2026-09-26",
-   "daily_volume": 6.4,
+   "daily_volume": 19.200000000000003,
    "placements": [
     {
      "token_id": "87131648918137474349304257527344538579233235348393719175219550429557466113538",
@@ -70,6 +72,20 @@
      "cost": 6.4,
      "ts": 1790415555.8161044,
      "trader": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+     "title": ""
+    },
+    {
+     "token_id": "92536838434496120066336867329720712347011757598910765112207122349920164573458",
+     "cost": 6.4,
+     "ts": 1790425332.16572,
+     "trader": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
+     "title": "Map Handicap: HERO (-1.5) vs Sangal (+1.5)"
+    },
+    {
+     "token_id": "58626443203690482438828308938112817407824673439746787776021894252069836787068",
+     "cost": 6.4,
+     "ts": 1790426721.738925,
+     "trader": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
      "title": ""
     }
    ]
@@ -633,18 +649,156 @@
     "chosen": 200.0
    },
    "floor_usd": 200.0
+  },
+  "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+   "tier": "1b",
+   "ts": 1790419382.3355591,
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790419321.1807199,
+    "n_acts": 4000,
+    "n_resolved_markets": 1805,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 299,
+      "roi": -0.0176,
+      "trimmed": -0.0473,
+      "ok": false
+     },
+     "200": {
+      "n": 353,
+      "roi": -0.0056,
+      "trimmed": -0.0518,
+      "ok": false
+     },
+     "150": {
+      "n": 388,
+      "roi": 0.018,
+      "trimmed": -0.0266,
+      "ok": false
+     },
+     "100": {
+      "n": 419,
+      "roi": 0.0416,
+      "trimmed": -0.0053,
+      "ok": false
+     }
+    },
+    "chosen": null
+   },
+   "floor_usd": null
+  },
+  "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
+   "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
+   "tier": "1b",
+   "ts": 1790419516.3906574,
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790419321.1807199,
+    "n_acts": 4000,
+    "n_resolved_markets": 227,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 64,
+      "roi": 0.3523,
+      "trimmed": 0.1587,
+      "ok": true
+     },
+     "200": {
+      "n": 80,
+      "roi": 0.3118,
+      "trimmed": 0.148,
+      "ok": true
+     },
+     "150": {
+      "n": 91,
+      "roi": 0.2654,
+      "trimmed": 0.1145,
+      "ok": true
+     },
+     "100": {
+      "n": 105,
+      "roi": 0.2965,
+      "trimmed": 0.1446,
+      "ok": true
+     }
+    },
+    "chosen": 300.0
+   },
+   "floor_usd": 300.0
+  },
+  "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
+   "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+   "tier": "1b",
+   "ts": 1790419544.395236,
+   "source": "telegram-gate",
+   "floor_row": {
+    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
+    "ts": 1790419321.1807199,
+    "n_acts": 4000,
+    "n_resolved_markets": 686,
+    "era": 1784976482.215206,
+    "bars": {
+     "min_n": 15,
+     "min_roi": 0.1,
+     "trimmed_min": 0.0
+    },
+    "at": {
+     "300": {
+      "n": 161,
+      "roi": -0.0379,
+      "trimmed": -0.0666,
+      "ok": false
+     },
+     "200": {
+      "n": 264,
+      "roi": 0.0001,
+      "trimmed": -0.023,
+      "ok": false
+     },
+     "150": {
+      "n": 330,
+      "roi": -0.013,
+      "trimmed": -0.0315,
+      "ok": false
+     },
+     "100": {
+      "n": 408,
+      "roi": -0.0307,
+      "trimmed": -0.0466,
+      "ok": false
+     }
+    },
+    "chosen": null
+   },
+   "floor_usd": null
   }
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 120.67,
+  "last_equity": 120.37,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-26T06:43:00Z-4a77",
-  "admit_scan_ts": 1790408373.9709096,
+  "admit_scan_ts": 1790419320.2807124,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 7,
   "day_pnl": -6.4,
@@ -658,7 +812,7 @@
    "7176164693333913912271980594552279937832227503542042198140094468727106225171",
    "114415763702250973760299499587430450894909671709658162852834453684441658587440"
   ],
-  "form_scan_ts": 1790396111.0383916,
+  "form_scan_ts": 1790417746.449748,
   "daily_line_attempt_day": "2026-09-26",
   "daily_line_sent": true,
   "daily_line_day": "2026-09-26",
@@ -702,51 +856,123 @@
   "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {
    "since": 1790408379.9945147,
    "settled": 0
+  },
+  "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
+   "since": 1790419321.1807199,
+   "settled": 0
+  },
+  "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
+   "since": 1790419321.1807199,
+   "settled": 0
+  },
+  "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
+   "since": 1790419321.1807199,
+   "settled": 0
   }
  },
  "form": {
-  "ts": 1790408373.9709096,
+  "ts": 1790419320.2807124,
   "version": 4,
   "wallets": {
    "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
     "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
-    "n": 215,
-    "won": 183,
-    "cost": 199177.94,
-    "back": 232911.77,
-    "avg_price": 0.6920938474289386,
+    "n": 216,
+    "won": 184,
+    "cost": 201805.17,
+    "back": 235854.24,
+    "avg_price": 0.6941609467763749,
     "worst_day": -2111.56,
     "ok": false,
     "reason": "scalper: 51% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790396111.8173714,
+    "ts": 1790417747.4617927,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 43,
     "flips": 22,
     "last_trade_ts": 1790392670.0,
-    "hit": 0.8512,
-    "net_pct": 16.94
+    "hit": 0.8519,
+    "net_pct": 16.87
+   },
+   "0x09b045baad1fbe115c70785635a261411774a3b6": {
+    "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+    "n": 31,
+    "won": 22,
+    "cost": 12219.58,
+    "back": 13466.75,
+    "avg_price": 0.5826267542575639,
+    "worst_day": -332.99,
+    "ok": false,
+    "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
+    "ts": 1790417747.4617927,
+    "rows": 3000,
+    "covered_days": 14.0,
+    "capped": false,
+    "exits": 30,
+    "flips": 30,
+    "last_trade_ts": 1790410386.0,
+    "hit": 0.7097,
+    "net_pct": 10.21
+   },
+   "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
+    "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+    "n": 51,
+    "won": 36,
+    "cost": 19606.51,
+    "back": 22903.59,
+    "avg_price": 0.5399160891171141,
+    "worst_day": -535.02,
+    "ok": false,
+    "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
+    "ts": 1790417747.4617927,
+    "rows": 3000,
+    "covered_days": 14.0,
+    "capped": false,
+    "exits": 49,
+    "flips": 49,
+    "last_trade_ts": 1790415156.0,
+    "hit": 0.7059,
+    "net_pct": 16.82
    },
    "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": {
     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
-    "n": 231,
-    "won": 118,
-    "cost": 690647.75,
-    "back": 729490.37,
-    "avg_price": 0.5404517488258282,
+    "n": 222,
+    "won": 110,
+    "cost": 677670.53,
+    "back": 705364.82,
+    "avg_price": 0.5371896454348375,
     "worst_day": -24321.05,
     "ok": false,
-    "reason": "51% came out ahead vs 54% needed (-3 points, need +3)",
-    "ts": 1790396111.8173714,
+    "reason": "50% came out ahead vs 54% needed (-4 points, need +3)",
+    "ts": 1790417747.4617927,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 6,
     "flips": 1,
-    "last_trade_ts": 1790389320.0,
-    "hit": 0.5108,
-    "net_pct": 5.62
+    "last_trade_ts": 1790417672.0,
+    "hit": 0.4955,
+    "net_pct": 4.09
+   },
+   "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {
+    "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
+    "n": 5,
+    "won": 2,
+    "cost": 6145.74,
+    "back": 9494.75,
+    "avg_price": 0.42094109927472556,
+    "worst_day": -1358.43,
+    "ok": false,
+    "reason": "only 5 settled bets on our slice in 14 days (need 30)",
+    "ts": 1790417747.4617927,
+    "rows": 3500,
+    "covered_days": 14.0,
+    "capped": false,
+    "exits": 1,
+    "flips": 0,
+    "last_trade_ts": 1790413331.0,
+    "hit": 0.4,
+    "net_pct": 54.49
    },
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
@@ -758,7 +984,7 @@
     "worst_day": -3391.19,
     "ok": false,
     "reason": "77% came out ahead vs 75% needed (+2 points, need +3)",
-    "ts": 1790396111.8173714,
+    "ts": 1790417747.4617927,
     "rows": 2000,
     "covered_days": 14.0,
     "capped": false,
@@ -778,75 +1004,75 @@
     "worst_day": -87.05,
     "ok": true,
     "reason": "72% came out ahead vs 53% needed, net +56.3%",
-    "ts": 1790396111.8173714,
+    "ts": 1790417747.4617927,
     "rows": 2000,
     "covered_days": 14.0,
     "capped": false,
     "exits": 8,
     "flips": 3,
-    "last_trade_ts": 1790353172.0,
+    "last_trade_ts": 1790417663.0,
     "hit": 0.7188,
     "net_pct": 56.26
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "n": 342,
-    "won": 178,
-    "cost": 1090192.82,
-    "back": 1158366.7,
-    "avg_price": 0.47978741825146837,
-    "worst_day": -31087.56,
+    "n": 336,
+    "won": 173,
+    "cost": 1058058.86,
+    "back": 1123590.46,
+    "avg_price": 0.4780313423424448,
+    "worst_day": -32014.32,
     "ok": false,
     "reason": "scalper: 72% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790396111.8173714,
+    "ts": 1790417747.4617927,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 18,
     "flips": 13,
-    "last_trade_ts": 1790391689.0,
-    "hit": 0.5205,
-    "net_pct": 6.25
+    "last_trade_ts": 1790415669.0,
+    "hit": 0.5149,
+    "net_pct": 6.19
    },
    "0xd25156e222c9b907b128e27c36821fdb41db4d37": {
     "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
-    "n": 68,
-    "won": 44,
-    "cost": 38469.06,
-    "back": 49605.13,
-    "avg_price": 0.47844531175571464,
-    "worst_day": -2190.88,
+    "n": 70,
+    "won": 46,
+    "cost": 40114.35,
+    "back": 52695.3,
+    "avg_price": 0.4822455172619408,
+    "worst_day": -1860.03,
     "ok": true,
-    "reason": "65% came out ahead vs 48% needed, net +28.9%",
-    "ts": 1790396111.8173714,
+    "reason": "66% came out ahead vs 48% needed, net +31.4%",
+    "ts": 1790417747.4617927,
     "rows": 5500,
-    "covered_days": 9.791166867724172,
+    "covered_days": 10.008940530008188,
     "capped": true,
     "exits": 27,
     "flips": 3,
-    "last_trade_ts": 1790371326.0,
-    "hit": 0.6471,
-    "net_pct": 28.95
+    "last_trade_ts": 1790415677.0,
+    "hit": 0.6571,
+    "net_pct": 31.36
    },
    "0xf49614e63fb15383d4a9b717a1be03ad2410fe79": {
     "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
-    "n": 68,
-    "won": 35,
-    "cost": 233296.85,
-    "back": 259255.72,
-    "avg_price": 0.5064458451843573,
+    "n": 63,
+    "won": 31,
+    "cost": 205682.65,
+    "back": 197569.68,
+    "avg_price": 0.5235054056741618,
     "worst_day": -11770.62,
     "ok": false,
-    "reason": "scalper: 40% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790396111.8173714,
+    "reason": "49% came out ahead vs 52% needed (-3 points, need +3)",
+    "ts": 1790417747.4617927,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
-    "exits": 10,
+    "exits": 8,
     "flips": 4,
     "last_trade_ts": 1790380674.0,
-    "hit": 0.5147,
-    "net_pct": 11.13
+    "hit": 0.4921,
+    "net_pct": -3.94
    },
    "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
     "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
@@ -858,7 +1084,7 @@
     "worst_day": -6319.64,
     "ok": true,
     "reason": "55% came out ahead vs 48% needed, net +2.8%",
-    "ts": 1790396111.8173714,
+    "ts": 1790417747.4617927,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
@@ -870,83 +1096,83 @@
    },
    "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a": {
     "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
-    "n": 68,
-    "won": 43,
-    "cost": 49835.75,
-    "back": 47457.6,
-    "avg_price": 0.7022153147465129,
+    "n": 70,
+    "won": 45,
+    "cost": 51751.78,
+    "back": 49683.1,
+    "avg_price": 0.7070414918467591,
     "worst_day": -2631.81,
     "ok": false,
     "reason": "scalper: 86% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790396111.8173714,
+    "ts": 1790417747.4617927,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 22,
     "flips": 19,
-    "last_trade_ts": 1790392686.0,
-    "hit": 0.6324,
-    "net_pct": -4.77
+    "last_trade_ts": 1790416386.0,
+    "hit": 0.6429,
+    "net_pct": -4.0
    },
-   "0x09b045baad1fbe115c70785635a261411774a3b6": {
-    "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-    "n": 31,
-    "won": 22,
-    "cost": 12219.58,
-    "back": 13466.75,
-    "avg_price": 0.5826267542575639,
-    "worst_day": -332.99,
+   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
+    "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+    "n": 88,
+    "won": 41,
+    "cost": 43854.62,
+    "back": 47166.04,
+    "avg_price": 0.37982824387518693,
+    "worst_day": -2314.16,
+    "ok": true,
+    "reason": "47% came out ahead vs 38% needed, net +7.6%",
+    "ts": 1790419320.2807124,
+    "rows": 4500,
+    "covered_days": 14.0,
+    "capped": false,
+    "exits": 6,
+    "flips": 2,
+    "last_trade_ts": 1790418336.0,
+    "hit": 0.4659,
+    "net_pct": 7.55
+   },
+   "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
+    "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
+    "n": 6,
+    "won": 5,
+    "cost": 4088.87,
+    "back": 7465.55,
+    "avg_price": 0.7199124827455069,
+    "worst_day": -329.83,
     "ok": false,
-    "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790408373.9709096,
+    "reason": "only 6 settled bets on our slice in 14 days (need 30)",
+    "ts": 1790419320.2807124,
     "rows": 3000,
     "covered_days": 14.0,
     "capped": false,
-    "exits": 30,
-    "flips": 30,
-    "last_trade_ts": 1790398751.0,
-    "hit": 0.7097,
-    "net_pct": 10.21
-   },
-   "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
-    "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-    "n": 51,
-    "won": 36,
-    "cost": 19606.51,
-    "back": 22903.59,
-    "avg_price": 0.5399160891171141,
-    "worst_day": -535.02,
-    "ok": false,
-    "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790408373.9709096,
-    "rows": 3000,
-    "covered_days": 14.0,
-    "capped": false,
-    "exits": 49,
-    "flips": 49,
-    "last_trade_ts": 1790390256.0,
-    "hit": 0.7059,
-    "net_pct": 16.82
-   },
-   "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {
-    "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
-    "n": 5,
-    "won": 2,
-    "cost": 6145.74,
-    "back": 9494.75,
-    "avg_price": 0.42094109927472556,
-    "worst_day": -1358.43,
-    "ok": false,
-    "reason": "only 5 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790408373.9709096,
-    "rows": 3500,
-    "covered_days": 14.0,
-    "capped": false,
-    "exits": 1,
+    "exits": 4,
     "flips": 0,
-    "last_trade_ts": 1790334225.0,
-    "hit": 0.4,
-    "net_pct": 54.49
+    "last_trade_ts": 1790418521.0,
+    "hit": 0.8333,
+    "net_pct": 82.58
+   },
+   "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
+    "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+    "n": 0,
+    "won": 0,
+    "cost": 0.0,
+    "back": 0.0,
+    "avg_price": 0.0,
+    "worst_day": 0.0,
+    "ok": false,
+    "reason": "only 0 settled bets on our slice in 14 days (need 30)",
+    "ts": 1790419320.2807124,
+    "rows": 2000,
+    "covered_days": 14.0,
+    "capped": false,
+    "exits": 0,
+    "flips": 0,
+    "last_trade_ts": 1788842812.0,
+    "hit": 0.0,
+    "net_pct": 0.0
    }
   },
   "overrides": {},
@@ -955,24 +1181,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1790341080.423772,
-   "day": "2026-09-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1790341088.5600715,
-   "day": "2026-09-25",
-   "kind": "escalation_delivered",
-   "before": "routine escalation",
-   "after": "sent",
-   "detail": "Loss streak is 7 losing copies in a row, up from 4 a week ago. The bot's only alert fired once, at 4, on Sep 18 (bankrol",
-   "push": "BOT"
-  },
   {
    "ts": 1790342643.4500165,
    "day": "2026-09-25",
@@ -1170,38 +1378,75 @@
    "after": "watching",
    "detail": "tick 120s",
    "push": null
+  },
+  {
+   "ts": 1790419321.1807199,
+   "day": "2026-09-26",
+   "kind": "auto_admit",
+   "before": "0x5213eb85 not in Z",
+   "after": "in set Z, on probation",
+   "detail": "77 settled paper copies, paper ROI +21.0%, trimmed +10.5%, ideal +22.0%, real quotes +16.3% over 77 matched",
+   "push": "WALLET",
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+   "rail": "real quotes",
+   "floor": "no floor clears the bars, global floor stays: 300 no -2% (n=299, trimmed -5%) · 200 no -1% (n=353, trimmed -5%) · 150 no +2% (n=388, trimmed -3%) · 100 no +4% (n=419, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)"
+  },
+  {
+   "ts": 1790419321.1807199,
+   "day": "2026-09-26",
+   "kind": "auto_admit",
+   "before": "0x73653992 not in Z",
+   "after": "in set Z, on probation",
+   "detail": "41 settled paper copies, paper ROI +15.2%, trimmed +9.2%, ideal +16.2%, real quotes +8.8% over 26 matched",
+   "push": "WALLET",
+   "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
+   "rail": "real quotes",
+   "floor": "copies at $300: 300 YES +35% (n=64, trimmed +16%) · 200 yes +31% (n=80, trimmed +15%) · 150 yes +27% (n=91, trimmed +11%) · 100 yes +30% (n=105, trimmed +14%); backward replay (copy-and-hold at their price, first entry, clean era)"
+  },
+  {
+   "ts": 1790419321.1807199,
+   "day": "2026-09-26",
+   "kind": "auto_admit",
+   "before": "0xeef6ad0e not in Z",
+   "after": "in set Z, on probation",
+   "detail": "75 settled paper copies, paper ROI +10.5%, trimmed +2.8%, ideal +18.1%, real quotes +14.2% over 41 matched",
+   "push": "WALLET",
+   "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+   "rail": "real quotes",
+   "floor": "no floor clears the bars, global floor stays: 300 no -4% (n=161, trimmed -7%) · 200 no +0% (n=264, trimmed -2%) · 150 no -1% (n=330, trimmed -3%) · 100 no -3% (n=408, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)"
+  },
+  {
+   "ts": 1790419320.2807124,
+   "day": "2026-09-26",
+   "kind": "form",
+   "before": "0x5213eb85 unknown",
+   "after": "in form",
+   "detail": "0x5213eb85: 88 settled, 47% won vs 38% needed, net +7.6% on $43,855, worst day -2,314, 2 of 6 exits under 10 min",
+   "push": null,
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
+  },
+  {
+   "ts": 1790419320.2807124,
+   "day": "2026-09-26",
+   "kind": "form",
+   "before": "0x73653992 unknown",
+   "after": "benched",
+   "detail": "0x73653992: 6 settled, 83% won vs 72% needed, net +82.6% on $4,089, worst day -330, 0 of 4 exits under 10 min",
+   "push": null,
+   "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da"
+  },
+  {
+   "ts": 1790419320.2807124,
+   "day": "2026-09-26",
+   "kind": "form",
+   "before": "0xeef6ad0e unknown",
+   "after": "benched",
+   "detail": "0xeef6ad0e: no settled bets on our slice in 14 days",
+   "push": null,
+   "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c"
   }
  ],
  "important": [
-  "2026-09-25 22:18:44 ERROR Error fetching CTF events [94446388-94446389]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 22:19:29 ERROR Error fetching CTF events [94446418-94446419]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 22:35:23 ERROR Network error fetching 0x3f3a...e8fd: ",
-  "2026-09-25 22:35:24 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-25 22:35:24 ERROR Network error fetching 0x722a...d6ed: ",
-  "2026-09-25 22:35:24 ERROR Network error fetching 0xfd3e...5a7a: ",
-  "2026-09-25 22:35:24 ERROR Network error fetching 0x0011...4333: ",
-  "2026-09-25 22:40:56 ERROR Network error fetching 0xf916...e770: Server disconnected without sending a response.",
-  "2026-09-25 22:50:04 ERROR Error fetching CTF events [94447639-94447642]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:13:05 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
-  "2026-09-25 23:18:19 ERROR Error fetching CTF events [94448771-94448772]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:18:50 ERROR Error fetching CTF events [94448792-94448793]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:19:16 ERROR Error fetching NEG_RISK_CTF events [94448809-94448810]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:20:31 ERROR Error fetching NEG_RISK_CTF events [94448859-94448860]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:25:32 ERROR Error fetching CTF events [94449060-94449061]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:25:51 ERROR Error fetching NEG_RISK_CTF events [94449073-94449074]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:26:19 ERROR Error fetching NEG_RISK_CTF events [94449091-94449092]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:29:20 ERROR Error fetching NEG_RISK_CTF events [94449212-94449213]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:36:23 ERROR Error fetching CTF events [94449494-94449495]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:40:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-25 23:47:23 ERROR Error fetching NEG_RISK_CTF events [94449934-94449935]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:49:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-25 23:49:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-25 23:55:10 ERROR Error fetching CTF events [94450245-94450246]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:57:00 ERROR Error fetching CTF events [94450319-94450320]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-25 23:57:00 ERROR Error fetching NEG_RISK_CTF events [94450319-94450320]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:00:14 ERROR Error fetching CTF events [94450448-94450449]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:00:14 ERROR Error fetching NEG_RISK_CTF events [94450448-94450449]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 00:02:22 ERROR Error fetching NEG_RISK_CTF events [94450533-94450534]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 00:05:54 ERROR Error fetching CTF events [94450675-94450675]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 00:06:49 ERROR Error fetching CTF events [94450711-94450712]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 00:16:40 ERROR Error fetching CTF events [94451105-94451106]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -1547,8 +1792,33 @@
   "2026-09-26 09:49:58 ERROR Network error fetching 0xd251...4d37: ",
   "2026-09-26 09:49:58 ERROR Network error fetching 0x984f...9a43: ",
   "2026-09-26 09:49:58 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
-  "2026-09-25 10:16:24 ERROR Error fetching NEG_RISK_CTF events [94417468-94417474]: {'code': -32002, 'message': 'request timed out'}",
-  "2026-09-25 12:57:54 INFO  [recovery] No pending orders to recover",
+  "2026-09-26 10:43:02 WARNING [zset] ADMITTED 0x5213eb85fcd465c8927a8382f95dd2dc22306a35 to set Z (+11% over 74 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-26 10:43:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 10:43:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 10:44:57 INFO  [ops] auto_admit: '0x5213eb85 not in Z' -> 'in set Z, on probation' | 77 settled paper copies, paper ROI +21.0%, trimmed +10.5%, ideal +22.0%, real quotes +16.3% over 77 matched",
+  "2026-09-26 10:45:16 WARNING [zset] ADMITTED 0x736539924a5602b37a03a54fc12c1cc8f98964da to set Z (+9% over 38 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-26 10:45:42 INFO  [ops] auto_admit: '0x73653992 not in Z' -> 'in set Z, on probation' | 41 settled paper copies, paper ROI +15.2%, trimmed +9.2%, ideal +16.2%, real quotes +8.8% over 26 matched",
+  "2026-09-26 10:45:44 WARNING [zset] ADMITTED 0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c to set Z (+3% over 43 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-26 10:46:45 INFO  [ops] auto_admit: '0xeef6ad0e not in Z' -> 'in set Z, on probation' | 75 settled paper copies, paper ROI +10.5%, trimmed +2.8%, ideal +18.1%, real quotes +14.2% over 41 matched",
+  "2026-09-26 10:46:54 INFO  [ops] form: '0x5213eb85 unknown' -> 'in form' | 0x5213eb85: 88 settled, 47% won vs 38% needed, net +7.6% on $43,855, worst day -2,314, 2 of 6 exits under 10 min",
+  "2026-09-26 10:47:00 INFO  [ops] form: '0x73653992 unknown' -> 'benched' | 0x73653992: 6 settled, 83% won vs 72% needed, net +82.6% on $4,089, worst day -330, 0 of 4 exits under 10 min",
+  "2026-09-26 10:47:08 INFO  [ops] form: '0xeef6ad0e unknown' -> 'benched' | 0xeef6ad0e: no settled bets on our slice in 14 days",
+  "2026-09-26 11:17:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 11:54:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 12:08:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-26 12:08:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-26 12:22:11 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / no spend cap (the day stops after $45 lost)",
+  "2026-09-26 12:22:12 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $19.20 / $200.00",
+  "2026-09-26 12:31:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-26 12:31:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-26 12:42:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-26 12:42:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-26 12:45:20 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $19.20 / no spend cap (the day stops after $45 lost)",
+  "2026-09-26 12:45:21 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $25.60 / $200.00",
+  "2026-09-26 12:52:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-26 12:55:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-09-26 12:55:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-26 13:03:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-25 13:24:06 INFO  [recovery] No pending orders to recover",
   "2026-09-25 13:38:50 INFO  [recovery] No pending orders to recover",
   "2026-09-25 14:52:53 TRADE [LIVE] BUY $6.40 on '' @ 0.6300, order 0x557fb8a720...",
@@ -1572,43 +1842,13 @@
   "2026-09-26 08:59:54 TRADE [DISARMED] would BUY $6.40 on '' @ 0.2800 (from 0x3f3a...e8fd); the arm is off",
   "2026-09-26 09:22:01 INFO  [recovery] No pending orders to recover",
   "2026-09-26 09:39:11 TRADE [LIVE] BUY $6.40 on '' @ 0.9000, order 0xc7613e77e1...",
-  "2026-09-26 09:39:17 TRADE [verify] FILLED: BUY 5.00 shares on '' @ 0.9000"
+  "2026-09-26 09:39:17 TRADE [verify] FILLED: BUY 5.00 shares on '' @ 0.9000",
+  "2026-09-26 12:22:11 TRADE [LIVE] BUY $6.40 on 'Map Handicap: HERO (-1.5) vs Sangal (+1.' @ 0.5100, order 0xdee08e5f50...",
+  "2026-09-26 12:22:12 TRADE [verify] FILLED: BUY 12.55 shares on 'Map Handicap: HERO (-1.5) vs Sangal (+1.' @ 0.5100",
+  "2026-09-26 12:45:21 TRADE [LIVE] BUY $6.40 on '' @ 0.5700, order 0x99c8fab930...",
+  "2026-09-26 12:45:22 TRADE [verify] FILLED: BUY 11.23 shares on '' @ 0.5700"
  ],
  "watcher": [
-  {
-   "ts": 1790341080.59767,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "proposal": "experiment",
-   "woke_because": "supervise",
-   "concluded": "requeued min150 as min150-r1",
-   "did": "requeued min150 as min150-r1",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790341080.59767,
-   "day": "2026-09-25",
-   "kind": "analyst",
-   "proposal": "experiment",
-   "woke_because": "supervise",
-   "concluded": "started min150-r1 (pid 7, first start since this supervisor came up)",
-   "did": "started min150-r1 (pid 7, first start since this supervisor came up)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790341202.3576975,
-   "day": "2026-09-25",
-   "woke_because": "962fd1d59e01",
-   "fingerprint": "962fd1d59e01",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The line that woke me is the bot's own routine loss-streak escalation being delivered successfully, an INFO event, not an error. The bot detected the streak grew from 4 to 7 losing copies and its alert path already sent that to the owner (escalation_delivered: sent), so he already knows. A losing streak is strategy performance, a P&L and risk call that belongs to the owner, not a bot malfunction. Nothing in order placement, sizing, arming, budget or fill verification is broken: guard is clean, spend is 12.8 of 54, and the box can still verify its fills (chain primary, 130 matched). The copies ",
-   "confidence": 0.8,
-   "cost_usd": 0.18920750000000003,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1790341504.9359877,
    "day": "2026-09-25",
@@ -2072,6 +2312,20 @@
    "did": "noted",
    "proof": "",
    "question": ""
+  },
+  {
+   "ts": 1790419671.6146815,
+   "day": "2026-09-26",
+   "woke_because": "7d62a20b0696",
+   "fingerprint": "7d62a20b0696",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "Cause: the form tracker benched wallet 0xeef6ad0e because it has no settled bets on our slice in 14 days, which is the safe direction and removes it from ranking. This is not a fault: an inactive wallet produces no fills, so real money cannot follow it even though set Z lists it as copyable once armed. The exact admit-then-bench sequence already fired on 09-13, and the owner personally handled this wallet this morning at 06:08 with Desk ruling s-wo3xsp, clearing a spurious eviction from pre-fix probation code before it was re-admitted at 10:45. The chain reader is healthy, last good read 5s ag",
+   "confidence": 0.82,
+   "cost_usd": 0.3033855,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -2091,12 +2345,13 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1790415658.8132656,
-   "count": 20,
+   "last": 1790426752.988227,
+   "count": 22,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1790415658.8132656
+    1790425432.8354738,
+    1790426752.988227
    ],
    "action": null,
    "action_ts": null,
@@ -2105,12 +2360,13 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1790415658.8132656,
-   "count": 20,
+   "last": 1790426752.988227,
+   "count": 22,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1790415658.8132656
+    1790425432.8354738,
+    1790426752.988227
    ],
    "action": null,
    "action_ts": null,
@@ -2119,12 +2375,13 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1790415658.8132656,
-   "count": 19,
+   "last": 1790426752.988227,
+   "count": 21,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1790415658.8132656
+    1790425432.8354738,
+    1790426752.988227
    ],
    "action": null,
    "action_ts": null,
@@ -2189,14 +2446,14 @@
   },
   "c3db66a087f7": {
    "first": 1790098332.9559617,
-   "last": 1790408782.3187575,
-   "count": 6,
+   "last": 1790419551.598308,
+   "count": 9,
    "sample": "2026-09-21 12:08:17 WARNING [zset] ADMITTED 0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770 to set Z (+2% over 36 copies with its best 3 deleted). Real money may now follow it once armed.",
    "norm": "WARNING [zset] ADMITTED <hex> to set Z (N over N copies with its best N deleted). Real money may now follow it once armed.",
    "recent": [
-    1790408430.9750392,
-    1790408430.9750392,
-    1790408782.3187575
+    1790419431.3442829,
+    1790419551.598308,
+    1790419551.598308
    ],
    "action": null,
    "action_ts": null,
@@ -2308,20 +2565,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790414500.0935237,
-   "count": 118,
+   "last": 1790427833.0374768,
+   "count": 126,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790412061.518792,
-    1790412061.518792,
-    1790412061.518792,
-    1790412061.518792,
-    1790412061.518792,
-    1790412061.518792,
-    1790412061.518792,
-    1790414207.079609,
-    1790414500.0935237
+    1790427233.0066578,
+    1790427833.0374768
    ],
    "action": null,
    "action_ts": null,
@@ -2372,15 +2622,19 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1790401745.0927324,
-   "count": 50,
+   "last": 1790427353.014497,
+   "count": 58,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1790401624.9833918,
-    1790401624.9833918,
-    1790401745.0927324,
-    1790401745.0927324
+    1790424592.737286,
+    1790424592.737286,
+    1790425912.909263,
+    1790425912.909263,
+    1790426632.9823363,
+    1790426632.9823363,
+    1790427353.014497,
+    1790427353.014497
    ],
    "action": null,
    "action_ts": null,
@@ -2417,14 +2671,13 @@
   },
   "9d498e122ffb": {
    "first": 1790265615.5461192,
-   "last": 1790408782.3187575,
-   "count": 8,
+   "last": 1790419671.6146815,
+   "count": 10,
    "sample": "2026-09-24 15:59:00 INFO  [ops] form: '0x09b045ba in form' -> 'benched' | 0x09b045ba: 34 settled, 74% won vs 59% needed, net +11.5% on $13,335, worst day -333, 33 of 33 exits under 10 min",
    "norm": "INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min",
    "recent": [
-    1790408782.3187575,
-    1790408782.3187575,
-    1790408782.3187575
+    1790419671.6146815,
+    1790419671.6146815
    ],
    "action": null,
    "action_ts": null,
@@ -2674,13 +2927,15 @@
   },
   "41cab7e764a5": {
    "first": 1790351832.0916538,
-   "last": 1790401745.0927324,
-   "count": 10,
+   "last": 1790427353.014497,
+   "count": 14,
    "sample": "2026-09-25 15:57:06 ERROR [py_clob_client_v2] request error: The read operation timed out",
    "norm": "ERROR [py_clob_client_v2] request error: The read operation timed out",
    "recent": [
-    1790401624.9833918,
-    1790401745.0927324
+    1790424592.737286,
+    1790425912.909263,
+    1790426632.9823363,
+    1790427353.014497
    ],
    "action": null,
    "action_ts": null,
@@ -2806,14 +3061,14 @@
   },
   "b36205e25762": {
    "first": 1790408430.9750392,
-   "last": 1790408782.3187575,
-   "count": 3,
+   "last": 1790419671.6146815,
+   "count": 6,
    "sample": "2026-09-26 07:40:18 INFO  [ops] auto_admit: '0x09b045ba not in Z' -> 'in set Z, on probation' | 49 settled paper copies, paper ROI +36.9%, trimmed +28.0%, ideal +37.9%, real quotes +1.1% over 30 matched",
    "norm": "INFO [ops] auto_admit: 'S' -> 'S' | N settled paper copies, paper ROI N, trimmed N, ideal N, real quotes N over N matched",
    "recent": [
-    1790408430.9750392,
-    1790408782.3187575,
-    1790408782.3187575
+    1790419551.598308,
+    1790419551.598308,
+    1790419671.6146815
    ],
    "action": null,
    "action_ts": null,
@@ -2864,12 +3119,27 @@
   },
   "59f5d5ebf4a6": {
    "first": 1790415658.8132656,
-   "last": 1790415658.8132656,
-   "count": 1,
+   "last": 1790426752.988227,
+   "count": 3,
    "sample": "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)",
    "recent": [
-    1790415658.8132656
+    1790425432.8354738,
+    1790426752.988227
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "7d62a20b0696": {
+   "first": 1790419671.6146815,
+   "last": 1790419671.6146815,
+   "count": 1,
+   "sample": "2026-09-26 10:47:08 INFO  [ops] form: '0xeef6ad0e unknown' -> 'benched' | 0xeef6ad0e: no settled bets on our slice in 14 days",
+   "norm": "INFO [ops] form: 'S' -> 'S' | <hex>: no settled bets on our slice in N days",
+   "recent": [
+    1790419671.6146815
    ],
    "action": null,
    "action_ts": null,
