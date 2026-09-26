@@ -207,14 +207,14 @@ def test_an_escalation_from_the_routine_is_sent_once_and_moved_aside(ops_env):
     assert ow.deliver_escalation(send=sent.append, now=3.0) is None
 
 
-def test_probation_caps_a_new_wallet_until_five_settled(ops_env):
+def test_probation_lasts_until_five_settled(ops_env):
     ow.probation_start("0xNEW", now=1.0)
-    assert ow.probation_cap("0xnew") == 1 and ow.probation_cap("0xold") is None
+    assert "0xnew" in ow.probation_wallets() and "0xold" not in ow.probation_wallets()
     for i in range(4):
         ow.record_settlements([ow.Settlement(f"t{i}", "0xNEW", 5.0, 9.0)], equity=67.0, stated=80.0, floor=56.0, send=None, now=10.0 + i)
-    assert ow.probation_cap("0xnew") == 1
+    assert "0xnew" in ow.probation_wallets()
     ow.record_settlements([ow.Settlement("t9", "0xNEW", 5.0, 0.0)], equity=67.0, stated=80.0, floor=56.0, send=None, now=20.0)
-    assert ow.probation_cap("0xnew") is None
+    assert "0xnew" not in ow.probation_wallets()
     assert any(r["kind"] == "probation_over" for r in _ledger(ops_env))
 
 
@@ -242,7 +242,7 @@ def test_auto_admission_goes_through_the_gate_and_starts_probation(ops_env, monk
     sent: list = []
     got = ops_admit.scan(send=lambda text, kb: sent.append((text, kb)), now=5.0)
     assert got == ["0xaaa"] and admitted_calls == ["0xaaa"], "in Z and evicted are skipped; the door is zc.admit"
-    assert ow.probation_cap("0xaaa") == 1
+    assert "0xaaa" in ow.probation_wallets()
     assert sent and "Admitted to set Z on its own" in sent[0][0] and sent[0][1]["inline_keyboard"][0][0]["callback_data"] == "zevict:0xaaa"
     assert "34 settled paper copies" in sent[0][0] and "paper ROI +9.1%" in sent[0][0]
     rows = _ledger(ops_env)
@@ -284,17 +284,29 @@ def test_release_by_token_takes_that_orders_row(monkeypatch, tmp_path):
     assert exp.open_total == 6.0 and rows == []
 
 
-def test_probation_caps_through_the_real_per_wallet_check(ops_env, monkeypatch):
-    from src.copy_trading import daily_spend_guard as g
+def test_probation_no_longer_counts_copies_the_new_wallet_rule_does(ops_env, monkeypatch):
+    """Owner, 2026-09-26: the only per-wallet limits are 1 a day for a
+    wallet's first 7 days in Z and 20 a day after. Probation (pass or fail)
+    stays; its 1-a-day cap and the probationers' shared share are gone."""
+    from src.copy_trading import daily_spend_guard as g, zset
     monkeypatch.setattr(g, "_STATE_FILE", str(ops_env / "d.json"))
-    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 2)
+    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 20)
+    monkeypatch.setattr(zset, "is_new", lambda w, now=None: w.lower() == "0xnew")
     g.reset_state()
-    ow.probation_start("0xNEW", now=1.0)
+    for w in ("0xP1", "0xP2", "0xP3"):
+        ow.probation_start(w, now=1.0)
+        g.record_wallet_copy(w); g.record_wallet_copy(w)
+    for w in ("0xP1", "0xP2", "0xP3"):
+        assert g.can_copy_wallet(w) == (True, ""), "a probationer that is not new in Z has the ordinary cap"
     g.record_wallet_copy("0xNEW")
     ok, why = g.can_copy_wallet("0xNEW")
-    assert ok is False and "probation cap: 1 of 1" in why
-    g.record_wallet_copy("0xOLD")
+    assert ok is False and "new-wallet cap (first 7 days in set Z): 1 of 1" in why
+    for _ in range(19):
+        g.record_wallet_copy("0xOLD")
     assert g.can_copy_wallet("0xOLD") == (True, "")
+    g.record_wallet_copy("0xOLD")
+    ok, why = g.can_copy_wallet("0xOLD")
+    assert ok is False and "per-wallet daily cap: 20 of 20" in why
 
 
 def test_the_evict_button_evicts_and_receipts(ops_env, monkeypatch):
@@ -416,29 +428,6 @@ def test_the_admit_scan_clock_survives_a_restart(ops_env):
     assert 'get("admit_scan_ts")' in src and "ops_watch.note_admit_scan(_now)" in src
 
 
-def test_probationers_share_two_copies_a_day_between_them(ops_env, monkeypatch):
-    """Manager r3: seven probationers at one copy a day each could take every
-    slot of a four-copy day from the proven wallets; together they get two."""
-    monkeypatch.setattr(ow, "PROBATION_TOTAL_PER_DAY", 2)   # the share this test is about; the default is 4 since 2026-09-24
-    from src.copy_trading import daily_spend_guard as g
-    monkeypatch.setattr(g, "_STATE_FILE", str(ops_env / "d.json"))
-    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 2)
-    g.reset_state()
-    for w in ("0xP1", "0xP2", "0xP3"):
-        ow.probation_start(w, now=1.0)
-    assert g.can_copy_wallet("0xP1") == (True, "")
-    g.record_wallet_copy("0xP1")
-    assert g.can_copy_wallet("0xP2") == (True, "")
-    g.record_wallet_copy("0xP2")
-    ok, why = g.can_copy_wallet("0xP3")
-    assert ok is False and "probation share: 2 of 2" in why, why
-    # a proven wallet is untouched by the share
-    assert g.can_copy_wallet("0xOLD") == (True, "")
-    # graduation frees the share
-    monkeypatch.setattr(ow, "PROBATION_TOTAL_PER_DAY", 3)
-    assert g.can_copy_wallet("0xP3") == (True, "")
-
-
 def test_the_scan_admits_one_wallet_per_pass(ops_env, monkeypatch):
     from src.copy_trading import ops_admit, zset, zset_candidates as zc
     class C:
@@ -521,19 +510,6 @@ def test_a_corrupt_escalation_file_goes_aside_and_is_logged(ops_env, caplog):
     assert any("escalation file unreadable" in r.getMessage() for r in caplog.records)
 
 
-def test_the_probation_share_applies_even_when_the_per_wallet_cap_is_one(ops_env, monkeypatch):
-    monkeypatch.setattr(ow, "PROBATION_TOTAL_PER_DAY", 2)   # the share this test is about; the default is 4 since 2026-09-24
-    from src.copy_trading import daily_spend_guard as g
-    monkeypatch.setattr(g, "_STATE_FILE", str(ops_env / "d.json"))
-    monkeypatch.setattr(CONFIG, "live_max_per_wallet_day", 1)
-    g.reset_state()
-    for w in ("0xP1", "0xP2", "0xP3"):
-        ow.probation_start(w, now=1.0)
-    g.record_wallet_copy("0xP1"); g.record_wallet_copy("0xP2")
-    ok, why = g.can_copy_wallet("0xP3")
-    assert ok is False and "probation share" in why
-
-
 # ---- code review (s-g8int5) ----
 
 def test_the_rearm_cap_binds_across_varying_reason_text(ops_env):
@@ -598,7 +574,7 @@ def test_eviction_ends_probation_and_a_second_tap_is_not_a_failure(ops_env, monk
     monkeypatch.setattr(zset, "evicted_set", lambda: set(state["ev"]))
     monkeypatch.setattr(zset, "wallet_set", lambda: set(state["z"]))
     toast, text = tb._handle_callback("zevict:0xabc")
-    assert toast == "Evicted" and ow.probation_cap("0xabc") is None
+    assert toast == "Evicted" and "0xabc" not in ow.probation_wallets()
     toast2, text2 = tb._handle_callback("zevict:0xabc")
     assert toast2 == "Already evicted" and "Could not" not in text2
     assert sum(1 for r in _ledger(ops_env) if r["kind"] == "evict") == 1
@@ -624,7 +600,7 @@ def test_a_probationer_that_loses_is_evicted_with_the_numbers(ops_env, monkeypat
     assert evicted == [("0xnew", "probation failed: 1 of 5 won, realized -60.0% on $25.00 (pass needs 2 won and -10%)")]
     row = [r for r in _ledger(ops_env) if r["kind"] == "probation_failed"][-1]
     assert row["after"].startswith("evicted: 1 of 5 won") and "readmit" in row["detail"] and row["push"] == "WALLET"
-    assert ow.probation_cap("0xnew") is None and "0xnew" not in ow.probation_wallets()
+    assert "0xnew" not in ow.probation_wallets() and "0xnew" not in ow.probation_wallets()
 
 
 def test_two_won_but_a_deep_loss_still_fails_and_a_shallow_one_passes(ops_env, monkeypatch):

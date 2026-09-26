@@ -162,6 +162,8 @@ def can_spend(amount_usd: float) -> tuple[bool, str]:
         closed = _state.closed_reason
     if closed:
         return False, f"spend guard closed: {closed}"
+    if cap == float("inf"):
+        return True, ""  # the owner's daily stop is a loss, not a spend (live_daily_loss_usd)
     if spent >= cap:
         return False, f"Daily spend cap reached: ${spent:.2f} >= ${cap:.2f}"
     if spent + amount_usd > cap:
@@ -186,17 +188,27 @@ def reserve_spend(amount_usd: float, source: str) -> tuple[bool, str]:
         if _state.closed_reason:
             return False, f"spend guard closed: {_state.closed_reason}"
         spent = _state.spent_usd
-        if spent >= cap:
-            return False, f"Daily spend cap reached: ${spent:.2f} >= ${cap:.2f}"
-        if spent + amount_usd > cap:
-            return False, (f"Daily spend cap would be exceeded: ${spent:.2f} + "
-                           f"${amount_usd:.2f} > ${cap:.2f}")
+        if cap != float("inf"):
+            if spent >= cap:
+                return False, f"Daily spend cap reached: ${spent:.2f} >= ${cap:.2f}"
+            if spent + amount_usd > cap:
+                return False, (f"Daily spend cap would be exceeded: ${spent:.2f} + "
+                               f"${amount_usd:.2f} > ${cap:.2f}")
         _state.spent_usd = round_cents(_state.spent_usd + amount_usd)
         _save_locked()
         spent = _state.spent_usd
     logger.info(f"[daily-cap] +${amount_usd:.2f} ({source}) reserved | total today "
-                f"${spent:.2f} / ${cap:.2f}")
+                f"${spent:.2f} / {cap_text(cap)}")
     return True, ""
+
+
+def cap_text(cap: float) -> str:
+    """``$54.00``, or the owner's rule when the day is not capped by spend."""
+    if cap == float("inf"):
+        from src.copy_trading import live_budget
+        stop = live_budget.daily_loss_stop_usd()
+        return f"no spend cap (the day stops after ${stop:.0f} lost)" if stop else "no spend cap"
+    return f"${cap:.2f}"
 
 
 def release_spend(amount_usd: float, source: str) -> None:
@@ -231,7 +243,7 @@ def record_spend(amount_usd: float, source: str) -> None:
     from src.copy_trading import live_budget
     logger.info(
         f"[daily-cap] +${amount_usd:.2f} ({source}) | total today "
-        f"${spent:.2f} / ${live_budget.daily_cap():.2f}"
+        f"${spent:.2f} / {cap_text(live_budget.daily_cap())}"
     )
 
 
@@ -259,6 +271,17 @@ def status() -> dict:
     cap = float(live_budget.daily_cap())
     with _lock:
         _load_locked()
+        if cap == float("inf"):
+            # No spend cap: the number that bounds the day is the loss stop
+            # (live_guard); None here, never a made-up ceiling.
+            return {
+                "date": _state.date,
+                "spent_usd": round_cents(_state.spent_usd),
+                "cap_usd": None,
+                "remaining_usd": None,
+                "daily_loss_stop_usd": live_budget.daily_loss_stop_usd(),
+                "closed_reason": _state.closed_reason,
+            }
         return {
             "date": _state.date,
             "spent_usd": round_cents(_state.spent_usd),
@@ -281,38 +304,29 @@ def wallet_copies_today(wallet: str) -> int:
 def can_copy_wallet(wallet: str) -> tuple[bool, str]:
     """May one more BUY be copied from this wallet today?
 
-    ``LIVE_MAX_PER_WALLET_DAY`` (0 = no cap). Bounds how much of the daily
-    money one busy wallet can take, so the slower, stronger wallets still get
-    their turn.
+    The owner's two numbers (2026-09-26), and nothing else: a wallet in its
+    first ``ZSET_NEW_WALLET_DAYS`` days of set Z gets
+    ``ZSET_NEW_WALLET_COPIES_PER_DAY`` (1); every other wallet gets
+    ``LIVE_MAX_PER_WALLET_DAY`` (20; 0 = no cap). The probation cap and the
+    probationers' shared share that used to sit here are gone: probation
+    still decides pass or fail (ops_watch), it no longer counts copies.
     """
     # The analyst may lower this for a day inside its band (live_limits);
     # the owner's number is the ceiling and the fallback.
     from src.copy_trading import live_limits
     cap = int(live_limits.current("LIVE_MAX_PER_WALLET_DAY") or getattr(CONFIG, "live_max_per_wallet_day", 0) or 0)
-    # A wallet the bot admitted on its own is on probation: fewer copies a
-    # day until its first live copies have settled (ops_watch).
-    try:
-        from src.copy_trading import ops_watch
-        pcap = ops_watch.probation_cap(wallet)
-    except Exception:
-        pcap = None
     label = "per-wallet daily cap"
-    if pcap is not None:
-        if cap <= 0 or pcap < cap:
-            cap, label = int(pcap), "probation cap"
-        # The probationers' shared share of the day, whatever the caps.
-        try:
-            total_cap = int(ops_watch.PROBATION_TOTAL_PER_DAY)
-            probs = ops_watch.probation_wallets()
-        except Exception:
-            total_cap, probs = 0, set()
-        if total_cap > 0 and probs:
-            with _lock:
-                _load_locked()
-                used = sum(int(v) for k, v in _state.wallet_copies.items() if k in probs)
-            if used >= total_cap:
-                return False, (f"probation share: {used} of {total_cap} probation copies "
-                               f"already today, {(wallet or '')[:10]} waits")
+    try:
+        from src.copy_trading import zset
+        new = zset.is_new(wallet)
+    except Exception as exc:  # noqa: BLE001
+        # Unreadable Z record: the tighter rule, said once per day in the log.
+        logger.warn(f"[daily-cap] set-Z age unreadable for {(wallet or '')[:10]} ({exc}); new-wallet cap applies")
+        new = True
+    if new:
+        ncap = int(getattr(CONFIG, "zset_new_wallet_copies_per_day", 1) or 0)
+        if ncap > 0 and (cap <= 0 or ncap < cap):
+            cap, label = ncap, f"new-wallet cap (first {float(CONFIG.zset_new_wallet_days):g} days in set Z)"
     if cap <= 0:
         return True, ""
     n = wallet_copies_today(wallet)

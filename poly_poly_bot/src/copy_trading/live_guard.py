@@ -242,14 +242,18 @@ def should_self_disarm(*, crash_streak: int = 0,
                        unredeemed: int = 0,
                        feed_stale_s: Optional[float] = None,
                        equity_usd: Optional[float] = None,
-                       floor_usd: Optional[float] = None) -> tuple[bool, str]:
+                       floor_usd: Optional[float] = None,
+                       loss_today_usd: Optional[float] = None,
+                       daily_loss_usd: Optional[float] = None) -> tuple[bool, str]:
     """Has the session lost enough trust in its own state to stop trading?
 
     Three triggers are statements about OUR reliability, not about the
     market. The fourth is different in kind: a losing session is not a trust
     failure, but a bankroll below the floor the owner set is a stop of a
     different kind, and it is his to override (a fresh /live CONFIRM after
-    the trip counts as that override; see ``run_once``).
+    the trip counts as that override; see ``run_once``). The fifth is the
+    owner's daily stop (2026-09-26): more than ``daily_loss_usd`` lost since
+    00:00 UTC, measured on equity at cost, disarms until he arms again.
     """
     if crash_streak >= CRASH_LOOP_N:
         return (True, f"{crash_streak} consecutive cycle failures: the session "
@@ -266,15 +270,62 @@ def should_self_disarm(*, crash_streak: int = 0,
                       f"${float(floor_usd):,.0f} you set: a losing session is not "
                       f"a trust failure, but a bankroll below the floor is a stop "
                       f"of a different kind. /live CONFIRM overrides it")
+    if (loss_today_usd is not None and daily_loss_usd is not None
+            and float(loss_today_usd) > float(daily_loss_usd)):
+        return (True, f"{DAILY_LOSS_REASON_PREFIX}{float(loss_today_usd):,.2f} today, over the "
+                      f"${float(daily_loss_usd):,.0f} a day you set: real money stops "
+                      f"here and waits for your instructions. /live CONFIRM arms again "
+                      f"and the stop stays quiet for the rest of the UTC day")
     return (False, "")
 
 
 FLOOR_REASON_PREFIX = "bankroll $"
 FLOOR_DISARM_BY = "live-guard:floor"
+DAILY_LOSS_REASON_PREFIX = "lost $"
+DAILY_LOSS_DISARM_BY = live_mode.DAILY_LOSS_DISARM_BY
 
 
 def is_floor_reason(why: str) -> bool:
     return bool(why) and why.startswith(FLOOR_REASON_PREFIX)
+
+
+def is_daily_loss_reason(why: str) -> bool:
+    return bool(why) and why.startswith(DAILY_LOSS_REASON_PREFIX)
+
+
+def _utc_day(now: float) -> str:
+    return time.strftime("%Y-%m-%d", time.gmtime(now))
+
+
+def _daily_loss_overridden(now: float) -> bool:
+    """Did the owner arm again after today's daily-loss stop? Then the stop
+    is his to ignore for the rest of THIS UTC day (the arm record carries
+    the day; ``live_mode.arm`` sets it when the disarm it follows was the
+    stop's). Tomorrow the day's loss is counted afresh from 00:00."""
+    try:
+        arm = live_mode.read_arm()
+        return arm.get("armed") is True and arm.get("daily_loss_override_day") == _utc_day(now)
+    except Exception:
+        return False
+
+
+def loss_today(state: dict, equity_usd: Optional[float], now: float) -> Optional[float]:
+    """Dollars lost since 00:00 UTC on equity at cost, and the day's baseline
+    kept in the guard state. The first pass of a UTC day with a readable
+    equity sets the baseline; a pass with no equity changes nothing and
+    answers None (unknown is not zero). A deposit or a withdrawal moves
+    this like a win or a loss would; the owner knows when he moved money."""
+    if equity_usd is None:
+        return None
+    day = _utc_day(now)
+    de = state.get("day_equity") if isinstance(state.get("day_equity"), dict) else {}
+    if de.get("day") != day:
+        de = {"day": day, "start": round(float(equity_usd), 2), "ts": now}
+        state["day_equity"] = de
+    try:
+        return round(float(de["start"]) - float(equity_usd), 2)
+    except (TypeError, ValueError, KeyError):
+        return None
 
 
 def _floor_overridden() -> bool:
@@ -297,8 +348,8 @@ def active_block() -> Optional[str]:
     if not st.get("self_disarm"):
         return None
     why = str(st.get("self_disarm_reason") or "")
-    if is_floor_reason(why):
-        return None  # the floor is the owner's to override by arming
+    if is_floor_reason(why) or is_daily_loss_reason(why):
+        return None  # the floor and the daily stop are the owner's to override by arming
     return why or "a self-disarm condition is active"
 
 
@@ -373,11 +424,23 @@ def run_once(*, pending_orders: Optional[list] = None,
     # the automatic stop steps aside.
     overridden = _floor_overridden()
     eq_for_trigger = None if overridden else equity_usd
+    # The owner's daily stop: dollars lost since 00:00 UTC on equity at
+    # cost, against LIVE_DAILY_LOSS_USD; quiet for the rest of the day once
+    # he has armed again after a trip.
+    lost = loss_today(st, equity_usd, now)
+    try:
+        from src.copy_trading import live_budget
+        daily_stop = live_budget.daily_loss_stop_usd()
+    except Exception:  # noqa: BLE001
+        daily_stop = None
+    loss_overridden = _daily_loss_overridden(now)
     disarm, why = should_self_disarm(
         crash_streak=crash_streak,
         unredeemed=0 if redeem_unknown else len(unred),
         feed_stale_s=feed_stale_s,
-        equity_usd=eq_for_trigger, floor_usd=floor_usd)
+        equity_usd=eq_for_trigger, floor_usd=floor_usd,
+        loss_today_usd=None if loss_overridden else lost,
+        daily_loss_usd=daily_stop)
     disarmed = False
     findings_disarm_condition = bool(disarm)
     # The self-disarm edge is DETECTED and logged whether or not anything is
@@ -391,7 +454,9 @@ def run_once(*, pending_orders: Optional[list] = None,
         if armed:
             # Always allowed: this can only move toward preview. The floor
             # disarms under its own name so the next arm can carry the override.
-            by = FLOOR_DISARM_BY if is_floor_reason(why) else "live-guard"
+            by = (FLOOR_DISARM_BY if is_floor_reason(why)
+                  else DAILY_LOSS_DISARM_BY if is_daily_loss_reason(why)
+                  else "live-guard")
             disarmed = bool(live_mode.disarm(by=by, reason=why))
             if not disarmed:
                 # `disarm` already hard-disarms this process on a write

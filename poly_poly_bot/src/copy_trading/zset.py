@@ -39,8 +39,10 @@ in, exactly as before the ruling. Book A keeps running.
 
 from __future__ import annotations
 
+import time
 from typing import Iterable, Optional
 
+from src.config import CONFIG
 from src.copy_trading import promotion_state
 from src.logger import logger
 
@@ -99,6 +101,35 @@ def wallet_set() -> set:
     function and the more natural-looking name for "is this wallet in Z".
     """
     return {w.lower() for w in wallets()}
+
+
+def admitted_ts(wallet: str) -> Optional[float]:
+    """When the gate admitted this wallet to Z (the record's own ``ts``), or
+    None when it is not in Z or the record carries no time."""
+    w = (wallet or "").lower()
+    if not w or w not in wallet_set():
+        return None
+    for key, rec in promotion_state.promoted_map(SCOPE).items():
+        if key.lower() == w and isinstance(rec, dict):
+            try:
+                ts = float(rec.get("ts") or 0.0)
+            except (TypeError, ValueError):
+                return None
+            return ts if ts > 0 else None
+    return None
+
+
+def is_new(wallet: str, now: Optional[float] = None) -> bool:
+    """A wallet in its first ``ZSET_NEW_WALLET_DAYS`` days of set Z (owner,
+    2026-09-26: one copy a day for seven days, then the ordinary cap). Not
+    in Z, or no admission time on record, reads as not new: the money path
+    refuses a wallet outside Z on its own, and a record without a time is
+    a hand edit the gate did not write."""
+    ts = admitted_ts(wallet)
+    if ts is None:
+        return False
+    now = time.time() if now is None else now
+    return (now - ts) < float(CONFIG.zset_new_wallet_days) * 86400.0
 
 
 def _num(x) -> float:

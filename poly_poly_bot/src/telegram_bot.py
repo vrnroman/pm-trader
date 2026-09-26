@@ -2203,8 +2203,14 @@ def _real_header_lines() -> list[str]:
     try:
         from src.copy_trading.daily_spend_guard import status as spend_status
         sp = spend_status()
-        lines.append(f"  Today ({sp['date']}): <b>${sp['spent_usd']:,.2f}</b> spent "
-                     f"of a ${sp['cap_usd']:,.2f} cap")
+        if sp.get("cap_usd") is None:
+            # The owner's daily stop is a loss, not a spend (2026-09-26).
+            stop = sp.get("daily_loss_stop_usd")
+            lines.append(f"  Today ({sp['date']}): <b>${sp['spent_usd']:,.2f}</b> spent, "
+                         f"no spend cap" + (f"; the day stops after ${stop:,.0f} lost" if stop else ""))
+        else:
+            lines.append(f"  Today ({sp['date']}): <b>${sp['spent_usd']:,.2f}</b> spent "
+                         f"of a ${sp['cap_usd']:,.2f} cap")
         if sp.get("closed_reason"):
             lines.append(f"  ⚠ spending is closed today: {_esc(sp['closed_reason'])}")
     except Exception as e:  # noqa: BLE001

@@ -247,8 +247,10 @@ def caps(*, live: Optional[bool] = None, balance: Optional[float] = None,
         effective_usd=effective, per_copy_usd=per_copy,
         per_market_usd=per_market,
         # An absolute daily cap wins over the fraction, never over the
-        # effective bankroll.
-        daily_usd=round(min(effective, DAILY_ABS) if DAILY_ABS else effective * DAILY_FRAC, 2),
+        # effective bankroll. No spend cap at all under the owner's daily
+        # LOSS stop (2026-09-26): the day is bounded by what it lost.
+        daily_usd=(float("inf") if daily_loss_stop_usd() else
+                   round(min(effective, DAILY_ABS) if DAILY_ABS else effective * DAILY_FRAC, 2)),
         exposure_usd=round(effective * EXPOSURE_FRAC, 2),
         min_trader_bet_usd=book_tiers.live_min_trader_bet(CONFIG),
         live=live,
@@ -287,8 +289,23 @@ def govern_tier(cfg, *, live: Optional[bool] = None,
     return (governed, None)
 
 
+def daily_loss_stop_usd() -> Optional[float]:
+    """The owner's daily stop in dollars LOST (``LIVE_DAILY_LOSS_USD``), or
+    None when he keeps a spend cap instead. When set, the day has no spend
+    cap: the guard disarms once equity has fallen by more than this since
+    00:00 UTC, and only /live CONFIRM arms again (2026-09-26)."""
+    try:
+        v = float(getattr(CONFIG, "live_daily_loss_usd", 0.0) or 0.0)
+    except (TypeError, ValueError):
+        return None
+    return round(v, 2) if v > 0 else None
+
+
 def daily_cap(*, live: Optional[bool] = None) -> float:
-    """The per-UTC-day spend cap: the env cap, lowered by the governor."""
+    """The per-UTC-day spend cap: the env cap, lowered by the governor; inf
+    under the owner's daily loss stop, which replaces every spend cap."""
+    if daily_loss_stop_usd():
+        return float("inf")
     base = float(CONFIG.max_daily_volume_usd)
     c = caps(live=live)
     return min(base, c.daily_usd) if c is not None else base
@@ -380,9 +397,12 @@ def status_lines(*, live: Optional[bool] = None) -> list[str]:
                  f"+ ${c.open_cost_usd:,.2f} in open positions")
     else:
         basis = "chain balance unreadable, using the stated number"
+    stop = daily_loss_stop_usd()
+    per_day = (f"per day: no spend cap, stops after ${stop:.0f} lost" if stop
+               else f"per day ${c.daily_usd:.2f}")
     out = [f"✅ bankroll governor: ${c.effective_usd:,.2f} effective ({basis})",
            f"  per copy ${c.per_copy_usd:.2f} · per market ${c.per_market_usd:.2f} "
-           f"· per day ${c.daily_usd:.2f} · open at once ${c.exposure_usd:.2f} "
+           f"· {per_day} · open at once ${c.exposure_usd:.2f} "
            f"· copies target buys from ${c.min_trader_bet_usd:,.0f}"]
     if not c.tradeable:
         out.append(f"  ⚠️ per copy ${c.per_copy_usd:.2f} is under the "

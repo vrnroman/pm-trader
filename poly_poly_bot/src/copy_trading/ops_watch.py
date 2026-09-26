@@ -70,13 +70,10 @@ NO_COPY_MIN_SIGNALS = _env_i("OPS_NO_COPY_MIN_SIGNALS", 3)
 GUARD_FAIL_STREAK = _env_i("OPS_GUARD_FAIL_STREAK", 6)        # six passes = 30 min
 DAILY_LINE_DEADLINE_UTC_H = _env_f("OPS_DAILY_LINE_DEADLINE_H", 9.0)
 PROBATION_SETTLED_N = _env_i("ZSET_PROBATION_SETTLED_N", 5)
-PROBATION_COPIES_PER_DAY = _env_i("ZSET_PROBATION_COPIES_PER_DAY", 1)
-# All probationers together take at most this many of the day's copies, so
-# seven new wallets cannot crowd the proven ones out of a four-copy day
-# (manager s-g8int5 r3, LOW-CONFIDENCE on the number, env-tunable).
-# 2 -> 4 (owner, 2026-09-24, part 3 R3): with three admissions a scan the
-# probationers would queue behind each other and the 10-day clock run out.
-PROBATION_TOTAL_PER_DAY = _env_i("ZSET_PROBATION_TOTAL_PER_DAY", 4)
+# Probation no longer counts copies (owner, 2026-09-26): a wallet's first
+# days in Z are capped by daily_spend_guard's new-wallet rule, one a day
+# for ZSET_NEW_WALLET_DAYS, for every Z wallet. Probation still decides
+# pass or fail below.
 # Probation is pass/fail: PROBATION_SETTLED_N live settles OR PROBATION_DAYS
 # calendar days, whichever first; pass = at least PROBATION_MIN_WON won AND
 # the live copies' realized ROI at or above PROBATION_MIN_ROI; fail evicts
@@ -722,12 +719,6 @@ def probation_check(now: Optional[float] = None) -> list[str]:
             probation_conclude(w, now, why=f"{PROBATION_DAYS:.0f} days on probation")
             out.append(w)
     return out
-
-
-def probation_cap(wallet: str) -> Optional[int]:
-    """Copies per day allowed while on probation, or None when not on it."""
-    d = _read_json(_p(PROBATION_FILE))
-    return PROBATION_COPIES_PER_DAY if (wallet or "").lower() in d else None
 
 
 def probation_end(wallet: str, why: str = "evicted") -> None:

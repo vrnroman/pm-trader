@@ -318,3 +318,24 @@ def test_the_prompt_carries_the_chain_readers_own_health_line(box):
     p = runner.calls[0]
     assert "chain reader: reading, last good read 5s ago" in p and "4 refused chunk(s) retried" in p
     assert "head race" in p and "not an outage" in p and "confirmed through the CLOB" in p
+
+
+def test_the_prompt_tells_the_model_to_read_the_whole_log_and_carries_the_census(box):
+    """Owner, 2026-09-26: woken by an error, the SRE must be able to read
+    all the logs before it concludes. The prompt names the files, hands it
+    the hour's census of the full log, and the runner grants read tools."""
+    import time as _t
+    day = _t.strftime("%Y-%m-%d", _t.gmtime(NOW))
+    t = _t.strftime("%Y-%m-%d %H:%M:%S", _t.gmtime(NOW - 30))
+    (box["logs"] / f"bot-{day}.log").write_text(
+        "\n".join([f"{t} INFO  Onchain: cursor {i}, head {i}, lag 0 block(s)" for i in range(50)]
+                  + [f"{t} ERROR Error fetching CTF events [1-2]: refused"]) + "\n")
+    _append(box, LINE)
+    runner = _runner_for({"kind": "nothing", "reasoning": "50 good chunks next to 1 refused"})
+    sre.cycle(NOW, logs_dir=str(box["logs"]), runner=runner, send=_sender())
+    p = runner.calls[0]
+    assert "Look further before you conclude" in p and f"bot-{day}.log" in p and str(box["logs"]) in p
+    assert "51 lines in the last" in p and "50  INFO Onchain: cursor N, head" in p
+    assert "a component still logging" in p
+    rows = sre.thoughts()
+    assert "bot logs (read tools)" in rows[-1]["looked_at"]

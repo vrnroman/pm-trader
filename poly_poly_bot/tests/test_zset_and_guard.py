@@ -589,7 +589,12 @@ def test_every_disarm_trigger_is_actually_fed_by_production():
                 and node.func.attr == "run_once"):
             supplied |= {kw.arg for kw in node.keywords if kw.arg}
     # `unredeemed` is derived inside run_once from `redeemable`/`positions`.
-    derived = {"unredeemed": {"redeemable", "positions"}}
+    derived = {"unredeemed": {"redeemable", "positions"},
+               # The owner's daily loss stop (2026-09-26): dollars lost since
+               # 00:00 UTC, derived inside run_once from the equity the loop
+               # supplies and the day's baseline the guard keeps in its state;
+               # the threshold is read from config there.
+               "loss_today_usd": {"equity_usd"}, "daily_loss_usd": {"equity_usd"}}
     missing = []
     for t in sorted(trigger_params):
         if t in supplied:
