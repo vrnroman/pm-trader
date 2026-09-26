@@ -879,11 +879,17 @@ async def place_trade_orders(
                     _skip_row(record_trade_history, trade, qt, _why_w)
                     mark_trade_as_seen(trade.id)
                     continue
-            if trade.side == "BUY" and trade.size < gov.min_trader_bet_usd:
-                logger.skip(f"[exec] target bet ${trade.size:.0f} is under the evidence "
-                            f"base's ${gov.min_trader_bet_usd:.0f}: not copied")
-                mark_trade_as_seen(trade.id)
-                continue
+            if trade.side == "BUY":
+                # The wallet's own floor when the owner flipped the switch
+                # (LIVE_PER_WALLET_MIN_USD); the global floor otherwise.
+                from src.copy_trading import wallet_floor
+                _floor = wallet_floor.live_floor(trade.trader_address, gov.min_trader_bet_usd)
+                if trade.size < _floor:
+                    _own = "this wallet's" if _floor != gov.min_trader_bet_usd else "the evidence base's"
+                    logger.skip(f"[exec] target bet ${trade.size:.0f} is under {_own} "
+                                f"${_floor:.0f}: not copied")
+                    mark_trade_as_seen(trade.id)
+                    continue
             if copy_size > gov.per_copy_usd:
                 copy_size = gov.per_copy_usd
             # Cash, in plain words, before the exchange is the one to say no.

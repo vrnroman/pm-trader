@@ -776,7 +776,20 @@ def second_line(now: Optional[float] = None) -> str:
     return ops_watch.watcher_line(now)
 
 
+def _on_term(sig, frame) -> None:
+    """docker stop sends SIGTERM to PID 1, and PID 1 ignores the default
+    disposition: without a handler the sidecar was force-killed after 10 s
+    on every deploy (2026-09-24, dockerd: "failed to exit within 10s of
+    signal 15"). Ending the tick is safe: every file here is written
+    atomically and the experiment child restarts with the sidecar."""
+    logger.info(f"[sre] signal {sig}: stopping")
+    raise SystemExit(0)
+
+
 def main() -> int:
+    import signal as _signal
+    _signal.signal(_signal.SIGTERM, _on_term)
+    _signal.signal(_signal.SIGINT, _on_term)
     logger.info(f"[sre] AI SRE started: tick {TICK_S:.0f}s, model {MODEL}, push path {'ready' if can_push() else 'ABSENT'}, "
                 f"fixes to {'main when off the money path' if PUSH_MAIN else 'branches only (SRE_PUSH_MAIN off)'}, "
                 f"limits {MAX_WAKES_PER_HOUR}/h wakes, {MAX_PUSHES_PER_DAY}/day pushes, ${MAX_USD_PER_DIAGNOSIS:.0f}/diagnosis")

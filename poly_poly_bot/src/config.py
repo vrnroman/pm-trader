@@ -344,6 +344,11 @@ class Config:
     # Real money copies target buys from this floor; default the paper floor.
     # Decoupled so a lower paper book never lowers what real money copies.
     live_min_trader_bet_usd: float = _opt_float("LIVE_MIN_TRADER_BET_USD", 0.0)
+    # A floor per wallet, chosen by the gate and stored on the Z record
+    # (2026-09-24 doc, part 3 §3.4 item 2). OFF: the row is evidence only and
+    # real money keeps the global floor. ON: a Z wallet with a chosen floor is
+    # copied from that floor. The owner's switch; the run ships it off.
+    live_per_wallet_min_usd: bool = _opt_bool("LIVE_PER_WALLET_MIN_USD", False)
     # B's slate caps: looser than A's 3/8 because take-all IS the B thesis (the
     # counterfactual: capped B re-runs A's +6% regime; uncapped B is the +8%
     # regime whose gains concentrate in high-frequency wallets). Not unlimited —

@@ -74,7 +74,9 @@ def test_main_runs_one_thread_per_book_and_only_the_primary_talks(box):
     b = src[src.index("def _copy_paper_b_loop(book=None):"):src.index("def _ab_race_reporter_loop")]
     assert "_kw.update(min_usd=book.min_usd, ledger_path=book_tiers.ledger_path(book, CONFIG)" in b
     assert 'state_scope=_scope,' in b and 'scope="b"' not in b
-    assert "if book.primary else (lambda o: False)" in b and "observer=_get_shadow_observer() if book.primary else None" in b
+    assert "if book.primary else (lambda o: False)" in b
+    # The lower-floor books feed the observer under their own budget (2026-09-26).
+    assert "observer=_get_shadow_observer() if book.primary else _lower_book_observer(book.id)" in b
     assert "if summary.resolved and book.primary:" in b and "if book.primary:\n        try:\n            cross_route.seed_extras" in b
     assert "for _book in _bt.books(CONFIG):" in src and "target=_copy_paper_b_loop, args=(_book,)" in src
     # R5: discovery scores on the book's own slice

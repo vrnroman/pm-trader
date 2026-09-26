@@ -36,7 +36,7 @@ import json
 import math
 import os
 import time
-from typing import Optional
+from typing import Callable, Optional
 
 from src.config import CONFIG
 from src.copy_trading.order_executor import entry_penalty_bps, quote_copy_order
@@ -48,8 +48,56 @@ from src.logger import logger
 SECOND_SAMPLE_DELAY_S = 12.0
 
 # Bound the work a sweep can create: each sampled trade costs two book reads,
-# and the detector can emit a burst when a slate settles.
-MAX_SAMPLES_PER_SWEEP = 40
+# and the detector can emit a burst when a slate settles. SHADOW_MAX_SAMPLES_
+# PER_SWEEP moves it (the owner's doc of 2026-09-24, part 3 §3.1: "raise the
+# cap (env) and quote set-Z / near-miss wallets first").
+def _env_int(name: str, default: int) -> int:
+    try:
+        v = int(float(os.environ.get(name, "") or default))
+    except (TypeError, ValueError):
+        return default
+    return v if v > 0 else default
+
+
+MAX_SAMPLES_PER_SWEEP = _env_int("SHADOW_MAX_SAMPLES_PER_SWEEP", 40)
+
+# What a book other than the primary may add to a sweep. The lower-floor
+# books (B150, B100) detect a superset of the primary's trades; the copy id
+# is the same trade in every book, so the dedup below quotes each trade once
+# whichever book saw it first, and this budget only bounds the EXTRA work
+# their smaller bets bring. 0 keeps those books off the observer.
+LOWER_BOOK_BUDGET = _env_int("SHADOW_LOWER_BOOK_BUDGET", 10)
+
+# Wallets quoted before the rest when a sweep exceeds the cap: set Z and the
+# gate's near misses, whose slices are what the execution rail reads. The
+# provider is registered by main (zset_candidates.priority_wallets) so this
+# module stays free of the gate's imports. None = feed order, as before.
+_priority_provider: Optional[Callable[[], set]] = None
+
+
+def set_priority_provider(fn: Optional[Callable[[], set]]) -> None:
+    global _priority_provider
+    _priority_provider = fn
+
+
+def priority_wallets() -> set:
+    """Lowercased wallets to quote first; empty when no provider or it fails."""
+    if _priority_provider is None:
+        return set()
+    try:
+        return {str(w).lower() for w in (_priority_provider() or ())}
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[shadow] priority provider failed: {exc}")
+        return set()
+
+
+# The coverage ledger (2026-09-26): one row per sweep per book saying what
+# the observer was handed and what it kept, so a thin slice on a card can be
+# read back to "the cap dropped it" or "nothing was detected". Bounded like
+# the quote log.
+COVERAGE_FILE = "shadow-coverage.jsonl"
+COVERAGE_MAX_ROWS = 20000
+_COVERAGE_TRIM_TO = 15000
 
 # How stale a t0 quote may be before it stops describing "the price we could
 # have had when we were told". The worker quotes on dequeue, so this is queue
@@ -439,22 +487,33 @@ def make_observer(clob_client_factory, queue_max: int = 500):
 
     threading.Thread(target=_worker, name="shadow-quote", daemon=True).start()
 
-    def observer(detected: list) -> None:
+    def observer(detected: list, *, budget: Optional[int] = None, book: str = "") -> None:
+        cap = MAX_SAMPLES_PER_SWEEP if budget is None else max(0, int(budget))
         dropped = 0
         queued = 0
-        for t in detected:
+        already = 0
+        # Set Z and the near misses first: their slices are what the
+        # execution rail reads, so when a sweep exceeds the cap the head of
+        # the queue is theirs. A stable sort keeps feed order inside each class.
+        prio = priority_wallets()
+        rows = list(detected)
+        if prio:
+            rows.sort(key=lambda t: 0 if (t.get("target") or "").lower() in prio else 1)
+        n_prio = sum(1 for t in rows if (t.get("target") or "").lower() in prio) if prio else 0
+        for t in rows:
             cid = t.get("copy_id") or ""
             # One quote per detected trade ever: the detector re-emits the same
             # trade every sweep until it ages out of the window, and re-quoting
             # it would weight slow-moving markets by how long they linger.
             if cid and cid in seen:
+                already += 1
                 continue
             # The worker sleeps 12s between a trade's two samples, so it drains
             # ~5/min while a sweep can emit 30-40. Cap per sweep so the queue
             # holds recent trades instead of a growing backlog of stale ones —
             # and mark the skipped ones seen, so what is measured stays a
             # clean per-sweep head rather than an ever-lagging tail.
-            if queued >= MAX_SAMPLES_PER_SWEEP:
+            if queued >= cap:
                 if cid:
                     seen.add(cid)
                 dropped += 1
@@ -470,11 +529,103 @@ def make_observer(clob_client_factory, queue_max: int = 500):
             # Never silent: a truncated sample that renders as a complete one
             # is how a measurement lies.
             logger.info(f"[shadow] sampled {queued} of {queued + dropped} new "
-                        f"detected trade(s) this sweep")
+                        f"detected trade(s) this sweep"
+                        + (f" (book {book})" if book else ""))
+        record_coverage({"detected": len(rows), "new": queued + dropped, "queued": queued,
+                         "dropped": dropped, "already": already, "priority": n_prio,
+                         "cap": cap, "book": book or "primary"})
         if len(seen) > 50000:
             seen.clear()
 
     return observer, stop.set
+
+
+def budgeted(observer, budget: int, book: str):
+    """The observer as a lower-floor book sees it: the same dedup, its own
+    per-sweep budget, its rows stamped with the book in the coverage ledger.
+    A budget of 0 is "not on the observer" and returns None, which the
+    engine treats as no observer at all."""
+    if observer is None or budget <= 0:
+        return None
+
+    def sink(detected: list) -> None:
+        observer(detected, budget=budget, book=book)
+    return sink
+
+
+def _coverage_path() -> str:
+    return os.path.join(CONFIG.data_dir, COVERAGE_FILE)
+
+
+def record_coverage(row: dict, now: Optional[float] = None) -> None:
+    """One row per sweep per book. Never raises into the engine."""
+    row = {"ts": time.time() if now is None else now, **row}
+    try:
+        os.makedirs(CONFIG.data_dir, exist_ok=True)
+        with open(_coverage_path(), "a") as f:
+            f.write(json.dumps(row) + "\n")
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[shadow] coverage row not written: {exc}")
+        return
+    _maybe_trim_coverage()
+
+
+def _maybe_trim_coverage() -> None:
+    try:
+        p = _coverage_path()
+        if not os.path.exists(p) or os.path.getsize(p) < COVERAGE_MAX_ROWS * 120:
+            return
+        with open(p) as f:
+            lines = f.readlines()
+        if len(lines) <= COVERAGE_MAX_ROWS:
+            return
+        tmp = p + ".tmp"
+        with open(tmp, "w") as f:
+            f.writelines(lines[-_COVERAGE_TRIM_TO:])
+        os.replace(tmp, p)
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[shadow] coverage trim failed: {exc}")
+
+
+def coverage_rows(since_ts: float = 0.0) -> list[dict]:
+    out: list[dict] = []
+    try:
+        with open(_coverage_path()) as f:
+            for line in f:
+                try:
+                    r = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if float(r.get("ts") or 0) >= since_ts:
+                    out.append(r)
+    except OSError:
+        return []
+    return out
+
+
+def coverage_summary(since_ts: float = 0.0) -> dict:
+    """Per book: sweeps, detected, new, queued, dropped. Raw counts."""
+    out: dict = {}
+    for r in coverage_rows(since_ts):
+        b = str(r.get("book") or "primary")
+        d = out.setdefault(b, {"sweeps": 0, "detected": 0, "new": 0, "queued": 0, "dropped": 0, "priority": 0})
+        d["sweeps"] += 1
+        for k in ("detected", "new", "queued", "dropped", "priority"):
+            d[k] += int(r.get(k) or 0)
+    return out
+
+
+def coverage_line(since_ts: float = 0.0) -> str:
+    """One phone line: what the observer kept, per book, over the window."""
+    s = coverage_summary(since_ts)
+    if not s:
+        return "shadow coverage: no sweeps recorded"
+    parts = []
+    for b, d in sorted(s.items()):
+        parts.append(f"{b}: {d['queued']} quoted of {d['new']} new"
+                     + (f", {d['dropped']} dropped at the cap" if d["dropped"] else "")
+                     + f" ({d['sweeps']} sweeps)")
+    return "shadow coverage: " + " · ".join(parts)
 
 
 # --------------------------------------------------------------------------- #

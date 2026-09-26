@@ -16,6 +16,12 @@ this module does two things and refuses a third:
   ``zset.admit``, which has no force path.
 * It never admits on its own. ``seed_zset.py --apply`` still exists for a
   scripted seed, and it calls the same evaluation, so there is one gate.
+
+Since 2026-09-26 (the owner's ruling on his doc, part 3 §3.1) the execution
+rail is the real-quote slice: the wallet's copies re-priced at the quotes
+the shadow observer took, refused when they lose over at least fifteen
+matched copies. Book A's contradiction check stands in while the slice is
+thin. Every card says which rail answered.
 """
 
 from __future__ import annotations
@@ -93,6 +99,11 @@ class Candidate:
     settled: list = field(default_factory=list)
     a_roi: Optional[float] = None
     a_n: int = 0
+    # The execution rail's evidence: the wallet at the prices we would
+    # really pay (the real-quote slice) and which rail answered.
+    real_roi: Optional[float] = None
+    real_n: int = 0
+    exec_rail: str = ""
     last_ts: Optional[float] = None
     n_open: int = 0
 
@@ -102,15 +113,20 @@ class Candidate:
 
 
 def evaluate(wallet: str, b_positions, a_positions, *, era: Optional[float],
-             now: float, book_corr) -> Optional[Candidate]:
+             now: float, book_corr, quotes: Optional[dict] = None) -> Optional[Candidate]:
     """One wallet through the go-live gate plus set Z's rails.
 
     The single evaluation both the seeding script and the Telegram cards run,
     so there is one gate. Returns None when the wallet has no settled rows.
+    ``quotes`` is the real-quote map (``virtual_ledger.quote_map``); None
+    loads it, cached for a minute, so a scan over many wallets reads the
+    observer's log once.
     """
     settled, last_ts = wallet_rows(b_positions, wallet)
     if not settled:
         return None
+    if quotes is None:
+        quotes = load_quotes()
     # R4 (2026-09-24): "active within 14 d" reads the wallet's OWN trades
     # when the form rail has read them, not only our copies: 69 wallets
     # failed it while active, producing no $300 bets or hitting the caps.
@@ -137,12 +153,17 @@ def evaluate(wallet: str, b_positions, a_positions, *, era: Optional[float],
     a_settled, _ = wallet_rows(a_positions, wallet)
     a_roi, a_n = clean_roi(a_settled, era)
     conc_ok, conc_detail = zset.concentration_check(settled, min_opened_ts=era)
-    contra_ok, contra_detail = zset.contradiction_check(a_roi, a_n, CONTRADICTION_MIN_N)
+    # The execution rail (owner's ruling 2026-09-26, his doc part 3 §3.1):
+    # the real-quote slice when it covers the wallet, book A while thin.
+    rq = real_quote_slice(wallet, b_positions, quotes, era)
+    real_roi, real_n = rq.get("real_roi"), int(rq.get("n_matched") or 0)
+    contra_ok, contra_detail, rail = zset.execution_check(
+        real_roi, real_n, a_roi, a_n, min_a_n=CONTRADICTION_MIN_N)
     bl = zset._blacklist_block(wallet)
     scalp_ok, scalp_detail = scalper_check(wallet)
     all_checks = list(checks) + [
         ("still positive with its best 3 copies deleted", conc_ok, conc_detail),
-        ("the other book does not contradict it", contra_ok, contra_detail),
+        (zset.execution_label(rail), contra_ok, contra_detail),
         ("not under the bot's own auto-demote", bl is None, bl or "no active demotion"),
         ("not a scalper at our latency", scalp_ok, scalp_detail),
     ]
@@ -156,7 +177,9 @@ def evaluate(wallet: str, b_positions, a_positions, *, era: Optional[float],
         gate_ready=bool(ready), checks=all_checks, gate_checks=list(checks),
         ideal_roi=ideal_roi, n_ideal=n_ideal, paper_roi=stats.roi,
         trimmed_roi=trimmed, n_trimmed_kept=kept, n_trimmed_dropped=dropped,
-        settled=settled, a_roi=a_roi, a_n=a_n, last_ts=last_ts, n_open=n_open)
+        settled=settled, a_roi=a_roi, a_n=a_n,
+        real_roi=real_roi, real_n=real_n, exec_rail=rail,
+        last_ts=last_ts, n_open=n_open)
 
 
 def scalper_check(wallet: str) -> tuple[bool, str]:
@@ -199,15 +222,34 @@ def candidates(b_positions, a_positions, *, era: Optional[float], now: float,
         wallets = sorted(w for w, n in counts.items()
                          if n >= CONFIG.copy_golive_min_settled)
     passers, near = [], []
+    quotes = load_quotes()
     for w in wallets:
-        c = evaluate(w, b_positions, a_positions, era=era, now=now, book_corr=book_corr)
+        c = evaluate(w, b_positions, a_positions, era=era, now=now, book_corr=book_corr,
+                     quotes=quotes)
         if c is None:
             continue
         if c.ok:
             passers.append(c)
         elif c.n_fail <= 2:
             near.append(c)
+    _near_door.clear()
+    _near_door.update(c.wallet.lower() for c in passers + near)
     return passers, near, book_corr
+
+
+# The wallets at the door as of the last scan (passers and near misses),
+# for the shadow observer's priority: their slices are what the execution
+# rail reads, so they are quoted before the rest when a sweep exceeds the cap.
+_near_door: set = set()
+
+
+def priority_wallets() -> set:
+    """Set Z plus the last scan's passers and near misses, lowercased."""
+    try:
+        z = zset.wallet_set()
+    except Exception:  # noqa: BLE001
+        z = set()
+    return set(z) | set(_near_door)
 
 
 def admit(wallet: str, *, era: Optional[float], b_positions, a_positions,
@@ -226,6 +268,7 @@ def admit(wallet: str, *, era: Optional[float], b_positions, a_positions,
     ok, checks = zset.admit(
         wallet, ready=c.gate_ready, checks=c.gate_checks, settled=c.settled,
         era_floor=era, other_book_roi=c.a_roi, other_book_n=c.a_n,
+        real_roi=c.real_roi, real_n=c.real_n,
         rails_supplied=True, source="telegram-gate")
     return (ok, checks, c)
 
@@ -309,13 +352,14 @@ def standing_map(wallets: Iterable[str], b_positions, a_positions, *,
     if book_corr is None:
         book_corr = promotion_gate.split_half_corr(b_positions, min_opened_ts=era)
     in_z, evicted = zset.wallet_set(), zset.evicted_set()
+    quotes = load_quotes()
     out: dict[str, str] = {}
     for w in wallets:
         key = (w or "").lower()
         if not key.startswith("0x") or key in out:
             continue
         cand = evaluate(key, b_positions, a_positions, era=era, now=now,
-                        book_corr=book_corr)
+                        book_corr=book_corr, quotes=quotes)
         out[key] = standing(key, cand, in_z=in_z, evicted=evicted,
                             auto_admit=auto_admit)
     return out
@@ -324,6 +368,38 @@ def standing_map(wallets: Iterable[str], b_positions, a_positions, *,
 # --------------------------------------------------------------------------- #
 # The measured columns
 # --------------------------------------------------------------------------- #
+
+# The real-quote map, read once a minute at most: the observer's log is tens
+# of thousands of rows and a scan evaluates dozens of wallets.
+QUOTES_TTL_S = 60.0
+_quotes_cache: dict = {"ts": 0.0, "quotes": None}
+
+
+def load_quotes(now: Optional[float] = None) -> dict:
+    """``copy_id -> our price`` from the shadow observer's log, cached.
+
+    An unreadable log is said at WARNING and yields an empty map, which the
+    execution rail treats as a thin slice: the wallet is then judged by
+    book A, a real rail, never waved through. The message names the error
+    so "the slice is thin" and "the log could not be read" stay distinct.
+    """
+    now = time.time() if now is None else now
+    c = _quotes_cache
+    if c["quotes"] is not None and now - float(c["ts"]) < QUOTES_TTL_S:
+        return c["quotes"]
+    try:
+        quotes = virtual_ledger.quote_map(shadow_quote.load_rows())
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[zset] real-quote log unreadable ({exc}): the execution "
+                    f"rail falls back to book A for every wallet this scan")
+        quotes = {}
+    c["ts"], c["quotes"] = now, quotes
+    return quotes
+
+
+def clear_quotes_cache() -> None:
+    _quotes_cache["ts"], _quotes_cache["quotes"] = 0.0, None
+
 
 def real_quote_slice(wallet: str, b_positions, quotes: dict, era: Optional[float]) -> dict:
     """The wallet's own counterfactual at real quotes, with its sample size."""
@@ -424,7 +500,9 @@ def render_card(c: Candidate, *, rq: dict, pen: Optional[dict], ex: dict,
     lines.append(f"active: last copy {idle:.1f}d ago · {c.n_open} open" if idle is not None
                  else f"active: no timestamp · {c.n_open} open")
     n_ok = sum(1 for ch in c.checks if ch[1])
-    lines.append(f"gate: {n_ok}/{len(c.checks)} checks pass")
+    rail = ("the real-quote slice" if c.exec_rail == zset.RAIL_SLICE
+            else f"book A (slice thin, {c.real_n} of {zset.REAL_QUOTE_MIN_N} matched)")
+    lines.append(f"gate: {n_ok}/{len(c.checks)} checks pass · execution rail: {rail}")
     if in_z:
         lines.append("<i>already in set Z; /zset drop to remove</i>")
     return "\n".join(lines)
