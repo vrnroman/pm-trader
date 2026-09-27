@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-27T12:41:38Z-f3b1",
-    "ts": 1790512898,
+    "id": "2026-09-27T18:40:00Z-95b8",
+    "ts": 1790534400,
     "kind": "nothing",
-    "message": "Armed since 09:23:34 UTC on 2026-09-26, no self-disarm since. Spend today $6.40 against the $45 daily-loss stop, no cap hit. Last copy filled 03:57 UTC today (Chengdu Open, $6.40), which later settled a loss. The 404 no-orderbook and network-disconnect errors are the same chronic noise seen in prior digests, no new fault. The bar benched 0x722abb54 again at 04:31 UTC; the two in-form wallets, 0xd25156e2 and 0xf9168343, show no losing streak or hit-rate slide that clears the wallet_action bar.",
+    "message": "Armed since 2026-09-26 09:23:34 UTC, no self-disarm since. Spend today $6.40 against the $45 daily-loss stop, no cap hit. Three wallets in form (0x5213eb85, 0xd25156e2, 0xf9168343), none show a losing streak or a hit-rate slide against the bar. The 404 no-orderbook and connection-disconnect errors are the same chronic noise as prior digests, no new fault.",
     "evidence": [
+        "## money state {\"cash\": 99.746233, \"open_cost\": 4.5, \"equity\": 104.25, \"floor\": 30.0, \"spend\": {\"date\": \"2026-09-27\", \"spent_usd\": 6.4, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
         "## arm: {\"armed\": true, \"ts\": 1790414614.14, \"by\": \"owner:claude-session\", \"reason\": \"owner instruction 2026-09-26 via Claude session: do actual deals under the new limits\"}",
         "## spend today: {\"date\": \"2026-09-27\", \"spent_usd\": 6.4, \"daily_loss_stop_usd\": 45.0, \"cap_usd\": null}",
-        "2026-09-27 03:57:21 TRADE [verify] FILLED: BUY 11.85 shares on 'Chengdu Open: Jenson Brooksby vs Nikoloz' @ 0.5400",
-        "2026-09-27 04:31:08 INFO [ops] form: '0x722abb54 in form' -> 'benched' | 0x722abb54: 61 settled, 79% won vs 77% needed, net +9.0% on $102,922, worst day -2,522, 3 of 50 exits under 10 min",
-        "54ac26fb3ff1 x192 last 0.2h ago [open: 192 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}"
+        "in form  0xf9168343: 53 settled, 55% won vs 48% needed, net +2.8% on $146,637, worst day -6,320, 2 of 33 exits under 10 min",
+        "54ac26fb3ff1 x227 last 1.2h ago [open: 227 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}"
     ],
     "commit": null
 }
