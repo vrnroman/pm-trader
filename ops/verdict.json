@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-26T18:41:41Z-4517",
-    "ts": 1790448101,
+    "id": "2026-09-27T00:42:20Z-aef1",
+    "ts": 1790469740,
     "kind": "nothing",
-    "message": "Armed since 09:23 UTC, three live copies filled clean since (09:39, 12:22, 12:45). Spend today $19.20 against the $45 daily-loss stop, no cap hit. The chain RPC invalid-block-range outage has not recurred since 08:35 UTC.",
+    "message": "Armed since 09:23 UTC yesterday, no self-disarm since. Spend today $19.20 against the $45 daily-loss stop, no cap hit. The chain RPC invalid-block-range outage has not recurred since 08:35 UTC. In-form wallets show no losing streak or outsized worst day.",
     "evidence": [
         "## arm: {\"armed\": true, \"ts\": 1790414614.13, \"by\": \"owner:claude-session\"}",
         "spend today: spent_usd 19.2, daily_loss_stop_usd 45.0, cap_usd null",
-        "2026-09-26 12:45:22 TRADE [verify] FILLED: BUY 11.23 shares on 'Map Handicap: HERO (-1.5) vs Sangal (+1.' @ 0.5700",
-        "dcba498fc237 x188 last 9.9h ago [recurred: 8 hit(s) since the disarm 12.6 h ago]",
-        "6fbcddbc9dfb x175 last 9.9h ago [recurred: 11 hit(s) since the disarm 13.9 h ago]"
+        "dcba498fc237 x188 last 15.2h ago [recurred: 8 hit(s) since the disarm 18.0 h ago]",
+        "in form 0xd25156e2: 67 settled, 66% won vs 46% needed, net +30.5%, worst day -2,469",
+        "in form 0xf9168343: 53 settled, 55% won vs 48% needed, net +2.8%, worst day -6,320"
     ],
     "commit": null
 }
