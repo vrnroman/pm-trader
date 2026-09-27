@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-27T04:36:31.336146+00:00",
+ "generated": "2026-09-27T08:08:22.961400+00:00",
  "money": {
   "cash": 120.306233,
-  "open_cost": 10.9,
-  "equity": 131.21,
+  "open_cost": 4.5,
+  "equity": 124.81,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
@@ -15,13 +15,13 @@
    "closed_reason": ""
   },
   "armed": true,
-  "resolved_unclaimed": 68,
+  "resolved_unclaimed": 69,
   "tier": {
    "1a": 0,
-   "1b": 19.2,
+   "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790483432.1021614,
+  "ts": 1790496326.9625976,
   "day": "2026-09-27"
  },
  "arm": {
@@ -55,7 +55,7 @@
    "placements": []
   },
   "1b": {
-   "open_total": 19.2,
+   "open_total": 12.8,
    "daily_date": "2026-09-27",
    "daily_volume": 6.4,
    "placements": [
@@ -72,13 +72,6 @@
      "ts": 1790415555.8161044,
      "trader": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
      "title": ""
-    },
-    {
-     "token_id": "101922131308350308405118205643864036992501268344680822256490594210909214672298",
-     "cost": 6.4,
-     "ts": 1790481440.814199,
-     "trader": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-     "title": "Chengdu Open: Jenson Brooksby vs Nikoloz Basilashvili"
     }
    ]
   },
@@ -97,9 +90,9 @@
    "source": "gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790402937.394338,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 646,
+    "n_resolved_markets": 658,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -108,27 +101,27 @@
     },
     "at": {
      "300": {
-      "n": 380,
-      "roi": 0.0146,
-      "trimmed": -0.0135,
+      "n": 385,
+      "roi": -0.0088,
+      "trimmed": -0.0366,
       "ok": false
      },
      "200": {
-      "n": 430,
-      "roi": 0.0297,
-      "trimmed": 0.0034,
+      "n": 439,
+      "roi": 0.0003,
+      "trimmed": -0.024,
       "ok": false
      },
      "150": {
-      "n": 446,
-      "roi": 0.037,
-      "trimmed": 0.0102,
+      "n": 461,
+      "roi": 0.002,
+      "trimmed": -0.0233,
       "ok": false
      },
      "100": {
-      "n": 481,
-      "roi": 0.0445,
-      "trimmed": 0.0198,
+      "n": 498,
+      "roi": 0.0094,
+      "trimmed": -0.014,
       "ok": false
      }
     },
@@ -143,9 +136,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790402951.5675707,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 1144,
+    "n_resolved_markets": 1013,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -154,27 +147,27 @@
     },
     "at": {
      "300": {
-      "n": 437,
-      "roi": 0.0376,
-      "trimmed": 0.0147,
+      "n": 425,
+      "roi": 0.0405,
+      "trimmed": 0.0109,
       "ok": false
      },
      "200": {
-      "n": 504,
-      "roi": 0.0448,
-      "trimmed": 0.0246,
+      "n": 489,
+      "roi": 0.0392,
+      "trimmed": 0.0135,
       "ok": false
      },
      "150": {
-      "n": 546,
-      "roi": 0.0412,
-      "trimmed": 0.0225,
+      "n": 522,
+      "roi": 0.0379,
+      "trimmed": 0.0139,
       "ok": false
      },
      "100": {
-      "n": 622,
-      "roi": 0.0392,
-      "trimmed": 0.0228,
+      "n": 591,
+      "roi": 0.03,
+      "trimmed": 0.0088,
       "ok": false
      }
     },
@@ -189,9 +182,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790402964.3429935,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 1415,
+    "n_resolved_markets": 1455,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -200,27 +193,27 @@
     },
     "at": {
      "300": {
-      "n": 47,
-      "roi": 0.0214,
-      "trimmed": -0.069,
+      "n": 51,
+      "roi": 0.004,
+      "trimmed": -0.08,
       "ok": false
      },
      "200": {
-      "n": 77,
-      "roi": 0.0166,
-      "trimmed": -0.0646,
+      "n": 76,
+      "roi": -0.0179,
+      "trimmed": -0.0852,
       "ok": false
      },
      "150": {
       "n": 104,
-      "roi": 0.0244,
-      "trimmed": -0.0456,
+      "roi": 0.0013,
+      "trimmed": -0.064,
       "ok": false
      },
      "100": {
-      "n": 159,
-      "roi": 0.039,
-      "trimmed": -0.0107,
+      "n": 161,
+      "roi": 0.0358,
+      "trimmed": -0.0113,
       "ok": false
      }
     },
@@ -235,9 +228,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790403012.1562374,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 946,
+    "n_resolved_markets": 956,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -246,27 +239,27 @@
     },
     "at": {
      "300": {
-      "n": 163,
-      "roi": 0.09,
-      "trimmed": 0.0548,
+      "n": 168,
+      "roi": 0.0794,
+      "trimmed": 0.0451,
       "ok": false
      },
      "200": {
-      "n": 178,
-      "roi": 0.0519,
-      "trimmed": 0.0191,
+      "n": 183,
+      "roi": 0.0433,
+      "trimmed": 0.0112,
       "ok": false
      },
      "150": {
-      "n": 204,
-      "roi": 0.0252,
-      "trimmed": -0.0038,
+      "n": 209,
+      "roi": 0.0183,
+      "trimmed": -0.0101,
       "ok": false
      },
      "100": {
-      "n": 246,
-      "roi": 0.0515,
-      "trimmed": 0.0226,
+      "n": 251,
+      "roi": 0.0452,
+      "trimmed": 0.0168,
       "ok": false
      }
     },
@@ -281,9 +274,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790403034.1411688,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 1673,
+    "n_resolved_markets": 1740,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -292,27 +285,27 @@
     },
     "at": {
      "300": {
-      "n": 296,
-      "roi": 0.2121,
-      "trimmed": 0.1773,
+      "n": 314,
+      "roi": 0.2163,
+      "trimmed": 0.1824,
       "ok": true
      },
      "200": {
-      "n": 373,
-      "roi": 0.2017,
-      "trimmed": 0.1682,
+      "n": 394,
+      "roi": 0.2052,
+      "trimmed": 0.1735,
       "ok": true
      },
      "150": {
-      "n": 428,
-      "roi": 0.2023,
-      "trimmed": 0.1731,
+      "n": 450,
+      "roi": 0.2065,
+      "trimmed": 0.1788,
       "ok": true
      },
      "100": {
-      "n": 511,
-      "roi": 0.1979,
-      "trimmed": 0.1693,
+      "n": 536,
+      "roi": 0.2098,
+      "trimmed": 0.1806,
       "ok": true
      }
     },
@@ -327,9 +320,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790403074.6571865,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 173,
+    "n_resolved_markets": 182,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -338,27 +331,27 @@
     },
     "at": {
      "300": {
-      "n": 179,
-      "roi": 0.0772,
-      "trimmed": 0.0067,
+      "n": 189,
+      "roi": 0.0356,
+      "trimmed": -0.0118,
       "ok": false
      },
      "200": {
-      "n": 214,
-      "roi": 0.0199,
-      "trimmed": -0.0409,
+      "n": 225,
+      "roi": -0.0454,
+      "trimmed": -0.0851,
       "ok": false
      },
      "150": {
-      "n": 224,
-      "roi": 0.0251,
-      "trimmed": -0.0329,
+      "n": 235,
+      "roi": -0.0389,
+      "trimmed": -0.0758,
       "ok": false
      },
      "100": {
-      "n": 229,
-      "roi": 0.0273,
-      "trimmed": -0.0293,
+      "n": 242,
+      "roi": -0.039,
+      "trimmed": -0.0751,
       "ok": false
      }
     },
@@ -373,9 +366,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790403083.8554258,
+    "ts": 1790495524.1502345,
     "n_acts": 1065,
-    "n_resolved_markets": 174,
+    "n_resolved_markets": 180,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -384,27 +377,27 @@
     },
     "at": {
      "300": {
-      "n": 100,
-      "roi": 0.116,
-      "trimmed": 0.0063,
+      "n": 106,
+      "roi": 0.1236,
+      "trimmed": 0.0205,
       "ok": true
      },
      "200": {
-      "n": 100,
-      "roi": 0.116,
-      "trimmed": 0.0063,
+      "n": 106,
+      "roi": 0.1236,
+      "trimmed": 0.0205,
       "ok": true
      },
      "150": {
-      "n": 100,
-      "roi": 0.1132,
-      "trimmed": 0.0034,
+      "n": 106,
+      "roi": 0.1209,
+      "trimmed": 0.0178,
       "ok": true
      },
      "100": {
-      "n": 100,
-      "roi": 0.1132,
-      "trimmed": 0.0034,
+      "n": 106,
+      "roi": 0.1209,
+      "trimmed": 0.0178,
       "ok": true
      }
     },
@@ -419,9 +412,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790403093.1450658,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 232,
+    "n_resolved_markets": 246,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -430,27 +423,27 @@
     },
     "at": {
      "300": {
-      "n": 43,
-      "roi": 0.2283,
-      "trimmed": 0.0469,
+      "n": 42,
+      "roi": 0.2451,
+      "trimmed": 0.0603,
       "ok": true
      },
      "200": {
       "n": 69,
-      "roi": 0.1561,
-      "trimmed": 0.0428,
+      "roi": 0.1571,
+      "trimmed": 0.044,
       "ok": true
      },
      "150": {
       "n": 93,
-      "roi": 0.1034,
-      "trimmed": 0.0186,
+      "roi": 0.1227,
+      "trimmed": 0.0385,
       "ok": true
      },
      "100": {
-      "n": 111,
-      "roi": 0.1021,
-      "trimmed": 0.0079,
+      "n": 113,
+      "roi": 0.1246,
+      "trimmed": 0.0327,
       "ok": true
      }
     },
@@ -465,9 +458,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790403109.883757,
-    "n_acts": 2191,
-    "n_resolved_markets": 306,
+    "ts": 1790495524.1502345,
+    "n_acts": 2230,
+    "n_resolved_markets": 315,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -476,27 +469,27 @@
     },
     "at": {
      "300": {
-      "n": 118,
-      "roi": 0.2493,
-      "trimmed": 0.1965,
+      "n": 124,
+      "roi": 0.2621,
+      "trimmed": 0.2123,
       "ok": true
      },
      "200": {
-      "n": 164,
-      "roi": 0.2549,
-      "trimmed": 0.2121,
+      "n": 170,
+      "roi": 0.2641,
+      "trimmed": 0.223,
       "ok": true
      },
      "150": {
-      "n": 182,
-      "roi": 0.2872,
-      "trimmed": 0.2351,
+      "n": 189,
+      "roi": 0.2876,
+      "trimmed": 0.2375,
       "ok": true
      },
      "100": {
-      "n": 209,
-      "roi": 0.219,
-      "trimmed": 0.1727,
+      "n": 218,
+      "roi": 0.2187,
+      "trimmed": 0.1744,
       "ok": true
      }
     },
@@ -511,9 +504,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790408379.9945147,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 1090,
+    "n_resolved_markets": 1130,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -522,27 +515,27 @@
     },
     "at": {
      "300": {
-      "n": 189,
-      "roi": 0.3047,
-      "trimmed": 0.255,
+      "n": 190,
+      "roi": 0.2966,
+      "trimmed": 0.247,
       "ok": true
      },
      "200": {
-      "n": 252,
-      "roi": 0.4401,
-      "trimmed": 0.3501,
+      "n": 256,
+      "roi": 0.4429,
+      "trimmed": 0.3544,
       "ok": true
      },
      "150": {
-      "n": 288,
-      "roi": 0.4479,
-      "trimmed": 0.3461,
+      "n": 294,
+      "roi": 0.4578,
+      "trimmed": 0.3583,
       "ok": true
      },
      "100": {
-      "n": 328,
-      "roi": 0.4889,
-      "trimmed": 0.4001,
+      "n": 339,
+      "roi": 0.4963,
+      "trimmed": 0.4105,
       "ok": true
      }
     },
@@ -557,9 +550,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790408379.9945147,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 1115,
+    "n_resolved_markets": 1173,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -568,27 +561,27 @@
     },
     "at": {
      "300": {
-      "n": 184,
-      "roi": 0.3379,
-      "trimmed": 0.2774,
+      "n": 192,
+      "roi": 0.3495,
+      "trimmed": 0.2918,
       "ok": true
      },
      "200": {
-      "n": 248,
-      "roi": 0.3215,
-      "trimmed": 0.2644,
+      "n": 261,
+      "roi": 0.3351,
+      "trimmed": 0.281,
       "ok": true
      },
      "150": {
-      "n": 274,
-      "roi": 0.3628,
-      "trimmed": 0.3003,
+      "n": 288,
+      "roi": 0.3776,
+      "trimmed": 0.3184,
       "ok": true
      },
      "100": {
-      "n": 334,
-      "roi": 0.3917,
-      "trimmed": 0.3408,
+      "n": 348,
+      "roi": 0.401,
+      "trimmed": 0.3522,
       "ok": true
      }
     },
@@ -603,9 +596,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790408379.9945147,
+    "ts": 1790495524.1502345,
     "n_acts": 4000,
-    "n_resolved_markets": 111,
+    "n_resolved_markets": 112,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -614,27 +607,27 @@
     },
     "at": {
      "300": {
-      "n": 70,
-      "roi": 0.1968,
-      "trimmed": 0.0823,
+      "n": 73,
+      "roi": 0.2245,
+      "trimmed": 0.1161,
       "ok": true
      },
      "200": {
-      "n": 82,
-      "roi": 0.2277,
-      "trimmed": 0.1194,
+      "n": 84,
+      "roi": 0.2653,
+      "trimmed": 0.1611,
       "ok": true
      },
      "150": {
-      "n": 91,
-      "roi": 0.1844,
-      "trimmed": 0.0858,
+      "n": 92,
+      "roi": 0.2326,
+      "trimmed": 0.1366,
       "ok": true
      },
      "100": {
-      "n": 102,
-      "roi": 0.1718,
-      "trimmed": 0.0745,
+      "n": 103,
+      "roi": 0.2149,
+      "trimmed": 0.1198,
       "ok": true
      }
     },
@@ -783,18 +776,18 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 131.21,
+  "last_equity": 124.81,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-26T06:43:00Z-4a77",
-  "admit_scan_ts": 1790473775.595187,
+  "admit_scan_ts": 1790495517.404418,
   "day_loss_pushed": "2026-09-12",
-  "loss_streak": 7,
+  "loss_streak": 8,
   "day_pnl": -6.4,
-  "day_pnl_day": "2026-09-25",
+  "day_pnl_day": "2026-09-27",
   "settled_tokens": [
    "6691701803539626176077488709374004737591849995522510168757367609925258534749",
    "111426907502041127672975490206099880504280577275905396462330907920963353499778",
@@ -802,12 +795,13 @@
    "86842978223026466862449934105595250822075305679428664631958332197768084254089",
    "96998131034687394987869300990474810645455355843214977734260368889207437752543",
    "7176164693333913912271980594552279937832227503542042198140094468727106225171",
-   "114415763702250973760299499587430450894909671709658162852834453684441658587440"
+   "114415763702250973760299499587430450894909671709658162852834453684441658587440",
+   "101922131308350308405118205643864036992501268344680822256490594210909214672298"
   ],
   "form_scan_ts": 1790483432.1035542,
-  "daily_line_attempt_day": "2026-09-26",
+  "daily_line_attempt_day": "2026-09-27",
   "daily_line_sent": true,
-  "daily_line_day": "2026-09-26",
+  "daily_line_day": "2026-09-27",
   "guard_failing_pushed": false,
   "floor_near_day": "2026-09-19"
  },
@@ -851,7 +845,7 @@
   },
   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
    "since": 1790419321.1807199,
-   "settled": 0
+   "settled": 1
   },
   "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
    "since": 1790419321.1807199,
@@ -1174,128 +1168,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790400803.4656682,
-   "day": "2026-09-26",
-   "kind": "sre_escalate",
-   "before": "fingerprint dcba498fc237",
-   "after": "owner told",
-   "detail": "Still 164 chain read errors since you re-armed 40 min ago: the CTF feed the bot trades on is fully down, so it is live but blind, 0 traded today and 68 position",
-   "push": "BOT",
-   "fingerprint": "dcba498fc237"
-  },
-  {
-   "ts": 1790401865.099971,
-   "day": "2026-09-26",
-   "kind": "sre_disarm",
-   "before": "armed",
-   "after": "disarmed",
-   "detail": "Chain fill reconciliation is fully down (RPC -32000 invalid block range) while armed, so the bot can still place copy orders it cannot confirm on chain; back to",
-   "push": "DEAL",
-   "fingerprint": "dcba498fc237"
-  },
-  {
-   "ts": 1790402790.9767268,
-   "day": "2026-09-26",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1790404170.876388,
-   "day": "2026-09-26",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1790405122.9200625,
-   "day": "2026-09-26",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1790408379.9945147,
-   "day": "2026-09-26",
-   "kind": "auto_admit",
-   "before": "0x09b045ba not in Z",
-   "after": "in set Z, on probation",
-   "detail": "49 settled paper copies, paper ROI +36.9%, trimmed +28.0%, ideal +37.9%, real quotes +1.1% over 30 matched",
-   "push": "WALLET",
-   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-   "rail": "real quotes",
-   "floor": "copies at $100: 300 yes +30% (n=189, trimmed +26%) · 200 yes +44% (n=252, trimmed +35%) · 150 yes +45% (n=288, trimmed +35%) · 100 YES +49% (n=328, trimmed +40%); backward replay (copy-and-hold at their price, first entry, clean era)"
-  },
-  {
-   "ts": 1790408379.9945147,
-   "day": "2026-09-26",
-   "kind": "auto_admit",
-   "before": "0x1985327e not in Z",
-   "after": "in set Z, on probation",
-   "detail": "36 settled paper copies, paper ROI +54.9%, trimmed +34.3%, ideal +55.9%, real quotes +19.6% over 20 matched",
-   "push": "WALLET",
-   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-   "rail": "real quotes",
-   "floor": "copies at $100: 300 yes +34% (n=184, trimmed +28%) · 200 yes +32% (n=248, trimmed +26%) · 150 yes +36% (n=274, trimmed +30%) · 100 YES +39% (n=334, trimmed +34%); backward replay (copy-and-hold at their price, first entry, clean era)"
-  },
-  {
-   "ts": 1790408379.9945147,
-   "day": "2026-09-26",
-   "kind": "auto_admit",
-   "before": "0x4980930d not in Z",
-   "after": "in set Z, on probation",
-   "detail": "34 settled paper copies, paper ROI +36.5%, trimmed +19.9%, ideal +37.5%, real quotes +33.5% over 26 matched",
-   "push": "WALLET",
-   "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
-   "rail": "real quotes",
-   "floor": "copies at $200: 300 yes +20% (n=70, trimmed +8%) · 200 YES +23% (n=82, trimmed +12%) · 150 yes +18% (n=91, trimmed +9%) · 100 yes +17% (n=102, trimmed +7%); backward replay (copy-and-hold at their price, first entry, clean era)"
-  },
-  {
-   "ts": 1790408373.9709096,
-   "day": "2026-09-26",
-   "kind": "form",
-   "before": "0x09b045ba unknown",
-   "after": "benched",
-   "detail": "0x09b045ba: 31 settled, 71% won vs 58% needed, net +10.2% on $12,220, worst day -333, 30 of 30 exits under 10 min",
-   "push": null,
-   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6"
-  },
-  {
-   "ts": 1790408373.9709096,
-   "day": "2026-09-26",
-   "kind": "form",
-   "before": "0x1985327e unknown",
-   "after": "benched",
-   "detail": "0x1985327e: 51 settled, 71% won vs 54% needed, net +16.8% on $19,607, worst day -535, 49 of 49 exits under 10 min",
-   "push": null,
-   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab"
-  },
-  {
-   "ts": 1790408373.9709096,
-   "day": "2026-09-26",
-   "kind": "form",
-   "before": "0x4980930d unknown",
-   "after": "benched",
-   "detail": "0x4980930d: 5 settled, 40% won vs 42% needed, net +54.5% on $6,146, worst day -1,358, 0 of 1 exits under 10 min",
-   "push": null,
-   "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709"
-  },
-  {
-   "ts": 1790408764.557082,
-   "day": "2026-09-26",
-   "kind": "escalation_delivered",
-   "before": "routine escalation",
-   "after": "sent",
-   "detail": "Chain RPC is still failing. CTF and NEG_RISK_CTF getLogs have hit invalid block range params without a clean stretch sin",
-   "push": "BOT"
-  },
-  {
    "ts": 1790412284.7953641,
    "day": "2026-09-26",
    "kind": "sre_started",
@@ -1417,143 +1289,197 @@
    "detail": "0x722abb54: 61 settled, 79% won vs 77% needed, net +9.0% on $102,922, worst day -2,522, 3 of 50 exits under 10 min",
    "push": "WALLET",
    "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"
+  },
+  {
+   "ts": 1790488902.491293,
+   "day": "2026-09-27",
+   "kind": "analyst_study",
+   "before": "2026-09-27-form-c2308d97",
+   "after": "wallets in 6 -> 6 (stay 5, enter 1, leave 1); copies 3007 -> 2073; ROI at their price +3.2% -> +2.9%",
+   "detail": "estimate: 40 of 187 wallets studied (most settled first); activity rows capped at 5,500 per wallet by the data api (20 capped, marked *); in = the form rail's v",
+   "push": "BOT"
+  },
+  {
+   "ts": 1790488902.491293,
+   "day": "2026-09-27",
+   "kind": "analyst_pr_failed",
+   "before": "analyst/2026-09-27-exp-study-form-totals-must-filter-copies",
+   "after": "not applied",
+   "detail": "patch does not apply: error: No valid patches in input (allow with \"--allow-empty\")\n",
+   "push": null
+  },
+  {
+   "ts": 1790493600.9003372,
+   "day": "2026-09-27",
+   "kind": "settled",
+   "before": "open $6.40",
+   "after": "paid $0.00",
+   "detail": "lost -6.40 on 'Chengdu Open: Jenson Brooksby vs Nikoloz' (0x5213eb85, tier 1b)",
+   "push": null,
+   "token_id": "101922131308350308405118205643864036992501268344680822256490594210909214672298",
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+   "pnl": -6.4,
+   "won": false,
+   "cost": 6.4
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0x00110b8e floor 300.0",
+   "after": "floor 300.0 (same)",
+   "detail": "copies at $300: 300 YES +22% (n=314, trimmed +18%) · 200 yes +21% (n=394, trimmed +17%) · 150 yes +21% (n=450, trimmed +18%) · 100 yes +21% (n=536, trimmed +18%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
+   "floor_before": 300.0,
+   "floor_after": 300.0,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0x09b045ba floor 100.0",
+   "after": "floor 100.0 (same)",
+   "detail": "copies at $100: 300 yes +30% (n=190, trimmed +25%) · 200 yes +44% (n=256, trimmed +35%) · 150 yes +46% (n=294, trimmed +36%) · 100 YES +50% (n=339, trimmed +41%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+   "floor_before": 100.0,
+   "floor_after": 100.0,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0x1985327e floor 100.0",
+   "after": "floor 100.0 (same)",
+   "detail": "copies at $100: 300 yes +35% (n=192, trimmed +29%) · 200 yes +34% (n=261, trimmed +28%) · 150 yes +38% (n=288, trimmed +32%) · 100 YES +40% (n=348, trimmed +35%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+   "floor_before": 100.0,
+   "floor_after": 100.0,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0x3f3aa700 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0x4980930d floor 200.0",
+   "after": "floor 200.0 (same)",
+   "detail": "copies at $200: 300 yes +22% (n=73, trimmed +12%) · 200 YES +27% (n=84, trimmed +16%) · 150 yes +23% (n=92, trimmed +14%) · 100 yes +21% (n=103, trimmed +12%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
+   "floor_before": 200.0,
+   "floor_after": 200.0,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0x722abb54 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +8% (n=168, trimmed +5%) · 200 no +4% (n=183, trimmed +1%) · 150 no +2% (n=209, trimmed -1%) · 100 no +5% (n=251, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0x984ffef1 floor 150.0",
+   "after": "floor 150.0 (same)",
+   "detail": "copies at $150: 300 yes +26% (n=124, trimmed +21%) · 200 yes +26% (n=170, trimmed +22%) · 150 YES +29% (n=189, trimmed +24%) · 100 yes +22% (n=218, trimmed +17%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
+   "floor_before": 150.0,
+   "floor_after": 150.0,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0x9f15613e floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +4% (n=425, trimmed +1%) · 200 no +4% (n=489, trimmed +1%) · 150 no +4% (n=522, trimmed +1%) · 100 no +3% (n=591, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0xd25156e2 floor 300.0",
+   "after": "floor 300.0 (same)",
+   "detail": "copies at $300: 300 YES +25% (n=42, trimmed +6%) · 200 yes +16% (n=69, trimmed +4%) · 150 yes +12% (n=93, trimmed +4%) · 100 yes +12% (n=113, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+   "floor_before": 300.0,
+   "floor_after": 300.0,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0xf49614e6 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +4% (n=189, trimmed -1%) · 200 no -5% (n=225, trimmed -9%) · 150 no -4% (n=235, trimmed -8%) · 100 no -4% (n=242, trimmed -8%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0xf9168343 floor 300.0",
+   "after": "floor 300.0 (same)",
+   "detail": "copies at $300: 300 YES +12% (n=106, trimmed +2%) · 200 yes +12% (n=106, trimmed +2%) · 150 yes +12% (n=106, trimmed +2%) · 100 yes +12% (n=106, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
+   "floor_before": 300.0,
+   "floor_after": 300.0,
+   "live": false
+  },
+  {
+   "ts": 1790495524.1502345,
+   "day": "2026-09-27",
+   "kind": "floor_row",
+   "before": "0xfd3e6449 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +0% (n=51, trimmed -8%) · 200 no -2% (n=76, trimmed -9%) · 150 no +0% (n=104, trimmed -6%) · 100 no +4% (n=161, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-09-26 04:37:20 ERROR Error fetching NEG_RISK_CTF events [94461532-94461533]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 04:37:41 ERROR Error fetching NEG_RISK_CTF events [94461546-94461547]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 04:39:04 ERROR Error fetching NEG_RISK_CTF events [94461601-94461602]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 04:40:43 ERROR Error fetching CTF events [94461667-94461668]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 04:47:17 ERROR Error fetching CTF events [94461930-94461931]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 04:49:31 ERROR Error fetching NEG_RISK_CTF events [94462019-94462020]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 04:49:37 ERROR Error fetching NEG_RISK_CTF events [94462024-94462024]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 04:51:33 ERROR Error fetching CTF events [94462101-94462102]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 04:55:29 ERROR Error fetching NEG_RISK_CTF events [94462258-94462259]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 04:59:20 ERROR Error fetching CTF events [94462412-94462413]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:02:38 ERROR Error fetching NEG_RISK_CTF events [94462544-94462545]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:02:46 ERROR Error fetching CTF events [94462550-94462550]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:03:49 ERROR Error fetching NEG_RISK_CTF events [94462591-94462592]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:05:51 ERROR Error fetching NEG_RISK_CTF events [94462673-94462674]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:08:16 ERROR Error fetching CTF events [94462769-94462770]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:08:16 ERROR Error fetching NEG_RISK_CTF events [94462769-94462770]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:08:33 ERROR Error fetching NEG_RISK_CTF events [94462781-94462781]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:10:16 ERROR Error fetching CTF events [94462850-94462850]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:11:19 ERROR Error fetching CTF events [94462891-94462892]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:12:24 WARNING [live] ARMED for real orders by telegram: no reason given",
-  "2026-09-26 05:13:35 ERROR Error fetching NEG_RISK_CTF events [94462982-94462983]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:14:45 ERROR Error fetching NEG_RISK_CTF events [94463029-94463029]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:15:02 ERROR Error fetching NEG_RISK_CTF events [94463040-94463041]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:24:55 ERROR Error fetching CTF events [94463436-94463436]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:25:23 ERROR Error fetching NEG_RISK_CTF events [94463454-94463455]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:26:04 ERROR Error fetching CTF events [94463481-94463482]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:26:29 ERROR Error fetching CTF events [94463498-94463499]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:26:29 ERROR Error fetching NEG_RISK_CTF events [94463498-94463499]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:26:56 ERROR Error fetching CTF events [94463516-94463517]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:28:52 ERROR Error fetching CTF events [94463593-94463594]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:29:28 ERROR Error fetching NEG_RISK_CTF events [94463617-94463618]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:29:53 ERROR Error fetching NEG_RISK_CTF events [94463634-94463635]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:29:58 ERROR Error fetching NEG_RISK_CTF events [94463637-94463638]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:31:08 ERROR Error fetching NEG_RISK_CTF events [94463684-94463685]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:31:33 ERROR Error fetching CTF events [94463701-94463702]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:31:40 ERROR Error fetching CTF events [94463705-94463706]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:31:40 ERROR Error fetching NEG_RISK_CTF events [94463705-94463706]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:33:01 ERROR Error fetching NEG_RISK_CTF events [94463759-94463760]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:33:07 ERROR Error fetching CTF events [94463764-94463764]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:33:37 ERROR Error fetching CTF events [94463783-94463784]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:34:47 ERROR Error fetching CTF events [94463830-94463831]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:40:12 ERROR Error fetching NEG_RISK_CTF events [94464047-94464048]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:40:48 ERROR Error fetching NEG_RISK_CTF events [94464071-94464072]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:40:55 ERROR Error fetching CTF events [94464075-94464076]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:41:05 ERROR Error fetching NEG_RISK_CTF events [94464082-94464083]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:42:57 ERROR Error fetching CTF events [94464157-94464157]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:44:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-26 05:44:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-26 05:46:10 ERROR Error fetching CTF events [94464285-94464286]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:47:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-26 05:47:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-26 05:47:33 ERROR Error fetching NEG_RISK_CTF events [94464341-94464342]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:49:31 ERROR Error fetching NEG_RISK_CTF events [94464419-94464420]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:49:39 ERROR Error fetching NEG_RISK_CTF events [94464425-94464426]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:50:48 ERROR Error fetching CTF events [94464471-94464472]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:51:41 ERROR Error fetching NEG_RISK_CTF events [94464506-94464507]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:55:59 ERROR Error fetching CTF events [94464678-94464679]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:57:24 ERROR Error fetching NEG_RISK_CTF events [94464735-94464735]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:58:05 ERROR Error fetching NEG_RISK_CTF events [94464762-94464763]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:58:15 ERROR Error fetching CTF events [94464769-94464770]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:58:18 ERROR Error fetching CTF events [94464771-94464771]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:58:18 ERROR Error fetching NEG_RISK_CTF events [94464771-94464771]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 05:59:05 ERROR Error fetching NEG_RISK_CTF events [94464802-94464803]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:00:54 ERROR Error fetching NEG_RISK_CTF events [94464875-94464875]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:01:01 ERROR Error fetching NEG_RISK_CTF events [94464879-94464880]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:01:40 ERROR Error fetching CTF events [94464905-94464906]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:01:40 ERROR Error fetching NEG_RISK_CTF events [94464905-94464906]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:02:44 ERROR Error fetching NEG_RISK_CTF events [94464948-94464949]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:04:20 ERROR Error fetching NEG_RISK_CTF events [94465012-94465013]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:05:13 ERROR Error fetching CTF events [94465047-94465048]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:06:00 INFO  Received signal 15, shutting down...",
-  "2026-09-26 06:06:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-26 06:06:27 INFO  Bot started. Monitoring trades...",
-  "2026-09-26 06:09:10 ERROR Error fetching NEG_RISK_CTF events [94465206-94465206]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:09:13 ERROR Error fetching NEG_RISK_CTF events [94465207-94465208]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:13:01 ERROR Error fetching CTF events [94465350-94465359]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:17:41 ERROR Error fetching NEG_RISK_CTF events [94465544-94465546]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:17:59 ERROR Error fetching NEG_RISK_CTF events [94465555-94465558]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:20:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:20:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:20:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:25:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:26:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:26:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:26:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:26:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:29:07 INFO  Received signal 15, shutting down...",
-  "2026-09-26 06:29:08 ERROR Error fetching CTF events [94465999-94466005]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:29:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-26 06:29:55 INFO  Bot started. Monitoring trades...",
-  "2026-09-26 06:30:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/book body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:30:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/book body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:31:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/book body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 06:31:39 ERROR Error fetching CTF events [94466105-94466105]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:31:39 ERROR Error fetching NEG_RISK_CTF events [94466105-94466105]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 06:45:05 INFO  Received signal 15, shutting down...",
-  "2026-09-26 06:45:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-26 06:45:48 INFO  Bot started. Monitoring trades...",
-  "2026-09-26 07:07:13 ERROR Error fetching CTF events [94467524-94467528]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 07:07:13 ERROR Error fetching NEG_RISK_CTF events [94467524-94467528]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 07:18:16 ERROR Error fetching NEG_RISK_CTF events [94467966-94467969]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 07:23:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 07:23:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 07:24:14 ERROR Error fetching CTF events [94468195-94468208]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 07:24:32 ERROR [inventory] API sync failed: ",
-  "2026-09-26 07:30:15 ERROR [inventory] API sync failed: ",
-  "2026-09-26 07:37:14 ERROR Error fetching NEG_RISK_CTF events [94468728-94468728]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 07:37:16 ERROR Error fetching NEG_RISK_CTF events [94468729-94468730]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 07:37:18 ERROR Error fetching NEG_RISK_CTF events [94468731-94468731]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 07:39:52 WARNING [zset] ADMITTED 0x09b045baad1fbe115c70785635a261411774a3b6 to set Z (+28% over 46 copies with its best 3 deleted). Real money may now follow it once armed.",
-  "2026-09-26 07:39:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 07:39:56 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 07:40:18 INFO  [ops] auto_admit: '0x09b045ba not in Z' -> 'in set Z, on probation' | 49 settled paper copies, paper ROI +36.9%, trimmed +28.0%, ideal +37.9%, real quotes +1.1% over 30 matched",
-  "2026-09-26 07:40:19 WARNING [zset] ADMITTED 0x1985327e5782c62362dbbdf714c423d40d8f51ab to set Z (+34% over 33 copies with its best 3 deleted). Real money may now follow it once armed.",
-  "2026-09-26 07:40:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 07:40:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 07:40:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 07:40:44 INFO  [ops] auto_admit: '0x1985327e not in Z' -> 'in set Z, on probation' | 36 settled paper copies, paper ROI +54.9%, trimmed +34.3%, ideal +55.9%, real quotes +19.6% over 20 matched",
-  "2026-09-26 07:40:46 WARNING [zset] ADMITTED 0x4980930da4ad1194d4f0fd5e29f17b70a42e5709 to set Z (+20% over 31 copies with its best 3 deleted). Real money may now follow it once armed.",
-  "2026-09-26 07:40:48 INFO  [ops] auto_admit: '0x4980930d not in Z' -> 'in set Z, on probation' | 34 settled paper copies, paper ROI +36.5%, trimmed +19.9%, ideal +37.5%, real quotes +33.5% over 26 matched",
-  "2026-09-26 07:40:52 INFO  [ops] form: '0x09b045ba unknown' -> 'benched' | 0x09b045ba: 31 settled, 71% won vs 58% needed, net +10.2% on $12,220, worst day -333, 30 of 30 exits under 10 min",
-  "2026-09-26 07:40:56 INFO  [ops] form: '0x1985327e unknown' -> 'benched' | 0x1985327e: 51 settled, 71% won vs 54% needed, net +16.8% on $19,607, worst day -535, 49 of 49 exits under 10 min",
-  "2026-09-26 07:41:00 INFO  [ops] form: '0x4980930d unknown' -> 'benched' | 0x4980930d: 5 settled, 40% won vs 42% needed, net +54.5% on $6,146, worst day -1,358, 0 of 1 exits under 10 min",
-  "2026-09-26 07:46:05 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Chain RPC is still failing. CTF and NEG_RISK_CTF getLogs have hit invalid block range params without a clean stretch sin",
-  "2026-09-26 07:57:07 ERROR Error fetching CTF events [94469524-94469524]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 07:57:07 ERROR Error fetching NEG_RISK_CTF events [94469524-94469524]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 07:57:12 ERROR Error fetching NEG_RISK_CTF events [94469527-94469527]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:00:11 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
-  "2026-09-26 08:00:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 08:01:08 ERROR Error fetching NEG_RISK_CTF events [94469684-94469685]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:08:13 ERROR Error fetching CTF events [94469967-94469968]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:08:13 ERROR Error fetching NEG_RISK_CTF events [94469967-94469968]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:08:15 ERROR Error fetching CTF events [94469969-94469969]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:08:15 ERROR Error fetching NEG_RISK_CTF events [94469969-94469969]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 08:21:07 ERROR Error fetching CTF events [94470482-94470484]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 08:21:37 ERROR Error fetching NEG_RISK_CTF events [94470503-94470504]: {'code': -32000, 'message': 'invalid block range params'}",
   "2026-09-26 08:29:12 ERROR Error fetching CTF events [94470806-94470807]: {'code': -32000, 'message': 'invalid block range params'}",
@@ -1696,19 +1622,36 @@
   "2026-09-27 03:57:20 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $19.20 / $200.00",
   "2026-09-27 04:11:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
   "2026-09-27 04:31:08 INFO  [ops] form: '0x722abb54 in form' -> 'benched' | 0x722abb54: 61 settled, 79% won vs 77% needed, net +9.0% on $102,922, worst day -2,522, 3 of 50 exits under 10 min",
-  "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
-  "2026-09-26 06:06:27 INFO  [recovery] No pending orders to recover",
-  "2026-09-26 06:11:25 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5300 (from 0x3f3a...e8fd); the arm is off",
-  "2026-09-26 06:22:03 TRADE [DISARMED] would BUY $6.40 on '' @ 0.3700 (from 0x9f15...bdb3); the arm is off",
-  "2026-09-26 06:29:10 TRADE [DISARMED] would BUY $6.40 on '' @ 0.4400 (from 0x3f3a...e8fd); the arm is off",
-  "2026-09-26 06:29:55 INFO  [recovery] No pending orders to recover",
-  "2026-09-26 06:30:43 TRADE [DISARMED] would BUY $6.40 on 'North Macedonia vs. Switzerland: O/U 2.5' @ 0.4400 (from 0x3f3a...e8fd); the arm is off",
-  "2026-09-26 06:42:58 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5800 (from 0x3f3a...e8fd); the arm is off",
-  "2026-09-26 06:45:48 INFO  [recovery] No pending orders to recover",
-  "2026-09-26 06:56:56 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5800 (from 0x3f3a...e8fd); the arm is off",
-  "2026-09-26 07:08:56 TRADE [DISARMED] would BUY $6.40 on '' @ 0.6300 (from 0x3f3a...e8fd); the arm is off",
-  "2026-09-26 07:23:43 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5000 (from 0x3f3a...e8fd); the arm is off",
-  "2026-09-26 07:23:54 TRADE [DISARMED] would BUY $6.40 on '' @ 0.5000 (from 0x3f3a...e8fd); the arm is off",
+  "2026-09-27 04:44:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 04:54:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 04:54:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 04:59:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 06:44:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 06:49:41 ERROR Network error fetching 0x4980...5709: ",
+  "2026-09-27 06:49:41 ERROR Network error fetching 0x1985...51ab: ",
+  "2026-09-27 06:49:41 ERROR Network error fetching 0x5213...6a35: ",
+  "2026-09-27 06:49:41 ERROR Network error fetching 0x7365...64da: ",
+  "2026-09-27 07:20:00 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80",
+  "2026-09-27 07:20:01 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Chengdu Open: Jenson Brooksby vs Nikoloz' (0x5213eb85, tier 1b)",
+  "2026-09-27 07:31:14 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.",
+  "2026-09-27 07:31:15 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.",
+  "2026-09-27 07:31:15 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
+  "2026-09-27 07:31:15 ERROR Network error fetching 0x722a...d6ed: Server disconnected without sending a response.",
+  "2026-09-27 07:31:15 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
+  "2026-09-27 07:53:42 INFO  [ops] floor_row: '0x00110b8e floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +22% (n=314, trimmed +18%) · 200 yes +21% (n=394, trimmed +17%) · 150 yes +21% (n=450, trimmed +18%) · 100 yes +21% (n=536, trimmed +18%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:54:00 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +30% (n=190, trimmed +25%) · 200 yes +44% (n=256, trimmed +35%) · 150 yes +46% (n=294, trimmed +36%) · 100 YES +50% (n=339, trimmed +41%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:55:06 INFO  [ops] floor_row: '0x1985327e floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +35% (n=192, trimmed +29%) · 200 yes +34% (n=261, trimmed +28%) · 150 yes +38% (n=288, trimmed +32%) · 100 YES +40% (n=348, trimmed +35%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:56:21 INFO  [ops] floor_row: '0x4980930d floor 200.0' -> 'floor 200.0 (same)' | copies at $200: 300 yes +22% (n=73, trimmed +12%) · 200 YES +27% (n=84, trimmed +16%) · 150 yes +23% (n=92, trimmed +14%) · 100 yes +21% (n=103, trimmed +12%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:57:14 INFO  [ops] floor_row: '0x722abb54 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +8% (n=168, trimmed +5%) · 200 no +4% (n=183, trimmed +1%) · 150 no +2% (n=209, trimmed -1%) · 100 no +5% (n=251, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:57:47 INFO  [ops] floor_row: '0x984ffef1 floor 150.0' -> 'floor 150.0 (same)' | copies at $150: 300 yes +26% (n=124, trimmed +21%) · 200 yes +26% (n=170, trimmed +22%) · 150 YES +29% (n=189, trimmed +24%) · 100 yes +22% (n=218, trimmed +17%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:58:55 INFO  [ops] floor_row: '0x9f15613e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +4% (n=425, trimmed +1%) · 200 no +4% (n=489, trimmed +1%) · 150 no +4% (n=522, trimmed +1%) · 100 no +3% (n=591, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:59:28 INFO  [ops] floor_row: '0xd25156e2 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +25% (n=42, trimmed +6%) · 200 yes +16% (n=69, trimmed +4%) · 150 yes +12% (n=93, trimmed +4%) · 100 yes +12% (n=113, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:59:34 INFO  [ops] floor_row: '0xf49614e6 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +4% (n=189, trimmed -1%) · 200 no -5% (n=225, trimmed -9%) · 150 no -4% (n=235, trimmed -8%) · 100 no -4% (n=242, trimmed -8%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 07:59:38 INFO  [ops] floor_row: '0xf9168343 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +12% (n=106, trimmed +2%) · 200 yes +12% (n=106, trimmed +2%) · 150 yes +12% (n=106, trimmed +2%) · 100 yes +12% (n=106, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 08:00:25 INFO  [ops] floor_row: '0xfd3e6449 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +0% (n=51, trimmed -8%) · 200 no -2% (n=76, trimmed -9%) · 150 no +0% (n=104, trimmed -6%) · 100 no +4% (n=161, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-09-27 08:00:59 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
+  "2026-09-27 08:07:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-26 08:45:10 INFO  [recovery] No pending orders to recover",
   "2026-09-26 08:59:54 TRADE [DISARMED] would BUY $6.40 on '' @ 0.2800 (from 0x3f3a...e8fd); the arm is off",
   "2026-09-26 09:22:01 INFO  [recovery] No pending orders to recover",
@@ -1723,216 +1666,6 @@
   "2026-09-27 03:57:21 TRADE [verify] FILLED: BUY 11.85 shares on 'Chengdu Open: Jenson Brooksby vs Nikoloz' @ 0.5400"
  ],
  "watcher": [
-  {
-   "ts": 1790398184.407604,
-   "day": "2026-09-26",
-   "woke_because": "6fbcddbc9dfb",
-   "fingerprint": "6fbcddbc9dfb",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "Upstream RPC is returning -32000 invalid block range params on chain CTF and NEG_RISK_CTF event reads, and chain is the primary fill and inventory channel. The requested ranges are single or adjacent blocks (94462024-94462024, 94462019-94462020), which are valid, so this is a provider side fault and not our range construction. The bot already disarmed itself to paper 0.3h ago for this exact fault and the owner was already told, so real money is not at risk right now. The 7 recurrences since the disarm are the same outage continuing, not a new fault, so no new escalation or disarm is warranted.",
-   "confidence": 0.82,
-   "cost_usd": 0.27327450000000003,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790398855.3686247,
-   "day": "2026-09-26",
-   "woke_because": "84e240524773",
-   "fingerprint": "84e240524773",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The disarm placed 0.5h ago is working: a live copy signal from 0xfd3e6449 arrived and the bot logged a would-BUY instead of placing real money because the arm is off. This DISARMED line is the paper path refusing the trade, which is exactly the intended behaviour during the chain read outage that triggered the disarm. No money moved (spent_usd 0.0, armed false), and the owner already has the disarm and escalation receipts for the underlying RPC fault. The empty market name is just degraded metadata during the chain outage and is harmless while disarmed. Nothing to do; the safety path is holdin",
-   "confidence": 0.9,
-   "cost_usd": 0.1379975,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790399603.2158184,
-   "day": "2026-09-26",
-   "woke_because": "4a9f22de1928",
-   "kind": "held",
-   "concluded": "1 wake(s) held: 4 already this hour",
-   "did": "nothing (rate)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790399723.400475,
-   "day": "2026-09-26",
-   "woke_because": "6fbcddbc9dfb",
-   "kind": "held",
-   "concluded": "1 wake(s) held: 4 already this hour",
-   "did": "nothing (rate)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790400443.427056,
-   "day": "2026-09-26",
-   "woke_because": "6fbcddbc9dfb",
-   "kind": "held",
-   "concluded": "1 wake(s) held: 4 already this hour",
-   "did": "nothing (rate)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790400803.4656682,
-   "day": "2026-09-26",
-   "woke_because": "dcba498fc237",
-   "fingerprint": "dcba498fc237",
-   "kind": "escalate",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The chain RPC is rejecting CTF and NEG_RISK_CTF event reads with -32000 invalid block range params, so the bot's primary on-chain trade feed is fully down. This is the same fault the SRE already escalated and disarmed for one hour ago, but the owner re-armed via telegram 0.3h ago with no reason while the errors kept coming (164 hits on CTF plus 24 on the neg-risk twin since the disarm). Because chain is the primary signal and it is down, the bot has placed nothing today (spent_usd 0.0), so it is idle and blind rather than placing, sizing or doubling orders wrongly, which is why I am not overri",
-   "confidence": 0.72,
-   "cost_usd": 0.27710250000000003,
-   "did": "escalated",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790401280.8729014,
-   "day": "2026-09-26",
-   "woke_because": "6fbcddbc9dfb",
-   "fingerprint": "6fbcddbc9dfb",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The Polygon RPC is returning -32000 invalid block range params on live CTF and NEG_RISK_CTF head polls, so the primary chain read path is down while the deploy at d5be6a3 is unchanged, which points to an RPC or node sync fault and not a code bug. I already disarmed for this 1.1h ago, the owner deliberately re-armed via telegram, and I escalated the persistence to his phone about 3 minutes ago, so the human has looked and chosen to hold it armed. No money has been spent today and no live orders have gone out since the re-arm, and the degraded API verify path still exists as backup, so there is ",
-   "confidence": 0.6,
-   "cost_usd": 0.5585935000000001,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790401624.9833918,
-   "day": "2026-09-26",
-   "woke_because": "dcba498fc237",
-   "kind": "held",
-   "concluded": "1 wake(s) held: 4 already this hour",
-   "did": "nothing (rate)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790401865.099971,
-   "day": "2026-09-26",
-   "woke_because": "dcba498fc237",
-   "fingerprint": "dcba498fc237",
-   "kind": "disarm",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The chain event reader is fully down because the RPC returns -32000 invalid block range params for CTF and NEG_RISK_CTF block polls, and chain is the primary fill reconciliation path (chain-only 656 vs api-only 8, CHAIN IS PRIMARY). The bot is armed and can still take copy signals from the API path, but it can no longer confirm those fills on chain, so a fill it cannot see could be re-placed or mis-stated. A prior SRE already disarmed for this exact cause; the owner re-armed with no reason and was escalated to again 40 minutes ago, yet the errors kept coming (170 more hits, last 0 min ago). Th",
-   "confidence": 0.6,
-   "cost_usd": 0.33603249999999996,
-   "did": "disarmed",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790402257.5439508,
-   "day": "2026-09-26",
-   "woke_because": "dcba498fc237",
-   "kind": "held",
-   "concluded": "1 wake(s) held: 4 already this hour",
-   "did": "nothing (rate)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790402497.5712512,
-   "day": "2026-09-26",
-   "kind": "analyst",
-   "proposal": "experiment",
-   "woke_because": "daily check of min150-r1",
-   "concluded": "+10.6 pp vs control on 138 settled copies, day 1 of 14",
-   "did": "exp min150-r1 live: +10.6 pp vs control on 138 settled copies, day 1 of 14",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790402497.5712512,
-   "day": "2026-09-26",
-   "kind": "analyst",
-   "proposal": "postmortem",
-   "woke_because": "void of min150",
-   "concluded": "harness_pp -7.49 on 65 copies is within one standard error (recomputed se 7.9 pp; per-copy sd ~90 pp gives a chance band near +-31 pp), while the 48 matched copies both books took agreed to the cent (recomputed mismatch 0 of 30). The 1.5 pp whole-book tolerance that voided it (legacy why, not the harness_mismatch path) sits deep inside the noise, so a bad rule ended it, not a real harness disagree",
-   "did": "post-mortem: rule",
-   "cost_usd": 0.36878750000000005
-  },
-  {
-   "ts": 1790402791.4233766,
-   "day": "2026-09-26",
-   "kind": "analyst",
-   "proposal": "experiment",
-   "woke_because": "supervise",
-   "concluded": "started min150-r1 (pid 7, first start since this supervisor came up)",
-   "did": "started min150-r1 (pid 7, first start since this supervisor came up)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790403272.3858454,
-   "day": "2026-09-26",
-   "woke_because": "dcba498fc237",
-   "fingerprint": "dcba498fc237",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "An external RPC node is returning -32000 invalid block range params on CTF and NEG_RISK_CTF event reads, which is the primary chain path for fill reconciliation. The bot is already disarmed to paper by a prior ai-sre action, so the 6 recurrences since the disarm place no real orders and cannot mis-confirm fills; they are harmless log noise while the outage persists. The owner was already escalated about this same fingerprint 33 minutes ago and the disarm is 15 minutes old, so a fresh escalate would only repeat. The source tree is not present on this box, so no verifiable fix is possible and th",
-   "confidence": 0.82,
-   "cost_usd": 0.336927,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790404291.371484,
-   "day": "2026-09-26",
-   "woke_because": "51c53b9cd7c8",
-   "kind": "held",
-   "concluded": "1 wake(s) held: 4 already this hour",
-   "did": "nothing (rate)",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1790407524.410194,
-   "day": "2026-09-26",
-   "woke_because": "907b728a6b72",
-   "fingerprint": "907b728a6b72",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The inventory API sync failed with an empty error string, which is the same Polymarket API and RPC outage that is already throwing 404 price errors, CTF invalid-block-range errors and the earlier 'API sync failed: Server disconnected' line (13ad3e5ddfe8). The bot is already disarmed by ai-sre for that outage, so it is in paper mode and no real money is at risk from stale inventory. The owner has already been told twice about the outage and there have been two disarms, so re-escalating this symptom would be noise. Worth one ledger line because it is a new fingerprint and the empty message means",
-   "confidence": 0.72,
-   "cost_usd": 0.1543575,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790408430.9750392,
-   "day": "2026-09-26",
-   "woke_because": "b36205e25762",
-   "fingerprint": "b36205e25762",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The new fingerprint is a routine INFO set Z auto-admission, not a fault, and the bot is already back to paper for the separate chain reconciliation incident the owner was told about. The notable detail is the paper versus real gap: 0x09b045ba was admitted on trimmed paper edge +28% (paper ROI +36.9%) while its real executable quotes over 30 matched show only +1.1%, and 0x1985327e was admitted in the same minute. The admission gate looks like it keys off paper or trimmed edge rather than the near breakeven real quotes number. The surrounding burst of 404 no orderbook errors on the price endpoin",
-   "confidence": 0.6,
-   "cost_usd": 0.400349,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790408782.3187575,
-   "day": "2026-09-26",
-   "woke_because": "e5755fdaf81b",
-   "fingerprint": "e5755fdaf81b",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, receipts",
-   "concluded": "The line is an INFO confirming the bot delivered its own escalation about the known chain RPC getLogs failure (RPC -32000 invalid block range) to the owner. It is the escalation path working as designed, not a new fault. The underlying chain read outage is already handled: the bot disarmed itself back to paper at 1790402016 and the owner has been escalated twice plus this delivery. Current arm state is off and guards are clean, so real money is already protected while chain reconciliation is down. No further action is warranted from this benign confirmation line.",
-   "confidence": 0.85,
-   "cost_usd": 0.1732625,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1790414620.1020496,
    "day": "2026-09-26",
@@ -1971,6 +1704,96 @@
    "concluded": "Cause: the form tracker benched wallet 0xeef6ad0e because it has no settled bets on our slice in 14 days, which is the safe direction and removes it from ranking. This is not a fault: an inactive wallet produces no fills, so real money cannot follow it even though set Z lists it as copyable once armed. The exact admit-then-bench sequence already fired on 09-13, and the owner personally handled this wallet this morning at 06:08 with Desk ruling s-wo3xsp, clearing a spurious eviction from pre-fix probation code before it was re-admitted at 10:45. The chain reader is healthy, last good read 5s ag",
    "confidence": 0.82,
    "cost_usd": 0.3033855,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790488902.491293,
+   "day": "2026-09-27",
+   "kind": "analyst",
+   "proposal": "postmortem",
+   "woke_because": "void of min150-r1",
+   "concluded": "0 of 53 matched copies disagree (mismatch 0, far under the 0.2*53=10.6 bar) and the +10.6 pp gap sits inside the 16.9 pp (2x se 8.46) noise band, so the harness, bars, data and process all held and no machinery fault fired. The void is the owner's deliberate withdrawal because he runs this experiment himself (Desk note 2026-09-26 s-wo3xsp, retry false), so the change is being tested by him and cor",
+   "did": "post-mortem: idea",
+   "cost_usd": 0.46178850000000005
+  },
+  {
+   "ts": 1790488902.491293,
+   "day": "2026-09-27",
+   "kind": "analyst",
+   "proposal": "study",
+   "woke_because": "daily study",
+   "concluded": "The 5500-row cap already truncates FORM_DAYS=14 for the highest-volume wallets (0x9f15613e, 0x3f3aa700, 0x00110b8e read 'window in full, older lookback cut'; 0xd25156e2 reads only 10.1 of 14 days), so at a 10 day window with the $300 floor, who stays in form, who enters, who leaves versus the trunca",
+   "did": "study 2026-09-27-form-c2308d97 frozen: wallets in 6 -> 6 (stay 5, enter 1, leave 1); copies 3007 -> 2073; ROI at their price +3.2% -> +2.9%",
+   "cost_usd": 0.0,
+   "study_id": "2026-09-27-form-c2308d97"
+  },
+  {
+   "ts": 1790488902.491293,
+   "day": "2026-09-27",
+   "kind": "analyst",
+   "proposal": "note",
+   "woke_because": "daily study",
+   "concluded": "The wallet_cap study reports copies falling 3840 to 2956 when the cap loosens from 3 to 5, which is impossible: a looser per-day cap can only keep or add copies, so the from/to counting in exp_study.py is inverted or its columns are swapped (the +2 wallets and +2.8 pp ROI look right, only the copy count is backward); the repo source is not mounted in my environment so I cannot hand in a verified p",
+   "counterfactual": "",
+   "did": "noted",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790488902.491293,
+   "day": "2026-09-27",
+   "kind": "analyst",
+   "proposal": "pr",
+   "woke_because": "daily study",
+   "concluded": "My question was about the form rail: who stays, enters, leaves. The totals block filters the wallet count to the in-form set (6 -> 6) but computes copies and ROI over all 40 studied wallets (copies_to sums to exactly 2073, and the in-form six sum to only 443). So the headline ROI describes copying everyone, not the copyable set, and it points the wrong way: the true form-set ROI rises while the re",
+   "counterfactual": "Filtered to the in-form set the totals read copies 522 -> 443 and ROI +8.3% -> +10.8% (an improvement from dropping one stale weak wallet), not the reported copies 3007 -> 2073 and ROI +3.2% -> +2.9% decline.",
+   "did": "pr not applied: patch does not apply: error: No valid patches in input (allow with \"--allow-empty\")\n",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790488902.491293,
+   "day": "2026-09-27",
+   "kind": "analyst",
+   "proposal": "study",
+   "woke_because": "study 2026-09-27-form-c2308d97",
+   "concluded": "In-form ROI is +8.3% -> +10.8% at the 10-day window (the menu's headline +3.2% -> +2.9% wrongly averages in the 34 rejected wallets, whose copies make up 2073 of the total). The shorter window clears the 5,500-row truncation and drops one stale weak wallet, so the copy set is cleaner and marginally stronger, but the form window is not a copy or exposure knob so nothing here changes the live bot.",
+   "did": "concluded; one question the menu cannot compute noted; pr not applied: patch does not apply: error: No valid patches in input (allow with \"--allow-empty\")\n",
+   "cost_usd": 0.576346
+  },
+  {
+   "ts": 1790488902.491293,
+   "day": "2026-09-27",
+   "kind": "analyst",
+   "woke_because": "daily study",
+   "concluded": "Study: does a 10d form window (which fits the 5500-row cap) change who we follow vs the truncated 14d rail. Note: wallet_cap study copy count runs backward (3840->2956 as cap loosens 3->5), needs an exp_study.py fix I can't write without repo access.",
+   "did": "3 proposal(s): study 2026-09-27-form-c2308d97 frozen: wallets in 6 -> 6 (st; noted; concluded; one question the menu cannot compute noted; pr no",
+   "cost_usd": 1.256487
+  },
+  {
+   "ts": 1790495657.6745641,
+   "day": "2026-09-27",
+   "woke_because": "7da5b6289516, 727577d69f4e",
+   "fingerprint": "7da5b6289516",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The cause is a new important-log line kind: INFO [ops] floor_row, a backward-replay report of copy ROI at each floor price, which reached the important log for the first time today. grep found exactly 3 floor_row lines in bot-2026-09-27.log and 3 in important-2026-09-27.log and zero in every important log from 09-14 through 09-26, so this is a first appearance, not a regression. The two fingerprints (7da5b6289516 and its sibling 727577d69f4e) differ only in where the uppercase YES token, which marks the selected floor size, falls in the normalised string. All three lines end in 'floor N (same)",
+   "confidence": 0.9,
+   "cost_usd": 0.2816575,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790495881.4863753,
+   "day": "2026-09-27",
+   "woke_because": "7dfc4a226f73, df29d6690f77, a05fff81fe03",
+   "fingerprint": "7dfc4a226f73",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The wake is new scheduled floor_row analyst reporting, not a fault. These lines first appear today at 07:53 (zero in any prior bot log) and every one of the 7 rows says 'floor X (same)', so no wallet copy-size floor moved and nothing about money changed. The three new fingerprints differ only in which bar is uppercased and the copies-vs-global variant, so the normaliser mints a fresh id per text shape from identical benign reporting. Alongside them the bot is fully alive: last 60 min shows 303 COPY-PAPER detection lines, 26 Onchain trade batches with cursor==head and lag 0 (last good read 2s a",
+   "confidence": 0.9,
+   "cost_usd": 0.4532425,
    "did": "nothing",
    "proof": "",
    "question": ""
@@ -2049,13 +1872,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1790443177.6521616,
-   "count": 20,
+   "last": 1790493617.1719475,
+   "count": 21,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1790442217.3976295,
-    1790443177.6521616
+    1790493617.1719475
    ],
    "action": null,
    "action_ts": null,
@@ -2064,12 +1886,12 @@
   },
   "2497cd50ff7d": {
    "first": 1790098332.9559617,
-   "last": 1790307539.664495,
-   "count": 3,
+   "last": 1790493617.1719475,
+   "count": 4,
    "sample": "2026-09-21 00:52:20 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Counter-Strike: Bounty Hunters Esports v' (0x57b25849, tier 1b)",
    "norm": "INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)",
    "recent": [
-    1790307539.664495
+    1790493617.1719475
    ],
    "action": null,
    "action_ts": null,
@@ -2078,12 +1900,12 @@
   },
   "34253fa6334e": {
    "first": 1790098332.9559617,
-   "last": 1790409660.7299569,
-   "count": 6,
+   "last": 1790496118.9553983,
+   "count": 7,
    "sample": "2026-09-21 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
    "norm": "INFO [AB-RACE] rehearsal line sent, real-money line sent",
    "recent": [
-    1790409660.7299569
+    1790496118.9553983
    ],
    "action": null,
    "action_ts": null,
@@ -2207,16 +2029,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790477021.7432384,
-   "count": 174,
+   "last": 1790496478.9915218,
+   "count": 182,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790474141.5488243,
-    1790475101.6631289,
-    1790475101.6631289,
-    1790475701.6873186,
-    1790477021.7432384
+    1790496478.9915218,
+    1790496478.9915218
    ],
    "action": null,
    "action_ts": null,
@@ -2487,16 +2306,16 @@
   },
   "6eca45f47973": {
    "first": 1790342544.7724473,
-   "last": 1790463459.6622343,
-   "count": 19,
+   "last": 1790494337.4651096,
+   "count": 24,
    "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
    "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
    "recent": [
-    1790463459.6622343,
-    1790463459.6622343,
-    1790463459.6622343,
-    1790463459.6622343,
-    1790463459.6622343
+    1790494337.4651096,
+    1790494337.4651096,
+    1790494337.4651096,
+    1790494337.4651096,
+    1790494337.4651096
    ],
    "action": null,
    "action_ts": null,
@@ -2505,21 +2324,15 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1790463579.9487627,
-   "count": 22,
+   "last": 1790491816.6608982,
+   "count": 26,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1790461779.1711042,
-    1790463459.6622343,
-    1790463459.6622343,
-    1790463459.6622343,
-    1790463459.6622343,
-    1790463579.9487627,
-    1790463579.9487627,
-    1790463579.9487627,
-    1790463579.9487627,
-    1790463579.9487627
+    1790491816.6608982,
+    1790491816.6608982,
+    1790491816.6608982,
+    1790491816.6608982
    ],
    "action": null,
    "action_ts": null,
@@ -2782,6 +2595,83 @@
    "norm": "INFO [ops] form: 'S' -> 'S' | <hex>: no settled bets on our slice in N days",
    "recent": [
     1790419671.6146815
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "7da5b6289516": {
+   "first": 1790495657.6745641,
+   "last": 1790496118.9553983,
+   "count": 3,
+   "sample": "2026-09-27 07:53:42 INFO  [ops] floor_row: '0x00110b8e floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +22% (n=314, trimmed +18%) · 200 yes +21% (n=394, trimmed +17%) · 150 yes +21% (n=450, trimmed +18%) · 100 yes +21% (n=536, trimmed +18%); backward replay (copy-and-hold at their pri",
+   "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "recent": [
+    1790495657.6745641,
+    1790496118.9553983,
+    1790496118.9553983
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "727577d69f4e": {
+   "first": 1790495657.6745641,
+   "last": 1790495881.4863753,
+   "count": 2,
+   "sample": "2026-09-27 07:54:00 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +30% (n=190, trimmed +25%) · 200 yes +44% (n=256, trimmed +35%) · 150 yes +46% (n=294, trimmed +36%) · 100 YES +50% (n=339, trimmed +41%); backward replay (copy-and-hold at their pri",
+   "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "recent": [
+    1790495657.6745641,
+    1790495881.4863753
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "7dfc4a226f73": {
+   "first": 1790495881.4863753,
+   "last": 1790496118.9553983,
+   "count": 5,
+   "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
+   "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
+   "recent": [
+    1790495881.4863753,
+    1790495881.4863753,
+    1790496118.9553983,
+    1790496118.9553983,
+    1790496118.9553983
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "df29d6690f77": {
+   "first": 1790495881.4863753,
+   "last": 1790495881.4863753,
+   "count": 1,
+   "sample": "2026-09-27 07:56:21 INFO  [ops] floor_row: '0x4980930d floor 200.0' -> 'floor 200.0 (same)' | copies at $200: 300 yes +22% (n=73, trimmed +12%) · 200 YES +27% (n=84, trimmed +16%) · 150 yes +23% (n=92, trimmed +14%) · 100 yes +21% (n=103, trimmed +12%); backward replay (copy-and-hold at their price,",
+   "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "recent": [
+    1790495881.4863753
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "a05fff81fe03": {
+   "first": 1790495881.4863753,
+   "last": 1790495881.4863753,
+   "count": 1,
+   "sample": "2026-09-27 07:57:47 INFO  [ops] floor_row: '0x984ffef1 floor 150.0' -> 'floor 150.0 (same)' | copies at $150: 300 yes +26% (n=124, trimmed +21%) · 200 yes +26% (n=170, trimmed +22%) · 150 YES +29% (n=189, trimmed +24%) · 100 yes +22% (n=218, trimmed +17%); backward replay (copy-and-hold at their pri",
+   "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "recent": [
+    1790495881.4863753
    ],
    "action": null,
    "action_ts": null,
