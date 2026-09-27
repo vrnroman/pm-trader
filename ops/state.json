@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-27T08:08:22.961400+00:00",
+ "generated": "2026-09-27T10:27:20.953967+00:00",
  "money": {
-  "cash": 120.306233,
-  "open_cost": 4.5,
-  "equity": 124.81,
+  "cash": 99.746233,
+  "open_cost": 24.5,
+  "equity": 124.25,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
@@ -21,7 +21,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790496326.9625976,
+  "ts": 1790504547.7050982,
   "day": "2026-09-27"
  },
  "arm": {
@@ -776,7 +776,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 124.81,
+  "last_equity": 124.25,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -1168,24 +1168,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790412284.7953641,
-   "day": "2026-09-26",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1790414499.8314414,
-   "day": "2026-09-26",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
    "ts": 1790419321.1807199,
    "day": "2026-09-26",
    "kind": "auto_admit",
@@ -1480,36 +1462,6 @@
   }
  ],
  "important": [
-  "2026-09-26 08:21:07 ERROR Error fetching CTF events [94470482-94470484]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:21:37 ERROR Error fetching NEG_RISK_CTF events [94470503-94470504]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:29:12 ERROR Error fetching CTF events [94470806-94470807]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:31:38 ERROR Error fetching CTF events [94470904-94470905]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:31:38 ERROR Error fetching NEG_RISK_CTF events [94470904-94470905]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:34:13 ERROR Error fetching CTF events [94471008-94471008]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:34:15 ERROR Error fetching NEG_RISK_CTF events [94471009-94471009]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:35:14 ERROR Error fetching CTF events [94471048-94471048]: {'code': -32000, 'message': 'invalid block range params'}",
-  "2026-09-26 08:39:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 08:39:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 08:44:32 INFO  Received signal 15, shutting down...",
-  "2026-09-26 08:45:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-26 08:45:10 INFO  Bot started. Monitoring trades...",
-  "2026-09-26 09:06:49 ERROR [inventory] API sync failed: ",
-  "2026-09-26 09:15:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 09:21:21 INFO  Received signal 15, shutting down...",
-  "2026-09-26 09:21:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 09:22:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-09-26 09:22:01 INFO  Bot started. Monitoring trades...",
-  "2026-09-26 09:23:05 WARNING [live] ARMED for real orders by owner:claude-session: owner instruction 2026-09-26 via Claude session: do actual deals under the new limits (1/day new wallets, 20 others, \u0005 daily-loss stop)",
-  "2026-09-26 09:23:34 WARNING [live] ARMED for real orders by owner:claude-session: owner instruction 2026-09-26 via Claude session: do actual deals under the new limits (1 a day for new wallets, 20 for the others, 45 USD daily-loss stop)",
-  "2026-09-26 09:27:23 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
-  "2026-09-26 09:33:04 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
-  "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
-  "2026-09-26 09:39:15 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
-  "2026-09-26 09:49:58 ERROR Network error fetching 0xf496...fe79: ",
-  "2026-09-26 09:49:58 ERROR Network error fetching 0xf916...e770: ",
-  "2026-09-26 09:49:58 ERROR Network error fetching 0xd251...4d37: ",
-  "2026-09-26 09:49:58 ERROR Network error fetching 0x984f...9a43: ",
-  "2026-09-26 09:49:58 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
   "2026-09-26 10:43:02 WARNING [zset] ADMITTED 0x5213eb85fcd465c8927a8382f95dd2dc22306a35 to set Z (+11% over 74 copies with its best 3 deleted). Real money may now follow it once armed.",
   "2026-09-26 10:43:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-26 10:43:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1652,11 +1604,13 @@
   "2026-09-27 08:00:25 INFO  [ops] floor_row: '0xfd3e6449 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +0% (n=51, trimmed -8%) · 200 no -2% (n=76, trimmed -9%) · 150 no +0% (n=104, trimmed -6%) · 100 no +4% (n=161, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-09-27 08:00:59 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
   "2026-09-27 08:07:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 08:45:10 INFO  [recovery] No pending orders to recover",
-  "2026-09-26 08:59:54 TRADE [DISARMED] would BUY $6.40 on '' @ 0.2800 (from 0x3f3a...e8fd); the arm is off",
-  "2026-09-26 09:22:01 INFO  [recovery] No pending orders to recover",
-  "2026-09-26 09:39:11 TRADE [LIVE] BUY $6.40 on '' @ 0.9000, order 0xc7613e77e1...",
-  "2026-09-26 09:39:17 TRADE [verify] FILLED: BUY 5.00 shares on '' @ 0.9000",
+  "2026-09-27 09:16:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 09:27:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 10:09:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 10:09:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 10:09:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 10:14:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-27 10:15:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-26 12:22:11 TRADE [LIVE] BUY $6.40 on 'Map Handicap: HERO (-1.5) vs Sangal (+1.' @ 0.5100, order 0xdee08e5f50...",
   "2026-09-26 12:22:12 TRADE [verify] FILLED: BUY 12.55 shares on 'Map Handicap: HERO (-1.5) vs Sangal (+1.' @ 0.5100",
   "2026-09-26 12:45:21 TRADE [LIVE] BUY $6.40 on '' @ 0.5700, order 0x99c8fab930...",
@@ -1666,34 +1620,6 @@
   "2026-09-27 03:57:21 TRADE [verify] FILLED: BUY 11.85 shares on 'Chengdu Open: Jenson Brooksby vs Nikoloz' @ 0.5400"
  ],
  "watcher": [
-  {
-   "ts": 1790414620.1020496,
-   "day": "2026-09-26",
-   "woke_because": "d9f102ca20ef, 590e8b8a4374",
-   "fingerprint": "d9f102ca20ef",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The owner deliberately armed real money via a Claude session at 09:23:34, seconds after the 09:20:39 deploy of the new-limits build 07f0b74 and the 09:22:01 restart. The two waking fingerprints (d9f102ca20ef and 590e8b8a4374) are the same arm event; the first line at 09:23:05 lacked the daily-loss number and was superseded 29s later by the complete instruction, and the limit text is a recorded reason string, not parsed (cap_usd is 54 while the text says 45 USD). The money path is healthy: chain reader shows cursor 94472996 equal to head with lag 0 at 09:23:56 after the arm, the earlier RPC out",
-   "confidence": 0.86,
-   "cost_usd": 0.6467045,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
-  {
-   "ts": 1790415658.8132656,
-   "day": "2026-09-26",
-   "woke_because": "59f5d5ebf4a6",
-   "fingerprint": "59f5d5ebf4a6",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The daily-cap line changed from a numeric spend cap to 'no spend cap (the day stops after $45 lost)' because the owner re-armed at 09:23 today with new limits that set cap_usd to null, which created this new fingerprint. This is faithful to the owner's own arm instruction (1/day new wallets, 20/day others, $45 daily-loss stop, no dollar spend cap), not a fault. Grep confirms 'no spend cap' appears exactly once and only today; prior days (09-24, 09-25) logged numeric caps of $32.00 and $54.00. The first live trade under the new regime placed and filled cleanly ($6.40 BUY, 5 shares @ 0.90, tier ",
-   "confidence": 0.85,
-   "cost_usd": 0.6244765000000001,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1790419671.6146815,
    "day": "2026-09-26",
@@ -2029,13 +1955,21 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790496478.9915218,
-   "count": 182,
+   "last": 1790504160.180077,
+   "count": 192,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790496478.9915218,
-    1790496478.9915218
+    1790500679.9163048,
+    1790500679.9163048,
+    1790501280.0253375,
+    1790503800.1281905,
+    1790503800.1281905,
+    1790503800.1281905,
+    1790503800.1281905,
+    1790504160.180077,
+    1790504160.180077,
+    1790504160.180077
    ],
    "action": null,
    "action_ts": null,
