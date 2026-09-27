@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-27T18:22:54.386129+00:00",
+ "generated": "2026-09-27T19:12:54.908971+00:00",
  "money": {
   "cash": 99.746233,
   "open_cost": 4.5,
@@ -21,7 +21,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790533268.4107633,
+  "ts": 1790536284.9112594,
   "day": "2026-09-27"
  },
  "arm": {
@@ -1406,10 +1406,6 @@
   }
  ],
  "important": [
-  "2026-09-26 18:24:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 18:45:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 18:50:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 19:06:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-26 19:53:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-26 20:27:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-26 20:27:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
@@ -1543,6 +1539,7 @@
   "2026-09-27 18:06:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
   "2026-09-27 18:19:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-09-27 18:19:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-09-27 18:47:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-27 03:57:20 TRADE [LIVE] BUY $6.40 on 'Chengdu Open: Jenson Brooksby vs Nikoloz' @ 0.5400, order 0x730feb92e6...",
   "2026-09-27 03:57:21 TRADE [verify] FILLED: BUY 11.85 shares on 'Chengdu Open: Jenson Brooksby vs Nikoloz' @ 0.5400"
  ],
@@ -1868,13 +1865,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790529124.1988232,
-   "count": 227,
+   "last": 1790534884.50853,
+   "count": 228,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790525763.4458032,
-    1790529124.1988232
+    1790534884.50853
    ],
    "action": null,
    "action_ts": null,
