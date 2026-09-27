@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-27T22:09:53.663687+00:00",
+ "generated": "2026-09-27T22:30:55.775353+00:00",
  "money": {
   "cash": 99.746233,
   "open_cost": 4.5,
@@ -21,7 +21,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790546847.7675805,
+  "ts": 1790548054.0645003,
   "day": "2026-09-27"
  },
  "arm": {
@@ -1406,8 +1406,6 @@
   }
  ],
  "important": [
-  "2026-09-26 22:10:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-26 22:29:31 ERROR Network error fetching 0xeef6...cd4c: ",
   "2026-09-26 22:56:42 ERROR Network error fetching 0xd251...4d37: ",
   "2026-09-26 22:56:45 ERROR Network error fetching 0xf916...e770: Server disconnected without sending a response.",
   "2026-09-26 22:56:45 ERROR Network error fetching 0xf496...fe79: Server disconnected without sending a response.",
