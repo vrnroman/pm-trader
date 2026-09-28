@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-28T21:46:35.498953+00:00",
+ "generated": "2026-09-28T22:01:48.031456+00:00",
  "money": {
   "cash": 85.137803,
   "open_cost": 6.4,
@@ -21,7 +21,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790631922.051963,
+  "ts": 1790632583.7472372,
   "day": "2026-09-28"
  },
  "arm": {
@@ -1751,6 +1751,11 @@
   "2026-09-28 21:40:44 ERROR Network error fetching 0x3f3a...e8fd: ",
   "2026-09-28 21:40:44 ERROR Network error fetching 0x9f15...bdb3: ",
   "2026-09-28 21:45:46 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 10 straight losing copies with no win since it stood at 3, ten days ago. Equity fell 113.26 to 91.68 over",
+  "2026-09-28 21:52:22 ERROR [inventory] API sync failed: ",
+  "2026-09-28 21:53:39 ERROR Network error fetching 0x3f3a...e8fd: ",
+  "2026-09-28 21:53:40 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-09-28 21:53:40 ERROR Network error fetching 0xfd3e...5a7a: ",
+  "2026-09-28 21:56:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-27 23:44:14 ERROR Network error fetching 0x5213...6a35: Server disconnected without sending a response.",
   "2026-09-28 01:41:35 TRADE [LIVE] BUY $6.40 on 'China Open, Qualification: Yannick Hanfm' @ 0.5500, order 0xb44c5cd511...",
   "2026-09-28 01:41:36 TRADE [verify] FILLED: BUY 11.64 shares on 'China Open, Qualification: Yannick Hanfm' @ 0.5500",
@@ -1915,6 +1920,20 @@
    "concluded": "A single transient 429 rate limit on the data-api positions read recovered on the very next poll. The failed sync at 17:24:04 was followed 9 seconds later by a clean Synced 80 positions at 17:24:13, and the hour shows 74 successful inventory syncs against this one failure. This path is read-only position bookkeeping; it cannot place, size, or double an order, and our own orders are confirmed through the CLOB, not this read. The chain reader that is primary is healthy (last good read 1s ago, lag 0 blocks), and 429s on this endpoint recur a few times most days as a known nuisance. Nothing to do.",
    "confidence": 0.95,
    "cost_usd": 0.252724,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790632045.7878072,
+   "day": "2026-09-28",
+   "woke_because": "9d6f31d998d2",
+   "fingerprint": "9d6f31d998d2",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The cause is the bot's own loss-streak monitor firing a routine escalation, which it already delivered to the owner ('routine escalation' -> 'sent'). This is a real market-risk signal, not a code fault: 3 live buys today each placed at $6.40 tier 1b and each confirmed by a matching FILLED verify line through the CLOB within one second, so sizing and confirmation are intact. Today equity fell 104.25 to 91.54, about 12.7 down, under the 45 daily-loss stop and above the 30 floor, and the bot kept logging COPY-PAPER and fast-Z cadence through 21:48 with the chain reader at lag 0. The owner already",
+   "confidence": 0.82,
+   "cost_usd": 0.49333000000000005,
    "did": "nothing",
    "proof": "",
    "question": ""
@@ -2148,14 +2167,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790629165.4975643,
-   "count": 290,
+   "last": 1790632691.2610137,
+   "count": 291,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790628325.4604342,
-    1790628325.4604342,
-    1790629165.4975643
+    1790629165.4975643,
+    1790632691.2610137
    ],
    "action": null,
    "action_ts": null,
@@ -2450,13 +2468,16 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1790631685.7546887,
-   "count": 35,
+   "last": 1790632451.0486097,
+   "count": 38,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
     1790631685.7546887,
-    1790631685.7546887
+    1790631685.7546887,
+    1790632451.0486097,
+    1790632451.0486097,
+    1790632451.0486097
    ],
    "action": null,
    "action_ts": null,
@@ -2628,12 +2649,12 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1790524563.0450468,
-   "count": 7,
+   "last": 1790632451.0486097,
+   "count": 8,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1790524563.0450468
+    1790632451.0486097
    ],
    "action": null,
    "action_ts": null,
@@ -2888,6 +2909,20 @@
    "norm": "ERROR [inventory] API sync failed: Client error 'S' for url 'S'",
    "recent": [
     1790616244.8723001
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "9d6f31d998d2": {
+   "first": 1790632045.7878072,
+   "last": 1790632045.7878072,
+   "count": 1,
+   "sample": "2026-09-28 21:45:46 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 10 straight losing copies with no win since it stood at 3, ten days ago. Equity fell 113.26 to 91.68 over",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Loss streak is N straight losing copies with no win since it stood at N, ten days ago. Equity fell N to N over",
+   "recent": [
+    1790632045.7878072
    ],
    "action": null,
    "action_ts": null,
