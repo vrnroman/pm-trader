@@ -1,12 +1,14 @@
 {
-    "id": "2026-09-28T12:51:27Z-069f",
-    "ts": 1790599887,
-    "kind": "fix",
-    "message": "Fixed exp_study.py: totals() summed copies and ROI over every studied wallet instead of only the ones that pass the form bar, so the 2026-09-27 form study showed wallets in 6 -> 6 next to copies 3007 -> 2073 and ROI +3.2% -> +2.9% pulled from all 40 studied wallets, not just the 6. Added a regression test for the scope leak, full suite passed (1751 passed, 1 pre-existing unrelated failure in test_golive_month_one.py::test_a_disarm_that_cannot_be_written_stops_this_process that also fails on unmodified main in this sandbox, root can mkdir a nonexistent path where a non-root CI runner cannot, so its own OSError branch never fires), pushed to main.",
+    "id": "2026-09-28T18:43:24Z-bd83",
+    "ts": 1790621004,
+    "kind": "escalation",
+    "message": "Loss streak is 10 straight losing copies with no win since it stood at 3, ten days ago. Equity fell 113.26 to 91.68 over that span. Streak moved 8 to 10 today on two settled losses (0x5213eb85, 0x19585131), day loss 12.80. Arm is on, daily-loss stop 45.00, spend today 12.80, no cap breach. The loss-streak Telegram alert fires once per crossing and none appears in the last 24h ledger, so this severity never reached your phone. No guard failure, no self-disarm, digest is fresh.",
     "evidence": [
-        "study 2026-09-27-form-c2308d97: wallets in 6 -> 6 (stay 5, enter 1, leave 1); copies 3007 -> 2073; ROI at their price +3.2% -> +2.9%",
-        "2026-09-27 analyst wake: 3007 to 2073 copies and +3.2% to +2.9% ROI in the form study are summed over all 40 studied wallets while the wallet count is filtered to the in-form 6, so the headline mixes scopes and the true in-form ROI is +8.3% to +10.8%",
-        "2026-09-27 analyst wake: two confirmed exp_study.py bugs ... noting not PRing because the repo is not reachable from this box"
+        "watch: \"loss_streak\": 10, \"day_pnl\": -12.8, \"day_pnl_day\": \"2026-09-28\"",
+        "money: {\"cash\": 91.676523, \"equity\": 91.68, \"spend\": {\"spent_usd\": 12.8, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
+        "ledger: lost -6.40 on 'China Open, Qualification: Yannick Hanfm' (0x5213eb85, tier 1b)",
+        "ledger: lost -6.40 on 'Counter-Strike: Sinners vs BET-M 33 (BO3' (0x19585131, tier 1b)",
+        "push:daily_loss: \"Today's losses reach $12.80 (10% of the $91.68 bankroll).\""
     ],
-    "commit": "1681713493232df0949cfee700bfa182e5186424"
+    "commit": null
 }
