@@ -83,6 +83,29 @@ def test_an_unread_wallet_is_a_row_not_a_crash_and_the_population_is_capped(desk
     assert "2 of 5 wallets studied" in rec["caveat"] and rec["totals"]["unread"] == 2
 
 
+def test_totals_copies_and_roi_are_scoped_to_the_in_wallets_only(desk, monkeypatch):
+    """2026-09-27 analyst finding: a wallet whose buys clear the floor but
+    fails the form bar (not enough settled bets) still has n_from/n_to > 0
+    from replay(), and totals() summed that into copies/ROI for every
+    studied wallet instead of only the ones the headline counts as in."""
+    monkeypatch.setattr(wallet_form, "FORM_MIN_N", 5)
+    # w1: 6 settled bets at 400, clears FORM_MIN_N=5, in at both floors.
+    # w2: 2 settled bets at 400, clears the floor but fails FORM_MIN_N=5,
+    #     so in_from=in_to=False even though its copies are counted by replay.
+    rows = {"0xw1": acts_for(400, 6, won_every=1), "0xw2": acts_for(400, 2, won_every=1)}
+    b_rows = [{"target": w, "closed": True} for w in rows for _ in range(12)]
+
+    def fetch(w):
+        return rows[w], [], wallet_form.Coverage(rows=len(rows[w]), pages=1, oldest_ts=NOW - 12 * DAY, capped=False)
+    res = {a["conditionId"]: 0 for r in rows.values() for a in r if a["type"] == "TRADE"}
+    rec = es.run("min_usd", {"from": 300, "to": 150}, now=NOW, fetch=fetch, resolve=lambda cid: res.get(cid),
+                 b_rows=b_rows, zset_wallets=set())
+    by = {r["wallet"]: r for r in rec["rows"]}
+    assert by["0xw2"]["in_from"] is False and by["0xw2"]["n_from"] == 2, "w2 clears the floor but fails the form bar"
+    t = rec["totals"]
+    assert t["wallets_in_from"] == 1 and t["copies_from"] == 6, "w2's copies must not leak into the in-wallets' total"
+
+
 def test_the_wallet_cap_study_reads_book_b_only(desk, monkeypatch):
     monkeypatch.setattr(CONFIG, "copy_paper_b_max_per_wallet_day", 25)
     b_rows = []

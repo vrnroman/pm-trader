@@ -278,8 +278,12 @@ def study_wallet_cap(params: dict, *, b_rows: list[dict], wallets: list[str]) ->
 
 def totals(rows: list[dict]) -> dict:
     def side(sfx: str) -> tuple[int, int, float]:
-        rs = [r for r in rows if r.get("move") != "unread"]
-        n_in = sum(1 for r in rs if r[f"in_{sfx}"])
+        # copies and ROI are the in-wallets' own activity only: a wallet whose
+        # buys clear the floor but who fails the form bar (in_{sfx} False)
+        # still has n_{sfx} > 0 from replay(), and summing that in mixed the
+        # in-population's headline with the full studied population's copies.
+        rs = [r for r in rows if r.get("move") != "unread" and r[f"in_{sfx}"]]
+        n_in = len(rs)
         n = sum(int(r[f"n_{sfx}"]) for r in rs)
         w = sum(float(r[f"roi_{sfx}"]) * int(r[f"n_{sfx}"]) for r in rs)
         return (n_in, n, (w / n) if n else 0.0)
