@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-28T15:28:08.446753+00:00",
+ "generated": "2026-09-28T15:50:54.379651+00:00",
  "money": {
   "cash": 91.676523,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1790609168.4727645,
+  "ts": 1790610382.889087,
   "day": "2026-09-28"
  },
  "arm": {
@@ -866,7 +866,7 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
-  "last_escalation_id": "2026-09-28T06:41:26Z-5d66",
+  "last_escalation_id": "2026-09-28T12:51:27Z-069f",
   "admit_scan_ts": 1790605344.24792,
   "day_loss_pushed": "2026-09-28",
   "loss_streak": 10,
@@ -1603,10 +1603,18 @@
    "after": "watching",
    "detail": "tick 120s",
    "push": null
+  },
+  {
+   "ts": 1790609476.2704751,
+   "day": "2026-09-28",
+   "kind": "escalation_delivered",
+   "before": "routine fix",
+   "after": "sent",
+   "detail": "Fixed exp_study.py: totals() summed copies and ROI over every studied wallet instead of only the ones that pass the form",
+   "push": "BOT"
   }
  ],
  "important": [
-  "2026-09-27 15:33:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-27 15:54:40 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.",
   "2026-09-27 15:55:15 ERROR [inventory] API sync failed: ",
   "2026-09-27 15:59:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1709,6 +1717,7 @@
   "2026-09-28 14:05:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-28 14:41:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-28 15:00:11 ERROR Network error fetching 0x09b0...a3b6: ",
+  "2026-09-28 15:31:17 INFO  [ops] escalation_delivered: 'routine fix' -> 'sent' | Fixed exp_study.py: totals() summed copies and ROI over every studied wallet instead of only the ones that pass the form",
   "2026-09-27 23:44:14 ERROR Network error fetching 0x5213...6a35: Server disconnected without sending a response.",
   "2026-09-28 01:41:35 TRADE [LIVE] BUY $6.40 on 'China Open, Qualification: Yannick Hanfm' @ 0.5500, order 0xb44c5cd511...",
   "2026-09-28 01:41:36 TRADE [verify] FILLED: BUY 11.64 shares on 'China Open, Qualification: Yannick Hanfm' @ 0.5500",
@@ -1843,6 +1852,20 @@
    "concluded": "This is the bot's own daily-loss notification push firing for the first time today, which is why the fingerprint is new. Today's realized loss is $12.80, from two settled tier-1b copies of $6.40 each (0x19585131 and an earlier 0x5213eb85), and that sits well under the $45 daily-loss stop that is still armed and unfired. Today's log shows zero disarm or loss-stop events, the push logged as delivered, and the box is healthy with 984 lines of steady progress in the last hour and the chain reader at lag 0. The '10% of the $91.68 bankroll' text is just the threshold band label on a Telegram heads-u",
    "confidence": 0.95,
    "cost_usd": 0.42546649999999997,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790609583.3849332,
+   "day": "2026-09-28",
+   "woke_because": "043ee7895da4",
+   "fingerprint": "043ee7895da4",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The line is the bot's own ops receipt escalation_delivered: 'routine fix' -> 'sent', reporting a fix already made to exp_study.py, an offline wallet-study script whose totals() summed copies and ROI over all studied wallets instead of only in-form ones. That is a reporting bug in the form study output the owner reads, not the money path, and grep shows exp_study.py appears exactly once in today's 13,677-line bot log (this receipt), so it is not in the live trading loop. The owner was already notified (state 'sent'), and the box is healthy: armed, chain reader current with cursor==head 94602966",
+   "confidence": 0.94,
+   "cost_usd": 0.2460995,
    "did": "nothing",
    "proof": "",
    "question": ""
@@ -2786,6 +2809,20 @@
    "norm": "INFO [ops] push:daily_loss: None -> 'S'",
    "recent": [
     1790599473.6040406
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "043ee7895da4": {
+   "first": 1790609583.3849332,
+   "last": 1790609583.3849332,
+   "count": 1,
+   "sample": "2026-09-28 15:31:17 INFO  [ops] escalation_delivered: 'routine fix' -> 'sent' | Fixed exp_study.py: totals() summed copies and ROI over every studied wallet instead of only the ones that pass the form",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Fixed exp_study.py: totals() summed copies and ROI over every studied wallet instead of only the ones that pass the form",
+   "recent": [
+    1790609583.3849332
    ],
    "action": null,
    "action_ts": null,
