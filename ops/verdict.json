@@ -1,14 +1,13 @@
 {
-    "id": "2026-09-28T00:41:54Z-38f6",
-    "ts": 1790556114,
-    "kind": "nothing",
-    "message": "Armed since owner instruction 2026-09-26, no self-disarm or Traceback since. Spend today $6.40 against the $45 daily-loss stop, no cap hit. Three wallets in form (0x5213eb85, 0xd25156e2, 0xf9168343), numbers unchanged or better than the prior digest, no losing streak or hit-rate slide against the bar. Errors remain the same chronic 404 no-orderbook and disconnect noise, no new fault.",
+    "id": "2026-09-28T06:41:26Z-5d66",
+    "ts": 1790577686,
+    "kind": "escalation",
+    "message": "Digest is stale by over 5 hours. Last digest ran 2026-09-28 01:08 UTC. No GitHub Actions workflow in this repo has run since then, including the hourly ops-digest cron and the Heartbeat schedule. This escalation may not reach Telegram until Actions resumes. As of the last digest: armed, spend $0.00 today, equity $104.25, no new errors beyond the usual chronic noise. Check GitHub Actions status and the repo's Actions minutes or billing.",
     "evidence": [
-        "## money state {\"cash\": 99.746233, \"open_cost\": 4.5, \"equity\": 104.25, \"floor\": 30.0, \"spend\": {\"date\": \"2026-09-27\", \"spent_usd\": 6.4, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
+        "# ops digest 2026-09-28T01:08:23.192300+00:00 (last 24h)",
+        "## money state {\"cash\": 99.746233, \"open_cost\": 4.5, \"equity\": 104.25, \"floor\": 30.0, \"spend\": {\"date\": \"2026-09-28\", \"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
         "## arm: {\"armed\": true, \"ts\": 1790414614.14, \"by\": \"owner:claude-session\", \"reason\": \"owner instruction 2026-09-26 via Claude session: do actual deals under the new limits\"}",
-        "in form  0x5213eb85: 86 settled, 45% won vs 39% needed, net +6.9% on $42,400, worst day -2,314, 2 of 5 exits under 10 min",
-        "in form  0xd25156e2: 71 settled, 66% won vs 46% needed, net +28.9% on $40,551, worst day -3,078, 3 of 25 exits under 10 min (capped: 10.1 of 14 days read, 5500 rows)",
-        "in form  0xf9168343: 53 settled, 55% won vs 48% needed, net +2.8% on $146,637, worst day -6,320, 2 of 33 exits under 10 min"
+        "## spend today: {\"date\": \"2026-09-28\", \"spent_usd\": 0.0, \"wallet_copies\": {}}"
     ],
     "commit": null
 }
