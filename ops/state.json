@@ -1,14 +1,14 @@
 {
- "generated": "2026-09-28T06:52:36.721626+00:00",
+ "generated": "2026-09-28T07:28:33.741185+00:00",
  "money": {
-  "cash": 98.200193,
-  "open_cost": 0.0,
-  "equity": 98.2,
+  "cash": 91.676523,
+  "open_cost": 6.4,
+  "equity": 98.08,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-28",
-   "spent_usd": 6.4,
+   "spent_usd": 12.8,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 71,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790578318.6738226,
+  "ts": 1790580434.056976,
   "day": "2026-09-28"
  },
  "arm": {
@@ -35,9 +35,10 @@
  },
  "spend": {
   "date": "2026-09-28",
-  "spent_usd": 6.4,
+  "spent_usd": 12.8,
   "wallet_copies": {
-   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1
+   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1,
+   "0x1958513132accb7dd17f2cf7beebbc165776b24e": 1
   },
   "wallet_copies_yesterday": {
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1
@@ -53,9 +54,9 @@
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
+   "open_total": 12.8,
    "daily_date": "2026-09-28",
-   "daily_volume": 6.4,
+   "daily_volume": 12.8,
    "placements": [
     {
      "token_id": "87131648918137474349304257527344538579233235348393719175219550429557466113538",
@@ -63,6 +64,13 @@
      "ts": 1790149797.062317,
      "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
      "title": "Will Spain win on 2026-09-23?"
+    },
+    {
+     "token_id": "95398244405608378280626791547555206559829968220411436324906242254895884885312",
+     "cost": 6.4,
+     "ts": 1790579468.5543108,
+     "trader": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
+     "title": "Counter-Strike: Sinners vs BET-M 33 (BO3) - NODWIN Clutch Se"
     }
    ]
   },
@@ -859,13 +867,13 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 98.2,
+  "last_equity": 98.08,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
-  "last_escalation_id": "2026-09-26T06:43:00Z-4a77",
+  "last_escalation_id": "2026-09-28T06:41:26Z-5d66",
   "admit_scan_ts": 1790572248.3197942,
   "day_loss_pushed": "2026-09-12",
   "loss_streak": 9,
@@ -1300,20 +1308,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790493600.9003372,
-   "day": "2026-09-27",
-   "kind": "settled",
-   "before": "open $6.40",
-   "after": "paid $0.00",
-   "detail": "lost -6.40 on 'Chengdu Open: Jenson Brooksby vs Nikoloz' (0x5213eb85, tier 1b)",
-   "push": null,
-   "token_id": "101922131308350308405118205643864036992501268344680822256490594210909214672298",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-   "pnl": -6.4,
-   "won": false,
-   "cost": 6.4
-  },
-  {
    "ts": 1790495524.1502345,
    "day": "2026-09-27",
    "kind": "floor_row",
@@ -1574,11 +1568,18 @@
    "after": "🏁 <b>Bankroll fell under $100</b>: $98.20.",
    "detail": "",
    "push": "DEAL"
+  },
+  {
+   "ts": 1790578623.104119,
+   "day": "2026-09-28",
+   "kind": "escalation_delivered",
+   "before": "routine escalation",
+   "after": "sent",
+   "detail": "Digest is stale by over 5 hours. Last digest ran 2026-09-28 01:08 UTC. No GitHub Actions workflow in this repo has run s",
+   "push": "BOT"
   }
  ],
  "important": [
-  "2026-09-27 07:20:00 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80",
-  "2026-09-27 07:20:01 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Chengdu Open: Jenson Brooksby vs Nikoloz' (0x5213eb85, tier 1b)",
   "2026-09-27 07:31:14 ERROR Network error fetching 0x3f3a...e8fd: Server disconnected without sending a response.",
   "2026-09-27 07:31:15 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.",
   "2026-09-27 07:31:15 ERROR Network error fetching 0xfd3e...5a7a: Server disconnected without sending a response.",
@@ -1703,10 +1704,16 @@
   "2026-09-28 06:51:57 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
   "2026-09-28 06:51:57 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'China Open, Qualification: Yannick Hanfm' (0x5213eb85, tier 1b)",
   "2026-09-28 06:51:58 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll fell under $100</b>: $98.20.'",
+  "2026-09-28 06:55:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-28 06:57:03 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Digest is stale by over 5 hours. Last digest ran 2026-09-28 01:08 UTC. No GitHub Actions workflow in this repo has run s",
+  "2026-09-28 07:11:07 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / no spend cap (the day stops after $45 lost)",
+  "2026-09-28 07:11:08 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
   "2026-09-27 23:44:14 ERROR Network error fetching 0x5213...6a35: Server disconnected without sending a response.",
   "2026-09-28 01:41:35 TRADE [LIVE] BUY $6.40 on 'China Open, Qualification: Yannick Hanfm' @ 0.5500, order 0xb44c5cd511...",
   "2026-09-28 01:41:36 TRADE [verify] FILLED: BUY 11.64 shares on 'China Open, Qualification: Yannick Hanfm' @ 0.5500",
-  "2026-09-28 05:10:58 WARNING [zset] ADMITTED 0x10658d371ae1f09eed503a3a14c8ac6a1a936218 to set Z (+3% over 27 copies with its best 3 deleted). Real money may now follow it once armed."
+  "2026-09-28 05:10:58 WARNING [zset] ADMITTED 0x10658d371ae1f09eed503a3a14c8ac6a1a936218 to set Z (+3% over 27 copies with its best 3 deleted). Real money may now follow it once armed.",
+  "2026-09-28 07:11:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Sinners vs BET-M 33 (BO3' @ 0.6100, order 0x91fc19b03a...",
+  "2026-09-28 07:11:09 TRADE [verify] FILLED: BUY 10.49 shares on 'Counter-Strike: Sinners vs BET-M 33 (BO3' @ 0.6100"
  ],
  "watcher": [
   {
@@ -1809,6 +1816,34 @@
    "concluded": "Two confirmed exp_study.py bugs: wallet_cap copy count is inverted (3840->2956 as cap loosens, impossible) and the form study sums copies/ROI over all 40 wallets not the in-form 6; noting not PRing because the repo is not reachable from this box and a blind diff already failed to apply. No exposure ",
    "did": "2 proposal(s): noted; noted",
    "cost_usd": 0.8613854999999999
+  },
+  {
+   "ts": 1790578383.915225,
+   "day": "2026-09-28",
+   "woke_because": "5e8145241ab5",
+   "fingerprint": "5e8145241ab5",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The line is the bot's own bankroll-under-$100 milestone notification firing correctly after a single legitimate settled loss of $6.40, and it has already been pushed to the owner's phone (receipt push: DEAL). It only looks new because the fingerprinter had not hashed this exact wording this window; the same milestone fired on Sept 19 (down at $63.52, up at $113.52) and Sept 13. The bot is healthy: 166 heartbeats today, 781 lines in the last 60 min with steady copy, onchain and inventory cadence, chain reader current at lag 0 blocks. Money is safe with cash $98.20 above the $30 floor and day lo",
+   "confidence": 0.95,
+   "cost_usd": 0.22788,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790578682.667124,
+   "day": "2026-09-28",
+   "woke_because": "ca7e673ce9f0",
+   "fingerprint": "ca7e673ce9f0",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The bot's own self-monitor detected the digest is stale by over 5 hours (last ran 2026-09-28 01:08 UTC) because the external GitHub Actions digest workflow stopped firing, and it already escalated this to the owner's phone ('routine escalation' -> 'sent'). This is a reporting/visibility gap, not the money path: the chain reader is fully caught up (cursor 94582365 == head, lag 0 blocks, last good read at 06:58:09), with 356 onchain reads and 84 scheduler heartbeats in the last log window. The digest is produced by GitHub Actions CI outside this box, so there is nothing in the repo to fix and no",
+   "confidence": 0.9,
+   "cost_usd": 0.43732099999999996,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -1828,12 +1863,12 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1790559727.33674,
-   "count": 24,
+   "last": 1790579482.0183427,
+   "count": 25,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1790559727.33674
+    1790579482.0183427
    ],
    "action": null,
    "action_ts": null,
@@ -1842,12 +1877,12 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1790559727.33674,
-   "count": 24,
+   "last": 1790579482.0183427,
+   "count": 25,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1790559727.33674
+    1790579482.0183427
    ],
    "action": null,
    "action_ts": null,
@@ -1856,12 +1891,12 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1790559727.33674,
-   "count": 23,
+   "last": 1790579482.0183427,
+   "count": 24,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1790559727.33674
+    1790579482.0183427
    ],
    "action": null,
    "action_ts": null,
@@ -1884,12 +1919,13 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1790576583.8212545,
-   "count": 22,
+   "last": 1790578383.915225,
+   "count": 23,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1790576583.8212545
+    1790576583.8212545,
+    1790578383.915225
    ],
    "action": null,
    "action_ts": null,
@@ -1898,12 +1934,12 @@
   },
   "2497cd50ff7d": {
    "first": 1790098332.9559617,
-   "last": 1790493617.1719475,
-   "count": 4,
+   "last": 1790578383.915225,
+   "count": 5,
    "sample": "2026-09-21 00:52:20 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Counter-Strike: Bounty Hunters Esports v' (0x57b25849, tier 1b)",
    "norm": "INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)",
    "recent": [
-    1790493617.1719475
+    1790578383.915225
    ],
    "action": null,
    "action_ts": null,
@@ -2039,35 +2075,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790572374.4051957,
-   "count": 278,
+   "last": 1790578562.629995,
+   "count": 279,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957,
-    1790572374.4051957
+    1790578562.629995
    ],
    "action": null,
    "action_ts": null,
@@ -2609,12 +2622,12 @@
   },
   "59f5d5ebf4a6": {
    "first": 1790415658.8132656,
-   "last": 1790559727.33674,
-   "count": 5,
+   "last": 1790579482.0183427,
+   "count": 6,
    "sample": "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)",
    "recent": [
-    1790559727.33674
+    1790579482.0183427
    ],
    "action": null,
    "action_ts": null,
@@ -2715,6 +2728,34 @@
    "norm": "ERROR Onchain: chunk NN SKIPPED after N refused reads (head race: CTF [NN]: {'S': N, 'S': 'S'}); a set-Z fill in those blocks reaches the bot through the data api only",
    "recent": [
     1790567993.3468313
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "5e8145241ab5": {
+   "first": 1790578383.915225,
+   "last": 1790578383.915225,
+   "count": 1,
+   "sample": "2026-09-28 06:51:58 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll fell under $100</b>: $98.20.'",
+   "norm": "INFO [ops] push:milestone: None -> 'S'",
+   "recent": [
+    1790578383.915225
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "ca7e673ce9f0": {
+   "first": 1790578682.667124,
+   "last": 1790578682.667124,
+   "count": 1,
+   "sample": "2026-09-28 06:57:03 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Digest is stale by over 5 hours. Last digest ran 2026-09-28 01:08 UTC. No GitHub Actions workflow in this repo has run s",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Digest is stale by over N hours. Last digest ran NNN N:N UTC. No GitHub Actions workflow in this repo has run s",
+   "recent": [
+    1790578682.667124
    ],
    "action": null,
    "action_ts": null,
