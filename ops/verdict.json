@@ -1,13 +1,12 @@
 {
-    "id": "2026-09-28T06:41:26Z-5d66",
-    "ts": 1790577686,
-    "kind": "escalation",
-    "message": "Digest is stale by over 5 hours. Last digest ran 2026-09-28 01:08 UTC. No GitHub Actions workflow in this repo has run since then, including the hourly ops-digest cron and the Heartbeat schedule. This escalation may not reach Telegram until Actions resumes. As of the last digest: armed, spend $0.00 today, equity $104.25, no new errors beyond the usual chronic noise. Check GitHub Actions status and the repo's Actions minutes or billing.",
+    "id": "2026-09-28T12:51:27Z-069f",
+    "ts": 1790599887,
+    "kind": "fix",
+    "message": "Fixed exp_study.py: totals() summed copies and ROI over every studied wallet instead of only the ones that pass the form bar, so the 2026-09-27 form study showed wallets in 6 -> 6 next to copies 3007 -> 2073 and ROI +3.2% -> +2.9% pulled from all 40 studied wallets, not just the 6. Added a regression test for the scope leak, full suite passed (1751 passed, 1 pre-existing unrelated failure in test_golive_month_one.py::test_a_disarm_that_cannot_be_written_stops_this_process that also fails on unmodified main in this sandbox, root can mkdir a nonexistent path where a non-root CI runner cannot, so its own OSError branch never fires), pushed to main.",
     "evidence": [
-        "# ops digest 2026-09-28T01:08:23.192300+00:00 (last 24h)",
-        "## money state {\"cash\": 99.746233, \"open_cost\": 4.5, \"equity\": 104.25, \"floor\": 30.0, \"spend\": {\"date\": \"2026-09-28\", \"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
-        "## arm: {\"armed\": true, \"ts\": 1790414614.14, \"by\": \"owner:claude-session\", \"reason\": \"owner instruction 2026-09-26 via Claude session: do actual deals under the new limits\"}",
-        "## spend today: {\"date\": \"2026-09-28\", \"spent_usd\": 0.0, \"wallet_copies\": {}}"
+        "study 2026-09-27-form-c2308d97: wallets in 6 -> 6 (stay 5, enter 1, leave 1); copies 3007 -> 2073; ROI at their price +3.2% -> +2.9%",
+        "2026-09-27 analyst wake: 3007 to 2073 copies and +3.2% to +2.9% ROI in the form study are summed over all 40 studied wallets while the wallet count is filtered to the in-form 6, so the headline mixes scopes and the true in-form ROI is +8.3% to +10.8%",
+        "2026-09-27 analyst wake: two confirmed exp_study.py bugs ... noting not PRing because the repo is not reachable from this box"
     ],
-    "commit": null
+    "commit": "1681713493232df0949cfee700bfa182e5186424"
 }
