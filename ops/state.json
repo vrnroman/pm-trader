@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-29T01:39:16.293120+00:00",
+ "generated": "2026-09-29T01:56:40.619651+00:00",
  "money": {
   "cash": 89.803053,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1790645669.2538497,
+  "ts": 1790646879.4086726,
   "day": "2026-09-29"
  },
  "arm": {
@@ -1679,8 +1679,6 @@
   }
  ],
  "important": [
-  "2026-09-28 01:41:34 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
-  "2026-09-28 01:41:35 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $19.20 / $200.00",
   "2026-09-28 02:08:37 WARNING [zset] ADMITTED 0x1958513132accb7dd17f2cf7beebbc165776b24e to set Z (+12% over 27 copies with its best 3 deleted). Real money may now follow it once armed.",
   "2026-09-28 02:08:39 INFO  [ops] auto_admit: '0x19585131 not in Z' -> 'in set Z, on probation' | 30 settled paper copies, paper ROI +31.4%, trimmed +11.9%, ideal +32.4%, real quotes +31.9% over 30 matched",
   "2026-09-28 02:08:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1791,8 +1789,6 @@
   "2026-09-29 00:17:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 01:09:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
   "2026-09-29 01:09:20 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Curitiba: Ryan Dickerson vs Jose Pereira' (0xf9168343, tier 1b)",
-  "2026-09-28 01:41:35 TRADE [LIVE] BUY $6.40 on 'China Open, Qualification: Yannick Hanfm' @ 0.5500, order 0xb44c5cd511...",
-  "2026-09-28 01:41:36 TRADE [verify] FILLED: BUY 11.64 shares on 'China Open, Qualification: Yannick Hanfm' @ 0.5500",
   "2026-09-28 05:10:58 WARNING [zset] ADMITTED 0x10658d371ae1f09eed503a3a14c8ac6a1a936218 to set Z (+3% over 27 copies with its best 3 deleted). Real money may now follow it once armed.",
   "2026-09-28 07:11:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: Sinners vs BET-M 33 (BO3' @ 0.6100, order 0x91fc19b03a...",
   "2026-09-28 07:11:09 TRADE [verify] FILLED: BUY 10.49 shares on 'Counter-Strike: Sinners vs BET-M 33 (BO3' @ 0.6100",
