@@ -1,7 +1,7 @@
-# ops digest 2026-09-29T08:10:05.491853+00:00 (last 24h)
+# ops digest 2026-09-29T08:28:13.263996+00:00 (last 24h)
 
 ## money state
-{"cash": 89.803053, "open_cost": 0.0, "equity": 89.8, "floor": 30.0, "stated": 80.0, "spend": {"date": "2026-09-29", "spent_usd": 6.4, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 73, "tier": {"1a": 0, "1b": 6.4, "1c": 0}, "ts": 1790669185.4411287, "day": "2026-09-29"}
+{"cash": 89.803053, "open_cost": 0.0, "equity": 89.8, "floor": 30.0, "stated": 80.0, "spend": {"date": "2026-09-29", "spent_usd": 6.4, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 73, "tier": {"1a": 0, "1b": 6.4, "1c": 0}, "ts": 1790670438.252447, "day": "2026-09-29"}
 
 ## arm: {"armed": true, "ts": 1790414614.1373932, "by": "owner:claude-session", "reason": "owner instruction 2026-09-26 via Claude session: do actual deals under the new limits (1 a day for new wallets, 20 for the others, 45 USD daily-loss stop)", "first_armed_ts": 1788617432.0499406, "floor_override": false, "daily_loss_override_day": null}
 ## spend today: {"date": "2026-09-29", "spent_usd": 6.4, "wallet_copies": {"0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": 1}, "wallet_copies_yesterday": {"0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1, "0x1958513132accb7dd17f2cf7beebbc165776b24e": 1, "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": 1}, "yesterday": "2026-09-28", "closed_reason": ""}
@@ -27,7 +27,7 @@ benched  0xf49614e6: 45 settled, 47% won vs 55% needed, net -12.9% on $146,299, 
 benched  0xf9168343: 58 settled, 53% won vs 47% needed, net +1.3% on $155,954, worst day -6,320, 2 of 36 exits under 10 min
 benched  0xfd3e6449: 56 settled, 66% won vs 70% needed, net -1.7% on $46,584, worst day -2,632, 10 of 15 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
 two clocks: 153 matched fills over 1.0 d, api lag p50 31.9s, chain lag p50 3.5s, chain earlier by 28.3s at the median; api-only 2, chain-only 887, replayed rows 0; CHAIN IS PRIMARY
-⏱ api lag cost, last 7d (estimate): +9.42 USD over 6363 fills at $6.40 each, +0.000 USD a fill at the median, chain earlier by 14.6s
+⏱ api lag cost, last 7d (estimate): +8.53 USD over 6366 fills at $6.40 each, +0.000 USD a fill at the median, chain earlier by 14.6s
 
 ## watcher (8 wakes in 24h)
 {"ts": 1790584403.418733, "kind": "nothing", "woke_because": "56388f05c474", "concluded": "The fault is a benign INFO ops analytics line, not an error. floor_row prints per-wallet copy statistics at price floors, and its fingerprint splits into many variants only because the normalizer keeps the literal YES/yes/no side tokens while collapsing numbers, so each token arrangement looks new. Today's b
@@ -43,11 +43,11 @@ LIVE_MAX_PER_WALLET_DAY: 20 (owner) band 1..20
 FETCH_INTERVAL: 3.0 (owner) band 2..5
 OPS_REARM_CLEAR_S: 900.0 (owner) band 600.0..1800.0
 OPS_REARM_MAX_PER_DAY: 3 (owner) band 1..3
-FORM_DAYS: 10.0 (analyst, 21.8 h left, owner 14.0): In-form replayed ROI was +8.3% to +10.8% at a 10 day window vs the 14 day rail, 
+FORM_DAYS: 10.0 (analyst, 21.5 h left, owner 14.0): In-form replayed ROI was +8.3% to +10.8% at a 10 day window vs the 14 day rail, 
 ## book B at each slice floor (raw numbers; the gate reads the one marked)
 b300 (floor $300): 7810 settled, 262 open, realized +2.2%, at their price +3.2% (net -7.6%), win rate 57%, feeds the Z gate
 b150 (floor $150): 609 settled, 57 open, realized -1.4%, at their price -0.4% (net -11.4%), win rate 58%
-b100 (floor $100): 740 settled, 110 open, realized +2.0%, at their price +3.0% (net -7.9%), win rate 55%
+b100 (floor $100): 740 settled, 112 open, realized +2.0%, at their price +3.0% (net -7.9%), win rate 55%
 ## near the Z door (34 wallets within 2 fails; 1 pass and wait)
 0x09b045ba: 1 fail(s): not a scalper at our latency (scalper: 100% of exits within 10 min; uncopyable at our latency)
 0x1985327e: 1 fail(s): not a scalper at our latency (scalper: 100% of exits within 10 min; uncopyable at our latency)
@@ -73,50 +73,38 @@ study 2026-09-27-form-c2308d97: wallets in 6 -> 6 (stay 5, enter 1, leave 1); co
 2026-09-25 after study 2026-09-25-wallet_cap-178163d7: What do the copies in wallet-day slots 4 and 5 actually earn, the ones the live cap of 3 turns away but a cap of 5 would admit? (missing: This run baselined at cap 25 rather than the live 3, so its rows cannot isolate the marginal ROI of the slot 4 and 5 copies; that needs a study framed from {cap:3} to {cap:5}.)
 2026-09-27 after study 2026-09-27-form-c2308d97: What is the untruncated 14-day form verdict for the 20 capped wallets, with no 5,500-row limit, so the 10-day window can be compared against a clean baseline rather than an already-truncated one? (missing: The data api hard-caps activity at 5,500 rows per wallet, so rows past the cap are absent from the frozen inputs and the full 14-day history cannot be reconstructed from this study.)
 ## fingerprints (30 shown)
-7a8d58f20915 x46 last 0.1h ago [open: 46 hits, no action yet] :: ERROR Network error fetching <hex>:
-34253fa6334e x9 last 0.1h ago [open: 9 hits, no action yet] :: INFO [AB-RACE] rehearsal line sent, real-money line sent
-6eca45f47973 x43 last 1.6h ago [open: 43 hits, no action yet] :: ERROR Network error fetching <hex>: Server disconnected without sending a response.
-907b728a6b72 x9 last 1.9h ago [open: 9 hits, no action yet] :: ERROR [inventory] API sync failed:
-7dfc4a226f73 x15 last 2.6h ago [open: 15 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
-54ac26fb3ff1 x295 last 2.7h ago [open: 295 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
-9d498e122ffb x18 last 3.3h ago [open: 18 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
-df29d6690f77 x3 last 5.7h ago [open: 3 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, tri
-c6d91d798e54 x26 last 7.0h ago [open: 26 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
-2497cd50ff7d x7 last 7.0h ago [open: 7 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
-eb7da12386c6 x27 last 8.1h ago [open: 27 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
-a77088f7944a x27 last 8.1h ago [open: 27 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
-d7140f640d29 x26 last 8.1h ago [open: 26 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
-59f5d5ebf4a6 x8 last 8.1h ago [open: 8 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)
-5e8145241ab5 x3 last 9.0h ago [open: 3 hits, no action yet] :: INFO [ops] push:milestone: None -> 'S'
-13ad3e5ddfe8 x4 last 9.6h ago [open: 4 hits, no action yet] :: ERROR [inventory] API sync failed: Server disconnected without sending a response.
-9d6f31d998d2 x1 last 10.4h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Loss streak is N straight losing copies with no win since it stood at N, t
-41cab7e764a5 x32 last 12.2h ago [open: 32 hits, no action yet] :: ERROR [py_clob_client_v2] request error: The read operation timed out
-6c813168939b x92 last 12.3h ago [open: 92 hits, no action yet] :: ERROR [py_clob_client_v2] request error: Server disconnected
-001dacd732e7 x2 last 14.5h ago [open: 2 hits, no action yet] :: INFO [ops] probation_held: 'S' -> 'S' | untested is not failed; the clock keeps running
-398dbb2e838a x1 last 14.8h ago [open: 1 hits, no action yet] :: ERROR [inventory] API sync failed: Client error 'S' for url 'S'
-043ee7895da4 x1 last 16.6h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Fixed exp_study.py: totals() summed copies and ROI over every studied wall
-6f12d4998994 x28 last 19.2h ago [open: 28 hits, no action yet] :: INFO [recovery] No pending orders to recover
-6b829965c182 x28 last 19.2h ago [open: 28 hits, no action yet] :: INFO Bot started. Monitoring trades...
-9d8a6d2794ec x22 last 19.2h ago [open: 22 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
-c47d62e70341 x28 last 19.2h ago [open: 28 hits, no action yet] :: INFO Received signal N, shutting down...
-a19634278c3d x1 last 19.4h ago [open: 1 hits, no action yet] :: INFO [ops] push:daily_loss: None -> 'S'
-27c57bdbc2c6 x2 last 19.6h ago [open: 2 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (head race: CTF [NN]: {'S': N, 'S': 'S'}); a set-Z fill in those b
-7da5b6289516 x7 last 20.9h ago [open: 7 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
-56388f05c474 x1 last 23.6h ago [open: 1 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N no N (n=N, trim
+7a8d58f20915 x46 last 0.4h ago [open: 46 hits, no action yet] :: ERROR Network error fetching <hex>:
+34253fa6334e x9 last 0.4h ago [open: 9 hits, no action yet] :: INFO [AB-RACE] rehearsal line sent, real-money line sent
+6eca45f47973 x43 last 1.9h ago [open: 43 hits, no action yet] :: ERROR Network error fetching <hex>: Server disconnected without sending a response.
+907b728a6b72 x9 last 2.2h ago [open: 9 hits, no action yet] :: ERROR [inventory] API sync failed:
+7dfc4a226f73 x15 last 2.9h ago [open: 15 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
+54ac26fb3ff1 x295 last 3.0h ago [open: 295 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
+9d498e122ffb x18 last 3.6h ago [open: 18 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
+df29d6690f77 x3 last 6.0h ago [open: 3 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, tri
+c6d91d798e54 x26 last 7.3h ago [open: 26 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
+2497cd50ff7d x7 last 7.3h ago [open: 7 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
+eb7da12386c6 x27 last 8.4h ago [open: 27 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
+a77088f7944a x27 last 8.4h ago [open: 27 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
+d7140f640d29 x26 last 8.4h ago [open: 26 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
+59f5d5ebf4a6 x8 last 8.4h ago [open: 8 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)
+5e8145241ab5 x3 last 9.3h ago [open: 3 hits, no action yet] :: INFO [ops] push:milestone: None -> 'S'
+13ad3e5ddfe8 x4 last 9.9h ago [open: 4 hits, no action yet] :: ERROR [inventory] API sync failed: Server disconnected without sending a response.
+9d6f31d998d2 x1 last 10.7h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Loss streak is N straight losing copies with no win since it stood at N, t
+41cab7e764a5 x32 last 12.5h ago [open: 32 hits, no action yet] :: ERROR [py_clob_client_v2] request error: The read operation timed out
+6c813168939b x92 last 12.6h ago [open: 92 hits, no action yet] :: ERROR [py_clob_client_v2] request error: Server disconnected
+001dacd732e7 x2 last 14.8h ago [open: 2 hits, no action yet] :: INFO [ops] probation_held: 'S' -> 'S' | untested is not failed; the clock keeps running
+398dbb2e838a x1 last 15.1h ago [open: 1 hits, no action yet] :: ERROR [inventory] API sync failed: Client error 'S' for url 'S'
+043ee7895da4 x1 last 16.9h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Fixed exp_study.py: totals() summed copies and ROI over every studied wall
+6f12d4998994 x28 last 19.5h ago [open: 28 hits, no action yet] :: INFO [recovery] No pending orders to recover
+6b829965c182 x28 last 19.5h ago [open: 28 hits, no action yet] :: INFO Bot started. Monitoring trades...
+9d8a6d2794ec x22 last 19.5h ago [open: 22 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
+c47d62e70341 x28 last 19.5h ago [open: 28 hits, no action yet] :: INFO Received signal N, shutting down...
+a19634278c3d x1 last 19.7h ago [open: 1 hits, no action yet] :: INFO [ops] push:daily_loss: None -> 'S'
+27c57bdbc2c6 x2 last 19.9h ago [open: 2 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (head race: CTF [NN]: {'S': N, 'S': 'S'}); a set-Z fill in those b
+7da5b6289516 x7 last 21.2h ago [open: 7 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
+56388f05c474 x1 last 23.9h ago [open: 1 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N no N (n=N, trim
 
-## ledger (30 rows)
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0x00110b8e floor 300.0", "after": "floor 300.0 (same)", "detail": "copies at $300: 300 YES +22% (n=285, trimmed +18%) · 200 yes +20% (n=358, trimmed +17%) · 150 yes +20% (n=409, trimmed +17%) · 100 yes +21% (n=491, trimmed +18%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333", "floor_before": 300.0, "floor_after": 300.0, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0x09b045ba floor 100.0", "after": "floor 100.0 (same)", "detail": "copies at $100: 300 yes +29% (n=179, trimmed +23%) · 200 yes +44% (n=242, trimmed +34%) · 150 yes +45% (n=276, trimmed +35%) · 100 YES +48% (n=319, trimmed +38%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6", "floor_before": 100.0, "floor_after": 100.0, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0x1985327e floor 100.0", "after": "floor 100.0 (same)", "detail": "copies at $100: 300 yes +32% (n=180, trimmed +26%) · 200 yes +30% (n=245, trimmed +25%) · 150 yes +35% (n=272, trimmed +29%) · 100 YES +38% (n=328, trimmed +33%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab", "floor_before": 100.0, "floor_after": 100.0, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0x3f3aa700 floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no -2% (n=344, trimmed -5%) · 200 no -1% (n=389, trimmed -3%) · 150 no -2% (n=408, trimmed -4%) · 100 no -1% (n=442, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd", "floor_before": null, "floor_after": null, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0x4980930d floor 200.0", "after": "floor 200.0 (same)", "detail": "copies at $200: 300 yes +22% (n=75, trimmed +11%) · 200 YES +24% (n=87, trimmed +14%) · 150 yes +20% (n=96, trimmed +11%) · 100 yes +17% (n=106, trimmed +8%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709", "floor_before": 200.0, "floor_after": 200.0, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0x722abb54 floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no +7% (n=168, trimmed +4%) · 200 no +4% (n=183, trimmed +0%) · 150 no +1% (n=208, trimmed -2%) · 100 no +4% (n=249, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed", "floor_before": null, "floor_after": null, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0x984ffef1 floor 150.0", "after": "floor 150.0 (same)", "detail": "copies at $150: 300 yes +28% (n=125, trimmed +23%) · 200 yes +27% (n=173, trimmed +23%) · 150 YES +29% (n=192, trimmed +24%) · 100 yes +23% (n=223, trimmed +19%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43", "floor_before": 150.0, "floor_after": 150.0, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0x9f15613e floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no +7% (n=399, trimmed +3%) · 200 no +8% (n=449, trimmed +4%) · 150 no +7% (n=483, trimmed +3%) · 100 no +6% (n=544, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3", "floor_before": null, "floor_after": null, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0xd25156e2 floor 300.0", "after": "floor 300.0 (same)", "detail": "copies at $300: 300 YES +21% (n=41, trimmed +2%) · 200 yes +12% (n=67, trimmed +0%) · 150 no +8% (n=92, trimmed -0%) · 100 yes +11% (n=111, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37", "floor_before": 300.0, "floor_after": 300.0, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0xf49614e6 floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no +2% (n=178, trimmed -3%) · 200 no -6% (n=211, trimmed -10%) · 150 no -4% (n=221, trimmed -8%) · 100 no -4% (n=228, trimmed -8%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79", "floor_before": null, "floor_after": null, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0xf9168343 floor 300.0", "after": "floor 300.0 (same)", "detail": "copies at $300: 300 YES +12% (n=104, trimmed +2%) · 200 yes +12% (n=104, trimmed +2%) · 150 yes +12% (n=104, trimmed +2%) · 100 yes +12% (n=104, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770", "floor_before": 300.0, "floor_after": 300.0, "live": false}
-{"ts": 1790583249.2116756, "day": "2026-09-28", "kind": "floor_row", "before": "0xfd3e6449 floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no -3% (n=42, trimmed -11%) · 200 no -3% (n=64, trimmed -10%) · 150 no -6% (n=88, trimmed -12%) · 100 no -1% (n=139, trimmed -6%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a", "floor_before": null, "floor_after": null, "live": false}
+## ledger (18 rows)
 {"ts": 1790594233.238564, "day": "2026-09-28", "kind": "floor_row", "before": "0x5213eb85 floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no -4% (n=292, trimmed -7%) · 200 no -3% (n=344, trimmed -7%) · 150 no +0% (n=376, trimmed -4%) · 100 no +3% (n=404, trimmed -2%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35", "floor_before": null, "floor_after": null, "live": false}
 {"ts": 1790594233.238564, "day": "2026-09-28", "kind": "floor_row", "before": "0x73653992 floor 300.0", "after": "floor 300.0 (same)", "detail": "copies at $300: 300 YES +35% (n=65, trimmed +16%) · 200 yes +31% (n=81, trimmed +15%) · 150 yes +27% (n=92, trimmed +12%) · 100 yes +27% (n=110, trimmed +12%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da", "floor_before": 300.0, "floor_after": 300.0, "live": false}
 {"ts": 1790594233.238564, "day": "2026-09-28", "kind": "floor_row", "before": "0xeef6ad0e floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no -3% (n=160, trimmed -6%) · 200 no -0% (n=261, trimmed -3%) · 150 no -1% (n=327, trimmed -3%) · 100 no -3% (n=403, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c", "floor_before": null, "floor_after": null, "live": false}
@@ -136,14 +124,7 @@ a19634278c3d x1 last 19.4h ago [open: 1 hits, no action yet] :: INFO [ops] push:
 {"ts": 1790659947.950017, "day": "2026-09-29", "kind": "floor_row", "before": "0x10658d37 floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no -6% (n=142, trimmed -11%) · 200 no -6% (n=215, trimmed -11%) · 150 no -3% (n=287, trimmed -8%) · 100 no -8% (n=374, trimmed -12%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218", "floor_before": null, "floor_after": null, "live": false}
 {"ts": 1790661617.8800063, "day": "2026-09-29", "kind": "analyst_limit", "before": "FORM_DAYS", "after": "FORM_DAYS = 10.0 until 09-30 06:00 UTC (owner 14.0)", "detail": "In-form replayed ROI was +8.3% to +10.8% at a 10 day window vs the 14 day rail, and 14 is already silently truncated by the 5500 row cap for every high-volume w", "push": "BOT"}
 
-## important lines (96)
-2026-09-28 08:16:07 ERROR Network error fetching 0x5213...6a35: 
-2026-09-28 08:16:07 ERROR Network error fetching 0x1958...b24e: 
-2026-09-28 08:20:24 INFO  [ops] floor_row: '0x00110b8e floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +22% (n=285, trimmed +18%) · 200 yes +20% (n=358, trimmed +17%) · 150 yes +20% (n=409, trimmed +17%) · 100 yes +21% (n=491, trimmed +18%); backward replay (copy-and-hold at their price, first entry, clean era)
-2026-09-28 08:23:01 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +29% (n=179, trimmed +23%) · 200 yes +44% (n=242, trimmed +34%) · 150 yes +45% (n=276, trimmed +35%) · 100 YES +48% (n=319, trimmed +38%); backward replay (copy-and-hold at their price, first entry, clean era)
-2026-09-28 08:25:33 INFO  [ops] floor_row: '0x1985327e floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +32% (n=180, trimmed +26%) · 200 yes +30% (n=245, trimmed +25%) · 150 yes +35% (n=272, trimmed +29%) · 100 YES +38% (n=328, trimmed +33%); backward replay (copy-and-hold at their price, first entry, clean era)
-2026-09-28 08:26:55 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -2% (n=344, trimmed -5%) · 200 no -1% (n=389, trimmed -3%) · 150 no -2% (n=408, trimmed -4%) · 100 no -1% (n=442, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)
-2026-09-28 08:27:17 INFO  [ops] floor_row: '0x4980930d floor 200.0' -> 'floor 200.0 (same)' | copies at $200: 300 yes +22% (n=75, trimmed +11%) · 200 YES +24% (n=87, trimmed +14%) · 150 yes +20% (n=96, trimmed +11%) · 100 yes +17% (n=106, trimmed +8%); backward replay (copy-and-hold at their price, first entry, clean era)
+## important lines (89)
 2026-09-28 08:29:21 INFO  [ops] floor_row: '0x722abb54 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +7% (n=168, trimmed +4%) · 200 no +4% (n=183, trimmed +0%) · 150 no +1% (n=208, trimmed -2%) · 100 no +4% (n=249, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)
 2026-09-28 08:30:09 INFO  [ops] floor_row: '0x984ffef1 floor 150.0' -> 'floor 150.0 (same)' | copies at $150: 300 yes +28% (n=125, trimmed +23%) · 200 yes +27% (n=173, trimmed +23%) · 150 YES +29% (n=192, trimmed +24%) · 100 yes +23% (n=223, trimmed +19%); backward replay (copy-and-hold at their price, first entry, clean era)
 2026-09-28 08:32:22 INFO  [ops] floor_row: '0x9f15613e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +7% (n=399, trimmed +3%) · 200 no +8% (n=449, trimmed +4%) · 150 no +7% (n=483, trimmed +3%) · 100 no +6% (n=544, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)
