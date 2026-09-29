@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-29T19:58:51.592773+00:00",
+ "generated": "2026-09-29T20:46:39.717889+00:00",
  "money": {
   "cash": 76.708143,
   "open_cost": 6.4,
@@ -21,7 +21,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790711667.9359915,
+  "ts": 1790714686.064416,
   "day": "2026-09-29"
  },
  "arm": {
@@ -877,7 +877,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-28T18:43:24Z-bd83",
-  "admit_scan_ts": 1790703662.0301988,
+  "admit_scan_ts": 1790714686.0664926,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 12,
   "day_pnl": -12.8,
@@ -1679,10 +1679,6 @@
   }
  ],
  "important": [
-  "2026-09-28 20:16:57 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $19.20 / no spend cap (the day stops after $45 lost)",
-  "2026-09-28 20:16:58 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
-  "2026-09-28 20:43:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-28 20:43:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-28 20:59:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-28 21:40:26 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
   "2026-09-28 21:40:44 ERROR Network error fetching 0x3f3a...e8fd: ",
@@ -1790,8 +1786,7 @@
   "2026-09-29 19:10:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 19:31:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 19:55:52 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-09-28 20:16:57 TRADE [LIVE] BUY $6.40 on 'Mouilleron-Le-Captif: Clement Tabur vs M' @ 0.5700, order 0x1360c9c164...",
-  "2026-09-28 20:16:58 TRADE [verify] FILLED: BUY 11.23 shares on 'Mouilleron-Le-Captif: Clement Tabur vs M' @ 0.5700",
+  "2026-09-29 20:44:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-28 22:31:12 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
   "2026-09-29 00:03:34 TRADE [LIVE] BUY $6.40 on 'Curitiba: Ryan Dickerson vs Jose Pereira' @ 0.4800, order 0x70c7879851...",
   "2026-09-29 00:03:38 TRADE [verify] FILLED: BUY 13.33 shares on 'Curitiba: Ryan Dickerson vs Jose Pereira' @ 0.4800",
@@ -2094,19 +2089,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790710394.457791,
-   "count": 326,
+   "last": 1790714714.8404868,
+   "count": 327,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790707514.2137258,
-    1790707514.2137258,
-    1790707874.3310478,
-    1790709074.3835921,
-    1790709074.3835921,
-    1790709074.3835921,
-    1790710394.457791,
-    1790710394.457791
+    1790714714.8404868
    ],
    "action": null,
    "action_ts": null,
