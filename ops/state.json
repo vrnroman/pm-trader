@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-29T15:02:31.021952+00:00",
+ "generated": "2026-09-29T15:53:10.765887+00:00",
  "money": {
   "cash": 76.708143,
   "open_cost": 6.4,
@@ -21,7 +21,7 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790693908.4667685,
+  "ts": 1790697170.540974,
   "day": "2026-09-29"
  },
  "arm": {
@@ -1316,15 +1316,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790609476.2704751,
-   "day": "2026-09-28",
-   "kind": "escalation_delivered",
-   "before": "routine fix",
-   "after": "sent",
-   "detail": "Fixed exp_study.py: totals() summed copies and ROI over every studied wallet instead of only the ones that pass the form",
-   "push": "BOT"
-  },
-  {
    "ts": 1790613706.1674163,
    "day": "2026-09-28",
    "kind": "form",
@@ -1708,7 +1699,6 @@
   }
  ],
  "important": [
-  "2026-09-28 15:31:17 INFO  [ops] escalation_delivered: 'routine fix' -> 'sent' | Fixed exp_study.py: totals() summed copies and ROI over every studied wallet instead of only the ones that pass the form",
   "2026-09-28 16:11:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-28 16:42:23 INFO  [ops] form: '0x5213eb85 in form' -> 'benched' | 0x5213eb85: 90 settled, 42% won vs 39% needed, net +0.5% on $44,118, worst day -2,314, 2 of 4 exits under 10 min",
   "2026-09-28 17:09:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1807,6 +1797,13 @@
   "2026-09-29 14:28:09 INFO  [ops] probation_held: '0xf49614e6 on probation (10 days on probation)' -> 'held: 0 live copy(ies) settled, under the 2 the bar needs' | untested is not failed; the clock keeps running",
   "2026-09-29 14:30:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 15:02:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-29 15:11:10 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
+  "2026-09-29 15:13:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-29 15:17:04 ERROR [inventory] API sync failed: ",
+  "2026-09-29 15:23:16 ERROR [inventory] API sync failed: ",
+  "2026-09-29 15:24:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-29 15:50:06 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-09-29 15:50:55 ERROR [inventory] API sync failed: ",
   "2026-09-28 20:16:57 TRADE [LIVE] BUY $6.40 on 'Mouilleron-Le-Captif: Clement Tabur vs M' @ 0.5700, order 0x1360c9c164...",
   "2026-09-28 20:16:58 TRADE [verify] FILLED: BUY 11.23 shares on 'Mouilleron-Le-Captif: Clement Tabur vs M' @ 0.5700",
   "2026-09-28 22:31:12 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
@@ -1819,20 +1816,6 @@
   "2026-09-29 11:46:36 TRADE [verify] FILLED: BUY 12.08 shares on 'Will the highest temperature in Houston ' @ 0.5300"
  ],
  "watcher": [
-  {
-   "ts": 1790609583.3849332,
-   "day": "2026-09-28",
-   "woke_because": "043ee7895da4",
-   "fingerprint": "043ee7895da4",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The line is the bot's own ops receipt escalation_delivered: 'routine fix' -> 'sent', reporting a fix already made to exp_study.py, an offline wallet-study script whose totals() summed copies and ROI over all studied wallets instead of only in-form ones. That is a reporting bug in the form study output the owner reads, not the money path, and grep shows exp_study.py appears exactly once in today's 13,677-line bot log (this receipt), so it is not in the live trading loop. The owner was already notified (state 'sent'), and the box is healthy: armed, chain reader current with cursor==head 94602966",
-   "confidence": 0.94,
-   "cost_usd": 0.2460995,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1790616244.8723001,
    "day": "2026-09-28",
@@ -2139,12 +2122,15 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790692267.2613015,
-   "count": 309,
+   "last": 1790695508.2381837,
+   "count": 312,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790692267.2613015
+    1790692267.2613015,
+    1790694187.4866385,
+    1790694908.0098462,
+    1790695508.2381837
    ],
    "action": null,
    "action_ts": null,
@@ -2431,12 +2417,12 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1790669040.3713632,
-   "count": 46,
+   "last": 1790697068.5422077,
+   "count": 47,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1790669040.3713632
+    1790697068.5422077
    ],
    "action": null,
    "action_ts": null,
@@ -2551,13 +2537,12 @@
   },
   "13ad3e5ddfe8": {
    "first": 1790378100.0295238,
-   "last": 1790634732.0433834,
-   "count": 4,
+   "last": 1790694788.0023031,
+   "count": 5,
    "sample": "2026-09-25 23:13:05 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
    "norm": "ERROR [inventory] API sync failed: Server disconnected without sending a response.",
    "recent": [
-    1790631685.7546887,
-    1790634732.0433834
+    1790694788.0023031
    ],
    "action": null,
    "action_ts": null,
@@ -2608,12 +2593,14 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1790662556.6232455,
-   "count": 9,
+   "last": 1790697068.5422077,
+   "count": 12,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1790662556.6232455
+    1790695028.0195007,
+    1790695508.2381837,
+    1790697068.5422077
    ],
    "action": null,
    "action_ts": null,
