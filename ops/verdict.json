@@ -1,14 +1,14 @@
 {
-    "id": "2026-09-28T18:43:24Z-bd83",
-    "ts": 1790621004,
-    "kind": "escalation",
-    "message": "Loss streak is 10 straight losing copies with no win since it stood at 3, ten days ago. Equity fell 113.26 to 91.68 over that span. Streak moved 8 to 10 today on two settled losses (0x5213eb85, 0x19585131), day loss 12.80. Arm is on, daily-loss stop 45.00, spend today 12.80, no cap breach. The loss-streak Telegram alert fires once per crossing and none appears in the last 24h ledger, so this severity never reached your phone. No guard failure, no self-disarm, digest is fresh.",
+    "id": "2026-09-29T00:42:00Z-4953",
+    "ts": 1790642520,
+    "kind": "nothing",
+    "message": "Armed, copies landing, loss streak holds at 10 and day loss at $12.80 unchanged from the already-delivered escalation, spend $19.20 stays under the $45 stop, no new guard failure or self-disarm, digest fresh.",
     "evidence": [
-        "watch: \"loss_streak\": 10, \"day_pnl\": -12.8, \"day_pnl_day\": \"2026-09-28\"",
-        "money: {\"cash\": 91.676523, \"equity\": 91.68, \"spend\": {\"spent_usd\": 12.8, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
-        "ledger: lost -6.40 on 'China Open, Qualification: Yannick Hanfm' (0x5213eb85, tier 1b)",
-        "ledger: lost -6.40 on 'Counter-Strike: Sinners vs BET-M 33 (BO3' (0x19585131, tier 1b)",
-        "push:daily_loss: \"Today's losses reach $12.80 (10% of the $91.68 bankroll).\""
+        "money: {\"armed\": true, \"equity\": 91.54, \"spend\": {\"spent_usd\": 19.2, \"daily_loss_stop_usd\": 45.0}}",
+        "watch: \"loss_streak\": 10, \"day_pnl\": -12.8, \"day_pnl_day\": \"2026-09-28\", \"guard_fail_streak\": 0",
+        "watch: \"last_escalation_id\": \"2026-09-28T18:43:24Z-bd83\", \"daily_line_sent\": true, \"daily_line_day\": \"2026-09-28\"",
+        "ledger: escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 10 straight losing copies with no win since it stood at 3, ten days ago.",
+        "ledger: TRADE [verify] FILLED: BUY 11.23 shares on 'Mouilleron-Le-Captif: Clement Tabur vs M' @ 0.5700"
     ],
     "commit": null
 }
