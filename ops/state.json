@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-29T23:38:57.198526+00:00",
+ "generated": "2026-09-30T00:28:47.759782+00:00",
  "money": {
   "cash": 76.708143,
   "open_cost": 6.4,
@@ -7,8 +7,8 @@
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
-   "date": "2026-09-29",
-   "spent_usd": 19.2,
+   "date": "2026-09-30",
+   "spent_usd": 0.0,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -21,8 +21,8 @@
    "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790725014.9609458,
-  "day": "2026-09-29"
+  "ts": 1790727853.7833712,
+  "day": "2026-09-30"
  },
  "arm": {
   "armed": true,
@@ -34,19 +34,15 @@
   "daily_loss_override_day": null
  },
  "spend": {
-  "date": "2026-09-29",
-  "spent_usd": 19.2,
-  "wallet_copies": {
+  "date": "2026-09-30",
+  "spent_usd": 0.0,
+  "wallet_copies": {},
+  "wallet_copies_yesterday": {
    "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": 1,
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1,
    "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1
   },
-  "wallet_copies_yesterday": {
-   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1,
-   "0x1958513132accb7dd17f2cf7beebbc165776b24e": 1,
-   "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": 1
-  },
-  "yesterday": "2026-09-28",
+  "yesterday": "2026-09-29",
   "closed_reason": ""
  },
  "tier": {
@@ -877,7 +873,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-28T18:43:24Z-bd83",
-  "admit_scan_ts": 1790714686.0664926,
+  "admit_scan_ts": 1790725619.8417504,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 12,
   "day_pnl": -12.8,
@@ -1662,9 +1658,6 @@
   }
  ],
  "important": [
-  "2026-09-29 00:03:33 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
-  "2026-09-29 00:03:34 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
-  "2026-09-29 00:17:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 01:09:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
   "2026-09-29 01:09:20 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Curitiba: Ryan Dickerson vs Jose Pereira' (0xf9168343, tier 1b)",
   "2026-09-29 02:30:03 INFO  [ops] floor_row: '0x19585131 floor 200.0' -> 'floor 200.0 (same)' | copies at $200: 300 yes +17% (n=66, trimmed +7%) · 200 YES +18% (n=72, trimmed +9%) · 150 yes +16% (n=75, trimmed +7%) · 100 yes +16% (n=75, trimmed +7%); backward replay (copy-and-hold at their price, first entry, clean era)",
@@ -1749,8 +1742,11 @@
   "2026-09-29 21:41:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 22:43:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 23:01:36 INFO  [ops] form: '0xf9168343 benched' -> 'in form' | 0xf9168343: 37 settled, 57% won vs 46% needed, net +3.9% on $89,138, worst day -4,052, 1 of 24 exits under 10 min",
-  "2026-09-29 00:03:34 TRADE [LIVE] BUY $6.40 on 'Curitiba: Ryan Dickerson vs Jose Pereira' @ 0.4800, order 0x70c7879851...",
-  "2026-09-29 00:03:38 TRADE [verify] FILLED: BUY 13.33 shares on 'Curitiba: Ryan Dickerson vs Jose Pereira' @ 0.4800",
+  "2026-09-29 23:46:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-29 23:46:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-30 00:10:24 ERROR Network error fetching 0x09b0...a3b6: ",
+  "2026-09-30 00:10:24 ERROR Network error fetching 0x984f...9a43: ",
+  "2026-09-30 00:24:57 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
   "2026-09-29 10:02:43 TRADE [LIVE] BUY $6.40 on 'Hangzhou Open: Daniil Medvedev vs Andrey' @ 0.3300, order 0x7f2608c097...",
   "2026-09-29 10:02:44 TRADE [verify] FILLED: BUY 19.39 shares on 'Hangzhou Open: Daniil Medvedev vs Andrey' @ 0.3300",
   "2026-09-29 11:45:14 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Houston ' @ 0.5300, order 0xa3d2d7c998...",
@@ -2036,12 +2032,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790721915.2820477,
-   "count": 329,
+   "last": 1790725635.5945616,
+   "count": 332,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790721915.2820477
+    1790725635.5945616,
+    1790725635.5945616,
+    1790725635.5945616
    ],
    "action": null,
    "action_ts": null,
@@ -2312,14 +2310,12 @@
   },
   "6eca45f47973": {
    "first": 1790342544.7724473,
-   "last": 1790663517.1300802,
-   "count": 43,
+   "last": 1790727915.996069,
+   "count": 44,
    "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
    "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
    "recent": [
-    1790663517.1300802,
-    1790663517.1300802,
-    1790663517.1300802
+    1790727915.996069
    ],
    "action": null,
    "action_ts": null,
@@ -2328,13 +2324,13 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1790700310.1187851,
-   "count": 48,
+   "last": 1790727075.7582116,
+   "count": 50,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1790697068.5422077,
-    1790700310.1187851
+    1790727075.7582116,
+    1790727075.7582116
    ],
    "action": null,
    "action_ts": null,
