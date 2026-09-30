@@ -1,9 +1,9 @@
 {
- "generated": "2026-09-30T13:42:07.939292+00:00",
+ "generated": "2026-09-30T16:58:05.038312+00:00",
  "money": {
-  "cash": 70.169423,
-  "open_cost": 12.8,
-  "equity": 82.97,
+  "cash": 81.399423,
+  "open_cost": 6.4,
+  "equity": 87.8,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 74,
   "tier": {
    "1a": 0,
-   "1b": 19.2,
+   "1b": 12.8,
    "1c": 0
   },
-  "ts": 1790775567.7338471,
+  "ts": 1790787357.1490757,
   "day": "2026-09-30"
  },
  "arm": {
@@ -55,7 +55,7 @@
    "placements": []
   },
   "1b": {
-   "open_total": 19.2,
+   "open_total": 12.8,
    "daily_date": "2026-09-30",
    "daily_volume": 6.4,
    "placements": [
@@ -72,13 +72,6 @@
      "ts": 1790682314.5353403,
      "trader": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
      "title": "Will the highest temperature in Houston be between 90-91°F o"
-    },
-    {
-     "token_id": "72641399962137431586891993679615893269400390578132672919927479201728964991062",
-     "cost": 6.4,
-     "ts": 1790769114.0903063,
-     "trader": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-     "title": "Adana: Teodora Kostovic vs Dalma Galfi"
     }
    ]
   },
@@ -875,14 +868,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 82.97,
+  "last_equity": 87.8,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-28T18:43:24Z-bd83",
-  "admit_scan_ts": 1790769300.451057,
+  "admit_scan_ts": 1790780400.546439,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 12,
   "day_pnl": -12.8,
@@ -1321,39 +1314,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790689674.615278,
-   "day": "2026-09-29",
-   "kind": "settled",
-   "before": "open $6.40",
-   "after": "paid $0.00",
-   "detail": "lost -6.40 on 'Hangzhou Open: Daniil Medvedev vs Andrey' (0x5213eb85, tier 1b)",
-   "push": null,
-   "token_id": "51356476393519450490348876445720659187108550884924368556655512845680067906411",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-   "pnl": -6.4,
-   "won": false,
-   "cost": 6.4
-  },
-  {
-   "ts": 1790689674.615278,
-   "day": "2026-09-29",
-   "kind": "push:daily_loss",
-   "before": null,
-   "after": "📉 <b>Today's losses reach $12.80</b> (10% of the $83.11 bankroll).",
-   "detail": "",
-   "push": "DEAL"
-  },
-  {
-   "ts": 1790692088.1490526,
-   "day": "2026-09-29",
-   "kind": "probation_held",
-   "before": "0xf49614e6 on probation (10 days on probation)",
-   "after": "held: 0 live copy(ies) settled, under the 2 the bar needs",
-   "detail": "untested is not failed; the clock keeps running",
-   "push": null,
-   "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79"
-  },
-  {
    "ts": 1790722844.1283362,
    "day": "2026-09-29",
    "kind": "form",
@@ -1616,23 +1576,6 @@
   }
  ],
  "important": [
-  "2026-09-29 13:47:54 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80",
-  "2026-09-29 13:47:54 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Hangzhou Open: Daniil Medvedev vs Andrey' (0x5213eb85, tier 1b)",
-  "2026-09-29 13:47:55 INFO  [ops] push:daily_loss: None -> \"📉 <b>Today's losses reach $12.80</b> (10% of the $83.11 bankroll).\"",
-  "2026-09-29 14:10:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-09-29 14:10:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-09-29 14:28:09 INFO  [ops] probation_held: '0xf49614e6 on probation (10 days on probation)' -> 'held: 0 live copy(ies) settled, under the 2 the bar needs' | untested is not failed; the clock keeps running",
-  "2026-09-29 14:30:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-29 15:02:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-29 15:11:10 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
-  "2026-09-29 15:13:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-29 15:17:04 ERROR [inventory] API sync failed: ",
-  "2026-09-29 15:23:16 ERROR [inventory] API sync failed: ",
-  "2026-09-29 15:24:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-29 15:50:06 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-09-29 15:50:55 ERROR [inventory] API sync failed: ",
-  "2026-09-29 16:45:03 ERROR Network error fetching 0x4980...5709: ",
-  "2026-09-29 16:49:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 17:04:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 17:04:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 17:31:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1710,6 +1653,12 @@
   "2026-09-30 11:57:47 INFO  [ops] floor_row: '0x73653992 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +35% (n=65, trimmed +16%) · 200 yes +31% (n=81, trimmed +15%) · 150 yes +27% (n=92, trimmed +12%) · 100 yes +27% (n=110, trimmed +12%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-09-30 11:58:17 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=157, trimmed -7%) · 200 no +1% (n=260, trimmed -2%) · 150 no -1% (n=325, trimmed -3%) · 100 no -3% (n=404, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-09-30 12:21:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-30 14:28:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-30 15:30:23 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80",
+  "2026-09-30 15:32:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-30 16:08:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-30 16:54:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-09-30 16:54:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 11:51:53 TRADE [LIVE] BUY $6.40 on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700, order 0x02dd6c6ceb...",
   "2026-09-30 11:51:54 TRADE [verify] FILLED: BUY 11.23 shares on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700"
  ],
@@ -1797,12 +1746,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1790689746.960168,
-   "count": 27,
+   "last": 1790782310.015561,
+   "count": 28,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1790689746.960168
+    1790782310.015561
    ],
    "action": null,
    "action_ts": null,
@@ -1952,13 +1901,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790771028.4472516,
-   "count": 346,
+   "last": 1790787350.5848455,
+   "count": 351,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790768026.6630547,
-    1790771028.4472516
+    1790784590.3379111,
+    1790787350.5848455,
+    1790787350.5848455
    ],
    "action": null,
    "action_ts": null,
