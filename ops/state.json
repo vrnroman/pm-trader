@@ -1,14 +1,14 @@
 {
- "generated": "2026-09-30T19:20:34.910562+00:00",
+ "generated": "2026-09-30T21:23:15.527275+00:00",
  "money": {
-  "cash": 68.482483,
-  "open_cost": 19.2,
-  "equity": 87.68,
+  "cash": 61.993963,
+  "open_cost": 25.6,
+  "equity": 87.59,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-09-30",
-   "spent_usd": 19.2,
+   "spent_usd": 25.6,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 74,
   "tier": {
    "1a": 0,
-   "1b": 25.6,
+   "1b": 32.0,
    "1c": 0
   },
-  "ts": 1790795827.9294891,
+  "ts": 1790803384.792902,
   "day": "2026-09-30"
  },
  "arm": {
@@ -35,10 +35,10 @@
  },
  "spend": {
   "date": "2026-09-30",
-  "spent_usd": 19.2,
+  "spent_usd": 25.6,
   "wallet_copies": {
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1,
-   "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1,
+   "0xd25156e222c9b907b128e27c36821fdb41db4d37": 2,
    "0x1958513132accb7dd17f2cf7beebbc165776b24e": 1
   },
   "wallet_copies_yesterday": {
@@ -57,9 +57,9 @@
    "placements": []
   },
   "1b": {
-   "open_total": 25.6,
+   "open_total": 32.0,
    "daily_date": "2026-09-30",
-   "daily_volume": 19.200000000000003,
+   "daily_volume": 25.6,
    "placements": [
     {
      "token_id": "87131648918137474349304257527344538579233235348393719175219550429557466113538",
@@ -88,6 +88,13 @@
      "ts": 1790795170.0718288,
      "trader": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
      "title": "Counter-Strike: BIG vs fnatic (BO3) - Stake Ranked Episode 4"
+    },
+    {
+     "token_id": "67216007032936380241244942174899718620023584237775861961574250684264721348731",
+     "cost": 6.4,
+     "ts": 1790797651.7293382,
+     "trader": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+     "title": "Will the highest temperature in Manila be 34°C on October 2?"
     }
    ]
   },
@@ -884,14 +891,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 87.68,
+  "last_equity": 87.59,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-28T18:43:24Z-bd83",
-  "admit_scan_ts": 1790791364.3794358,
+  "admit_scan_ts": 1790802453.4297876,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 12,
   "day_pnl": -12.8,
@@ -1592,9 +1599,6 @@
   }
  ],
  "important": [
-  "2026-09-29 19:31:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-29 19:55:52 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-09-29 20:44:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 21:41:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 22:43:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-29 23:01:36 INFO  [ops] form: '0xf9168343 benched' -> 'in form' | 0xf9168343: 37 settled, 57% won vs 46% needed, net +3.9% on $89,138, worst day -4,052, 1 of 24 exits under 10 min",
@@ -1677,12 +1681,18 @@
   "2026-09-30 18:14:02 ERROR Network error fetching 0x7365...64da: Server disconnected without sending a response.",
   "2026-09-30 19:06:08 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $19.20 / no spend cap (the day stops after $45 lost)",
   "2026-09-30 19:06:10 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $25.60 / $200.00",
+  "2026-09-30 19:47:30 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $25.60 / no spend cap (the day stops after $45 lost)",
+  "2026-09-30 19:47:31 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $32.00 / $200.00",
+  "2026-09-30 20:30:02 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-09-30 20:52:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 11:51:53 TRADE [LIVE] BUY $6.40 on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700, order 0x02dd6c6ceb...",
   "2026-09-30 11:51:54 TRADE [verify] FILLED: BUY 11.23 shares on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700",
   "2026-09-30 17:32:54 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Paris be' @ 0.5300, order 0xbd29a39196...",
   "2026-09-30 17:32:54 TRADE [verify] FILLED: BUY 12.08 shares on 'Will the highest temperature in Paris be' @ 0.5300",
   "2026-09-30 19:06:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: BIG vs fnatic (BO3) - St' @ 0.6500, order 0xaa7fd161df...",
-  "2026-09-30 19:06:10 TRADE [verify] FILLED: BUY 9.85 shares on 'Counter-Strike: BIG vs fnatic (BO3) - St' @ 0.6500"
+  "2026-09-30 19:06:10 TRADE [verify] FILLED: BUY 9.85 shares on 'Counter-Strike: BIG vs fnatic (BO3) - St' @ 0.6500",
+  "2026-09-30 19:47:31 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Manila b' @ 0.7300, order 0x9b8fabf985...",
+  "2026-09-30 19:47:32 TRADE [verify] FILLED: BUY 8.77 shares on 'Will the highest temperature in Manila b' @ 0.7300"
  ],
  "watcher": [
   {
@@ -1712,12 +1722,13 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1790795273.0423205,
-   "count": 32,
+   "last": 1790797674.6055386,
+   "count": 33,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1790795273.0423205
+    1790795273.0423205,
+    1790797674.6055386
    ],
    "action": null,
    "action_ts": null,
@@ -1726,12 +1737,13 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1790795273.0423205,
-   "count": 32,
+   "last": 1790797674.6055386,
+   "count": 33,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1790795273.0423205
+    1790795273.0423205,
+    1790797674.6055386
    ],
    "action": null,
    "action_ts": null,
@@ -1740,12 +1752,13 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1790795273.0423205,
-   "count": 31,
+   "last": 1790797674.6055386,
+   "count": 32,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1790795273.0423205
+    1790795273.0423205,
+    1790797674.6055386
    ],
    "action": null,
    "action_ts": null,
@@ -1923,14 +1936,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790787350.5848455,
-   "count": 351,
+   "last": 1790801636.8439188,
+   "count": 352,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790784590.3379111,
-    1790787350.5848455,
-    1790787350.5848455
+    1790801636.8439188
    ],
    "action": null,
    "action_ts": null,
@@ -2468,12 +2479,13 @@
   },
   "59f5d5ebf4a6": {
    "first": 1790415658.8132656,
-   "last": 1790795273.0423205,
-   "count": 13,
+   "last": 1790797674.6055386,
+   "count": 14,
    "sample": "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)",
    "recent": [
-    1790795273.0423205
+    1790795273.0423205,
+    1790797674.6055386
    ],
    "action": null,
    "action_ts": null,
@@ -2654,12 +2666,12 @@
   },
   "398dbb2e838a": {
    "first": 1790616244.8723001,
-   "last": 1790788191.416192,
-   "count": 2,
+   "last": 1790800316.0909545,
+   "count": 3,
    "sample": "2026-09-28 17:24:04 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
    "norm": "ERROR [inventory] API sync failed: Client error 'S' for url 'S'",
    "recent": [
-    1790788191.416192
+    1790800316.0909545
    ],
    "action": null,
    "action_ts": null,
