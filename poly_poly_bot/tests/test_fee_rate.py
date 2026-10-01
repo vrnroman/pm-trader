@@ -58,6 +58,13 @@ def test_a_raising_client_is_none_not_a_crash(env, monkeypatch):
     assert fr.fee_bps("T", now=1.0) is None
 
 
+def test_a_raising_injected_reader_is_none_too(env, monkeypatch):
+    def boom(tok):
+        raise RuntimeError("502")
+    monkeypatch.setattr(fr, "reader", boom)
+    assert fr.fee_bps("T", now=1.0) is None
+
+
 def test_the_effective_price_and_break_even_read_like_the_real_fill():
     # The 10-01 Safiullin fill: 13.33 shares at 0.48 for $6.56 paid on a $6.40 order.
     assert fr.effective_price(0.90, 250) == pytest.approx(0.9225)

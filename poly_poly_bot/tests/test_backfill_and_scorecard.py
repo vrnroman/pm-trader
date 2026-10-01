@@ -53,6 +53,18 @@ def test_backfill_rows_are_the_unbooked_wins_dated_at_the_payout():
     assert r["cost"] == 6.56 and r["payout"] == 13.33
 
 
+def test_a_win_with_no_followed_wallet_behind_it_is_not_a_copy():
+    """The canary and the owner's own bets on the same wallet are wins, not
+    copies: left out and said (verifier, s-k7m2qa round 3)."""
+    hand = rm.MarketResult(condition_id="0xhand", title="United Russia", wallet="", first_buy_ts=1790600000,
+                           paid_usd=50.0, paid_out_usd=0.0, sold_usd=53.33)
+    deal = rm.Deal(ts=1790600000, kind="BUY", title="United Russia", shares=66.0, price=0.75, usd=-50.0,
+                   condition_id="0xhand", asset="888", wallet="")
+    skipped = []
+    rows = ow.backfill_rows([deal], [hand], already=set(), skipped_out=skipped)
+    assert rows == [] and len(skipped) == 1 and skipped[0]["pnl"] == pytest.approx(3.33, abs=0.01)
+
+
 def test_a_win_the_ledger_already_booked_is_not_backfilled():
     assert ow.backfill_rows(_deals(), _markets(), already={TOK}) == []
 

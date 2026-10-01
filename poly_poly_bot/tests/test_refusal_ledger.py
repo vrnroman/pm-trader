@@ -18,6 +18,7 @@ class Pos:
         self.closed = won is not None
         self.won = won
         self.refunded = refunded
+        self.copy_id = f"{opened}-{token}"
 
 
 def _skip(ts, reason, token="TOK", trader=W, price=0.5):
@@ -78,7 +79,23 @@ def test_a_refusal_without_a_twin_is_counted_not_dropped():
     assert by["drift"]["n"] == 1 and by["drift"]["settled"] == 0
     assert by["floor"]["n"] == 1 and by["floor"]["settled"] == 0
     text = rl.render(rows, days=7, stake_usd=6.4, n_refusals=2)
-    assert "0 settled twins yet" in text and "2 refusals, 0 with a settled paper twin" in text
+    assert "0 settled twins yet" in text and "2 refusals, 0 distinct settled paper twins" in text
+
+
+def test_one_paper_copy_counts_once_however_many_refusals_point_at_it():
+    """Ten retries of one refused trade are one outcome, not ten (verifier,
+    s-k7m2qa round 3: 742 'twins' were 252 copies)."""
+    ref = [{"ts": T + i, "trader": W, "token": "TOK", "reason": "r", "cls": "drift", "price": 0.5, "title": "m"}
+           for i in range(10)]
+    pos = Pos(W, "TOK", T + 60, 0.5, won=True)
+    pos.copy_id = "tx-TOK"
+    rows = rl.table(rl.join(ref, [pos], []), stake_usd=6.4)
+    assert rows[0]["n"] == 10 and rows[0]["settled"] == 1 and rows[0]["won"] == 1 and rows[0]["repeats"] == 9
+    assert rows[0]["net_their"] == pytest.approx(6.4, abs=0.01)
+    pw = rl.per_wallet(rl.join(ref, [pos], []), stake_usd=6.4)
+    assert pw[W]["settled"] == 1 and pw[W]["repeats"] == 9
+    text = rl.render(rows, days=7, stake_usd=6.4, n_refusals=10)
+    assert "1 distinct settled paper twins (9 repeat refusals of the same copy folded in)" in text
 
 
 def test_a_refunded_twin_is_not_a_settlement():

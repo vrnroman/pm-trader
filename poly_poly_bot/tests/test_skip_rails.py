@@ -60,6 +60,14 @@ def test_an_unread_fee_does_not_refuse(monkeypatch):
     assert "fee" not in (d.reason or "")
 
 
+def test_a_raising_fee_read_does_not_refuse_the_trade(monkeypatch):
+    def boom(tok):
+        raise RuntimeError("502")
+    monkeypatch.setattr(fee_rate, "fee_bps", boom)
+    d = trm._evaluate_tiered_trade_with_state(_trade(price=0.89), "1b", trm.TierExposure(), _cfg(0.90))
+    assert "fee" not in (d.reason or "")
+
+
 def test_a_sell_is_never_fee_capped(monkeypatch):
     monkeypatch.setattr(fee_rate, "fee_bps", lambda tok: pytest.fail("a SELL asked for the fee"))
     d = trm._evaluate_tiered_trade_with_state(_trade(price=0.89, side="SELL"), "1b", trm.TierExposure(), _cfg(0.90))

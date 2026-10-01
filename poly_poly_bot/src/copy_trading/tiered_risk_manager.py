@@ -248,7 +248,10 @@ def _evaluate_tiered_trade_with_state(
         # a 2.5%-fee market costs 0.912 of a dollar that pays 1.00 (owner,
         # 2026-10-01: "if price is 0.99 and even if we win we lose on fees").
         from src.copy_trading import fee_rate
-        bps = fee_rate.fee_bps(trade.token_id)
+        try:
+            bps = fee_rate.fee_bps(trade.token_id)
+        except Exception:  # noqa: BLE001  unread is not a reason to refuse
+            bps = None
         eff = fee_rate.effective_price(trade.price, bps)
         if bps and eff > cfg.max_price:
             return skip(f"Price {trade.price:.4f} + {bps / 100:.1f}% fee = {eff:.4f} > tier {tier} max {cfg.max_price}")

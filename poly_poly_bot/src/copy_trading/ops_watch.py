@@ -956,7 +956,8 @@ def probation_wallets() -> set:
 # Backfill: the wins Polymarket paid before the ledger could see them
 # --------------------------------------------------------------------------- #
 
-def backfill_rows(deals: list, markets: list, *, already: set) -> list[dict]:
+def backfill_rows(deals: list, markets: list, *, already: set,
+                  skipped_out: Optional[list] = None) -> list[dict]:
     """The settled rows the ledger is missing: every WON market since live
     trading started whose token the ledger has not booked, with the cost
     paid, the cash back, the followed wallet and the payout's own timestamp.
@@ -979,6 +980,14 @@ def backfill_rows(deals: list, markets: list, *, already: set) -> list[dict]:
             continue
         paid_ts = max([d.ts for d in ds if d.kind in ("PAYOUT", "SELL")] or [m.first_buy_ts])
         wallet = (m.wallet or next((d.wallet for d in buys if d.wallet), "") or "").lower()
+        if not wallet.startswith("0x") or len(wallet) != 42:
+            # Not a copy: the canary, or a bet the owner placed by hand on
+            # the same wallet. The ledger judges followed wallets; these
+            # have none behind them (the verifier, s-k7m2qa round 3).
+            if skipped_out is not None:
+                skipped_out.append({"condition_id": m.condition_id, "title": m.title, "wallet": wallet,
+                                    "pnl": round(float(m.pnl), 2)})
+            continue
         payout = round(float(m.paid_out_usd) + float(m.sold_usd), 2)
         out.append({"token_id": token, "wallet": wallet, "cost": round(float(m.paid_usd), 2),
                     "payout": payout, "title": m.title or "", "ts": float(paid_ts),

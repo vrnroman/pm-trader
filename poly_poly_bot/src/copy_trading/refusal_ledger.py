@@ -138,6 +138,7 @@ def join(refusals: list[dict], b_positions: Iterable, shadow_rows: Iterable[dict
             if dt <= QUOTE_WINDOW_S and (quote is None or dt < abs(float(quote.get("their_ts") or 0.0) - r["ts"])):
                 quote = q
         row = dict(r)
+        row["copy_id"] = str(getattr(pos, "copy_id", "") or "") if pos is not None else ""
         row["settled"] = bool(pos is not None and getattr(pos, "closed", False)
                               and getattr(pos, "won", None) is not None and not getattr(pos, "refunded", False))
         row["won"] = bool(getattr(pos, "won", False)) if row["settled"] else None
@@ -156,14 +157,27 @@ def _roi(won: bool, price: Optional[float]) -> Optional[float]:
 def table(joined: list[dict], *, stake_usd: float) -> list[dict]:
     """Per class: refusals, joined, settled, won, net at their price and at
     our quote (dollars at ``stake_usd`` per copy), quoted (how many had a
-    shadow quote). Sorted by refusals, most first."""
+    shadow quote). Sorted by refusals, most first.
+
+    One paper copy counts ONCE per class however many refusal rows point at
+    it: a trade refused on ten retries, or offered by ten wallets, is one
+    outcome, not ten (the verifier, s-k7m2qa round 3: 742 "settled twins"
+    were 252 copies, one counted 34 times). ``repeats`` says how many rows
+    folded into an earlier one."""
     agg: dict = {}
+    seen: dict = {}
     for r in joined:
         a = agg.setdefault(r["cls"], {"cls": r["cls"], "n": 0, "settled": 0, "won": 0, "quoted": 0,
-                                       "net_their": 0.0, "net_our": 0.0, "settled_quoted": 0})
+                                       "net_their": 0.0, "net_our": 0.0, "settled_quoted": 0, "repeats": 0})
         a["n"] += 1
         if not r["settled"]:
             continue
+        cid = r.get("copy_id") or ""
+        key = (r["cls"], cid)
+        if cid and key in seen:
+            a["repeats"] += 1
+            continue
+        seen[key] = True
         a["settled"] += 1
         a["won"] += 1 if r["won"] else 0
         rt = _roi(r["won"], r["their_price"])
@@ -186,12 +200,18 @@ def per_wallet(joined: list[dict], *, stake_usd: float) -> dict:
     """Per followed wallet: refusals, settled twins, won, net at their price
     (book B's price, their price plus one percent) at ``stake_usd`` a copy."""
     out: dict = {}
+    seen: set = set()
     for r in joined:
         w = r.get("trader") or "?"
-        a = out.setdefault(w, {"wallet": w, "n": 0, "settled": 0, "won": 0, "net_their": 0.0})
+        a = out.setdefault(w, {"wallet": w, "n": 0, "settled": 0, "won": 0, "net_their": 0.0, "repeats": 0})
         a["n"] += 1
         if not r.get("settled"):
             continue
+        cid = r.get("copy_id") or ""
+        if cid and (w, cid) in seen:
+            a["repeats"] += 1
+            continue
+        seen.add((w, cid))
         a["settled"] += 1
         a["won"] += 1 if r.get("won") else 0
         rt = _roi(bool(r.get("won")), r.get("their_price"))
@@ -207,7 +227,7 @@ def render(rows: list[dict], *, days: float, stake_usd: float, n_refusals: int) 
         return (f"🧾 <b>Refusals, last {days:.0f}d</b>: none recorded. "
                 f"<i>Market-quality refusals are written from 2026-10-01; older ones were retries only.</i>")
     lines = [f"🧾 <b>Refusals, last {days:.0f}d</b>  <i>what each 'no' would have done, "
-             f"at ${stake_usd:.2f} a copy</i>",
+             f"at ${stake_usd:.2f} a copy; a paper copy counts once per class</i>",
              "<i>class · refused · settled paper twins · won · net at their price · net at OUR quote (n quoted)</i>"]
     for a in rows:
         if a["settled"]:
@@ -217,7 +237,9 @@ def render(rows: list[dict], *, days: float, stake_usd: float, n_refusals: int) 
         else:
             lines.append(f"  <b>{a['cls']}</b> · {a['n']} · 0 settled twins yet")
     joined = sum(a["settled"] for a in rows)
-    lines.append(f"<i>{n_refusals} refusals, {joined} with a settled paper twin. A positive net at our quote "
+    reps = sum(a.get("repeats", 0) for a in rows)
+    lines.append(f"<i>{n_refusals} refusals, {joined} distinct settled paper twins"
+                 f"{f' ({reps} repeat refusals of the same copy folded in)' if reps else ''}. A positive net at our quote "
                  f"is a rail costing money; negative is the rail earning its keep. "
                  f"Argue the rails from this table, not from the config comment that set them.</i>")
     return "\n".join(lines)

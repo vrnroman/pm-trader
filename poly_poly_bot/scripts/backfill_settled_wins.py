@@ -50,9 +50,13 @@ def main(argv: list[str]) -> int:
     deals, _other = real_money.parse_deals(activity, since_ts=live_ts)
     real_money.attribute_wallets(deals, orders)
     already = set(ops_watch._read_json(ops_watch._p(ops_watch.STATE_FILE)).get("settled_tokens") or [])
-    rows = ops_watch.backfill_rows(deals, book.markets, already=already)
+    skipped: list = []
+    rows = ops_watch.backfill_rows(deals, book.markets, already=already, skipped_out=skipped)
     total = round(sum(r["payout"] - r["cost"] for r in rows), 2)
-    print(f"{len(rows)} won market(s) to backfill, net {total:+.2f}; already booked: {len(already)}")
+    print(f"{len(rows)} won market(s) to backfill, net {total:+.2f}; already booked: {len(already)}; "
+          f"not copies (left out): {len(skipped)}")
+    for s_ in skipped:
+        print(f"  left out: {s_['title'][:50]} ({s_['wallet'] or 'no wallet'}, {s_['pnl']:+.2f})")
     for r in rows:
         print(f"  {time.strftime('%Y-%m-%d %H:%M', time.gmtime(r['ts']))}  {r['wallet'][:10]:10}  "
               f"${r['cost']:.2f} -> ${r['payout']:.2f}  {r['title'][:50]}")

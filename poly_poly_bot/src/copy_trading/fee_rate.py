@@ -79,7 +79,11 @@ def _read_from_exchange(token_id: str) -> Optional[int]:
     """One public GET; None on any failure."""
     global _client
     if reader is not None:
-        return reader(token_id)
+        try:
+            return reader(token_id)
+        except Exception as exc:  # noqa: BLE001
+            logger.warn(f"[fee] injected reader failed for {str(token_id)[:12]}: {exc}")
+            return None
     try:
         if _client is None:
             from py_clob_client_v2.client import ClobClient
