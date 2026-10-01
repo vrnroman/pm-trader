@@ -49,15 +49,18 @@ def _resolved(ts=1790831823.0, cost=6.4, tok="555"):
             "title": "Hangzhou Open: Daniil Medvedev vs Andrey Rublev", "why": "resolved"}
 
 
-def _buy(ts=1790831823, tok=TOK, cid=CID, usdc=6.56475):
+def _buy(ts=1790831823, tok=TOK, cid=CID, usdc=6.56475, oi=0):
     return {"timestamp": ts, "conditionId": cid, "type": "TRADE", "size": 13.33, "usdcSize": usdc,
-            "price": 0.48, "asset": tok, "side": "BUY", "title": "China Open"}
+            "price": 0.48, "asset": tok, "side": "BUY", "outcomeIndex": oi, "title": "China Open"}
 
 
-def _redeem(ts=1790842451, cid=CID, usdc=13.33):
-    # The real row: no asset, no side, the condition and the cash.
-    return {"timestamp": ts, "conditionId": cid, "type": "REDEEM", "size": 13.33,
-            "usdcSize": usdc, "price": 0, "asset": "", "side": "", "title": "China Open"}
+def _redeem(ts=1790842451, cid=CID, usdc=13.33, oi=0):
+    # The real row: no asset, no side, the condition, the outcome index and the cash.
+    row = {"timestamp": ts, "conditionId": cid, "type": "REDEEM", "size": 13.33,
+           "usdcSize": usdc, "price": 0, "asset": "", "side": "", "title": "China Open"}
+    if oi is not None:
+        row["outcomeIndex"] = oi
+    return row
 
 
 def _sell(ts=1790842451, tok=TOK, cid=CID, usdc=9.1):
@@ -90,6 +93,23 @@ def test_a_redeem_before_the_placement_is_not_this_rows_payout():
 
 def test_a_token_we_never_bought_on_the_api_cannot_be_attributed():
     assert ow.payout_from_activity("999", 1790831823.0, [_buy(), _redeem()]) is None
+
+
+def test_both_sides_of_one_condition_do_not_share_a_payout():
+    """Two followed wallets on opposite sides of one match: one REDEEM row
+    for the winner. The loser's token must not read as paid (verifier,
+    s-k7m2qa, finding 1)."""
+    rows = [_buy(tok=TOK, oi=0), _buy(tok="999", oi=1), _redeem(oi=0, usdc=13.33)]
+    assert ow.payout_from_activity(TOK, 1790831823.0, rows) == 13.33
+    assert ow.payout_from_activity("999", 1790831823.0, rows) is None
+
+
+def test_a_redeem_without_an_outcome_index_is_held_when_two_of_our_tokens_share_the_condition():
+    rows = [_buy(tok=TOK, oi=0), _buy(tok="999", oi=1), _redeem(oi=None, usdc=13.33)]
+    assert ow.payout_from_activity(TOK, 1790831823.0, rows) is None
+    assert ow.payout_from_activity("999", 1790831823.0, rows) is None
+    # and attributed when the token is the only one we hold on the condition
+    assert ow.payout_from_activity(TOK, 1790831823.0, [_buy(tok=TOK, oi=0), _redeem(oi=None)]) == 13.33
 
 
 def test_a_zero_redeem_is_a_found_loss_not_a_hold():
@@ -146,6 +166,33 @@ def test_an_unreadable_activity_holds_every_gone_row_and_still_books_the_chain(e
     st = _ledger(env, "settled")
     assert st[0]["token_id"] == "555" and st[0]["won"] is False
     assert "unreadable" in _ledger(env, "settle_pending")[0]["after"]
+
+
+def test_a_resolved_row_the_chain_list_does_not_carry_is_held_not_booked_at_zero(env):
+    """The latent $0 trap (verifier, finding 5): unknown is not zero on the
+    chain path either."""
+    out = ow.settle_released([_resolved(tok="555")], [], fetch_activity=lambda since: [],
+                             equity=88.0, stated=80.0, floor=30.0, send=None, now=1790842500.0)
+    assert out["booked"] == 0 and out["pending"] == 1
+    assert _ledger(env, "settled") == []
+
+
+def test_booked_counts_rows_written_not_rows_offered(env):
+    act = [_buy(), _redeem()]
+    a = ow.settle_released([_gone()], [], fetch_activity=lambda since: act,
+                           equity=88.0, stated=80.0, floor=30.0, send=None, now=1790842500.0)
+    b = ow.settle_released([_gone()], [], fetch_activity=lambda since: act,
+                           equity=88.0, stated=80.0, floor=30.0, send=None, now=1790842800.0)
+    assert a["booked"] == 1 and b["booked"] == 0
+
+
+def test_a_corrupt_pending_file_is_said_and_a_bad_said_map_does_not_raise(env):
+    (env / ow.PENDING_FILE).write_text("{not json")
+    assert ow.pending_rows() == []
+    (env / ow.PENDING_FILE).write_text(json.dumps({"rows": [_gone()], "said": 5}))
+    out = ow.settle_released([], [], fetch_activity=lambda since: [_buy()],
+                             equity=88.0, stated=80.0, floor=30.0, send=None, now=1790842500.0)
+    assert out["pending"] == 1
 
 
 def test_a_raising_activity_reader_is_a_hold_not_a_crash(env):

@@ -220,28 +220,43 @@ PENDING_SAID_EVERY_S = 24 * 3600.0
 
 def payout_from_activity(token_id: str, since_ts: float, rows: list) -> Optional[float]:
     """What Polymarket paid the proxy wallet for ``token_id`` since the row
-    was placed, from the Data API activity rows. None means not found yet.
+    was placed, from the Data API activity rows. None means not found yet,
+    or not attributable.
 
-    A REDEEM row carries no token id, only the condition; our own BUY of
-    the token (asset == token_id) names the condition, so the payout is the
-    REDEEMs of that condition plus our SELLs of the token, from ``since_ts``
-    minus a slack. A token this wallet never bought on the api cannot be
-    attributed and stays None.
+    A REDEEM row carries no token id, only the condition and the outcome
+    index; our own BUY of the token (asset == token_id) names both, so the
+    payout is the REDEEMs of that condition AND outcome plus our SELLs of
+    the token, from ``since_ts`` minus a slack. A REDEEM without an outcome
+    index is attributed only when the token is the one outcome of that
+    condition we ever bought; two of our tokens on one condition (both
+    sides of a tennis match, from two followed wallets) otherwise share the
+    row and both would read as paid (verifier, s-k7m2qa). A token this
+    wallet never bought on the api cannot be attributed and stays None.
     """
     tok = str(token_id or "")
     if not tok:
         return None
     floor = float(since_ts or 0.0) - PAYOUT_MATCH_SLACK_S
     cid = ""
+    oi: Optional[int] = None
+    ours_on_cid: set = set()
     for r in rows or []:
-        if not isinstance(r, dict):
+        if not isinstance(r, dict) or str(r.get("type") or "").upper() != "TRADE":
             continue
-        if str(r.get("type") or "").upper() == "TRADE" and str(r.get("asset") or "") == tok:
+        if str(r.get("side") or "").upper() != "BUY":
+            continue
+        if str(r.get("asset") or "") == tok and not cid:
             cid = str(r.get("conditionId") or "")
-            if cid:
-                break
+            try:
+                oi = int(r.get("outcomeIndex")) if r.get("outcomeIndex") is not None else None
+            except (TypeError, ValueError):
+                oi = None
     if not cid:
         return None
+    for r in rows or []:
+        if (isinstance(r, dict) and str(r.get("type") or "").upper() == "TRADE"
+                and str(r.get("conditionId") or "") == cid and r.get("asset")):
+            ours_on_cid.add(str(r.get("asset")))
     paid = 0.0
     found = False
     for r in rows or []:
@@ -255,6 +270,16 @@ def payout_from_activity(token_id: str, since_ts: float, rows: list) -> Optional
             continue
         typ = str(r.get("type") or "").upper()
         if typ == "REDEEM" and str(r.get("conditionId") or "") == cid:
+            r_oi = r.get("outcomeIndex")
+            try:
+                r_oi = int(r_oi) if r_oi is not None else None
+            except (TypeError, ValueError):
+                r_oi = None
+            if r_oi is not None and oi is not None:
+                if r_oi != oi:
+                    continue          # the other side's payout, not this token's
+            elif len(ours_on_cid) > 1:
+                return None           # shared row, no index to split it: hold
             paid += float(r.get("usdcSize") or 0.0)
             found = True
         elif (typ == "TRADE" and str(r.get("side") or "").upper() == "SELL"
@@ -303,18 +328,31 @@ def aggregate_released(rows: list, value_of, *, payout_of_gone=None,
         else:
             payout = payout_of_gone(tok, a["ts"]) if payout_of_gone is not None else None
             title = a["title"]
-            if payout is None:
-                if pending_out is not None:
-                    pending_out.extend(a["rows"])
-                continue
+        if payout is None:
+            # Unknown is not zero, on either path: held for the next pass.
+            if pending_out is not None:
+                pending_out.extend(a["rows"])
+            continue
         out.append(Settlement(token_id=tok, wallet=a["trader"], cost=round(a["cost"], 2),
                               payout=float(payout or 0.0), tier=a["tier"], title=a["title"] or str(title or "")))
     return out
 
 
 def pending_rows() -> list:
-    """Released rows still waiting for their payout to show in the activity."""
-    d = _read_json(_p(PENDING_FILE))
+    """Released rows still waiting for their payout to show in the activity.
+    A file that exists and will not parse is said: the rows in it were
+    released once and cannot be released again."""
+    path = _p(PENDING_FILE)
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                d = json.load(f)
+        except (OSError, ValueError) as exc:
+            logger.error(f"[ops] settle-pending.json unreadable ({exc}): held settlements may be lost; "
+                         f"check /real against the ledger")
+            return []
+    else:
+        d = {}
     rows = d.get("rows") if isinstance(d, dict) else None
     return [r for r in (rows or []) if isinstance(r, dict)]
 
@@ -344,7 +382,9 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
                     break
     if value_of is None:
         def value_of(tok, _bt=by_tok):
-            return ((float(_pv(_bt[tok])) if tok in _bt else 0.0), (_bt.get(tok) or {}).get("title"))
+            # A token the chain's list does not carry has no price here:
+            # None holds it rather than booking a $0 loss.
+            return ((float(_pv(_bt[tok])) if tok in _bt else None), (_bt.get(tok) or {}).get("title"))
     held = pending_rows()
     rows = list(released_rows or []) + held
     gone = [r for r in rows if r.get("why") == "gone"]
@@ -368,8 +408,11 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
         # No activity read: book what the chain can price, hold every gone row.
         settled = aggregate_released([r for r in rows if r.get("why") == "resolved"], value_of)
         pending = gone
+    booked = 0
     if settled:
+        before = set(_read_json(_p(STATE_FILE)).get("settled_tokens") or [])
         record_settlements(settled, equity=equity, stated=stated, floor=floor, send=send, now=now)
+        booked = sum(1 for s in settled if s.token_id and s.token_id not in before)
     # Dedupe the held rows by token (two passes can release the same row
     # twice when the exposure state is rewritten) and keep them for the
     # next pass.
@@ -382,7 +425,8 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
         seen.add(tok)
         uniq.append(r)
     d = _read_json(_p(PENDING_FILE))
-    said = dict(d.get("said") or {}) if isinstance(d, dict) else {}
+    said = d.get("said") if isinstance(d, dict) else None
+    said = dict(said) if isinstance(said, dict) else {}
     for r in uniq:
         tok = str(r.get("token_id") or "")
         last = float(said.get(tok) or 0.0)
@@ -393,7 +437,7 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
                     now=now, extra={"token_id": tok, "wallet": str(r.get("trader") or "").lower()})
             said[tok] = now
     _write_json(_p(PENDING_FILE), {"rows": uniq, "said": {k: v for k, v in said.items() if k in seen}, "ts": now})
-    return {"booked": len(settled), "pending": len(uniq), "activity_ok": activity_ok}
+    return {"booked": booked, "pending": len(uniq), "activity_ok": activity_ok}
 
 
 def record_settlements(settled: list[Settlement], *, equity: Optional[float],
