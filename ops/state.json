@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-01T13:13:07.009673+00:00",
+ "generated": "2026-10-01T14:44:55.333497+00:00",
  "money": {
   "cash": 68.759213,
   "open_cost": 19.2,
@@ -21,7 +21,7 @@
    "1b": 32.0,
    "1c": 0
   },
-  "ts": 1790860183.5065374,
+  "ts": 1790865864.2827678,
   "day": "2026-10-01"
  },
  "arm": {
@@ -104,52 +104,6 @@
   }
  },
  "zset": {
-  "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": {
-   "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
-   "tier": "1b",
-   "ts": 1786889554.1197178,
-   "source": "gate",
-   "floor_row": {
-    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790846453.6077092,
-    "n_acts": 4000,
-    "n_resolved_markets": 593,
-    "era": 1784976482.215206,
-    "bars": {
-     "min_n": 15,
-     "min_roi": 0.1,
-     "trimmed_min": 0.0
-    },
-    "at": {
-     "300": {
-      "n": 353,
-      "roi": -0.0563,
-      "trimmed": -0.0849,
-      "ok": false
-     },
-     "200": {
-      "n": 401,
-      "roi": -0.0609,
-      "trimmed": -0.0861,
-      "ok": false
-     },
-     "150": {
-      "n": 419,
-      "roi": -0.0729,
-      "trimmed": -0.0976,
-      "ok": false
-     },
-     "100": {
-      "n": 454,
-      "roi": -0.0647,
-      "trimmed": -0.0875,
-      "ok": false
-     }
-    },
-    "chosen": null
-   },
-   "floor_usd": null
-  },
   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
    "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
    "tier": "1b",
@@ -849,7 +803,7 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
-  "last_escalation_id": "2026-10-01T06:43:37Z-f4cc",
+  "last_escalation_id": "2026-10-01T12:45:51Z-e04c",
   "admit_scan_ts": 1790857258.9437568,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 12,
@@ -1569,10 +1523,37 @@
    "floor_before": null,
    "floor_after": null,
    "live": false
+  },
+  {
+   "ts": 1790860538.5585892,
+   "day": "2026-10-01",
+   "kind": "escalation_delivered",
+   "before": "routine escalation",
+   "after": "sent",
+   "detail": "No digest or heartbeat run since 2026-10-01 07:02 UTC, now over five hours quiet though both workflows show active. Last",
+   "push": "BOT"
+  },
+  {
+   "ts": 1790861100.498967,
+   "day": "2026-10-01",
+   "kind": "evict",
+   "before": "0x3f3aa700 in set Z",
+   "after": "evicted (sticky)",
+   "detail": "owner order 2026-10-01 (Claude session s-k7m2qa): real record 4W/4L -$8.76; backward replay negative at every floor (-5.6% at $300, trimmed -8.5%); form-benched (50% vs 49% needed); in Z since 08-16 via the old automatic gate. Note: against the paper-book gate it only flickered 1-2 days, so the 7-day exit door would not have caught it.",
+   "push": null,
+   "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd"
+  },
+  {
+   "ts": 1790862990.6113029,
+   "day": "2026-10-01",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
   }
  ],
  "important": [
-  "2026-09-30 14:28:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 15:30:23 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80",
   "2026-09-30 15:32:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 16:08:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1647,6 +1628,19 @@
   "2026-10-01 12:21:40 INFO  [ops] floor_row: '0x5213eb85 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +0% (n=285, trimmed -3%) · 200 no +2% (n=333, trimmed -3%) · 150 no +4% (n=364, trimmed -1%) · 100 no +8% (n=391, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-01 12:21:43 INFO  [ops] floor_row: '0x73653992 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +40% (n=71, trimmed +23%) · 200 yes +34% (n=88, trimmed +19%) · 150 yes +25% (n=101, trimmed +11%) · 100 yes +23% (n=121, trimmed +10%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-01 12:21:59 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -3% (n=156, trimmed -6%) · 200 no +1% (n=260, trimmed -2%) · 150 no -0% (n=326, trimmed -2%) · 100 no -2% (n=405, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 13:15:43 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | No digest or heartbeat run since 2026-10-01 07:02 UTC, now over five hours quiet though both workflows show active. Last",
+  "2026-10-01 13:25:00 WARNING [zset] EVICTED 0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd from set Z: owner order 2026-10-01 (Claude session s-k7m2qa): real record 4W/4L -$8.76; backward replay negative at every floor (-5.6% at $300, trimmed -8.5%); form-benched (50% vs 49% needed); in Z since 08-16 via the old automatic gate. Note: against the paper-book gate it only flickered 1-2 days, so the 7-day exit door would not have caught it.",
+  "2026-10-01 13:25:00 INFO  [ops] evict: '0x3f3aa700 in set Z' -> 'evicted (sticky)' | owner order 2026-10-01 (Claude session s-k7m2qa): real record 4W/4L -$8.76; backward replay negative at every floor (-5.6% at $300, trimmed -8.5%); form-benched (50% vs 49% needed); in Z since 08-16 via the old automatic gate. Note: against the paper-book gate it only flickered 1-2 days, so the 7-day exit door would not have caught it.",
+  "2026-10-01 13:25:33 ERROR [inventory] API sync failed: ",
+  "2026-10-01 13:26:25 ERROR Network error fetching 0x1065...6218: ",
+  "2026-10-01 13:32:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-01 13:56:10 INFO  Received signal 15, shutting down...",
+  "2026-10-01 13:56:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-10-01 13:56:57 INFO  Bot started. Monitoring trades...",
+  "2026-10-01 14:02:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-01 14:02:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-01 14:02:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-01 14:35:07 ERROR [inventory] API sync failed: ",
   "2026-09-30 17:32:54 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Paris be' @ 0.5300, order 0xbd29a39196...",
   "2026-09-30 17:32:54 TRADE [verify] FILLED: BUY 12.08 shares on 'Will the highest temperature in Paris be' @ 0.5300",
   "2026-09-30 19:06:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: BIG vs fnatic (BO3) - St' @ 0.6500, order 0xaa7fd161df...",
@@ -1654,7 +1648,8 @@
   "2026-09-30 19:47:31 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Manila b' @ 0.7300, order 0x9b8fabf985...",
   "2026-09-30 19:47:32 TRADE [verify] FILLED: BUY 8.77 shares on 'Will the highest temperature in Manila b' @ 0.7300",
   "2026-10-01 05:17:01 TRADE [LIVE] BUY $6.40 on 'China Open: Roman Safiullin vs Flavio Co' @ 0.4800, order 0x0b6d83cbee...",
-  "2026-10-01 05:17:04 TRADE [verify] FILLED: BUY 13.33 shares on 'China Open: Roman Safiullin vs Flavio Co' @ 0.4800"
+  "2026-10-01 05:17:04 TRADE [verify] FILLED: BUY 13.33 shares on 'China Open: Roman Safiullin vs Flavio Co' @ 0.4800",
+  "2026-10-01 13:56:57 INFO  [recovery] No pending orders to recover"
  ],
  "watcher": [
   {
@@ -1741,6 +1736,34 @@
    "confidence": 0.86,
    "cost_usd": 1.6235645000000003,
    "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790860559.9999523,
+   "day": "2026-10-01",
+   "woke_because": "8a7661b71540",
+   "fingerprint": "8a7661b71540",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The cause is the bot's own escalation about its external digest and heartbeat workflows being quiet since 07:02 UTC, and that escalation already reached the owner's phone (escalation_delivered -> sent). The internal loop is not quiet: bot-2026-10-01.log has 316 heartbeat lines today, with the [scheduler] heartbeat firing every 5 minutes unbroken from 00:01:45 to 13:14:40 one minute before the alert, errors=0, polls at 761121, chain reader lag 0 blocks last read 13s ago, and 34 LIVE buys filled and verified. The quiet is in the two external notifier workflows that the bot said show active, not ",
+   "confidence": 0.84,
+   "cost_usd": 0.38734499999999994,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790861172.298907,
+   "day": "2026-10-01",
+   "woke_because": "b9ccd88725f8, 119162961503",
+   "fingerprint": "b9ccd88725f8",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The cause is a deliberate owner-ordered sticky eviction of wallet 0x3f3aa700 from set Z, issued by Claude session s-k7m2qa on 2026-10-01, and the fingerprint is new only because it is the first owner-order sticky eviction. It is risk reducing: the bot stops copying a wallet whose real record was 4W/4L for -$8.76, whose backward replay is negative at every floor (-5.6% at $300), and which the form already benched; a 06:19 reacquire attempt had already failed the same gate. The eviction is reversible via /zset readmit and the owner issued it, so he already knows. Immediately after at 13:25:02+ t",
+   "confidence": 0.9,
+   "cost_usd": 0.38395650000000003,
+   "did": "nothing",
    "proof": "",
    "question": ""
   }
@@ -1888,12 +1911,12 @@
   },
   "c47d62e70341": {
    "first": 1790098332.9559617,
-   "last": 1790600220.0354779,
-   "count": 28,
+   "last": 1790862980.3644574,
+   "count": 29,
    "sample": "2026-09-22 14:25:08 INFO  Received signal 15, shutting down...",
    "norm": "INFO Received signal N, shutting down...",
    "recent": [
-    1790600220.0354779
+    1790862980.3644574
    ],
    "action": null,
    "action_ts": null,
@@ -1902,12 +1925,12 @@
   },
   "6f12d4998994": {
    "first": 1790098332.9559617,
-   "last": 1790600340.0596583,
-   "count": 28,
+   "last": 1790863110.8934762,
+   "count": 29,
    "sample": "2026-09-22 14:25:37 INFO  [recovery] No pending orders to recover",
    "norm": "INFO [recovery] No pending orders to recover",
    "recent": [
-    1790600340.0596583
+    1790863110.8934762
    ],
    "action": null,
    "action_ts": null,
@@ -1916,12 +1939,12 @@
   },
   "6b829965c182": {
    "first": 1790098332.9559617,
-   "last": 1790600340.0596583,
-   "count": 28,
+   "last": 1790863110.8934762,
+   "count": 29,
    "sample": "2026-09-22 14:25:37 INFO  Bot started. Monitoring trades...",
    "norm": "INFO Bot started. Monitoring trades...",
    "recent": [
-    1790600340.0596583
+    1790863110.8934762
    ],
    "action": null,
    "action_ts": null,
@@ -1959,12 +1982,12 @@
   },
   "9d8a6d2794ec": {
    "first": 1790101843.0850005,
-   "last": 1790600340.0596583,
-   "count": 22,
+   "last": 1790863110.8934762,
+   "count": 23,
    "sample": "2026-09-22 18:30:34 ERROR [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}",
    "recent": [
-    1790600340.0596583
+    1790863110.8934762
    ],
    "action": null,
    "action_ts": null,
@@ -1973,13 +1996,15 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790845515.1576464,
-   "count": 364,
+   "last": 1790863351.9160624,
+   "count": 368,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790842995.0280309,
-    1790845515.1576464
+    1790861538.5845776,
+    1790863351.9160624,
+    1790863351.9160624,
+    1790863351.9160624
    ],
    "action": null,
    "action_ts": null,
@@ -2254,18 +2279,12 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1790828405.8351376,
-   "count": 65,
+   "last": 1790861417.8075428,
+   "count": 66,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1790827925.6107228,
-    1790827925.6107228,
-    1790828405.8351376,
-    1790828405.8351376,
-    1790828405.8351376,
-    1790828405.8351376,
-    1790828405.8351376
+    1790861417.8075428
    ],
    "action": null,
    "action_ts": null,
@@ -2436,12 +2455,12 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1790762863.7153761,
-   "count": 13,
+   "last": 1790865392.319033,
+   "count": 15,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1790762863.7153761
+    1790865392.319033
    ],
    "action": null,
    "action_ts": null,
@@ -2795,6 +2814,48 @@
    "norm": "INFO [ops] probation_failed: 'S' -> 'S' | lost N on 'Curitiba: Ryan Dickerso | Evict is reversible: /zset readmit",
    "recent": [
     1790856761.5336912
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "8a7661b71540": {
+   "first": 1790860559.9999523,
+   "last": 1790860559.9999523,
+   "count": 1,
+   "sample": "2026-10-01 13:15:43 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | No digest or heartbeat run since 2026-10-01 07:02 UTC, now over five hours quiet though both workflows show active. Last",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | No digest or heartbeat run since NNN N:N UTC, now over five hours quiet though both workflows show active. Last",
+   "recent": [
+    1790860559.9999523
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "b9ccd88725f8": {
+   "first": 1790861172.298907,
+   "last": 1790861172.298907,
+   "count": 1,
+   "sample": "2026-10-01 13:25:00 WARNING [zset] EVICTED 0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd from set Z: owner order 2026-10-01 (Claude session s-k7m2qa): real record 4W/4L -$8.76; backward replay negative at every floor (-5.6% at $300, trimmed -8.5%); form-benched (50% vs 49% needed); in Z since 08-16 via",
+   "norm": "WARNING [zset] EVICTED <hex> from set Z: owner order NNN (Claude session s-k7m2qa): real record NW/NL -$N; backward replay negative at every floor (N at $N, trimmed N); form-benched (N vs N needed); in Z since NN via the old automatic gate.",
+   "recent": [
+    1790861172.298907
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "119162961503": {
+   "first": 1790861172.298907,
+   "last": 1790861172.298907,
+   "count": 1,
+   "sample": "2026-10-01 13:25:00 INFO  [ops] evict: '0x3f3aa700 in set Z' -> 'evicted (sticky)' | owner order 2026-10-01 (Claude session s-k7m2qa): real record 4W/4L -$8.76; backward replay negative at every floor (-5.6% at $300, trimmed -8.5%); form-benched (50% vs 49% needed); in Z since 08-16 via the old auto",
+   "norm": "INFO [ops] evict: 'S' -> 'S' | owner order NNN (Claude session s-k7m2qa): real record NW/NL -$N; backward replay negative at every floor (N at $N, trimmed N); form-benched (N vs N needed); in Z since NN via the old automatic gate. Note: aga",
+   "recent": [
+    1790861172.298907
    ],
    "action": null,
    "action_ts": null,
