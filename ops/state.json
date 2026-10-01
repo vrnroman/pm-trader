@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-01T05:51:50.703134+00:00",
+ "generated": "2026-10-01T07:02:51.346832+00:00",
  "money": {
   "cash": 55.429213,
-  "open_cost": 32.0,
-  "equity": 87.43,
+  "open_cost": 25.6,
+  "equity": 81.03,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
@@ -21,7 +21,7 @@
    "1b": 38.4,
    "1c": 0
   },
-  "ts": 1790833787.1821537,
+  "ts": 1790837993.606333,
   "day": "2026-10-01"
  },
  "arm": {
@@ -854,7 +854,7 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790747516.4938116,
+    "ts": 1790835425.111147,
     "n_acts": 4000,
     "n_resolved_markets": 1292,
     "era": 1784976482.215206,
@@ -865,27 +865,27 @@
     },
     "at": {
      "300": {
-      "n": 147,
-      "roi": -0.0471,
-      "trimmed": -0.0942,
+      "n": 153,
+      "roi": -0.0373,
+      "trimmed": -0.0823,
       "ok": false
      },
      "200": {
-      "n": 221,
-      "roi": -0.0601,
-      "trimmed": -0.1056,
+      "n": 228,
+      "roi": -0.0477,
+      "trimmed": -0.0916,
       "ok": false
      },
      "150": {
-      "n": 293,
-      "roi": -0.029,
-      "trimmed": -0.0784,
+      "n": 301,
+      "roi": -0.0235,
+      "trimmed": -0.0715,
       "ok": false
      },
      "100": {
-      "n": 382,
-      "roi": -0.0805,
-      "trimmed": -0.1187,
+      "n": 391,
+      "roi": -0.0776,
+      "trimmed": -0.1149,
       "ok": false
      }
     },
@@ -896,14 +896,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 87.43,
+  "last_equity": 81.03,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-28T18:43:24Z-bd83",
-  "admit_scan_ts": 1790824308.4548142,
+  "admit_scan_ts": 1790835421.5767345,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 12,
   "day_pnl": -12.8,
@@ -1342,19 +1342,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790747516.4938116,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x10658d37 floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no -5% (n=147, trimmed -9%) · 200 no -6% (n=221, trimmed -11%) · 150 no -3% (n=293, trimmed -8%) · 100 no -8% (n=382, trimmed -12%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
    "ts": 1790758487.9359133,
    "day": "2026-09-30",
    "kind": "floor_row",
@@ -1591,10 +1578,31 @@
    "floor_before": 200.0,
    "floor_after": 200.0,
    "live": false
+  },
+  {
+   "ts": 1790834409.322037,
+   "day": "2026-10-01",
+   "kind": "analyst_limit",
+   "before": "FORM_DAYS",
+   "after": "FORM_DAYS = 10.0 until 10-02 06:00 UTC (owner 14.0)",
+   "detail": "In-form replayed ROI rises +8.3% to +10.8% at a 10 day window, and 14 is silently truncated by the 5500-row cap for every high-volume wallet (0x9f15613e, 0x3f3a",
+   "push": "BOT"
+  },
+  {
+   "ts": 1790835425.111147,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x10658d37 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -4% (n=153, trimmed -8%) · 200 no -5% (n=228, trimmed -9%) · 150 no -2% (n=301, trimmed -7%) · 100 no -8% (n=391, trimmed -11%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-09-30 05:52:26 INFO  [ops] floor_row: '0x10658d37 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -5% (n=147, trimmed -9%) · 200 no -6% (n=221, trimmed -11%) · 150 no -3% (n=293, trimmed -8%) · 100 no -8% (n=382, trimmed -12%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-09-30 08:00:14 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
   "2026-09-30 08:27:56 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 08:56:07 INFO  [ops] floor_row: '0x00110b8e floor 300.0' -> 'floor 100.0 (moved)' | copies at $100: 300 yes +20% (n=310, trimmed +17%) · 200 yes +19% (n=384, trimmed +16%) · 150 yes +19% (n=443, trimmed +17%) · 100 YES +20% (n=527, trimmed +17%); backward replay (copy-and-hold at their price, first entry, clean era)",
@@ -1672,6 +1680,8 @@
   "2026-10-01 05:17:00 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
   "2026-10-01 05:17:03 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $38.40 / $200.00",
   "2026-10-01 05:24:27 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-01 05:53:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-01 06:19:10 INFO  [ops] floor_row: '0x10658d37 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=153, trimmed -8%) · 200 no -5% (n=228, trimmed -9%) · 150 no -2% (n=301, trimmed -7%) · 100 no -8% (n=391, trimmed -11%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-09-30 11:51:53 TRADE [LIVE] BUY $6.40 on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700, order 0x02dd6c6ceb...",
   "2026-09-30 11:51:54 TRADE [verify] FILLED: BUY 11.23 shares on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700",
   "2026-09-30 17:32:54 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Paris be' @ 0.5300, order 0xbd29a39196...",
@@ -1685,13 +1695,35 @@
  ],
  "watcher": [
   {
-   "ts": 1790748087.4655402,
-   "day": "2026-09-30",
+   "ts": 1790834409.322037,
+   "day": "2026-10-01",
+   "kind": "analyst",
+   "proposal": "limit",
+   "woke_because": "daily study",
+   "concluded": "In-form replayed ROI rises +8.3% to +10.8% at a 10 day window, and 14 is silently truncated by the 5500-row cap for every high-volume wallet (0x9f15613e, 0x3f3aa700, 0x00110b8e, 0xd25156e2 all read window-cut), so 14 is not even honored; re-up the expired 09-29 setting for another 24h.",
+   "counterfactual": "+8.3% -> +10.8% in-form replayed ROI at the 10 day window (corrected study 2026-09-27-form-c2308d97)",
+   "did": "limit applied: FORM_DAYS = 10.0 until 10-02 06:00 UTC (owner 14.0)",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790834409.322037,
+   "day": "2026-10-01",
+   "kind": "analyst",
+   "proposal": "note",
+   "woke_because": "daily study",
+   "concluded": "The wallet_cap study still prints copies 3840 -> 2956 as the cap loosens 3 -> 5 (impossible: from/to inverted in exp_study.py) and it has been noted 5 days running without fix because the repo is not mounted on this box (only /app/logs), so I structurally cannot deliver the machinery PR the directive asks for; please mount the checkout or swap the one from/to line yourself.",
+   "counterfactual": "",
+   "did": "noted",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1790834409.322037,
+   "day": "2026-10-01",
    "kind": "analyst",
    "woke_because": "daily study",
-   "concluded": "no usable answer",
-   "did": "nothing",
-   "cost_usd": 0.0
+   "concluded": "Re-up FORM_DAYS=10 (in-form ROI +8.3->+10.8, 14d is row-cap truncated); wallet_cap inversion still unfixed because the repo is not on the box, so I can't PR it.",
+   "did": "2 proposal(s): limit applied: FORM_DAYS = 10.0 until 10-02 06:00 UTC (owner; noted",
+   "cost_usd": 0.6784875
   }
  ],
  "fingerprints": {
@@ -1922,13 +1954,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790830206.560814,
-   "count": 361,
+   "last": 1790834049.2079659,
+   "count": 362,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790827805.3398938,
-    1790830206.560814
+    1790834049.2079659
    ],
    "action": null,
    "action_ts": null,
@@ -2529,13 +2560,12 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1790769587.7069123,
-   "count": 31,
+   "last": 1790835594.7217693,
+   "count": 32,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1790769467.6970727,
-    1790769587.7069123
+    1790835594.7217693
    ],
    "action": null,
    "action_ts": null,
