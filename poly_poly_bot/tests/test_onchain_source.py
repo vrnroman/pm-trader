@@ -442,20 +442,22 @@ def _driven_source(monkeypatch, tmp_path, fetch):
     monkeypatch.setattr(s, "_fetch_events_range", fetch)
     monkeypatch.setattr(mod, "POLL_INTERVAL_S", 0.0)
     monkeypatch.setattr(mod, "CHUNK_RETRY_DELAY_S", 0.0)
-    # The reader's own back-off sleeps are real seconds; the driver spins the
-    # loop a bounded number of times, so under a ticking (frozen) clock a
-    # 5 s sleep in an error branch left the test racing the wall clock (red
-    # on the +90d/+400d gate from 09-29, s-k7m2qa). Every sleep yields once.
+    # Two sources of wall-clock in the reader made this driver race under
+    # the ticking clock of the +90d/+400d gate (red on main's 09-29 nightly
+    # and on this branch's runs, with no code behind it): the fetch runs in
+    # a worker thread (run_in_executor), and the error branches sleep real
+    # seconds. The driver runs the fetch inline and makes every sleep a
+    # single yield, so one spin of the loop is one step of the reader.
     import asyncio as _aio
     _real_sleep = _aio.sleep
 
-    # The fetch itself runs in a worker thread (run_in_executor), so a bare
-    # yield is not enough for an attempt to complete on a slow runner: each
-    # sleep becomes two milliseconds of real wall time, a bounded wait the
-    # 400-spin drivers finish in under a second.
     async def _yield_once(_delay=0, *_a, **_k):
-        await _real_sleep(0.002)
+        await _real_sleep(0)
     monkeypatch.setattr(mod.asyncio, "sleep", _yield_once)
+
+    async def _inline(self, _executor, fn, *args):
+        return fn(*args)
+    monkeypatch.setattr(_aio.BaseEventLoop, "run_in_executor", _inline)
     polls: list = []
     monkeypatch.setattr(trade_store, "record_poll_ok", lambda: polls.append(1))
     logged = {"warn": [], "error": []}
@@ -467,14 +469,20 @@ def _driven_source(monkeypatch, tmp_path, fetch):
 def test_a_refused_chunk_holds_the_cursor_and_is_read_again(tmp_path, monkeypatch):
     from src.copy_trading import onchain_source as mod
     calls: list = []
+    hold: dict = {}
 
     def fetch(from_block, to_block):
         calls.append((from_block, to_block))
         if len(calls) == 1:
             raise mod.ChunkReadError("CTF", from_block, to_block,
                                      ValueError({'code': -32000, 'message': 'invalid block range params'}))
+        # The second read is the one under test; stop the reader from inside
+        # it so the loop ends after this chunk is booked, never a third read
+        # racing the driver (the drift gate, s-k7m2qa).
+        hold["s"]._running = False
         return []
     s, saved, polls, logged = _driven_source(monkeypatch, tmp_path, fetch)
+    hold["s"] = s
 
     async def run():
         import asyncio
