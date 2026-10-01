@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-01T07:02:51.346832+00:00",
+ "generated": "2026-10-01T13:13:07.009673+00:00",
  "money": {
-  "cash": 55.429213,
-  "open_cost": 25.6,
-  "equity": 81.03,
+  "cash": 68.759213,
+  "open_cost": 19.2,
+  "equity": 87.96,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 74,
   "tier": {
    "1a": 0,
-   "1b": 38.4,
+   "1b": 32.0,
    "1c": 0
   },
-  "ts": 1790837993.606333,
+  "ts": 1790860183.5065374,
   "day": "2026-10-01"
  },
  "arm": {
@@ -55,7 +55,7 @@
    "placements": []
   },
   "1b": {
-   "open_total": 38.4,
+   "open_total": 32.0,
    "daily_date": "2026-10-01",
    "daily_volume": 6.4,
    "placements": [
@@ -93,13 +93,6 @@
      "ts": 1790797651.7293382,
      "trader": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
      "title": "Will the highest temperature in Manila be 34°C on October 2?"
-    },
-    {
-     "token_id": "113034430878768724272370722009970212521380904707731855345754801157534908440839",
-     "cost": 6.4,
-     "ts": 1790831823.0796216,
-     "trader": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-     "title": "China Open: Roman Safiullin vs Flavio Cobolli"
     }
    ]
   },
@@ -118,9 +111,9 @@
    "source": "gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
-    "n_resolved_markets": 594,
+    "n_resolved_markets": 593,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -129,27 +122,27 @@
     },
     "at": {
      "300": {
-      "n": 355,
-      "roi": -0.0578,
-      "trimmed": -0.0862,
+      "n": 353,
+      "roi": -0.0563,
+      "trimmed": -0.0849,
       "ok": false
      },
      "200": {
-      "n": 403,
-      "roi": -0.0622,
-      "trimmed": -0.0873,
+      "n": 401,
+      "roi": -0.0609,
+      "trimmed": -0.0861,
       "ok": false
      },
      "150": {
-      "n": 421,
-      "roi": -0.0741,
-      "trimmed": -0.0987,
+      "n": 419,
+      "roi": -0.0729,
+      "trimmed": -0.0976,
       "ok": false
      },
      "100": {
-      "n": 455,
-      "roi": -0.0638,
-      "trimmed": -0.0864,
+      "n": 454,
+      "roi": -0.0647,
+      "trimmed": -0.0875,
       "ok": false
      }
     },
@@ -164,9 +157,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
-    "n_resolved_markets": 840,
+    "n_resolved_markets": 841,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -175,27 +168,27 @@
     },
     "at": {
      "300": {
-      "n": 401,
-      "roi": 0.062,
-      "trimmed": 0.0189,
+      "n": 408,
+      "roi": 0.0544,
+      "trimmed": 0.012,
       "ok": false
      },
      "200": {
-      "n": 446,
-      "roi": 0.0529,
-      "trimmed": 0.0141,
+      "n": 454,
+      "roi": 0.048,
+      "trimmed": 0.0099,
       "ok": false
      },
      "150": {
-      "n": 484,
-      "roi": 0.059,
-      "trimmed": 0.0233,
+      "n": 492,
+      "roi": 0.0516,
+      "trimmed": 0.0165,
       "ok": false
      },
      "100": {
-      "n": 539,
-      "roi": 0.0411,
-      "trimmed": 0.009,
+      "n": 548,
+      "roi": 0.0349,
+      "trimmed": 0.0033,
       "ok": false
      }
     },
@@ -210,9 +203,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
-    "n_resolved_markets": 1425,
+    "n_resolved_markets": 1429,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -221,27 +214,27 @@
     },
     "at": {
      "300": {
-      "n": 46,
-      "roi": -0.0953,
-      "trimmed": -0.177,
+      "n": 44,
+      "roi": -0.1136,
+      "trimmed": -0.2006,
       "ok": false
      },
      "200": {
-      "n": 70,
-      "roi": -0.0636,
-      "trimmed": -0.1297,
+      "n": 67,
+      "roi": -0.0796,
+      "trimmed": -0.1496,
       "ok": false
      },
      "150": {
-      "n": 99,
-      "roi": -0.0119,
-      "trimmed": -0.081,
+      "n": 95,
+      "roi": -0.0382,
+      "trimmed": -0.1112,
       "ok": false
      },
      "100": {
-      "n": 162,
-      "roi": 0.0047,
-      "trimmed": -0.0427,
+      "n": 157,
+      "roi": -0.0322,
+      "trimmed": -0.0757,
       "ok": false
      }
     },
@@ -256,9 +249,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
-    "n_resolved_markets": 940,
+    "n_resolved_markets": 938,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -267,27 +260,27 @@
     },
     "at": {
      "300": {
-      "n": 180,
-      "roi": 0.0859,
-      "trimmed": 0.054,
+      "n": 182,
+      "roi": 0.0872,
+      "trimmed": 0.0556,
       "ok": false
      },
      "200": {
-      "n": 199,
-      "roi": 0.0528,
-      "trimmed": 0.0234,
+      "n": 201,
+      "roi": 0.0542,
+      "trimmed": 0.0252,
       "ok": false
      },
      "150": {
-      "n": 228,
-      "roi": 0.021,
-      "trimmed": -0.005,
+      "n": 230,
+      "roi": 0.0226,
+      "trimmed": -0.0032,
       "ok": false
      },
      "100": {
-      "n": 271,
-      "roi": 0.0487,
-      "trimmed": 0.0225,
+      "n": 273,
+      "roi": 0.0498,
+      "trimmed": 0.0238,
       "ok": false
      }
     },
@@ -302,9 +295,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
-    "n_resolved_markets": 1717,
+    "n_resolved_markets": 1715,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -314,32 +307,32 @@
     "at": {
      "300": {
       "n": 310,
-      "roi": 0.2017,
-      "trimmed": 0.1673,
+      "roi": 0.2007,
+      "trimmed": 0.1663,
       "ok": true
      },
      "200": {
       "n": 384,
-      "roi": 0.1933,
-      "trimmed": 0.1607,
+      "roi": 0.1889,
+      "trimmed": 0.1562,
       "ok": true
      },
      "150": {
-      "n": 443,
-      "roi": 0.1934,
-      "trimmed": 0.1651,
+      "n": 442,
+      "roi": 0.187,
+      "trimmed": 0.1586,
       "ok": true
      },
      "100": {
-      "n": 527,
-      "roi": 0.1973,
-      "trimmed": 0.1675,
+      "n": 528,
+      "roi": 0.1907,
+      "trimmed": 0.1609,
       "ok": true
      }
     },
-    "chosen": 100.0
+    "chosen": 300.0
    },
-   "floor_usd": 100.0
+   "floor_usd": 300.0
   },
   "0xf49614e63fb15383d4a9b717a1be03ad2410fe79": {
    "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
@@ -348,7 +341,7 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
     "n_resolved_markets": 183,
     "era": 1784976482.215206,
@@ -359,79 +352,33 @@
     },
     "at": {
      "300": {
-      "n": 188,
-      "roi": 0.0159,
-      "trimmed": -0.0295,
+      "n": 187,
+      "roi": 0.0157,
+      "trimmed": -0.0299,
       "ok": false
      },
      "200": {
-      "n": 222,
-      "roi": -0.0498,
-      "trimmed": -0.09,
+      "n": 221,
+      "roi": -0.0503,
+      "trimmed": -0.0907,
       "ok": false
      },
      "150": {
-      "n": 233,
-      "roi": -0.0393,
-      "trimmed": -0.0765,
+      "n": 232,
+      "roi": -0.0397,
+      "trimmed": -0.0771,
       "ok": false
      },
      "100": {
-      "n": 240,
-      "roi": -0.0393,
-      "trimmed": -0.0758,
+      "n": 239,
+      "roi": -0.0397,
+      "trimmed": -0.0763,
       "ok": false
      }
     },
     "chosen": null
    },
    "floor_usd": null
-  },
-  "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
-   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
-   "tier": "1b",
-   "ts": 1789992497.9469755,
-   "source": "telegram-gate",
-   "floor_row": {
-    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
-    "n_acts": 1084,
-    "n_resolved_markets": 186,
-    "era": 1784976482.215206,
-    "bars": {
-     "min_n": 15,
-     "min_roi": 0.1,
-     "trimmed_min": 0.0
-    },
-    "at": {
-     "300": {
-      "n": 111,
-      "roi": 0.1179,
-      "trimmed": 0.0194,
-      "ok": true
-     },
-     "200": {
-      "n": 111,
-      "roi": 0.1179,
-      "trimmed": 0.0194,
-      "ok": true
-     },
-     "150": {
-      "n": 111,
-      "roi": 0.1153,
-      "trimmed": 0.0168,
-      "ok": true
-     },
-     "100": {
-      "n": 111,
-      "roi": 0.1153,
-      "trimmed": 0.0168,
-      "ok": true
-     }
-    },
-    "chosen": 300.0
-   },
-   "floor_usd": 300.0
   },
   "0xd25156e222c9b907b128e27c36821fdb41db4d37": {
    "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
@@ -440,9 +387,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
-    "n_resolved_markets": 242,
+    "n_resolved_markets": 264,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -451,27 +398,27 @@
     },
     "at": {
      "300": {
-      "n": 35,
-      "roi": 0.0635,
-      "trimmed": -0.1501,
+      "n": 31,
+      "roi": -0.179,
+      "trimmed": -0.36,
       "ok": false
      },
      "200": {
-      "n": 58,
-      "roi": 0.0492,
-      "trimmed": -0.082,
+      "n": 57,
+      "roi": -0.0863,
+      "trimmed": -0.2034,
       "ok": false
      },
      "150": {
-      "n": 87,
-      "roi": 0.05,
-      "trimmed": -0.0359,
+      "n": 84,
+      "roi": -0.0117,
+      "trimmed": -0.087,
       "ok": false
      },
      "100": {
       "n": 108,
-      "roi": 0.0622,
-      "trimmed": -0.0306,
+      "roi": 0.0063,
+      "trimmed": -0.0544,
       "ok": false
      }
     },
@@ -486,9 +433,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
-    "n_acts": 2387,
-    "n_resolved_markets": 344,
+    "ts": 1790846453.6077092,
+    "n_acts": 2403,
+    "n_resolved_markets": 350,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -497,27 +444,27 @@
     },
     "at": {
      "300": {
-      "n": 139,
-      "roi": 0.2574,
-      "trimmed": 0.213,
+      "n": 144,
+      "roi": 0.2575,
+      "trimmed": 0.2146,
       "ok": true
      },
      "200": {
-      "n": 191,
-      "roi": 0.249,
-      "trimmed": 0.2122,
+      "n": 197,
+      "roi": 0.2435,
+      "trimmed": 0.2078,
       "ok": true
      },
      "150": {
-      "n": 211,
-      "roi": 0.2731,
-      "trimmed": 0.2281,
+      "n": 217,
+      "roi": 0.2674,
+      "trimmed": 0.2236,
       "ok": true
      },
      "100": {
-      "n": 243,
-      "roi": 0.2119,
-      "trimmed": 0.1721,
+      "n": 249,
+      "roi": 0.2084,
+      "trimmed": 0.1695,
       "ok": true
      }
     },
@@ -532,9 +479,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
-    "n_resolved_markets": 1081,
+    "n_resolved_markets": 1074,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -543,27 +490,27 @@
     },
     "at": {
      "300": {
-      "n": 191,
-      "roi": 0.296,
-      "trimmed": 0.2466,
+      "n": 194,
+      "roi": 0.2958,
+      "trimmed": 0.2473,
       "ok": true
      },
      "200": {
-      "n": 257,
-      "roi": 0.435,
-      "trimmed": 0.3467,
+      "n": 261,
+      "roi": 0.4278,
+      "trimmed": 0.3408,
       "ok": true
      },
      "150": {
-      "n": 296,
-      "roi": 0.4454,
-      "trimmed": 0.3465,
+      "n": 300,
+      "roi": 0.4348,
+      "trimmed": 0.337,
       "ok": true
      },
      "100": {
-      "n": 343,
-      "roi": 0.4801,
-      "trimmed": 0.3952,
+      "n": 347,
+      "roi": 0.4669,
+      "trimmed": 0.3828,
       "ok": true
      }
     },
@@ -578,9 +525,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
-    "n_resolved_markets": 1177,
+    "n_resolved_markets": 1170,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -589,27 +536,27 @@
     },
     "at": {
      "300": {
-      "n": 194,
-      "roi": 0.3525,
-      "trimmed": 0.2954,
+      "n": 195,
+      "roi": 0.3474,
+      "trimmed": 0.2905,
       "ok": true
      },
      "200": {
       "n": 266,
-      "roi": 0.3398,
-      "trimmed": 0.2868,
+      "roi": 0.3311,
+      "trimmed": 0.278,
       "ok": true
      },
      "150": {
       "n": 293,
-      "roi": 0.3812,
-      "trimmed": 0.323,
+      "roi": 0.3747,
+      "trimmed": 0.3164,
       "ok": true
      },
      "100": {
-      "n": 352,
-      "roi": 0.4013,
-      "trimmed": 0.3531,
+      "n": 351,
+      "roi": 0.3999,
+      "trimmed": 0.3515,
       "ok": true
      }
     },
@@ -624,9 +571,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790758487.9359133,
+    "ts": 1790846453.6077092,
     "n_acts": 4000,
-    "n_resolved_markets": 111,
+    "n_resolved_markets": 113,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -635,28 +582,28 @@
     },
     "at": {
      "300": {
-      "n": 75,
-      "roi": 0.1686,
-      "trimmed": 0.0608,
+      "n": 77,
+      "roi": 0.1382,
+      "trimmed": 0.0321,
       "ok": true
      },
      "200": {
-      "n": 86,
-      "roi": 0.1631,
-      "trimmed": 0.0709,
+      "n": 88,
+      "roi": 0.1376,
+      "trimmed": 0.0467,
       "ok": true
      },
      "150": {
-      "n": 94,
-      "roi": 0.1391,
-      "trimmed": 0.0542,
+      "n": 96,
+      "roi": 0.1162,
+      "trimmed": 0.0324,
       "ok": true
      },
      "100": {
-      "n": 104,
-      "roi": 0.1183,
-      "trimmed": 0.0282,
-      "ok": true
+      "n": 106,
+      "roi": 0.0969,
+      "trimmed": 0.0079,
+      "ok": false
      }
     },
     "chosen": 200.0
@@ -670,9 +617,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790769304.9871376,
+    "ts": 1790857260.0032833,
     "n_acts": 4000,
-    "n_resolved_markets": 1785,
+    "n_resolved_markets": 1280,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -681,27 +628,27 @@
     },
     "at": {
      "300": {
-      "n": 298,
-      "roi": -0.0135,
-      "trimmed": -0.0433,
+      "n": 285,
+      "roi": 0.0016,
+      "trimmed": -0.0294,
       "ok": false
      },
      "200": {
-      "n": 350,
-      "roi": 0.0017,
-      "trimmed": -0.0449,
+      "n": 333,
+      "roi": 0.02,
+      "trimmed": -0.0288,
       "ok": false
      },
      "150": {
-      "n": 383,
-      "roi": 0.0259,
-      "trimmed": -0.0192,
+      "n": 364,
+      "roi": 0.0414,
+      "trimmed": -0.0059,
       "ok": false
      },
      "100": {
-      "n": 413,
-      "roi": 0.057,
-      "trimmed": 0.0096,
+      "n": 391,
+      "roi": 0.0753,
+      "trimmed": 0.0253,
       "ok": false
      }
     },
@@ -716,9 +663,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790769304.9871376,
+    "ts": 1790857260.0032833,
     "n_acts": 4000,
-    "n_resolved_markets": 222,
+    "n_resolved_markets": 252,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -727,27 +674,27 @@
     },
     "at": {
      "300": {
-      "n": 65,
-      "roi": 0.3517,
-      "trimmed": 0.1612,
+      "n": 71,
+      "roi": 0.4017,
+      "trimmed": 0.2302,
       "ok": true
      },
      "200": {
-      "n": 81,
-      "roi": 0.3119,
-      "trimmed": 0.1502,
+      "n": 88,
+      "roi": 0.3389,
+      "trimmed": 0.1915,
       "ok": true
      },
      "150": {
-      "n": 92,
-      "roi": 0.2659,
-      "trimmed": 0.1168,
+      "n": 101,
+      "roi": 0.2455,
+      "trimmed": 0.1095,
       "ok": true
      },
      "100": {
-      "n": 110,
-      "roi": 0.2685,
-      "trimmed": 0.1229,
+      "n": 121,
+      "roi": 0.2311,
+      "trimmed": 0.0981,
       "ok": true
      }
     },
@@ -762,9 +709,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790769304.9871376,
+    "ts": 1790857260.0032833,
     "n_acts": 4000,
-    "n_resolved_markets": 672,
+    "n_resolved_markets": 670,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -773,27 +720,27 @@
     },
     "at": {
      "300": {
-      "n": 157,
-      "roi": -0.0403,
-      "trimmed": -0.0697,
+      "n": 156,
+      "roi": -0.033,
+      "trimmed": -0.0625,
       "ok": false
      },
      "200": {
       "n": 260,
-      "roi": 0.0074,
-      "trimmed": -0.016,
+      "roi": 0.0081,
+      "trimmed": -0.0152,
       "ok": false
      },
      "150": {
-      "n": 325,
-      "roi": -0.0101,
-      "trimmed": -0.0289,
+      "n": 326,
+      "roi": -0.0029,
+      "trimmed": -0.0227,
       "ok": false
      },
      "100": {
-      "n": 404,
-      "roi": -0.0304,
-      "trimmed": -0.0465,
+      "n": 405,
+      "roi": -0.0246,
+      "trimmed": -0.0409,
       "ok": false
      }
     },
@@ -896,14 +843,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 81.03,
+  "last_equity": 87.96,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
-  "last_escalation_id": "2026-09-28T18:43:24Z-bd83",
-  "admit_scan_ts": 1790835421.5767345,
+  "last_escalation_id": "2026-10-01T06:43:37Z-f4cc",
+  "admit_scan_ts": 1790857258.9437568,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 12,
   "day_pnl": -12.8,
@@ -922,10 +869,10 @@
    "34537177291679694949397291005907747989930794525598723838821364287418875572517",
    "51356476393519450490348876445720659187108550884924368556655512845680067906411"
   ],
-  "form_scan_ts": 1790831738.042177,
-  "daily_line_attempt_day": "2026-09-30",
+  "form_scan_ts": 1790853561.529993,
+  "daily_line_attempt_day": "2026-10-01",
   "daily_line_sent": true,
-  "daily_line_day": "2026-09-30",
+  "daily_line_day": "2026-10-01",
   "guard_failing_pushed": false,
   "floor_near_day": "2026-09-19"
  },
@@ -944,10 +891,6 @@
    "since": 1789827868.9550335,
    "settled": 0,
    "held_said": true
-  },
-  "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
-   "since": 1789992496.5955625,
-   "settled": 1
   },
   "0xd25156e222c9b907b128e27c36821fdb41db4d37": {
    "since": 1790166548.6465027,
@@ -991,268 +934,268 @@
   }
  },
  "form": {
-  "ts": 1790831752.0450768,
+  "ts": 1790853562.3812726,
   "version": 4,
   "wallets": {
    "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
     "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
-    "n": 112,
-    "won": 93,
-    "cost": 128644.19,
-    "back": 147292.74,
-    "avg_price": 0.670336767122203,
-    "worst_day": -2111.56,
+    "n": 41,
+    "won": 33,
+    "cost": 46751.35,
+    "back": 51728.62,
+    "avg_price": 0.6452411827701428,
+    "worst_day": -1977.88,
     "ok": false,
-    "reason": "scalper: 37% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790831752.0450768,
+    "reason": "scalper: 36% of exits within 10 min; uncopyable at our latency",
+    "ts": 1790853562.3812726,
     "rows": 5500,
-    "covered_days": 14.0,
+    "covered_days": 10.0,
     "capped": true,
-    "exits": 27,
-    "flips": 10,
+    "exits": 11,
+    "flips": 4,
     "last_trade_ts": 1790820459.0,
-    "hit": 0.8304,
-    "net_pct": 14.5
+    "hit": 0.8049,
+    "net_pct": 10.65
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-    "n": 24,
-    "won": 19,
-    "cost": 9417.48,
-    "back": 10873.42,
-    "avg_price": 0.5792014905820749,
-    "worst_day": -332.99,
+    "n": 14,
+    "won": 12,
+    "cost": 5554.49,
+    "back": 6766.64,
+    "avg_price": 0.573430265257959,
+    "worst_day": -81.75,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790831752.0450768,
-    "rows": 3000,
-    "covered_days": 14.0,
+    "ts": 1790853562.3812726,
+    "rows": 2500,
+    "covered_days": 10.0,
     "capped": false,
-    "exits": 24,
-    "flips": 24,
+    "exits": 14,
+    "flips": 14,
     "last_trade_ts": 1790817161.0,
-    "hit": 0.7917,
-    "net_pct": 15.46
+    "hit": 0.8571,
+    "net_pct": 21.82
    },
    "0x10658d371ae1f09eed503a3a14c8ac6a1a936218": {
     "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
-    "n": 26,
-    "won": 15,
-    "cost": 21433.72,
-    "back": 26299.34,
-    "avg_price": 0.519692438082279,
+    "n": 21,
+    "won": 13,
+    "cost": 14696.45,
+    "back": 20679.37,
+    "avg_price": 0.5028807056880321,
     "worst_day": -1219.61,
     "ok": false,
-    "reason": "only 26 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790831752.0450768,
+    "reason": "only 21 settled bets on our slice in 10 days (need 30)",
+    "ts": 1790853562.3812726,
     "rows": 1000,
-    "covered_days": 14.0,
+    "covered_days": 10.0,
     "capped": false,
     "exits": 1,
     "flips": 0,
-    "last_trade_ts": 1790814515.0,
-    "hit": 0.5769,
-    "net_pct": 22.7
+    "last_trade_ts": 1790845757.0,
+    "hit": 0.619,
+    "net_pct": 40.71
    },
    "0x1958513132accb7dd17f2cf7beebbc165776b24e": {
     "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
-    "n": 40,
-    "won": 24,
-    "cost": 23776.52,
-    "back": 29085.25,
-    "avg_price": 0.5218111460436146,
+    "n": 20,
+    "won": 10,
+    "cost": 12187.97,
+    "back": 11228.23,
+    "avg_price": 0.5396506343284603,
     "worst_day": -902.44,
-    "ok": true,
-    "reason": "60% came out ahead vs 52% needed, net +22.3%",
-    "ts": 1790831752.0450768,
-    "rows": 206,
-    "covered_days": 14.0,
+    "ok": false,
+    "reason": "only 20 settled bets on our slice in 10 days (need 30)",
+    "ts": 1790853562.3812726,
+    "rows": 207,
+    "covered_days": 10.0,
     "capped": false,
-    "exits": 1,
+    "exits": 0,
     "flips": 0,
-    "last_trade_ts": 1790813310.0,
-    "hit": 0.6,
-    "net_pct": 22.33
+    "last_trade_ts": 1790833614.0,
+    "hit": 0.5,
+    "net_pct": -7.87
    },
    "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-    "n": 30,
-    "won": 24,
-    "cost": 11162.96,
-    "back": 13961.74,
-    "avg_price": 0.5703116455376843,
-    "worst_day": -155.98,
+    "n": 12,
+    "won": 9,
+    "cost": 4402.64,
+    "back": 5753.54,
+    "avg_price": 0.553329074835609,
+    "worst_day": -93.81,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790831752.0450768,
-    "rows": 3000,
-    "covered_days": 14.0,
+    "ts": 1790853562.3812726,
+    "rows": 2500,
+    "covered_days": 10.0,
     "capped": false,
-    "exits": 30,
-    "flips": 30,
+    "exits": 12,
+    "flips": 12,
     "last_trade_ts": 1790817164.0,
-    "hit": 0.8,
-    "net_pct": 25.07
+    "hit": 0.75,
+    "net_pct": 30.68
    },
    "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd": {
     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
-    "n": 223,
-    "won": 109,
-    "cost": 671584.48,
-    "back": 683574.44,
-    "avg_price": 0.523140480408514,
+    "n": 116,
+    "won": 58,
+    "cost": 394422.21,
+    "back": 400182.27,
+    "avg_price": 0.4945721713044501,
     "worst_day": -40137.52,
     "ok": false,
-    "reason": "49% came out ahead vs 52% needed (-3 points, need +3)",
-    "ts": 1790831752.0450768,
+    "reason": "50% came out ahead vs 49% needed (+1 points, need +3)",
+    "ts": 1790853562.3812726,
     "rows": 5500,
-    "covered_days": 14.0,
+    "covered_days": 10.0,
     "capped": true,
-    "exits": 7,
+    "exits": 4,
     "flips": 2,
     "last_trade_ts": 1790797479.0,
-    "hit": 0.4888,
-    "net_pct": 1.79
+    "hit": 0.5,
+    "net_pct": 1.46
    },
    "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {
     "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
-    "n": 14,
-    "won": 7,
-    "cost": 28045.12,
-    "back": 41960.58,
-    "avg_price": 0.4591717384908353,
-    "worst_day": -4801.56,
+    "n": 12,
+    "won": 6,
+    "cost": 21463.58,
+    "back": 32170.87,
+    "avg_price": 0.4455091422078789,
+    "worst_day": -4443.65,
     "ok": false,
-    "reason": "only 14 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790831752.0450768,
-    "rows": 3000,
-    "covered_days": 14.0,
+    "reason": "only 12 settled bets on our slice in 10 days (need 30)",
+    "ts": 1790853562.3812726,
+    "rows": 2000,
+    "covered_days": 10.0,
     "capped": false,
     "exits": 6,
     "flips": 0,
-    "last_trade_ts": 1790817797.0,
+    "last_trade_ts": 1790852807.0,
     "hit": 0.5,
-    "net_pct": 49.62
+    "net_pct": 49.89
    },
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": {
     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-    "n": 90,
-    "won": 43,
-    "cost": 45435.62,
-    "back": 50524.83,
-    "avg_price": 0.4338065526722808,
+    "n": 74,
+    "won": 38,
+    "cost": 38628.05,
+    "back": 45379.17,
+    "avg_price": 0.43061468544388193,
     "worst_day": -2314.16,
     "ok": true,
-    "reason": "48% came out ahead vs 43% needed, net +11.2%",
-    "ts": 1790831752.0450768,
+    "reason": "51% came out ahead vs 43% needed, net +17.5%",
+    "ts": 1790853562.3812726,
     "rows": 4000,
-    "covered_days": 14.0,
+    "covered_days": 10.0,
     "capped": false,
-    "exits": 5,
-    "flips": 2,
-    "last_trade_ts": 1790831787.0,
-    "hit": 0.4778,
-    "net_pct": 11.2
+    "exits": 3,
+    "flips": 0,
+    "last_trade_ts": 1790849658.0,
+    "hit": 0.5135,
+    "net_pct": 17.48
    },
    "0x722abb5460060870d46728bf45f66a6b1635d6ed": {
     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
-    "n": 37,
-    "won": 29,
-    "cost": 54567.48,
-    "back": 62410.34,
-    "avg_price": 0.7961856471230302,
+    "n": 24,
+    "won": 20,
+    "cost": 33476.72,
+    "back": 39639.51,
+    "avg_price": 0.7764817124157913,
     "worst_day": -2522.4,
     "ok": false,
-    "reason": "78% came out ahead vs 80% needed (-1 points, need +3)",
-    "ts": 1790831752.0450768,
+    "reason": "only 24 settled bets on our slice in 10 days (need 30)",
+    "ts": 1790853562.3812726,
     "rows": 2000,
-    "covered_days": 14.0,
+    "covered_days": 10.0,
     "capped": false,
-    "exits": 31,
+    "exits": 21,
     "flips": 0,
     "last_trade_ts": 1790800454.0,
-    "hit": 0.7838,
-    "net_pct": 14.37
+    "hit": 0.8333,
+    "net_pct": 18.41
    },
    "0x736539924a5602b37a03a54fc12c1cc8f98964da": {
     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
-    "n": 5,
-    "won": 5,
-    "cost": 3189.19,
-    "back": 6864.62,
-    "avg_price": 0.7180606837048761,
-    "worst_day": 29.61,
+    "n": 4,
+    "won": 4,
+    "cost": 2308.23,
+    "back": 5954.05,
+    "avg_price": 0.8573185917292506,
+    "worst_day": 93.27,
     "ok": false,
-    "reason": "only 5 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790831752.0450768,
-    "rows": 3000,
-    "covered_days": 14.0,
+    "reason": "only 4 settled bets on our slice in 10 days (need 30)",
+    "ts": 1790853562.3812726,
+    "rows": 2500,
+    "covered_days": 10.0,
     "capped": false,
-    "exits": 4,
+    "exits": 3,
     "flips": 0,
-    "last_trade_ts": 1790818388.0,
+    "last_trade_ts": 1790850357.0,
     "hit": 1.0,
-    "net_pct": 115.25
+    "net_pct": 157.95
    },
    "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43": {
     "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
-    "n": 45,
-    "won": 33,
-    "cost": 38621.56,
-    "back": 54328.24,
-    "avg_price": 0.5602139522712146,
+    "n": 43,
+    "won": 31,
+    "cost": 36341.83,
+    "back": 50828.18,
+    "avg_price": 0.5541177958719586,
     "worst_day": 588.57,
     "ok": false,
     "reason": "scalper: 33% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790831752.0450768,
-    "rows": 2000,
-    "covered_days": 14.0,
+    "ts": 1790853562.3812726,
+    "rows": 1500,
+    "covered_days": 10.0,
     "capped": false,
     "exits": 15,
     "flips": 5,
-    "last_trade_ts": 1790782401.0,
-    "hit": 0.7333,
-    "net_pct": 40.67
+    "last_trade_ts": 1790851113.0,
+    "hit": 0.7209,
+    "net_pct": 39.86
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "n": 285,
-    "won": 140,
-    "cost": 1316668.71,
-    "back": 1358959.98,
-    "avg_price": 0.5100699174536834,
+    "n": 174,
+    "won": 89,
+    "cost": 926697.4,
+    "back": 936683.74,
+    "avg_price": 0.5336970142013416,
     "worst_day": -47015.63,
     "ok": false,
-    "reason": "scalper: 84% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790831752.0450768,
+    "reason": "scalper: 87% of exits within 10 min; uncopyable at our latency",
+    "ts": 1790853562.3812726,
     "rows": 5500,
-    "covered_days": 14.0,
+    "covered_days": 10.0,
     "capped": true,
-    "exits": 19,
-    "flips": 16,
-    "last_trade_ts": 1790828313.0,
-    "hit": 0.4912,
-    "net_pct": 3.21
+    "exits": 15,
+    "flips": 13,
+    "last_trade_ts": 1790850752.0,
+    "hit": 0.5115,
+    "net_pct": 1.08
    },
    "0xd25156e222c9b907b128e27c36821fdb41db4d37": {
     "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
-    "n": 67,
-    "won": 40,
-    "cost": 39008.87,
-    "back": 49980.03,
-    "avg_price": 0.43400559005609946,
+    "n": 50,
+    "won": 29,
+    "cost": 31452.58,
+    "back": 36812.95,
+    "avg_price": 0.4246810472517089,
     "worst_day": -3077.66,
     "ok": true,
-    "reason": "60% came out ahead vs 43% needed, net +28.1%",
-    "ts": 1790831752.0450768,
+    "reason": "58% came out ahead vs 42% needed, net +17.0%",
+    "ts": 1790853562.3812726,
     "rows": 5500,
-    "covered_days": 12.212014410611657,
+    "covered_days": 10.0,
     "capped": true,
-    "exits": 22,
-    "flips": 3,
-    "last_trade_ts": 1790831789.0,
-    "hit": 0.597,
-    "net_pct": 28.12
+    "exits": 16,
+    "flips": 2,
+    "last_trade_ts": 1790853341.0,
+    "hit": 0.58,
+    "net_pct": 17.04
    },
    "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
@@ -1263,10 +1206,10 @@
     "avg_price": 0.0,
     "worst_day": 0.0,
     "ok": false,
-    "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1790831752.0450768,
-    "rows": 1500,
-    "covered_days": 14.0,
+    "reason": "only 0 settled bets on our slice in 10 days (need 30)",
+    "ts": 1790853562.3812726,
+    "rows": 1000,
+    "covered_days": 10.0,
     "capped": false,
     "exits": 0,
     "flips": 0,
@@ -1276,63 +1219,63 @@
    },
    "0xf49614e63fb15383d4a9b717a1be03ad2410fe79": {
     "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
-    "n": 45,
-    "won": 21,
-    "cost": 146298.8,
-    "back": 127406.5,
-    "avg_price": 0.5484171320574214,
-    "worst_day": -11770.62,
+    "n": 11,
+    "won": 5,
+    "cost": 35628.42,
+    "back": 24851.93,
+    "avg_price": 0.7417783642983946,
+    "worst_day": -9060.6,
     "ok": false,
-    "reason": "47% came out ahead vs 55% needed (-8 points, need +3)",
-    "ts": 1790831752.0450768,
+    "reason": "only 11 settled bets on our slice in 10 days (need 30)",
+    "ts": 1790853562.3812726,
     "rows": 5500,
-    "covered_days": 14.0,
-    "capped": true,
-    "exits": 7,
-    "flips": 3,
+    "covered_days": 10.0,
+    "capped": false,
+    "exits": 0,
+    "flips": 0,
     "last_trade_ts": 1790823518.0,
-    "hit": 0.4667,
-    "net_pct": -12.91
+    "hit": 0.4545,
+    "net_pct": -30.25
    },
    "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": {
     "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
-    "n": 50,
-    "won": 26,
-    "cost": 128629.83,
-    "back": 124639.67,
-    "avg_price": 0.46638247497943836,
-    "worst_day": -6319.64,
+    "n": 15,
+    "won": 6,
+    "cost": 39635.68,
+    "back": 32808.6,
+    "avg_price": 0.46239301486410367,
+    "worst_day": -4051.97,
     "ok": false,
-    "reason": "net -3.1% (need +2%)",
-    "ts": 1790831752.0450768,
+    "reason": "only 15 settled bets on our slice in 10 days (need 30)",
+    "ts": 1790853562.3812726,
     "rows": 1000,
-    "covered_days": 14.0,
+    "covered_days": 10.0,
     "capped": false,
-    "exits": 30,
-    "flips": 1,
+    "exits": 10,
+    "flips": 0,
     "last_trade_ts": 1790650661.0,
-    "hit": 0.52,
-    "net_pct": -3.1
+    "hit": 0.4,
+    "net_pct": -17.22
    },
    "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a": {
     "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
-    "n": 51,
-    "won": 35,
-    "cost": 43806.63,
-    "back": 42358.98,
-    "avg_price": 0.7122540466823742,
-    "worst_day": -2631.81,
-    "ok": false,
-    "reason": "scalper: 67% of exits within 10 min; uncopyable at our latency",
-    "ts": 1790831752.0450768,
+    "n": 32,
+    "won": 26,
+    "cost": 29003.54,
+    "back": 30019.23,
+    "avg_price": 0.752192336840935,
+    "worst_day": -1054.37,
+    "ok": true,
+    "reason": "81% came out ahead vs 75% needed, net +3.5%",
+    "ts": 1790853562.3812726,
     "rows": 5500,
-    "covered_days": 14.0,
+    "covered_days": 10.0,
     "capped": true,
-    "exits": 12,
-    "flips": 8,
-    "last_trade_ts": 1790825589.0,
-    "hit": 0.6863,
-    "net_pct": -3.3
+    "exits": 5,
+    "flips": 3,
+    "last_trade_ts": 1790850087.0,
+    "hit": 0.8125,
+    "net_pct": 3.5
    }
   },
   "overrides": {},
@@ -1341,231 +1284,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x00110b8e floor 300.0",
-   "after": "floor 100.0 (moved)",
-   "detail": "copies at $100: 300 yes +20% (n=310, trimmed +17%) · 200 yes +19% (n=384, trimmed +16%) · 150 yes +19% (n=443, trimmed +17%) · 100 YES +20% (n=527, trimmed +17%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": "WALLET",
-   "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
-   "floor_before": 300.0,
-   "floor_after": 100.0,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x09b045ba floor 100.0",
-   "after": "floor 100.0 (same)",
-   "detail": "copies at $100: 300 yes +30% (n=191, trimmed +25%) · 200 yes +44% (n=257, trimmed +35%) · 150 yes +45% (n=296, trimmed +35%) · 100 YES +48% (n=343, trimmed +40%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-   "floor_before": 100.0,
-   "floor_after": 100.0,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x1985327e floor 100.0",
-   "after": "floor 100.0 (same)",
-   "detail": "copies at $100: 300 yes +35% (n=194, trimmed +30%) · 200 yes +34% (n=266, trimmed +29%) · 150 yes +38% (n=293, trimmed +32%) · 100 YES +40% (n=352, trimmed +35%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-   "floor_before": 100.0,
-   "floor_after": 100.0,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x3f3aa700 floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no -6% (n=355, trimmed -9%) · 200 no -6% (n=403, trimmed -9%) · 150 no -7% (n=421, trimmed -10%) · 100 no -6% (n=455, trimmed -9%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x4980930d floor 200.0",
-   "after": "floor 200.0 (same)",
-   "detail": "copies at $200: 300 yes +17% (n=75, trimmed +6%) · 200 YES +16% (n=86, trimmed +7%) · 150 yes +14% (n=94, trimmed +5%) · 100 yes +12% (n=104, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
-   "floor_before": 200.0,
-   "floor_after": 200.0,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x722abb54 floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no +9% (n=180, trimmed +5%) · 200 no +5% (n=199, trimmed +2%) · 150 no +2% (n=228, trimmed -0%) · 100 no +5% (n=271, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x984ffef1 floor 150.0",
-   "after": "floor 150.0 (same)",
-   "detail": "copies at $150: 300 yes +26% (n=139, trimmed +21%) · 200 yes +25% (n=191, trimmed +21%) · 150 YES +27% (n=211, trimmed +23%) · 100 yes +21% (n=243, trimmed +17%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
-   "floor_before": 150.0,
-   "floor_after": 150.0,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x9f15613e floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no +6% (n=401, trimmed +2%) · 200 no +5% (n=446, trimmed +1%) · 150 no +6% (n=484, trimmed +2%) · 100 no +4% (n=539, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0xd25156e2 floor 100.0",
-   "after": "floor global (moved)",
-   "detail": "no floor clears the bars, global floor stays: 300 no +6% (n=35, trimmed -15%) · 200 no +5% (n=58, trimmed -8%) · 150 no +5% (n=87, trimmed -4%) · 100 no +6% (n=108, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": "WALLET",
-   "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
-   "floor_before": 100.0,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0xf49614e6 floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no +2% (n=188, trimmed -3%) · 200 no -5% (n=222, trimmed -9%) · 150 no -4% (n=233, trimmed -8%) · 100 no -4% (n=240, trimmed -8%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0xf9168343 floor 300.0",
-   "after": "floor 300.0 (same)",
-   "detail": "copies at $300: 300 YES +12% (n=111, trimmed +2%) · 200 yes +12% (n=111, trimmed +2%) · 150 yes +12% (n=111, trimmed +2%) · 100 yes +12% (n=111, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
-   "floor_before": 300.0,
-   "floor_after": 300.0,
-   "live": false
-  },
-  {
-   "ts": 1790758487.9359133,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0xfd3e6449 floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no -10% (n=46, trimmed -18%) · 200 no -6% (n=70, trimmed -13%) · 150 no -1% (n=99, trimmed -8%) · 100 no +0% (n=162, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1790766642.8700845,
-   "day": "2026-09-30",
-   "kind": "form",
-   "before": "0x19585131 benched",
-   "after": "in form",
-   "detail": "0x19585131: 40 settled, 60% won vs 52% needed, net +22.3% on $23,777, worst day -902, 0 of 1 exits under 10 min",
-   "push": "WALLET",
-   "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e"
-  },
-  {
-   "ts": 1790766642.8700845,
-   "day": "2026-09-30",
-   "kind": "form",
-   "before": "0x5213eb85 benched",
-   "after": "in form",
-   "detail": "0x5213eb85: 86 settled, 47% won vs 42% needed, net +7.0% on $43,379, worst day -2,314, 2 of 4 exits under 10 min",
-   "push": "WALLET",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
-  },
-  {
-   "ts": 1790766642.8700845,
-   "day": "2026-09-30",
-   "kind": "form",
-   "before": "0xf9168343 in form",
-   "after": "benched",
-   "detail": "0xf9168343: 53 settled, 53% won vs 47% needed, net -0.4% on $140,264, worst day -6,320, 2 of 32 exits under 10 min",
-   "push": "WALLET",
-   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770"
-  },
-  {
-   "ts": 1790769304.9871376,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x5213eb85 floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no -1% (n=298, trimmed -4%) · 200 no +0% (n=350, trimmed -4%) · 150 no +3% (n=383, trimmed -2%) · 100 no +6% (n=413, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1790769304.9871376,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0x73653992 floor 300.0",
-   "after": "floor 300.0 (same)",
-   "detail": "copies at $300: 300 YES +35% (n=65, trimmed +16%) · 200 yes +31% (n=81, trimmed +15%) · 150 yes +27% (n=92, trimmed +12%) · 100 yes +27% (n=110, trimmed +12%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
-   "floor_before": 300.0,
-   "floor_after": 300.0,
-   "live": false
-  },
-  {
-   "ts": 1790769304.9871376,
-   "day": "2026-09-30",
-   "kind": "floor_row",
-   "before": "0xeef6ad0e floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no -4% (n=157, trimmed -7%) · 200 no +1% (n=260, trimmed -2%) · 150 no -1% (n=325, trimmed -3%) · 100 no -3% (n=404, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
   {
    "ts": 1790824346.7039583,
    "day": "2026-10-01",
@@ -1600,38 +1318,260 @@
    "floor_before": null,
    "floor_after": null,
    "live": false
+  },
+  {
+   "ts": 1790838299.4133153,
+   "day": "2026-10-01",
+   "kind": "escalation_delivered",
+   "before": "routine escalation",
+   "after": "sent",
+   "detail": "Loss streak is 12 straight losing copies with no win since it stood at 3. The bot's own push was at streak 10 on 2026-09",
+   "push": "BOT"
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x00110b8e floor 100.0",
+   "after": "floor 300.0 (moved)",
+   "detail": "copies at $300: 300 YES +20% (n=310, trimmed +17%) · 200 yes +19% (n=384, trimmed +16%) · 150 yes +19% (n=442, trimmed +16%) · 100 yes +19% (n=528, trimmed +16%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": "WALLET",
+   "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
+   "floor_before": 100.0,
+   "floor_after": 300.0,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x09b045ba floor 100.0",
+   "after": "floor 100.0 (same)",
+   "detail": "copies at $100: 300 yes +30% (n=194, trimmed +25%) · 200 yes +43% (n=261, trimmed +34%) · 150 yes +43% (n=300, trimmed +34%) · 100 YES +47% (n=347, trimmed +38%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+   "floor_before": 100.0,
+   "floor_after": 100.0,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x1985327e floor 100.0",
+   "after": "floor 100.0 (same)",
+   "detail": "copies at $100: 300 yes +35% (n=195, trimmed +29%) · 200 yes +33% (n=266, trimmed +28%) · 150 yes +37% (n=293, trimmed +32%) · 100 YES +40% (n=351, trimmed +35%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+   "floor_before": 100.0,
+   "floor_after": 100.0,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x3f3aa700 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -6% (n=353, trimmed -8%) · 200 no -6% (n=401, trimmed -9%) · 150 no -7% (n=419, trimmed -10%) · 100 no -6% (n=454, trimmed -9%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x4980930d floor 200.0",
+   "after": "floor 200.0 (same)",
+   "detail": "copies at $200: 300 yes +14% (n=77, trimmed +3%) · 200 YES +14% (n=88, trimmed +5%) · 150 yes +12% (n=96, trimmed +3%) · 100 no +10% (n=106, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
+   "floor_before": 200.0,
+   "floor_after": 200.0,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x722abb54 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +9% (n=182, trimmed +6%) · 200 no +5% (n=201, trimmed +3%) · 150 no +2% (n=230, trimmed -0%) · 100 no +5% (n=273, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x984ffef1 floor 150.0",
+   "after": "floor 150.0 (same)",
+   "detail": "copies at $150: 300 yes +26% (n=144, trimmed +21%) · 200 yes +24% (n=197, trimmed +21%) · 150 YES +27% (n=217, trimmed +22%) · 100 yes +21% (n=249, trimmed +17%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
+   "floor_before": 150.0,
+   "floor_after": 150.0,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x9f15613e floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +5% (n=408, trimmed +1%) · 200 no +5% (n=454, trimmed +1%) · 150 no +5% (n=492, trimmed +2%) · 100 no +3% (n=548, trimmed +0%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0xd25156e2 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -18% (n=31, trimmed -36%) · 200 no -9% (n=57, trimmed -20%) · 150 no -1% (n=84, trimmed -9%) · 100 no +1% (n=108, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0xf49614e6 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +2% (n=187, trimmed -3%) · 200 no -5% (n=221, trimmed -9%) · 150 no -4% (n=232, trimmed -8%) · 100 no -4% (n=239, trimmed -8%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0xf9168343 floor 300.0",
+   "after": "floor 300.0 (same)",
+   "detail": "copies at $300: 300 YES +12% (n=111, trimmed +2%) · 200 yes +12% (n=111, trimmed +2%) · 150 yes +12% (n=111, trimmed +2%) · 100 yes +12% (n=111, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
+   "floor_before": 300.0,
+   "floor_after": 300.0,
+   "live": false
+  },
+  {
+   "ts": 1790846453.6077092,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0xfd3e6449 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -11% (n=44, trimmed -20%) · 200 no -8% (n=67, trimmed -15%) · 150 no -4% (n=95, trimmed -11%) · 100 no -3% (n=157, trimmed -8%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790853562.3812726,
+   "day": "2026-10-01",
+   "kind": "form",
+   "before": "0x19585131 in form",
+   "after": "benched",
+   "detail": "0x19585131: 20 settled, 50% won vs 54% needed, net -7.9% on $12,188, worst day -902",
+   "push": "WALLET",
+   "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e"
+  },
+  {
+   "ts": 1790853562.3812726,
+   "day": "2026-10-01",
+   "kind": "form",
+   "before": "0xfd3e6449 benched",
+   "after": "in form",
+   "detail": "0xfd3e6449: 32 settled, 81% won vs 75% needed, net +3.5% on $29,004, worst day -1,054, 3 of 5 exits under 10 min (capped: 10.0 of 14 days read, 5500 rows)",
+   "push": "WALLET",
+   "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a"
+  },
+  {
+   "ts": 1790856653.9447286,
+   "day": "2026-10-01",
+   "kind": "evict",
+   "before": "0xf9168343 in set Z",
+   "after": "evicted (sticky)",
+   "detail": "probation failed: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)",
+   "push": null,
+   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770"
+  },
+  {
+   "ts": 1790856651.1078465,
+   "day": "2026-10-01",
+   "kind": "probation_failed",
+   "before": "0xf9168343 on probation (10 days on probation)",
+   "after": "evicted: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)",
+   "detail": "lost -6.40 on 'Curitiba: Ryan Dickerso | Evict is reversible: /zset readmit",
+   "push": "WALLET",
+   "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
+   "trial": [
+    {
+     "token_id": "34537177291679694949397291005907747989930794525598723838821364287418875572517",
+     "pnl": -6.4,
+     "won": false
+    }
+   ]
+  },
+  {
+   "ts": 1790857260.0032833,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x5213eb85 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +0% (n=285, trimmed -3%) · 200 no +2% (n=333, trimmed -3%) · 150 no +4% (n=364, trimmed -1%) · 100 no +8% (n=391, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1790857260.0032833,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0x73653992 floor 300.0",
+   "after": "floor 300.0 (same)",
+   "detail": "copies at $300: 300 YES +40% (n=71, trimmed +23%) · 200 yes +34% (n=88, trimmed +19%) · 150 yes +25% (n=101, trimmed +11%) · 100 yes +23% (n=121, trimmed +10%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
+   "floor_before": 300.0,
+   "floor_after": 300.0,
+   "live": false
+  },
+  {
+   "ts": 1790857260.0032833,
+   "day": "2026-10-01",
+   "kind": "floor_row",
+   "before": "0xeef6ad0e floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -3% (n=156, trimmed -6%) · 200 no +1% (n=260, trimmed -2%) · 150 no -0% (n=326, trimmed -2%) · 100 no -2% (n=405, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-09-30 08:00:14 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
-  "2026-09-30 08:27:56 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-30 08:56:07 INFO  [ops] floor_row: '0x00110b8e floor 300.0' -> 'floor 100.0 (moved)' | copies at $100: 300 yes +20% (n=310, trimmed +17%) · 200 yes +19% (n=384, trimmed +16%) · 150 yes +19% (n=443, trimmed +17%) · 100 YES +20% (n=527, trimmed +17%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:56:52 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +30% (n=191, trimmed +25%) · 200 yes +44% (n=257, trimmed +35%) · 150 yes +45% (n=296, trimmed +35%) · 100 YES +48% (n=343, trimmed +40%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:57:15 INFO  [ops] floor_row: '0x1985327e floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +35% (n=194, trimmed +30%) · 200 yes +34% (n=266, trimmed +29%) · 150 yes +38% (n=293, trimmed +32%) · 100 YES +40% (n=352, trimmed +35%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:57:25 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -6% (n=355, trimmed -9%) · 200 no -6% (n=403, trimmed -9%) · 150 no -7% (n=421, trimmed -10%) · 100 no -6% (n=455, trimmed -9%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:57:27 INFO  [ops] floor_row: '0x4980930d floor 200.0' -> 'floor 200.0 (same)' | copies at $200: 300 yes +17% (n=75, trimmed +6%) · 200 YES +16% (n=86, trimmed +7%) · 150 yes +14% (n=94, trimmed +5%) · 100 yes +12% (n=104, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:57:38 INFO  [ops] floor_row: '0x722abb54 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +9% (n=180, trimmed +5%) · 200 no +5% (n=199, trimmed +2%) · 150 no +2% (n=228, trimmed -0%) · 100 no +5% (n=271, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:57:42 INFO  [ops] floor_row: '0x984ffef1 floor 150.0' -> 'floor 150.0 (same)' | copies at $150: 300 yes +26% (n=139, trimmed +21%) · 200 yes +25% (n=191, trimmed +21%) · 150 YES +27% (n=211, trimmed +23%) · 100 yes +21% (n=243, trimmed +17%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:58:06 INFO  [ops] floor_row: '0x9f15613e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +6% (n=401, trimmed +2%) · 200 no +5% (n=446, trimmed +1%) · 150 no +6% (n=484, trimmed +2%) · 100 no +4% (n=539, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:58:21 INFO  [ops] floor_row: '0xd25156e2 floor 100.0' -> 'floor global (moved)' | no floor clears the bars, global floor stays: 300 no +6% (n=35, trimmed -15%) · 200 no +5% (n=58, trimmed -8%) · 150 no +5% (n=87, trimmed -4%) · 100 no +6% (n=108, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:58:34 INFO  [ops] floor_row: '0xf49614e6 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +2% (n=188, trimmed -3%) · 200 no -5% (n=222, trimmed -9%) · 150 no -4% (n=233, trimmed -8%) · 100 no -4% (n=240, trimmed -8%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:58:41 INFO  [ops] floor_row: '0xf9168343 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +12% (n=111, trimmed +2%) · 200 yes +12% (n=111, trimmed +2%) · 150 yes +12% (n=111, trimmed +2%) · 100 yes +12% (n=111, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 08:59:11 INFO  [ops] floor_row: '0xfd3e6449 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -10% (n=46, trimmed -18%) · 200 no -6% (n=70, trimmed -13%) · 150 no -1% (n=99, trimmed -8%) · 100 no +0% (n=162, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 09:18:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-30 09:20:30 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-30 09:22:16 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
-  "2026-09-30 10:07:02 ERROR [inventory] API sync failed: ",
-  "2026-09-30 11:07:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-30 11:11:15 INFO  [ops] form: '0x19585131 benched' -> 'in form' | 0x19585131: 40 settled, 60% won vs 52% needed, net +22.3% on $23,777, worst day -902, 0 of 1 exits under 10 min",
-  "2026-09-30 11:11:48 INFO  [ops] form: '0x5213eb85 benched' -> 'in form' | 0x5213eb85: 86 settled, 47% won vs 42% needed, net +7.0% on $43,379, worst day -2,314, 2 of 4 exits under 10 min",
-  "2026-09-30 11:12:41 INFO  [ops] form: '0xf9168343 in form' -> 'benched' | 0xf9168343: 53 settled, 53% won vs 47% needed, net -0.4% on $140,264, worst day -6,320, 2 of 32 exits under 10 min",
-  "2026-09-30 11:33:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-30 11:51:52 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
-  "2026-09-30 11:51:54 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $19.20 / $200.00",
-  "2026-09-30 11:57:36 INFO  [ops] floor_row: '0x5213eb85 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=298, trimmed -4%) · 200 no +0% (n=350, trimmed -4%) · 150 no +3% (n=383, trimmed -2%) · 100 no +6% (n=413, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 11:57:47 INFO  [ops] floor_row: '0x73653992 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +35% (n=65, trimmed +16%) · 200 yes +31% (n=81, trimmed +15%) · 150 yes +27% (n=92, trimmed +12%) · 100 yes +27% (n=110, trimmed +12%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 11:58:17 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=157, trimmed -7%) · 200 no +1% (n=260, trimmed -2%) · 150 no -1% (n=325, trimmed -3%) · 100 no -3% (n=404, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 12:21:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 14:28:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 15:30:23 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $12.80",
   "2026-09-30 15:32:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1682,8 +1622,31 @@
   "2026-10-01 05:24:27 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-01 05:53:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 06:19:10 INFO  [ops] floor_row: '0x10658d37 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=153, trimmed -8%) · 200 no -5% (n=228, trimmed -9%) · 150 no -2% (n=301, trimmed -7%) · 100 no -8% (n=391, trimmed -11%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-09-30 11:51:53 TRADE [LIVE] BUY $6.40 on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700, order 0x02dd6c6ceb...",
-  "2026-09-30 11:51:54 TRADE [verify] FILLED: BUY 11.23 shares on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700",
+  "2026-10-01 07:05:00 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 12 straight losing copies with no win since it stood at 3. The bot's own push was at streak 10 on 2026-09",
+  "2026-10-01 08:00:14 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
+  "2026-10-01 08:15:30 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $32.00",
+  "2026-10-01 08:22:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-01 09:03:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-01 09:21:38 INFO  [ops] floor_row: '0x00110b8e floor 100.0' -> 'floor 300.0 (moved)' | copies at $300: 300 YES +20% (n=310, trimmed +17%) · 200 yes +19% (n=384, trimmed +16%) · 150 yes +19% (n=442, trimmed +16%) · 100 yes +19% (n=528, trimmed +16%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:21:59 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +30% (n=194, trimmed +25%) · 200 yes +43% (n=261, trimmed +34%) · 150 yes +43% (n=300, trimmed +34%) · 100 YES +47% (n=347, trimmed +38%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:22:13 INFO  [ops] floor_row: '0x1985327e floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +35% (n=195, trimmed +29%) · 200 yes +33% (n=266, trimmed +28%) · 150 yes +37% (n=293, trimmed +32%) · 100 YES +40% (n=351, trimmed +35%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:22:24 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -6% (n=353, trimmed -8%) · 200 no -6% (n=401, trimmed -9%) · 150 no -7% (n=419, trimmed -10%) · 100 no -6% (n=454, trimmed -9%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:22:31 INFO  [ops] floor_row: '0x4980930d floor 200.0' -> 'floor 200.0 (same)' | copies at $200: 300 yes +14% (n=77, trimmed +3%) · 200 YES +14% (n=88, trimmed +5%) · 150 yes +12% (n=96, trimmed +3%) · 100 no +10% (n=106, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:22:40 INFO  [ops] floor_row: '0x722abb54 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +9% (n=182, trimmed +6%) · 200 no +5% (n=201, trimmed +3%) · 150 no +2% (n=230, trimmed -0%) · 100 no +5% (n=273, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:22:44 INFO  [ops] floor_row: '0x984ffef1 floor 150.0' -> 'floor 150.0 (same)' | copies at $150: 300 yes +26% (n=144, trimmed +21%) · 200 yes +24% (n=197, trimmed +21%) · 150 YES +27% (n=217, trimmed +22%) · 100 yes +21% (n=249, trimmed +17%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:22:59 INFO  [ops] floor_row: '0x9f15613e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +5% (n=408, trimmed +1%) · 200 no +5% (n=454, trimmed +1%) · 150 no +5% (n=492, trimmed +2%) · 100 no +3% (n=548, trimmed +0%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:23:08 INFO  [ops] floor_row: '0xd25156e2 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -18% (n=31, trimmed -36%) · 200 no -9% (n=57, trimmed -20%) · 150 no -1% (n=84, trimmed -9%) · 100 no +1% (n=108, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:23:15 INFO  [ops] floor_row: '0xf49614e6 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +2% (n=187, trimmed -3%) · 200 no -5% (n=221, trimmed -9%) · 150 no -4% (n=232, trimmed -8%) · 100 no -4% (n=239, trimmed -8%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:23:18 INFO  [ops] floor_row: '0xf9168343 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +12% (n=111, trimmed +2%) · 200 yes +12% (n=111, trimmed +2%) · 150 yes +12% (n=111, trimmed +2%) · 100 yes +12% (n=111, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 09:23:44 INFO  [ops] floor_row: '0xfd3e6449 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -11% (n=44, trimmed -20%) · 200 no -8% (n=67, trimmed -15%) · 150 no -4% (n=95, trimmed -11%) · 100 no -3% (n=157, trimmed -8%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 11:19:35 INFO  [ops] form: '0x19585131 in form' -> 'benched' | 0x19585131: 20 settled, 50% won vs 54% needed, net -7.9% on $12,188, worst day -902",
+  "2026-10-01 11:20:32 INFO  [ops] form: '0xfd3e6449 benched' -> 'in form' | 0xfd3e6449: 32 settled, 81% won vs 75% needed, net +3.5% on $29,004, worst day -1,054, 3 of 5 exits under 10 min (capped: 10.0 of 14 days read, 5500 rows)",
+  "2026-10-01 12:10:53 WARNING [zset] EVICTED 0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770 from set Z: probation failed: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)",
+  "2026-10-01 12:10:53 INFO  [ops] evict: '0xf9168343 in set Z' -> 'evicted (sticky)' | probation failed: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)",
+  "2026-10-01 12:10:53 INFO  [ops] probation_failed: '0xf9168343 on probation (10 days on probation)' -> 'evicted: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)' | lost -6.40 on 'Curitiba: Ryan Dickerso | Evict is reversible: /zset readmit",
+  "2026-10-01 12:21:40 INFO  [ops] floor_row: '0x5213eb85 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +0% (n=285, trimmed -3%) · 200 no +2% (n=333, trimmed -3%) · 150 no +4% (n=364, trimmed -1%) · 100 no +8% (n=391, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 12:21:43 INFO  [ops] floor_row: '0x73653992 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +40% (n=71, trimmed +23%) · 200 yes +34% (n=88, trimmed +19%) · 150 yes +25% (n=101, trimmed +11%) · 100 yes +23% (n=121, trimmed +10%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-01 12:21:59 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -3% (n=156, trimmed -6%) · 200 no +1% (n=260, trimmed -2%) · 150 no -0% (n=326, trimmed -2%) · 100 no -2% (n=405, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-09-30 17:32:54 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Paris be' @ 0.5300, order 0xbd29a39196...",
   "2026-09-30 17:32:54 TRADE [verify] FILLED: BUY 12.08 shares on 'Will the highest temperature in Paris be' @ 0.5300",
   "2026-09-30 19:06:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: BIG vs fnatic (BO3) - St' @ 0.6500, order 0xaa7fd161df...",
@@ -1724,6 +1687,62 @@
    "concluded": "Re-up FORM_DAYS=10 (in-form ROI +8.3->+10.8, 14d is row-cap truncated); wallet_cap inversion still unfixed because the repo is not on the box, so I can't PR it.",
    "did": "2 proposal(s): limit applied: FORM_DAYS = 10.0 until 10-02 06:00 UTC (owner; noted",
    "cost_usd": 0.6784875
+  },
+  {
+   "ts": 1790838356.1132774,
+   "day": "2026-10-01",
+   "woke_because": "f2269856c89b",
+   "fingerprint": "f2269856c89b",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The bot's loss-streak monitor correctly fired a routine escalation because real-money copying is now 0 wins in 12 settled copies, every live bet ever placed has lost (grep across all bot logs: 12 settled, 12 lost, 0 won). This is the escalation path working as designed, not a code fault: the line reads 'sent' so the owner's phone already has it, and the bot had already pushed him at streak 10. The loss sits inside the armed envelope, today down only about 6.5 dollars against the 45 dollar daily stop, one copy placed and FILLED and CLOB-verified. Nothing can place, size or double an order wrong",
+   "confidence": 0.72,
+   "cost_usd": 0.823191,
+   "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790846595.2085648,
+   "day": "2026-10-01",
+   "woke_because": "5e388c7bc7b2",
+   "fingerprint": "5e388c7bc7b2",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The waking line is an INFO [ops] floor_row analytics report ('0x4980930d floor 200.0' -> 'floor 200.0 (same)'), the bot stating a per-wallet copy floor and its backward-replay ROI; it is not a fault. It registered as a new fingerprint only because the yes/YES/no column ordering in that row normalises differently from the sibling floor_row lines (7da5b6289516, 727577d69f4e, 7dfc4a226f73, a05fff81fe03), which are the identical report for other wallets. The box is healthy around the wake: 112 scheduler heartbeats today, floor_row logged 13 times (one per wallet per cycle), chain reader reading wi",
+   "confidence": 0.95,
+   "cost_usd": 0.20937599999999998,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790853716.0075634,
+   "day": "2026-10-01",
+   "woke_because": "d107d07b88b8",
+   "fingerprint": "d107d07b88b8",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "A benched wallet (0xfd3e6449) qualified into form at 81% won vs 75% needed and the form scanner logged the transition as a normal INFO [ops] line. This is a new fingerprint only because this form-report variant carries the (capped: N of N days read, N rows) suffix, which the normaliser treats as distinct from the older form fingerprints 9d498e122ffb and fe47bbb56041. The [form] scanner ran twice today (05:18 and 11:20), each time scanning 17 wallets with 17 measured and 3 in form, so the subsystem is healthy. The line is a by-design copy-eligibility report, not a fault. No money, sizing, arm, ",
+   "confidence": 0.95,
+   "cost_usd": 0.2218925,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790856761.5336912,
+   "day": "2026-10-01",
+   "woke_because": "cb08900ff1a4",
+   "fingerprint": "cb08900ff1a4",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The wake is a benign, correct probation eviction whose log line leaks the market name into the fingerprint. Wallet 0xf9168343 sat in set Z on probation, placed exactly one real tier 1b copy of $6.40 on Curitiba Ryan Dickerson on Sep 29 that settled at a total loss, and the Oct 1 12:10 scan evicted it for breaching the drawdown floor (0 of 1 won, realized -100 percent, pass needs 2 won and -10 percent); that matches the Sep 29 settle line exactly and the wallet has only ever placed that one tier 1b copy across all logs, so the accounting is right and no money leaked. The eviction is risk reduci",
+   "confidence": 0.86,
+   "cost_usd": 1.6235645000000003,
+   "did": "noted",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -1785,12 +1804,12 @@
   },
   "fe47bbb56041": {
    "first": 1790098332.9559617,
-   "last": 1790679416.4838698,
-   "count": 8,
+   "last": 1790853595.9588218,
+   "count": 9,
    "sample": "2026-09-21 00:18:31 INFO  [ops] form: '0x722abb54 in form' -> 'benched' | 0x722abb54: 101 settled, 76% won vs 74% needed, net +5.0% on $213,391, worst day -7,408",
    "norm": "INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N",
    "recent": [
-    1790679416.4838698
+    1790853595.9588218
    ],
    "action": null,
    "action_ts": null,
@@ -1799,12 +1818,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1790782310.015561,
-   "count": 28,
+   "last": 1790842634.964261,
+   "count": 29,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1790782310.015561
+    1790842634.964261
    ],
    "action": null,
    "action_ts": null,
@@ -1827,12 +1846,12 @@
   },
   "34253fa6334e": {
    "first": 1790098332.9559617,
-   "last": 1790755301.4636862,
-   "count": 10,
+   "last": 1790841674.8314342,
+   "count": 11,
    "sample": "2026-09-21 08:00:09 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
    "norm": "INFO [AB-RACE] rehearsal line sent, real-money line sent",
    "recent": [
-    1790755301.4636862
+    1790841674.8314342
    ],
    "action": null,
    "action_ts": null,
@@ -1954,12 +1973,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790834049.2079659,
-   "count": 362,
+   "last": 1790845515.1576464,
+   "count": 364,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790834049.2079659
+    1790842995.0280309,
+    1790845515.1576464
    ],
    "action": null,
    "action_ts": null,
@@ -2083,20 +2103,12 @@
   },
   "b04bf1a60c1d": {
    "first": 1790266414.9428663,
-   "last": 1790266414.9428663,
-   "count": 9,
+   "last": 1790856761.5336912,
+   "count": 10,
    "sample": "2026-09-24 16:11:52 WARNING [zset] EVICTED 0x05878ac343c1387d592042d788424412733ac40b from set Z: probation failed: 0 of 2 won, realized -99.9% on $12.80 (pass needs 2 won and -10%)",
    "norm": "WARNING [zset] EVICTED <hex> from set Z: probation failed: N of N won, realized N on $N (pass needs N won and N)",
    "recent": [
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663
+    1790856761.5336912
    ],
    "action": null,
    "action_ts": null,
@@ -2105,20 +2117,12 @@
   },
   "89a855d4a192": {
    "first": 1790266414.9428663,
-   "last": 1790266414.9428663,
-   "count": 9,
+   "last": 1790856761.5336912,
+   "count": 10,
    "sample": "2026-09-24 16:11:52 INFO  [ops] evict: '0x05878ac3 in set Z' -> 'evicted (sticky)' | probation failed: 0 of 2 won, realized -99.9% on $12.80 (pass needs 2 won and -10%)",
    "norm": "INFO [ops] evict: 'S' -> 'S' | probation failed: N of N won, realized N on $N (pass needs N won and N)",
    "recent": [
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663,
-    1790266414.9428663
+    1790856761.5336912
    ],
    "action": null,
    "action_ts": null,
@@ -2530,12 +2534,12 @@
   },
   "7da5b6289516": {
    "first": 1790495657.6745641,
-   "last": 1790769467.6970727,
-   "count": 12,
+   "last": 1790857317.9818318,
+   "count": 15,
    "sample": "2026-09-27 07:53:42 INFO  [ops] floor_row: '0x00110b8e floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +22% (n=314, trimmed +18%) · 200 yes +21% (n=394, trimmed +17%) · 150 yes +21% (n=450, trimmed +18%) · 100 yes +21% (n=536, trimmed +18%); backward replay (copy-and-hold at their pri",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
    "recent": [
-    1790769467.6970727
+    1790857317.9818318
    ],
    "action": null,
    "action_ts": null,
@@ -2544,14 +2548,13 @@
   },
   "727577d69f4e": {
    "first": 1790495657.6745641,
-   "last": 1790758662.2969909,
-   "count": 9,
+   "last": 1790846595.2085648,
+   "count": 11,
    "sample": "2026-09-27 07:54:00 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +30% (n=190, trimmed +25%) · 200 yes +44% (n=256, trimmed +35%) · 150 yes +46% (n=294, trimmed +36%) · 100 YES +50% (n=339, trimmed +41%); backward replay (copy-and-hold at their pri",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
    "recent": [
-    1790758662.2969909,
-    1790758662.2969909,
-    1790758662.2969909
+    1790846595.2085648,
+    1790846595.2085648
    ],
    "action": null,
    "action_ts": null,
@@ -2560,12 +2563,13 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1790835594.7217693,
-   "count": 32,
+   "last": 1790857438.0148134,
+   "count": 40,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1790835594.7217693
+    1790857317.9818318,
+    1790857438.0148134
    ],
    "action": null,
    "action_ts": null,
@@ -2588,12 +2592,12 @@
   },
   "a05fff81fe03": {
    "first": 1790495881.4863753,
-   "last": 1790758662.2969909,
-   "count": 4,
+   "last": 1790846595.2085648,
+   "count": 5,
    "sample": "2026-09-27 07:57:47 INFO  [ops] floor_row: '0x984ffef1 floor 150.0' -> 'floor 150.0 (same)' | copies at $150: 300 yes +26% (n=124, trimmed +21%) · 200 yes +26% (n=170, trimmed +22%) · 150 YES +29% (n=189, trimmed +24%) · 100 yes +22% (n=218, trimmed +17%); backward replay (copy-and-hold at their pri",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
    "recent": [
-    1790758662.2969909
+    1790846595.2085648
    ],
    "action": null,
    "action_ts": null,
@@ -2735,6 +2739,62 @@
    "norm": "INFO [verify] PARTIAL: N shares filled so far on 'S'",
    "recent": [
     1790682416.6426873
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "f2269856c89b": {
+   "first": 1790838356.1132774,
+   "last": 1790838356.1132774,
+   "count": 1,
+   "sample": "2026-10-01 07:05:00 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 12 straight losing copies with no win since it stood at 3. The bot's own push was at streak 10 on 2026-09",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Loss streak is N straight losing copies with no win since it stood at N. The bot's own push was at streak N on NN",
+   "recent": [
+    1790838356.1132774
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "5e388c7bc7b2": {
+   "first": 1790846595.2085648,
+   "last": 1790846595.2085648,
+   "count": 1,
+   "sample": "2026-10-01 09:22:31 INFO  [ops] floor_row: '0x4980930d floor 200.0' -> 'floor 200.0 (same)' | copies at $200: 300 yes +14% (n=77, trimmed +3%) · 200 YES +14% (n=88, trimmed +5%) · 150 yes +12% (n=96, trimmed +3%) · 100 no +10% (n=106, trimmed +1%); backward replay (copy-and-hold at their price, firs",
+   "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "recent": [
+    1790846595.2085648
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "d107d07b88b8": {
+   "first": 1790853716.0075634,
+   "last": 1790853716.0075634,
+   "count": 1,
+   "sample": "2026-10-01 11:20:32 INFO  [ops] form: '0xfd3e6449 benched' -> 'in form' | 0xfd3e6449: 32 settled, 81% won vs 75% needed, net +3.5% on $29,004, worst day -1,054, 3 of 5 exits under 10 min (capped: 10.0 of 14 days read, 5500 rows)",
+   "norm": "INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min (capped: N of N days read, N rows)",
+   "recent": [
+    1790853716.0075634
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "cb08900ff1a4": {
+   "first": 1790856761.5336912,
+   "last": 1790856761.5336912,
+   "count": 1,
+   "sample": "2026-10-01 12:10:53 INFO  [ops] probation_failed: '0xf9168343 on probation (10 days on probation)' -> 'evicted: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)' | lost -6.40 on 'Curitiba: Ryan Dickerso | Evict is reversible: /zset readmit",
+   "norm": "INFO [ops] probation_failed: 'S' -> 'S' | lost N on 'Curitiba: Ryan Dickerso | Evict is reversible: /zset readmit",
+   "recent": [
+    1790856761.5336912
    ],
    "action": null,
    "action_ts": null,
