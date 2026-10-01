@@ -16,11 +16,12 @@ owner's "week or two" (the manager's number, s-k7m2qa; the owner's at review).
 What counts as "below the door". Only the checks that say the wallet has
 stopped being worth real money: paper ROI, the promotion floor (which
 carries the second-half decay test), the trimmed-ROI rail, the execution
-rail (real-quote slice or book A), at-their-price ROI, the scalper rail.
-A sample-size check cannot fail for a member that already passed it, an
-idle wallet costs nothing (the form rail benches it), and the book-wide
-persistence check fails for everyone at once and would empty Z on a book
-statistic. Those never count.
+rail (real-quote slice or book A), at-their-price ROI. A sample-size check
+cannot fail for a member that already passed it, an idle wallet costs
+nothing (the form rail benches it), the book-wide persistence check fails
+for everyone at once and would empty Z on a book statistic, and the
+scalper rail measures copyability, not decay (see DECAY_LABELS). Those
+never count.
 
 Mechanics. One row per member per UTC day, written by the same scan that
 refreshes the floor rows, from the same read of the books. A failing day
@@ -73,8 +74,17 @@ DECAY_LABELS = (
     "still positive with its best",
     "does not lose at the prices we would really pay",
     "the other book does not contradict it",
-    "not a scalper at our latency",
 )
+# Not counted on purpose: "not a scalper at our latency". The scalper rail
+# measures whether a wallet's EXITS can be mirrored, which is an admission
+# question; the exit door is for decay. The four members the form table
+# calls scalpers win when their entries are held (+27..+47% at their price,
+# one of them the best real-money net of any wallet followed), and the form
+# rail already benches them reversibly. A sticky eviction on a label the
+# data contradicts is the false positive this door must not fire (the
+# manager, s-k7m2qa round 3). ZSET_DECAY_SCALPER=true counts it again.
+if str(os.environ.get("ZSET_DECAY_SCALPER", "")).strip().lower() in ("1", "true", "yes", "on"):
+    DECAY_LABELS = DECAY_LABELS + ("not a scalper at our latency",)
 
 
 # Checks that read LIVE state (today's form table, today's shadow quotes),

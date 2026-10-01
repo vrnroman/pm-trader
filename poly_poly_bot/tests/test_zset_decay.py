@@ -228,16 +228,28 @@ FAIL_SCALPER = [c if not c[0].startswith("still positive") else c for c in PASS]
     [("not a scalper at our latency", False, "scalper: 100% of exits within 10 min")]
 
 
-def test_the_seed_never_backdates_a_live_only_check(env, monkeypatch):
-    """The scalper rail reads today's form table on every replay day, so a
-    seed that counted it handed a scalper a 14-day streak on day one. It
-    counts from today instead (verifier, s-k7m2qa round 3)."""
+FAIL_SLICE = [c if not c[0].startswith("does not lose") else (c[0], False, "-9% at real quotes over 65") for c in PASS]
+
+
+def test_the_scalper_rail_does_not_count_at_the_door(env, monkeypatch):
+    """It measures copyability (an admission question), not decay; the
+    members the form calls scalpers win when held and the form rail already
+    benches them reversibly (manager, s-k7m2qa round 3)."""
     monkeypatch.setattr(zc, "evaluate", lambda w, b, a, *, era, now, book_corr: Cand(FAIL_SCALPER))
-    sent = []
-    out = _run([W1], T0, send=lambda t, kb=None: sent.append(t))
+    out = _run([W1], T0)
+    assert out["green"] == [W1] and zd.state() == {}
+    assert zd.decay_fails(FAIL_SCALPER) == []
+
+
+def test_the_seed_never_backdates_a_live_only_check(env, monkeypatch):
+    """The real-quote slice reads today's shadow table on every replay day,
+    so a seed that counted it would backdate a streak. It counts from today
+    instead (verifier, s-k7m2qa round 3)."""
+    monkeypatch.setattr(zc, "evaluate", lambda w, b, a, *, era, now, book_corr: Cand(FAIL_SLICE))
+    out = _run([W1], T0)
     assert out["red"] == [W1] and zd.state()[W1]["days"] == 1
-    assert zd.decay_fails(FAIL_SCALPER, replayable_only=True) == []
-    assert zd.decay_fails(FAIL_SCALPER) == [("not a scalper at our latency", "scalper: 100% of exits within 10 min")]
+    assert zd.decay_fails(FAIL_SLICE, replayable_only=True) == []
+    assert zd.decay_fails(FAIL_SLICE) == [("does not lose at the prices we would really pay", "-9% at real quotes over 65")]
 
 
 def test_the_opening_roster_shows_who_left_not_passes(env, monkeypatch):
