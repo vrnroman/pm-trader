@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-01T18:54:18.562311+00:00",
+ "generated": "2026-10-01T20:15:12.397557+00:00",
  "money": {
   "cash": 78.609213,
   "open_cost": 12.8,
@@ -21,7 +21,7 @@
    "1b": 25.6,
    "1c": 0
   },
-  "ts": 1790880775.7426658,
+  "ts": 1790885609.474169,
   "day": "2026-10-01"
  },
  "arm": {
@@ -1722,10 +1722,6 @@
   }
  ],
  "important": [
-  "2026-09-30 19:06:08 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $19.20 / no spend cap (the day stops after $45 lost)",
-  "2026-09-30 19:06:10 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $25.60 / $200.00",
-  "2026-09-30 19:47:30 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $25.60 / no spend cap (the day stops after $45 lost)",
-  "2026-09-30 19:47:31 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $32.00 / $200.00",
   "2026-09-30 20:30:02 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
   "2026-09-30 20:52:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 21:25:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1889,10 +1885,6 @@
   "2026-10-01 18:08:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 18:27:31 INFO  [ops] floor_row: '0x05878ac3 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +5% (n=330, trimmed +2%) · 200 no +1% (n=448, trimmed -1%) · 150 no -1% (n=487, trimmed -3%) · 100 no -5% (n=554, trimmed -7%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-01 18:46:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-09-30 19:06:08 TRADE [LIVE] BUY $6.40 on 'Counter-Strike: BIG vs fnatic (BO3) - St' @ 0.6500, order 0xaa7fd161df...",
-  "2026-09-30 19:06:10 TRADE [verify] FILLED: BUY 9.85 shares on 'Counter-Strike: BIG vs fnatic (BO3) - St' @ 0.6500",
-  "2026-09-30 19:47:31 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Manila b' @ 0.7300, order 0x9b8fabf985...",
-  "2026-09-30 19:47:32 TRADE [verify] FILLED: BUY 8.77 shares on 'Will the highest temperature in Manila b' @ 0.7300",
   "2026-10-01 05:17:01 TRADE [LIVE] BUY $6.40 on 'China Open: Roman Safiullin vs Flavio Co' @ 0.4800, order 0x0b6d83cbee...",
   "2026-10-01 05:17:04 TRADE [verify] FILLED: BUY 13.33 shares on 'China Open: Roman Safiullin vs Flavio Co' @ 0.4800",
   "2026-10-01 13:56:57 INFO  [recovery] No pending orders to recover",
