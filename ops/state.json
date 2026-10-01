@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-30T23:49:28.893194+00:00",
+ "generated": "2026-10-01T00:48:11.663690+00:00",
  "money": {
   "cash": 61.993963,
   "open_cost": 25.6,
@@ -7,8 +7,8 @@
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
-   "date": "2026-09-30",
-   "spent_usd": 25.6,
+   "date": "2026-10-01",
+   "spent_usd": 0.0,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -21,8 +21,8 @@
    "1b": 32.0,
    "1c": 0
   },
-  "ts": 1790811963.6494164,
-  "day": "2026-09-30"
+  "ts": 1790815669.1517296,
+  "day": "2026-10-01"
  },
  "arm": {
   "armed": true,
@@ -34,19 +34,15 @@
   "daily_loss_override_day": null
  },
  "spend": {
-  "date": "2026-09-30",
-  "spent_usd": 25.6,
-  "wallet_copies": {
+  "date": "2026-10-01",
+  "spent_usd": 0.0,
+  "wallet_copies": {},
+  "wallet_copies_yesterday": {
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1,
    "0xd25156e222c9b907b128e27c36821fdb41db4d37": 2,
    "0x1958513132accb7dd17f2cf7beebbc165776b24e": 1
   },
-  "wallet_copies_yesterday": {
-   "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770": 1,
-   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1,
-   "0xd25156e222c9b907b128e27c36821fdb41db4d37": 1
-  },
-  "yesterday": "2026-09-29",
+  "yesterday": "2026-09-30",
   "closed_reason": ""
  },
  "tier": {
@@ -898,7 +894,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-09-28T18:43:24Z-bd83",
-  "admit_scan_ts": 1790802453.4297876,
+  "admit_scan_ts": 1790813502.7586126,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 12,
   "day_pnl": -12.8,
@@ -1589,12 +1585,6 @@
   }
  ],
  "important": [
-  "2026-09-30 00:10:24 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-09-30 00:10:24 ERROR Network error fetching 0x984f...9a43: ",
-  "2026-09-30 00:24:57 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
-  "2026-09-30 00:29:12 ERROR Network error fetching 0x7365...64da: ",
-  "2026-09-30 00:29:12 ERROR Network error fetching 0xeef6...cd4c: Server disconnected without sending a response.",
-  "2026-09-30 00:34:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 00:53:48 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
   "2026-09-30 01:04:03 ERROR Network error fetching 0x1985...51ab: ",
   "2026-09-30 01:08:39 ERROR Network error fetching 0x3f3a...e8fd: ",
@@ -1674,6 +1664,8 @@
   "2026-09-30 22:08:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 22:49:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 23:19:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-01 00:12:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-01 00:45:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-09-30 11:51:53 TRADE [LIVE] BUY $6.40 on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700, order 0x02dd6c6ceb...",
   "2026-09-30 11:51:54 TRADE [verify] FILLED: BUY 11.23 shares on 'Adana: Teodora Kostovic vs Dalma Galfi' @ 0.5700",
   "2026-09-30 17:32:54 TRADE [LIVE] BUY $6.40 on 'Will the highest temperature in Paris be' @ 0.5300, order 0xbd29a39196...",
@@ -1925,13 +1917,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790810398.7652137,
-   "count": 356,
+   "last": 1790815560.1469245,
+   "count": 358,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790808598.385442,
-    1790810398.7652137
+    1790813639.5123239,
+    1790815560.1469245
    ],
    "action": null,
    "action_ts": null,
