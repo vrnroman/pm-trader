@@ -26,16 +26,18 @@ RAIL_STATE_FILE = "zset-rail-state.json"
 
 
 def scan(*, send: Optional[Callable[[str, dict], None]] = None,
-         now: Optional[float] = None, limit: int = 1) -> list[str]:
+         now: Optional[float] = None, limit: int = 1, books=None) -> list[str]:
     """Admit every gate-passing wallet not yet in Z and not evicted, up to
     ``limit`` per scan (one wallet at a time keeps the probation honest).
-    Returns the admitted wallets. Never raises."""
+    Returns the admitted wallets. Never raises. ``books`` is an optional
+    preloaded ``(era, b_positions, a_positions)`` so the exit door that
+    runs in the same pass reads the books once."""
     from src.copy_trading import ops_watch, zset, zset_candidates as zc
     now = time.time() if now is None else now
     if not ops_watch.auto_admit_enabled():
         return []
     try:
-        era, b_pos, a_pos = zc.load_books()
+        era, b_pos, a_pos = books if books is not None else zc.load_books()
         passers, near, _corr = zc.candidates(b_pos, a_pos, era=era, now=now)
     except Exception as exc:
         logger.warn(f"[ops] auto-admit scan could not read the books: {exc}")
@@ -180,3 +182,24 @@ def _card_line(c) -> str:
         return ", ".join(parts)
     except Exception:
         return "gate passed"
+
+
+def exit_door(*, send: Optional[Callable[[str, dict], None]] = None,
+              now: Optional[float] = None, books=None) -> dict:
+    """Read every set-Z member against the gate for this UTC day; a member
+    below it ``zset_decay.DECAY_DAYS`` days running leaves on its own. Runs
+    whether or not auto-admission is on: the way out never depends on the
+    way in. Never raises."""
+    from src.copy_trading import zset, zset_candidates as zc, zset_decay
+    now = time.time() if now is None else now
+    try:
+        era, b_pos, a_pos = books if books is not None else zc.load_books()
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] exit door could not read the books: {exc}")
+        return {"red": [], "green": [], "evicted": [], "skipped": [], "error": str(exc)}
+    try:
+        return zset_decay.check(zset.wallet_set(), b_positions=b_pos, a_positions=a_pos,
+                                era=era, now=now, send=send)
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] exit door failed: {exc}")
+        return {"red": [], "green": [], "evicted": [], "skipped": [], "error": str(exc)}

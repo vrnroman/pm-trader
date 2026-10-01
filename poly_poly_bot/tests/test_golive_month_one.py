@@ -3326,7 +3326,7 @@ def test_the_gate_opens_at_fifteen_settled_and_admits_three_every_three_hours():
     assert CONFIG.copy_promote_min_roi == 0.10 or _os.environ.get("COPY_PROMOTE_MIN_ROI"), "the +10% floor stays"
     src = open("main.py", encoding="utf-8").read()
     assert 'os.environ.get("ZSET_AUTO_ADMIT_EVERY_S", 3 * 3600)' in src
-    assert 'ZSET_AUTO_ADMIT_LIMIT", 3' in src and "ops_admit.scan(send=_send_wallet_kb, limit=admit_scan_limit)" in src
+    assert 'ZSET_AUTO_ADMIT_LIMIT", 3' in src and "ops_admit.scan(send=_send_wallet_kb, limit=admit_scan_limit, books=_books)" in src
     assert "ops_watch.probation_check(now=_now)" in src
     dy = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
     assert "ensure_env COPY_GOLIVE_MIN_SETTLED 15" in dy and "s#^COPY_GOLIVE_MIN_SETTLED=.*#COPY_GOLIVE_MIN_SETTLED=15#" in dy

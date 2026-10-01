@@ -399,11 +399,25 @@ def _live_guard_loop():
             if _now - last_admit_scan >= admit_scan_every:
                 last_admit_scan = _now
                 ops_watch.note_admit_scan(_now)
+                _books = None
+                try:
+                    from src.copy_trading import ops_admit, zset_candidates as _zc
+                    _books = _zc.load_books()
+                except Exception as _exc:
+                    logger.warn(f"[guard] the paper books could not be read for the Z scan: {_exc}")
                 try:
                     from src.copy_trading import ops_admit
-                    ops_admit.scan(send=_send_wallet_kb, limit=admit_scan_limit)
+                    ops_admit.scan(send=_send_wallet_kb, limit=admit_scan_limit, books=_books)
                 except Exception as _exc:
                     logger.warn(f"[guard] auto-admit scan failed: {_exc}")
+                # The exit door (the owner, 2026-10-01): every member re-read
+                # against the gate daily, out on its own after a run of days
+                # below it. Independent of the auto-admit switch.
+                try:
+                    from src.copy_trading import ops_admit
+                    ops_admit.exit_door(send=_send_wallet_kb, now=_now, books=_books)
+                except Exception as _exc:
+                    logger.warn(f"[guard] exit door failed: {_exc}")
             # The form scan on its own persisted clock (FORM_EVERY_S), plus a
             # catch-up each pass for wallets the table has never measured
             # (admitted by another path, or a failed first read): they are
