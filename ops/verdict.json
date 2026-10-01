@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-01T06:43:37Z-f4cc",
-    "ts": 1790837017,
+    "id": "2026-10-01T12:45:51Z-e04c",
+    "ts": 1790858751,
     "kind": "escalation",
-    "message": "Loss streak is 12 straight losing copies with no win since it stood at 3. The bot's own push was at streak 10 on 2026-09-28; nothing new since, last_escalation_id unchanged. Equity is 87.43 now, down from 91.68 at that push, after dipping to 83.11 on 2026-09-29. Spend today is 6.40, well under the 45 stop. Armed true, no guard failure, no self-disarm.",
+    "message": "No digest or heartbeat run since 2026-10-01 07:02 UTC, now over five hours quiet though both workflows show active. Last commit on ops-digest is 89facbb at 07:02:53Z. Last known state from that digest: armed true, equity 81.03, spend 6.40 of no cap, loss streak 12 unchanged from the prior escalation. I only see GitHub run history, not the VM or Telegram. The bot may be running blind with no fresh floor or form checks and no way to catch a disarm. Check Actions scheduling and the runner.",
     "evidence": [
-        "money: {\"armed\": true, \"equity\": 87.43, \"spend\": {\"spent_usd\": 6.4, \"daily_loss_stop_usd\": 45.0}}",
-        "watch: \"loss_streak\": 12, \"day_pnl\": -12.8, \"day_pnl_day\": \"2026-09-29\", \"last_escalation_id\": \"2026-09-28T18:43:24Z-bd83\"",
-        "fingerprint: 9d6f31d998d2 last 56.0h ago :: INFO [ops] escalation_delivered: 'S' -> 'S' | Loss streak is N straight losing copies with no win since it stood at N, t",
-        "digest-2026-09-28.md ledger: escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 10 straight losing copies with no win since it stood at 3, ten days ago. Equity fell 113.26 to 91.68 over",
-        "fingerprint: 2497cd50ff7d x8 last 40.0h ago :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)"
+        "ops digest 2026-10-01T07:02:23.667956+00:00 (last 24h) -- no newer digest commit exists on ops-digest as of this check",
+        "GitHub Actions: Ops digest run #211 completed success at 2026-10-01T07:01:15Z, no run since (checked via actions_list)",
+        "GitHub Actions: Heartbeat run #494 completed success at 2026-10-01T07:00:15Z, no run since (checked via actions_list)",
+        "money state: {\"armed\": true, \"equity\": 81.03, \"spend\": {\"spent_usd\": 6.4, \"daily_loss_stop_usd\": 45.0}}",
+        "watch: \"loss_streak\": 12, \"day_pnl\": -12.8, \"day_pnl_day\": \"2026-09-29\", \"last_escalation_id\": \"2026-09-28T18:43:24Z-bd83\" (unchanged from prior verdict 2026-10-01T06:43:37Z-f4cc)"
     ],
     "commit": null
 }
