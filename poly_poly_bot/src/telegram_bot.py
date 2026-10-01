@@ -2051,12 +2051,19 @@ def _handle_zset(text: str) -> None:
         lines.append("<i>An empty Z is a safe state, not a broken one: with "
                      "nothing in it, arming trades nothing.</i>")
     else:
+        from src.copy_trading import zset_decay
+        _door = zset_decay.state()
         for w in wallets:
             tier = promotion_state.promoted_tier_of(w, scope=zset.SCOPE) or "?"
             lines.append(f"  <code>{_esc(w)}</code>  tier {_esc(str(tier))}")
+            _dl = zset_decay.line_for(w, _door)
+            if _dl:
+                lines.append(f"      🟡 {_esc(_dl)}")
         lines.append("")
         lines.append(f"<i>{len(wallets)} wallet(s). Admitted by the go-live "
-                     f"gate plus the concentration rail, never by hand.</i>")
+                     f"gate plus the concentration rail, never by hand. "
+                     f"Re-read against the gate daily; {zset_decay.DECAY_DAYS} days below it "
+                     f"and a member leaves on its own.</i>")
     lines.append("")
     lines.append("<b>Status</b>")
     lines.append(f"  {'🔴 LIVE' if not st['preview'] else '🟢 PREVIEW'}, "
