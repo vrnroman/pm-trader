@@ -442,6 +442,16 @@ def _driven_source(monkeypatch, tmp_path, fetch):
     monkeypatch.setattr(s, "_fetch_events_range", fetch)
     monkeypatch.setattr(mod, "POLL_INTERVAL_S", 0.0)
     monkeypatch.setattr(mod, "CHUNK_RETRY_DELAY_S", 0.0)
+    # The reader's own back-off sleeps are real seconds; the driver spins the
+    # loop a bounded number of times, so under a ticking (frozen) clock a
+    # 5 s sleep in an error branch left the test racing the wall clock (red
+    # on the +90d/+400d gate from 09-29, s-k7m2qa). Every sleep yields once.
+    import asyncio as _aio
+    _real_sleep = _aio.sleep
+
+    async def _yield_once(_delay=0, *_a, **_k):
+        await _real_sleep(0)
+    monkeypatch.setattr(mod.asyncio, "sleep", _yield_once)
     polls: list = []
     monkeypatch.setattr(trade_store, "record_poll_ok", lambda: polls.append(1))
     logged = {"warn": [], "error": []}
