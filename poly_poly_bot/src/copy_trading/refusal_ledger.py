@@ -222,7 +222,15 @@ def per_wallet(joined: list[dict], *, stake_usd: float) -> dict:
     return out
 
 
-def render(rows: list[dict], *, days: float, stake_usd: float, n_refusals: int) -> str:
+def distinct_copies(joined: list[dict]) -> int:
+    """How many distinct paper copies the settled refusals point at, across
+    classes (a copy refused under two classes is one copy here, two rows in
+    the table)."""
+    return len({r.get("copy_id") for r in joined if r.get("settled") and r.get("copy_id")})
+
+
+def render(rows: list[dict], *, days: float, stake_usd: float, n_refusals: int,
+           n_distinct: Optional[int] = None) -> str:
     if not rows:
         return (f"🧾 <b>Refusals, last {days:.0f}d</b>: none recorded. "
                 f"<i>Market-quality refusals are written from 2026-10-01; older ones were retries only.</i>")
@@ -238,7 +246,8 @@ def render(rows: list[dict], *, days: float, stake_usd: float, n_refusals: int) 
             lines.append(f"  <b>{a['cls']}</b> · {a['n']} · 0 settled twins yet")
     joined = sum(a["settled"] for a in rows)
     reps = sum(a.get("repeats", 0) for a in rows)
-    lines.append(f"<i>{n_refusals} refusals, {joined} distinct settled paper twins"
+    copies = f" over {n_distinct} distinct copies" if n_distinct is not None and n_distinct != joined else ""
+    lines.append(f"<i>{n_refusals} refusals, {joined} settled class rows{copies}"
                  f"{f' ({reps} repeat refusals of the same copy folded in)' if reps else ''}. A positive net at our quote "
                  f"is a rail costing money; negative is the rail earning its keep. "
                  f"Argue the rails from this table, not from the config comment that set them.</i>")
@@ -291,7 +300,9 @@ def report(*, days: float = 7.0, now: Optional[float] = None, stake_usd: Optiona
         wrote = write_baseline_once(rows, days=days, now=now)
         return {"rows": rows, "n": len(refusals), "days": days, "stake": stake_usd, "baseline_written": wrote,
                 "per_wallet": per_wallet(joined, stake_usd=stake_usd),
-                "text": render(rows, days=days, stake_usd=stake_usd, n_refusals=len(refusals)),
+                "n_distinct": distinct_copies(joined),
+                "text": render(rows, days=days, stake_usd=stake_usd, n_refusals=len(refusals),
+                               n_distinct=distinct_copies(joined)),
                 "line": line(rows, days=days)}
     except Exception as exc:  # noqa: BLE001
         logger.warn(f"[refusals] report failed: {exc}")

@@ -79,7 +79,7 @@ def test_a_refusal_without_a_twin_is_counted_not_dropped():
     assert by["drift"]["n"] == 1 and by["drift"]["settled"] == 0
     assert by["floor"]["n"] == 1 and by["floor"]["settled"] == 0
     text = rl.render(rows, days=7, stake_usd=6.4, n_refusals=2)
-    assert "0 settled twins yet" in text and "2 refusals, 0 distinct settled paper twins" in text
+    assert "0 settled twins yet" in text and "2 refusals, 0 settled class rows" in text
 
 
 def test_one_paper_copy_counts_once_however_many_refusals_point_at_it():
@@ -94,8 +94,22 @@ def test_one_paper_copy_counts_once_however_many_refusals_point_at_it():
     assert rows[0]["net_their"] == pytest.approx(6.4, abs=0.01)
     pw = rl.per_wallet(rl.join(ref, [pos], []), stake_usd=6.4)
     assert pw[W]["settled"] == 1 and pw[W]["repeats"] == 9
-    text = rl.render(rows, days=7, stake_usd=6.4, n_refusals=10)
-    assert "1 distinct settled paper twins (9 repeat refusals of the same copy folded in)" in text
+    text = rl.render(rows, days=7, stake_usd=6.4, n_refusals=10, n_distinct=1)
+    assert "1 settled class rows (9 repeat refusals of the same copy folded in)" in text
+
+
+def test_a_copy_refused_under_two_classes_is_two_rows_and_one_copy_and_the_footer_says_both():
+    """The verifier's round-4 flag: the per-class total and the per-copy
+    total differ by design; the footer names both so neither reads as the
+    other (the owner's 30cbda4 correction)."""
+    ref = [{"ts": T, "trader": W, "token": "TOK", "reason": "min_trader_bet", "cls": "floor", "price": 0.5, "title": "m"},
+           {"ts": T + 5, "trader": W, "token": "TOK", "reason": "too old", "cls": "too old", "price": 0.5, "title": "m"}]
+    pos = Pos(W, "TOK", T + 60, 0.5, won=True)
+    j = rl.join(ref, [pos], [])
+    rows = rl.table(j, stake_usd=6.4)
+    assert sum(r["settled"] for r in rows) == 2 and rl.distinct_copies(j) == 1
+    text = rl.render(rows, days=7, stake_usd=6.4, n_refusals=2, n_distinct=rl.distinct_copies(j))
+    assert "2 settled class rows over 1 distinct copies" in text
 
 
 def test_a_refunded_twin_is_not_a_settlement():
