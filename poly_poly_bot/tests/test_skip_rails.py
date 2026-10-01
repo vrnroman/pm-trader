@@ -180,4 +180,4 @@ def test_the_refusal_command_and_the_daily_line_are_wired():
     tb = (SRC / "src" / "telegram_bot.py").read_text()
     assert '{"command": "refusals"' in tb and 'text.startswith("/refusals")' in tb
     ow = (SRC / "src" / "copy_trading" / "ops_watch.py").read_text()
-    assert "ref = refusal_line(now)" in ow and "(tail, lag, exp, ref)" in ow
+    assert "ref = refusal_line(now)" in ow and "(tail, lag, exp, ref, zs)" in ow

@@ -2069,14 +2069,22 @@ def _handle_zset(text: str) -> None:
         lines.append("<i>An empty Z is a safe state, not a broken one: with "
                      "nothing in it, arming trades nothing.</i>")
     else:
-        from src.copy_trading import zset_decay
+        from src.copy_trading import ops_watch, refusal_ledger, zset_decay
         _door = zset_decay.state()
+        try:
+            _refused = refusal_ledger.report(days=30.0).get("per_wallet") or {}
+        except Exception:  # noqa: BLE001
+            _refused = None
         for w in wallets:
             tier = promotion_state.promoted_tier_of(w, scope=zset.SCOPE) or "?"
             lines.append(f"  <code>{_esc(w)}</code>  tier {_esc(str(tier))}")
             _dl = zset_decay.line_for(w, _door)
             if _dl:
                 lines.append(f"      🟡 {_esc(_dl)}")
+            try:
+                lines.append(f"      {_esc(ops_watch.wallet_scorecard_line(w, days=30.0, refused=_refused))}")
+            except Exception as exc:  # noqa: BLE001
+                lines.append(f"      ours: unreadable ({_esc(str(exc))[:60]})")
         lines.append("")
         lines.append(f"<i>{len(wallets)} wallet(s). Admitted by the go-live "
                      f"gate plus the concentration rail, never by hand. "

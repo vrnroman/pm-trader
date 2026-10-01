@@ -182,6 +182,26 @@ def table(joined: list[dict], *, stake_usd: float) -> list[dict]:
     return rows
 
 
+def per_wallet(joined: list[dict], *, stake_usd: float) -> dict:
+    """Per followed wallet: refusals, settled twins, won, net at their price
+    (book B's price, their price plus one percent) at ``stake_usd`` a copy."""
+    out: dict = {}
+    for r in joined:
+        w = r.get("trader") or "?"
+        a = out.setdefault(w, {"wallet": w, "n": 0, "settled": 0, "won": 0, "net_their": 0.0})
+        a["n"] += 1
+        if not r.get("settled"):
+            continue
+        a["settled"] += 1
+        a["won"] += 1 if r.get("won") else 0
+        rt = _roi(bool(r.get("won")), r.get("their_price"))
+        if rt is not None:
+            a["net_their"] += stake_usd * rt
+    for a in out.values():
+        a["net_their"] = round(a["net_their"], 2)
+    return out
+
+
 def render(rows: list[dict], *, days: float, stake_usd: float, n_refusals: int) -> str:
     if not rows:
         return (f"🧾 <b>Refusals, last {days:.0f}d</b>: none recorded. "
@@ -248,6 +268,7 @@ def report(*, days: float = 7.0, now: Optional[float] = None, stake_usd: Optiona
         rows = table(joined, stake_usd=stake_usd)
         wrote = write_baseline_once(rows, days=days, now=now)
         return {"rows": rows, "n": len(refusals), "days": days, "stake": stake_usd, "baseline_written": wrote,
+                "per_wallet": per_wallet(joined, stake_usd=stake_usd),
                 "text": render(rows, days=days, stake_usd=stake_usd, n_refusals=len(refusals)),
                 "line": line(rows, days=days)}
     except Exception as exc:  # noqa: BLE001
