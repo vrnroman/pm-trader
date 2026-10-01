@@ -206,7 +206,7 @@ def _live_guard_loop():
         # was structurally incapable of firing while the log said the guard was
         # up. A read that fails must be loud AND must count as a failed pass,
         # or the guard keeps passing on empty inputs forever.
-        pending, redeemable = [], []
+        pending, redeemable, resolved = [], [], []
         read_failed = False
         try:
             pending = list(trade_queue.peek_pending_orders())
@@ -315,23 +315,20 @@ def _live_guard_loop():
                 # released, the bankroll checked against the push policy, and
                 # the money state written for the digest.
                 try:
-                    from src.copy_trading import ops_watch
-                    from src.copy_trading.auto_redeemer import _position_value as _pv
-                    _by_tok = {}
-                    for _p in (redeemable or []):
-                        if isinstance(_p, dict):
-                            for _k in ("tokenId", "asset", "token_id"):
-                                if _p.get(_k):
-                                    _by_tok[str(_p.get(_k))] = _p
-                                    break
-                    _settled = ops_watch.aggregate_released(
-                        released_rows,
-                        lambda tok: ((float(_pv(_by_tok[tok])) if tok in _by_tok else 0.0),
-                                     (_by_tok.get(tok) or {}).get("title")))
+                    from src.copy_trading import ops_watch, real_money
                     _stated = live_budget.stated_budget()
-                    if _settled:
-                        ops_watch.record_settlements(_settled, equity=equity_usd, stated=_stated,
-                                                     floor=floor_usd, send=_send_deal)
+                    # Rows that left the wallet (a winner Polymarket paid, a
+                    # position we sold) are priced from the proxy wallet's own
+                    # activity; rows still in it from the chain's resolved
+                    # list. A payout not found yet is held, never booked as $0.
+                    _settle = ops_watch.settle_released(
+                        released_rows, resolved or redeemable,
+                        fetch_activity=lambda since: real_money.fetch_activity(
+                            CONFIG.proxy_wallet, since_ts=int(since)),
+                        equity=equity_usd, stated=_stated, floor=floor_usd, send=_send_deal)
+                    if _settle.get("pending"):
+                        logger.info(f"[guard] {_settle['pending']} settlement(s) waiting for Polymarket's "
+                                    f"payout row ({'activity read ok' if _settle.get('activity_ok') else 'activity unreadable'})")
                     ops_watch.check_bankroll(equity=equity_usd, floor=floor_usd, send=_send_deal)
                     _spend = None
                     try:
