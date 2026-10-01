@@ -214,11 +214,52 @@ def test_a_member_with_no_rows_in_the_book_is_not_judged(env, gate):
     assert out["skipped"] == [W1] and zd.state() == {}
 
 
-def test_a_corrupt_state_file_reads_as_empty(env, gate):
+def test_a_corrupt_state_file_reopens_the_door_from_the_history(env, monkeypatch):
     (env / zd.STATE_FILE).write_text("{not json")
-    gate({W1: FAIL_FLOOR})
-    out = _run([W1], T0)
+    monkeypatch.setattr(zc, "evaluate", lambda w, b, a, *, era, now, book_corr: Cand(FAIL_FLOOR))
+    sent = []
+    out = _run([W1], T0, send=lambda t, kb=None: sent.append(t))
+    assert out["red"] == [W1]
+    assert zd.state()[W1]["days"] >= 1
+    assert any("exit door is open" in m for m in sent), "a torn file is a re-open, not a silent zero"
+
+
+FAIL_SCALPER = [c if not c[0].startswith("still positive") else c for c in PASS] + \
+    [("not a scalper at our latency", False, "scalper: 100% of exits within 10 min")]
+
+
+def test_the_seed_never_backdates_a_live_only_check(env, monkeypatch):
+    """The scalper rail reads today's form table on every replay day, so a
+    seed that counted it handed a scalper a 14-day streak on day one. It
+    counts from today instead (verifier, s-k7m2qa round 3)."""
+    monkeypatch.setattr(zc, "evaluate", lambda w, b, a, *, era, now, book_corr: Cand(FAIL_SCALPER))
+    sent = []
+    out = _run([W1], T0, send=lambda t, kb=None: sent.append(t))
     assert out["red"] == [W1] and zd.state()[W1]["days"] == 1
+    assert zd.decay_fails(FAIL_SCALPER, replayable_only=True) == []
+    assert zd.decay_fails(FAIL_SCALPER) == [("not a scalper at our latency", "scalper: 100% of exits within 10 min")]
+
+
+def test_the_opening_roster_shows_who_left_not_passes(env, monkeypatch):
+    _admit(W1)
+    monkeypatch.setattr(zc, "evaluate", lambda w, b, a, *, era, now, book_corr: Cand(FAIL_FLOOR))
+    sent = []
+    out = _run([W1], T0, send=lambda t, kb=None: sent.append(t))
+    assert out["evicted"] == [W1]
+    roster = [m for m in sent if "exit door is open" in m][0]
+    assert "LEFT:" in roster and "passes the door" not in roster
+
+
+def test_an_evicted_member_on_a_stale_list_is_not_counted_again(env, gate):
+    _admit(W1)
+    gate({W1: FAIL_FLOOR})
+    for d in range(7):
+        _run([W1], T0 + d * DAY)
+    assert zset.wallets() == []
+    sent = []
+    out = _run([W1], T0 + 7 * DAY, send=lambda t, kb=None: sent.append(t))
+    assert out == {"red": [], "green": [], "evicted": [], "skipped": []}
+    assert sent == [] and zd.state() == {}
 
 
 # --------------------------------------------------------------------------- #

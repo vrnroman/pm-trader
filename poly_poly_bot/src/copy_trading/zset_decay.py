@@ -31,8 +31,13 @@ phone; the days between are ledger rows. Eviction goes through
 ``zset.evict`` and is as sticky as the owner's own: ``/zset readmit`` is
 the way back, and the gate must pass the wallet again.
 
+The first run seeds each counter from the books as they stood on each past
+day, counting only the checks a replay can date (the scalper rail and the
+real-quote slice read today's tables and are counted from day one, never
+backdated).
+
 Idempotent by construction: a second check on the same UTC day re-reads
-the same verdict and changes nothing. A leaf over ``zset_candidates``,
+the same verdict and changes nothing; a member already evicted is skipped. A leaf over ``zset_candidates``,
 ``zset`` and ``ops_watch``; nothing here places, sizes or arms.
 """
 
@@ -72,18 +77,33 @@ DECAY_LABELS = (
 )
 
 
+# Checks that read LIVE state (today's form table, today's shadow quotes),
+# not the books as they stood: a replay cannot date them, so the history
+# seed never counts them (the verifier, s-k7m2qa round 3: seeding from
+# them handed five members a fabricated fifteen-day streak on day one).
+LIVE_ONLY_LABELS = (
+    "not a scalper at our latency",
+    "does not lose at the prices we would really pay",
+)
+
+
 def _p() -> str:
     return os.path.join(CONFIG.data_dir, STATE_FILE)
 
 
-def _read() -> dict:
+def _read() -> Optional[dict]:
+    """The state, {} when there is none, None when the file is there but
+    will not parse (then the door re-opens from the history, not from a
+    silent zero)."""
     import json
+    if not os.path.exists(_p()):
+        return {}
     try:
         with open(_p(), encoding="utf-8") as f:
             d = json.load(f)
-        return d if isinstance(d, dict) else {}
+        return d if isinstance(d, dict) else None
     except (OSError, ValueError):
-        return {}
+        return None
 
 
 def _write(d: dict) -> bool:
@@ -104,8 +124,9 @@ def _day(ts: float) -> str:
     return time.strftime("%Y-%m-%d", time.gmtime(ts))
 
 
-def decay_fails(checks: Iterable) -> list[tuple[str, str]]:
-    """The failing checks that count, as ``(label, detail)``."""
+def decay_fails(checks: Iterable, *, replayable_only: bool = False) -> list[tuple[str, str]]:
+    """The failing checks that count, as ``(label, detail)``.
+    ``replayable_only`` drops the checks that read live state (the seed)."""
     out = []
     for item in checks or []:
         try:
@@ -115,15 +136,18 @@ def decay_fails(checks: Iterable) -> list[tuple[str, str]]:
         if ok:
             continue
         lab = str(label or "")
-        if any(lab.startswith(pfx) for pfx in DECAY_LABELS):
-            out.append((lab, str(detail or "")))
+        if not any(lab.startswith(pfx) for pfx in DECAY_LABELS):
+            continue
+        if replayable_only and any(lab.startswith(pfx) for pfx in LIVE_ONLY_LABELS):
+            continue
+        out.append((lab, str(detail or "")))
     return out
 
 
 def state() -> dict:
     """Per member: ``{"days": n, "since": first red day, "last_day": day,
     "fails": [labels]}``. Members not in the red are absent."""
-    return _read()
+    return _read() or {}
 
 
 def line_for(wallet: str, st: Optional[dict] = None) -> str:
@@ -185,7 +209,7 @@ def seed_from_history(members: Iterable[str], *, b_positions, a_positions,
                 break
             if cand is None:
                 break
-            fails = decay_fails(cand.checks)
+            fails = decay_fails(cand.checks, replayable_only=True)
             if not fails:
                 break
             streak += 1
@@ -205,7 +229,10 @@ def roster_lines(members: Iterable[str], st: dict, *, window: int,
     for w in sorted({(m or "").lower() for m in members if m}):
         rec = st.get(w) if isinstance(st.get(w), dict) else None
         tail = f" ({_esc(notes[w])})" if notes.get(w) else ""
-        if rec and rec.get("days"):
+        if rec and rec.get("evicted"):
+            out.append(f"  <code>{w[:10]}</code> LEFT: {int(rec['days'])} days below the door "
+                       f"({_esc((rec.get('fails') or ['?'])[0])}){tail}")
+        elif rec and rec.get("days"):
             out.append(f"  <code>{w[:10]}</code> below the door {int(rec['days'])} of {window} days: "
                        f"{_esc((rec.get('fails') or ['?'])[0])}{tail}")
         else:
@@ -227,10 +254,18 @@ def check(members: Iterable[str], *, b_positions, a_positions, era: Optional[flo
     now = time.time() if now is None else now
     window = int(DECAY_DAYS if days is None else days)
     today = _day(now)
-    first_run = not os.path.exists(_p())
     st = _read()
+    first_run = not os.path.exists(_p()) or st is None
+    if st is None:
+        logger.error("[zset-decay] zset-decay.json unreadable: the door re-opens from the history")
+        st = {}
     out = {"red": [], "green": [], "evicted": [], "skipped": []}
     notes: dict = {}
+    roster: dict = {}
+    try:
+        gone = zset.evicted_set()
+    except Exception:  # noqa: BLE001
+        gone = set()
     if first_run:
         # The door opens with the history already on the clock: a member
         # below it for weeks does not get a fresh window today. The roster
@@ -245,10 +280,16 @@ def check(members: Iterable[str], *, b_positions, a_positions, era: Optional[flo
         book_corr = None
     changed = False
     for w in sorted({(m or "").lower() for m in members if m}):
+        if w in gone:
+            # Not a member any more (evicted this pass or earlier): a stale
+            # member list must not restart its clock.
+            st.pop(w, None)
+            continue
         rec = st.get(w) if isinstance(st.get(w), dict) else None
         if rec and rec.get("last_day") == today:
             # Already read today: the second pass changes nothing.
             (out["red"] if rec.get("days") else out["green"]).append(w)
+            roster[w] = dict(rec)
             continue
         try:
             cand = zc.evaluate(w, b_positions, a_positions, era=era, now=now, book_corr=book_corr)
@@ -275,12 +316,14 @@ def check(members: Iterable[str], *, b_positions, a_positions, era: Optional[flo
             st.pop(w, None)
             changed = True
             out["green"].append(w)
+            roster[w] = {}
             continue
         n = (int(rec.get("days") or 0) if rec else 0) + 1
         labels = [lab for lab, _d in fails]
         detail = "; ".join(f"{lab}: {d}" for lab, d in fails)[:300]
         since = float(rec.get("since") or now) if rec else now
         st[w] = {"days": n, "since": since, "last_day": today, "fails": labels}
+        roster[w] = dict(st[w])
         changed = True
         if n >= window:
             reason = (f"decayed: below the door {n} consecutive days "
@@ -293,6 +336,8 @@ def check(members: Iterable[str], *, b_positions, a_positions, era: Optional[flo
                 extra={"wallet": w, "days": n, "window": window, "fails": labels})
             if evicted:
                 st.pop(w, None)
+                gone.add(w)
+                roster[w]["evicted"] = True
                 out["evicted"].append(w)
                 _say(send, f"🚫 <b>Left set Z on its own</b> <code>{w}</code>\n"
                            f"Below the door {n} days running (the window is {window}).\n"
@@ -317,7 +362,7 @@ def check(members: Iterable[str], *, b_positions, a_positions, era: Optional[flo
     if changed:
         _write(st)
     if first_run:
-        lines = roster_lines(members, st, window=window, notes=notes)
+        lines = roster_lines(roster.keys(), roster, window=window, notes=notes)
         plain = " | ".join(l.replace("<code>", "").replace("</code>", "").strip() for l in lines)
         ops_watch.receipt("decay_roster", before="exit door opened", after=f"window {window} days",
                           detail=plain[:600], push="WALLET", now=now,
