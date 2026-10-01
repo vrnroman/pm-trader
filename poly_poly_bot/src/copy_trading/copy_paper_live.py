@@ -52,6 +52,7 @@ def make_detector(
     min_usd: float,
     flagged_by_map: Optional[dict] = None,
     horizon_resolver: Optional[Callable[[str], Optional[float]]] = None,
+    wallet_min_usd: Optional[dict] = None,
 ):
     """Return a detector() yielding fresh, large target BUY trades to copy.
 
@@ -66,12 +67,16 @@ def make_detector(
     (every detected BUY is eligible), preserving the original behaviour.
     """
     fb = {k.lower(): v for k, v in (flagged_by_map or {}).items()}
+    # A wallet with its own PAPER floor (COPY_PAPER_WALLET_MIN_USD) is copied
+    # from that floor instead of the book's; everyone else keeps min_usd.
+    floors = {k.lower(): float(v) for k, v in (wallet_min_usd or {}).items()}
 
     def detect() -> list[dict]:
         out = []
         stats = detect.stats = _blank_reject_stats()
         cutoff = time.time() - max_age_s
         for w in wallets:
+            w_min = floors.get(w.lower(), min_usd)
             acts = _get(DATA, "/activity", user=w, limit=30) or []
             # Stamped per wallet, right after ITS fetch returns: a sweep over
             # ~400 wallets takes minutes, so a single stamp taken at the top
@@ -93,7 +98,7 @@ def make_detector(
                 usd = float(a.get("usdcSize") or 0)
                 if usd <= 0:
                     usd = float(a.get("size") or 0) * price
-                if usd < min_usd:
+                if usd < w_min:
                     stats["below_min_usd"] += 1
                     continue
                 tx = a.get("transactionHash") or ""
@@ -279,16 +284,26 @@ def make_feed_detector(
     horizon_resolver: Optional[Callable[[str], Optional[float]]] = None,
     feed: Optional["TradeFeed"] = None,
     feed_min_usd: Optional[float] = None,
+    wallet_min_usd: Optional[dict] = None,
 ):
     """Feed-based drop-in for ``make_detector`` — same emitted trade shape.
 
     Reads the shared global feed (down to ``feed_min_usd``, a low floor so exits
     are also visible) and keeps only watched-wallet copyable BUYs >= ``min_usd``.
+
+    ``wallet_min_usd`` (COPY_PAPER_WALLET_MIN_USD) names watched wallets with
+    their own, lower floor. The shared feed cannot carry their small trades
+    (its floor is server-side), so each such wallet is polled on its own
+    activity through ``make_detector`` with its floor, and the rows are merged
+    in, deduplicated on copy_id. Paper only: the live floor never reads this.
     """
     fb = {k.lower(): v for k, v in (flagged_by_map or {}).items()}
     watched = {w.lower() for w in wallets}
     feed = feed if feed is not None else TradeFeed()
     floor = feed_min_usd if feed_min_usd is not None else min_usd
+    floors = {k.lower(): float(v) for k, v in (wallet_min_usd or {}).items() if k.lower() in watched}
+    own = {w: make_detector([w], max_age_s, f, flagged_by_map, horizon_resolver)
+           for w, f in floors.items()}
 
     def detect() -> list[dict]:
         out = []
@@ -350,6 +365,22 @@ def make_feed_detector(
                 "detected_at": now_wall,
             })
             stats["emitted"] += 1
+        if own:
+            seen = {r["copy_id"] for r in out}
+            for w, sub in own.items():
+                try:
+                    rows = sub()
+                except Exception:  # noqa: BLE001  one wallet's read never stalls the feed
+                    rows = []
+                for k, v in (getattr(sub, "stats", None) or {}).items():
+                    if k in stats and k != "emitted":
+                        stats[k] += int(v or 0)
+                for r in rows:
+                    if r["copy_id"] in seen:
+                        continue
+                    seen.add(r["copy_id"])
+                    out.append(r)
+                    stats["emitted"] += 1
         return out
 
     detect.stats = {}

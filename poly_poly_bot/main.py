@@ -498,7 +498,7 @@ def _copy_paper_loop():
     from src.copy_trading import governance
     from src.copy_trading.copy_paper import format_resolution_telegram, report
     from src.copy_trading.copy_paper_live import (
-        TradeFeed, make_feed_detector, make_feed_exit_detector)
+        TradeFeed, make_detector, make_feed_detector, make_feed_exit_detector)
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
     from src.copy_trading.outcome_names import DEFAULT_RESOLVER
 
@@ -697,13 +697,19 @@ def _copy_paper_loop():
     # watchlist scales to hundreds. Falls back to per-wallet polling when off.
     detector_factory = None
     exit_detector_factory = None
+    if CONFIG.copy_paper_wallet_min_usd and not CONFIG.copy_paper_feed_detection:
+        # Per-wallet polling already; the overrides ride into make_detector.
+        def detector_factory(wallets, max_age_s, min_usd, flagged_by_map=None, **kw):
+            return make_detector(wallets, max_age_s, min_usd, flagged_by_map,
+                                 wallet_min_usd=CONFIG.copy_paper_wallet_min_usd, **kw)
     if CONFIG.copy_paper_feed_detection:
         _feed = TradeFeed()
         _feed_min = CONFIG.copy_paper_feed_min_usd
 
         def detector_factory(wallets, max_age_s, min_usd, flagged_by_map=None, **kw):
             return make_feed_detector(wallets, max_age_s, min_usd, flagged_by_map,
-                                      feed=_feed, feed_min_usd=_feed_min, **kw)
+                                      feed=_feed, feed_min_usd=_feed_min,
+                                      wallet_min_usd=CONFIG.copy_paper_wallet_min_usd, **kw)
 
         def exit_detector_factory(wallets, max_age_s):
             return make_feed_exit_detector(wallets, max_age_s,
@@ -915,7 +921,7 @@ def _copy_paper_b_loop(book=None):
     from src.copy_trading import cross_route, governance, promotion_state
     from src.copy_trading.copy_paper import format_resolution_telegram, report
     from src.copy_trading.copy_paper_live import (
-        TradeFeed, make_feed_detector, make_feed_exit_detector)
+        TradeFeed, make_detector, make_feed_detector, make_feed_exit_detector)
     from src.copy_trading.copy_paper_runner import CopyPaperRunner
     from src.copy_trading import book_recipes, book_tiers
     from src.copy_trading.outcome_names import DEFAULT_RESOLVER
@@ -1079,13 +1085,19 @@ def _copy_paper_b_loop(book=None):
 
     detector_factory = None
     exit_detector_factory = None
+    if CONFIG.copy_paper_wallet_min_usd and not CONFIG.copy_paper_feed_detection:
+        # Per-wallet polling already; the overrides ride into make_detector.
+        def detector_factory(wallets, max_age_s, min_usd, flagged_by_map=None, **kw):
+            return make_detector(wallets, max_age_s, min_usd, flagged_by_map,
+                                 wallet_min_usd=CONFIG.copy_paper_wallet_min_usd, **kw)
     if CONFIG.copy_paper_feed_detection:
         _feed = TradeFeed()   # B's own feed poll — no cross-thread cache sharing
         _feed_min = CONFIG.copy_paper_feed_min_usd
 
         def detector_factory(wallets, max_age_s, min_usd, flagged_by_map=None, **kw):
             return make_feed_detector(wallets, max_age_s, min_usd, flagged_by_map,
-                                      feed=_feed, feed_min_usd=_feed_min, **kw)
+                                      feed=_feed, feed_min_usd=_feed_min,
+                                      wallet_min_usd=CONFIG.copy_paper_wallet_min_usd, **kw)
 
         def exit_detector_factory(wallets, max_age_s):
             return make_feed_exit_detector(wallets, max_age_s,

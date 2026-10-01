@@ -32,6 +32,25 @@ def _opt_int(name: str, fallback: int) -> int:
     return int(v) if v else fallback
 
 
+def _opt_wallet_floors(name: str) -> dict:
+    """``"0xabc:1,0xdef:5"`` -> {"0xabc": 1.0, "0xdef": 5.0}; a bad entry is
+    skipped, never a crash at boot."""
+    out: dict = {}
+    for item in (os.environ.get(name, "") or "").split(","):
+        item = item.strip()
+        if not item or ":" not in item:
+            continue
+        w, _, v = item.partition(":")
+        w = w.strip().lower()
+        try:
+            f = float(v.strip())
+        except ValueError:
+            continue
+        if w.startswith("0x") and len(w) == 42 and f >= 0:
+            out[w] = f
+    return out
+
+
 def _opt_bool(name: str, fallback: bool) -> bool:
     v = os.environ.get(name, "").strip()
     if not v:
@@ -221,6 +240,14 @@ class Config:
     # copy_paper_min_usd so no copyable BUY is filtered out, but low enough to
     # still catch a watched wallet's exits. The BUY min_usd gate still applies.
     copy_paper_feed_min_usd: float = _opt_float("COPY_PAPER_FEED_MIN_USD", 100.0)
+    # PAPER-ONLY floor overrides per wallet (owner, 2026-10-02: "ignore deal
+    # size for this wallet only"): "0xabc…:1,0xdef…:5" maps a lowercased
+    # wallet to the minimum bet the PAPER detectors copy from it, in place of
+    # the book's floor. The overridden wallet is polled on its own activity
+    # (the shared feed drops trades under its server-side floor). The LIVE
+    # floor never reads this: real money keeps LIVE_MIN_TRADER_BET_USD and the
+    # Z record's own floor row, so an override wallet is measured, never traded.
+    copy_paper_wallet_min_usd: dict = _opt_wallet_floors("COPY_PAPER_WALLET_MIN_USD")
     # Entry guardrails (cut the copies that historically leaked ROI). Reversible
     # via env; set a cap <= 0 to disable it. fill-gate: skip a copy whose
     # achievable fill is > this many bps from the target's price ON EITHER SIDE
