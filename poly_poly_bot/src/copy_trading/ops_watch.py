@@ -205,25 +205,239 @@ class Settlement:
         return self.payout > self.cost
 
 
-def aggregate_released(rows: list, value_of) -> list:
+PENDING_FILE = "settle-pending.json"
+# A payout looked for in the proxy wallet's activity is matched from this
+# long before the row left the wallet (the auto-redeem lands in the same
+# block as the resolution; the slack covers clock skew between the chain
+# and the api).
+PAYOUT_MATCH_SLACK_S = 3600.0
+# A row held this long without a payout in the activity is said on the
+# ledger once a day, never booked as a loss: a payout we did not find is
+# not a payout that did not happen (the 12-settled / 0-won ledger of
+# 2026-10-01 came from booking exactly that).
+PENDING_SAID_EVERY_S = 24 * 3600.0
+
+
+def payout_from_activity(token_id: str, since_ts: float, rows: list) -> Optional[float]:
+    """What Polymarket paid the proxy wallet for ``token_id`` since the row
+    was placed, from the Data API activity rows. None means not found yet,
+    or not attributable.
+
+    A REDEEM row carries no token id, only the condition and the outcome
+    index; our own BUY of the token (asset == token_id) names both, so the
+    payout is the REDEEMs of that condition AND outcome plus our SELLs of
+    the token, from ``since_ts`` minus a slack. A REDEEM without an outcome
+    index is attributed only when the token is the one outcome of that
+    condition we ever bought; two of our tokens on one condition (both
+    sides of a tennis match, from two followed wallets) otherwise share the
+    row and both would read as paid (verifier, s-k7m2qa). A token this
+    wallet never bought on the api cannot be attributed and stays None.
+    """
+    tok = str(token_id or "")
+    if not tok:
+        return None
+    floor = float(since_ts or 0.0) - PAYOUT_MATCH_SLACK_S
+    cid = ""
+    oi: Optional[int] = None
+    ours_on_cid: set = set()
+    for r in rows or []:
+        if not isinstance(r, dict) or str(r.get("type") or "").upper() != "TRADE":
+            continue
+        if str(r.get("side") or "").upper() != "BUY":
+            continue
+        if str(r.get("asset") or "") == tok and not cid:
+            cid = str(r.get("conditionId") or "")
+            try:
+                oi = int(r.get("outcomeIndex")) if r.get("outcomeIndex") is not None else None
+            except (TypeError, ValueError):
+                oi = None
+    if not cid:
+        return None
+    for r in rows or []:
+        if (isinstance(r, dict) and str(r.get("type") or "").upper() == "TRADE"
+                and str(r.get("conditionId") or "") == cid and r.get("asset")):
+            ours_on_cid.add(str(r.get("asset")))
+    paid = 0.0
+    found = False
+    for r in rows or []:
+        if not isinstance(r, dict):
+            continue
+        try:
+            ts = float(r.get("timestamp") or 0)
+        except (TypeError, ValueError):
+            continue
+        if ts < floor:
+            continue
+        typ = str(r.get("type") or "").upper()
+        if typ == "REDEEM" and str(r.get("conditionId") or "") == cid:
+            r_oi = r.get("outcomeIndex")
+            try:
+                r_oi = int(r_oi) if r_oi is not None else None
+            except (TypeError, ValueError):
+                r_oi = None
+            if r_oi is not None and oi is not None:
+                if r_oi != oi:
+                    continue          # the other side's payout, not this token's
+            elif len(ours_on_cid) > 1:
+                return None           # shared row, no index to split it: hold
+            paid += float(r.get("usdcSize") or 0.0)
+            found = True
+        elif (typ == "TRADE" and str(r.get("side") or "").upper() == "SELL"
+              and str(r.get("asset") or "") == tok):
+            paid += float(r.get("usdcSize") or 0.0)
+            found = True
+    return round(paid, 6) if found else None
+
+
+def aggregate_released(rows: list, value_of, *, payout_of_gone=None,
+                       pending_out: Optional[list] = None) -> list:
     """One Settlement per token from the tier ledger's released rows: two
     placements on one market side share one payout, so their costs are
     summed against it (code review, finding 5). ``value_of(token) -> (payout,
-    title)`` reads the chain's resolved row."""
+    title)`` reads the chain's resolved row.
+
+    A row released because the token LEFT the wallet (``why == "gone"``) is
+    a winner Polymarket already paid, or a position we sold; its payout is
+    not on the chain's resolved list any more, so ``payout_of_gone(token,
+    since_ts) -> float | None`` reads it from the proxy wallet's activity.
+    None (not found yet, or no reader) parks the row in ``pending_out``
+    instead of booking it: until 2026-10-01 these rows were dropped, so the
+    ledger booked every loss and no win (12 settled, 0 won, against
+    Polymarket's 32W/17L).
+    """
     agg: dict = {}
     for r in rows:
-        if r.get("why") != "resolved":
+        why = r.get("why")
+        if why not in ("resolved", "gone"):
             continue
         tok = str(r.get("token_id") or "")
         a = agg.setdefault(tok, {"cost": 0.0, "trader": str(r.get("trader") or ""),
-                                 "tier": str(r.get("tier") or ""), "title": str(r.get("title") or "")})
+                                 "tier": str(r.get("tier") or ""), "title": str(r.get("title") or ""),
+                                 "why": why, "ts": float(r.get("ts") or 0.0), "rows": []})
         a["cost"] += float(r.get("cost") or 0.0)
+        ts = float(r.get("ts") or 0.0)
+        if ts and (not a["ts"] or ts < a["ts"]):
+            a["ts"] = ts   # the earliest placement: the payout is looked for from here
+        a["rows"].append(r)
+        if why == "resolved":
+            a["why"] = "resolved"
     out = []
     for tok, a in agg.items():
-        payout, title = value_of(tok)
+        if a["why"] == "resolved":
+            payout, title = value_of(tok)
+        else:
+            payout = payout_of_gone(tok, a["ts"]) if payout_of_gone is not None else None
+            title = a["title"]
+        if payout is None:
+            # Unknown is not zero, on either path: held for the next pass.
+            if pending_out is not None:
+                pending_out.extend(a["rows"])
+            continue
         out.append(Settlement(token_id=tok, wallet=a["trader"], cost=round(a["cost"], 2),
                               payout=float(payout or 0.0), tier=a["tier"], title=a["title"] or str(title or "")))
     return out
+
+
+def pending_rows() -> list:
+    """Released rows still waiting for their payout to show in the activity.
+    A file that exists and will not parse is said: the rows in it were
+    released once and cannot be released again."""
+    path = _p(PENDING_FILE)
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                d = json.load(f)
+        except (OSError, ValueError) as exc:
+            logger.error(f"[ops] settle-pending.json unreadable ({exc}): held settlements may be lost; "
+                         f"check /real against the ledger")
+            return []
+    else:
+        d = {}
+    rows = d.get("rows") if isinstance(d, dict) else None
+    return [r for r in (rows or []) if isinstance(r, dict)]
+
+
+def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Callable,
+                    equity: Optional[float], stated: Optional[float], floor: Optional[float],
+                    send: Optional[Callable[[str], None]], now: Optional[float] = None,
+                    value_of: Optional[Callable] = None) -> dict:
+    """The one seam the guard calls: book every released row whose payout
+    is known, hold the rest, say what was held. Returns
+    ``{"booked": n, "pending": n, "activity_ok": bool}``.
+
+    ``redeemable`` is the chain's resolved list (the redeemer's), the payout
+    source for rows still in the wallet. ``fetch_activity(since_ts) ->
+    list | None`` is the proxy wallet's Data API activity, the payout source
+    for rows that left it; it is called only when such rows exist (this
+    pass or held from an earlier one), and a failed read holds them all.
+    """
+    now = time.time() if now is None else now
+    from src.copy_trading.auto_redeemer import _position_value as _pv
+    by_tok: dict = {}
+    for p in redeemable or []:
+        if isinstance(p, dict):
+            for k in ("tokenId", "asset", "token_id"):
+                if p.get(k):
+                    by_tok[str(p.get(k))] = p
+                    break
+    if value_of is None:
+        def value_of(tok, _bt=by_tok):
+            # A token the chain's list does not carry has no price here:
+            # None holds it rather than booking a $0 loss.
+            return ((float(_pv(_bt[tok])) if tok in _bt else None), (_bt.get(tok) or {}).get("title"))
+    held = pending_rows()
+    rows = list(released_rows or []) + held
+    gone = [r for r in rows if r.get("why") == "gone"]
+    activity = None
+    activity_ok = True
+    if gone:
+        since = min(float(r.get("ts") or now) for r in gone) - PAYOUT_MATCH_SLACK_S
+        try:
+            activity = fetch_activity(since)
+        except Exception as exc:  # noqa: BLE001
+            logger.warn(f"[ops] activity read for settlements raised: {exc}")
+            activity = None
+        activity_ok = activity is not None
+    pending: list = []
+    if activity_ok:
+        settled = aggregate_released(
+            rows, value_of,
+            payout_of_gone=lambda tok, ts, _a=activity: payout_from_activity(tok, ts, _a or []),
+            pending_out=pending)
+    else:
+        # No activity read: book what the chain can price, hold every gone row.
+        settled = aggregate_released([r for r in rows if r.get("why") == "resolved"], value_of)
+        pending = gone
+    booked = 0
+    if settled:
+        before = set(_read_json(_p(STATE_FILE)).get("settled_tokens") or [])
+        record_settlements(settled, equity=equity, stated=stated, floor=floor, send=send, now=now)
+        booked = sum(1 for s in settled if s.token_id and s.token_id not in before)
+    # Dedupe the held rows by token (two passes can release the same row
+    # twice when the exposure state is rewritten) and keep them for the
+    # next pass.
+    seen: set = set()
+    uniq: list = []
+    for r in pending:
+        tok = str(r.get("token_id") or "")
+        if tok in seen:
+            continue
+        seen.add(tok)
+        uniq.append(r)
+    d = _read_json(_p(PENDING_FILE))
+    said = d.get("said") if isinstance(d, dict) else None
+    said = dict(said) if isinstance(said, dict) else {}
+    for r in uniq:
+        tok = str(r.get("token_id") or "")
+        last = float(said.get(tok) or 0.0)
+        if now - last >= PENDING_SAID_EVERY_S:
+            receipt("settle_pending", before=f"{str(r.get('trader') or '')[:10]} open ${float(r.get('cost') or 0):.2f}",
+                    after=("payout not in the activity yet" if activity_ok else "activity unreadable, held"),
+                    detail=f"'{str(r.get('title') or '')[:40]}' left the wallet; booked when Polymarket's row shows",
+                    now=now, extra={"token_id": tok, "wallet": str(r.get("trader") or "").lower()})
+            said[tok] = now
+    _write_json(_p(PENDING_FILE), {"rows": uniq, "said": {k: v for k, v in said.items() if k in seen}, "ts": now})
+    return {"booked": booked, "pending": len(uniq), "activity_ok": activity_ok}
 
 
 def record_settlements(settled: list[Settlement], *, equity: Optional[float],

@@ -2880,7 +2880,7 @@ def test_released_rows_aggregate_per_token(tmp_path, monkeypatch):
     assert out[0].won is False and out[0].pnl == -3.8
     import pathlib
     src = (pathlib.Path(__file__).resolve().parents[1] / "main.py").read_text()
-    assert "ops_watch.aggregate_released(" in src and "out = None  # this pass's guard findings only" in src
+    assert "ops_watch.settle_released(" in src and "out = None  # this pass's guard findings only" in src
     assert "_clear = pass_ok and isinstance(out, dict)" in src
 
 
