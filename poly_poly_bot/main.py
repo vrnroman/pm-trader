@@ -24,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.config import CONFIG
+from src.copy_trading import book_recipes as _book_recipes
 from src.logger import logger
 
 import src.telegram_bot as telegram_bot
@@ -754,6 +755,7 @@ def _copy_paper_loop():
         costs_enabled=CONFIG.copy_paper_costs_enabled,
         gas_usd_per_trade=CONFIG.copy_paper_gas_usd,
         trade_fee_bps=CONFIG.copy_paper_trade_fee_bps,
+        fee_lookup=_book_recipes._fee_lookup(CONFIG),
         # When Strategy 4 is on, this near-term book stops short-copying far-future
         # bets — they would lock paper capital for months and belong to the S4
         # book instead. Off => horizon-blind, so behaviour is unchanged.

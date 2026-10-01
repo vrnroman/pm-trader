@@ -406,8 +406,9 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
             pending_out=pending)
     else:
         # No activity read: book what the chain can price, hold every gone row.
-        settled = aggregate_released([r for r in rows if r.get("why") == "resolved"], value_of)
-        pending = gone
+        settled = aggregate_released([r for r in rows if r.get("why") == "resolved"], value_of,
+                                     pending_out=pending)
+        pending = pending + gone
     booked = 0
     if settled:
         before = set(_read_json(_p(STATE_FILE)).get("settled_tokens") or [])
@@ -1037,12 +1038,25 @@ def daily_line(now: Optional[float] = None) -> str:
     tail = watcher_line(now)
     lag = lag_cost_line(now)
     exp = experiment_line(now)
-    extra = "".join(("\n" + t) for t in (tail, lag, exp) if t)
+    ref = refusal_line(now)
+    extra = "".join(("\n" + t) for t in (tail, lag, exp, ref) if t)
     if not rows:
         return "📒 ledger: nothing happened in the last 24h" + extra
     return (f"📒 ledger, last 24h: {len(settled)} settled ({won} won) {pnl:+.2f}; "
             f"{len(heals)} self-heal(s); {sum(1 for r in rows if r.get('kind') == 'auto_admit')} auto-admission(s)"
             + extra)
+
+
+def refusal_line(now: Optional[float] = None) -> str:
+    """The refusal ledger's one line (s-k7m2qa): the three rails with the
+    most money behind their refusals at our quote, last 7 days. Empty while
+    nothing has a settled paper twin."""
+    try:
+        from src.copy_trading import refusal_ledger
+        return refusal_ledger.report(days=7.0, now=now).get("line") or ""
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] refusal line failed: {exc}")
+        return ""
 
 
 def experiment_line(now: Optional[float] = None) -> str:

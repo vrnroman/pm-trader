@@ -110,6 +110,7 @@ class CopyPaperRunner:
         costs_enabled: bool = False,
         gas_usd_per_trade: float = 0.0,
         trade_fee_bps: float = 0.0,
+        fee_lookup: Optional[Callable[[str], Optional[int]]] = None,
         # which auto-demote blacklist binds this book. Default (None) reads the
         # legacy global store; a per-strategy book passes its own scoped reader
         # so strategy A's demotions never filter strategy B's watchlist (a wallet
@@ -164,6 +165,7 @@ class CopyPaperRunner:
         self.era_state_path = era_state_path
         self.gas_usd_per_trade = gas_usd_per_trade
         self.trade_fee_bps = trade_fee_bps
+        self.fee_lookup = fee_lookup
         self._cost_model = CostModel.from_env() if costs_enabled else None
         self._blacklist_provider = blacklist_provider
         self._mark_fetcher = mark_fetcher
@@ -323,6 +325,7 @@ class CopyPaperRunner:
             cost_model=self._cost_model,
             gas_usd_per_trade=self.gas_usd_per_trade,
             trade_fee_bps=self.trade_fee_bps,
+            fee_lookup=self.fee_lookup,
             observer=self._observer,
         )
         summary = engine.run_cycle()

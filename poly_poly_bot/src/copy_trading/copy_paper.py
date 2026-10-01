@@ -550,6 +550,10 @@ class CopyPaperEngine:
         cost_model: Optional[CostModel] = None,
         gas_usd_per_trade: float = 0.0,
         trade_fee_bps: float = 0.0,
+        # The exchange's own fee for the token (bps) when it can be read;
+        # ``trade_fee_bps`` is the fallback. Charged from the day this shipped
+        # forward; rows already stamped keep what they were stamped with.
+        fee_lookup: Optional[Callable[[str], Optional[int]]] = None,
         # Pure observation of the RAW detected list, before any admission
         # rule. Used by the shadow-quote measurement to price the trades this
         # engine refuses as well as the ones it takes. None = engine
@@ -601,6 +605,7 @@ class CopyPaperEngine:
         self.cost_model = cost_model
         self.gas_usd_per_trade = gas_usd_per_trade
         self.trade_fee_bps = trade_fee_bps
+        self.fee_lookup = fee_lookup
 
     def _evidence_maps(self) -> tuple[dict, dict]:
         """Settled-record maps for the P1-6 book-evidence gates:
@@ -844,8 +849,16 @@ class CopyPaperEngine:
             # fills finally reads as what a real copier could have kept.
             cost_usd = ideal_cost_usd = 0.0
             if self.cost_model is not None:
+                fee_bps = float(self.trade_fee_bps)
+                if self.fee_lookup is not None:
+                    try:
+                        _live = self.fee_lookup(token)
+                        if _live is not None:
+                            fee_bps = float(_live)
+                    except Exception:  # noqa: BLE001  the fallback rate stands
+                        pass
                 cost_usd = (self.gas_usd_per_trade
-                            + fill.spent * self.trade_fee_bps / 10000.0)
+                            + fill.spent * fee_bps / 10000.0)
                 ideal_cost_usd = (cost_usd
                                   + fill.spent * self.cost_model.cost_of(category))
             self.ledger.add(PaperPosition(

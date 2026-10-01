@@ -698,6 +698,15 @@ async def place_trade_orders(
 
             # --- SELL check: verify we have a position ---
             if trade.side == "SELL" and not has_position(trade.token_id):
+                from src.copy_trading.trade_store import token_ever_bought
+                if not token_ever_bought(trade.token_id):
+                    # Their exit from a position we never entered: nothing to
+                    # mirror and nothing to ask the api about (1,776 syncs in
+                    # 14 days did exactly that, each a positions read).
+                    _skip_throttled(f"never-held:{trade.trader_address[:10]}", "never held",
+                                    f"[exec] SELL skipped: we never held {trade.token_id[:12]}... (no sync)")
+                    mark_trade_as_seen(trade.id)
+                    continue
                 logger.info(f"[exec] SELL but no position for {trade.token_id[:12]}..., syncing inventory...")
                 try:
                     _, _, _, sync_fn = _inventory()
@@ -733,8 +742,11 @@ async def place_trade_orders(
             quality_issue = _check_market_quality(trade, snapshot)
             if quality_issue is not None:
                 logger.skip(f"[exec] Market quality: {quality_issue}")
-                # Retry — don't mark as seen
-                increment_retry(trade.id)
+                # Retry — don't mark as seen. One SKIPPED row per refusal
+                # episode (the first retry), so the refusal ledger can price
+                # what this rail turns away; the retries stay off the record.
+                if increment_retry(trade.id) == 1:
+                    _skip_row(record_trade_history, trade, qt, f"market quality: {quality_issue}")
                 continue
 
             # --- The flip gate (owner, 2026-09-24): a buy the target has
@@ -1282,8 +1294,16 @@ async def process_verifications(
                     outcome=trade.outcome,
                 ))
 
+                _fee = None
+                if trade.side == "BUY":
+                    try:
+                        from src.copy_trading import fee_rate as _fr
+                        _fee = _fr.fee_bps(trade.token_id)
+                    except Exception:  # noqa: BLE001  a line, never a blocker
+                        _fee = None
                 await tg.trade_filled(trade.market, fill.filled_shares, fill.fill_price,
-                                      outcome=trade.outcome)
+                                      outcome=trade.outcome, fee_bps=_fee,
+                                      side=trade.side)
                 remove_pending_order(po.order_id)
 
             elif fill.status == "PARTIAL":

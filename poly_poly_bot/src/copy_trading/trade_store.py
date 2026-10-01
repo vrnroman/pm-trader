@@ -190,6 +190,50 @@ def append_trade_history(record: TradeRecord) -> None:
             f.write(line)
     except Exception as e:
         logger.error(f"[trade-store] Failed to append trade history: {e}")
+    _note_bought(record)
+
+
+# Statuses that mean a BUY of ours went to a book, paper or real: the
+# tokens a mirrored SELL could ever have something of ours to sell.
+_BOUGHT_STATUSES = frozenset({"PLACED", "FILLED", "PARTIAL", "PREVIEW"})
+_bought_tokens: Optional[set] = None
+
+
+def _load_bought_tokens() -> set:
+    global _bought_tokens
+    if _bought_tokens is not None:
+        return _bought_tokens
+    toks: set = set()
+    try:
+        with open(_HISTORY_FILE, encoding="utf-8") as f:
+            for raw in f:
+                try:
+                    r = json.loads(raw)
+                except ValueError:
+                    continue
+                if (isinstance(r, dict) and str(r.get("side") or "").upper() == "BUY"
+                        and r.get("status") in _BOUGHT_STATUSES and r.get("token_id")):
+                    toks.add(str(r["token_id"]))
+    except OSError:
+        pass
+    _bought_tokens = toks
+    return toks
+
+
+def _note_bought(record: TradeRecord) -> None:
+    try:
+        if (str(getattr(record, "side", "") or "").upper() == "BUY"
+                and getattr(record, "status", None) in _BOUGHT_STATUSES
+                and getattr(record, "token_id", None)):
+            _load_bought_tokens().add(str(record.token_id))
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def token_ever_bought(token_id: str) -> bool:
+    """Did any BUY of ours (paper or real) ever touch this token? Read once
+    from the history, kept current by append_trade_history."""
+    return str(token_id or "") in _load_bought_tokens()
 
 
 # Alias kept for callers that import the older name. Same function.

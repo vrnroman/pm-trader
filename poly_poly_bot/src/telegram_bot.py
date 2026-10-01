@@ -52,6 +52,7 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "history", "description": "Last 10 copy trades"},
     {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
     {"command": "speed", "description": "Pre-flip: how fast am I told + how much worse is my entry price"},
+    {"command": "refusals", "description": "What the deals we refused would have done, per rail (/refusals [days])"},
     {"command": "zset", "description": "Set Z: the only wallets real money may follow"},
     {"command": "live", "description": "The real-money interlock: status, or /live CONFIRM to arm"},
     {"command": "canary", "description": "One minimum-size real order through the live path (/canary CONFIRM)"},
@@ -452,6 +453,8 @@ def _handle_command(text: str):
         _handle_check()
     elif text.startswith("/speed"):
         _handle_speed(text)
+    elif text.startswith("/refusals"):
+        _handle_refusals(text)
     elif text.startswith("/zset"):
         _handle_zset(text)
     elif text.startswith("/canary"):
@@ -1750,6 +1753,21 @@ def _fmt_secs(v) -> str:
 
 def _fmt_bps(v) -> str:
     return "n/a" if v is None else f"{v:+.0f}bps"
+
+
+def _handle_refusals(text: str) -> None:
+    """/refusals [days]: every refusal priced against its paper twin and the
+    shadow quote (refusal_ledger). Read-only."""
+    from src.copy_trading import refusal_ledger
+    parts = text.split()
+    days = 7.0
+    if len(parts) > 1:
+        try:
+            days = max(1.0, min(90.0, float(parts[1])))
+        except ValueError:
+            pass
+    rep = refusal_ledger.report(days=days)
+    _send_chunked(rep["text"])
 
 
 def _handle_speed(text: str) -> None:
