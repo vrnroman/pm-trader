@@ -449,8 +449,12 @@ def _driven_source(monkeypatch, tmp_path, fetch):
     import asyncio as _aio
     _real_sleep = _aio.sleep
 
+    # The fetch itself runs in a worker thread (run_in_executor), so a bare
+    # yield is not enough for an attempt to complete on a slow runner: each
+    # sleep becomes two milliseconds of real wall time, a bounded wait the
+    # 400-spin drivers finish in under a second.
     async def _yield_once(_delay=0, *_a, **_k):
-        await _real_sleep(0)
+        await _real_sleep(0.002)
     monkeypatch.setattr(mod.asyncio, "sleep", _yield_once)
     polls: list = []
     monkeypatch.setattr(trade_store, "record_poll_ok", lambda: polls.append(1))
