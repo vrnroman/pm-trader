@@ -18,6 +18,14 @@ from typing import Any
 from src.config import CONFIG
 
 
+def _fee_lookup(cfg):
+    """The exchange's per-token fee for the modeled cost, when costs are on."""
+    if not getattr(cfg, "copy_paper_costs_enabled", False):
+        return None
+    from src.copy_trading import fee_rate
+    return fee_rate.fee_bps
+
+
 def _cap(v):
     return v if v and v > 0 else None
 
@@ -65,6 +73,7 @@ def book_b_kwargs(cfg=CONFIG) -> dict[str, Any]:
         costs_enabled=cfg.copy_paper_costs_enabled,
         gas_usd_per_trade=cfg.copy_paper_gas_usd,
         trade_fee_bps=cfg.copy_paper_trade_fee_bps,
+        fee_lookup=_fee_lookup(cfg),
         conviction_base_usd=(cfg.copy_paper_conviction_base_usd
                              if cfg.copy_paper_conviction_base_usd > 0 else None),
         conviction_min=cfg.copy_paper_conviction_min,

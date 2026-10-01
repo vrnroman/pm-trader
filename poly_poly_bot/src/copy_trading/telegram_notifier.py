@@ -1,6 +1,8 @@
 """Telegram notification sender for copy-trading events."""
 
 import httpx
+from typing import Optional
+
 from src.config import CONFIG
 from src.logger import logger
 from src.utils import error_message
@@ -74,9 +76,19 @@ class TelegramNotifier:
         await _send_message(f'{prefix} <b>Order Placed</b>\n{side} ${size:.2f} on {_bet_label(market, outcome)} @ {price}')
 
     async def trade_filled(self, market: str, shares: float, price: float,
-                           outcome: str = "") -> None:
+                           outcome: str = "", fee_bps: Optional[int] = None,
+                           side: str = "BUY") -> None:
         prefix = "🔵 [PREVIEW]" if CONFIG.preview_mode else "✅ [LIVE]"
-        await _send_message(f'{prefix} <b>Filled</b>\n{shares} shares (${shares * price:.2f}) on {_bet_label(market, outcome)} @ {price}')
+        text = f'{prefix} <b>Filled</b>\n{shares} shares (${shares * price:.2f}) on {_bet_label(market, outcome)} @ {price}'
+        if side == "BUY" and shares and price:
+            # What this ticket nets if it wins, after the exchange's fee, and
+            # the win rate that breaks even (owner, 2026-10-01).
+            try:
+                from src.copy_trading import fee_rate
+                text += "\n<i>" + fee_rate.break_even_line(price, fee_bps, shares * price) + "</i>"
+            except Exception:  # noqa: BLE001
+                pass
+        await _send_message(text)
 
     async def trade_unfilled(self, market: str) -> None:
         prefix = "🔵 [PREVIEW]" if CONFIG.preview_mode else "⚪ [LIVE]"

@@ -52,6 +52,7 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "history", "description": "Last 10 copy trades"},
     {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
     {"command": "speed", "description": "Pre-flip: how fast am I told + how much worse is my entry price"},
+    {"command": "refusals", "description": "What the deals we refused would have done, per rail (/refusals [days])"},
     {"command": "zset", "description": "Set Z: the only wallets real money may follow"},
     {"command": "live", "description": "The real-money interlock: status, or /live CONFIRM to arm"},
     {"command": "canary", "description": "One minimum-size real order through the live path (/canary CONFIRM)"},
@@ -452,6 +453,8 @@ def _handle_command(text: str):
         _handle_check()
     elif text.startswith("/speed"):
         _handle_speed(text)
+    elif text.startswith("/refusals"):
+        _handle_refusals(text)
     elif text.startswith("/zset"):
         _handle_zset(text)
     elif text.startswith("/canary"):
@@ -1752,6 +1755,21 @@ def _fmt_bps(v) -> str:
     return "n/a" if v is None else f"{v:+.0f}bps"
 
 
+def _handle_refusals(text: str) -> None:
+    """/refusals [days]: every refusal priced against its paper twin and the
+    shadow quote (refusal_ledger). Read-only."""
+    from src.copy_trading import refusal_ledger
+    parts = text.split()
+    days = 7.0
+    if len(parts) > 1:
+        try:
+            days = max(1.0, min(90.0, float(parts[1])))
+        except ValueError:
+            pass
+    rep = refusal_ledger.report(days=days)
+    _send_chunked(rep["text"])
+
+
 def _handle_speed(text: str) -> None:
     """/speed [days], the two pre-flip numbers, measured, not modeled.
 
@@ -2051,14 +2069,22 @@ def _handle_zset(text: str) -> None:
         lines.append("<i>An empty Z is a safe state, not a broken one: with "
                      "nothing in it, arming trades nothing.</i>")
     else:
-        from src.copy_trading import zset_decay
+        from src.copy_trading import ops_watch, refusal_ledger, zset_decay
         _door = zset_decay.state()
+        try:
+            _refused = refusal_ledger.report(days=30.0).get("per_wallet") or {}
+        except Exception:  # noqa: BLE001
+            _refused = None
         for w in wallets:
             tier = promotion_state.promoted_tier_of(w, scope=zset.SCOPE) or "?"
             lines.append(f"  <code>{_esc(w)}</code>  tier {_esc(str(tier))}")
             _dl = zset_decay.line_for(w, _door)
             if _dl:
                 lines.append(f"      🟡 {_esc(_dl)}")
+            try:
+                lines.append(f"      {_esc(ops_watch.wallet_scorecard_line(w, days=30.0, refused=_refused))}")
+            except Exception as exc:  # noqa: BLE001
+                lines.append(f"      ours: unreadable ({_esc(str(exc))[:60]})")
         lines.append("")
         lines.append(f"<i>{len(wallets)} wallet(s). Admitted by the go-live "
                      f"gate plus the concentration rail, never by hand. "

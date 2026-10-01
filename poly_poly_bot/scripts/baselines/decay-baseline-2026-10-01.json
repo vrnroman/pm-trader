@@ -1,0 +1,636 @@
+{
+ "ts": 1790863653.110091,
+ "day": "2026-10-01",
+ "days": 45,
+ "note": "the scalper check reads the live form table, so in a replay it is constant over the history: a member the form calls a scalper today reads as below the door on every day",
+ "windows": {
+  "5": {
+   "evictions": 8,
+   "rows": [
+    {
+     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
+     "evicted_on": "2026-09-10",
+     "check": "promotion floor still holds",
+     "after_n": 6,
+     "after_roi_their": -0.172,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+     "evicted_on": "2026-09-10",
+     "check": "not a scalper at our latency",
+     "after_n": 8,
+     "after_roi_their": 0.4792,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
+     "evicted_on": "2026-09-14",
+     "check": "paper ROI \u2265 +0% now",
+     "after_n": 37,
+     "after_roi_their": 0.1292,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
+     "evicted_on": "2026-09-23",
+     "check": "still positive with its best 3 copies deleted",
+     "after_n": 25,
+     "after_roi_their": 0.3122,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+     "evicted_on": "2026-09-28",
+     "check": "promotion floor still holds",
+     "after_n": 5,
+     "after_roi_their": -0.1092,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
+     "evicted_on": "2026-09-29",
+     "check": "not a scalper at our latency",
+     "after_n": 4,
+     "after_roi_their": 0.3471,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+     "evicted_on": "2026-09-30",
+     "check": "not a scalper at our latency",
+     "after_n": 2,
+     "after_roi_their": -0.2754,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+     "evicted_on": "2026-09-30",
+     "check": "not a scalper at our latency",
+     "after_n": 3,
+     "after_roi_their": -0.5241,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    }
+   ]
+  },
+  "7": {
+   "evictions": 6,
+   "rows": [
+    {
+     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
+     "evicted_on": "2026-09-23",
+     "check": "promotion floor still holds",
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+     "evicted_on": "2026-09-12",
+     "check": "not a scalper at our latency",
+     "after_n": 8,
+     "after_roi_their": 0.2241,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
+     "evicted_on": "2026-09-16",
+     "check": "paper ROI \u2265 +0% now",
+     "after_n": 33,
+     "after_roi_their": 0.0845,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
+     "evicted_on": "2026-09-25",
+     "check": "still positive with its best 3 copies deleted",
+     "after_n": 17,
+     "after_roi_their": 0.4443,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+     "evicted_on": "2026-09-30",
+     "check": "promotion floor still holds",
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
+     "evicted_on": "2026-10-01",
+     "check": "not a scalper at our latency",
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 46
+    },
+    {
+     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 46
+    },
+    {
+     "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    }
+   ]
+  },
+  "10": {
+   "evictions": 4,
+   "rows": [
+    {
+     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
+     "evicted_on": "2026-09-26",
+     "check": "promotion floor still holds",
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+     "evicted_on": "2026-09-15",
+     "check": "not a scalper at our latency",
+     "after_n": 9,
+     "after_roi_their": 1.0367,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
+     "evicted_on": "2026-09-19",
+     "check": "paper ROI \u2265 +0% now",
+     "after_n": 25,
+     "after_roi_their": 0.0231,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
+     "evicted_on": "2026-09-28",
+     "check": "still positive with its best 3 copies deleted",
+     "after_n": 2,
+     "after_roi_their": 2.7949,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 8
+    },
+    {
+     "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 31
+    },
+    {
+     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 46
+    },
+    {
+     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 46
+    },
+    {
+     "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    }
+   ]
+  },
+  "14": {
+   "evictions": 2,
+   "rows": [
+    {
+     "wallet": "0x3f3aa7005f8006bfcc367d43a25cde25509fe8fd",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x57b258499f7a4cfc5043ceae57a51f7e6f529da2",
+     "evicted_on": "2026-09-30",
+     "check": "promotion floor still holds",
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+     "evicted_on": "2026-09-19",
+     "check": "not a scalper at our latency",
+     "after_n": 6,
+     "after_roi_their": 1.0199,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xf91683432c57581b0c8c58eb3bd0d6e5f03fe770",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 4
+    },
+    {
+     "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 21
+    },
+    {
+     "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 8
+    },
+    {
+     "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 31
+    },
+    {
+     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 46
+    },
+    {
+     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 46
+    },
+    {
+     "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    },
+    {
+     "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+     "evicted_on": null,
+     "check": null,
+     "after_n": 0,
+     "after_roi_their": null,
+     "trailing_below": 0
+    }
+   ]
+  }
+ }
+}

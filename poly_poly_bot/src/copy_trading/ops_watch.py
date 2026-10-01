@@ -406,8 +406,9 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
             pending_out=pending)
     else:
         # No activity read: book what the chain can price, hold every gone row.
-        settled = aggregate_released([r for r in rows if r.get("why") == "resolved"], value_of)
-        pending = gone
+        settled = aggregate_released([r for r in rows if r.get("why") == "resolved"], value_of,
+                                     pending_out=pending)
+        pending = pending + gone
     booked = 0
     if settled:
         before = set(_read_json(_p(STATE_FILE)).get("settled_tokens") or [])
@@ -951,6 +952,168 @@ def probation_wallets() -> set:
 # Rendering from the ledger
 # --------------------------------------------------------------------------- #
 
+# --------------------------------------------------------------------------- #
+# Backfill: the wins Polymarket paid before the ledger could see them
+# --------------------------------------------------------------------------- #
+
+def backfill_rows(deals: list, markets: list, *, already: set,
+                  skipped_out: Optional[list] = None) -> list[dict]:
+    """The settled rows the ledger is missing: every WON market since live
+    trading started whose token the ledger has not booked, with the cost
+    paid, the cash back, the followed wallet and the payout's own timestamp.
+    Pure: ``deals``/``markets`` are real_money's, ``already`` the ledger's
+    settled tokens. Wins only (the manager, s-k7m2qa): a backfill can move a
+    probation verdict away from a wrong eviction, never admit anyone."""
+    by_cid: dict = {}
+    for d in deals or []:
+        by_cid.setdefault(d.condition_id, []).append(d)
+    out: list[dict] = []
+    for m in markets or []:
+        if getattr(m, "state", "") != "won":
+            continue
+        ds = by_cid.get(m.condition_id, [])
+        buys = [d for d in ds if d.kind == "BUY" and d.asset]
+        if not buys:
+            continue
+        token = buys[0].asset
+        if token in already:
+            continue
+        paid_ts = max([d.ts for d in ds if d.kind in ("PAYOUT", "SELL")] or [m.first_buy_ts])
+        wallet = (m.wallet or next((d.wallet for d in buys if d.wallet), "") or "").lower()
+        if not wallet.startswith("0x") or len(wallet) != 42:
+            # Not a copy: the canary, or a bet the owner placed by hand on
+            # the same wallet. The ledger judges followed wallets; these
+            # have none behind them (the verifier, s-k7m2qa round 3).
+            if skipped_out is not None:
+                skipped_out.append({"condition_id": m.condition_id, "title": m.title, "wallet": wallet,
+                                    "pnl": round(float(m.pnl), 2)})
+            continue
+        payout = round(float(m.paid_out_usd) + float(m.sold_usd), 2)
+        out.append({"token_id": token, "wallet": wallet, "cost": round(float(m.paid_usd), 2),
+                    "payout": payout, "title": m.title or "", "ts": float(paid_ts),
+                    "condition_id": m.condition_id})
+    out.sort(key=lambda r: r["ts"])
+    return out
+
+
+def apply_backfill(rows: list[dict], *, now: Optional[float] = None) -> int:
+    """Append the rows as ``settled`` receipts marked ``backfill``, dated at
+    the payout, and add their tokens to the dedup list so a later booking of
+    the same win is refused. Touches neither the loss streak nor the day's
+    pnl: those are running state about recent events, not history. Returns
+    the rows written."""
+    now = time.time() if now is None else now
+    st = _read_json(_p(STATE_FILE))
+    booked = list(st.get("settled_tokens") or [])
+    n = 0
+    for r in rows:
+        tok = str(r.get("token_id") or "")
+        if not tok or tok in booked:
+            continue
+        pnl = round(float(r["payout"]) - float(r["cost"]), 2)
+        receipt("settled", before=f"open ${float(r['cost']):.2f}", after=f"paid ${float(r['payout']):.2f}",
+                detail=f"{'won' if pnl > 0 else 'lost'} {pnl:+.2f} on '{str(r.get('title') or '')[:40]}' "
+                       f"({str(r.get('wallet') or '')[:10]}, tier 1b) [backfill 2026-10-01]",
+                now=float(r["ts"]),
+                extra={"token_id": tok, "wallet": r.get("wallet") or "", "pnl": pnl, "won": pnl > 0,
+                       "cost": float(r["cost"]), "backfill": True, "backfilled_at": now})
+        booked.append(tok)
+        n += 1
+    st["settled_tokens"] = booked
+    _write_json(_p(STATE_FILE), st)
+    return n
+
+
+# --------------------------------------------------------------------------- #
+# Our side of the book: what following each member did to OUR money
+# --------------------------------------------------------------------------- #
+
+def _fee_paid_estimate(rows: list[dict]) -> tuple[float, int, int]:
+    """(fee dollars, tokens read, tokens total) from the exchange's cached
+    rate per token; a rate not in the cache is not read here (no network on
+    a phone command)."""
+    try:
+        from src.copy_trading import fee_rate
+    except Exception:  # noqa: BLE001
+        return (0.0, 0, len(rows))
+    fee = 0.0
+    read = 0
+    for r in rows:
+        tok = str(r.get("token_id") or "")
+        bps = None
+        try:
+            hit = fee_rate._mem.get(tok)
+            bps = hit[0] if hit else None
+        except Exception:  # noqa: BLE001
+            bps = None
+        if bps is None:
+            continue
+        read += 1
+        fee += _row_cost(r) * bps / 10000.0
+    return (round(fee, 2), read, len(rows))
+
+
+def wallet_scorecard_line(wallet: str, *, now: Optional[float] = None, days: float = 30.0,
+                          refused: Optional[dict] = None) -> str:
+    """One line for ``/zset``: our own settled copies of this wallet (W/L,
+    net before fee, the fee read), and what its refused copies would have
+    netted at book B's price. Small samples are said as small."""
+    now = time.time() if now is None else now
+    w = (wallet or "").lower()
+    rows = [r for r in ledger_rows(since_ts=now - days * 86400, kinds={"settled"})
+            if str(r.get("wallet") or "").lower() == w]
+    bits = []
+    if rows:
+        won = sum(1 for r in rows if r.get("won"))
+        pnl = round(sum(float(r.get("pnl") or 0) for r in rows), 2)
+        fee, read, total = _fee_paid_estimate(rows)
+        small = " (too few to read)" if len(rows) < 5 else ""
+        fee_txt = (f", fee ≈ ${fee:.2f} on {read} of {total}" if read else ", fee unread")
+        bits.append(f"ours {days:.0f}d: {len(rows)} settled, {won}W/{len(rows) - won}L, {pnl:+.2f} before fee{fee_txt}{small}")
+    else:
+        bits.append(f"ours {days:.0f}d: no settled copies")
+    if refused is not None:
+        a = refused.get(w)
+        if a and a.get("settled"):
+            bits.append(f"refused {a['n']}, {a['settled']} settled twins {a['won']}W: "
+                        f"{a['net_their']:+.0f} at book B's price")
+        elif a:
+            bits.append(f"refused {a['n']}, no settled twins yet")
+    return "; ".join(bits)
+
+
+def z_scorecard_line(now: Optional[float] = None, days: float = 30.0) -> str:
+    """The digest's one Z-wide line: our settled copies of every member,
+    W/L and net before fee, and what the refused twins would have netted."""
+    now = time.time() if now is None else now
+    try:
+        from src.copy_trading import refusal_ledger, zset
+        members = {w.lower() for w in zset.wallets()}
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] Z scorecard: members unreadable: {exc}")
+        return ""
+    rows = [r for r in ledger_rows(since_ts=now - days * 86400, kinds={"settled"})
+            if str(r.get("wallet") or "").lower() in members]
+    if not rows:
+        return ""
+    won = sum(1 for r in rows if r.get("won"))
+    pnl = round(sum(float(r.get("pnl") or 0) for r in rows), 2)
+    fee, read, total = _fee_paid_estimate(rows)
+    line = (f"🅩 our money {days:.0f}d: {len(rows)} settled, {won}W/{len(rows) - won}L, {pnl:+.2f} before fee"
+            + (f" (fee ≈ ${fee:.2f}, {read} of {total} read)" if read else ""))
+    try:
+        rep = refusal_ledger.report(days=days, now=now)
+        pw = rep.get("per_wallet") or {}
+        n = sum(a["n"] for w, a in pw.items() if w in members)
+        st = sum(a["settled"] for w, a in pw.items() if w in members)
+        net = round(sum(a["net_their"] for w, a in pw.items() if w in members), 2)
+        if n:
+            line += f"; refused {n} of theirs, {st} settled twins would have netted {net:+.0f} at book B's price"
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] Z scorecard: refusals unreadable: {exc}")
+    return line
+
+
 def wallet_ledger(now: Optional[float] = None, days: float = 30.0) -> list[dict]:
     """Per followed wallet, from the settled rows only: n settled, wins, net
     pnl. An aggregation, not a grade; nothing here ranks or decides."""
@@ -1037,12 +1200,26 @@ def daily_line(now: Optional[float] = None) -> str:
     tail = watcher_line(now)
     lag = lag_cost_line(now)
     exp = experiment_line(now)
-    extra = "".join(("\n" + t) for t in (tail, lag, exp) if t)
+    ref = refusal_line(now)
+    zs = z_scorecard_line(now)
+    extra = "".join(("\n" + t) for t in (tail, lag, exp, ref, zs) if t)
     if not rows:
         return "📒 ledger: nothing happened in the last 24h" + extra
     return (f"📒 ledger, last 24h: {len(settled)} settled ({won} won) {pnl:+.2f}; "
             f"{len(heals)} self-heal(s); {sum(1 for r in rows if r.get('kind') == 'auto_admit')} auto-admission(s)"
             + extra)
+
+
+def refusal_line(now: Optional[float] = None) -> str:
+    """The refusal ledger's one line (s-k7m2qa): the three rails with the
+    most money behind their refusals at our quote, last 7 days. Empty while
+    nothing has a settled paper twin."""
+    try:
+        from src.copy_trading import refusal_ledger
+        return refusal_ledger.report(days=7.0, now=now).get("line") or ""
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[ops] refusal line failed: {exc}")
+        return ""
 
 
 def experiment_line(now: Optional[float] = None) -> str:
