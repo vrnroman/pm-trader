@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-02T20:44:18.431384+00:00",
+ "generated": "2026-10-02T22:53:55.015582+00:00",
  "money": {
   "cash": 85.658183,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 19.2,
    "1c": 0
   },
-  "ts": 1790973618.9781408,
+  "ts": 1790981493.6472387,
   "day": "2026-10-02"
  },
  "arm": {
@@ -788,7 +788,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-10-01T12:45:51Z-e04c",
-  "admit_scan_ts": 1790966726.3918407,
+  "admit_scan_ts": 1790977545.6819284,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 0,
   "day_pnl": 7.22,
@@ -1468,11 +1468,24 @@
    "floor_before": null,
    "floor_after": null,
    "live": false
+  },
+  {
+   "ts": 1790977545.6819284,
+   "day": "2026-10-02",
+   "kind": "decay_day",
+   "before": "0x10658d37 in set Z",
+   "after": "below the door 1 of 7",
+   "detail": "still positive with its best 3 copies deleted: -3% over 35 copies with its best 3 deleted",
+   "push": "WALLET",
+   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+   "days": 1,
+   "window": 7,
+   "fails": [
+    "still positive with its best 3 copies deleted"
+   ]
   }
  ],
  "important": [
-  "2026-10-01 21:17:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-01 21:32:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 23:32:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 23:37:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 23:37:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1570,6 +1583,33 @@
   "2026-10-02 20:32:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-02 20:32:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
   "2026-10-02 20:34:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 20:44:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 20:44:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-02 20:49:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 20:55:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 21:05:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 21:27:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 21:37:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 21:37:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 21:45:59 INFO  [ops] decay_day: '0x10658d37 in set Z' -> 'below the door 1 of 7' | still positive with its best 3 copies deleted: -3% over 35 copies with its best 3 deleted",
+  "2026-10-02 21:48:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 21:48:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 21:53:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-02 21:53:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 21:53:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-02 21:54:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:09:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:14:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:20:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:20:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:25:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:35:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:47:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:47:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:47:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:47:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:47:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 22:47:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-02 05:34:59 TRADE [LIVE] BUY $6.40 on 'China Open: Jasmine Paolini vs Daria Sni' @ 0.4700, order 0xb2d59a8df1...",
   "2026-10-02 05:35:00 TRADE [verify] FILLED: BUY 13.62 shares on 'China Open: Jasmine Paolini vs Daria Sni' @ 0.4700"
  ],
@@ -1657,6 +1697,34 @@
    "concluded": "The cause is a stale HTTP/2 connection to the CLOB that Polymarket closed server side, so the next request on that socket raised the h2 RECV_SETTINGS-in-CLOSED protocol error; it is the same transient network family as the Server disconnected fingerprint (x102), just the h2 variant. It fired once at 19:33:19 right after two Server disconnected lines at 19:33:18 and the client recovered within one second: [fast] detection logged a new Z trade at 19:33:20 and Onchain booked 2 trades at 19:33:22. Scheduler heartbeat read errors=0 at 19:26, 19:31 and 19:36 with rate steady at 1.4/s, and the chain ",
    "confidence": 0.9,
    "cost_usd": 0.40954799999999997,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790977621.5655048,
+   "day": "2026-10-02",
+   "woke_because": "c09dc77a87f4",
+   "fingerprint": "c09dc77a87f4",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "This is the set-Z decay door mechanism working as designed, not a fault. Wallet 0x10658d37 (overall +27.8% on $17,113, 24 settled) failed the fragility check: with its best 3 copies removed its return is -3% over 35 copies, so it moved to 'below the door 1 of 7' toward removal from the real-money copy set. It is a new fingerprint only because this door-reason phrasing differs from the recurring 'does not lose at the prices we would really pay' variant already seen (0x00110b8e on 2026-10-01 and 2026-10-02). The line at bot-2026-10-02.log:18063 is followed by clean COPY-PAPER cycles, scheduler h",
+   "confidence": 0.9,
+   "cost_usd": 0.577328,
+   "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790981323.6676545,
+   "day": "2026-10-02",
+   "woke_because": "54ac26fb3ff1",
+   "fingerprint": "54ac26fb3ff1",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The /price 404 No orderbook exists errors come from fetching prices on resolved or closed market tokens that no longer have an orderbook, during inventory valuation and paper-copy evaluation. This is long standing, not new: 62, 41, 24, 69, 70 hits per day across Sep 28 to Oct 2, and 23 in the last hour, next to 577 paper opens and 265 inventory syncs today with the chain reader at lag 0 blocks. The guard explicitly excludes the 85 resolved positions awaiting redemption from equity, so these 404s cannot corrupt equity or the 45 USD daily-loss stop. There are zero LIVE trades today and the live ",
+   "confidence": 0.85,
+   "cost_usd": 0.772975,
    "did": "nothing",
    "proof": "",
    "question": ""
@@ -1894,15 +1962,34 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790973301.2010515,
-   "count": 464,
+   "last": 1790981323.6676545,
+   "count": 495,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790969719.0750244,
-    1790972340.4765718,
-    1790973181.1455002,
-    1790973301.2010515
+    1790977843.0714417,
+    1790977843.0714417,
+    1790978083.1603198,
+    1790978083.1603198,
+    1790979043.389324,
+    1790979283.4050798,
+    1790979283.4050798,
+    1790979643.433186,
+    1790979643.433186,
+    1790980003.4866705,
+    1790980003.4866705,
+    1790980603.5418074,
+    1790981323.6676545,
+    1790981323.6676545,
+    1790981323.6676545,
+    1790981323.6676545,
+    1790981323.6676545,
+    1790981323.6676545,
+    1790981323.6676545,
+    1790981323.6676545,
+    1790981323.6676545,
+    1790981323.6676545,
+    1790981323.6676545
    ],
    "action": null,
    "action_ts": null,
@@ -2921,12 +3008,14 @@
   },
   "2b4b01a02868": {
    "first": 1790899337.8760197,
-   "last": 1790973181.1455002,
-   "count": 6,
+   "last": 1790978083.1603198,
+   "count": 10,
    "sample": "2026-10-02 00:00:29 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/fee-rate body={'S':'S'}",
    "recent": [
-    1790973181.1455002
+    1790978083.1603198,
+    1790978083.1603198,
+    1790978083.1603198
    ],
    "action": null,
    "action_ts": null,
@@ -2983,6 +3072,20 @@
    "norm": "ERROR [py_clob_client_v2] request error: Invalid input ConnectionInputs.RECV_SETTINGS in state ConnectionState.CLOSED",
    "recent": [
     1790969719.0750244
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "c09dc77a87f4": {
+   "first": 1790977621.5655048,
+   "last": 1790977621.5655048,
+   "count": 1,
+   "sample": "2026-10-02 21:45:59 INFO  [ops] decay_day: '0x10658d37 in set Z' -> 'below the door 1 of 7' | still positive with its best 3 copies deleted: -3% over 35 copies with its best 3 deleted",
+   "norm": "INFO [ops] decay_day: 'S' -> 'S' | still positive with its best N copies deleted: N over N copies with its best N deleted",
+   "recent": [
+    1790977621.5655048
    ],
    "action": null,
    "action_ts": null,
