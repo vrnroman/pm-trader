@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-02T18:41:30.684799+00:00",
+ "generated": "2026-10-02T20:44:18.431384+00:00",
  "money": {
   "cash": 85.658183,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 19.2,
    "1c": 0
   },
-  "ts": 1790966397.9298418,
+  "ts": 1790973618.9781408,
   "day": "2026-10-02"
  },
  "arm": {
@@ -739,9 +739,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790879130.5658064,
+    "ts": 1790966768.6830387,
     "n_acts": 4000,
-    "n_resolved_markets": 601,
+    "n_resolved_markets": 575,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -750,27 +750,27 @@
     },
     "at": {
      "300": {
-      "n": 330,
-      "roi": 0.0456,
-      "trimmed": 0.0216,
+      "n": 319,
+      "roi": 0.0533,
+      "trimmed": 0.0285,
       "ok": false
      },
      "200": {
-      "n": 448,
-      "roi": 0.0108,
-      "trimmed": -0.009,
+      "n": 428,
+      "roi": 0.0276,
+      "trimmed": 0.007,
       "ok": false
      },
      "150": {
-      "n": 487,
-      "roi": -0.0132,
-      "trimmed": -0.0327,
+      "n": 466,
+      "roi": -0.0013,
+      "trimmed": -0.0215,
       "ok": false
      },
      "100": {
-      "n": 554,
-      "roi": -0.0504,
-      "trimmed": -0.0715,
+      "n": 531,
+      "roi": -0.0413,
+      "trimmed": -0.0632,
       "ok": false
      }
     },
@@ -788,7 +788,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-10-01T12:45:51Z-e04c",
-  "admit_scan_ts": 1790955668.4928288,
+  "admit_scan_ts": 1790966726.3918407,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 0,
   "day_pnl": 7.22,
@@ -1455,10 +1455,22 @@
    "detail": "0xfd3e6449: 34 settled, 79% won vs 75% needed, net +1.5% on $29,750, worst day -1,054, 5 of 7 exits under 10 min (capped: 10.0 of 14 days read, 5500 rows)",
    "push": "WALLET",
    "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a"
+  },
+  {
+   "ts": 1790966768.6830387,
+   "day": "2026-10-02",
+   "kind": "floor_row",
+   "before": "0x05878ac3 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +5% (n=319, trimmed +3%) · 200 no +3% (n=428, trimmed +1%) · 150 no -0% (n=466, trimmed -2%) · 100 no -4% (n=531, trimmed -6%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x05878ac343c1387d592042d788424412733ac40b",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-10-01 18:46:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 21:17:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 21:32:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 23:32:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1544,6 +1556,20 @@
   "2026-10-02 18:13:49 ERROR Network error fetching 0x0011...4333: ",
   "2026-10-02 18:33:59 ERROR Network error fetching 0x0587...c40b: ",
   "2026-10-02 18:40:09 ERROR [inventory] API sync failed: ",
+  "2026-10-02 18:49:28 INFO  [ops] floor_row: '0x05878ac3 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +5% (n=319, trimmed +3%) · 200 no +3% (n=428, trimmed +1%) · 150 no -0% (n=466, trimmed -2%) · 100 no -4% (n=531, trimmed -6%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-02 19:26:41 ERROR Network error fetching 0xeef6...cd4c: ",
+  "2026-10-02 19:26:42 ERROR Network error fetching 0x1958...b24e: Server disconnected without sending a response.",
+  "2026-10-02 19:26:42 ERROR Network error fetching 0x1065...6218: Server disconnected without sending a response.",
+  "2026-10-02 19:26:42 ERROR Network error fetching 0x7365...64da: Server disconnected without sending a response.",
+  "2026-10-02 19:26:42 ERROR Network error fetching 0x0587...c40b: Server disconnected without sending a response.",
+  "2026-10-02 19:27:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 19:33:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-02 19:33:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Invalid input ConnectionInputs.RECV_SETTINGS in state ConnectionState.CLOSED",
+  "2026-10-02 19:33:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 20:18:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 20:32:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 20:32:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-02 20:34:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-02 05:34:59 TRADE [LIVE] BUY $6.40 on 'China Open: Jasmine Paolini vs Daria Sni' @ 0.4700, order 0xb2d59a8df1...",
   "2026-10-02 05:35:00 TRADE [verify] FILLED: BUY 13.62 shares on 'China Open: Jasmine Paolini vs Daria Sni' @ 0.4700"
  ],
@@ -1617,6 +1643,20 @@
    "concluded": "A resolved position (0xd25156e2, 'Will the highest temperature in Manila b') left the wallet on chain but Polymarket's data-api activity feed has not yet shown the payout row, so the ops layer parks it to book later; this is the handler's designed pending state, not an error. The very next line confirms it: '1 settlement(s) waiting for Polymarket's payout row (activity read ok)', so the read succeeded and nothing is stuck. The redeemer is working normally: it booked settled positions at 00:54 and 17:00 today ('returned $0.00 on $6.40' losing bets), and tier 1b correctly released $6.40 of expos",
    "confidence": 0.9,
    "cost_usd": 0.3873365,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1790969719.0750244,
+   "day": "2026-10-02",
+   "woke_because": "1bdbd8a4ca6b",
+   "fingerprint": "1bdbd8a4ca6b",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The cause is a stale HTTP/2 connection to the CLOB that Polymarket closed server side, so the next request on that socket raised the h2 RECV_SETTINGS-in-CLOSED protocol error; it is the same transient network family as the Server disconnected fingerprint (x102), just the h2 variant. It fired once at 19:33:19 right after two Server disconnected lines at 19:33:18 and the client recovered within one second: [fast] detection logged a new Z trade at 19:33:20 and Onchain booked 2 trades at 19:33:22. Scheduler heartbeat read errors=0 at 19:26, 19:31 and 19:36 with rate steady at 1.4/s, and the chain ",
+   "confidence": 0.9,
+   "cost_usd": 0.40954799999999997,
    "did": "nothing",
    "proof": "",
    "question": ""
@@ -1854,15 +1894,15 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790959448.5956912,
-   "count": 459,
+   "last": 1790973301.2010515,
+   "count": 464,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790956688.4409277,
-    1790956928.4814065,
-    1790957528.5066552,
-    1790959448.5956912
+    1790969719.0750244,
+    1790972340.4765718,
+    1790973181.1455002,
+    1790973301.2010515
    ],
    "action": null,
    "action_ts": null,
@@ -1913,13 +1953,13 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1790956928.4814065,
-   "count": 100,
+   "last": 1790969599.059927,
+   "count": 102,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1790956928.4814065,
-    1790956928.4814065
+    1790969599.059927,
+    1790969599.059927
    ],
    "action": null,
    "action_ts": null,
@@ -2117,15 +2157,15 @@
   },
   "6eca45f47973": {
    "first": 1790342544.7724473,
-   "last": 1790934843.962625,
-   "count": 71,
+   "last": 1790969238.7177837,
+   "count": 75,
    "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
    "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
    "recent": [
-    1790934843.962625,
-    1790934843.962625,
-    1790934843.962625,
-    1790934843.962625
+    1790969238.7177837,
+    1790969238.7177837,
+    1790969238.7177837,
+    1790969238.7177837
    ],
    "action": null,
    "action_ts": null,
@@ -2134,15 +2174,13 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1790966117.3669903,
-   "count": 78,
+   "last": 1790969238.7177837,
+   "count": 79,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1790964916.8752167,
-    1790964916.8752167,
-    1790964916.8752167,
-    1790966117.3669903
+    1790966117.3669903,
+    1790969238.7177837
    ],
    "action": null,
    "action_ts": null,
@@ -2440,13 +2478,12 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1790944807.61111,
-   "count": 48,
+   "last": 1790967077.9110146,
+   "count": 49,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1790944807.61111,
-    1790944807.61111
+    1790967077.9110146
    ],
    "action": null,
    "action_ts": null,
@@ -2884,12 +2921,12 @@
   },
   "2b4b01a02868": {
    "first": 1790899337.8760197,
-   "last": 1790954168.2181458,
-   "count": 5,
+   "last": 1790973181.1455002,
+   "count": 6,
    "sample": "2026-10-02 00:00:29 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/fee-rate body={'S':'S'}",
    "recent": [
-    1790954168.2181458
+    1790973181.1455002
    ],
    "action": null,
    "action_ts": null,
@@ -2932,6 +2969,20 @@
    "norm": "INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows",
    "recent": [
     1790960528.7135174
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "1bdbd8a4ca6b": {
+   "first": 1790969719.0750244,
+   "last": 1790969719.0750244,
+   "count": 1,
+   "sample": "2026-10-02 19:33:19 ERROR [py_clob_client_v2] request error: Invalid input ConnectionInputs.RECV_SETTINGS in state ConnectionState.CLOSED",
+   "norm": "ERROR [py_clob_client_v2] request error: Invalid input ConnectionInputs.RECV_SETTINGS in state ConnectionState.CLOSED",
+   "recent": [
+    1790969719.0750244
    ],
    "action": null,
    "action_ts": null,
