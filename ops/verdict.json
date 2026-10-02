@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-01T18:43:20Z-1fbf",
-    "ts": 1790880200,
+    "id": "2026-10-02T00:42:49Z-96fc",
+    "ts": 1790901769,
     "kind": "nothing",
-    "message": "Armed, spend inside caps, daily line sent, digest fresh. Loss streak unchanged at 12 since the prior escalation, no new condition.",
+    "message": "Armed, spend 0 today, loss streak reset to 0 from 12, digest fresh at 0.7h old, daily line sent for 2026-10-01. No new condition.",
     "evidence": [
-        "## money state {\"cash\": 68.759213, \"equity\": 87.96, \"spend\": {\"spent_usd\": 6.4, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
-        "## arm: {\"armed\": true, \"ts\": 1790414614.1373932, \"by\": \"owner:claude-session\"}",
-        "watch: \"loss_streak\": 12, \"last_escalation_id\": \"2026-10-01T12:45:51Z-e04c\" (unchanged, already delivered)",
-        "watch: \"daily_line_sent\": true, \"daily_line_day\": \"2026-10-01\"",
-        "# ops digest 2026-10-01T14:43:25.058175+00:00 (last 24h) -- generated 2026-10-01T14:44:55Z, 3h58m before this check, within the workflow's normal irregular cadence"
+        "## money state {\"cash\": 78.609213, \"equity\": 91.41, \"armed\": true, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"day\": \"2026-10-02\"}",
+        "## arm: {\"armed\": true, \"by\": \"owner:claude-session\"}",
+        "watch: \"loss_streak\": 0, \"last_escalation_id\": \"2026-10-01T12:45:51Z-e04c\" (resolved, workflows running again)",
+        "watch: \"daily_line_sent\": true, \"daily_line_day\": \"2026-10-01\", \"guard_fail_streak\": 0",
+        "# ops digest 2026-10-02T00:04:50.743215+00:00 (last 24h) -- 0.7h old at this check"
     ],
     "commit": null
 }
