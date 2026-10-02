@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-02T06:03:48.630458+00:00",
+ "generated": "2026-10-02T08:33:09.186986+00:00",
  "money": {
   "cash": 72.038183,
   "open_cost": 12.8,
@@ -21,7 +21,7 @@
    "1b": 32.0,
    "1c": 0
   },
-  "ts": 1790920804.0109742,
+  "ts": 1790929900.262234,
   "day": "2026-10-02"
  },
  "arm": {
@@ -707,9 +707,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790835425.111147,
+    "ts": 1790922922.0384095,
     "n_acts": 4000,
-    "n_resolved_markets": 1292,
+    "n_resolved_markets": 1271,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -718,27 +718,27 @@
     },
     "at": {
      "300": {
-      "n": 153,
-      "roi": -0.0373,
-      "trimmed": -0.0823,
+      "n": 151,
+      "roi": -0.0608,
+      "trimmed": -0.1069,
       "ok": false
      },
      "200": {
-      "n": 228,
-      "roi": -0.0477,
-      "trimmed": -0.0916,
+      "n": 224,
+      "roi": -0.0614,
+      "trimmed": -0.1063,
       "ok": false
      },
      "150": {
-      "n": 301,
-      "roi": -0.0235,
-      "trimmed": -0.0715,
+      "n": 295,
+      "roi": -0.0355,
+      "trimmed": -0.0846,
       "ok": false
      },
      "100": {
-      "n": 391,
-      "roi": -0.0776,
-      "trimmed": -0.1149,
+      "n": 381,
+      "roi": -0.0886,
+      "trimmed": -0.1269,
       "ok": false
      }
     },
@@ -802,7 +802,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-10-01T12:45:51Z-e04c",
-  "admit_scan_ts": 1790911985.0687308,
+  "admit_scan_ts": 1790922918.6033466,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 0,
   "day_pnl": 3.45,
@@ -859,9 +859,9 @@
    "79864763679346497199429518225998890696187195705207088653130457597159410843721"
   ],
   "form_scan_ts": 1790918630.9499536,
-  "daily_line_attempt_day": "2026-10-01",
+  "daily_line_attempt_day": "2026-10-02",
   "daily_line_sent": true,
-  "daily_line_day": "2026-10-01",
+  "daily_line_day": "2026-10-02",
   "guard_failing_pushed": false,
   "floor_near_day": "2026-09-19"
  },
@@ -1229,28 +1229,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790835425.111147,
-   "day": "2026-10-01",
-   "kind": "floor_row",
-   "before": "0x10658d37 floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no -4% (n=153, trimmed -8%) · 200 no -5% (n=228, trimmed -9%) · 150 no -2% (n=301, trimmed -7%) · 100 no -8% (n=391, trimmed -11%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1790838299.4133153,
-   "day": "2026-10-01",
-   "kind": "escalation_delivered",
-   "before": "routine escalation",
-   "after": "sent",
-   "detail": "Loss streak is 12 straight losing copies with no win since it stood at 3. The bot's own push was at streak 10 on 2026-09",
-   "push": "BOT"
-  },
-  {
    "ts": 1790846453.6077092,
    "day": "2026-10-01",
    "kind": "floor_row",
@@ -1595,22 +1573,6 @@
    }
   },
   {
-   "ts": 1790842451.0,
-   "day": "2026-10-01",
-   "kind": "settled",
-   "before": "open $6.56",
-   "after": "paid $13.33",
-   "detail": "won +6.77 on 'China Open: Roman Safiullin vs Flavio Co' (0x5213eb85, tier 1b) [backfill 2026-10-01]",
-   "push": null,
-   "token_id": "113034430878768724272370722009970212521380904707731855345754801157534908440839",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-   "pnl": 6.77,
-   "won": true,
-   "cost": 6.56,
-   "backfill": true,
-   "backfilled_at": 1790868524.969587
-  },
-  {
    "ts": 1790868783.2901492,
    "day": "2026-10-01",
    "kind": "probation_over",
@@ -1739,14 +1701,22 @@
    "after": "FORM_DAYS = 10.0 until 10-03 06:01 UTC (owner 14.0)",
    "detail": "10.0 of 14 days is all the form rail actually reads for the three highest-volume wallets (0x9f15613e, 0x00110b8e, 0xfd3e6449), capped by the 5500-row limit, so ",
    "push": "BOT"
+  },
+  {
+   "ts": 1790922922.0384095,
+   "day": "2026-10-02",
+   "kind": "floor_row",
+   "before": "0x10658d37 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -6% (n=151, trimmed -11%) · 200 no -6% (n=224, trimmed -11%) · 150 no -4% (n=295, trimmed -8%) · 100 no -9% (n=381, trimmed -13%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-10-01 06:19:10 INFO  [ops] floor_row: '0x10658d37 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=153, trimmed -8%) · 200 no -5% (n=228, trimmed -9%) · 150 no -2% (n=301, trimmed -7%) · 100 no -8% (n=391, trimmed -11%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-01 07:05:00 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Loss streak is 12 straight losing copies with no win since it stood at 3. The bot's own push was at streak 10 on 2026-09",
-  "2026-10-01 08:00:14 INFO  [AB-RACE] rehearsal line sent, real-money line sent",
-  "2026-10-01 08:15:30 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $32.00",
-  "2026-10-01 08:22:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 09:03:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-01 09:21:38 INFO  [ops] floor_row: '0x00110b8e floor 100.0' -> 'floor 300.0 (moved)' | copies at $300: 300 YES +20% (n=310, trimmed +17%) · 200 yes +19% (n=384, trimmed +16%) · 150 yes +19% (n=442, trimmed +16%) · 100 yes +19% (n=528, trimmed +16%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-01 09:21:59 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +30% (n=194, trimmed +25%) · 200 yes +43% (n=261, trimmed +34%) · 150 yes +43% (n=300, trimmed +34%) · 100 YES +47% (n=347, trimmed +38%); backward replay (copy-and-hold at their price, first entry, clean era)",
@@ -1904,6 +1874,15 @@
   "2026-10-02 05:04:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-02 05:34:58 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
   "2026-10-02 05:34:59 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $32.00 / $200.00",
+  "2026-10-02 06:05:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-02 06:05:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 06:05:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-02 06:35:59 INFO  [ops] floor_row: '0x10658d37 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -6% (n=151, trimmed -11%) · 200 no -6% (n=224, trimmed -11%) · 150 no -4% (n=295, trimmed -8%) · 100 no -9% (n=381, trimmed -13%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-02 07:18:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 07:29:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 07:39:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-02 08:00:03 INFO  [AB-RACE] daily snapshot SEND FAILED (era_day=68.8, era_floor=1784976482)",
+  "2026-10-02 08:00:20 INFO  [AB-RACE] rehearsal line held/failed, real-money line sent",
   "2026-10-01 13:56:57 INFO  [recovery] No pending orders to recover",
   "2026-10-01 14:58:41 INFO  [recovery] No pending orders to recover",
   "2026-10-01 15:24:55 INFO  [recovery] No pending orders to recover",
@@ -1912,20 +1891,6 @@
   "2026-10-02 05:35:00 TRADE [verify] FILLED: BUY 13.62 shares on 'China Open: Jasmine Paolini vs Daria Sni' @ 0.4700"
  ],
  "watcher": [
-  {
-   "ts": 1790838356.1132774,
-   "day": "2026-10-01",
-   "woke_because": "f2269856c89b",
-   "fingerprint": "f2269856c89b",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The bot's loss-streak monitor correctly fired a routine escalation because real-money copying is now 0 wins in 12 settled copies, every live bet ever placed has lost (grep across all bot logs: 12 settled, 12 lost, 0 won). This is the escalation path working as designed, not a code fault: the line reads 'sent' so the owner's phone already has it, and the bot had already pushed him at streak 10. The loss sits inside the armed envelope, today down only about 6.5 dollars against the 45 dollar daily stop, one copy placed and FILLED and CLOB-verified. Nothing can place, size or double an order wrong",
-   "confidence": 0.72,
-   "cost_usd": 0.823191,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1790846595.2085648,
    "day": "2026-10-01",
@@ -2105,6 +2070,20 @@
    "concluded": "Re-upped FORM_DAYS=10 (row cap truncates 14d to 10d for top wallets); the exp_study.py bugs still cannot be PR'd because this box has no repo checkout, please mount it.",
    "did": "2 proposal(s): limit applied: FORM_DAYS = 10.0 until 10-03 06:01 UTC (owner; noted",
    "cost_usd": 0.51751
+  },
+  {
+   "ts": 1790928056.0532649,
+   "day": "2026-10-02",
+   "woke_because": "74647a944e17, c51c5e128ab1",
+   "fingerprint": "c51c5e128ab1",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The daily 08:00 AB-RACE report lines were routed through the research telegram channel, which holds its messages by design, so the A-vs-B snapshot logged SEND FAILED and the rehearsal counterfactual logged held/failed. These are report messages, not orders: #73 is the A-vs-B stats line and #74 is the Rehearsal at your caps summary marked counterfactual not a book, and 74 research messages were held today as normal. The real-money line is a report summary and it did send. This is the first 08:00 run under deploy 32427c7 (reporter thread restarted 10-01 ~16:20), where 10-01 under the prior code ",
+   "confidence": 0.86,
+   "cost_usd": 0.9488810000000001,
+   "did": "noted",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -2339,15 +2318,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1790917503.3550975,
-   "count": 439,
+   "last": 1790926855.9972997,
+   "count": 443,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1790914023.0868554,
-    1790914263.1224887,
-    1790916903.253637,
-    1790917503.3550975
+    1790925535.866287,
+    1790926255.9029188,
+    1790926855.9972997
    ],
    "action": null,
    "action_ts": null,
@@ -2922,12 +2900,12 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1790879295.5443814,
-   "count": 41,
+   "last": 1790923015.601986,
+   "count": 42,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1790879295.5443814
+    1790923015.601986
    ],
    "action": null,
    "action_ts": null,
@@ -3365,12 +3343,41 @@
   },
   "2b4b01a02868": {
    "first": 1790899337.8760197,
-   "last": 1790899337.8760197,
-   "count": 1,
+   "last": 1790921215.3909583,
+   "count": 3,
    "sample": "2026-10-02 00:00:29 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/fee-rate body={'S':'S'}",
    "recent": [
-    1790899337.8760197
+    1790921215.3909583,
+    1790921215.3909583
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "74647a944e17": {
+   "first": 1790928056.0532649,
+   "last": 1790928056.0532649,
+   "count": 1,
+   "sample": "2026-10-02 08:00:03 INFO  [AB-RACE] daily snapshot SEND FAILED (era_day=68.8, era_floor=1784976482)",
+   "norm": "INFO [AB-RACE] daily snapshot SEND FAILED (era_day=N, era_floor=N)",
+   "recent": [
+    1790928056.0532649
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "c51c5e128ab1": {
+   "first": 1790928056.0532649,
+   "last": 1790928056.0532649,
+   "count": 1,
+   "sample": "2026-10-02 08:00:20 INFO  [AB-RACE] rehearsal line held/failed, real-money line sent",
+   "norm": "INFO [AB-RACE] rehearsal line held/failed, real-money line sent",
+   "recent": [
+    1790928056.0532649
    ],
    "action": null,
    "action_ts": null,
