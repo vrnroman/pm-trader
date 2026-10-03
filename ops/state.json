@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-03T06:31:48.505018+00:00",
+ "generated": "2026-10-03T07:50:54.005993+00:00",
  "money": {
   "cash": 85.658183,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 19.2,
    "1c": 0
   },
-  "ts": 1791008944.7030454,
+  "ts": 1791013812.2785528,
   "day": "2026-10-03"
  },
  "arm": {
@@ -691,9 +691,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790922922.0384095,
+    "ts": 1791010157.5016384,
     "n_acts": 4000,
-    "n_resolved_markets": 1271,
+    "n_resolved_markets": 1294,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -702,27 +702,27 @@
     },
     "at": {
      "300": {
-      "n": 151,
-      "roi": -0.0608,
-      "trimmed": -0.1069,
+      "n": 156,
+      "roi": -0.044,
+      "trimmed": -0.0883,
       "ok": false
      },
      "200": {
-      "n": 224,
-      "roi": -0.0614,
-      "trimmed": -0.1063,
+      "n": 231,
+      "roi": -0.0521,
+      "trimmed": -0.0955,
       "ok": false
      },
      "150": {
-      "n": 295,
-      "roi": -0.0355,
-      "trimmed": -0.0846,
+      "n": 305,
+      "roi": -0.0227,
+      "trimmed": -0.0701,
       "ok": false
      },
      "100": {
-      "n": 381,
-      "roi": -0.0886,
-      "trimmed": -0.1269,
+      "n": 396,
+      "roi": -0.0788,
+      "trimmed": -0.1156,
       "ok": false
      }
     },
@@ -786,7 +786,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-10-01T12:45:51Z-e04c",
-  "admit_scan_ts": 1790999326.3840225,
+  "admit_scan_ts": 1791010155.8014064,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 0,
   "day_pnl": 7.22,
@@ -1214,19 +1214,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790922922.0384095,
-   "day": "2026-10-02",
-   "kind": "floor_row",
-   "before": "0x10658d37 floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no -6% (n=151, trimmed -11%) · 200 no -6% (n=224, trimmed -11%) · 150 no -4% (n=295, trimmed -8%) · 100 no -9% (n=381, trimmed -13%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
    "ts": 1790930806.8480804,
    "day": "2026-10-02",
    "kind": "settled",
@@ -1487,13 +1474,22 @@
    "floor_before": 200.0,
    "floor_after": 300.0,
    "live": false
+  },
+  {
+   "ts": 1791010157.5016384,
+   "day": "2026-10-03",
+   "kind": "floor_row",
+   "before": "0x10658d37 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -4% (n=156, trimmed -9%) · 200 no -5% (n=231, trimmed -10%) · 150 no -2% (n=305, trimmed -7%) · 100 no -8% (n=396, trimmed -12%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-10-02 06:35:59 INFO  [ops] floor_row: '0x10658d37 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -6% (n=151, trimmed -11%) · 200 no -6% (n=224, trimmed -11%) · 150 no -4% (n=295, trimmed -8%) · 100 no -9% (n=381, trimmed -13%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-02 07:18:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 07:29:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 07:39:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-02 08:00:03 INFO  [AB-RACE] daily snapshot SEND FAILED (era_day=68.8, era_floor=1784976482)",
   "2026-10-02 08:00:20 INFO  [AB-RACE] rehearsal line held/failed, real-money line sent",
   "2026-10-02 08:46:46 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $25.60",
@@ -1615,7 +1611,12 @@
   "2026-10-03 05:31:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
   "2026-10-03 05:31:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
   "2026-10-03 06:18:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-03 06:18:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}"
+  "2026-10-03 06:18:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-03 06:35:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-03 06:35:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-10-03 06:49:51 INFO  [ops] floor_row: '0x10658d37 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=156, trimmed -9%) · 200 no -5% (n=231, trimmed -10%) · 150 no -2% (n=305, trimmed -7%) · 100 no -8% (n=396, trimmed -12%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-03 06:50:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-03 07:48:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}"
  ],
  "watcher": [
   {
@@ -1980,17 +1981,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791008422.6885548,
-   "count": 526,
+   "last": 1791013703.0882785,
+   "count": 528,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791005516.6370473,
-    1791008422.6885548,
-    1791008422.6885548,
-    1791008422.6885548,
-    1791008422.6885548,
-    1791008422.6885548
+    1791010342.932743,
+    1791013703.0882785
    ],
    "action": null,
    "action_ts": null,
@@ -2041,13 +2038,13 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1790992116.332562,
-   "count": 104,
+   "last": 1791009382.8830218,
+   "count": 106,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1790992116.332562,
-    1790992116.332562
+    1791009382.8830218,
+    1791009382.8830218
    ],
    "action": null,
    "action_ts": null,
@@ -2323,12 +2320,12 @@
   },
   "41cab7e764a5": {
    "first": 1790351832.0916538,
-   "last": 1790788311.4426324,
-   "count": 36,
+   "last": 1791009382.8830218,
+   "count": 37,
    "sample": "2026-09-25 15:57:06 ERROR [py_clob_client_v2] request error: The read operation timed out",
    "norm": "ERROR [py_clob_client_v2] request error: The read operation timed out",
    "recent": [
-    1790788311.4426324
+    1791009382.8830218
    ],
    "action": null,
    "action_ts": null,
@@ -2565,12 +2562,12 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1790967077.9110146,
-   "count": 49,
+   "last": 1791010222.9250998,
+   "count": 50,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1790967077.9110146
+    1791010222.9250998
    ],
    "action": null,
    "action_ts": null,
