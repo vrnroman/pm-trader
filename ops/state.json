@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-03T13:13:09.323700+00:00",
+ "generated": "2026-10-03T17:16:30.221349+00:00",
  "money": {
   "cash": 79.134513,
   "open_cost": 6.4,
@@ -21,7 +21,7 @@
    "1b": 25.6,
    "1c": 0
   },
-  "ts": 1791032932.2970161,
+  "ts": 1791047624.351131,
   "day": "2026-10-03"
  },
  "arm": {
@@ -795,7 +795,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-10-01T12:45:51Z-e04c",
-  "admit_scan_ts": 1791031942.399351,
+  "admit_scan_ts": 1791042774.1295428,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 0,
   "day_pnl": 7.22,
@@ -1223,17 +1223,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790960509.5213113,
-   "day": "2026-10-02",
-   "kind": "settle_pending",
-   "before": "0xd25156e2 open $6.40",
-   "after": "payout not in the activity yet",
-   "detail": "'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "67216007032936380241244942174899718620023584237775861961574250684264721348731",
-   "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37"
-  },
-  {
    "ts": 1790962024.3262355,
    "day": "2026-10-02",
    "kind": "form",
@@ -1507,21 +1496,20 @@
    "fails": [
     "still positive with its best 3 copies deleted"
    ]
+  },
+  {
+   "ts": 1791047017.899383,
+   "day": "2026-10-03",
+   "kind": "settle_pending",
+   "before": "0xd25156e2 open $6.40",
+   "after": "payout not in the activity yet",
+   "detail": "'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "67216007032936380241244942174899718620023584237775861961574250684264721348731",
+   "wallet": "0xd25156e222c9b907b128e27c36821fdb41db4d37"
   }
  ],
  "important": [
-  "2026-10-02 13:43:10 ERROR Onchain: chunk 94828960-94828966 SKIPPED after 5 refused reads (head race: CTF [94828960-94828966]: {'code': -32000, 'message': 'invalid block range params'}); a set-Z fill in those blocks reaches the bot through the data api only",
-  "2026-10-02 14:47:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 15:14:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
-  "2026-10-02 15:14:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 15:57:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 16:01:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 16:01:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-10-02 16:11:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 16:43:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 17:01:49 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $19.20",
-  "2026-10-02 17:01:50 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
-  "2026-10-02 17:02:01 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-02 17:28:16 INFO  [ops] form: '0xfd3e6449 in form' -> 'benched' | 0xfd3e6449: 34 settled, 79% won vs 75% needed, net +1.5% on $29,750, worst day -1,054, 5 of 7 exits under 10 min (capped: 10.0 of 14 days read, 5500 rows)",
   "2026-10-02 18:13:49 ERROR Network error fetching 0x9f15...bdb3: ",
   "2026-10-02 18:13:49 ERROR Network error fetching 0xfd3e...5a7a: ",
@@ -1655,24 +1643,14 @@
   "2026-10-03 12:53:14 INFO  [ops] floor_row: '0x73653992 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +31% (n=80, trimmed +15%) · 200 yes +27% (n=97, trimmed +13%) · 150 yes +18% (n=111, trimmed +5%) · 100 yes +17% (n=133, trimmed +5%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-03 12:53:29 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -5% (n=156, trimmed -8%) · 200 no +0% (n=260, trimmed -2%) · 150 no -1% (n=324, trimmed -3%) · 100 no -2% (n=399, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-03 12:53:33 INFO  [ops] decay_day: '0x4980930d in set Z' -> 'below the door 1 of 7' | still positive with its best 3 copies deleted: -1% over 42 copies with its best 3 deleted",
+  "2026-10-03 14:52:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-03 16:11:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-03 17:03:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-03 17:03:38 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
   "2026-10-03 11:50:56 TRADE [LIVE] BUY $6.40 on 'Adana: Antonia Ruzic vs Leolia Jeanjean' @ 0.6100, order 0x88431f38af...",
   "2026-10-03 11:51:08 TRADE [verify] FILLED: BUY 10.49 shares on 'Adana: Antonia Ruzic vs Leolia Jeanjean' @ 0.6100"
  ],
  "watcher": [
-  {
-   "ts": 1790960528.7135174,
-   "day": "2026-10-02",
-   "woke_because": "d3a278c17ca5",
-   "fingerprint": "d3a278c17ca5",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "A resolved position (0xd25156e2, 'Will the highest temperature in Manila b') left the wallet on chain but Polymarket's data-api activity feed has not yet shown the payout row, so the ops layer parks it to book later; this is the handler's designed pending state, not an error. The very next line confirms it: '1 settlement(s) waiting for Polymarket's payout row (activity read ok)', so the read succeeded and nothing is stuck. The redeemer is working normally: it booked settled positions at 00:54 and 17:00 today ('returned $0.00 on $6.40' losing bets), and tier 1b correctly released $6.40 of expos",
-   "confidence": 0.9,
-   "cost_usd": 0.3873365,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1790969719.0750244,
    "day": "2026-10-02",
@@ -2007,15 +1985,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791024144.1968904,
-   "count": 546,
+   "last": 1791047072.1734507,
+   "count": 549,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791021623.9156427,
-    1791022583.9743493,
-    1791023184.0557008,
-    1791024144.1968904
+    1791043951.9380126,
+    1791047072.1734507
    ],
    "action": null,
    "action_ts": null,
@@ -3087,12 +3063,12 @@
   },
   "d3a278c17ca5": {
    "first": 1790960528.7135174,
-   "last": 1790960528.7135174,
-   "count": 1,
+   "last": 1791047072.1734507,
+   "count": 2,
    "sample": "2026-10-02 17:01:50 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
    "norm": "INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows",
    "recent": [
-    1790960528.7135174
+    1791047072.1734507
    ],
    "action": null,
    "action_ts": null,
