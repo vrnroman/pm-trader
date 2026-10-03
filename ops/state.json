@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-03T19:52:48.837173+00:00",
+ "generated": "2026-10-03T20:53:08.553507+00:00",
  "money": {
   "cash": 79.134513,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 19.2,
    "1c": 0
   },
-  "ts": 1791057099.274686,
+  "ts": 1791060484.688224,
   "day": "2026-10-03"
  },
  "arm": {
@@ -1551,13 +1551,6 @@
   }
  ],
  "important": [
-  "2026-10-02 20:18:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 20:32:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 20:32:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
-  "2026-10-02 20:34:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 20:44:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-02 20:44:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
-  "2026-10-02 20:49:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-02 20:55:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-02 21:05:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-02 21:27:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1681,6 +1674,8 @@
   "2026-10-03 19:16:25 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Adana: Antonia Ruzic vs Leolia Jeanjean' (0x5213eb85, tier 1b)",
   "2026-10-03 19:16:25 INFO  [ops] probation_over: '0x5213eb85 on probation (5 live copies settled)' -> 'passed: 4 of 8 won, realized -4.3% on $51.64 (pass needs 2 won and -10%)' | won +4.69 on 'Hangzhou Open: Coleman W; won +4.69 on 'Adana: Teodora Kostovic ; won +6.77 on 'China Open: Roman Safiul; won +7.22 on 'China Open: Jasmine Paol; lost -6.40 on 'Adana: Antonia Ruzic vs",
   "2026-10-03 19:30:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-03 19:57:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-03 20:52:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: EOF occurred in violation of protocol (_ssl.c:2427)",
   "2026-10-03 11:50:56 TRADE [LIVE] BUY $6.40 on 'Adana: Antonia Ruzic vs Leolia Jeanjean' @ 0.6100, order 0x88431f38af...",
   "2026-10-03 11:51:08 TRADE [verify] FILLED: BUY 10.49 shares on 'Adana: Antonia Ruzic vs Leolia Jeanjean' @ 0.6100"
  ],
@@ -2019,14 +2014,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791055912.810351,
-   "count": 553,
+   "last": 1791057473.018984,
+   "count": 554,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791053072.9036422,
-    1791053672.9954982,
-    1791055912.810351
+    1791055912.810351,
+    1791057473.018984
    ],
    "action": null,
    "action_ts": null,
