@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-02T18:43:33Z-d260",
-    "ts": 1790966613,
+    "id": "2026-10-03T00:41:28Z-7f3a",
+    "ts": 1790988088,
     "kind": "nothing",
-    "message": "Armed, spend 6.40 of 45 loss stop today, loss streak 0, guard fail streak 0, daily line sent for 2026-10-02, day pnl +7.22, both in-form wallets still clear of break-even by their own bar, no self-disarm or new ERROR pattern since last check.",
+    "message": "Armed, spend 0.00 of 45 loss stop today, equity 85.66 vs floor 30, guard fail streak 0, daily line sent for 2026-10-02, only wallet 0x5213eb85 in form and clear of break-even, no self-disarm or new ERROR pattern since last check.",
     "evidence": [
-        "## money state {\"cash\": 85.658183, \"equity\": 92.06, \"spend\": {\"spent_usd\": 6.4, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-02\"}",
-        "watch: \"loss_streak\": 0, \"guard_fail_streak\": 0, \"guard_failing_pushed\": false, \"day_pnl\": 7.22",
-        "watch: \"daily_line_sent\": true, \"daily_line_day\": \"2026-10-02\"",
-        "in form  0x5213eb85: 74 settled, 55% won vs 44% needed, net +29.4% on $40,755, worst day -1,076, 0 of 3 exits under 10 min",
-        "in form  0xfd3e6449: 35 settled, 80% won vs 75% needed, net +3.7% on $31,585, worst day -1,054, 5 of 7 exits under 10 min (capped: 10.0 of 14 days read, 5500 rows)"
+        "## money state {\"cash\": 85.658183, \"equity\": 85.66, \"floor\": 30.0, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-03\"}",
+        "## arm: {\"armed\": true, \"by\": \"owner:claude-session\"}",
+        "in form  0x5213eb85: 70 settled, 60% won vs 44% needed, net +39.4% on $39,299, worst day -1,076, 1 of 3 exits under 10 min",
+        "watch: \"guard_fail_streak\": 0, \"guard_failing_pushed\": false, \"daily_line_sent\": true, \"daily_line_day\": \"2026-10-02\"",
+        "## spend today: {\"date\": \"2026-10-03\", \"spent_usd\": 0.0, \"closed_reason\": \"\"}"
     ],
     "commit": null
 }
