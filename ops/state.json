@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-03T17:16:30.221349+00:00",
+ "generated": "2026-10-03T17:33:42.627437+00:00",
  "money": {
   "cash": 79.134513,
   "open_cost": 6.4,
@@ -21,7 +21,7 @@
    "1b": 25.6,
    "1c": 0
   },
-  "ts": 1791047624.351131,
+  "ts": 1791048532.386873,
   "day": "2026-10-03"
  },
  "arm": {
@@ -1223,16 +1223,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790962024.3262355,
-   "day": "2026-10-02",
-   "kind": "form",
-   "before": "0xfd3e6449 in form",
-   "after": "benched",
-   "detail": "0xfd3e6449: 34 settled, 79% won vs 75% needed, net +1.5% on $29,750, worst day -1,054, 5 of 7 exits under 10 min (capped: 10.0 of 14 days read, 5500 rows)",
-   "push": "WALLET",
-   "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a"
-  },
-  {
    "ts": 1790966768.6830387,
    "day": "2026-10-02",
    "kind": "floor_row",
@@ -1510,7 +1500,6 @@
   }
  ],
  "important": [
-  "2026-10-02 17:28:16 INFO  [ops] form: '0xfd3e6449 in form' -> 'benched' | 0xfd3e6449: 34 settled, 79% won vs 75% needed, net +1.5% on $29,750, worst day -1,054, 5 of 7 exits under 10 min (capped: 10.0 of 14 days read, 5500 rows)",
   "2026-10-02 18:13:49 ERROR Network error fetching 0x9f15...bdb3: ",
   "2026-10-02 18:13:49 ERROR Network error fetching 0xfd3e...5a7a: ",
   "2026-10-02 18:13:49 ERROR Network error fetching 0x0011...4333: ",
