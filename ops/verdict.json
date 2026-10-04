@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-04T06:41:52Z-9a3c",
-    "ts": 1791096112,
-    "kind": "nothing",
-    "message": "Armed, spend 12.80 of 45 loss stop on 2026-10-04, equity 85.52 vs floor 30, guard fail streak 0, both in-form wallets healthy (0x5213eb85 net +22.9%, 0x722abb54 net +26.9%), no self-disarm or new ERROR pattern, daily line sent for 2026-10-03.",
+    "id": "2026-10-04T12:43:46Z-30fa",
+    "ts": 1791117826,
+    "kind": "escalation",
+    "message": "VM unreachable since at least 09:44 UTC. IAP SSH fails with \"failed to connect to port 22,\" the known network dead mode. Ops digest at 09:44 timed out and was cancelled; the 11:15 run failed the same way. Heartbeat also failed at 11:15 and already sent one Telegram alert for this. Last confirmed state is from 05:08 UTC: armed true, equity 85.52, spend 12.80 of the 45 daily loss stop. No digest since then, so current arm, spend, and trading status are unknown for over 7 hours. A gcloud compute instances reset usually clears this.",
     "evidence": [
-        "## money state {\"cash\": 66.393083, \"open_cost\": 19.13, \"equity\": 85.52, \"floor\": 30.0, \"spend\": {\"spent_usd\": 12.8, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-04\"}",
-        "in form  0x5213eb85: 100 settled, 52% won vs 43% needed, net +22.9% on $55,135, worst day -2,314, 0 of 3 exits under 10 min",
-        "in form  0x722abb54: 30 settled, 83% won vs 78% needed, net +26.9% on $46,325, worst day -2,522, 0 of 27 exits under 10 min",
-        "watch: \"guard_fail_streak\": 0, \"no_copy_pushed\": false, \"daily_line_sent\": true, \"daily_line_day\": \"2026-10-03\", \"floor_near\": false",
-        "2026-10-04 04:45:35 TRADE [verify] FILLED: BUY 11.25 shares on 'Altiri Chiba vs. Brave Thunders' @ 0.5690"
+        "# ops digest 2026-10-04T05:07:59.061842+00:00 (last 24h)",
+        "## money state {\"cash\": 66.393083, \"equity\": 85.52, \"floor\": 30.0, \"spend\": {\"spent_usd\": 12.8, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-04\"}",
+        "GitHub Actions: Ops digest run 37193118750 (sched 09:44 UTC) step 'Pull the digest out of the VM' cancelled after 10 min",
+        "GitHub Actions: Ops digest run 37198115281 (sched 11:15 UTC) step 'Pull the digest out of the VM' failed: state.json empty",
+        "GitHub Actions: Heartbeat run 37198007199 (11:15 UTC) failed: ERROR failed to connect to port 22; sent one Telegram alert"
     ],
     "commit": null
 }
