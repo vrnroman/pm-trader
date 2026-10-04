@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-03T18:41:06Z-0f72",
-    "ts": 1791052866,
+    "id": "2026-10-04T00:41:34Z-f08f",
+    "ts": 1791074494,
     "kind": "nothing",
-    "message": "Armed, spend 6.40 of 45 loss stop today, equity 85.53 vs floor 30, guard fail streak 0, two wallets in form (0x5213eb85 net +25.3%, 0x722abb54 net +22.8%), no self-disarm or new ERROR pattern since last check at 12:43, daily line sent for 2026-10-03.",
+    "message": "Armed, spend 19.04 of 45 loss stop on 2026-10-03, equity 78.92 vs floor 30, guard fail streak 0, only wallet in form (0x5213eb85) healthy at net +23.3%, no self-disarm or new ERROR pattern, daily line sent for 2026-10-03.",
     "evidence": [
-        "## money state {\"cash\": 79.134513, \"open_cost\": 6.4, \"equity\": 85.53, \"floor\": 30.0, \"spend\": {\"spent_usd\": 6.4, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-03\"}",
-        "## arm: {\"armed\": true, \"by\": \"owner:claude-session\"}",
-        "in form  0x5213eb85: 96 settled, 52% won vs 42% needed, net +25.3% on $51,842, worst day -2,314, 0 of 3 exits under 10 min",
-        "in form  0x722abb54: 32 settled, 81% won vs 78% needed, net +22.8% on $49,284, worst day -2,522, 0 of 28 exits under 10 min",
-        "watch: \"guard_fail_streak\": 0, \"guard_failing_pushed\": false, \"daily_line_sent\": true, \"daily_line_day\": \"2026-10-03\""
+        "## money state {\"cash\": 66.277713, \"open_cost\": 12.64, \"equity\": 78.92, \"floor\": 30.0, \"spend\": {\"spent_usd\": 19.04, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-03\"}",
+        "in form  0x5213eb85: 98 settled, 52% won vs 43% needed, net +23.3% on $53,552, worst day -2,314, 0 of 3 exits under 10 min",
+        "watch: \"guard_fail_streak\": 0, \"guard_failing_pushed\": false, \"daily_line_sent\": true, \"daily_line_day\": \"2026-10-03\"",
+        "watch: \"day_pnl\": -6.4, \"day_pnl_day\": \"2026-10-03\", \"loss_streak\": 1, \"floor_near\": false",
+        "2026-10-03 22:48:27 TRADE [verify] FILLED: BUY 13.15 shares on 'Texas Tech vs. Colorado: O/U 49.5' @ 0.4800"
     ],
     "commit": null
 }
