@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-04T02:38:12.487083+00:00",
+ "generated": "2026-10-04T05:08:59.024826+00:00",
  "money": {
-  "cash": 66.277713,
-  "open_cost": 12.64,
-  "equity": 78.92,
+  "cash": 66.393083,
+  "open_cost": 19.13,
+  "equity": 85.52,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-10-04",
-   "spent_usd": 0.0,
+   "spent_usd": 12.8,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 75,
   "tier": {
    "1a": 0,
-   "1b": 31.84,
+   "1b": 38.33,
    "1c": 0
   },
-  "ts": 1791081394.6320264,
+  "ts": 1791090490.1692424,
   "day": "2026-10-04"
  },
  "arm": {
@@ -35,8 +35,11 @@
  },
  "spend": {
   "date": "2026-10-04",
-  "spent_usd": 0.0,
-  "wallet_copies": {},
+  "spent_usd": 12.8,
+  "wallet_copies": {
+   "0x722abb5460060870d46728bf45f66a6b1635d6ed": 1,
+   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 1
+  },
   "wallet_copies_yesterday": {
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 3
   },
@@ -46,14 +49,14 @@
  "tier": {
   "1a": {
    "open_total": 0,
-   "daily_date": "2026-10-03",
+   "daily_date": "2026-10-04",
    "daily_volume": 0.0,
    "placements": []
   },
   "1b": {
-   "open_total": 31.84,
-   "daily_date": "2026-10-03",
-   "daily_volume": 19.04,
+   "open_total": 38.33,
+   "daily_date": "2026-10-04",
+   "daily_volume": 12.8,
    "placements": [
     {
      "token_id": "87131648918137474349304257527344538579233235348393719175219550429557466113538",
@@ -84,17 +87,24 @@
      "title": "Porto 2: Henrique Rocha vs Inaki Montes"
     },
     {
-     "token_id": "115330393331766326729480500850782485655017183333091655052444185169511717925380",
-     "cost": 6.31,
-     "ts": 1791067707.9245977,
+     "token_id": "96040977057410504258275136657909313728781036287377664561988141507190801831862",
+     "cost": 6.4,
+     "ts": 1791088601.205674,
+     "trader": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+     "title": "Japan Open Tennis Championships: Carlos Alcaraz vs Denis Sha"
+    },
+    {
+     "token_id": "110164432740590295267522652062845339067627165979535838785441892909653859937361",
+     "cost": 6.4,
+     "ts": 1791089135.2077525,
      "trader": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-     "title": "Texas Tech vs. Colorado: O/U 49.5"
+     "title": "Altiri Chiba vs. Brave Thunders"
     }
    ]
   },
   "1c": {
    "open_total": 0,
-   "daily_date": "2026-10-03",
+   "daily_date": "2026-10-04",
    "daily_volume": 0.0,
    "placements": []
   }
@@ -659,9 +669,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1790999333.1873643,
-    "n_acts": 257,
-    "n_resolved_markets": 75,
+    "ts": 1791086542.4063444,
+    "n_acts": 322,
+    "n_resolved_markets": 92,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -670,33 +680,33 @@
     },
     "at": {
      "300": {
-      "n": 65,
-      "roi": 0.127,
-      "trimmed": 0.0268,
-      "ok": true
+      "n": 78,
+      "roi": 0.0594,
+      "trimmed": -0.0261,
+      "ok": false
      },
      "200": {
-      "n": 69,
-      "roi": 0.1207,
-      "trimmed": 0.0263,
-      "ok": true
+      "n": 85,
+      "roi": 0.0645,
+      "trimmed": -0.0135,
+      "ok": false
      },
      "150": {
-      "n": 74,
-      "roi": 0.0933,
-      "trimmed": 0.0044,
+      "n": 90,
+      "roi": 0.0451,
+      "trimmed": -0.0291,
       "ok": false
      },
      "100": {
-      "n": 74,
-      "roi": 0.0933,
-      "trimmed": 0.0044,
+      "n": 90,
+      "roi": 0.0451,
+      "trimmed": -0.0291,
       "ok": false
      }
     },
-    "chosen": 300.0
+    "chosen": null
    },
-   "floor_usd": 300.0
+   "floor_usd": null
   },
   "0x10658d371ae1f09eed503a3a14c8ac6a1a936218": {
    "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
@@ -793,18 +803,18 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 78.92,
+  "last_equity": 85.52,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-09-12",
   "last_escalation_id": "2026-10-01T12:45:51Z-e04c",
-  "admit_scan_ts": 1791075624.095214,
+  "admit_scan_ts": 1791086540.7421217,
   "day_loss_pushed": "2026-09-29",
-  "loss_streak": 1,
-  "day_pnl": -6.4,
-  "day_pnl_day": "2026-10-03",
+  "loss_streak": 0,
+  "day_pnl": 6.84,
+  "day_pnl_day": "2026-10-04",
   "settled_tokens": [
    "6691701803539626176077488709374004737591849995522510168757367609925258534749",
    "111426907502041127672975490206099880504280577275905396462330907920963353499778",
@@ -856,7 +866,8 @@
    "113034430878768724272370722009970212521380904707731855345754801157534908440839",
    "79864763679346497199429518225998890696187195705207088653130457597159410843721",
    "67305847109990487279454964285003624051344865372370408134561700773664292300748",
-   "82330314419398234190426645942781818653679147252503323595435087133855728907002"
+   "82330314419398234190426645942781818653679147252503323595435087133855728907002",
+   "115330393331766326729480500850782485655017183333091655052444185169511717925380"
   ],
   "form_scan_ts": 1791071028.868378,
   "daily_line_attempt_day": "2026-10-03",
@@ -1225,19 +1236,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1790999333.1873643,
-   "day": "2026-10-03",
-   "kind": "floor_row",
-   "before": "0x19585131 floor 200.0",
-   "after": "floor 300.0 (moved)",
-   "detail": "copies at $300: 300 YES +13% (n=65, trimmed +3%) · 200 yes +12% (n=69, trimmed +3%) · 150 no +9% (n=74, trimmed +0%) · 100 no +9% (n=74, trimmed +0%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": "WALLET",
-   "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
-   "floor_before": 200.0,
-   "floor_after": 300.0,
-   "live": false
-  },
-  {
    "ts": 1791010157.5016384,
    "day": "2026-10-03",
    "kind": "floor_row",
@@ -1567,17 +1565,36 @@
     "promotion floor still holds",
     "still positive with its best 3 copies deleted"
    ]
+  },
+  {
+   "ts": 1791084423.4700623,
+   "day": "2026-10-04",
+   "kind": "settled",
+   "before": "open $6.31",
+   "after": "paid $13.15",
+   "detail": "won +6.84 on 'Texas Tech vs. Colorado: O/U 49.5' (0x5213eb85, tier 1b)",
+   "push": null,
+   "token_id": "115330393331766326729480500850782485655017183333091655052444185169511717925380",
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+   "pnl": 6.84,
+   "won": true,
+   "cost": 6.31
+  },
+  {
+   "ts": 1791086542.4063444,
+   "day": "2026-10-04",
+   "kind": "floor_row",
+   "before": "0x19585131 floor 300.0",
+   "after": "floor global (moved)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +6% (n=78, trimmed -3%) · 200 no +6% (n=85, trimmed -1%) · 150 no +5% (n=90, trimmed -3%) · 100 no +5% (n=90, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": "WALLET",
+   "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
+   "floor_before": 300.0,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-10-03 02:44:55 ERROR Network error fetching 0x5213...6a35: ",
-  "2026-10-03 02:52:39 ERROR [inventory] API sync failed: ",
-  "2026-10-03 03:49:08 INFO  [ops] floor_row: '0x19585131 floor 200.0' -> 'floor 300.0 (moved)' | copies at $300: 300 YES +13% (n=65, trimmed +3%) · 200 yes +12% (n=69, trimmed +3%) · 150 no +9% (n=74, trimmed +0%) · 100 no +9% (n=74, trimmed +0%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-03 03:55:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-03 04:05:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-03 04:27:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-03 04:48:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
-  "2026-10-03 04:48:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-03 05:30:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-03 05:31:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
   "2026-10-03 05:31:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
@@ -1699,29 +1716,36 @@
   "2026-10-04 01:47:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-10-04 01:53:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-10-04 01:53:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-10-04 03:17:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-04 03:17:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-04 03:18:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-04 03:27:03 INFO  [tiered-risk] tier 1b: released $6.31 of exposure from resolved or closed positions | open now: $25.53",
+  "2026-10-04 03:27:03 INFO  [ops] settled: 'open $6.31' -> 'paid $13.15' | won +6.84 on 'Texas Tech vs. Colorado: O/U 49.5' (0x5213eb85, tier 1b)",
+  "2026-10-04 03:33:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-04 04:02:36 INFO  [ops] floor_row: '0x19585131 floor 300.0' -> 'floor global (moved)' | no floor clears the bars, global floor stays: 300 no +6% (n=78, trimmed -3%) · 200 no +6% (n=85, trimmed -1%) · 150 no +5% (n=90, trimmed -3%) · 100 no +5% (n=90, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-04 04:10:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-04 04:10:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-04 04:11:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
+  "2026-10-04 04:21:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-04 04:36:40 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
+  "2026-10-04 04:36:41 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $31.93 / $200.00",
+  "2026-10-04 04:42:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-04 04:45:34 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / no spend cap (the day stops after $45 lost)",
+  "2026-10-04 04:45:35 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $38.33 / $200.00",
+  "2026-10-04 04:47:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-03 11:50:56 TRADE [LIVE] BUY $6.40 on 'Adana: Antonia Ruzic vs Leolia Jeanjean' @ 0.6100, order 0x88431f38af...",
   "2026-10-03 11:51:08 TRADE [verify] FILLED: BUY 10.49 shares on 'Adana: Antonia Ruzic vs Leolia Jeanjean' @ 0.6100",
   "2026-10-03 20:55:49 ERROR [inventory] API sync failed: ",
   "2026-10-03 22:04:58 TRADE [LIVE] BUY $6.33 on 'Porto 2: Henrique Rocha vs Inaki Montes' @ 0.3200, order 0xb762c849c5...",
   "2026-10-03 22:04:59 TRADE [verify] FILLED: BUY 19.78 shares on 'Porto 2: Henrique Rocha vs Inaki Montes' @ 0.3200",
   "2026-10-03 22:48:27 TRADE [LIVE] BUY $6.31 on 'Texas Tech vs. Colorado: O/U 49.5' @ 0.4800, order 0x299ea0c645...",
-  "2026-10-03 22:48:28 TRADE [verify] FILLED: BUY 13.15 shares on 'Texas Tech vs. Colorado: O/U 49.5' @ 0.4800"
+  "2026-10-03 22:48:28 TRADE [verify] FILLED: BUY 13.15 shares on 'Texas Tech vs. Colorado: O/U 49.5' @ 0.4800",
+  "2026-10-04 04:36:41 TRADE [LIVE] BUY $6.40 on 'Japan Open Tennis Championships: Carlos ' @ 0.6900, order 0xeab8d64ae4...",
+  "2026-10-04 04:36:41 TRADE [verify] FILLED: BUY 9.27 shares on 'Japan Open Tennis Championships: Carlos ' @ 0.6900",
+  "2026-10-04 04:45:35 TRADE [LIVE] BUY $6.40 on 'Altiri Chiba vs. Brave Thunders' @ 0.5690, order 0x13dc1601a1...",
+  "2026-10-04 04:45:35 TRADE [verify] FILLED: BUY 11.25 shares on 'Altiri Chiba vs. Brave Thunders' @ 0.5690"
  ],
  "watcher": [
-  {
-   "ts": 1790999437.8016772,
-   "day": "2026-10-03",
-   "woke_because": "7629a2eecebd",
-   "fingerprint": "7629a2eecebd",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The cause is a new text variant of the routine INFO [ops] floor_row ops receipt, not an error. floor_row logs 15 to 18 times a day (196 occurrences across the last 14 files) and this one just raised wallet 0x19585131's floor from 200 to 300 on a backward replay that is positive at every price (300 YES +13%, 200 yes +12%). The box is healthy around the wake: 27 Onchain cursor lines, 19 Onchain trades, 12 heartbeats and 10 inventory syncs in the last 60 min, chain reader lag 0 blocks, last good read 2s ago. Raising a floor is the conservative direction and spend today is 0, so no money action fo",
-   "confidence": 0.95,
-   "cost_usd": 0.332271,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1791007316.8158653,
    "day": "2026-10-03",
@@ -1813,13 +1837,13 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1791067819.9195476,
-   "count": 38,
+   "last": 1791089241.549849,
+   "count": 40,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1791065177.4048386,
-    1791067819.9195476
+    1791088641.4253066,
+    1791089241.549849
    ],
    "action": null,
    "action_ts": null,
@@ -1828,13 +1852,13 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1791067819.9195476,
-   "count": 38,
+   "last": 1791089241.549849,
+   "count": 40,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1791065177.4048386,
-    1791067819.9195476
+    1791088641.4253066,
+    1791089241.549849
    ],
    "action": null,
    "action_ts": null,
@@ -1843,13 +1867,13 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1791067819.9195476,
-   "count": 37,
+   "last": 1791089241.549849,
+   "count": 39,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1791065177.4048386,
-    1791067819.9195476
+    1791088641.4253066,
+    1791089241.549849
    ],
    "action": null,
    "action_ts": null,
@@ -1872,12 +1896,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1791054993.0847747,
-   "count": 33,
+   "last": 1791084440.9203963,
+   "count": 34,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1791054993.0847747
+    1791084440.9203963
    ],
    "action": null,
    "action_ts": null,
@@ -2031,13 +2055,15 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791077599.6474445,
-   "count": 570,
+   "last": 1791089361.581227,
+   "count": 576,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791074303.6181087,
-    1791077599.6474445
+    1791087081.1741445,
+    1791087801.2159774,
+    1791089001.4594557,
+    1791089361.581227
    ],
    "action": null,
    "action_ts": null,
@@ -2564,13 +2590,13 @@
   },
   "59f5d5ebf4a6": {
    "first": 1790415658.8132656,
-   "last": 1791067819.9195476,
-   "count": 19,
+   "last": 1791089241.549849,
+   "count": 21,
    "sample": "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)",
    "recent": [
-    1791065177.4048386,
-    1791067819.9195476
+    1791088641.4253066,
+    1791089241.549849
    ],
    "action": null,
    "action_ts": null,
@@ -2622,12 +2648,12 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1791053793.0247977,
-   "count": 57,
+   "last": 1791086601.0613704,
+   "count": 58,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1791053793.0247977
+    1791086601.0613704
    ],
    "action": null,
    "action_ts": null,
@@ -3037,12 +3063,12 @@
   },
   "4162a3122f5e": {
    "first": 1790869754.4189043,
-   "last": 1790930883.2569435,
-   "count": 2,
+   "last": 1791084440.9203963,
+   "count": 3,
    "sample": "2026-10-01 15:48:57 INFO  [ops] settled: 'open $6.40' -> 'paid $9.85' | won +3.45 on 'Counter-Strike: BIG vs fnatic (BO3) - St' (0x19585131, tier 1b)",
    "norm": "INFO [ops] settled: 'S' -> 'S' | won N on 'S' (<hex>, tier Nb)",
    "recent": [
-    1790930883.2569435
+    1791084440.9203963
    ],
    "action": null,
    "action_ts": null,
@@ -3065,12 +3091,15 @@
   },
   "2b4b01a02868": {
    "first": 1790899337.8760197,
-   "last": 1791077599.6474445,
-   "count": 24,
+   "last": 1791087081.1741445,
+   "count": 28,
    "sample": "2026-10-02 00:00:29 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/fee-rate body={\"error\":\"fee rate not found for market\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/fee-rate body={'S':'S'}",
    "recent": [
-    1791077599.6474445
+    1791083840.8507419,
+    1791083960.8945987,
+    1791087081.1741445,
+    1791087081.1741445
    ],
    "action": null,
    "action_ts": null,
