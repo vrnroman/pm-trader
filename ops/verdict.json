@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-05T00:42:38Z-e717",
-    "ts": 1791160958,
+    "id": "2026-10-05T06:41:00Z-9237",
+    "ts": 1791189660,
     "kind": "escalation",
-    "message": "VM still unreachable, no recovery since 09:44 UTC. Ops digest runs 240-247 (09:44 to 23:07 UTC) and heartbeat runs 509-512 (11:13 to 22:26 UTC) all failed on the same IAP error, failed to connect to backend, port 22. Last confirmed digest is still 05:07 UTC: armed true, equity 85.52, spend 12.80 of the 45 daily loss stop. Arm, spend, and trading status are unknown for over 19 hours, up from over 13 hours at the last escalation. A gcloud compute instances reset usually clears this and has not been applied yet.",
+    "message": "VM still unreachable, worse than before. No recovery since 09:44 UTC Oct 4. Ops digest runs 240 to 249 (09:44 Oct 4 to 01:58 UTC Oct 5) and heartbeat runs 509 to 513 (11:13 Oct 4 to 01:09 UTC Oct 5) all failed on the same IAP error, failed to connect to backend, port 22. No new run since 01:58 UTC, over 4 hours ago. Last confirmed digest is still 05:07 UTC Oct 4: armed true, equity 85.52, spend 12.80 of the 45 daily loss stop. Arm, spend, and trading status are unknown for over 25 hours, up from over 19 hours at the last escalation. A gcloud compute instances reset usually clears this and still has not been applied.",
     "evidence": [
         "# ops digest 2026-10-04T05:07:59.061842+00:00 (last 24h)",
         "## money state {\"cash\": 66.393083, \"equity\": 85.52, \"floor\": 30.0, \"spend\": {\"spent_usd\": 12.8, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-04\"}",
-        "GitHub Actions: Ops digest run 37242593724 (23:07 UTC) failed: could not carry verdict down to the VM, ConnectionCreationError failed to connect to backend port 22",
-        "GitHub Actions: Ops digest run 37228845402 (19:35 UTC) and run 37228139131 (19:24 UTC) both failed, same IAP tunnel error",
-        "GitHub Actions: Heartbeat run 37240046740 (22:26 UTC) and run 37228006695 (19:22 UTC) both failed, same failed to connect to port 22"
+        "GitHub Actions: Ops digest run 37253531700 (run #249, 01:58 UTC Oct 5) failed: could not carry verdict down to the VM, ConnectionCreationError failed to connect to backend port 22",
+        "GitHub Actions: Ops digest runs 37250481803 (#248, 01:11 UTC), 37242593724 (#247, 23:07 UTC Oct 4), 37240181749 (#246, 22:29 UTC Oct 4), 37228845402 (#245, 19:35 UTC Oct 4) all failed, same IAP tunnel error",
+        "GitHub Actions: Heartbeat run 37250338243 (#513, 01:09 UTC Oct 5) and run 37240046740 (#512, 22:26 UTC Oct 4) both failed, same failed to connect to port 22"
     ],
     "commit": null
 }
