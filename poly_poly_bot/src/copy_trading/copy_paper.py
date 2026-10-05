@@ -849,16 +849,19 @@ class CopyPaperEngine:
             # fills finally reads as what a real copier could have kept.
             cost_usd = ideal_cost_usd = 0.0
             if self.cost_model is not None:
-                fee_bps = float(self.trade_fee_bps)
+                # The fallback is a flat share of the stake; the market's own
+                # rate is curved by the price (fee_rate.fee_share).
+                fee_frac = float(self.trade_fee_bps) / 10000.0
                 if self.fee_lookup is not None:
                     try:
                         _live = self.fee_lookup(token)
                         if _live is not None:
-                            fee_bps = float(_live)
+                            from src.copy_trading.fee_rate import fee_share
+                            fee_frac = fee_share(fill.avg_price, _live)
                     except Exception:  # noqa: BLE001  the fallback rate stands
                         pass
                 cost_usd = (self.gas_usd_per_trade
-                            + fill.spent * fee_bps / 10000.0)
+                            + fill.spent * fee_frac)
                 ideal_cost_usd = (cost_usd
                                   + fill.spent * self.cost_model.cost_of(category))
             self.ledger.add(PaperPosition(

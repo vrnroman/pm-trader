@@ -1029,9 +1029,11 @@ def apply_backfill(rows: list[dict], *, now: Optional[float] = None) -> int:
 # --------------------------------------------------------------------------- #
 
 def _fee_paid_estimate(rows: list[dict]) -> tuple[float, int, int]:
-    """(fee dollars, tokens read, tokens total) from the exchange's cached
-    rate per token; a rate not in the cache is not read here (no network on
-    a phone command)."""
+    """(fee dollars, rows read, rows total) from the exchange's cached rate
+    per token; a rate not in the cache is not read here (no network on a
+    phone command). The fee is curved by the entry price, which a settled
+    row only gives back on a win (cost / payout); a loss on a fee market is
+    left unread rather than guessed."""
     try:
         from src.copy_trading import fee_rate
     except Exception:  # noqa: BLE001
@@ -1048,8 +1050,14 @@ def _fee_paid_estimate(rows: list[dict]) -> tuple[float, int, int]:
             bps = None
         if bps is None:
             continue
+        cost = _row_cost(r)
+        if bps > 0:
+            m = re.search(r"paid \$([0-9.]+)", str(r.get("after") or ""))
+            payout = float(m.group(1)) if m else 0.0
+            if not (r.get("won") and payout > 0 and cost > 0):
+                continue
+            fee += cost * fee_rate.fee_share(cost / payout, bps)
         read += 1
-        fee += _row_cost(r) * bps / 10000.0
     return (round(fee, 2), read, len(rows))
 
 

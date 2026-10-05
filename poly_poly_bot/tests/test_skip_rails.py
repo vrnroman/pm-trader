@@ -40,10 +40,18 @@ def _cfg(max_price=0.90):
 # --------------------------------------------------------------------------- #
 
 def test_a_buy_under_the_cap_before_the_fee_and_over_it_after_is_refused(monkeypatch):
-    monkeypatch.setattr(fee_rate, "fee_bps", lambda tok: 250)
-    d = trm._evaluate_tiered_trade_with_state(_trade(price=0.89), "1b", trm.TierExposure(), _cfg(0.90))
+    # 0.899 on a 0.05 market: 0.05 x 0.101 = 0.50% fee, 0.9035 a dollar.
+    monkeypatch.setattr(fee_rate, "fee_bps", lambda tok: 500)
+    d = trm._evaluate_tiered_trade_with_state(_trade(price=0.899), "1b", trm.TierExposure(), _cfg(0.90))
     assert d.should_copy is False
-    assert "2.5% fee" in d.reason and "0.912" in d.reason and "> tier 1b max 0.9" in d.reason
+    assert "0.50% fee" in d.reason and "0.9035" in d.reason and "> tier 1b max 0.9" in d.reason
+
+
+def test_the_curved_fee_lets_a_buy_well_under_the_cap_through(monkeypatch):
+    # 0.89 on the same market costs 0.8949: the flat-10% reading refused it.
+    monkeypatch.setattr(fee_rate, "fee_bps", lambda tok: 500)
+    d = trm._evaluate_tiered_trade_with_state(_trade(price=0.89), "1b", trm.TierExposure(), _cfg(0.90))
+    assert "tier 1b max" not in (d.reason or "")
 
 
 def test_the_same_buy_on_a_no_fee_market_passes_the_ceiling(monkeypatch):
@@ -155,8 +163,8 @@ async def test_the_notifier_prints_what_a_win_nets_after_the_fee(monkeypatch):
         return True
     monkeypatch.setattr(tn, "_send_message", fake_send)
     await tn.TelegramNotifier().trade_filled("China Open: Safiullin vs Cobolli", 13.33, 0.48,
-                                             outcome="Roman Safiullin", fee_bps=257, side="BUY")
-    assert "a win nets +6.77" in sent[0] and "fee 2.6%" in sent[0]
+                                             outcome="Roman Safiullin", fee_bps=500, side="BUY")
+    assert "a win nets +6.77" in sent[0] and "fee $0.17 = 2.6%" in sent[0]
     sent.clear()
     await tn.TelegramNotifier().trade_filled("m", 10.0, 0.5, side="SELL")
     assert "a win nets" not in sent[0]
