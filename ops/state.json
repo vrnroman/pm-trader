@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-06T20:18:58.821440+00:00",
+ "generated": "2026-10-06T21:53:46.142017+00:00",
  "money": {
-  "cash": 56.788553,
-  "open_cost": 31.99,
-  "equity": 88.78,
+  "cash": 65.098553,
+  "open_cost": 25.59,
+  "equity": 90.69,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 77,
   "tier": {
    "1a": 0,
-   "1b": 51.2,
+   "1b": 44.8,
    "1c": 0
   },
-  "ts": 1791317771.141803,
+  "ts": 1791323471.6424036,
   "day": "2026-10-06"
  },
  "arm": {
@@ -52,7 +52,7 @@
    "placements": []
   },
   "1b": {
-   "open_total": 51.2,
+   "open_total": 44.8,
    "daily_date": "2026-10-06",
    "daily_volume": 32.0,
    "placements": [
@@ -90,13 +90,6 @@
      "ts": 1791297662.0917733,
      "trader": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
      "title": "London Lions vs. CB 1939 Canarias"
-    },
-    {
-     "token_id": "63113646417683901387945221043820360644751999854877460494518945310692393943142",
-     "cost": 6.4,
-     "ts": 1791309409.5876155,
-     "trader": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
-     "title": "Will Niger win on 2026-10-06?"
     },
     {
      "token_id": "44552677849174263304715712416252845720862071120783870552720042980779204555230",
@@ -815,17 +808,17 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 88.78,
+  "last_equity": 90.69,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-06",
   "last_escalation_id": "2026-10-06T12:41:36Z-e6a5",
-  "admit_scan_ts": 1791308395.2944467,
+  "admit_scan_ts": 1791319281.4069533,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 0,
-  "day_pnl": -0.12,
+  "day_pnl": 1.79,
   "day_pnl_day": "2026-10-06",
   "settled_tokens": [
    "6691701803539626176077488709374004737591849995522510168757367609925258534749",
@@ -885,7 +878,8 @@
    "32993501144824886055285261002339015886764671616463647458103259409424379445379",
    "110164432740590295267522652062845339067627165979535838785441892909653859937361",
    "51667409341963554860694359718426564057683432992289879020633419114085836458215",
-   "48503613853252409319510793408611731792794459945736778716234143012952611942029"
+   "48503613853252409319510793408611731792794459945736778716234143012952611942029",
+   "63113646417683901387945221043820360644751999854877460494518945310692393943142"
   ],
   "form_scan_ts": 1791303499.198536,
   "daily_line_attempt_day": "2026-10-06",
@@ -1257,132 +1251,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1791234136.7967086,
-   "day": "2026-10-05",
-   "kind": "push:no_daily_line",
-   "before": null,
-   "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t",
-   "detail": "NOT delivered",
-   "push": null
-  },
-  {
-   "ts": 1791234136.7967086,
-   "day": "2026-10-05",
-   "kind": "no_daily_line",
-   "before": "expected by 09:00 UTC",
-   "after": "missing",
-   "detail": "",
-   "push": null
-  },
-  {
-   "ts": 1791234630.921606,
-   "day": "2026-10-05",
-   "kind": "push:no_daily_line",
-   "before": null,
-   "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t",
-   "detail": "NOT delivered",
-   "push": null
-  },
-  {
-   "ts": 1791234630.921606,
-   "day": "2026-10-05",
-   "kind": "no_daily_line",
-   "before": "expected by 09:00 UTC",
-   "after": "missing",
-   "detail": "",
-   "push": null
-  },
-  {
-   "ts": 1791235154.9411106,
-   "day": "2026-10-05",
-   "kind": "push:no_daily_line",
-   "before": null,
-   "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t",
-   "detail": "NOT delivered",
-   "push": null
-  },
-  {
-   "ts": 1791235154.9411106,
-   "day": "2026-10-05",
-   "kind": "no_daily_line",
-   "before": "expected by 09:00 UTC",
-   "after": "missing",
-   "detail": "",
-   "push": null
-  },
-  {
-   "ts": 1791235678.9601943,
-   "day": "2026-10-05",
-   "kind": "push:no_daily_line",
-   "before": null,
-   "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t",
-   "detail": "NOT delivered",
-   "push": null
-  },
-  {
-   "ts": 1791235678.9601943,
-   "day": "2026-10-05",
-   "kind": "no_daily_line",
-   "before": "expected by 09:00 UTC",
-   "after": "missing",
-   "detail": "",
-   "push": null
-  },
-  {
-   "ts": 1791236203.0163882,
-   "day": "2026-10-05",
-   "kind": "push:no_daily_line",
-   "before": null,
-   "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t",
-   "detail": "NOT delivered",
-   "push": null
-  },
-  {
-   "ts": 1791236203.0163882,
-   "day": "2026-10-05",
-   "kind": "no_daily_line",
-   "before": "expected by 09:00 UTC",
-   "after": "missing",
-   "detail": "",
-   "push": null
-  },
-  {
-   "ts": 1791236722.1605012,
-   "day": "2026-10-05",
-   "kind": "push:no_daily_line",
-   "before": null,
-   "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t",
-   "detail": "NOT delivered",
-   "push": null
-  },
-  {
-   "ts": 1791236722.1605012,
-   "day": "2026-10-05",
-   "kind": "no_daily_line",
-   "before": "expected by 09:00 UTC",
-   "after": "missing",
-   "detail": "",
-   "push": null
-  },
-  {
-   "ts": 1791237206.2254562,
-   "day": "2026-10-05",
-   "kind": "push:no_daily_line",
-   "before": null,
-   "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t",
-   "detail": "NOT delivered",
-   "push": null
-  },
-  {
-   "ts": 1791237206.2254562,
-   "day": "2026-10-05",
-   "kind": "no_daily_line",
-   "before": "expected by 09:00 UTC",
-   "after": "missing",
-   "detail": "",
-   "push": null
-  },
   {
    "ts": 1791237715.2474833,
    "day": "2026-10-05",
@@ -2529,12 +2397,23 @@
    "detail": "0x10658d37: 32 settled, 59% won vs 54% needed, net +23.8% on $26,405, worst day -1,220, 0 of 1 exits under 10 min",
    "push": "WALLET",
    "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218"
+  },
+  {
+   "ts": 1791320934.411836,
+   "day": "2026-10-06",
+   "kind": "settled",
+   "before": "open $6.40",
+   "after": "paid $8.31",
+   "detail": "won +1.91 on 'Will Niger win on 2026-10-06?' (0x722abb54, tier 1b)",
+   "push": null,
+   "token_id": "63113646417683901387945221043820360644751999854877460494518945310692393943142",
+   "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+   "pnl": 1.91,
+   "won": true,
+   "cost": 6.4
   }
  ],
  "important": [
-  "2026-10-06 10:22:02 ERROR Onchain poll error: HTTPSConnectionPool(host='polygon-bor-rpc.publicnode.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='polygon-bor-rpc.publicnode.com', port=443): Failed to resolve 'polygon-bor-rpc.publicnode.com' ([Errno -3] Temporary failure in name resolution)\"))",
-  "2026-10-06 10:22:02 ERROR [inventory] API sync failed: [Errno -3] Temporary failure in name resolution",
-  "2026-10-06 10:22:49 ERROR Onchain poll error: HTTPSConnectionPool(host='polygon-bor-rpc.publicnode.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='polygon-bor-rpc.publicnode.com', port=443): Failed to resolve 'polygon-bor-rpc.publicnode.com' ([Errno -3] Temporary failure in name resolution)\"))",
   "2026-10-06 10:22:49 ERROR Network error fetching 0x9f15...bdb3: [Errno -3] Temporary failure in name resolution",
   "2026-10-06 10:22:49 INFO  [ops] form_unreadable: '0x05878ac3 12 failed reads' -> 'the last verdict holds' | network error (ConnectionError) after 4 attempts",
   "2026-10-06 10:23:31 ERROR Onchain poll error: HTTPSConnectionPool(host='polygon-bor-rpc.publicnode.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError(\"HTTPSConnection(host='polygon-bor-rpc.publicnode.com', port=443): Failed to resolve 'polygon-bor-rpc.publicnode.com' ([Errno -3] Temporary failure in name resolution)\"))",
@@ -2918,6 +2797,9 @@
   "2026-10-06 18:54:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-06 18:54:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-06 20:18:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-06 20:30:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-06 21:08:54 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $44.80",
+  "2026-10-06 21:08:55 INFO  [ops] settled: 'open $6.40' -> 'paid $8.31' | won +1.91 on 'Will Niger win on 2026-10-06?' (0x722abb54, tier 1b)",
   "2026-10-06 07:00:07 ERROR Network error fetching 0x984f...9a43: [Errno -3] Temporary failure in name resolution",
   "2026-10-06 11:14:06 INFO  [recovery] No pending orders to recover",
   "2026-10-06 11:34:50 INFO  [recovery] No pending orders to recover",
@@ -3051,12 +2933,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1791286592.339895,
-   "count": 38,
+   "last": 1791321016.11744,
+   "count": 39,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1791286592.339895
+    1791321016.11744
    ],
    "action": null,
    "action_ts": null,
@@ -3211,14 +3093,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791312974.8193398,
-   "count": 603,
+   "last": 1791318615.2950063,
+   "count": 605,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791311054.6973124,
-    1791312854.8113863,
-    1791312974.8193398
+    1791318015.265739,
+    1791318615.2950063
    ],
    "action": null,
    "action_ts": null,
@@ -4234,13 +4115,12 @@
   },
   "4162a3122f5e": {
    "first": 1790869754.4189043,
-   "last": 1791286592.339895,
-   "count": 7,
+   "last": 1791321016.11744,
+   "count": 8,
    "sample": "2026-10-01 15:48:57 INFO  [ops] settled: 'open $6.40' -> 'paid $9.85' | won +3.45 on 'Counter-Strike: BIG vs fnatic (BO3) - St' (0x19585131, tier 1b)",
    "norm": "INFO [ops] settled: 'S' -> 'S' | won N on 'S' (<hex>, tier Nb)",
    "recent": [
-    1791286592.339895,
-    1791286592.339895
+    1791321016.11744
    ],
    "action": null,
    "action_ts": null,
