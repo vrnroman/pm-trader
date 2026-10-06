@@ -1,14 +1,15 @@
 {
-    "id": "2026-10-06T06:42:23Z-12d2",
-    "ts": 1791268943,
+    "id": "2026-10-06T12:41:36Z-e6a5",
+    "ts": 1791290496,
     "kind": "escalation",
-    "message": "VM still unreachable, worse again. No recovery since 05:07 UTC Oct 4. Ops digest run 256 (03:16 UTC Oct 6) failed with state.json not valid json, empty output over the IAP tunnel. Heartbeat run 517 (03:14 UTC Oct 6) failed to connect to backend on port 22, same network-dead signature as before. Last confirmed digest is still 05:07 UTC Oct 4: armed true, equity 85.52, spend 12.80 of the 45 daily loss stop. Arm, spend, and trading status are unknown for over 49 hours, up from over 43 hours at the last escalation. A gcloud compute instances reset usually clears this and still has not been applied.",
+    "message": "VM still unreachable, worse again. No recovery since the last confirmed digest at 05:07 UTC Oct 4, now over 55 hours. Ops digest run 258 (10:42 UTC Oct 6) failed: state.json not valid json, empty output over the IAP tunnel. Heartbeat run 518 (10:40 UTC Oct 6) failed: could not connect to backend on port 22, same network-dead signature as before. Last confirmed digest: armed true, equity 85.52, spend 12.80 of the 45 daily loss stop. Arm, spend, and trading status unknown for over 55 hours. A gcloud compute instances reset usually clears this and still has not been applied. Also: the last two escalations could not be carried down to the VM, so Telegram likely did not get them either.",
     "evidence": [
         "# ops digest 2026-10-04T05:07:59.061842+00:00 (last 24h)",
         "## money state {\"cash\": 66.393083, \"equity\": 85.52, \"floor\": 30.0, \"spend\": {\"spent_usd\": 12.8, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-04\"}",
-        "GitHub Actions: Ops digest run 37408199180 (run #256, 03:16 UTC Oct 6) failed: state.json is not valid json, empty output over the IAP tunnel",
-        "GitHub Actions: Heartbeat run 37408023290 (run #517, 03:14 UTC Oct 6) failed: ConnectionCreationError, failed to connect to backend, port 22",
-        "Previous escalation 2026-10-06T00:42:26Z-da8b: unreachable over 43 hours at that point, now over 49"
+        "GitHub Actions: Ops digest run 37451544012 (run #258, 10:42 UTC Oct 6) failed: state.json is not valid json, empty output over the IAP tunnel",
+        "GitHub Actions: Heartbeat run 37451317916 (run #518, 10:40 UTC Oct 6) failed: ConnectionCreationError, failed to connect to backend, port 22",
+        "Ops digest run #258 log: 'could not carry verdict 2026-10-06T06:42:23Z-12d2 down to the VM; it will be retried next run'",
+        "Previous escalation 2026-10-06T06:42:23Z-12d2: unreachable over 49 hours at that point, now over 55"
     ],
     "commit": null
 }
