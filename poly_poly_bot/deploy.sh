@@ -156,6 +156,22 @@ gcloud compute scp "${SSH_FLAGS[@]}" "$TOKEN_FILE" "$TARGET:~/app/.ar_token" \
     --project="$GCP_PROJECT_ID" --zone="$ZONE"
 rm -f "$TOKEN_FILE"
 
+# Host network self-heal (ops/net-watchdog/). On 2026-10-04 systemd-networkd
+# gave up on ens4 after one netlink timeout and the box sat unreachable for 49
+# hours; nothing on the host retries a Failed link. Installed on every deploy so
+# a rebuilt VM gets it too. Never fails the deploy: the bot matters more than
+# its watchdog, and a missing sudo is reported, not fatal.
+gcloud compute scp "${SSH_FLAGS[@]}" ops/net-watchdog/net-watchdog.sh \
+    ops/net-watchdog/net-watchdog.service ops/net-watchdog/net-watchdog.timer \
+    "$TARGET:~/app/" --project="$GCP_PROJECT_ID" --zone="$ZONE" || true
+gcloud compute ssh "$TARGET" \
+    --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
+    --command='cd ~/app && sudo -n install -m 755 net-watchdog.sh /usr/local/sbin/ \
+        && sudo -n install -m 644 net-watchdog.service net-watchdog.timer /etc/systemd/system/ \
+        && sudo -n systemctl daemon-reload && sudo -n systemctl enable --now net-watchdog.timer \
+        && echo "net-watchdog: installed" \
+        || echo "WARNING: net-watchdog not installed (no passwordless sudo?)"' || true
+
 # ─── Step 4: Pull & Run on VM (no build, no tarball) ─────────────
 echo "[4/5] Pulling image on VM and starting..."
 gcloud compute ssh "$TARGET" \

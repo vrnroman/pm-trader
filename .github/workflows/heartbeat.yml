@@ -30,7 +30,7 @@ concurrency:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -68,12 +68,53 @@ jobs:
           echo "rc=$RC" >> "$GITHUB_OUTPUT"
           echo "$OUT"
 
+      # Alerting alone left the box dark for 49 hours (2026-10-04 to 10-06):
+      # GitHub runs this cron every few hours, not every 30 minutes, and a
+      # phone alert at 3am fixes nothing. A VM that will not answer SSH twice,
+      # 90 seconds apart, gets reset; it has always come back clean from one
+      # and the container restarts itself (--restart unless-stopped). The
+      # on-host net-watchdog should catch most of these first; this covers a
+      # hung kernel, which no on-host watchdog can.
+      - name: Reset a VM that stays unreachable
+        id: heal
+        if: steps.probe.outputs.rc != '0' || !contains(steps.probe.outputs.raw, 'up=')
+        run: |
+          set +e
+          G="--zone=asia-northeast1-a --project=roman-vm"
+          ask() { gcloud compute ssh poly-poly-bot $G --tunnel-through-iap \
+                    --command='docker inspect -f "up={{.State.Running}}" poly-poly-bot' 2>&1; }
+          sleep 90
+          SECOND=$(ask | grep -o "up=[a-z]*")
+          if [ "$SECOND" = "up=true" ]; then
+            echo "action=none (answered on the second probe)" >> "$GITHUB_OUTPUT"
+            exit 0
+          elif [ -n "$SECOND" ]; then
+            # Reachable but the container is down: a reset is not the fix.
+            echo "action=no reset, box answered the second probe with $SECOND" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          STATUS=$(gcloud compute instances describe poly-poly-bot $G --format='value(status)')
+          if [ "$STATUS" = "RUNNING" ]; then
+            gcloud compute instances reset poly-poly-bot $G; VERB=reset
+          else
+            gcloud compute instances start poly-poly-bot $G; VERB="start (was $STATUS)"
+          fi
+          BACK=no
+          for i in $(seq 1 12); do
+            sleep 20
+            UP=$(ask | grep -o "up=[a-z]*") && { BACK="yes, container $UP"; break; }
+          done
+          echo "action=$VERB, back=$BACK" | tr -d '\n' >> "$GITHUB_OUTPUT"
+          echo >> "$GITHUB_OUTPUT"
+          echo "$VERB -> back=$BACK"
+
       - name: Decide, and speak only if something is wrong
         env:
           TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
           RAW: ${{ steps.probe.outputs.raw }}
           RC: ${{ steps.probe.outputs.rc }}
+          HEAL: ${{ steps.heal.outputs.action }}
         run: |
           python3 - <<'PY'
           import os, re, urllib.parse, urllib.request
@@ -86,6 +127,13 @@ jobs:
               # not answer. Nothing inside it could ever have told us.
               problems.append("the VM did not answer a health probe at all "
                               "(this is the network-dead failure mode)")
+              heal = os.environ.get("HEAL", "")
+              if heal.startswith("none"):
+                  # A transient IAP or runner glitch, not a dead box.
+                  print("first probe failed, second answered: staying silent")
+                  raise SystemExit(0)
+              if heal:
+                  problems.append(f"self-heal: {heal}")
           else:
               m = dict(re.findall(r"(\w+)=(\S+)", raw))
               if m.get("up", "false").lower() != "true":

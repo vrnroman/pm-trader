@@ -1,0 +1,6 @@
+[Unit]
+Description=poly-poly-bot host network self-heal (see net-watchdog.sh)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/net-watchdog.sh
