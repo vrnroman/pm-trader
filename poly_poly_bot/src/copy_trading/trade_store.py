@@ -36,14 +36,14 @@ _LATENCY_WINDOW = 50  # rolling window for avg reaction latency
 # Persistence helpers
 # ---------------------------------------------------------------------------
 
-def _atomic_write_json(path: str, data: object) -> None:
+def _atomic_write_json(path: str, data: object, indent: Optional[int] = 2) -> None:
     """Write JSON atomically: write to tmp file then rename."""
     dir_path = os.path.dirname(path)
     os.makedirs(dir_path, exist_ok=True)
     fd, tmp_path = tempfile.mkstemp(dir=dir_path, suffix=".tmp")
     try:
         with os.fdopen(fd, "w") as f:
-            json.dump(data, f, indent=2)
+            json.dump(data, f, indent=indent)
         os.replace(tmp_path, path)
     except Exception:
         try:
@@ -82,7 +82,9 @@ def _load_seen_trades() -> None:
 def _save_seen_trades() -> None:
     while len(_seen_trades) > _MAX_SEEN_TRADES:
         _seen_trades.popitem(last=False)
-    _atomic_write_json(_SEEN_FILE, list(_seen_trades.keys()))
+    # Compact: this file is rewritten after every trade, on the event loop,
+    # and at 50k ids the indented form was 7.7 MB per write.
+    _atomic_write_json(_SEEN_FILE, list(_seen_trades.keys()), indent=None)
 
 
 _load_seen_trades()
@@ -240,37 +242,69 @@ def token_ever_bought(token_id: str) -> bool:
 record_trade_history = append_trade_history
 
 
+# market+side -> how many history rows, built once and then advanced by the
+# bytes appended since the last call. It replaced a full parse of the history
+# per trade: at 39 MB that scan was 47% of the event loop on 2026-10-06, so
+# after a 49-hour outage the executor fell behind its own queue (52 -> 116
+# and climbing) and the live poller's reads timed out behind it. Rebuilt from
+# scratch whenever the file shrinks or is replaced (reset_pnl truncates it).
+_dup_index: dict = {"path": None, "ino": None, "head": b"", "offset": 0, "counts": {}}
+
+
+def _dup_counts() -> dict:
+    idx = _dup_index
+    try:
+        st = os.stat(_HISTORY_FILE)
+    except OSError:
+        idx.update(path=None, ino=None, head=b"", offset=0, counts={})
+        return idx["counts"]
+    with open(_HISTORY_FILE, "rb") as f:
+        # The first bytes catch a truncate-then-regrow that size alone misses.
+        head = f.read(256)
+        if (idx["path"] != _HISTORY_FILE or idx["ino"] != st.st_ino
+                or st.st_size < idx["offset"]
+                or head[:len(idx["head"])] != idx["head"]):
+            idx.update(path=_HISTORY_FILE, ino=st.st_ino, head=b"", offset=0, counts={})
+        if st.st_size == idx["offset"]:
+            return idx["counts"]
+        f.seek(idx["offset"])
+        chunk = f.read()
+    if len(idx["head"]) < 256:
+        idx["head"] = head
+    counts = idx["counts"]
+    # Only whole lines: a row being written right now is counted next time.
+    end = chunk.rfind(b"\n") + 1
+    for raw in chunk[:end].splitlines():
+        try:
+            rec = json.loads(raw)
+        except ValueError:
+            continue
+        if not isinstance(rec, dict):
+            continue
+        side = rec.get("side")
+        # A row counts once for each distinct key it can be asked by, the
+        # display string the executor uses or the condition id.
+        for key in {rec.get("market"), rec.get("condition_id")}:
+            if key:
+                counts[(side, key)] = counts.get((side, key), 0) + 1
+    idx["offset"] += end
+    return counts
+
+
 def get_duplicate_count(market_key: str, side: str) -> int:
     """Count how many trades we've already recorded for ``market_key`` on ``side``.
 
     Used by the executor to enforce ``max_copies_per_market_side``: if we've
     already copied this market+side N times, the next attempt is skipped.
-    Reads the trade-history JSONL on demand; cheap enough for the modest
-    history sizes the bot accumulates between restarts.
+    Matches a row's ``market`` or its ``condition_id``.
     """
-    if not market_key or not os.path.exists(_HISTORY_FILE):
+    if not market_key:
         return 0
-    count = 0
     try:
-        with open(_HISTORY_FILE) as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    rec = json.loads(line)
-                except Exception:
-                    continue
-                if rec.get("side") != side:
-                    continue
-                # Match either ``market`` (display string used as the key
-                # by the executor) or ``condition_id`` for resilience.
-                if rec.get("market") == market_key or rec.get("condition_id") == market_key:
-                    count += 1
+        return _dup_counts().get((side, market_key), 0)
     except Exception as e:
         logger.warn(f"[trade-store] get_duplicate_count read failed: {e}")
         return 0
-    return count
 
 
 # ---------------------------------------------------------------------------
