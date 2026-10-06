@@ -1,7 +1,7 @@
-# ops digest 2026-10-06T15:09:56.131494+00:00 (last 24h)
+# ops digest 2026-10-06T17:07:00.174968+00:00 (last 24h)
 
 ## money state
-{"cash": 76.251633, "open_cost": 12.79, "equity": 89.04, "floor": 30.0, "stated": 80.0, "spend": {"date": "2026-10-06", "spent_usd": 12.8, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 77, "tier": {"1a": 0, "1b": 32.0, "1c": 0}, "ts": 1791299266.8866088, "day": "2026-10-06"}
+{"cash": 76.251633, "open_cost": 12.79, "equity": 89.04, "floor": 30.0, "stated": 80.0, "spend": {"date": "2026-10-06", "spent_usd": 12.8, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 77, "tier": {"1a": 0, "1b": 32.0, "1c": 0}, "ts": 1791306281.1796238, "day": "2026-10-06"}
 
 ## arm: {"armed": true, "ts": 1791286264.991414, "by": "watcher:no trade data for", "reason": "watcher: 'no trade data for' clear for 15 min", "first_armed_ts": 1788617432.0499406, "floor_override": false, "daily_loss_override_day": null}
 ## spend today: {"date": "2026-10-06", "spent_usd": 12.8, "wallet_copies": {"0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 2}, "wallet_copies_yesterday": {}, "yesterday": "2026-10-05", "closed_reason": ""}
@@ -9,42 +9,28 @@
 ## tier exposure: {"1a": [0, 0], "1b": [32.0, 5], "1c": [0, 0]}
 ## probation: {"0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {"since": 1789752828.6614223, "settled": 0, "held_said": true}, "0xf49614e63fb15383d4a9b717a1be03ad2410fe79": {"since": 1789827868.9550335, "settled": 0, "held_said": true}, "0x09b045baad1fbe115c70785635a261411774a3b6": {"since": 1790408379.9945147, "settled": 0, "held_said": true}, "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {"since": 1790408379.9945147, "settled": 0, "held_said": true}, "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709": {"since": 1790408379.9945147, "settled": 0, "held_said": true}, "0x736539924a5602b37a03a54fc12c1cc8f98964da": {"since": 1790419321.1807199, "settled": 0, "held_said": true}, "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {"since": 1790419321.1807199, "settled": 0, "held_said": true}, "0x1958513132accb7dd17f2cf7beebbc165776b24e": {"since": 1790561308.3596761, "settled": 2}, "0x10658d371ae1f09eed503a3a14c8ac6a1a936218": {"since": 1790572249.31929, "settled": 0}, "0x05878ac343c1387d592042d788424412733ac40b": {"since": 1790869865.9736373, "settled": 0}}
 ## form (each wallet on its own money, last 14 days, our slice)
-benched  0x00110b8e: 94 settled, 80% won vs 69% needed, net +6.5% on $109,769, worst day -1,978, 6 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
-benched  0x05878ac3: 47 settled, 43% won vs 50% needed, net +2.0% on $55,134, worst day -5,040, 1 of 18 exits under 10 min
-benched  0x09b045ba: 17 settled, 88% won vs 60% needed, net +23.6% on $6,759, worst day -82, 17 of 17 exits under 10 min
-benched  0x10658d37: 32 settled, 53% won vs 51% needed, net +21.4% on $23,263, worst day -1,220, 0 of 1 exits under 10 min
-benched  0x19585131: 35 settled, 46% won vs 51% needed, net -7.5% on $22,348, worst day -2,857
-benched  0x1985327e: 26 settled, 73% won vs 49% needed, net +21.8% on $9,497, worst day -115, 26 of 26 exits under 10 min
-benched  0x4980930d: 24 settled, 42% won vs 51% needed, net +5.8% on $84,176, worst day -13,696, 1 of 11 exits under 10 min
-in form  0x5213eb85: 102 settled, 52% won vs 42% needed, net +28.0% on $56,495, worst day -2,314, 0 of 3 exits under 10 min
-in form  0x722abb54: 31 settled, 84% won vs 78% needed, net +27.2% on $47,516, worst day -2,522, 0 of 28 exits under 10 min
-benched  0x73653992: 4 settled, 100% won vs 86% needed, net +157.9% on $2,308, worst day +93, 0 of 3 exits under 10 min
-benched  0x984ffef1: 56 settled, 70% won vs 55% needed, net +22.7% on $49,477, worst day -3,259, 8 of 21 exits under 10 min
-benched  0x9f15613e: 252 settled, 54% won vs 52% needed, net +10.4% on $1,230,596, worst day -47,016, 16 of 18 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
+benched  0x00110b8e: 73 settled, 81% won vs 69% needed, net +9.6% on $91,634, worst day -1,978, 7 of 16 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
+benched  0x05878ac3: 7 settled, 14% won vs 46% needed, net -75.4% on $5,478, worst day -5,040, 0 of 1 exits under 10 min
+benched  0x09b045ba: 20 settled, 75% won vs 54% needed, net +16.3% on $7,855, worst day -241, 20 of 20 exits under 10 min
+in form  0x10658d37: 32 settled, 59% won vs 54% needed, net +23.8% on $26,405, worst day -1,220, 0 of 1 exits under 10 min
+benched  0x19585131: 60 settled, 47% won vs 50% needed, net -2.8% on $37,207, worst day -2,457
+benched  0x1985327e: 23 settled, 61% won vs 45% needed, net +14.9% on $8,416, worst day -165, 23 of 23 exits under 10 min
+benched  0x4980930d: 24 settled, 42% won vs 51% needed, net +4.1% on $108,252, worst day -26,665, 1 of 11 exits under 10 min
+in form  0x5213eb85: 99 settled, 54% won vs 41% needed, net +26.5% on $61,382, worst day -3,174, 0 of 6 exits under 10 min
+in form  0x722abb54: 46 settled, 78% won vs 74% needed, net +16.9% on $74,048, worst day -2,522, 2 of 39 exits under 10 min
+benched  0x73653992: 3 settled, 100% won vs 89% needed, net +20.4% on $1,028, worst day +93, 0 of 3 exits under 10 min
+benched  0x984ffef1: 64 settled, 64% won vs 53% needed, net +3.8% on $58,946, worst day -6,618, 9 of 24 exits under 10 min
+benched  0x9f15613e: 252 settled, 56% won vs 54% needed, net +6.6% on $1,219,063, worst day -47,016, 17 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
-benched  0xf49614e6: 26 settled, 42% won vs 59% needed, net -27.6% on $93,053, worst day -11,771, 0 of 3 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
-benched  0xfd3e6449: 53 settled, 72% won vs 73% needed, net -2.7% on $44,476, worst day -2,972, 11 of 15 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
-unread   0x00110b8e: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x05878ac3: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x09b045ba: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x10658d37: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x19585131: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x1985327e: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x4980930d: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x5213eb85: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x722abb54: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x73653992: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x984ffef1: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0x9f15613e: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0xeef6ad0e: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0xf49614e6: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-unread   0xfd3e6449: network error (ConnectionError) after 4 attempts, 12 tries, next try 16:16 UTC
-two clocks: 52 matched fills over 0.2 d, api lag p50 46.2s, chain lag p50 21.3s, chain earlier by 21.0s at the median; api-only 896, chain-only 83, replayed rows 0; CHAIN IS PRIMARY
-⏱ api lag cost, last 7d (estimate): -108.07 USD over 3586 fills at $6.40 each, +0.000 USD a fill at the median, chain earlier by 14.1s
+benched  0xf49614e6: 31 settled, 42% won vs 57% needed, net -24.5% on $86,064, worst day -9,061, 0 of 4 exits under 10 min
+benched  0xfd3e6449: 58 settled, 74% won vs 70% needed, net +6.1% on $47,449, worst day -1,054, 13 of 16 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
+two clocks: 55 matched fills over 0.2 d, api lag p50 44.7s, chain lag p50 18.0s, chain earlier by 12.0s at the median; api-only 896, chain-only 115, replayed rows 0; CHAIN IS PRIMARY
+⏱ api lag cost, last 7d (estimate): -95.70 USD over 3491 fills at $6.40 each, +0.000 USD a fill at the median, chain earlier by 14.4s
 
-## watcher (2 wakes in 24h)
+## watcher (3 wakes in 24h)
 {"ts": 1791266442.0856402, "kind": "analyst", "woke_because": "daily study", "concluded": "no usable answer", "did": "nothing", "cost_usd": 0.0}
 {"ts": 1791285342.9749777, "kind": "disarm", "woke_because": "d76e3169f01d", "concluded": "Cause: the 11:14 UTC restart cleared the live-guard self_disarm at 11:14:06, three seconds before the first fresh chain read at 11:14:09, so the Oct 4 protection that copying blind is worse than not copying was reset by the restart rather than by the blindness ending. The bot came up Mode: LIVE, authenticate
+{"ts": 1791299635.9508731, "kind": "escalate", "woke_because": "30d9e98599e7", "concluded": "The trading box is healthy and live-trading real money, but the owner-facing reporting pipeline (daily line and digest) has been down since Oct 4, and the ops monitor mislabels that as the whole VM being unreachable. I verified on-box: chain reader current at 15:15:48 with lag 0 blocks, 983 log lines in th
 ## live limits (owner's number, and the analyst's where one is in force)
 LIVE_MAX_PER_WALLET_DAY: 20 (owner) band 1..20
 FETCH_INTERVAL: 3.0 (owner) band 2..5
@@ -52,22 +38,22 @@ OPS_REARM_CLEAR_S: 900.0 (owner) band 600.0..1800.0
 OPS_REARM_MAX_PER_DAY: 3 (owner) band 1..3
 FORM_DAYS: 14.0 (owner) band 7.0..21.0
 ## book B at each slice floor (raw numbers; the gate reads the one marked)
-b300 (floor $300): 8631 settled, 270 open, realized +2.2%, at their price +3.2% (net -7.5%), win rate 57%, feeds the Z gate
-b150 (floor $150): 1752 settled, 144 open, realized +4.8%, at their price +5.8% (net -4.5%), win rate 61%
-b100 (floor $100): 1874 settled, 127 open, realized +4.7%, at their price +5.7% (net -4.6%), win rate 58%
-## near the Z door (45 wallets within 2 fails; 1 pass and wait)
+b300 (floor $300): 8645 settled, 276 open, realized +2.2%, at their price +3.2% (net -7.6%), win rate 57%, feeds the Z gate
+b150 (floor $150): 1773 settled, 139 open, realized +5.4%, at their price +6.4% (net -3.9%), win rate 62%
+b100 (floor $100): 1890 settled, 127 open, realized +5.2%, at their price +6.2% (net -4.1%), win rate 58%
+## near the Z door (44 wallets within 2 fails; 1 pass and wait)
 0x09b045ba: 1 fail(s): not a scalper at our latency (scalper: 100% of exits within 10 min; uncopyable at our latency)
 0x141a5834: 1 fail(s): promotion floor still holds (copy ROI +9% < floor +10%)
 0x1985327e: 1 fail(s): not a scalper at our latency (scalper: 100% of exits within 10 min; uncopyable at our latency)
 0x24ae647b: 1 fail(s): promotion floor still holds (copy ROI +4% < floor +10%)
 0x28ef6f21: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (29 clean (of 29 all-time))
 0x3968f7c9: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (19 clean (of 19 all-time))
-0x4c07bf46: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (15 clean (of 15 all-time))
-0x533177a2: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (20 clean (of 20 all-time))
+0x4c07bf46: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (17 clean (of 17 all-time))
 0x68e1e8ef: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (21 clean (of 21 all-time))
 0x984ffef1: 1 fail(s): not a scalper at our latency (scalper: 38% of exits within 10 min; uncopyable at our latency)
-0x9f15613e: 1 fail(s): not a scalper at our latency (scalper: 89% of exits within 10 min; uncopyable at our latency)
+0x9f15613e: 1 fail(s): not a scalper at our latency (scalper: 85% of exits within 10 min; uncopyable at our latency)
 0xa06ac748: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (23 clean (of 23 all-time))
+0xa42f3648: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (25 clean (of 25 all-time))
 ## experiments (the analyst's cards; one live at a time)
 min150-r1        void   slice floor 300 to 150                             n 138 +10.6 pp  (min150-r1 <- min150, study 2026-09-24-min_usd-cdc749c5)
 min150           void   slice floor 300 to 150                             n 128 -1.9 pp  (min150 <- study 2026-09-24-min_usd-cdc749c5)
@@ -76,69 +62,38 @@ study 2026-09-24-min_usd-cdc749c5: wallets in 19 -> 20 (stay 15, enter 5, leave 
 study 2026-09-25-wallet_cap-178163d7: wallets in 32 -> 34 (stay 32, enter 2, leave 0); copies 3840 -> 2956; ROI at their price +9.0% -> +11.8%
 study 2026-09-27-form-c2308d97: wallets in 6 -> 6 (stay 5, enter 1, leave 1); copies 3007 -> 2073; ROI at their price +3.2% -> +2.9%
 ## fingerprints (30 shown)
-eb7da12386c6 x45 last 0.5h ago [open: 45 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
-a77088f7944a x45 last 0.5h ago [open: 45 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
-d7140f640d29 x44 last 0.5h ago [open: 44 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
-59f5d5ebf4a6 x26 last 0.5h ago [open: 26 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)
-54ac26fb3ff1 x600 last 0.9h ago [open: 600 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
-7a8d58f20915 x117 last 1.6h ago [open: 117 hits, no action yet] :: ERROR Network error fetching <hex>:
-6f12d4998994 x35 last 2.6h ago [open: 35 hits, no action yet] :: INFO [recovery] No pending orders to recover
-6b829965c182 x35 last 2.6h ago [open: 35 hits, no action yet] :: INFO Bot started. Monitoring trades...
-9d8a6d2794ec x29 last 2.6h ago [open: 29 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
-6c813168939b x116 last 2.6h ago [open: 116 hits, no action yet] :: ERROR [py_clob_client_v2] request error: Server disconnected
-41cab7e764a5 x39 last 2.6h ago [open: 39 hits, no action yet] :: ERROR [py_clob_client_v2] request error: The read operation timed out
-c47d62e70341 x34 last 2.6h ago [open: 34 hits, no action yet] :: INFO Received signal N, shutting down...
-6eca45f47973 x103 last 2.7h ago [open: 103 hits, no action yet] :: ERROR Network error fetching <hex>: Server disconnected without sending a response.
-907b728a6b72 x111 last 3.0h ago [open: 111 hits, no action yet] :: ERROR [inventory] API sync failed:
-7dfc4a226f73 x72 last 3.3h ago [open: 72 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
-7da5b6289516 x24 last 3.3h ago [open: 24 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
-f0d4155b43e0 x3 last 3.4h ago [open: 3 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimme
-13ad3e5ddfe8 x8 last 3.5h ago [open: 8 hits, no action yet] :: ERROR [inventory] API sync failed: Server disconnected without sending a response.
-a05fff81fe03 x9 last 3.5h ago [open: 9 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, tri
-727577d69f4e x16 last 3.5h ago [open: 16 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
-c6d91d798e54 x38 last 3.6h ago [open: 38 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
-2497cd50ff7d x11 last 3.6h ago [open: 11 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
-5e8145241ab5 x5 last 3.6h ago [open: 5 hits, no action yet] :: INFO [ops] push:milestone: None -> 'S'
-4162a3122f5e x7 last 3.6h ago [open: 7 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | won N on 'S' (<hex>, tier Nb)
-d3a278c17ca5 x4 last 3.6h ago [open: 4 hits, no action yet] :: INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows
-08dfe8049544 x2 last 3.6h ago [open: 2 hits, no action yet] :: WARNING [live] ARMED for real orders by watcher:no trade data for: watcher: 'S' clear for N min
-b5f59c7d06e6 x2 last 3.6h ago [open: 2 hits, no action yet] :: INFO [ops] rearm: 'S' -> 'S' | self re-arm N/N today
-2b4b01a02868 x34 last 3.7h ago [open: 34 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/fee-rate body={'S':'S'}
-9758fc4fa742 x83 last 3.9h ago [open: 83 hits, no action yet] :: INFO [ops] no_daily_line: 'S' -> 'S'
-d76e3169f01d x1 last 3.9h ago [unproven: 0 hits but the path ran 0 times in 3.9 h; silence is not proof] :: INFO [ops] push:no_daily_line: None -> 'S'
+7a8d58f20915 x118 last 0.1h ago [open: 118 hits, no action yet] :: ERROR Network error fetching <hex>:
+9d498e122ffb x28 last 0.8h ago [open: 28 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
+30d9e98599e7 x1 last 1.9h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | VM still unreachable, worse again. No recovery since the last confirmed di
+eb7da12386c6 x45 last 2.4h ago [open: 45 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
+a77088f7944a x45 last 2.4h ago [open: 45 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
+d7140f640d29 x44 last 2.4h ago [open: 44 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
+59f5d5ebf4a6 x26 last 2.4h ago [open: 26 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)
+54ac26fb3ff1 x600 last 2.8h ago [open: 600 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
+6f12d4998994 x35 last 4.6h ago [open: 35 hits, no action yet] :: INFO [recovery] No pending orders to recover
+6b829965c182 x35 last 4.6h ago [open: 35 hits, no action yet] :: INFO Bot started. Monitoring trades...
+9d8a6d2794ec x29 last 4.6h ago [open: 29 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
+6c813168939b x116 last 4.6h ago [open: 116 hits, no action yet] :: ERROR [py_clob_client_v2] request error: Server disconnected
+41cab7e764a5 x39 last 4.6h ago [open: 39 hits, no action yet] :: ERROR [py_clob_client_v2] request error: The read operation timed out
+c47d62e70341 x34 last 4.6h ago [open: 34 hits, no action yet] :: INFO Received signal N, shutting down...
+6eca45f47973 x103 last 4.6h ago [open: 103 hits, no action yet] :: ERROR Network error fetching <hex>: Server disconnected without sending a response.
+907b728a6b72 x111 last 4.9h ago [open: 111 hits, no action yet] :: ERROR [inventory] API sync failed:
+7dfc4a226f73 x72 last 5.2h ago [open: 72 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
+7da5b6289516 x24 last 5.3h ago [open: 24 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
+f0d4155b43e0 x3 last 5.3h ago [open: 3 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimme
+13ad3e5ddfe8 x8 last 5.4h ago [open: 8 hits, no action yet] :: ERROR [inventory] API sync failed: Server disconnected without sending a response.
+a05fff81fe03 x9 last 5.4h ago [open: 9 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, tri
+727577d69f4e x16 last 5.5h ago [open: 16 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
+c6d91d798e54 x38 last 5.5h ago [open: 38 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
+2497cd50ff7d x11 last 5.5h ago [open: 11 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
+5e8145241ab5 x5 last 5.5h ago [open: 5 hits, no action yet] :: INFO [ops] push:milestone: None -> 'S'
+4162a3122f5e x7 last 5.5h ago [open: 7 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | won N on 'S' (<hex>, tier Nb)
+d3a278c17ca5 x4 last 5.5h ago [open: 4 hits, no action yet] :: INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows
+08dfe8049544 x2 last 5.5h ago [open: 2 hits, no action yet] :: WARNING [live] ARMED for real orders by watcher:no trade data for: watcher: 'S' clear for N min
+b5f59c7d06e6 x2 last 5.5h ago [open: 2 hits, no action yet] :: INFO [ops] rearm: 'S' -> 'S' | self re-arm N/N today
+2b4b01a02868 x34 last 5.7h ago [open: 34 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/fee-rate body={'S':'S'}
 
-## ledger (191 rows)
-{"ts": 1791213380.5855687, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
-{"ts": 1791213380.5855687, "day": "2026-10-05", "kind": "no_daily_line", "before": "expected by 09:00 UTC", "after": "missing", "detail": "", "push": null}
-{"ts": 1791213894.599486, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
-{"ts": 1791213894.599486, "day": "2026-10-05", "kind": "no_daily_line", "before": "expected by 09:00 UTC", "after": "missing", "detail": "", "push": null}
-{"ts": 1791214413.62218, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
-{"ts": 1791214413.62218, "day": "2026-10-05", "kind": "no_daily_line", "before": "expected by 09:00 UTC", "after": "missing", "detail": "", "push": null}
-{"ts": 1791214917.6401987, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
-{"ts": 1791214917.6401987, "day": "2026-10-05", "kind": "no_daily_line", "before": "expected by 09:00 UTC", "after": "missing", "detail": "", "push": null}
-{"ts": 1791215441.6182926, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
-{"ts": 1791215441.6182926, "day": "2026-10-05", "kind": "no_daily_line", "before": "expected by 09:00 UTC", "after": "missing", "detail": "", "push": null}
-{"ts": 1791215945.6116607, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
-{"ts": 1791215945.6116607, "day": "2026-10-05", "kind": "no_daily_line", "before": "expected by 09:00 UTC", "after": "missing", "detail": "", "push": null}
-{"ts": 1791216464.6096056, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
-{"ts": 1791216464.6096056, "day": "2026-10-05", "kind": "no_daily_line", "before": "expected by 09:00 UTC", "after": "missing", "detail": "", "push": null}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x00110b8e 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x05878ac3 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x05878ac343c1387d592042d788424412733ac40b"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x09b045ba 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x10658d37 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x19585131 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x1985327e 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x4980930d 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x5213eb85 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x722abb54 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x73653992 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x736539924a5602b37a03a54fc12c1cc8f98964da"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x984ffef1 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x984ffef12a23e7af5e2cef8e3283e0ab6a6e9a43"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0x9f15613e 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0xeef6ad0e 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0xf49614e6 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79"}
-{"ts": 1791216504.6628864, "day": "2026-10-05", "kind": "form_unreadable", "before": "0xfd3e6449 9 failed reads", "after": "the last verdict holds", "detail": "network error (ConnectionError) after 4 attempts", "push": null, "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a"}
-{"ts": 1791219808.802899, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
-{"ts": 1791219808.802899, "day": "2026-10-05", "kind": "no_daily_line", "before": "expected by 09:00 UTC", "after": "missing", "detail": "", "push": null}
+## ledger (163 rows)
 {"ts": 1791220322.8259351, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
 {"ts": 1791220322.8259351, "day": "2026-10-05", "kind": "no_daily_line", "before": "expected by 09:00 UTC", "after": "missing", "detail": "", "push": null}
 {"ts": 1791222907.2444868, "day": "2026-10-05", "kind": "push:no_daily_line", "before": null, "after": "🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t", "detail": "NOT delivered", "push": null}
@@ -299,11 +254,11 @@ d76e3169f01d x1 last 3.9h ago [unproven: 0 hits but the path ran 0 times in 3.9 
 {"ts": 1791286514.5789115, "day": "2026-10-06", "kind": "floor_row", "before": "0xf49614e6 floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no -6% (n=71, trimmed -14%) · 200 no -11% (n=87, trimmed -18%) · 150 no -8% (n=89, trimmed -15%) · 100 no -8% (n=91, trimmed -16%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0xf49614e63fb15383d4a9b717a1be03ad2410fe79", "floor_before": null, "floor_after": null, "live": false}
 {"ts": 1791286514.5789115, "day": "2026-10-06", "kind": "floor_row", "before": "0xfd3e6449 floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no -4% (n=26, trimmed -13%) · 200 no +1% (n=38, trimmed -8%) · 150 no -2% (n=51, trimmed -9%) · 100 no +2% (n=79, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a", "floor_before": null, "floor_after": null, "live": false}
 {"ts": 1791289910.1354916, "day": "2026-10-06", "kind": "sre_started", "before": "sidecar", "after": "watching", "detail": "tick 120s", "push": null}
+{"ts": 1791299571.7189662, "day": "2026-10-06", "kind": "escalation_delivered", "before": "routine escalation", "after": "sent", "detail": "VM still unreachable, worse again. No recovery since the last confirmed digest at 05:07 UTC Oct 4, now over 55 hours. Op", "push": "BOT"}
+{"ts": 1791299635.9508731, "day": "2026-10-06", "kind": "sre_escalate", "before": "fingerprint 30d9e98599e7", "after": "owner told", "detail": "Bot is up and live-trading real money now, equity 89 dollars, 12.80 of the 45 loss stop spent today, chain reader current. The VM unreachable 55 hour alarm is f", "push": "BOT", "fingerprint": "30d9e98599e7"}
+{"ts": 1791303500.1315303, "day": "2026-10-06", "kind": "form", "before": "0x10658d37 benched", "after": "in form", "detail": "0x10658d37: 32 settled, 59% won vs 54% needed, net +23.8% on $26,405, worst day -1,220, 0 of 1 exits under 10 min", "push": "WALLET", "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218"}
 
 ## important lines (400)
-2026-10-06 10:17:05 ERROR Network error fetching 0xf496...fe79: [Errno -3] Temporary failure in name resolution
-2026-10-06 10:17:37 ERROR Onchain poll error: HTTPSConnectionPool(host='polygon-bor-rpc.publicnode.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("HTTPSConnection(host='polygon-bor-rpc.publicnode.com', port=443): Failed to resolve 'polygon-bor-rpc.publicnode.com' ([Errno -3] Temporary failure in name resolution)"))
-2026-10-06 10:18:04 ERROR Onchain poll error: HTTPSConnectionPool(host='polygon-bor-rpc.publicnode.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("HTTPSConnection(host='polygon-bor-rpc.publicnode.com', port=443): Failed to resolve 'polygon-bor-rpc.publicnode.com' ([Errno -3] Temporary failure in name resolution)"))
 2026-10-06 10:18:04 ERROR Network error fetching 0x7365...64da: [Errno -3] Temporary failure in name resolution
 2026-10-06 10:18:51 ERROR Onchain poll error: HTTPSConnectionPool(host='polygon-bor-rpc.publicnode.com', port=443): Max retries exceeded with url: / (Caused by NameResolutionError("HTTPSConnection(host='polygon-bor-rpc.publicnode.com', port=443): Failed to resolve 'polygon-bor-rpc.publicnode.com' ([Errno -3] Temporary failure in name resolution)"))
 2026-10-06 10:18:51 ERROR Network error fetching 0xfd3e...5a7a: [Errno -3] Temporary failure in name resolution
@@ -693,6 +648,9 @@ d76e3169f01d x1 last 3.9h ago [unproven: 0 hits but the path ran 0 times in 3.9 
 2026-10-06 14:24:40 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $25.60 / $200.00
 2026-10-06 14:41:01 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / no spend cap (the day stops after $45 lost)
 2026-10-06 14:41:02 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $32.00 / $200.00
+2026-10-06 15:12:52 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | VM still unreachable, worse again. No recovery since the last confirmed digest at 05:07 UTC Oct 4, now over 55 hours. Op
+2026-10-06 16:18:38 INFO  [ops] form: '0x10658d37 benched' -> 'in form' | 0x10658d37: 32 settled, 59% won vs 54% needed, net +23.8% on $26,405, worst day -1,220, 0 of 1 exits under 10 min
+2026-10-06 17:01:29 ERROR Network error fetching 0x0587...c40b: 
 2026-10-06 07:00:07 ERROR Network error fetching 0x984f...9a43: [Errno -3] Temporary failure in name resolution
 2026-10-06 11:14:06 INFO  [recovery] No pending orders to recover
 2026-10-06 11:34:50 INFO  [recovery] No pending orders to recover
