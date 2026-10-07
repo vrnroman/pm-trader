@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-07T14:30:24.760204+00:00",
+ "generated": "2026-10-07T15:23:15.523786+00:00",
  "money": {
-  "cash": 90.040313,
-  "open_cost": 12.67,
-  "equity": 102.71,
+  "cash": 83.548233,
+  "open_cost": 19.07,
+  "equity": 102.62,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-10-07",
-   "spent_usd": 31.78,
+   "spent_usd": 38.18,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 79,
   "tier": {
    "1a": 0,
-   "1b": 38.36,
+   "1b": 44.76,
    "1c": 0
   },
-  "ts": 1791383346.5998688,
+  "ts": 1791386382.1713119,
   "day": "2026-10-07"
  },
  "arm": {
@@ -35,9 +35,9 @@
  },
  "spend": {
   "date": "2026-10-07",
-  "spent_usd": 31.78,
+  "spent_usd": 38.18,
   "wallet_copies": {
-   "0x722abb5460060870d46728bf45f66a6b1635d6ed": 3,
+   "0x722abb5460060870d46728bf45f66a6b1635d6ed": 4,
    "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 2
   },
   "wallet_copies_yesterday": {
@@ -55,9 +55,9 @@
    "placements": []
   },
   "1b": {
-   "open_total": 38.36,
+   "open_total": 44.76,
    "daily_date": "2026-10-07",
-   "daily_volume": 31.78,
+   "daily_volume": 38.18,
    "placements": [
     {
      "token_id": "87131648918137474349304257527344538579233235348393719175219550429557466113538",
@@ -100,6 +100,13 @@
      "ts": 1791383118.0621624,
      "trader": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
      "title": "Will FK Neftchi Fargona win on 2026-10-07?"
+    },
+    {
+     "token_id": "12523269150930482843474620409369664879839576915538265305350015027992001644003",
+     "cost": 6.4,
+     "ts": 1791383857.1998332,
+     "trader": "0x722abb5460060870d46728bf45f66a6b1635d6ed",
+     "title": "Will Xorazm Fk Urganch win on 2026-10-07?"
     }
    ]
   },
@@ -758,14 +765,14 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 102.71,
+  "last_equity": 102.62,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-07",
-  "last_escalation_id": "2026-10-07T06:43:46Z-9721",
-  "admit_scan_ts": 1791373353.557312,
+  "last_escalation_id": "2026-10-07T12:43:58Z-a17c",
+  "admit_scan_ts": 1791384255.567412,
   "day_loss_pushed": "2026-09-29",
   "loss_streak": 0,
   "day_pnl": 25.28,
@@ -1184,25 +1191,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1791299571.7189662,
-   "day": "2026-10-06",
-   "kind": "escalation_delivered",
-   "before": "routine escalation",
-   "after": "sent",
-   "detail": "VM still unreachable, worse again. No recovery since the last confirmed digest at 05:07 UTC Oct 4, now over 55 hours. Op",
-   "push": "BOT"
-  },
-  {
-   "ts": 1791299635.9508731,
-   "day": "2026-10-06",
-   "kind": "sre_escalate",
-   "before": "fingerprint 30d9e98599e7",
-   "after": "owner told",
-   "detail": "Bot is up and live-trading real money now, equity 89 dollars, 12.80 of the 45 loss stop spent today, chain reader current. The VM unreachable 55 hour alarm is f",
-   "push": "BOT",
-   "fingerprint": "30d9e98599e7"
-  },
-  {
    "ts": 1791303500.1315303,
    "day": "2026-10-06",
    "kind": "form",
@@ -1604,12 +1592,33 @@
    "floor_before": null,
    "floor_after": null,
    "live": false
+  },
+  {
+   "ts": 1791383651.8583393,
+   "day": "2026-10-07",
+   "kind": "escalation_delivered",
+   "before": "routine escalation",
+   "after": "sent",
+   "detail": "Digest still frozen at 01:17 UTC, now 11 hours stale, worse than the 5 hour 58 minute mark in the last escalation. GitHu",
+   "push": "BOT"
+  },
+  {
+   "ts": 1791384255.567412,
+   "day": "2026-10-07",
+   "kind": "decay_day",
+   "before": "0xfd3e6449 in set Z",
+   "after": "below the door 1 of 7",
+   "detail": "does not lose at the prices we would really pay: -1% at real quotes over 51 matched copies",
+   "push": "WALLET",
+   "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a",
+   "days": 1,
+   "window": 7,
+   "fails": [
+    "does not lose at the prices we would really pay"
+   ]
   }
  ],
  "important": [
-  "2026-10-06 14:41:01 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $12.80 / no spend cap (the day stops after $45 lost)",
-  "2026-10-06 14:41:02 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $32.00 / $200.00",
-  "2026-10-06 15:12:52 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | VM still unreachable, worse again. No recovery since the last confirmed digest at 05:07 UTC Oct 4, now over 55 hours. Op",
   "2026-10-06 16:18:38 INFO  [ops] form: '0x10658d37 benched' -> 'in form' | 0x10658d37: 32 settled, 59% won vs 54% needed, net +23.8% on $26,405, worst day -1,220, 0 of 1 exits under 10 min",
   "2026-10-06 17:01:29 ERROR Network error fetching 0x0587...c40b: ",
   "2026-10-06 17:56:48 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $19.20 / no spend cap (the day stops after $45 lost)",
@@ -1708,8 +1717,11 @@
   "2026-10-07 14:20:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-07 14:25:16 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $31.78 / no spend cap (the day stops after $45 lost)",
   "2026-10-07 14:25:18 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $38.36 / $200.00",
-  "2026-10-06 14:41:01 TRADE [LIVE] BUY $6.40 on 'London Lions vs. CB 1939 Canarias' @ 0.6600, order 0x86a7fe507a...",
-  "2026-10-06 14:41:02 TRADE [verify] FILLED: BUY 9.69 shares on 'London Lions vs. CB 1939 Canarias' @ 0.6600",
+  "2026-10-07 14:34:12 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Digest still frozen at 01:17 UTC, now 11 hours stale, worse than the 5 hour 58 minute mark in the last escalation. GitHu",
+  "2026-10-07 14:37:36 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $38.18 / no spend cap (the day stops after $45 lost)",
+  "2026-10-07 14:37:37 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $44.76 / $200.00",
+  "2026-10-07 14:42:09 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
+  "2026-10-07 14:44:27 INFO  [ops] decay_day: '0xfd3e6449 in set Z' -> 'below the door 1 of 7' | does not lose at the prices we would really pay: -1% at real quotes over 51 matched copies",
   "2026-10-06 17:56:49 TRADE [LIVE] BUY $6.40 on 'Will Niger win on 2026-10-06?' @ 0.7700, order 0xf6fb7dc4f9...",
   "2026-10-06 17:56:50 TRADE [verify] FILLED: BUY 8.31 shares on 'Will Niger win on 2026-10-06?' @ 0.7700",
   "2026-10-06 18:38:28 TRADE [LIVE] BUY $6.40 on 'Will England win on 2026-10-06?' @ 0.8800, order 0x8c4217a500...",
@@ -1728,23 +1740,11 @@
   "2026-10-07 05:15:39 TRADE [verify] FILLED: BUY 16.30 shares on 'W50 Burgas: Marie Vogt vs Lidia Encheva' @ 0.3900",
   "2026-10-07 11:42:33 INFO  [recovery] No pending orders to recover",
   "2026-10-07 14:25:17 TRADE [LIVE] BUY $6.40 on 'Will FK Neftchi Fargona win on 2026-10-0' @ 0.7700, order 0x6297e44c57...",
-  "2026-10-07 14:25:18 TRADE [verify] FILLED: BUY 8.31 shares on 'Will FK Neftchi Fargona win on 2026-10-0' @ 0.7700"
+  "2026-10-07 14:25:18 TRADE [verify] FILLED: BUY 8.31 shares on 'Will FK Neftchi Fargona win on 2026-10-0' @ 0.7700",
+  "2026-10-07 14:37:37 TRADE [LIVE] BUY $6.40 on 'Will Xorazm Fk Urganch win on 2026-10-07' @ 0.7070, order 0x65dc715ab9...",
+  "2026-10-07 14:37:37 TRADE [verify] FILLED: BUY 9.05 shares on 'Will Xorazm Fk Urganch win on 2026-10-07' @ 0.7070"
  ],
  "watcher": [
-  {
-   "ts": 1791299635.9508731,
-   "day": "2026-10-06",
-   "woke_because": "30d9e98599e7",
-   "fingerprint": "30d9e98599e7",
-   "kind": "escalate",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The trading box is healthy and live-trading real money, but the owner-facing reporting pipeline (daily line and digest) has been down since Oct 4, and the ops monitor mislabels that as the whole VM being unreachable. I verified on-box: chain reader current at 15:15:48 with lag 0 blocks, 983 log lines in the last 60 min, real-money tier 1b placements at 14:24 and 14:41 confirmed through tiered-risk and inventory BUY lines, $12.80 spent of the $45 loss stop, equity flat near $89. The money path is correct, bounded and CLOB-verified, so this is not a disarm. The danger is that the only page deliv",
-   "confidence": 0.82,
-   "cost_usd": 0.9530015000000001,
-   "did": "escalated",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1791336261.4213133,
    "day": "2026-10-07",
@@ -1820,6 +1820,20 @@
    "did": "nothing",
    "proof": "",
    "question": ""
+  },
+  {
+   "ts": 1791383762.631548,
+   "day": "2026-10-07",
+   "woke_because": "954d5bea9a47",
+   "fingerprint": "954d5bea9a47",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The repeated stale-digest escalations come from a separate digest-publisher VM that has been unreachable since yesterday and froze the GitHub digest at 01:18 UTC, external to this trading box, and the bot already pushed that alert to the owner twice (11:42 and 14:34). This box itself crashed around 07:29 UTC (last line was a claude -p LLM-gate TimeoutExpired) and was down until an 11:40 restart, which is why the 08:00 daily line was missing. It self-recovered: recovery logged No pending orders to recover, it re-armed via watcher, and it is now trading normally. Money path is verified healthy: ",
+   "confidence": 0.82,
+   "cost_usd": 0.8547879999999999,
+   "did": "noted",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -1839,12 +1853,13 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1791383162.5967603,
-   "count": 54,
+   "last": 1791384057.413538,
+   "count": 55,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1791383162.5967603
+    1791383162.5967603,
+    1791384057.413538
    ],
    "action": null,
    "action_ts": null,
@@ -1853,12 +1868,13 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1791383162.5967603,
-   "count": 54,
+   "last": 1791384057.413538,
+   "count": 55,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1791383162.5967603
+    1791383162.5967603,
+    1791384057.413538
    ],
    "action": null,
    "action_ts": null,
@@ -1867,12 +1883,13 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1791383162.5967603,
-   "count": 53,
+   "last": 1791384057.413538,
+   "count": 54,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1791383162.5967603
+    1791383162.5967603,
+    1791384057.413538
    ],
    "action": null,
    "action_ts": null,
@@ -2591,12 +2608,13 @@
   },
   "59f5d5ebf4a6": {
    "first": 1790415658.8132656,
-   "last": 1791383162.5967603,
-   "count": 35,
+   "last": 1791384057.413538,
+   "count": 36,
    "sample": "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)",
    "recent": [
-    1791383162.5967603
+    1791383162.5967603,
+    1791384057.413538
    ],
    "action": null,
    "action_ts": null,
@@ -2781,13 +2799,12 @@
   },
   "398dbb2e838a": {
    "first": 1790616244.8723001,
-   "last": 1790875454.180922,
-   "count": 11,
+   "last": 1791384177.4559453,
+   "count": 12,
    "sample": "2026-09-28 17:24:04 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
    "norm": "ERROR [inventory] API sync failed: Client error 'S' for url 'S'",
    "recent": [
-    1790872332.5368721,
-    1790875454.180922
+    1791384177.4559453
    ],
    "action": null,
    "action_ts": null,
@@ -2936,12 +2953,12 @@
   },
   "b2b604f5f44b": {
    "first": 1790868517.9549832,
-   "last": 1791255640.8627641,
-   "count": 6,
+   "last": 1791384297.4644194,
+   "count": 7,
    "sample": "2026-10-01 15:27:05 INFO  [ops] decay_day: '0x00110b8e in set Z' -> 'below the door 1 of 7' | does not lose at the prices we would really pay: -0% at real quotes over 70 matched copies",
    "norm": "INFO [ops] decay_day: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched copies",
    "recent": [
-    1791255640.8627641
+    1791384297.4644194
    ],
    "action": null,
    "action_ts": null,
@@ -3687,6 +3704,20 @@
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
    "recent": [
     1791373829.6951878
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "954d5bea9a47": {
+   "first": 1791383762.631548,
+   "last": 1791383762.631548,
+   "count": 1,
+   "sample": "2026-10-07 14:34:12 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Digest still frozen at 01:17 UTC, now 11 hours stale, worse than the 5 hour 58 minute mark in the last escalation. GitHu",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Digest still frozen at N:N UTC, now N hours stale, worse than the N hour N minute mark in the last escalation. GitHu",
+   "recent": [
+    1791383762.631548
    ],
    "action": null,
    "action_ts": null,
