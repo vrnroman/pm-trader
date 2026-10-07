@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-06T18:42:00Z-c464",
-    "ts": 1791312120,
+    "id": "2026-10-07T00:42:23Z-da52",
+    "ts": 1791333743,
     "kind": "nothing",
-    "message": "Armed, copying, nothing new. Equity 89.04, spend 12.80 of the 45 loss stop. The Oct 4-6 VM outage ended; the bot already told the owner the 55-hour alarm was a false one and it is live-trading. One self-disarm/rearm today (1 of 3), not repeated. No ERROR or Traceback since.",
+    "message": "Armed, copying, nothing new since the last verdict. Equity 90.69, spend 32.00 of the 45 loss stop, cash 65.10. The one self-disarm/rearm (11:14-11:31 UTC) stayed at 1 of 3 today, not repeated. Trading continued normally through 21:08 UTC with a win settled; no ERROR or Traceback beyond the already-escalated and resolved network outage.",
     "evidence": [
-        "## money state {\"cash\": 76.251633, \"equity\": 89.04, \"floor\": 30.0, \"spend\": {\"spent_usd\": 12.8, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-06\"}",
-        "{\"ts\": 1791299635.9508731, \"kind\": \"sre_escalate\", \"after\": \"owner told\", \"detail\": \"Bot is up and live-trading real money now, equity 89 dollars, 12.80 of the 45 loss stop spent today, chain reader current. The VM unreachable 55 hour alarm is f[alse]\", \"push\": \"BOT\"}",
+        "## money state {\"cash\": 65.098553, \"open_cost\": 25.59, \"equity\": 90.69, \"floor\": 30.0, \"spend\": {\"spent_usd\": 32.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-06\"}",
         "{\"ts\": 1791286264.9910297, \"kind\": \"rearm\", \"detail\": \"self re-arm 1/3 today\", \"push\": \"DEAL\"}",
-        "2026-10-06 14:24:37 TRADE [LIVE] BUY $6.40 on 'Igokea vs. Bilbao Basket' @ 0.5400, order 0x6cea4c809c...",
-        "2026-10-06 14:41:01 TRADE [LIVE] BUY $6.40 on 'London Lions vs. CB 1939 Canarias' @ 0.6600, order 0x86a7fe507a..."
+        "{\"ts\": 1791299635.9508731, \"kind\": \"sre_escalate\", \"after\": \"owner told\", \"detail\": \"Bot is up and live-trading real money now, equity 89 dollars, 12.80 of the 45 loss stop spent today, chain reader current.\", \"push\": \"BOT\"}",
+        "2026-10-06 21:08:55 INFO [ops] settled: 'open $6.40' -> 'paid $8.31' | won +1.91 on 'Will Niger win on 2026-10-06?' (0x722abb54, tier 1b)",
+        "2026-10-06 18:40:56 TRADE [LIVE] BUY $6.40 on 'Will Finland win on 2026-10-06?' @ 0.5200, order 0xa0873668e4..."
     ],
     "commit": null
 }
