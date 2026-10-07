@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-07T00:42:03.362667+00:00",
+ "generated": "2026-10-07T01:19:22.119275+00:00",
  "money": {
-  "cash": 78.123733,
-  "open_cost": 6.4,
-  "equity": 84.52,
+  "cash": 71.649493,
+  "open_cost": 12.8,
+  "equity": 84.45,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
    "date": "2026-10-07",
-   "spent_usd": 0.0,
+   "spent_usd": 6.4,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 79,
   "tier": {
    "1a": 0,
-   "1b": 25.6,
+   "1b": 32.0,
    "1c": 0
   },
-  "ts": 1791333421.5367332,
+  "ts": 1791335846.804804,
   "day": "2026-10-07"
  },
  "arm": {
@@ -796,7 +796,7 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 84.52,
+  "last_equity": 84.45,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
