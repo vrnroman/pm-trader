@@ -1,12 +1,14 @@
 {
-    "id": "2026-10-07T12:43:58Z-a17c",
-    "ts": 1791377038,
-    "kind": "escalation",
-    "message": "Digest still frozen at 01:17 UTC, now 11 hours stale, worse than the 5 hour 58 minute mark in the last escalation. GitHub Actions did run: ops digest fired at 07:12 and 07:51 UTC, heartbeat fired at 07:36 UTC. All three timed out reaching the VM over IAP SSH and were cancelled before finishing. Heartbeat's own reset step needs that probe to fail cleanly first; it never got the chance, so the automatic VM reset did not run either. Last confirmed state, from 01:17 UTC: armed true, equity 84.45, spend 6.40 of 45. Nothing since is confirmed. Needs a manual look at IAP SSH and the VM.",
+    "id": "2026-10-08T06:42:57Z-f3f3",
+    "ts": 1791441777,
+    "kind": "nothing",
+    "message": "Armed, equity 106.83 up from 84.45, day pnl +37.29, spend 0 of the 45 daily loss stop, no ERROR or self-disarm; the prior VM-down and stale-digest escalation resolved on its own and the no_daily_line gap was already pushed by the bot itself.",
     "evidence": [
-        "# ops digest 2026-10-07T01:18:49.831470+00:00 (last 24h)",
-        "## money state {\"cash\": 71.649493, \"open_cost\": 12.8, \"equity\": 84.45, \"floor\": 30.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-10-07\", \"spent_usd\": 6.4, \"cap_usd\": null, \"remaining_usd\": null, \"daily_loss_stop_usd\": 45.0, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 79, \"tier\": {\"1a\": 0, \"1b\": 32.0, \"1c\": 0}, \"ts\": 1791335846.804804, \"day\": \"2026-10-07\"}",
-        "## arm: {\"armed\": true, \"ts\": 1791286264.991414, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\", \"first_armed_ts\": 1788617432.0499406, \"floor_override\": false, \"daily_loss_override_day\": null}"
+        "## money state {\"cash\": 74.830423, \"open_cost\": 32.0, \"equity\": 106.83, \"floor\": 30.0, \"stated\": 80.0, \"spend\": {\"date\": \"2026-10-08\", \"spent_usd\": 0.0, \"cap_usd\": null, \"remaining_usd\": null, \"daily_loss_stop_usd\": 45.0, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 80, \"tier\": {\"1a\": 0, \"1b\": 57.6, \"1c\": 0}, \"ts\": 1791421018.7869463, \"day\": \"2026-10-08\"}",
+        "## arm: {\"armed\": true, \"ts\": 1791286264.991414, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\", \"first_armed_ts\": 1788617432.0499406, \"floor_override\": false, \"daily_loss_override_day\": null}",
+        "2026-10-07 11:42:44 INFO  [ops] push:no_daily_line: None -> '🕘 <b>No 08:00 real-money line today</b> by 9:00 UTC. The reporter did not run or its send failed; check the ledger and t'",
+        "in form  0x722abb54: 50 settled, 78% won vs 72% needed, net +9.0% on $94,582, worst day -3,882, 3 of 42 exits under 10 min",
+        "2026-10-07 20:08:46 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll crossed $100</b> upward: $110.54.'"
     ],
     "commit": null
 }
