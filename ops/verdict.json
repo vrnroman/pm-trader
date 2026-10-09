@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-09T12:51:50Z-eba1",
-    "ts": 1791550310,
-    "kind": "escalation",
-    "message": "Ops digest has not updated since 2026-10-09 09:03 UTC, now about 3.8 hours stale, past the three hour limit. Last known snapshot: armed true, equity 84.70, day pnl plus 5.39, spend 0 against the 45 daily loss stop. This repeats the same digest publisher VM freeze already reported on 10-05 through 10-08, not the trading box itself. No visibility into the VM or the money path since the last commit. Check the publisher and the ops-digest GitHub Action.",
+    "id": "2026-10-09T18:42:28Z-d4f3",
+    "ts": 1791571348,
+    "kind": "nothing",
+    "message": "Armed, equity 77.89, spend 17.74 against the 45 daily loss stop, 3 copies filled today, guard_fail_streak 0, loss_streak 1, daily line sent. No wallet in form shows a losing-now pattern the bar has not already caught. The prior digest-stale escalation resolved on its own and the bot already delivered it.",
     "evidence": [
-        "# ops digest 2026-10-09T09:01:15.840990+00:00 (last 24h)",
-        "## money state {\"armed\": true, \"equity\": 84.7, \"floor\": 30.0, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"day\": \"2026-10-09\"}",
-        "watch: day_pnl 5.39, day_pnl_day 2026-10-09, guard_fail_streak 0, loss_streak 0, no_copy_pushed false",
-        "git log ops/latest.md: last commit 1ff85f6 'ops: digest 2026-10-09T09:03:44Z', none since, now 2026-10-09T12:51Z",
-        "{\"ts\": 1791471786.39, \"concluded\": \"The external ops-digest workflow froze at 2026-10-08 01:03 UTC ... the same recurring overnight freeze the monitor already paged on for 10-07 ... and earlier on 10-06 and 10-01\"}"
+        "## money state {\"cash\": 60.149603, \"open_cost\": 17.74, \"equity\": 77.89, \"floor\": 30.0, \"spend\": {\"spent_usd\": 17.74, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-09\"}",
+        "2026-10-09 13:11:19 TRADE [verify] FILLED: BUY 10.39 shares on 'SC Paderborn 07 vs. VfB Stuttgart: O/U 3' @ 0.4900",
+        "state.json watch: guard_fail_streak 0, guard_fail_streak_prev 0, loss_streak 1, no_copy_pushed false, daily_line_sent true for 2026-10-09",
+        "2026-10-09 15:11:37 INFO [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest has not updated since 2026-10-09 09:03 UTC, now about 3.8 hours stale, past the three hour limit. Last known",
+        "## arm: {\"armed\": true, \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}"
     ],
     "commit": null
 }
