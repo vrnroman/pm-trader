@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-09T01:07:11.557884+00:00",
+ "generated": "2026-10-09T02:10:22.146683+00:00",
  "money": {
   "cash": 60.515983,
   "open_cost": 12.8,
@@ -21,7 +21,7 @@
    "1b": 57.6,
    "1c": 0
   },
-  "ts": 1791507799.4627335,
+  "ts": 1791511550.3967931,
   "day": "2026-10-09"
  },
  "arm": {
@@ -1216,47 +1216,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1791425313.7174654,
-   "day": "2026-10-08",
-   "kind": "evict",
-   "before": "0x19585131 in set Z",
-   "after": "evicted (sticky)",
-   "detail": "probation failed: 1 of 2 won, realized -23.0% on $12.80 (pass needs 2 won and -10%)",
-   "push": null,
-   "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e"
-  },
-  {
-   "ts": 1791425312.771862,
-   "day": "2026-10-08",
-   "kind": "probation_failed",
-   "before": "0x19585131 on probation (10 days on probation)",
-   "after": "evicted: 1 of 2 won, realized -23.0% on $12.80 (pass needs 2 won and -10%)",
-   "detail": "lost -6.40 on 'Counter-Strike: Sinners; won +3.45 on 'Counter-Strike: BIG vs f | Evict is reversible: /zset readmit",
-   "push": "WALLET",
-   "wallet": "0x1958513132accb7dd17f2cf7beebbc165776b24e",
-   "trial": [
-    {
-     "token_id": "95398244405608378280626791547555206559829968220411436324906242254895884885312",
-     "pnl": -6.4,
-     "won": false
-    },
-    {
-     "token_id": "79864763679346497199429518225998890696187195705207088653130457597159410843721",
-     "pnl": 3.45,
-     "won": true
-    }
-   ]
-  },
-  {
-   "ts": 1791425316.4953368,
-   "day": "2026-10-08",
-   "kind": "sre_no_verdict",
-   "before": "b5cc9555e840",
-   "after": "no verdict",
-   "detail": "",
-   "push": null
-  },
-  {
    "ts": 1791427425.516712,
    "day": "2026-10-08",
    "kind": "settled",
@@ -1660,12 +1619,6 @@
   }
  ],
  "important": [
-  "2026-10-08 01:51:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-08 01:57:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-08 02:02:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-08 02:08:33 WARNING [zset] EVICTED 0x1958513132accb7dd17f2cf7beebbc165776b24e from set Z: probation failed: 1 of 2 won, realized -23.0% on $12.80 (pass needs 2 won and -10%)",
-  "2026-10-08 02:08:33 INFO  [ops] evict: '0x19585131 in set Z' -> 'evicted (sticky)' | probation failed: 1 of 2 won, realized -23.0% on $12.80 (pass needs 2 won and -10%)",
-  "2026-10-08 02:08:33 INFO  [ops] probation_failed: '0x19585131 on probation (10 days on probation)' -> 'evicted: 1 of 2 won, realized -23.0% on $12.80 (pass needs 2 won and -10%)' | lost -6.40 on 'Counter-Strike: Sinners; won +3.45 on 'Counter-Strike: BIG vs f | Evict is reversible: /zset readmit",
   "2026-10-08 02:33:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-08 02:43:45 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $51.20",
   "2026-10-08 02:43:45 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'SC Internacional vs. SC Corinthians Paul' (0x5213eb85, tier 1b)",
@@ -1748,6 +1701,9 @@
   "2026-10-09 00:17:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-09 00:27:59 INFO  [tiered-risk] tier 1b: released $5.99 of exposure from resolved or closed positions | open now: $57.60",
   "2026-10-09 00:27:59 INFO  [ops] settled: 'open $5.99' -> 'paid $0.00' | lost -5.99 on 'Independiente Valle Del Cauca vs. Tigres' (0x5213eb85, tier 1b)",
+  "2026-10-09 01:09:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-09 01:09:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-09 01:46:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-08 04:11:18 TRADE [LIVE] BUY $6.40 on 'Shanghai Rolex Masters: Nuno Borges vs F' @ 0.7700, order 0xb0358ae60f...",
   "2026-10-08 04:11:22 TRADE [verify] FILLED: BUY 8.31 shares on 'Shanghai Rolex Masters: Nuno Borges vs F' @ 0.7700",
   "2026-10-08 06:41:29 TRADE [LIVE] BUY $6.40 on 'Shanghai Rolex Masters: Martin Landaluce' @ 0.5100, order 0x09fbaa4db9...",
@@ -1793,18 +1749,10 @@
   "2026-10-09 00:25:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.15 < min_bet=$5.00: SELL $7.70 on 'Will CA Paranaense win on 2026-10-08?'",
   "2026-10-09 00:38:58 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00: BUY $499.99 on 'Alebrijes de Oaxaca FC vs. CF Correcamin'",
   "2026-10-09 00:59:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00: BUY $500.00 on 'CA Aldosivi vs. CA Sarmiento: O/U 2.5'",
-  "2026-10-09 01:01:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00: SELL $482.30 on 'Sonic Boom vs. Goyang'"
+  "2026-10-09 01:01:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00: SELL $482.30 on 'Sonic Boom vs. Goyang'",
+  "2026-10-09 01:21:02 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00: BUY $994.63 on 'Buccaneers vs. Cowboys'"
  ],
  "watcher": [
-  {
-   "ts": 1791425316.4953368,
-   "day": "2026-10-08",
-   "woke_because": "b5cc9555e840",
-   "kind": "no-verdict",
-   "concluded": "the model gave no usable verdict",
-   "did": "nothing",
-   "cost_usd": 0.0
-  },
   {
    "ts": 1791439249.0812786,
    "day": "2026-10-08",
@@ -2112,13 +2060,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791505138.3917985,
-   "count": 684,
+   "last": 1791510420.0904262,
+   "count": 687,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791502617.5167263,
-    1791505138.3917985
+    1791508259.5578575,
+    1791508259.5578575,
+    1791510420.0904262
    ],
    "action": null,
    "action_ts": null,
@@ -3799,13 +3748,14 @@
   },
   "1781e8e2f42a": {
    "first": 1791482341.4384031,
-   "last": 1791507658.925352,
-   "count": 25,
+   "last": 1791508979.6389022,
+   "count": 26,
    "sample": "2026-10-08 17:58:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: BUY $500.00 on ''",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'",
    "recent": [
     1791506338.7730362,
-    1791507658.925352
+    1791507658.925352,
+    1791508979.6389022
    ],
    "action": null,
    "action_ts": null,
