@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-09T00:44:03Z-da4d",
-    "ts": 1791506643,
+    "id": "2026-10-09T06:41:57Z-123d",
+    "ts": 1791528117,
     "kind": "nothing",
-    "message": "Armed and trading normally; day pnl -7.22 against the 45 loss stop, no self-disarm, no new ERROR patterns beyond known fingerprints; digest is about 3h20m stale, matching the known overnight publisher-VM freeze already escalated and self-resolved on prior nights.",
+    "message": "Armed and trading normally; digest is fresh again (last commit 02:10:30 UTC) after the prior overnight freeze already escalated and resolved; day pnl -5.99 against the 45 loss stop, no self-disarm, no new ERROR patterns, tier 1b exposure skips logging correctly with no breach; form bar unchanged, 0x10658d37, 0x5213eb85, 0x722abb54 in form, the rest benched by the bar.",
     "evidence": [
-        "## money state {\"armed\": true, \"equity\": 79.31, \"floor\": 30.0, \"spend\": {\"spent_usd\": 44.39, \"daily_loss_stop_usd\": 45.0}, \"day\": \"2026-10-08\"}",
-        "day_pnl -7.22, day_pnl_day 2026-10-08, loss_streak 2 (watch section of state.json)",
+        "## money state {\"armed\": true, \"equity\": 73.32, \"floor\": 30.0, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"day\": \"2026-10-09\"}",
+        "watch: guard_fail_streak 0, loss_streak 3, day_pnl -5.99, day_pnl_day 2026-10-09, no_copy_pushed false, guard_failing_pushed false",
         "in form 0x10658d37: 34 settled, 59% won vs 54% needed, net +24.5%; in form 0x5213eb85: 109 settled, 53% won vs 40% needed, net +35.7%; in form 0x722abb54: 53 settled, 75% won vs 71% needed, net +6.2%",
-        "git log ops/latest.md: last digest commit 2026-10-08T21:19:37Z, none since (now 2026-10-09T00:44Z), same pattern as the 10-01/10-06/10-07/10-08 overnight freezes already escalated and resolved",
-        "2026-10-08 14:37:10 INFO Bot started. Monitoring trades... (clean restart after a transient auth-key 400, followed by normal FILLED trades at 15:55, 16:56, 17:32, 20:04)"
+        "git log ops/latest.md: digest commits at 2026-10-09T01:07:20Z and 2026-10-09T02:10:30Z, back to normal six-minute-class cadence after the already-escalated overnight freeze",
+        "2026-10-09 00:38 through 01:21 SKIP [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00 (exposure cap doing its job, no error)"
     ],
     "commit": null
 }
