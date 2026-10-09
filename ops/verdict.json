@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-08T18:42:22Z-0554",
-    "ts": 1791484942,
+    "id": "2026-10-09T00:44:03Z-da4d",
+    "ts": 1791506643,
     "kind": "nothing",
-    "message": "Armed, trading, spend 19.20 of the 45 stop, no new self-disarm or guard failure; the prior stale-digest escalation cleared on its own once the digest resumed at 15:35 UTC.",
+    "message": "Armed and trading normally; day pnl -7.22 against the 45 loss stop, no self-disarm, no new ERROR patterns beyond known fingerprints; digest is about 3h20m stale, matching the known overnight publisher-VM freeze already escalated and self-resolved on prior nights.",
     "evidence": [
-        "## money state {\"cash\": 86.409473, ... \"armed\": true, ... \"spend\": {\"spent_usd\": 19.2, \"daily_loss_stop_usd\": 45.0}}",
-        "## arm: {\"armed\": true, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}",
-        "2026-10-08 15:02:36 INFO [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest has not updated since 2026-10-08 01:03 UTC, now about 11.6 hours stale, past the three hour limit.",
-        "# ops digest 2026-10-08T15:35:22.898008+00:00 (last 24h)",
-        "in form 0x5213eb85: 107 settled, 54% won vs 40% needed, net +38.0%; in form 0x722abb54: 53 settled, 77% won vs 71% needed, net +7.5%; in form 0x10658d37: 34 settled, 59% won vs 54% needed, net +24.5%"
+        "## money state {\"armed\": true, \"equity\": 79.31, \"floor\": 30.0, \"spend\": {\"spent_usd\": 44.39, \"daily_loss_stop_usd\": 45.0}, \"day\": \"2026-10-08\"}",
+        "day_pnl -7.22, day_pnl_day 2026-10-08, loss_streak 2 (watch section of state.json)",
+        "in form 0x10658d37: 34 settled, 59% won vs 54% needed, net +24.5%; in form 0x5213eb85: 109 settled, 53% won vs 40% needed, net +35.7%; in form 0x722abb54: 53 settled, 75% won vs 71% needed, net +6.2%",
+        "git log ops/latest.md: last digest commit 2026-10-08T21:19:37Z, none since (now 2026-10-09T00:44Z), same pattern as the 10-01/10-06/10-07/10-08 overnight freezes already escalated and resolved",
+        "2026-10-08 14:37:10 INFO Bot started. Monitoring trades... (clean restart after a transient auth-key 400, followed by normal FILLED trades at 15:55, 16:56, 17:32, 20:04)"
     ],
     "commit": null
 }
