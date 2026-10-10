@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-10T12:57:20.898438+00:00",
+ "generated": "2026-10-10T13:43:02.638416+00:00",
  "money": {
   "cash": 15.695003,
   "open_cost": 42.52,
@@ -21,7 +21,7 @@
    "1b": 42.52,
    "1c": 0
   },
-  "ts": 1791637013.7025278,
+  "ts": 1791639572.107586,
   "day": "2026-10-10"
  },
  "arm": {
@@ -1273,14 +1273,18 @@
    "after": "📉 <b>Down $12.40 today</b>\nThat is 19% of the $64.39 bankroll (the alert line is 10%)",
    "detail": "",
    "push": "DEAL"
+  },
+  {
+   "ts": 1791637307.2510474,
+   "day": "2026-10-10",
+   "kind": "sre_started",
+   "before": "sidecar",
+   "after": "watching",
+   "detail": "tick 120s",
+   "push": null
   }
  ],
  "important": [
-  "2026-10-09 13:08:00 INFO  [daily-cap] +$6.25 (copy:1b) reserved | total today $12.65 / no spend cap (the day stops after $45 lost)",
-  "2026-10-09 13:08:02 INFO  [tiered-risk] Recorded tier 1b placement: $6.25 | open: $57.45 / $200.00",
-  "2026-10-09 13:11:14 INFO  [daily-cap] +$5.09 (copy:1b) reserved | total today $17.74 / no spend cap (the day stops after $45 lost)",
-  "2026-10-09 13:11:16 INFO  [tiered-risk] Recorded tier 1b placement: $5.09 | open: $62.54 / $200.00",
-  "2026-10-09 13:40:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-09 14:15:16 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-09 14:36:54 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-09 14:42:09 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
@@ -1485,12 +1489,11 @@
   "2026-10-10 12:16:07 INFO  [ops] push:daily_loss: None -> '📉 <b>Down $12.40 today</b>\\nThat is 19% of the $64.39 bankroll (the alert line is 10%)'",
   "2026-10-10 12:18:47 INFO  [tiered-risk] tier 1b: released $6.17 of exposure from resolved or closed positions | open now: $42.52",
   "2026-10-10 12:46:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-09 13:08:02 TRADE [LIVE] BUY $6.25 on 'Will Alanyaspor win on 2026-10-10?' @ 0.5000, order 0x47a51ed615...",
-  "2026-10-09 13:08:02 TRADE [verify] FILLED: BUY 12.50 shares on 'Will Alanyaspor win on 2026-10-10?' @ 0.5000",
-  "2026-10-09 13:11:15 TRADE [LIVE] BUY $5.09 on 'SC Paderborn 07 vs. VfB Stuttgart: O/U 3' @ 0.4900, order 0xc88ebaf648...",
-  "2026-10-09 13:11:19 TRADE [verify] FILLED: BUY 10.39 shares on 'SC Paderborn 07 vs. VfB Stuttgart: O/U 3' @ 0.4900",
-  "2026-10-09 13:23:29 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $1107.09 on 'Will Al Qadisiyah Saudi Club win on 2026'",
-  "2026-10-09 13:33:34 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $389.40 on 'Will Shenzhen Xinpengcheng FC vs. Henan '",
+  "2026-10-10 13:01:06 INFO  Received signal 15, shutting down...",
+  "2026-10-10 13:01:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
+  "2026-10-10 13:01:31 INFO  Bot started. Monitoring trades...",
+  "2026-10-10 13:02:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-10 13:37:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-09 13:55:07 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $338.24 on 'Will Croatia win on 2026-10-09?'",
   "2026-10-09 14:06:50 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $1372.79 on 'Will Pakhtakor win on 2026-10-09?'",
   "2026-10-09 14:11:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $400.00 on 'Pakhtakor vs. FC Bunyodkor: 1st Half O/U'",
@@ -1612,7 +1615,8 @@
   "2026-10-10 12:09:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$2.82 < min_bet=$5.00: BUY $800.52 on 'Will Rayo Vallecano de Madrid win on 202'",
   "2026-10-10 12:10:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$2.82 < min_bet=$5.00: SELL $7.83 on 'Parnu JK Vaprus vs. JK Narva Trans: O/U '",
   "2026-10-10 12:13:36 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$2.82 < min_bet=$5.00: SELL $42.63 on ''",
-  "2026-10-10 12:15:29 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$2.82 < min_bet=$5.00: BUY $444.00 on 'Will Altrincham FC win on 2026-10-10?'"
+  "2026-10-10 12:15:29 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$2.82 < min_bet=$5.00: BUY $444.00 on 'Will Altrincham FC win on 2026-10-10?'",
+  "2026-10-10 13:01:31 INFO  [recovery] No pending orders to recover"
  ],
  "watcher": [
   {
@@ -1889,12 +1893,12 @@
   },
   "c47d62e70341": {
    "first": 1790098332.9559617,
-   "last": 1791618172.7614892,
-   "count": 36,
+   "last": 1791637307.553835,
+   "count": 37,
    "sample": "2026-09-22 14:25:08 INFO  Received signal 15, shutting down...",
    "norm": "INFO Received signal N, shutting down...",
    "recent": [
-    1791618172.7614892
+    1791637307.553835
    ],
    "action": null,
    "action_ts": null,
@@ -1903,12 +1907,12 @@
   },
   "6f12d4998994": {
    "first": 1790098332.9559617,
-   "last": 1791618172.7614892,
-   "count": 41,
+   "last": 1791637307.553835,
+   "count": 42,
    "sample": "2026-09-22 14:25:37 INFO  [recovery] No pending orders to recover",
    "norm": "INFO [recovery] No pending orders to recover",
    "recent": [
-    1791618172.7614892
+    1791637307.553835
    ],
    "action": null,
    "action_ts": null,
@@ -1917,12 +1921,12 @@
   },
   "6b829965c182": {
    "first": 1790098332.9559617,
-   "last": 1791618172.7614892,
-   "count": 41,
+   "last": 1791637307.553835,
+   "count": 42,
    "sample": "2026-09-22 14:25:37 INFO  Bot started. Monitoring trades...",
    "norm": "INFO Bot started. Monitoring trades...",
    "recent": [
-    1791618172.7614892
+    1791637307.553835
    ],
    "action": null,
    "action_ts": null,
@@ -1960,12 +1964,12 @@
   },
   "9d8a6d2794ec": {
    "first": 1790101843.0850005,
-   "last": 1791618172.7614892,
-   "count": 37,
+   "last": 1791637307.553835,
+   "count": 38,
    "sample": "2026-09-22 18:30:34 ERROR [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}",
    "recent": [
-    1791618172.7614892
+    1791637307.553835
    ],
    "action": null,
    "action_ts": null,
@@ -1974,14 +1978,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791636440.7004588,
-   "count": 762,
+   "last": 1791639468.5861218,
+   "count": 764,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791633318.8368757,
-    1791634278.9276743,
-    1791636440.7004588
+    1791636440.7004588,
+    1791637427.6388788,
+    1791639468.5861218
    ],
    "action": null,
    "action_ts": null,
