@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-10T12:42:07Z-16c1",
-    "ts": 1791636127,
+    "id": "2026-10-10T18:41:58Z-c2ca",
+    "ts": 1791657718,
     "kind": "nothing",
-    "message": "Armed, equity 77.74, spend 6.23 against the 45 daily loss stop, tier 1b exposure 23.97 of 200, the overnight RPC 403 run already pushed to the owner and clear 6.2 hours ago, two in-form wallets both net positive, digest fresh at 07:05.",
+    "message": "Armed, equity 43.76 above the 30 floor, today net -21.8 (2 won, 5 lost), well inside the 45 daily-loss stop; both the 10% daily-loss alert and the under-$50 milestone already reached the owner by direct push; overnight RPC 403 run was escalated in an earlier window and the data-api fallback carried copies through it; digest fresh at 18:34.",
     "evidence": [
-        "## money state {\"cash\": 53.770493, \"open_cost\": 23.97, \"equity\": 77.74, \"floor\": 30.0, \"armed\": true, \"spend\": {\"spent_usd\": 6.23, \"daily_loss_stop_usd\": 45.0}, \"day\": \"2026-10-10\"}",
-        "in form  0x5213eb85: 141 settled, 50% won vs 41% needed, net +25.3% on $91,129, worst day -4,318, 0 of 9 exits under 10 min",
-        "in form  0x722abb54: 60 settled, 77% won vs 71% needed, net +10.3% on $100,622, worst day -5,499, 3 of 51 exits under 10 min",
-        "54cedf8fb5c2 x55 last 6.2h ago [open: 55 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (read refused: CTF [NN]: N Client Error: Forbidden for url: https:",
-        "## tier exposure: {\"1a\": [0, 0], \"1b\": [23.97, 4], \"1c\": [0, 0]}"
+        "## money state {\"cash\": 19.532443, \"open_cost\": 24.23, \"equity\": 43.76, \"floor\": 30.0, \"armed\": true, \"spend\": {\"spent_usd\": 59.76, \"daily_loss_stop_usd\": 45.0, \"closed_reason\": \"\"}, \"day\": \"2026-10-10\"}",
+        "state.json watch: day_pnl -21.8, day_won 2, day_lost 5, loss_streak 3",
+        "2026-10-10 12:16:07 INFO [ops] push:daily_loss: None -> 'Down $12.40 today, 19% of the $64.39 bankroll (the alert line is 10%)'",
+        "2026-10-10 17:31:32 INFO [ops] push:milestone: None -> 'Bankroll fell under $50: $49.96.'",
+        "2026-10-10 15:50:12 INFO [daily-cap] +$5.44 (copy:1b) reserved | total today $59.76 / no spend cap (the day stops after $45 lost)"
     ],
     "commit": null
 }
