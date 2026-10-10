@@ -1,7 +1,7 @@
-# ops digest 2026-10-10T00:21:20.105029+00:00 (last 24h)
+# ops digest 2026-10-10T00:49:18.920956+00:00 (last 24h)
 
 ## money state
-{"cash": 60.149603, "open_cost": 17.74, "equity": 77.89, "floor": 30.0, "stated": 80.0, "spend": {"date": "2026-10-10", "spent_usd": 0.0, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 84, "tier": {"1a": 0, "1b": 62.54, "1c": 0}, "ts": 1791591655.1583064, "day": "2026-10-10"}
+{"cash": 60.149603, "open_cost": 17.74, "equity": 77.89, "floor": 30.0, "stated": 80.0, "spend": {"date": "2026-10-10", "spent_usd": 0.0, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 84, "tier": {"1a": 0, "1b": 62.54, "1c": 0}, "ts": 1791593067.4340193, "day": "2026-10-10"}
 
 ## arm: {"armed": true, "ts": 1791286264.991414, "by": "watcher:no trade data for", "reason": "watcher: 'no trade data for' clear for 15 min", "first_armed_ts": 1788617432.0499406, "floor_override": false, "daily_loss_override_day": null}
 ## spend today: {"date": "2026-10-10", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 3}, "yesterday": "2026-10-09", "closed_reason": ""}
@@ -11,28 +11,30 @@
 ## form (each wallet on its own money, last 14 days, our slice)
 benched  0x05878ac3: no settled bets on our slice in 14 days
 benched  0x09b045ba: 19 settled, 74% won vs 56% needed, net +11.0% on $7,444, worst day -241, 19 of 19 exits under 10 min
-in form  0x10658d37: 33 settled, 58% won vs 54% needed, net +20.0% on $25,422, worst day -587, 0 of 1 exits under 10 min
+benched  0x10658d37: 33 settled, 61% won vs 60% needed, net +21.2% on $31,904, worst day -587, 0 of 1 exits under 10 min
 benched  0x1985327e: 23 settled, 57% won vs 46% needed, net +6.7% on $8,403, worst day -165, 23 of 23 exits under 10 min
-in form  0x28ef6f21: 54 settled, 63% won vs 57% needed, net +3.8% on $22,078, worst day -1,402, 1 of 3 exits under 10 min
-benched  0x4980930d: 26 settled, 42% won vs 49% needed, net +19.6% on $117,196, worst day -26,665, 1 of 12 exits under 10 min
-in form  0x5213eb85: 122 settled, 52% won vs 40% needed, net +29.4% on $81,116, worst day -3,938, 0 of 8 exits under 10 min
-in form  0x722abb54: 55 settled, 76% won vs 70% needed, net +9.7% on $94,274, worst day -5,499, 3 of 46 exits under 10 min
+in form  0x28ef6f21: 53 settled, 62% won vs 57% needed, net +2.5% on $21,718, worst day -1,402, 1 of 3 exits under 10 min
+benched  0x4980930d: 28 settled, 39% won vs 49% needed, net +14.7% on $122,153, worst day -26,665, 1 of 12 exits under 10 min
+in form  0x5213eb85: 130 settled, 53% won vs 40% needed, net +32.4% on $84,790, worst day -2,255, 0 of 9 exits under 10 min
+in form  0x722abb54: 59 settled, 78% won vs 71% needed, net +10.4% on $100,102, worst day -5,499, 3 of 50 exits under 10 min
 benched  0x73653992: 2 settled, 100% won vs 60% needed, net +27.8% on $972, worst day +93, 0 of 4 exits under 10 min
-benched  0x984ffef1: 73 settled, 63% won vs 54% needed, net -1.7% on $66,085, worst day -6,618, 7 of 23 exits under 10 min
-benched  0x9f15613e: 228 settled, 57% won vs 56% needed, net +2.5% on $1,090,725, worst day -47,016, 16 of 18 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
+benched  0x984ffef1: 74 settled, 64% won vs 54% needed, net -1.5% on $66,370, worst day -6,618, 7 of 23 exits under 10 min
+benched  0x9f15613e: 213 settled, 59% won vs 53% needed, net +8.3% on $874,035, worst day -47,016, 13 of 16 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
-benched  0xf49614e6: 35 settled, 46% won vs 57% needed, net -22.7% on $89,106, worst day -9,061, 0 of 4 exits under 10 min
-benched  0xfd3e6449: 50 settled, 70% won vs 69% needed, net +1.6% on $44,375, worst day -1,113, 14 of 17 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
-two clocks: 22 matched fills over 1.0 d, api lag p50 7.7s, chain lag p50 11.6s, chain earlier by -1.1s at the median; api-only 63, chain-only 700, replayed rows 0; CHAIN IS PRIMARY
-⏱ api lag cost, last 7d (estimate): -51.04 USD over 2564 fills at $6.40 each, +0.000 USD a fill at the median, chain earlier by 14.7s
+benched  0xf49614e6: 31 settled, 42% won vs 57% needed, net -22.8% on $79,507, worst day -9,061, 0 of 4 exits under 10 min
+benched  0xfd3e6449: 53 settled, 72% won vs 71% needed, net +2.7% on $45,001, worst day -1,113, 14 of 17 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
+two clocks: 22 matched fills over 1.0 d, api lag p50 7.7s, chain lag p50 11.6s, chain earlier by -1.1s at the median; api-only 74, chain-only 694, replayed rows 0; CHAIN IS PRIMARY
+⏱ api lag cost, last 7d (estimate): -49.56 USD over 2553 fills at $6.40 each, +0.000 USD a fill at the median, chain earlier by 14.7s
 
-## watcher (6 wakes in 24h)
+## watcher (8 wakes in 24h)
 {"ts": 1791525670.6611283, "kind": "analyst", "woke_because": "daily study", "concluded": "3840 copies at cap 5 versus 2956 at cap 3 is the only coherent reading, since a higher per-wallet-day cap cannot drop rows, so exp_study.py has the wallet_cap from/to swapped: it prints 3840 -> 2956 for 3 -> 5 (impossible), and read right it is cap 3 = +11.8% on 2956 vs cap 5 = +9.0% on 3840. I verified the 
 {"ts": 1791525670.6611283, "kind": "analyst", "woke_because": "daily study", "concluded": "Bankroll fell to $87.63 and tripped remaining=$0.00 tier-1b skips this window while equity sits at $73.32, so copy throughput is now bounded by capital, not by any parameter I am allowed to move, and the +26.92 'max copies reached' the dashboard shows as left on the table is partly this starvation; I am deli
 {"ts": 1791525670.6611283, "kind": "analyst", "woke_because": "daily study", "concluded": "No safe param move today. wallet_cap study still prints an impossible 3840->2956 (from/to swapped in exp_study.py); I confirmed no repo source is mounted so I cannot PR it from here, mount poly_poly_bot/ or hand-swap. Throughput is now bankroll-bound ($73 equity), not config.", "did": "2 proposal(s): noted; 
 {"ts": 1791548521.0657287, "kind": "note", "woke_because": "54ac26fb3ff1", "concluded": "The /price 404 is a price read against resolved or closed markets whose orderbook is gone, not a money-path fault. It recurs every day (31 on Oct 8, 42 on Oct 7, 18 on Oct 6, 40 today) and only crossed a rate threshold today with a burst of 13 in hour 12. Around the burst the bot was healthy: 814 Onchain progr
 {"ts": 1791558108.1072574, "kind": "nothing", "woke_because": "b895d62a9af7", "concluded": "The waking line is an INFO [ops] floor_row analytics row, a routine per-wallet backward-replay summary, not a fault. It is a new fingerprint only because the normaliser keys on the ordering of the no/no/yes/YES copy bars, so each fresh permutation of those labels hashes to a new id; six sibling floor_row fi
 {"ts": 1791564766.7392828, "kind": "note", "woke_because": "fbfa3698a1a3", "concluded": "The exec's equity-scaled tier 1b allowance (about 80 percent of equity, 0.80 x $77.89 = $62.31) drifted just under the $62.54 already deployed as equity fell from about $79.5 to $77.89, so remaining went to -$0.23 and every new tier 1b copy is skipped. The new fingerprint id is only a normalisation split of th
+{"ts": 1791591744.6066678, "kind": "escalate", "woke_because": "2660dcb986da, 54cedf8fb5c2", "concluded": "The Polygon RPC endpoint polygon-bor-rpc.publicnode.com is returning 403 Forbidden on every read, so the onchain reader has made zero forward progress since the 00:20:57 restart. Every chunk from block 95247869 onward was refused on all 4 retries then SKIPPED (I count 6 SKIPPED errors and 30+
+{"ts": 1791592183.6663747, "kind": "note", "woke_because": "54cedf8fb5c2", "concluded": "The public RPC host polygon-bor-rpc.publicnode.com returns 403 Forbidden on every chain read, so the onchain reader skips every chunk and walks forward without reading. In the last hour it logged 20 SKIPPED chunks and 84 refused-retry warnings with zero good reads. The designed data-api fallback is working: gu
 ## live limits (owner's number, and the analyst's where one is in force)
 LIVE_MAX_PER_WALLET_DAY: 20 (owner) band 1..20
 FETCH_INTERVAL: 3.0 (owner) band 2..5
@@ -40,10 +42,10 @@ OPS_REARM_CLEAR_S: 900.0 (owner) band 600.0..1800.0
 OPS_REARM_MAX_PER_DAY: 3 (owner) band 1..3
 FORM_DAYS: 14.0 (owner) band 7.0..21.0
 ## book B at each slice floor (raw numbers; the gate reads the one marked)
-b300 (floor $300): 9061 settled, 313 open, realized +1.8%, at their price +2.8% (net -7.9%), win rate 57%, feeds the Z gate
-b150 (floor $150): 2332 settled, 234 open, realized +3.7%, at their price +4.7% (net -5.4%), win rate 60%
-b100 (floor $100): 2498 settled, 197 open, realized +3.6%, at their price +4.6% (net -5.4%), win rate 58%
-## near the Z door (41 wallets within 2 fails; 2 pass and wait)
+b300 (floor $300): 9074 settled, 307 open, realized +1.8%, at their price +2.8% (net -7.9%), win rate 57%, feeds the Z gate
+b150 (floor $150): 2354 settled, 222 open, realized +3.9%, at their price +4.9% (net -5.2%), win rate 60%
+b100 (floor $100): 2517 settled, 194 open, realized +3.6%, at their price +4.5% (net -5.5%), win rate 58%
+## near the Z door (42 wallets within 2 fails; 2 pass and wait)
 0x00110b8e: 1 fail(s): does not lose at the prices we would really pay (-2% at real quotes over 80 matched copies)
 0x05878ac3: 1 fail(s): active within 14d (16d ago)
 0x09b045ba: 1 fail(s): not a scalper at our latency (scalper: 100% of exits within 10 min; uncopyable at our latency)
@@ -55,7 +57,7 @@ b100 (floor $100): 2498 settled, 197 open, realized +3.6%, at their price +4.6% 
 0x6739f528: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (19 clean (of 19 all-time))
 0x68e1e8ef: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (22 clean (of 22 all-time))
 0x984ffef1: 1 fail(s): not a scalper at our latency (scalper: 30% of exits within 10 min; uncopyable at our latency)
-0x9f15613e: 1 fail(s): not a scalper at our latency (scalper: 89% of exits within 10 min; uncopyable at our latency)
+0x9f15613e: 1 fail(s): not a scalper at our latency (scalper: 81% of exits within 10 min; uncopyable at our latency)
 ## experiments (the analyst's cards; one live at a time)
 min150-r1        void   slice floor 300 to 150                             n 138 +10.6 pp  (min150-r1 <- min150, study 2026-09-24-min_usd-cdc749c5)
 min150           void   slice floor 300 to 150                             n 128 -1.9 pp  (min150 <- study 2026-09-24-min_usd-cdc749c5)
@@ -64,39 +66,38 @@ study 2026-09-24-min_usd-cdc749c5: wallets in 19 -> 20 (stay 15, enter 5, leave 
 study 2026-09-25-wallet_cap-178163d7: wallets in 32 -> 34 (stay 32, enter 2, leave 0); copies 3840 -> 2956; ROI at their price +9.0% -> +11.8%
 study 2026-09-27-form-c2308d97: wallets in 6 -> 6 (stay 5, enter 1, leave 1); copies 3007 -> 2073; ROI at their price +3.2% -> +2.9%
 ## fingerprints (30 shown)
-3fd84e7cc412 x31 last 4.0h ago [open: 31 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: SELL $N on 'S'
-1781e8e2f42a x57 last 4.2h ago [open: 57 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'
-d3a278c17ca5 x11 last 5.9h ago [open: 11 hits, no action yet] :: INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows
-907b728a6b72 x113 last 6.7h ago [open: 113 hits, no action yet] :: ERROR [inventory] API sync failed:
-6eca45f47973 x122 last 6.9h ago [open: 122 hits, no action yet] :: ERROR Network error fetching <hex>: Server disconnected without sending a response.
-54ac26fb3ff1 x732 last 7.0h ago [open: 732 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
-fbfa3698a1a3 x1 last 7.5h ago [open: 1 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'Ascq: Amandine Monnot v'
-7c142b94624f x2 last 9.1h ago [open: 2 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Ops digest has not updated since NNN N:N UTC, now about N hours stale, pas
-7da5b6289516 x27 last 9.3h ago [open: 27 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
-727577d69f4e x22 last 9.3h ago [open: 22 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
-7dfc4a226f73 x95 last 9.3h ago [open: 95 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
-a05fff81fe03 x12 last 9.3h ago [open: 12 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, tri
-e7b471403f60 x3 last 9.3h ago [open: 3 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimm
-b895d62a9af7 x1 last 9.3h ago [open: 1 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N yes N (n=N, trimm
-1bd07071cf73 x8 last 9.7h ago [open: 8 hits, no action yet] :: ERROR Onchain poll error: ('S', RemoteDisconnected('S'))
-eb7da12386c6 x74 last 11.2h ago [open: 74 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
-a77088f7944a x74 last 11.2h ago [open: 74 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
-d7140f640d29 x72 last 11.2h ago [open: 72 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
-59f5d5ebf4a6 x55 last 11.2h ago [open: 55 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)
-c6d91d798e54 x60 last 12.2h ago [open: 60 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
-2497cd50ff7d x19 last 12.2h ago [open: 19 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
-9d498e122ffb x32 last 15.6h ago [open: 32 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
-74647a944e17 x6 last 16.3h ago [open: 6 hits, no action yet] :: INFO [AB-RACE] daily snapshot SEND FAILED (era_day=N, era_floor=N)
-c51c5e128ab1 x4 last 16.3h ago [open: 4 hits, no action yet] :: INFO [AB-RACE] rehearsal line held/failed, real-money line sent
-4162a3122f5e x21 last 17.2h ago [open: 21 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | won N on 'S' (<hex>, tier Nb)
-b2b604f5f44b x9 last 21.6h ago [open: 9 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched copi
-0c762d47a968 x2 last 21.6h ago [open: 2 hits, no action yet] :: INFO [ops] decay_recovered: 'S' -> 'S' | still positive with its best N copies deleted
-cad1f3aebfb9 x2 last 21.6h ago [open: 2 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | promotion floor still holds: copy ROI N < floor N
-7a8d58f20915 x121 last 33.4h ago [open: 121 hits, no action yet] :: ERROR Network error fetching <hex>:
-f0d4155b43e0 x5 last 33.6h ago [open: 5 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimme
+54cedf8fb5c2 x54 last -0.0h ago [open: 54 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (read refused: CTF [NN]: N Client Error: Forbidden for url: https:
+1781e8e2f42a x65 last 0.1h ago [open: 65 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'
+3fd84e7cc412 x33 last 0.4h ago [open: 33 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: SELL $N on 'S'
+6f12d4998994 x38 last 0.4h ago [open: 38 hits, no action yet] :: INFO [recovery] No pending orders to recover
+6b829965c182 x38 last 0.4h ago [open: 38 hits, no action yet] :: INFO Bot started. Monitoring trades...
+9d8a6d2794ec x34 last 0.4h ago [open: 34 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
+54ac26fb3ff1 x736 last 0.4h ago [open: 736 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
+9d498e122ffb x33 last 0.4h ago [open: 33 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
+7a8d58f20915 x122 last 0.4h ago [open: 122 hits, no action yet] :: ERROR Network error fetching <hex>:
+b2b604f5f44b x10 last 0.4h ago [open: 10 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched copi
+2660dcb986da x1 last 0.4h ago [open: 1 hits, no action yet] :: INFO [ops] decay_recovered: 'S' -> 'S' | promotion floor still holds
+d3a278c17ca5 x11 last 6.4h ago [open: 11 hits, no action yet] :: INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows
+907b728a6b72 x113 last 7.2h ago [open: 113 hits, no action yet] :: ERROR [inventory] API sync failed:
+6eca45f47973 x122 last 7.4h ago [open: 122 hits, no action yet] :: ERROR Network error fetching <hex>: Server disconnected without sending a response.
+fbfa3698a1a3 x1 last 7.9h ago [open: 1 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'Ascq: Amandine Monnot v'
+7c142b94624f x2 last 9.6h ago [open: 2 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Ops digest has not updated since NNN N:N UTC, now about N hours stale, pas
+7da5b6289516 x27 last 9.8h ago [open: 27 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
+727577d69f4e x22 last 9.8h ago [open: 22 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
+7dfc4a226f73 x95 last 9.8h ago [open: 95 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
+a05fff81fe03 x12 last 9.8h ago [open: 12 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, tri
+e7b471403f60 x3 last 9.8h ago [open: 3 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimm
+b895d62a9af7 x1 last 9.8h ago [open: 1 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N yes N (n=N, trimm
+1bd07071cf73 x8 last 10.2h ago [open: 8 hits, no action yet] :: ERROR Onchain poll error: ('S', RemoteDisconnected('S'))
+eb7da12386c6 x74 last 11.6h ago [open: 74 hits, no action yet] :: TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...
+a77088f7944a x74 last 11.6h ago [open: 74 hits, no action yet] :: INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N
+d7140f640d29 x72 last 11.6h ago [open: 72 hits, no action yet] :: TRADE [verify] FILLED: BUY N shares on 'S' @ N
+59f5d5ebf4a6 x55 last 11.6h ago [open: 55 hits, no action yet] :: INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)
+c6d91d798e54 x60 last 12.6h ago [open: 60 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
+2497cd50ff7d x19 last 12.6h ago [open: 19 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
+74647a944e17 x6 last 16.8h ago [open: 6 hits, no action yet] :: INFO [AB-RACE] daily snapshot SEND FAILED (era_day=N, era_floor=N)
 
-## ledger (27 rows)
-{"ts": 1791505679.3276043, "day": "2026-10-09", "kind": "settled", "before": "open $5.99", "after": "paid $0.00", "detail": "lost -5.99 on 'Independiente Valle Del Cauca vs. Tigres' (0x5213eb85, tier 1b)", "push": null, "token_id": "43482720158463802030774693153350400254316261202113261177495857296413264736089", "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35", "pnl": -5.99, "won": false, "cost": 5.99}
+## ledger (30 rows)
 {"ts": 1791513696.6884444, "day": "2026-10-09", "kind": "decay_recovered", "before": "0x4980930d below the door 6 day(s)", "after": "passes the door again", "detail": "still positive with its best 3 copies deleted", "push": "WALLET", "wallet": "0x4980930da4ad1194d4f0fd5e29f17b70a42e5709", "days": 6}
 {"ts": 1791513696.6884444, "day": "2026-10-09", "kind": "decay_day", "before": "0x722abb54 in set Z", "after": "below the door 2 of 7", "detail": "promotion floor still holds: copy ROI +10% < floor +10%", "push": null, "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed", "days": 2, "window": 7, "fails": ["promotion floor still holds"]}
 {"ts": 1791513696.6884444, "day": "2026-10-09", "kind": "decay_day", "before": "0xfd3e6449 in set Z", "after": "below the door 3 of 7", "detail": "does not lose at the prices we would really pay: -1% at real quotes over 51 matched copies", "push": null, "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a", "days": 3, "window": 7, "fails": ["does not lose at the prices we would really pay"]}
@@ -123,10 +124,12 @@ f0d4155b43e0 x5 last 33.6h ago [open: 5 hits, no action yet] :: INFO [ops] floor
 {"ts": 1791558696.9811578, "day": "2026-10-09", "kind": "escalation_delivered", "before": "routine escalation", "after": "sent", "detail": "Ops digest has not updated since 2026-10-09 09:03 UTC, now about 3.8 hours stale, past the three hour limit. Last known ", "push": "BOT"}
 {"ts": 1791570270.6777685, "day": "2026-10-09", "kind": "settle_pending", "before": "0x722abb54 open $6.40", "after": "payout not in the activity yet", "detail": "'Will FK Neftchi Fargona win on 2026-10-0' left the wallet; booked when Polymarket's row shows", "push": null, "token_id": "77587846294769262711777710024223648445687689730942435381581493863057880598996", "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed"}
 {"ts": 1791591623.8384802, "day": "2026-10-10", "kind": "sre_started", "before": "sidecar", "after": "watching", "detail": "tick 120s", "push": null}
+{"ts": 1791591656.2363195, "day": "2026-10-10", "kind": "decay_recovered", "before": "0x722abb54 below the door 2 day(s)", "after": "passes the door again", "detail": "promotion floor still holds", "push": "WALLET", "wallet": "0x722abb5460060870d46728bf45f66a6b1635d6ed", "days": 2}
+{"ts": 1791591656.2363195, "day": "2026-10-10", "kind": "decay_day", "before": "0xfd3e6449 in set Z", "after": "below the door 4 of 7", "detail": "does not lose at the prices we would really pay: -1% at real quotes over 52 matched copies", "push": null, "wallet": "0xfd3e6449d0c1e807501dcc17c0d9447201f35a7a", "days": 4, "window": 7, "fails": ["does not lose at the prices we would really pay"]}
+{"ts": 1791591715.6980922, "day": "2026-10-10", "kind": "form", "before": "0x10658d37 in form", "after": "benched", "detail": "0x10658d37: 33 settled, 61% won vs 60% needed, net +21.2% on $31,904, worst day -587, 0 of 1 exits under 10 min", "push": "WALLET", "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218"}
+{"ts": 1791591744.6066678, "day": "2026-10-10", "kind": "sre_escalate", "before": "fingerprint 54cedf8fb5c2", "after": "owner told", "detail": "Onchain reader dead 9000 blocks behind and growing, every read 403 Forbidden from publicnode.com since the 00:20 restart, live copies running on the data-api fa", "push": "BOT", "fingerprint": "54cedf8fb5c2"}
 
-## important lines (163)
-2026-10-09 00:27:59 INFO  [tiered-risk] tier 1b: released $5.99 of exposure from resolved or closed positions | open now: $57.60
-2026-10-09 00:27:59 INFO  [ops] settled: 'open $5.99' -> 'paid $0.00' | lost -5.99 on 'Independiente Valle Del Cauca vs. Tigres' (0x5213eb85, tier 1b)
+## important lines (228)
 2026-10-09 01:09:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-10-09 01:09:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-10-09 01:46:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
@@ -219,8 +222,64 @@ f0d4155b43e0 x5 last 33.6h ago [open: 5 hits, no action yet] :: INFO [ops] floor
 2026-10-10 00:20:54 INFO  Bot started. Monitoring trades...
 2026-10-10 00:21:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
 2026-10-10 00:21:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-10-09 00:25:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.15 < min_bet=$5.00: SELL $7.70 on 'Will CA Paranaense win on 2026-10-08?'
-2026-10-09 00:38:58 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00: BUY $499.99 on 'Alebrijes de Oaxaca FC vs. CF Correcamin'
+2026-10-10 00:21:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-10-10 00:21:39 ERROR Network error fetching 0x1985...51ab: 
+2026-10-10 00:21:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-10-10 00:21:53 INFO  [ops] decay_recovered: '0x722abb54 below the door 2 day(s)' -> 'passes the door again' | promotion floor still holds
+2026-10-10 00:21:55 ERROR Onchain: chunk 95247869-95248068 SKIPPED after 5 refused reads (read refused: CTF [95247869-95248068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:21:55 INFO  [ops] decay_day: '0xfd3e6449 in set Z' -> 'below the door 4 of 7' | does not lose at the prices we would really pay: -1% at real quotes over 52 matched copies
+2026-10-10 00:22:08 INFO  [ops] form: '0x10658d37 in form' -> 'benched' | 0x10658d37: 33 settled, 61% won vs 60% needed, net +21.2% on $31,904, worst day -587, 0 of 1 exits under 10 min
+2026-10-10 00:22:16 ERROR Onchain: chunk 95248069-95248268 SKIPPED after 5 refused reads (read refused: CTF [95248069-95248268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:22:43 ERROR Onchain: chunk 95248269-95248468 SKIPPED after 5 refused reads (read refused: CTF [95248269-95248468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:23:04 ERROR Onchain: chunk 95248469-95248668 SKIPPED after 5 refused reads (read refused: CTF [95248469-95248668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:23:22 ERROR Onchain: chunk 95248669-95248868 SKIPPED after 5 refused reads (read refused: CTF [95248669-95248868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:23:40 ERROR Onchain: chunk 95248869-95249068 SKIPPED after 5 refused reads (read refused: CTF [95248869-95249068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:23:59 ERROR Onchain: chunk 95249069-95249268 SKIPPED after 5 refused reads (read refused: CTF [95249069-95249268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:24:17 ERROR Onchain: chunk 95249269-95249468 SKIPPED after 5 refused reads (read refused: CTF [95249269-95249468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:24:36 ERROR Onchain: chunk 95249469-95249668 SKIPPED after 5 refused reads (read refused: CTF [95249469-95249668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:24:54 ERROR Onchain: chunk 95249669-95249868 SKIPPED after 5 refused reads (read refused: CTF [95249669-95249868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:25:12 ERROR Onchain: chunk 95249869-95250068 SKIPPED after 5 refused reads (read refused: CTF [95249869-95250068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:25:30 ERROR Onchain: chunk 95250069-95250268 SKIPPED after 5 refused reads (read refused: CTF [95250069-95250268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:25:50 ERROR Onchain: chunk 95250269-95250468 SKIPPED after 5 refused reads (read refused: CTF [95250269-95250468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:26:08 ERROR Onchain: chunk 95250469-95250668 SKIPPED after 5 refused reads (read refused: CTF [95250469-95250668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:26:26 ERROR Onchain: chunk 95250669-95250868 SKIPPED after 5 refused reads (read refused: CTF [95250669-95250868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:26:45 ERROR Onchain: chunk 95250869-95251068 SKIPPED after 5 refused reads (read refused: CTF [95250869-95251068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:27:14 ERROR Onchain: chunk 95251069-95251268 SKIPPED after 5 refused reads (read refused: CTF [95251069-95251268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:27:50 ERROR Onchain: chunk 95251269-95251468 SKIPPED after 5 refused reads (read refused: CTF [95251269-95251468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:28:33 ERROR Onchain: chunk 95251469-95251668 SKIPPED after 5 refused reads (read refused: CTF [95251469-95251668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:29:11 ERROR Onchain: chunk 95251669-95251868 SKIPPED after 5 refused reads (read refused: CTF [95251669-95251868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:29:52 ERROR Onchain: chunk 95251869-95252068 SKIPPED after 5 refused reads (read refused: CTF [95251869-95252068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:30:30 ERROR Onchain: chunk 95252069-95252268 SKIPPED after 5 refused reads (read refused: CTF [95252069-95252268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:31:06 ERROR Onchain: chunk 95252269-95252468 SKIPPED after 5 refused reads (read refused: CTF [95252269-95252468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:31:46 ERROR Onchain: chunk 95252469-95252668 SKIPPED after 5 refused reads (read refused: CTF [95252469-95252668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:32:29 ERROR Onchain: chunk 95252669-95252868 SKIPPED after 5 refused reads (read refused: CTF [95252669-95252868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:33:07 ERROR Onchain: chunk 95252869-95253068 SKIPPED after 5 refused reads (read refused: CTF [95252869-95253068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:33:46 ERROR Onchain: chunk 95253069-95253268 SKIPPED after 5 refused reads (read refused: CTF [95253069-95253268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:34:21 ERROR Onchain: chunk 95253269-95253468 SKIPPED after 5 refused reads (read refused: CTF [95253269-95253468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:35:00 ERROR Onchain: chunk 95253469-95253668 SKIPPED after 5 refused reads (read refused: CTF [95253469-95253668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:35:34 ERROR Onchain: chunk 95253669-95253868 SKIPPED after 5 refused reads (read refused: CTF [95253669-95253868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:36:07 ERROR Onchain: chunk 95253869-95254068 SKIPPED after 5 refused reads (read refused: CTF [95253869-95254068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:36:43 ERROR Onchain: chunk 95254069-95254268 SKIPPED after 5 refused reads (read refused: CTF [95254069-95254268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:37:26 ERROR Onchain: chunk 95254269-95254468 SKIPPED after 5 refused reads (read refused: CTF [95254269-95254468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:38:02 ERROR Onchain: chunk 95254469-95254668 SKIPPED after 5 refused reads (read refused: CTF [95254469-95254668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:38:46 ERROR Onchain: chunk 95254669-95254868 SKIPPED after 5 refused reads (read refused: CTF [95254669-95254868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:39:33 ERROR Onchain: chunk 95254869-95255068 SKIPPED after 5 refused reads (read refused: CTF [95254869-95255068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:40:07 ERROR Onchain: chunk 95255069-95255268 SKIPPED after 5 refused reads (read refused: CTF [95255069-95255268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:40:38 ERROR Onchain: chunk 95255269-95255468 SKIPPED after 5 refused reads (read refused: CTF [95255269-95255468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:41:10 ERROR Onchain: chunk 95255469-95255668 SKIPPED after 5 refused reads (read refused: CTF [95255469-95255668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:41:46 ERROR Onchain: chunk 95255669-95255868 SKIPPED after 5 refused reads (read refused: CTF [95255669-95255868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:42:23 ERROR Onchain: chunk 95255869-95256068 SKIPPED after 5 refused reads (read refused: CTF [95255869-95256068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:43:05 ERROR Onchain: chunk 95256069-95256268 SKIPPED after 5 refused reads (read refused: CTF [95256069-95256268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:43:36 ERROR Onchain: chunk 95256269-95256468 SKIPPED after 5 refused reads (read refused: CTF [95256269-95256468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:44:09 ERROR Onchain: chunk 95256469-95256668 SKIPPED after 5 refused reads (read refused: CTF [95256469-95256668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:44:50 ERROR Onchain: chunk 95256669-95256868 SKIPPED after 5 refused reads (read refused: CTF [95256669-95256868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:45:22 ERROR Onchain: chunk 95256869-95257068 SKIPPED after 5 refused reads (read refused: CTF [95256869-95257068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:45:59 ERROR Onchain: chunk 95257069-95257268 SKIPPED after 5 refused reads (read refused: CTF [95257069-95257268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:46:33 ERROR Onchain: chunk 95257269-95257468 SKIPPED after 5 refused reads (read refused: CTF [95257269-95257468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:47:08 ERROR Onchain: chunk 95257469-95257668 SKIPPED after 5 refused reads (read refused: CTF [95257469-95257668]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:47:44 ERROR Onchain: chunk 95257669-95257868 SKIPPED after 5 refused reads (read refused: CTF [95257669-95257868]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:48:18 ERROR Onchain: chunk 95257869-95258068 SKIPPED after 5 refused reads (read refused: CTF [95257869-95258068]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:48:53 ERROR Onchain: chunk 95258069-95258268 SKIPPED after 5 refused reads (read refused: CTF [95258069-95258268]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
 2026-10-09 00:59:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00: BUY $500.00 on 'CA Aldosivi vs. CA Sarmiento: O/U 2.5'
 2026-10-09 01:01:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00: SELL $482.30 on 'Sonic Boom vs. Goyang'
 2026-10-09 01:21:02 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$1.05 < min_bet=$5.00: BUY $994.63 on 'Buccaneers vs. Cowboys'
@@ -288,3 +347,14 @@ f0d4155b43e0 x5 last 33.6h ago [open: 5 hits, no action yet] :: INFO [ops] floor
 2026-10-09 20:07:53 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $1110.85 on 'Set Handicap: Daniil Medvedev (-1.5) vs '
 2026-10-09 20:16:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: SELL $2.85 on 'Spread: RCD Espanyol de Barcelona (-1.5)'
 2026-10-10 00:20:54 INFO  [recovery] No pending orders to recover
+2026-10-10 00:22:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: SELL $290.94 on 'Will Águilas Doradas Rionegro win on 202'
+2026-10-10 00:22:50 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $3169.62 on 'Spread: Jets (-2.5)'
+2026-10-10 00:22:53 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: SELL $27.77 on 'Kraken vs. Red Wings'
+2026-10-10 00:27:49 ERROR Onchain: chunk 95251269-95251468 SKIPPED after 5 refused reads (read refused: CTF [95251269-95251468]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only
+2026-10-10 00:31:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $515.24 on 'Will Club León FC win on 2026-10-09?'
+2026-10-10 00:34:41 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $364.23 on 'Spread: San Jose State (-2.5)'
+2026-10-10 00:37:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $368.82 on 'FC Augsburg vs. FC Bayern München: O/U 4'
+2026-10-10 00:38:26 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $500.00 on 'Will Chelsea FC win on 2026-10-10?'
+2026-10-10 00:38:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $365.40 on 'TSG 1899 Hoffenheim vs. Hamburger SV: O/'
+2026-10-10 00:39:40 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $368.46 on 'SC Paderborn 07 vs. VfB Stuttgart: O/U 3'
+2026-10-10 00:43:00 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $500.00 on 'Club Puebla vs. Club León FC: O/U 2.5'
