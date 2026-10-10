@@ -297,8 +297,13 @@ def _live_guard_loop():
                 # sum: release rows whose position resolved or left the wallet.
                 try:
                     from src.copy_trading import tiered_risk_manager as _trm
+                    # The FULL resolved set, neg-risk included. The redeemer's
+                    # subset left every resolved neg-risk loser (still held, so
+                    # never "gone" either) on the tier ledger for good: seven
+                    # of them held $44 of a $62 cap and refused copies as
+                    # "exposure full" from 2026-10-08 17:00 (found 10-10).
                     _resolved_ids = set()
-                    for _p in (redeemable or []):
+                    for _p in (resolved or []):
                         if isinstance(_p, dict):
                             for _k in ("tokenId", "asset", "token_id"):
                                 if _p.get(_k):

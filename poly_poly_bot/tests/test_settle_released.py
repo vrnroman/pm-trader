@@ -15,6 +15,7 @@ names the condition).
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -258,3 +259,15 @@ def test_main_calls_the_seam_not_the_old_booker():
     assert "ops_watch.record_settlements(" not in src
     i = src.index("rows_out=released_rows"); j = src.index("ops_watch.settle_released(")
     assert i < j, "the reconcile must release rows before the watcher books them"
+
+
+def test_the_exposure_reconcile_releases_resolved_neg_risk_positions():
+    """A resolved neg-risk loser is never claimed, so it stays in the wallet
+    and is never "gone"; the redeemer's neg-risk-free subset never named it
+    resolved either. Seven of them held the tier "full" for two days
+    (2026-10-10). The reconcile reads the full resolved set."""
+    src = (Path(__file__).resolve().parents[1] / "main.py").read_text()
+    i = src.index("_resolved_ids = set()")
+    j = src.index("_trm.reconcile_tiered_exposure(", i)
+    block = src[i:j]
+    assert "for _p in (resolved or []):" in block and "redeemable" not in block.split("for _p")[1]
