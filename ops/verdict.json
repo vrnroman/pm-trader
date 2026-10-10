@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-09T18:42:28Z-d4f3",
-    "ts": 1791571348,
+    "id": "2026-10-10T00:41:57Z-bbd7",
+    "ts": 1791592917,
     "kind": "nothing",
-    "message": "Armed, equity 77.89, spend 17.74 against the 45 daily loss stop, 3 copies filled today, guard_fail_streak 0, loss_streak 1, daily line sent. No wallet in form shows a losing-now pattern the bar has not already caught. The prior digest-stale escalation resolved on its own and the bot already delivered it.",
+    "message": "Armed, equity 77.89, spend 0.00 against the 45 daily loss stop on a fresh day, all four in-form wallets net positive, no ERROR or self-disarm pattern, digest 20 minutes old.",
     "evidence": [
-        "## money state {\"cash\": 60.149603, \"open_cost\": 17.74, \"equity\": 77.89, \"floor\": 30.0, \"spend\": {\"spent_usd\": 17.74, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-09\"}",
-        "2026-10-09 13:11:19 TRADE [verify] FILLED: BUY 10.39 shares on 'SC Paderborn 07 vs. VfB Stuttgart: O/U 3' @ 0.4900",
-        "state.json watch: guard_fail_streak 0, guard_fail_streak_prev 0, loss_streak 1, no_copy_pushed false, daily_line_sent true for 2026-10-09",
-        "2026-10-09 15:11:37 INFO [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest has not updated since 2026-10-09 09:03 UTC, now about 3.8 hours stale, past the three hour limit. Last known",
-        "## arm: {\"armed\": true, \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}"
+        "## money state {\"cash\": 60.149603, \"open_cost\": 17.74, \"equity\": 77.89, \"floor\": 30.0, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-10\"}",
+        "## arm: {\"armed\": true, \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}",
+        "in form  0x10658d37: 33 settled, 58% won vs 54% needed, net +20.0% on $25,422, worst day -587, 0 of 1 exits under 10 min",
+        "in form  0x5213eb85: 122 settled, 52% won vs 40% needed, net +29.4% on $81,116, worst day -3,938, 0 of 8 exits under 10 min",
+        "in form  0x722abb54: 55 settled, 76% won vs 70% needed, net +9.7% on $94,274, worst day -5,499, 3 of 46 exits under 10 min"
     ],
     "commit": null
 }
