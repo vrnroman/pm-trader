@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-10T18:34:50.130567+00:00",
+ "generated": "2026-10-10T21:24:23.351799+00:00",
  "money": {
   "cash": 19.532443,
-  "open_cost": 24.23,
-  "equity": 43.76,
+  "open_cost": 18.03,
+  "equity": 37.56,
   "floor": 30.0,
   "stated": 80.0,
   "spend": {
@@ -15,13 +15,13 @@
    "closed_reason": ""
   },
   "armed": true,
-  "resolved_unclaimed": 85,
+  "resolved_unclaimed": 86,
   "tier": {
    "1a": 0,
-   "1b": 24.23,
+   "1b": 18.03,
    "1c": 0
   },
-  "ts": 1791657155.809827,
+  "ts": 1791667456.9426074,
   "day": "2026-10-10"
  },
  "arm": {
@@ -54,7 +54,7 @@
    "placements": []
   },
   "1b": {
-   "open_total": 24.23,
+   "open_total": 18.03,
    "daily_date": "2026-10-10",
    "daily_volume": 59.76,
    "placements": [
@@ -64,13 +64,6 @@
      "ts": 1791474936.6025627,
      "trader": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
      "title": "Will Liverpool FC win on 2026-10-14?"
-    },
-    {
-     "token_id": "95248362190763282518152940808550775915245321680845494005962772210605255054720",
-     "cost": 6.2,
-     "ts": 1791618560.7897782,
-     "trader": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
-     "title": "L.R. Vicenza vs. Pisa SC: O/U 2.5"
     },
     {
      "token_id": "88612518871493097654956626683277619520689179658918518393439797470093482335064",
@@ -421,17 +414,17 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 43.76,
+  "last_equity": 37.56,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-09T12:51:50Z-eba1",
-  "admit_scan_ts": 1791646409.4147208,
+  "admit_scan_ts": 1791657457.6041267,
   "day_loss_pushed": "2026-10-10",
-  "loss_streak": 3,
-  "day_pnl": -21.8,
+  "loss_streak": 4,
+  "day_pnl": -28.0,
   "day_pnl_day": "2026-10-10",
   "settled_tokens": [
    "6691701803539626176077488709374004737591849995522510168757367609925258534749",
@@ -536,7 +529,8 @@
    "18012392638772194425216580461054715350834303482077437271152909886405133765289",
    "83098011654361555383622454356515682787997246256705070391057531116201795872992",
    "4282211200336122660518290619068668746136178027629344611251928370587382839532",
-   "91822211402620254055829551554048464972121437087994063485919559837707008690958"
+   "91822211402620254055829551554048464972121437087994063485919559837707008690958",
+   "95248362190763282518152940808550775915245321680845494005962772210605255054720"
   ],
   "form_scan_ts": 1791656817.4938133,
   "daily_line_attempt_day": "2026-10-10",
@@ -548,7 +542,7 @@
    "2026-10-06:no trade data for": 1
   },
   "day_won": 2,
-  "day_lost": 5
+  "day_lost": 6
  },
  "probation": {
   "0x09b045baad1fbe115c70785635a261411774a3b6": {
@@ -1290,6 +1284,38 @@
    "after": "❌ <b>LOST -$6.20</b>\n<b>Samsunspor vs. Trabzonspor: O/U 2.5</b>\nStaked $6.20, paid out $0.00\nCopied 0x9f15…bdb3, tier 1b",
    "detail": "",
    "push": "DEAL"
+  },
+  {
+   "ts": 1791660808.4697185,
+   "day": "2026-10-10",
+   "kind": "settled",
+   "before": "open $6.20",
+   "after": "paid $0.00",
+   "detail": "lost -6.20 on 'L.R. Vicenza vs. Pisa SC: O/U 2.5' (0x5213eb85, tier 1b)",
+   "push": null,
+   "token_id": "95248362190763282518152940808550775915245321680845494005962772210605255054720",
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+   "pnl": -6.2,
+   "won": false,
+   "cost": 6.2
+  },
+  {
+   "ts": 1791660808.4697185,
+   "day": "2026-10-10",
+   "kind": "push:settled",
+   "before": null,
+   "after": "❌ <b>LOST -$6.20</b>\n<b>L.R. Vicenza vs. Pisa SC: O/U 2.5</b>\nStaked $6.20, paid out $0.00\nCopied 0x5213…6a35, tier 1b\n⚠",
+   "detail": "",
+   "push": "DEAL"
+  },
+  {
+   "ts": 1791660808.4697185,
+   "day": "2026-10-10",
+   "kind": "push:loss_streak",
+   "before": null,
+   "after": "📉 <b>4 losses in a row</b>\nToday so far: -$28.00\nBankroll: $37.56",
+   "detail": "",
+   "push": "DEAL"
   }
  ],
  "important": [
@@ -1506,14 +1532,16 @@
   "2026-10-10 17:46:38 INFO  [tiered-risk] tier 1b: released $6.20 of exposure from resolved or closed positions | open now: $24.23",
   "2026-10-10 17:46:38 INFO  [ops] settled: 'open $6.20' -> 'paid $0.00' | lost -6.20 on 'Samsunspor vs. Trabzonspor: O/U 2.5' (0x9f15613e, tier 1b)",
   "2026-10-10 17:46:39 INFO  [ops] push:settled: None -> '❌ <b>LOST -$6.20</b>\\n<b>Samsunspor vs. Trabzonspor: O/U 2.5</b>\\nStaked $6.20, paid out $0.00\\nCopied 0x9f15…bdb3, tier 1b'",
-  "2026-10-09 19:22:31 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $476.92 on 'South Carolina vs. Florida: O/U 59.5'",
-  "2026-10-09 19:43:05 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: SELL $2.11 on 'Northern Ireland vs. Portugal: O/U 4.5'",
-  "2026-10-09 19:51:40 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $1000.00 on 'Spread: Oregon State (-15.5)'",
-  "2026-10-09 19:52:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $366.74 on 'Penguins vs. Blue Jackets: O/U 5.5'",
-  "2026-10-09 19:55:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $360.00 on 'Iowa State vs. BYU: O/U 45.5'",
-  "2026-10-09 20:02:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: SELL $11.24 on 'US Avellino 1912 vs. UC Sampdoria: O/U 5'",
-  "2026-10-09 20:07:53 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $1110.85 on 'Set Handicap: Daniil Medvedev (-1.5) vs '",
-  "2026-10-09 20:16:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: SELL $2.85 on 'Spread: RCD Espanyol de Barcelona (-1.5)'",
+  "2026-10-10 19:07:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-10 19:24:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-10 19:33:28 INFO  [tiered-risk] tier 1b: released $6.20 of exposure from resolved or closed positions | open now: $18.03",
+  "2026-10-10 19:33:28 INFO  [ops] settled: 'open $6.20' -> 'paid $0.00' | lost -6.20 on 'L.R. Vicenza vs. Pisa SC: O/U 2.5' (0x5213eb85, tier 1b)",
+  "2026-10-10 19:33:29 INFO  [ops] push:settled: None -> '❌ <b>LOST -$6.20</b>\\n<b>L.R. Vicenza vs. Pisa SC: O/U 2.5</b>\\nStaked $6.20, paid out $0.00\\nCopied 0x5213…6a35, tier 1b\\n⚠'",
+  "2026-10-10 19:33:30 INFO  [ops] push:loss_streak: None -> '📉 <b>4 losses in a row</b>\\nToday so far: -$28.00\\nBankroll: $37.56'",
+  "2026-10-10 19:34:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-10 20:20:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-10 20:36:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-10 21:18:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-10 00:20:54 INFO  [recovery] No pending orders to recover",
   "2026-10-10 00:22:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: SELL $290.94 on 'Will Águilas Doradas Rionegro win on 202'",
   "2026-10-10 00:22:50 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$-0.23 < min_bet=$5.00: BUY $3169.62 on 'Spread: Jets (-2.5)'",
@@ -1745,6 +1773,20 @@
    "did": "nothing",
    "proof": "",
    "question": ""
+  },
+  {
+   "ts": 1791660916.9492273,
+   "day": "2026-10-10",
+   "woke_because": "c01966f605c4",
+   "fingerprint": "c01966f605c4",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The cause is a first-ever 4-loss-streak notification firing, which is a new fingerprint only because this push type had never had reason to fire before. The settled trail confirms four straight losses (16:26, 17:31, 17:46, 19:33 all paid $0.00) so the message is accurate, and the push itself is the owner's Telegram alert so the drawdown is already surfaced. The bot is healthy: 53 onchain reads, 32 trade batches, 12 scheduler heartbeats and 12 inventory syncs in the last 60 min against this one notification, chain reader lag 0 blocks. Money envelope is intact with equity 37.56 above the 30.00 f",
+   "confidence": 0.9,
+   "cost_usd": 0.385503,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -1826,14 +1868,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1791654433.9758594,
-   "count": 70,
+   "last": 1791660916.9492273,
+   "count": 71,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1791651192.8536046,
-    1791653593.6131468,
-    1791654433.9758594
+    1791660916.9492273
    ],
    "action": null,
    "action_ts": null,
@@ -1842,13 +1882,12 @@
   },
   "2497cd50ff7d": {
    "first": 1790098332.9559617,
-   "last": 1791654433.9758594,
-   "count": 24,
+   "last": 1791660916.9492273,
+   "count": 25,
    "sample": "2026-09-21 00:52:20 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Counter-Strike: Bounty Hunters Esports v' (0x57b25849, tier 1b)",
    "norm": "INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)",
    "recent": [
-    1791653593.6131468,
-    1791654433.9758594
+    1791660916.9492273
    ],
    "action": null,
    "action_ts": null,
@@ -1984,14 +2023,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791652993.3440878,
-   "count": 770,
+   "last": 1791667109.8190563,
+   "count": 777,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791651792.9566092,
-    1791652753.157172,
-    1791652993.3440878
+    1791663748.89271,
+    1791664709.5021095,
+    1791667109.8190563
    ],
    "action": null,
    "action_ts": null,
@@ -3931,13 +3970,12 @@
   },
   "d7d42c1f33f7": {
    "first": 1791629042.6847835,
-   "last": 1791654433.9758594,
-   "count": 7,
+   "last": 1791660916.9492273,
+   "count": 8,
    "sample": "2026-10-10 10:43:05 INFO  [ops] push:settled: None -> '❌ <b>LOST -$6.23</b>\\n<b>Shanghai Rolex Masters: Yunchaokete Bu vs Casper Ruud</b>\\nPick: <b>Yunchaokete Bu</b>\\nStaked $6.'",
    "norm": "INFO [ops] push:settled: None -> 'S'",
    "recent": [
-    1791653593.6131468,
-    1791654433.9758594
+    1791660916.9492273
    ],
    "action": null,
    "action_ts": null,
@@ -3966,6 +4004,20 @@
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
    "recent": [
     1791646603.9674242
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "c01966f605c4": {
+   "first": 1791660916.9492273,
+   "last": 1791660916.9492273,
+   "count": 1,
+   "sample": "2026-10-10 19:33:30 INFO  [ops] push:loss_streak: None -> '📉 <b>4 losses in a row</b>\\nToday so far: -$28.00\\nBankroll: $37.56'",
+   "norm": "INFO [ops] push:loss_streak: None -> 'S'",
+   "recent": [
+    1791660916.9492273
    ],
    "action": null,
    "action_ts": null,
