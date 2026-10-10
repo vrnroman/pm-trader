@@ -1,15 +1,14 @@
 {
-    "id": "2026-10-10T06:41:59Z-065d",
-    "ts": 1791614519,
+    "id": "2026-10-10T12:42:07Z-16c1",
+    "ts": 1791636127,
     "kind": "nothing",
-    "message": "Armed, equity 77.89, spend 0.00 on a fresh day against the 45 daily loss stop, tier 1b exposure freed to 17.74 after the overnight squeeze, the RPC 403 run stopped 5.4 hours ago and was already pushed to the owner, three in-form wallets all net positive, digest 25 minutes old.",
+    "message": "Armed, equity 77.74, spend 6.23 against the 45 daily loss stop, tier 1b exposure 23.97 of 200, the overnight RPC 403 run already pushed to the owner and clear 6.2 hours ago, two in-form wallets both net positive, digest fresh at 07:05.",
     "evidence": [
-        "## money state {\"cash\": 60.149603, \"open_cost\": 17.74, \"equity\": 77.89, \"floor\": 30.0, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-10\"}",
-        "54cedf8fb5c2 x55 last 5.4h ago [open: 55 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (read refused: CTF [NN]: N Client Error: Forbidden",
-        "sre_escalate ts 1791591744 push: BOT :: Onchain reader dead 9000 blocks behind and growing, every read 403 Forbidden from publicnode.com since the 00:20 restart, live copies running on the data-api fa",
-        "2026-10-10 05:22:52 INFO [tiered-risk] tier 1b: released $44.80 of exposure from resolved or closed positions | open now: $17.74",
-        "in form  0x5213eb85: 130 settled, 53% won vs 40% needed, net +32.4% on $84,790, worst day -2,255, 0 of 9 exits under 10 min",
-        "in form  0x722abb54: 59 settled, 78% won vs 71% needed, net +10.4% on $100,102, worst day -5,499, 3 of 50 exits under 10 min"
+        "## money state {\"cash\": 53.770493, \"open_cost\": 23.97, \"equity\": 77.74, \"floor\": 30.0, \"armed\": true, \"spend\": {\"spent_usd\": 6.23, \"daily_loss_stop_usd\": 45.0}, \"day\": \"2026-10-10\"}",
+        "in form  0x5213eb85: 141 settled, 50% won vs 41% needed, net +25.3% on $91,129, worst day -4,318, 0 of 9 exits under 10 min",
+        "in form  0x722abb54: 60 settled, 77% won vs 71% needed, net +10.3% on $100,622, worst day -5,499, 3 of 51 exits under 10 min",
+        "54cedf8fb5c2 x55 last 6.2h ago [open: 55 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (read refused: CTF [NN]: N Client Error: Forbidden for url: https:",
+        "## tier exposure: {\"1a\": [0, 0], \"1b\": [23.97, 4], \"1c\": [0, 0]}"
     ],
     "commit": null
 }
