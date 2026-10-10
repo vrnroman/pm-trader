@@ -40,7 +40,8 @@ from src.copy_trading.discovery import (
 from src.copy_trading import gate_history
 from src.copy_trading import gate_recheck_queue
 from src.copy_trading import late_bet_queue
-from src.copy_trading.discovery_data import evaluate_sweep, fetch_activity
+from src.copy_trading.discovery_data import fetch_activity
+from src.copy_trading.discovery_worker import evaluate_in_subprocess
 from src.copy_trading.entry_profile import is_copyable_entry
 from src.copy_trading.llm_review import (
     DEFAULT_MODEL, RATE_LIMITED, build_dossier, review_wallet)
@@ -237,7 +238,9 @@ class DiscoveryRunner:
         on_removed: Optional[Callable[[str, Optional[Eval]], None]] = None,
         consensus_fired_path: Optional[str] = None,
         # injectable for tests
-        evaluate: Callable[..., dict[str, Eval]] = evaluate_sweep,
+        # The sweep runs in a child process so its ~1GB heap goes back to the
+        # OS when it ends (discovery_worker); DISCOVERY_SUBPROCESS=0 runs it here.
+        evaluate: Callable[..., dict[str, Eval]] = evaluate_in_subprocess,
         llm_review: Callable[..., object] = review_wallet,
         now: Callable[[], float] = time.time,
         rand: Callable[[], float] = None,
