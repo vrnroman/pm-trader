@@ -860,7 +860,8 @@ async def place_trade_orders(
                 ))
 
                 await tg.trade_placed(trade.market, trade.side, copy_size, trade.price,
-                                      outcome=trade.outcome)
+                                      outcome=trade.outcome, trader=trade.trader_address,
+                                      their_price=trade.price)
                 mark_trade_as_seen(trade.id)
                 placed += 1
                 continue
@@ -1039,7 +1040,8 @@ async def place_trade_orders(
                 # (part 2 C): a FAILED row, so /pnl, /real and the no-copy
                 # clock see it; today there was no row at all.
                 _failed_row(record_trade_history, trade, qt, copy_size, why, order_submitted_at)
-                await tg.trade_failed(trade.market, f"{trade.side} not placed: {why}")
+                await tg.trade_failed(trade.market, why if trade.side == "BUY" else f"the sell was not placed: {why}",
+                                      outcome=trade.outcome)
                 if canary_shot:
                     canary.record_post_failed(why)
                     try:
@@ -1128,7 +1130,8 @@ async def place_trade_orders(
                              f"and tier ledgers may under-count until the next reconcile.")
 
             await tg.trade_placed(trade.market, trade.side, copy_size, result.order_price,
-                                  outcome=trade.outcome)
+                                  outcome=trade.outcome, trader=trade.trader_address,
+                                  their_price=trade.price)
 
             record_trade_history(TradeRecord(
                 timestamp=trade.timestamp,
@@ -1369,7 +1372,7 @@ async def process_verifications(
                         outcome=trade.outcome,
                     ))
 
-                    await tg.trade_unfilled(trade.market)
+                    await tg.trade_unfilled(trade.market, outcome=trade.outcome)
                     remove_pending_order(po.order_id)
                 else:
                     # Cancel failed — track uncertain cycles

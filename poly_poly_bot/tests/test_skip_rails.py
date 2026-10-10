@@ -164,10 +164,11 @@ async def test_the_notifier_prints_what_a_win_nets_after_the_fee(monkeypatch):
     monkeypatch.setattr(tn, "_send_message", fake_send)
     await tn.TelegramNotifier().trade_filled("China Open: Safiullin vs Cobolli", 13.33, 0.48,
                                              outcome="Roman Safiullin", fee_bps=500, side="BUY")
-    assert "a win nets +6.77" in sent[0] and "fee $0.17 = 2.6%" in sent[0]
+    assert "If it wins: $13.33 back, +$6.77 after the $0.17 fee (2.6%)" in sent[0]
+    assert "Pick: <b>Roman Safiullin</b>" in sent[0] and "13.33 shares at 48¢" in sent[0]
     sent.clear()
     await tn.TelegramNotifier().trade_filled("m", 10.0, 0.5, side="SELL")
-    assert "a win nets" not in sent[0]
+    assert "If it wins" not in sent[0] and "Sold: $5.00 back" in sent[0]
 
 
 # --------------------------------------------------------------------------- #

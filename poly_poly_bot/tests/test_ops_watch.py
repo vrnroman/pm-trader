@@ -46,28 +46,85 @@ def test_a_receipt_is_one_factual_row(ops_env):
 def test_the_push_policy_at_a_67_dollar_bankroll(ops_env, monkeypatch):
     sent: list = []
     S = ow.Settlement
-    # a $5 loss is under 15% of $67: ledger only
-    out = ow.record_settlements([S("t1", "0xaaa", 5.5, 0.0, "1b", "Cruzeiro")],
+    # every finished bet is said (2026-10-10); a $5 loss is under 15% of $67:
+    # its own line, no big-loss flag, no alarm
+    out = ow.record_settlements([S("t1", "0xaaa", 5.5, 0.0, "1b", "Cruzeiro", "Yes")],
                                 equity=67.0, stated=80.0, floor=56.0, send=sent.append, now=1000.0)
-    assert out == [] and sent == []
-    # a $12 loss crosses 15%: push, and it also crosses the 10% day line: push once
-    out = ow.record_settlements([S("t2", "0xaaa", 12.0, 0.0, "1b", "Big one")],
-                                equity=67.0, stated=80.0, floor=56.0, send=sent.append, now=1100.0)
-    assert any("Loss of $12.00" in m for m in sent) and any("Today's losses" in m for m in sent)
+    assert out == sent and len(sent) == 1
+    assert sent[0].startswith("❌ <b>LOST -$5.50</b>") and "Pick: <b>Yes</b>" in sent[0]
+    assert "A big one" not in sent[0]
+    # a $12 loss crosses 15%: flagged on its own message, and it crosses the
+    # 10% day line: that alarm once
+    ow.record_settlements([S("t2", "0xaaa", 12.0, 0.0, "1b", "Big one")],
+                          equity=67.0, stated=80.0, floor=56.0, send=sent.append, now=1100.0)
+    assert any("LOST -$12.00" in m and "A big one: 18% of the $67.00 bankroll" in m for m in sent)
+    assert any("Down $17.50 today" in m for m in sent)
     n = len(sent)
     # four losses in a row (two already): third and fourth
     ow.record_settlements([S("t3", "0xbbb", 5.0, 0.0), S("t4", "0xbbb", 5.0, 0.0)],
                           equity=67.0, stated=80.0, floor=56.0, send=sent.append, now=1200.0)
-    assert any("4 losing copies in a row" in m for m in sent[n:])
-    # a win resets the streak and books a positive row
+    assert any("4 losses in a row" in m for m in sent[n:])
+    # a win resets the streak, books a positive row, and is said
+    n = len(sent)
     ow.record_settlements([S("t5", "0xaaa", 5.0, 9.4, "1b", "Kuopion")],
                           equity=67.0, stated=80.0, floor=56.0, send=sent.append, now=1300.0)
+    assert sent[n:] and sent[n].startswith("✅ <b>WON +$4.40</b>")
+    assert "Today so far: 1 won, 4 lost, -$23.10" in sent[n]
     rows = [r for r in _ledger(ops_env) if r["kind"] == "settled"]
     assert rows[-1]["won"] is True and rows[-1]["pnl"] == 4.4
     st = json.loads((ops_env / ow.STATE_FILE).read_text())
     assert st["loss_streak"] == 0
-    # no confidence numbers in any message
+    # the same settlement offered again is neither booked nor said again
+    n = len(sent)
+    ow.record_settlements([S("t5", "0xaaa", 5.0, 9.4, "1b", "Kuopion")],
+                          equity=67.0, stated=80.0, floor=56.0, send=sent.append, now=1400.0)
+    assert sent[n:] == []
+    # no confidence numbers, no dashes in any message
     assert not any("confidence" in m.lower() for m in sent)
+    assert not any("\u2014" in m or "\u2013" in m for m in sent)
+
+
+def test_many_settlements_in_one_pass_are_one_list(ops_env):
+    sent: list = []
+    S = ow.Settlement
+    batch = [S(f"t{i}", "0xaaa", 5.0, 10.0 if i % 2 else 0.0, "1b", f"Match {i}", "Yes") for i in range(5)]
+    ow.record_settlements(batch, equity=100.0, stated=100.0, floor=50.0, send=sent.append, now=1000.0)
+    (msg,) = [m for m in sent if "bets finished" in m]
+    assert msg.startswith("🏁 <b>5 bets finished: 2 won, 3 lost, -$5.00</b>")
+    assert "✅ +$5.00  Match 1 (Yes)" in msg and "❌ -$5.00  Match 0 (Yes)" in msg
+
+
+def test_a_refund_is_said_as_a_refund(ops_env):
+    sent: list = []
+    ow.record_settlements([ow.Settlement("r1", "0xaaa", 4.0, 5.0, "1b", "Draw", "Yes", refunded=True)],
+                          equity=100.0, stated=100.0, floor=50.0, send=sent.append, now=1000.0)
+    assert sent[0].startswith("↩️ <b>REFUNDED +$1.00</b>") and "0 won, 0 lost" in sent[0]
+
+
+def test_a_booked_token_is_not_held_again(ops_env):
+    """A loser booked by the redeemer's API path sat in settle-pending.json
+    for days waiting for a payout row that never comes (2026-10-10)."""
+    ow.record_settlements([ow.Settlement("tokL", "0xaaa", 6.4, 0.0, "1b", "Manila")],
+                          equity=100.0, stated=100.0, floor=50.0, send=None, now=1000.0)
+    (ops_env / ow.PENDING_FILE).write_text(json.dumps(
+        {"rows": [{"token_id": "tokL", "why": "gone", "cost": 6.4, "ts": 900.0, "trader": "0xaaa"}]}))
+    out = ow.settle_released([], [], fetch_activity=lambda since: [], equity=100.0, stated=100.0,
+                             floor=50.0, send=None, now=2000.0, value_of=lambda t: (None, ""))
+    assert out["pending"] == 0 and ow.pending_rows() == []
+
+
+def test_the_win_message_names_the_side_from_the_activity(ops_env):
+    sent: list = []
+    act = [{"type": "TRADE", "side": "BUY", "asset": "tokW", "conditionId": "0xc", "outcomeIndex": 0,
+            "outcome": "Djokovic", "timestamp": 1000, "usdcSize": 6.4},
+           {"type": "REDEEM", "conditionId": "0xc", "outcomeIndex": 0, "timestamp": 5000, "usdcSize": 12.8}]
+    ow.settle_released([{"token_id": "tokW", "why": "gone", "cost": 6.4, "ts": 1000.0, "trader": "0xaaa",
+                         "tier": "1b", "title": "Shanghai: Djokovic vs X"}], [],
+                       fetch_activity=lambda since: act, equity=100.0, stated=100.0, floor=50.0,
+                       send=sent.append, now=6000.0)
+    (m,) = sent
+    assert m.startswith("✅ <b>WON +$6.40</b>") and "Pick: <b>Djokovic</b>" in m
+    assert "Staked $6.40, paid out $12.80" in m
 
 
 def test_floor_distance_and_milestones_say_once(ops_env):

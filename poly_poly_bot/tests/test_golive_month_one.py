@@ -3199,7 +3199,7 @@ def test_a_refused_post_reaches_the_phone_with_the_reason_and_writes_a_failed_ro
     placed = h.run(h.trades(1))
     assert placed == 0 and len(h.posted) == 1
     assert h.failed_msgs and "we hold 20.00 shares, the order asked for 20.83" in h.failed_msgs[0][1]
-    assert h.failed_msgs[0][1].startswith("BUY not placed: exchange refused (HTTP 400)")
+    assert h.failed_msgs[0][1].startswith("exchange refused (HTTP 400)")
     failed = [r for r in h.history if r.status == "FAILED"]
     assert len(failed) == 1 and "we hold 20.00 shares" in failed[0].reason and failed[0].copy_size > 0
     assert daily_spend_guard.status().get("spent_today", daily_spend_guard.status().get("spent", 0)) in (0, 0.0), "a definite refusal gives the day's reservation back"
@@ -3211,7 +3211,7 @@ def test_an_ambiguous_post_keeps_its_reservation_and_still_writes_the_row(tmp_pa
     h = _Harness(tmp_path, monkeypatch)
     h.post_result = "fail"
     h.run(h.trades(1))
-    assert h.failed_msgs[0][1] == "BUY not placed: order placement returned no result"
+    assert h.failed_msgs[0][1] == "order placement returned no result"
     assert [r.status for r in h.history if r.status == "FAILED"] == ["FAILED"]
     st = daily_spend_guard.status()
     spent = st.get("spent_today", st.get("spent", None))

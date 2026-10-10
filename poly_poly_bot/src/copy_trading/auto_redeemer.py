@@ -218,6 +218,7 @@ def settle_from_api(positions: list[dict], notify=None) -> list[RedeemDetail]:
 
     booked = _settled_resolution_keys(load_realized())
     out: list[RedeemDetail] = []
+    settled_rows: list = []
     for pos in positions:
         token_id = str(pos.get("tokenId") or "")
         condition_id = str(pos.get("conditionId") or "")
@@ -268,19 +269,29 @@ def settle_from_api(positions: list[dict], notify=None) -> list[RedeemDetail]:
         except Exception as exc:
             logger.warn(f"[redeemer] settled position not dropped from inventory: {error_message(exc)}")
         out.append(RedeemDetail(title=title, shares=shares, cost_basis=cost_basis, returned=returned))
+        from src.copy_trading.ops_watch import Settlement
+        settled_rows.append(Settlement(
+            token_id=token_id, wallet=str(inv_pos.get("trader_address") or "").lower(),
+            cost=round(cost_basis, 2), payout=round(returned, 2), tier=str(inv_pos.get("tier") or ""),
+            title=title, outcome=str(pos.get("outcome") or inv_pos.get("outcome") or ""),
+            refunded=payout == 0.5))
         logger.info(f"[redeemer] settled '{title[:60]}' from the API: {shares:.2f} sh, "
                     f"returned ${returned:.2f} on ${cost_basis:.2f}"
                     f"{' (refund)' if payout == 0.5 else ''}")
-    if out and notify is not None:
-        pnl = sum(d.returned - d.cost_basis for d in out)
-        lines = [f"📒 <b>{len(out)} resolved position(s) settled</b> from the API "
-                 f"(realized {pnl:+,.2f} USD). Claimed by Polymarket, not by this bot."]
-        for d in out[:6]:
-            lines.append(f"• {d.title[:50]}: {d.returned - d.cost_basis:+,.2f}")
+    if settled_rows:
+        # The watcher's ledger books them and says each one, the same message
+        # as every other finished bet. This path used to post its own
+        # "N resolved position(s) settled" line, which only ever carried
+        # losses (a winner is claimed before this pass sees it), while the
+        # ledger missed these neg-risk losers entirely (2026-10-10).
         try:
-            notify("\n".join(lines))
+            from src.copy_trading import ops_watch
+            money = ops_watch._read_json(ops_watch._p(ops_watch.MONEY_STATE_FILE))
+            ops_watch.record_settlements(
+                settled_rows, equity=money.get("equity"), stated=money.get("stated"),
+                floor=money.get("floor"), send=notify)
         except Exception as exc:
-            logger.warn(f"[redeemer] settlement notify failed: {exc}")
+            logger.warn(f"[redeemer] settlements not handed to the ledger: {exc}")
     return out
 
 

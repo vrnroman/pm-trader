@@ -6,6 +6,8 @@ from typing import Optional
 from src.config import CONFIG
 from src.logger import logger
 from src.utils import error_message
+from src.copy_trading.msg_format import (cents, esc, join, pick_line, shares, signed_usd,
+                                          title_line, usd, wallet)
 
 BOT_TOKEN = CONFIG.telegram_bot_token
 CHAT_ID = CONFIG.telegram_chat_id
@@ -69,56 +71,102 @@ async def _send_message(text: str, kind: str | None = "deal") -> bool:
         return False
 
 
+def _prefix(live_emoji: str) -> str:
+    return "🔵 [PAPER]" if CONFIG.preview_mode else f"{live_emoji} [LIVE]"
+
+
+def _win_lines(price: float, stake_usd: float, fee_bps: Optional[int]) -> list[str]:
+    """What this ticket pays if it wins, after the fee, and the win rate it
+    needs to break even (owner, 2026-10-01; reworded 2026-10-10)."""
+    from src.copy_trading import fee_rate
+    b = fee_rate.break_even(price, fee_bps, stake_usd)
+    if fee_bps is None:
+        fee = " (fee not read)"
+    elif fee_bps <= 0:
+        fee = " (no fee)"
+    else:
+        fee = f" after the {usd(b['fee_usd'])} fee ({b['fee_share'] * 100:.1f}%)"
+    return [f"If it wins: {usd(b['payout'])} back, {signed_usd(b['net'])}{fee}",
+            f"<i>Break-even: needs to win {b['be_win'] * 100:.0f}% of bets like this</i>"]
+
+
 class TelegramNotifier:
     async def trade_placed(self, market: str, side: str, size: float, price: float,
-                           outcome: str = "") -> None:
-        prefix = "🔵 [PREVIEW]" if CONFIG.preview_mode else "🟢 [LIVE]"
-        await _send_message(f'{prefix} <b>Order Placed</b>\n{side} ${size:.2f} on {_bet_label(market, outcome)} @ {price}')
-
-    async def trade_filled(self, market: str, shares: float, price: float,
-                           outcome: str = "", fee_bps: Optional[int] = None,
-                           side: str = "BUY") -> None:
-        prefix = "🔵 [PREVIEW]" if CONFIG.preview_mode else "✅ [LIVE]"
-        text = f'{prefix} <b>Filled</b>\n{shares} shares (${shares * price:.2f}) on {_bet_label(market, outcome)} @ {price}'
-        if side == "BUY" and shares and price:
-            # What this ticket nets if it wins, after the exchange's fee, and
-            # the win rate that breaks even (owner, 2026-10-01).
-            try:
-                from src.copy_trading import fee_rate
-                text += "\n<i>" + fee_rate.break_even_line(price, fee_bps, shares * price) + "</i>"
-            except Exception:  # noqa: BLE001
-                pass
+                           outcome: str = "", trader: str = "",
+                           their_price: Optional[float] = None) -> None:
+        """The order is on the exchange; the fill report follows."""
+        who = f"Copying {wallet(trader)}" if trader else ""
+        if who and their_price:
+            who += f" (they paid {cents(their_price)})" if side == "BUY" else f" (they sold at {cents(their_price)})"
+        if side == "BUY":
+            n = (size / price) if price else 0.0
+            text = join(f"{_prefix('🟢')} <b>Bet placed: {usd(size)}</b>",
+                        title_line(market),
+                        pick_line(outcome),
+                        f"Price {cents(price)}, about {shares(n)} shares; pays about {usd(n)} if it wins"
+                        if price else "",
+                        who)
+        else:
+            text = join(f"{_prefix('🟠')} <b>Selling: about {usd(size)}</b>",
+                        title_line(market),
+                        pick_line(outcome),
+                        f"Price {cents(price)}",
+                        who.replace("Copying", "Following") + " out of this bet" if who else "")
         await _send_message(text)
 
-    async def trade_unfilled(self, market: str) -> None:
-        prefix = "🔵 [PREVIEW]" if CONFIG.preview_mode else "⚪ [LIVE]"
-        await _send_message(f'{prefix} <b>Unfilled</b>, cancelled\n"{_escape_html(market)}"')
+    async def trade_filled(self, market: str, shares_n: float, price: float,
+                           outcome: str = "", fee_bps: Optional[int] = None,
+                           side: str = "BUY") -> None:
+        cost = shares_n * price
+        if side == "BUY":
+            lines = [f"{_prefix('✅')} <b>Bet filled: {usd(cost)}</b>",
+                     title_line(market), pick_line(outcome),
+                     f"{shares(shares_n)} shares at {cents(price)}"]
+            if shares_n and price:
+                try:
+                    lines += _win_lines(price, cost, fee_bps)
+                except Exception:  # noqa: BLE001  a line, never a blocker
+                    pass
+        else:
+            lines = [f"{_prefix('✅')} <b>Sold: {usd(cost)} back</b>",
+                     title_line(market), pick_line(outcome),
+                     f"{shares(shares_n)} shares at {cents(price)}"]
+        await _send_message(join(*lines))
 
-    async def trade_failed(self, market: str, reason: str) -> None:
-        prefix = "🔵 [PREVIEW]" if CONFIG.preview_mode else "🔴 [LIVE]"
-        await _send_message(f'{prefix} <b>Failed</b>\n"{_escape_html(market)}"\n{_escape_html(reason)}')
+    async def trade_unfilled(self, market: str, outcome: str = "") -> None:
+        await _send_message(join(f"{_prefix('⚪')} <b>Bet not filled, cancelled</b>",
+                                 title_line(market), pick_line(outcome),
+                                 "Nobody took the order at our price. No money spent."))
+
+    async def trade_failed(self, market: str, reason: str, outcome: str = "") -> None:
+        await _send_message(join(f"{_prefix('🔴')} <b>Bet NOT placed</b>",
+                                 title_line(market), pick_line(outcome),
+                                 f"Why: {esc(reason)}"))
 
     async def _bot_kind(self, text: str) -> None:
         await _send_message(text, kind="bot")
 
     async def bot_started(self, traders: int, balance: float) -> None:
-        mode = "[PREVIEW MODE]" if CONFIG.preview_mode else "[LIVE MODE]"
-        await _send_message(f"🚀 <b>Bot Started {mode}</b>\n{traders} traders | ${balance:.2f} USDC", kind="bot")
+        mode = "paper mode" if CONFIG.preview_mode else "LIVE"
+        await _send_message(join(f"🚀 <b>Bot started ({mode})</b>",
+                                 f"Following {traders} wallets. Cash: {usd(balance)}"), kind="bot")
 
     async def bot_error(self, error: str) -> None:
         await _send_message(f"⚠️ <b>Error</b>\n{_escape_html(error)}", kind="bot")
 
     async def positions_redeemed(self, count: int, details: list) -> None:
-        lines = []
+        lines = [f"💰 <b>Collected {count} finished bet(s)</b>"]
         for d in details:
             pnl = d.returned - d.cost_basis
-            pnl_str = f"+${pnl:.2f}" if pnl >= 0 else f"-${abs(pnl):.2f}"
-            icon = "✅" if d.returned > 0 else "❌"
-            lines.append(f"• {icon} {_escape_html(d.title)}: {d.shares:.2f} sh, ${d.returned:.2f} back ({pnl_str})")
-        await _send_message(f"💰 <b>Redeemed {count} position(s)</b>\n" + "\n".join(lines))
+            icon = "✅" if d.returned > d.cost_basis else "❌"
+            lines.append(f"{icon} {esc(d.title)}: staked {usd(d.cost_basis)}, "
+                         f"got {usd(d.returned)} ({signed_usd(pnl)})")
+        await _send_message("\n".join(lines))
 
     async def daily_summary(self, trades: int, pnl: str, balance: float) -> None:
-        await _send_message(f"📊 <b>Daily Summary</b>\nTrades: {trades}\nP&L: {pnl}\nBalance: ${balance:.2f}")
+        await _send_message(join("📊 <b>Daily summary</b>",
+                                 f"Copies today: {trades}", f"Result: {pnl}",
+                                 f"Cash: {usd(balance)}"))
 
 
 telegram = TelegramNotifier()

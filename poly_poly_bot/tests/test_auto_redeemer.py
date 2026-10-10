@@ -243,7 +243,9 @@ def test_a_signer_that_is_not_the_proxy_books_its_own_copies_from_the_api(redeem
     assert row["tier"] == "1a" and row["trader_address"] == "0xWALLET"
     assert row["redeemed_onchain"] is False
     assert "tok-win" not in inv._positions and "tok-legacy" in inv._positions
-    assert notes and "settled" in notes[0] and "+12.00" in notes[0]
+    # one message per finished bet, from the watcher's ledger: the win is said
+    assert notes and notes[0].startswith("✅ <b>WON +$12.00</b>") and "Will X?" in notes[0]
+    assert "Staked $8.00, paid out $20.00" in notes[0]
 
 
 def test_a_settled_position_is_booked_once(redeem_env, monkeypatch):

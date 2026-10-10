@@ -172,6 +172,23 @@ gcloud compute ssh "$TARGET" \
         && echo "net-watchdog: installed" \
         || echo "WARNING: net-watchdog not installed (no passwordless sudo?)"' || true
 
+# Host swap. The VM has 1.97GB and no swap, while the two containers may hold
+# 1.5GB + 0.7GB: the kernel OOM-killed the bot on 2026-10-07 and 10-08, and on
+# 10-09 20:30 UTC the host thrashed into a hard hang (journald, logind and the
+# net-watchdog all froze) until the heartbeat reset it 4 hours later. A 2GB
+# swapfile turns that cliff into slowness. Idempotent; never fails the deploy.
+gcloud compute ssh "$TARGET" \
+    --project="$GCP_PROJECT_ID" --zone="$ZONE" "${SSH_FLAGS[@]}" \
+    --command='if sudo -n swapon --show=NAME --noheadings | grep -q "^/swapfile$"; then
+            echo "swap: /swapfile already on"
+        else
+            { [ -f /swapfile ] || { sudo -n fallocate -l 2G /swapfile && sudo -n chmod 600 /swapfile && sudo -n mkswap /swapfile; }; } \
+            && sudo -n swapon /swapfile \
+            && { grep -q "^/swapfile " /etc/fstab || echo "/swapfile none swap sw 0 0" | sudo -n tee -a /etc/fstab >/dev/null; } \
+            && echo "swap: /swapfile 2G on" \
+            || echo "WARNING: swap not set up"
+        fi' || true
+
 # ─── Step 4: Pull & Run on VM (no build, no tarball) ─────────────
 echo "[4/5] Pulling image on VM and starting..."
 gcloud compute ssh "$TARGET" \
@@ -244,13 +261,17 @@ gcloud compute ssh "$TARGET" \
         # caps a runaway. If the container ever exceeds it, the cgroup OOM-kills
         # just THIS container (which --restart brings back) instead of the
         # kernel OOM-killer taking down the guest agent / networking and
-        # network-deading the whole VM (the 2026-06-15 outage). memory-swap=
-        # memory disables swap for the container.
+        # network-deading the whole VM (the 2026-06-15 outage).
+        # The two caps (1500m + 700m) exceed the 1.97GB of the host, so the cgroup
+        # never fired: the kernel did (2026-10-07, 10-08) or the host hung
+        # (10-09). Since 2026-10-10 the host has a 2GB swapfile and each
+        # container may page into it (memory-swap above memory), so pressure
+        # makes the box slow instead of dead.
         docker run -d \
             --name poly-poly-bot \
             --restart unless-stopped \
             --memory=1500m \
-            --memory-swap=1500m \
+            --memory-swap=2500m \
             --log-opt max-size=50m --log-opt max-file=3 \
             --env-file .env \
             -v ~/app/data:/app/data \
@@ -282,7 +303,7 @@ gcloud compute ssh "$TARGET" \
             --name poly-poly-sre \
             --restart unless-stopped \
             --memory=700m \
-            --memory-swap=700m \
+            --memory-swap=1200m \
             --log-opt max-size=20m --log-opt max-file=3 \
             --env-file .env.sre \
             -e SRE_ROLE=sre \

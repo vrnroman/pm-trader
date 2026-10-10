@@ -9,8 +9,9 @@ inside the auto tier, or escalate with the evidence. Every action writes one
 factual receipt, state before -> state after, to ``data/ops-ledger.jsonl``;
 the daily and weekly lines are rendered from that ledger, never narrated.
 
-Money policy (manager s-g8int5 r1, at a bankroll of about $67): push on a
-single settled loss of at least 15% of the bankroll, a day's losses of at
+Money policy (manager s-g8int5 r1, at a bankroll of about $67; every
+settled bet is said since 2026-10-10, win or lose, with the big-loss flag on
+the bet's own message): push on a single settled loss of at least 15% of the bankroll, a day's losses of at
 least 10%, four losing copies in a row, equity within 20% of the floor (with
 the top-up that would restore it), every eviction, a bankroll milestone
 crossed either way ($50, $100), every auto-admission (receipt card with an
@@ -27,12 +28,17 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Callable, Optional
 
 from src.config import CONFIG
+from src.copy_trading.msg_format import esc as msg_esc
+from src.copy_trading.msg_format import join as msg_join
+from src.copy_trading.msg_format import pick_line, signed_usd, title_line, usd
+from src.copy_trading.msg_format import wallet as msg_wallet
 from src.logger import logger
 
 LEDGER_FILE = "ops-ledger.jsonl"
@@ -195,6 +201,8 @@ class Settlement:
     payout: float
     tier: str = ""
     title: str = ""
+    outcome: str = ""          # the side we bet, for the phone
+    refunded: bool = False     # a 50/50 resolution: half back per share
 
     @property
     def pnl(self) -> float:
@@ -386,7 +394,12 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
             # None holds it rather than booking a $0 loss.
             return ((float(_pv(_bt[tok])) if tok in _bt else None), (_bt.get(tok) or {}).get("title"))
     held = pending_rows()
-    rows = list(released_rows or []) + held
+    # A token already on the ledger (booked by the redeemer's API path, or an
+    # earlier pass) is not held again: a loser that never gets a payout row
+    # sat in settle-pending.json for days after it was booked (2026-10-10).
+    already = set(_read_json(_p(STATE_FILE)).get("settled_tokens") or [])
+    rows = [r for r in list(released_rows or []) + held
+            if str(r.get("token_id") or "") not in already]
     gone = [r for r in rows if r.get("why") == "gone"]
     activity = None
     activity_ok = True
@@ -411,6 +424,20 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
         pending = pending + gone
     booked = 0
     if settled:
+        # The side we bet, for the phone: the chain's row names it for a
+        # position still in the wallet, our own BUY in the activity for one
+        # that left it.
+        names: dict = {}
+        for r in activity or []:
+            if (isinstance(r, dict) and str(r.get("type") or "").upper() == "TRADE"
+                    and r.get("asset") and r.get("outcome")):
+                names.setdefault(str(r.get("asset")), str(r.get("outcome")))
+        for tok, p in by_tok.items():
+            if p.get("outcome"):
+                names[tok] = str(p.get("outcome"))
+        for st_ in settled:
+            if not st_.outcome:
+                st_.outcome = names.get(st_.token_id, "")
         before = set(_read_json(_p(STATE_FILE)).get("settled_tokens") or [])
         record_settlements(settled, equity=equity, stated=stated, floor=floor, send=send, now=now)
         booked = sum(1 for s in settled if s.token_id and s.token_id not in before)
@@ -441,19 +468,79 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
     return {"booked": booked, "pending": len(uniq), "activity_ok": activity_ok}
 
 
+_SETTLE_LOCK = threading.Lock()
+# More settlements than this in one pass are said as one list, not a burst.
+SETTLE_SINGLE_MAX = 3
+
+
+def _settlement_headline(s: Settlement) -> str:
+    if s.refunded:
+        return f"↩️ <b>REFUNDED {signed_usd(s.pnl)}</b>"
+    if s.won:
+        return f"✅ <b>WON {signed_usd(s.pnl)}</b>"
+    return f"❌ <b>LOST {signed_usd(s.pnl)}</b>"
+
+
+def _day_line(won: int, lost: int, pnl: float) -> str:
+    return f"Today so far: {won} won, {lost} lost, {signed_usd(pnl)}"
+
+
+def settlement_message(s: Settlement, *, day_won: int, day_lost: int, day_pnl: float,
+                       bank: Optional[float]) -> str:
+    """One finished bet, the way the owner reads it (2026-10-10): the result
+    first, then what we bet on, what we staked, what came back."""
+    who = f"Copied {msg_wallet(s.wallet)}" + (f", tier {s.tier}" if s.tier else "") if s.wallet else ""
+    warn = ""
+    if bank and s.pnl < 0 and abs(s.pnl) >= LOSS_SINGLE_FRAC * bank:
+        warn = (f"⚠️ A big one: {abs(s.pnl) / bank * 100:.0f}% of the "
+                f"{usd(bank)} bankroll")
+    return msg_join(_settlement_headline(s), title_line(s.title), pick_line(s.outcome),
+                    f"Staked {usd(s.cost)}, paid out {usd(s.payout)}", who, warn,
+                    _day_line(day_won, day_lost, day_pnl))
+
+
+def settlements_digest(new: list[Settlement], *, day_won: int, day_lost: int,
+                       day_pnl: float) -> str:
+    """Several bets finished in one pass: one message, one line each."""
+    won = sum(1 for s in new if s.won)
+    pnl = round(sum(s.pnl for s in new), 2)
+    lines = [f"🏁 <b>{len(new)} bets finished: {won} won, {len(new) - won} lost, {signed_usd(pnl)}</b>"]
+    for s in new:
+        icon = "↩️" if s.refunded else ("✅" if s.won else "❌")
+        side = f" ({msg_esc(s.outcome)})" if s.outcome else ""
+        lines.append(f"{icon} {signed_usd(s.pnl)}  {msg_esc(s.title[:60])}{side}")
+    lines.append(_day_line(day_won, day_lost, day_pnl))
+    return "\n".join(lines)
+
+
 def record_settlements(settled: list[Settlement], *, equity: Optional[float],
                        stated: Optional[float], floor: Optional[float],
                        send: Optional[Callable[[str], None]], now: Optional[float] = None) -> list[str]:
-    """Book each settlement as a ledger row and apply the push policy. Returns
-    the messages pushed (for tests)."""
+    """Book each settlement as a ledger row, tell the owner about every one
+    of them, win or lose (2026-10-10: only losses ever reached the phone),
+    and apply the push policy. Returns the messages pushed (for tests).
+
+    Two callers in two threads (the guard's settle_released, the redeemer's
+    API path), one state file: the lock keeps the read-modify-write whole."""
+    with _SETTLE_LOCK:
+        return _record_settlements(settled, equity=equity, stated=stated, floor=floor,
+                                   send=send, now=now)
+
+
+def _record_settlements(settled, *, equity, stated, floor, send, now) -> list[str]:
     now = time.time() if now is None else now
     st = _read_json(_p(STATE_FILE))
     pushed: list[str] = []
     bank = float(equity) if equity is not None else (float(stated) if stated else None)
     streak = int(st.get("loss_streak") or 0)
     day = _day(now)
-    day_pnl = float(st.get("day_pnl") or 0.0) if st.get("day_pnl_day") == day else 0.0
+    same_day = st.get("day_pnl_day") == day
+    day_pnl = float(st.get("day_pnl") or 0.0) if same_day else 0.0
+    day_won = int(st.get("day_won") or 0) if same_day else 0
+    day_lost = int(st.get("day_lost") or 0) if same_day else 0
     booked = list(st.get("settled_tokens") or [])
+    new: list[tuple[Settlement, int, int, float]] = []
+    streak_hit = None
     for s in settled:
         if s.token_id and s.token_id in booked:
             continue  # the same settlement offered twice books once
@@ -464,25 +551,40 @@ def record_settlements(settled: list[Settlement], *, equity: Optional[float],
                        f"({s.wallet[:10]}, tier {s.tier or '?'})", now=now,
                 extra={"token_id": s.token_id, "wallet": s.wallet, "pnl": s.pnl, "won": s.won, "cost": s.cost})
         day_pnl = round(day_pnl + s.pnl, 2)
+        if s.refunded:
+            pass
+        elif s.won:
+            day_won += 1
+        else:
+            day_lost += 1
         streak = 0 if s.won else streak + 1
-        _probation_settled(s.wallet, now)
-        if bank and s.pnl < 0 and abs(s.pnl) >= LOSS_SINGLE_FRAC * bank:
-            pushed.append(_push(send, f"💸 <b>Loss of ${abs(s.pnl):.2f}</b> on "
-                                      f"'{s.title[:40]}' ({s.wallet[:10]}). Bankroll ${bank:,.2f}.",
-                                "single_loss", now))
         if streak and streak == LOSS_STREAK_N:
-            pushed.append(_push(send, f"📉 <b>{streak} losing copies in a row</b>, "
-                                      f"day {day_pnl:+.2f}. Bankroll ${bank:,.2f}." if bank else
-                                      f"📉 <b>{streak} losing copies in a row</b>, day {day_pnl:+.2f}.",
-                                "loss_streak", now))
+            streak_hit = day_pnl
+        _probation_settled(s.wallet, now)
+        new.append((s, day_won, day_lost, day_pnl))
+    if 0 < len(new) <= SETTLE_SINGLE_MAX:
+        for s, w, l, p in new:
+            pushed.append(_push(send, settlement_message(s, day_won=w, day_lost=l, day_pnl=p, bank=bank),
+                                "settled", now))
+    elif new:
+        pushed.append(_push(send, settlements_digest([n[0] for n in new], day_won=day_won,
+                                                     day_lost=day_lost, day_pnl=day_pnl),
+                            "settled", now))
+    if streak_hit is not None:
+        pushed.append(_push(send, msg_join(f"📉 <b>{LOSS_STREAK_N} losses in a row</b>",
+                                           f"Today so far: {signed_usd(streak_hit)}",
+                                           f"Bankroll: {usd(bank)}" if bank else ""),
+                            "loss_streak", now))
     if bank and day_pnl < 0 and abs(day_pnl) >= LOSS_DAILY_FRAC * bank and not st.get("day_loss_pushed") == day:
-        m = _push(send, f"📉 <b>Today's losses reach ${abs(day_pnl):.2f}</b> "
-                        f"({LOSS_DAILY_FRAC * 100:.0f}% of the ${bank:,.2f} bankroll).",
+        m = _push(send, msg_join(f"📉 <b>Down {usd(abs(day_pnl))} today</b>",
+                                 f"That is {abs(day_pnl) / bank * 100:.0f}% of the {usd(bank)} bankroll "
+                                 f"(the alert line is {LOSS_DAILY_FRAC * 100:.0f}%)"),
                   "daily_loss", now)
         pushed.append(m)
         if m:
             st["day_loss_pushed"] = day
     st.update({"loss_streak": streak, "day_pnl": day_pnl, "day_pnl_day": day,
+               "day_won": day_won, "day_lost": day_lost,
                "settled_tokens": booked[-500:]})
     _write_json(_p(STATE_FILE), st)
     return [m for m in pushed if m]
