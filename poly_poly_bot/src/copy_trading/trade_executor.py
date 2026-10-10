@@ -696,6 +696,17 @@ async def place_trade_orders(
                 mark_trade_as_seen(trade.id)
                 continue
 
+            # --- The owner's picks are held to resolution: their exits are
+            # not copied (owner, 2026-10-10; owner_picks.py). ---
+            if trade.side == "SELL":
+                from src.copy_trading import owner_picks
+                if owner_picks.is_pick(trade.trader_address):
+                    _skip_throttled(f"hold:{trade.trader_address[:10]}", "owner pick held",
+                                    f"[exec] SELL not mirrored: {trade.trader_address[:10]} is an "
+                                    f"owner pick, held to resolution")
+                    mark_trade_as_seen(trade.id)
+                    continue
+
             # --- SELL check: verify we have a position ---
             if trade.side == "SELL" and not has_position(trade.token_id):
                 from src.copy_trading.trade_store import token_ever_bought
@@ -751,7 +762,8 @@ async def place_trade_orders(
 
             # --- The flip gate (owner, 2026-09-24): a buy the target has
             # already left is not traded, in preview and live alike. ---
-            if trade.side == "BUY":
+            from src.copy_trading import owner_picks as _op
+            if trade.side == "BUY" and not _op.is_pick(trade.trader_address):
                 try:
                     from src.copy_trading import flip_gate
                     _shares = float(trade.size) / float(trade.price) if trade.price and trade.price > 0 else 0.0

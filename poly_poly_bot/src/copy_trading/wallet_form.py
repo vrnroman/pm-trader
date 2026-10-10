@@ -402,6 +402,9 @@ def is_benched(wallet: str, now: Optional[float] = None) -> tuple[bool, str]:
     """May the sink copy this wallet? Benched until the first scan says it is
     in form (unknown is benched: the owner's 'better less deals')."""
     now = time.time() if now is None else now
+    from src.copy_trading import owner_picks
+    if owner_picks.is_pick(wallet):
+        return (False, owner_picks.WHY)
     d = _read()
     w = (wallet or "").lower()
     ov = (d.get("overrides") or {}).get(w)

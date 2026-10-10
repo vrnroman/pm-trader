@@ -221,7 +221,20 @@ jobs:
           # of the day went with the owner's 2026-09-26 limits; see above.)
           ensure_env ZSET_AUTO_ADMIT_EVERY_S 10800
           ensure_env ZSET_AUTO_ADMIT_LIMIT 3
-          ensure_env LIVE_MIN_TRADER_BET_USD 300
+          # Owner, 2026-10-10: real money copies target buys from $100 (was
+          # $300). Hold-to-resolution backtest of 10,413 followed buys since
+          # go-live: $100+ +6.0% [90% CI +2.7, +10.0] on 3,414 entries vs
+          # $300+ +2.6% [-0.5, +6.2] on 2,094. The secret's value is dropped
+          # so the ensure_env line below is the one place the floor is set
+          # (the analyst's win branch edits that line).
+          sed -i '/^LIVE_MIN_TRADER_BET_USD=/d' .env
+          ensure_env LIVE_MIN_TRADER_BET_USD 100
+          # Owner, 2026-10-10: "put positive wallets, remove negative". The
+          # wallets whose followed buys made money held to resolution (CI
+          # above zero), copied without the form bench and held to the end
+          # (src/copy_trading/owner_picks.py). An eviction still removes one.
+          sed -i '/^LIVE_HOLD_WALLETS=/d' .env
+          ensure_env LIVE_HOLD_WALLETS 0x5213eb85fcd465c8927a8382f95dd2dc22306a35,0x1985327e5782c62362dbbdf714c423d40d8f51ab,0x09b045baad1fbe115c70785635a261411774a3b6,0xd970693a3384dc762b191707a4927ac3814bbbba,0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3,0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333
           # Paper-only: the owner's friend (2026-10-02), $5 BTC windows, measured not traded.
           ensure_env COPY_PAPER_WALLET_MIN_USD 0x5a8f802ebad4f45e85d68ac1cbde86579fc9a6f5:1
 

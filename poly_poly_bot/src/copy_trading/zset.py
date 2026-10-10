@@ -90,6 +90,13 @@ def wallets() -> list[str]:
                             f"gate (source={rec.get('source')!r})")
             continue
         out.append(rec.get("wallet") or key)
+    # The owner's picks (owner_picks.py): in Z by his decision, not the
+    # gate's; an eviction still wins.
+    from src.copy_trading import owner_picks
+    have = {w.lower() for w in out}
+    for w in sorted(owner_picks.hold_wallets()):
+        if w not in evicted and w not in have:
+            out.append(w)
     return out
 
 

@@ -341,7 +341,12 @@ def get_wallet_tier(address: str) -> Optional[StrategyTier]:
     t = _wallet_tier_map.get(key)
     if t is not None:
         return t
-    return promotion_state.promoted_tier_of(address, scope=zset.SCOPE)
+    t = promotion_state.promoted_tier_of(address, scope=zset.SCOPE)
+    if t is None:
+        from src.copy_trading import owner_picks
+        if owner_picks.is_pick(key):
+            return owner_picks.TIER
+    return t
 
 
 def get_tier_config(tier: StrategyTier) -> TierConfig:

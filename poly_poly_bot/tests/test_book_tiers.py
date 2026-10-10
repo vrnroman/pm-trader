@@ -52,7 +52,7 @@ def test_real_money_keeps_its_own_floor_whatever_the_paper_books_do(box, monkeyp
     monkeypatch.setattr(live_budget, "_balance_cache", None)
     assert live_budget.caps(live=False).min_trader_bet_usd == 300.0
     dy = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
-    assert "ensure_env COPY_PAPER_B_BOOKS b300:300,b150:150,b100:100" in dy and "ensure_env LIVE_MIN_TRADER_BET_USD 300" in dy
+    assert "ensure_env COPY_PAPER_B_BOOKS b300:300,b150:150,b100:100" in dy and "ensure_env LIVE_MIN_TRADER_BET_USD 100" in dy
 
 
 def test_the_lines_read_each_ledger_and_mark_the_gate_book(box):

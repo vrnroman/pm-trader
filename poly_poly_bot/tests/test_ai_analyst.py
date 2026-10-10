@@ -548,7 +548,7 @@ def test_the_win_branch_carries_the_deploy_line_and_the_record(tmp_path, monkeyp
     assert an.deploy_lines_for({"knobs": {"min_usd": 150.0}}) == {"COPY_PAPER_MIN_USD": "150", "LIVE_MIN_TRADER_BET_USD": "150", "COPY_PAPER_B_BOOKS.primary_floor": "150"}
     real = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
     edited = an.edit_deploy_yml(real, an.deploy_lines_for({"knobs": {"min_usd": 150.0}}))
-    assert "ensure_env LIVE_MIN_TRADER_BET_USD 150\n" in edited and "LIVE_MIN_TRADER_BET_USD 300" not in edited
+    assert "ensure_env LIVE_MIN_TRADER_BET_USD 150\n" in edited and "ensure_env LIVE_MIN_TRADER_BET_USD 100" not in edited
     assert "ensure_env COPY_PAPER_B_BOOKS b300:150,b150:150,b100:100" in edited and "ensure_env COPY_PAPER_MIN_USD 150" in edited
 
 

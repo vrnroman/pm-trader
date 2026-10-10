@@ -392,6 +392,10 @@ class Config:
     # list: only those (a canary). Anything else reads as false, said once.
     # The owner's switch; the run ships it off.
     live_per_wallet_min_usd: str = _optional("LIVE_PER_WALLET_MIN_USD", "false")
+    # The owner's picks (2026-10-10, owner_picks.py): comma-separated wallets
+    # real money follows, never benched, their sells ignored (held to
+    # resolution). An eviction still removes one.
+    live_hold_wallets: str = _optional("LIVE_HOLD_WALLETS", "")
     # B's slate caps: looser than A's 3/8 because take-all IS the B thesis (the
     # counterfactual: capped B re-runs A's +6% regime; uncapped B is the +8%
     # regime whose gains concentrate in high-frequency wallets). Not unlimited —
