@@ -1,14 +1,15 @@
 {
-    "id": "2026-10-10T00:41:57Z-bbd7",
-    "ts": 1791592917,
+    "id": "2026-10-10T06:41:59Z-065d",
+    "ts": 1791614519,
     "kind": "nothing",
-    "message": "Armed, equity 77.89, spend 0.00 against the 45 daily loss stop on a fresh day, all four in-form wallets net positive, no ERROR or self-disarm pattern, digest 20 minutes old.",
+    "message": "Armed, equity 77.89, spend 0.00 on a fresh day against the 45 daily loss stop, tier 1b exposure freed to 17.74 after the overnight squeeze, the RPC 403 run stopped 5.4 hours ago and was already pushed to the owner, three in-form wallets all net positive, digest 25 minutes old.",
     "evidence": [
         "## money state {\"cash\": 60.149603, \"open_cost\": 17.74, \"equity\": 77.89, \"floor\": 30.0, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"day\": \"2026-10-10\"}",
-        "## arm: {\"armed\": true, \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}",
-        "in form  0x10658d37: 33 settled, 58% won vs 54% needed, net +20.0% on $25,422, worst day -587, 0 of 1 exits under 10 min",
-        "in form  0x5213eb85: 122 settled, 52% won vs 40% needed, net +29.4% on $81,116, worst day -3,938, 0 of 8 exits under 10 min",
-        "in form  0x722abb54: 55 settled, 76% won vs 70% needed, net +9.7% on $94,274, worst day -5,499, 3 of 46 exits under 10 min"
+        "54cedf8fb5c2 x55 last 5.4h ago [open: 55 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (read refused: CTF [NN]: N Client Error: Forbidden",
+        "sre_escalate ts 1791591744 push: BOT :: Onchain reader dead 9000 blocks behind and growing, every read 403 Forbidden from publicnode.com since the 00:20 restart, live copies running on the data-api fa",
+        "2026-10-10 05:22:52 INFO [tiered-risk] tier 1b: released $44.80 of exposure from resolved or closed positions | open now: $17.74",
+        "in form  0x5213eb85: 130 settled, 53% won vs 40% needed, net +32.4% on $84,790, worst day -2,255, 0 of 9 exits under 10 min",
+        "in form  0x722abb54: 59 settled, 78% won vs 71% needed, net +10.4% on $100,102, worst day -5,499, 3 of 50 exits under 10 min"
     ],
     "commit": null
 }
