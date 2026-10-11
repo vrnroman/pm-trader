@@ -207,7 +207,9 @@ jobs:
           # Owner, 2026-09-24 (docs/REQUIREMENTS-2026-09-24.md, part 1): the
           # floor is $30 and the daily cap $54, in dollars. These absolute
           # overrides win over the two fractions above.
-          ensure_env LIVE_FLOOR_USD 30
+          # Owner, 2026-10-11: floor lowered $30 -> $10 so the ~$50 that is
+          # there can actually be used ($5 bets, no top-up for now).
+          ensure_env LIVE_FLOOR_USD 10
           # Owner, 2026-10-11: every live copy is $5 flat, up to $50 open at
           # once (capped by what the wallet holds); refusals for money are
           # kept on paper in the missed book (/missed).

@@ -3276,7 +3276,7 @@ def test_absolute_floor_and_daily_override_the_fractions(monkeypatch, budget):
     assert live_budget.floor_usd() == 56.0
     assert live_budget.caps(live=False).daily_usd == round(80.0 * live_budget.DAILY_FRAC, 2)
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
-    assert "ensure_env LIVE_FLOOR_USD 30" in src
+    assert "ensure_env LIVE_FLOOR_USD 10" in src  # owner, 2026-10-11 (was 30)
     # The $54 daily spend cap is gone (owner, 2026-09-26): the day is bounded
     # by dollars lost, and the deploy deletes the secret's pinned value.
     assert "ensure_env LIVE_DAILY_USD" not in src and "/^LIVE_DAILY_USD=/d" in src
