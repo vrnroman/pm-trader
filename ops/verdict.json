@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-11T12:42:28Z-ae26",
-    "ts": 1791722548,
+    "id": "2026-10-11T18:42:53Z-dffe",
+    "ts": 1791744173,
     "kind": "nothing",
-    "message": "Armed and trading normally: live fills landing, wins and losses settling, no new ERROR or Traceback, no self-disarm, spend inside caps. Leaving the 0x9f15613e bench in place since its net only moved from +0.5% to +1.3% with the same win-rate cushion, not a clear recovery.",
+    "message": "Armed and trading normally: day_pnl +30.13 on 9 wins vs 3 losses, no new ERROR or self-disarm, spend $110 today is capital recycling at $5 flat per copy, well inside the $45 daily loss stop. The cash bottom (down to $4.14 at 12:43) was already pushed to the owner by the bot's own sre_escalate and cash has since recovered to $5.04. Leaving the 0x9f15613e bench in place: still only a 3 point win-rate cushion over break-even, not a clear recovery.",
     "evidence": [
-        "## arm: {\"armed\": true, \"ts\": 1791286264.991414, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}",
-        "## money state: {\"cash\": 14.462153, \"open_cost\": 16.38, \"equity\": 30.84, \"floor\": 10.0, \"armed\": true, \"spend\": {\"spent_usd\": 50.0, \"daily_loss_stop_usd\": 45.0, \"closed_reason\": \"\"}}",
-        "in form  0x9f15613e: 190 settled, 57% won vs 53% needed, net +1.3% on $724,243, worst day -47,198, 11 of 14 exits under 10 min",
-        "2026-10-11 08:11:23 INFO  [ops] settled: 'open $5.00' -> 'paid $10.19' | won +5.19 on 'Sydney Kings vs. Adelaide 36ers: O/U 190' (0x5213eb85, tier 1b)",
-        "2026-10-11 08:25:07 TRADE [verify] FILLED: BUY 7.94 shares on 'China Open (Doubles): Siniakova/Zhang vs' @ 0.6300"
+        "## money state {\"cash\": 5.035923, \"open_cost\": 16.4, \"equity\": 21.44, \"spend\": {\"spent_usd\": 110.0, \"daily_loss_stop_usd\": 45.0, \"closed_reason\": \"\"}, \"armed\": true}",
+        "day_pnl 30.13, day_won 9, day_lost 3 (state.json watch block, 2026-10-11)",
+        "sre_escalate 'owner told': Wallet cash is $4.14, under the $5 min bet, so live copying has stalled since 07:23 and missed 68 signals today, only 2 live fills squeezed out; top up the wall (push: BOT, already delivered)",
+        "in form  0x9f15613e: 185 settled, 56% won vs 53% needed, net +2.9% on $686,748, worst day -34,146, 10 of 13 exits under 10 min",
+        "## arm {\"armed\": true, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}"
     ],
     "commit": null
 }
