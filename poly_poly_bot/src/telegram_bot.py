@@ -49,6 +49,7 @@ BOT_MENU_COMMANDS: list[dict] = [
     {"command": "real", "description": "Real money: balance, open positions, latest deals"},
     {"command": "wallets", "description": "Top wallets overall + best/worst per strategy, each with its set-Z standing"},
     {"command": "gate", "description": "Gate picture: shortlist admit/reject + promotion offers/holds/demotes"},
+    {"command": "missed", "description": "Live copies refused for money, kept on paper"},
     {"command": "history", "description": "Last 10 copy trades"},
     {"command": "check", "description": "Verify trading setup (read-only, no orders)"},
     {"command": "speed", "description": "Pre-flip: how fast am I told + how much worse is my entry price"},
@@ -449,6 +450,8 @@ def _handle_command(text: str):
         _handle_wallets()
     elif text.startswith("/gate"):
         _handle_gate()
+    elif text.startswith("/missed"):
+        _handle_missed()
     elif text.startswith("/check"):
         _handle_check()
     elif text.startswith("/speed"):
@@ -1106,6 +1109,16 @@ def _promotion_gate_section() -> list[str]:
     return lines
 
 
+def _handle_missed():
+    """Handle /missed: live copies refused for money, kept on paper."""
+    from src.copy_trading import missed_paper
+    try:
+        lines = missed_paper.summary_lines()
+    except Exception as exc:  # noqa: BLE001
+        lines = [f"Missed book unreadable: {exc}"]
+    _send_chunked("\U0001f4ad <b>Missed</b>\n\n" + "\n".join(_esc(x) for x in lines))
+
+
 def _handle_gate():
     """Handle /gate: the LLM wallet-gate admit/reject picture.
 
@@ -1474,6 +1487,7 @@ def _handle_help():
         "<code>/pnl</code>: P&amp;L by strategy: realized + unrealized + total\n"
         "<code>/wallets</code>: Top wallets overall + best/worst per strategy, each with its set-Z standing\n"
         "<code>/gate</code>: Gate picture: shortlist admit/reject + promotion offers/holds/demotes\n"
+        "<code>/missed</code>: Live copies refused for money, kept on paper at the live stake\n"
         "<code>/golive &lt;wallet&gt;</code>: Re-check a promoted wallet before the real-money flip\n"
         "<code>/history</code>: Last 10 copy trades\n"
         "<code>/check</code>: Verify trading setup (read-only)\n\n"

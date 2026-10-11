@@ -208,6 +208,11 @@ jobs:
           # floor is $30 and the daily cap $54, in dollars. These absolute
           # overrides win over the two fractions above.
           ensure_env LIVE_FLOOR_USD 30
+          # Owner, 2026-10-11: every live copy is $5 flat, up to $50 open at
+          # once (capped by what the wallet holds); refusals for money are
+          # kept on paper in the missed book (/missed).
+          ensure_env LIVE_PER_COPY_USD 5
+          ensure_env LIVE_EXPOSURE_USD 50
           # Owner, 2026-09-24 (part 3 R1): 15 settled copies open the Z gate; the
           # +10% ROI floor stays. Rewritten in place too, in case the secret
           # still says 30 (ensure_env never overrides a defined key).

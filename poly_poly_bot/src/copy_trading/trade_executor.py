@@ -19,7 +19,7 @@ from typing import Optional
 from py_clob_client_v2 import ClobClient
 
 from src.config import CONFIG
-from src.copy_trading import live_mode, zset
+from src.copy_trading import live_mode, missed_paper, zset
 from src.logger import logger
 from src.models import (
     DetectedTrade,
@@ -618,6 +618,11 @@ async def place_trade_orders(
                         continue
 
                     if not decision.should_copy:
+                        # Refused for money or room, not by a rule: keep it
+                        # on paper so the cost of the empty wallet is known
+                        # (owner, 2026-10-11; missed_paper.py).
+                        if trade.side == "BUY" and missed_paper.is_money_reason(decision.reason):
+                            missed_paper.record(trade, decision.reason)
                         _skip_throttled(
                             f"tier:{tier}:{trade.market[:40]}",
                             decision.reason,
@@ -793,6 +798,8 @@ async def place_trade_orders(
                     # this process, the notifier would announce "[LIVE]", and a
                     # paper exit would write an untagged realized row. Log it,
                     # record it, and move on.
+                    if trade.side == "BUY":
+                        missed_paper.record(trade, "disarmed: the arm is off")
                     logger.trade(
                         f"[DISARMED] would {trade.side} ${copy_size:.2f} on "
                         f"'{trade.market[:40]}' @ {trade.price:.4f} "
@@ -930,6 +937,7 @@ async def place_trade_orders(
                           f"positions): waiting for them to resolve and pay out before the next copy")
                 logger.skip(f"[exec] {_why_c}")
                 _skip_row(record_trade_history, trade, qt, _why_c)
+                missed_paper.record(trade, _why_c)
                 mark_trade_as_seen(trade.id)
                 continue
 

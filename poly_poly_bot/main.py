@@ -247,6 +247,12 @@ def _live_guard_loop():
             canary.expire_if_due(send=_send_deal)
         except Exception as exc:
             logger.warn(f"[guard] canary expiry check failed: {exc}")
+        # The missed book: settle the paper bets live refused for money.
+        try:
+            from src.copy_trading import missed_paper
+            missed_paper.settle()
+        except Exception as exc:
+            logger.warn(f"[guard] missed-book settle failed: {exc}")
         # The floor under the bankroll: realized equity (USDC on chain plus
         # open positions at cost) against the drawdown floor the governor
         # derives from LIVE_BUDGET_USD. Only measured off paper; in preview

@@ -79,6 +79,13 @@ def _abs(name: str) -> Optional[float]:
 
 FLOOR_ABS = _abs("LIVE_FLOOR_USD")
 DAILY_ABS = _abs("LIVE_DAILY_USD")
+# Owner, 2026-10-11: "fix all bets to $5", up to ten open at once on the ~$50
+# that is there. With equity at $38 the 8% fraction sized a copy at $3, under
+# the $5 order minimum, and 304 copies in 14 hours were refused. When set, a
+# copy is this many dollars whatever the bankroll, and open-at-once is this
+# many dollars capped by the bankroll itself (never more than is there).
+PER_COPY_ABS = _abs("LIVE_PER_COPY_USD")
+EXPOSURE_ABS = _abs("LIVE_EXPOSURE_USD")
 
 # The chain is read by the guard thread (every pass, ~300s) and by the
 # Telegram thread on demand; the executor's asyncio loop only ever reads the
@@ -115,6 +122,8 @@ class Caps:
     @property
     def opening_budget_usd(self) -> float:
         """The smallest budget at which a copy clears the order minimum."""
+        if PER_COPY_ABS:
+            return float(CONFIG.min_order_size_usd)
         return round(float(CONFIG.min_order_size_usd) / PER_COPY_FRAC, 2)
 
 
@@ -239,7 +248,7 @@ def caps(*, live: Optional[bool] = None, balance: Optional[float] = None,
     # payout (the guard hands over the sum). The stated budget still caps
     # everything, and the sink checks cash before a post.
     effective = min(stated, bal + open_cost) if (live and read) else stated
-    per_copy = round(effective * PER_COPY_FRAC, 2)
+    per_copy = round(PER_COPY_ABS if PER_COPY_ABS else effective * PER_COPY_FRAC, 2)
     per_market = round(per_copy * max(1, int(CONFIG.max_copies_per_market_side)), 2)
     return Caps(
         stated_usd=stated, balance_usd=bal, balance_read=read,
@@ -251,7 +260,8 @@ def caps(*, live: Optional[bool] = None, balance: Optional[float] = None,
         # LOSS stop (2026-09-26): the day is bounded by what it lost.
         daily_usd=(float("inf") if daily_loss_stop_usd() else
                    round(min(effective, DAILY_ABS) if DAILY_ABS else effective * DAILY_FRAC, 2)),
-        exposure_usd=round(effective * EXPOSURE_FRAC, 2),
+        exposure_usd=round(min(EXPOSURE_ABS, effective) if EXPOSURE_ABS
+                           else effective * EXPOSURE_FRAC, 2),
         min_trader_bet_usd=book_tiers.live_min_trader_bet(CONFIG),
         live=live,
     )
