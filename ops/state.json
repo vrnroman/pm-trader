@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-11T20:18:41.583709+00:00",
+ "generated": "2026-10-11T22:21:34.351722+00:00",
  "money": {
-  "cash": 5.035923,
+  "cash": 14.125923,
   "open_cost": 11.4,
-  "equity": 16.44,
+  "equity": 25.53,
   "floor": 10.0,
   "stated": 80.0,
   "spend": {
@@ -21,7 +21,7 @@
    "1b": 11.4,
    "1c": 0
   },
-  "ts": 1791749793.3543367,
+  "ts": 1791757146.0626028,
   "day": "2026-10-11"
  },
  "arm": {
@@ -409,17 +409,17 @@
  },
  "watch": {
   "floor_near": false,
-  "last_equity": 16.44,
+  "last_equity": 25.53,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-11T06:41:37Z-6fe5",
-  "admit_scan_ts": 1791745111.7415714,
+  "admit_scan_ts": 1791756162.7998505,
   "day_loss_pushed": "2026-10-10",
-  "loss_streak": 1,
-  "day_pnl": 25.13,
+  "loss_streak": 0,
+  "day_pnl": 29.22,
   "day_pnl_day": "2026-10-11",
   "settled_tokens": [
    "6691701803539626176077488709374004737591849995522510168757367609925258534749",
@@ -538,7 +538,8 @@
    "25151881287037922828784258233440896437562831510333718132002523657755700488696",
    "96258192711557630786832429622099604008026565508658220502302116559695870249846",
    "94724072430356599686403233080722309167745079357622833429079555716855639766110",
-   "57730840202908862977330375302337998393085033215182736592010902410225871161357"
+   "57730840202908862977330375302337998393085033215182736592010902410225871161357",
+   "37986015188216676803768639359376425565833693173224060827492096587540153967357"
   ],
   "form_scan_ts": 1791743853.0034313,
   "daily_line_attempt_day": "2026-10-11",
@@ -549,7 +550,7 @@
   "rearms": {
    "2026-10-06:no trade data for": 1
   },
-  "day_won": 9,
+  "day_won": 10,
   "day_lost": 4
  },
  "probation": {
@@ -1454,22 +1455,32 @@
    "after": "❌ <b>LOST -$5.00</b>\n<b>Will AC Sparta Praha win on 2026-10-11?</b>\nPick: <b>No</b>\nStaked $5.00, paid out $0.00\nCopied ",
    "detail": "",
    "push": "DEAL"
+  },
+  {
+   "ts": 1791753665.0145535,
+   "day": "2026-10-11",
+   "kind": "settled",
+   "before": "open $5.00",
+   "after": "paid $9.09",
+   "detail": "won +4.09 on 'ES Troyes AC vs. Olympique de Marseille:' (0x5213eb85, tier 1b)",
+   "push": null,
+   "token_id": "37986015188216676803768639359376425565833693173224060827492096587540153967357",
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35",
+   "pnl": 4.09,
+   "won": true,
+   "cost": 5.0
+  },
+  {
+   "ts": 1791753665.0145535,
+   "day": "2026-10-11",
+   "kind": "push:settled",
+   "before": null,
+   "after": "✅ <b>WON +$4.09</b>\n<b>ES Troyes AC vs. Olympique de Marseille: O/U 8.5 Total Corne</b>\nPick: <b>Over</b>\nStaked $5.00, ",
+   "detail": "",
+   "push": "DEAL"
   }
  ],
  "important": [
-  "2026-10-10 20:20:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-10 20:36:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-10 21:18:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-10 22:37:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-10 22:47:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-10 22:47:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-10 23:03:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-10 23:31:10 WARNING [disk-watch] still tripped: free 6.8G shrinking 505MB/day → hits 2.5G floor in ~8d",
-  "2026-10-10 23:50:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-11 00:08:46 INFO  [tiered-risk] tier 1b: released $11.63 of exposure from resolved or closed positions | open now: $6.40",
-  "2026-10-11 00:08:46 INFO  [ops] settled: 'open $6.16' -> 'paid $12.57' | won +6.41 on 'Botev Plovdiv vs. PFC Slavia Sofia: O/U ' (0x9f15613e, tier 1b)",
-  "2026-10-11 00:08:46 INFO  [ops] settled: 'open $5.47' -> 'paid $13.34' | won +7.87 on 'Will FC Salzburg win on 2026-10-10?' (0x5213eb85, tier 1b)",
-  "2026-10-11 00:08:47 INFO  [ops] push:settled: None -> '✅ <b>WON +$6.41</b>\\n<b>Botev Plovdiv vs. PFC Slavia Sofia: O/U 2.5</b>\\nPick: <b>Under</b>\\nStaked $6.16, paid out $12.57\\n'",
   "2026-10-11 00:08:48 INFO  [ops] push:settled: None -> '✅ <b>WON +$7.87</b>\\n<b>Will FC Salzburg win on 2026-10-10?</b>\\nPick: <b>No</b>\\nStaked $5.47, paid out $13.34\\nCopied 0x52'",
   "2026-10-11 00:08:49 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll crossed $50</b> upward: $51.84.'",
   "2026-10-11 00:21:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1729,6 +1740,20 @@
   "2026-10-11 20:06:07 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $11.40",
   "2026-10-11 20:06:07 INFO  [ops] settled: 'open $5.00' -> 'paid $0.00' | lost -5.00 on 'Will AC Sparta Praha win on 2026-10-11?' (0x5213eb85, tier 1b)",
   "2026-10-11 20:06:08 INFO  [ops] push:settled: None -> '❌ <b>LOST -$5.00</b>\\n<b>Will AC Sparta Praha win on 2026-10-11?</b>\\nPick: <b>No</b>\\nStaked $5.00, paid out $0.00\\nCopied '",
+  "2026-10-11 20:25:35 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $115.00 / no spend cap (the day stops after $45 lost)",
+  "2026-10-11 20:25:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={\"error\":\"not enough balance / allowance: the balance is not enough to cover the fee estimate -\\u003e balance: 5035923, order amount: 4993100, fee estimate: 127320, required total: 5120420\"}",
+  "2026-10-11 20:25:36 ERROR [exec] Order placement failed: PolyApiException[status_code=400, error_message={'error': 'not enough balance / allowance: the balance is not enough to cover the fee estimate -> balance: 5035923, order amount: 4993100, fee estimate: 127320, required total: 5120420'}]",
+  "2026-10-11 20:25:36 INFO  [daily-cap] -$5.00 (copy:1b) released, post failed | total today $110.00",
+  "2026-10-11 20:25:36 INFO  [daily-cap] $5.00 reservation released: the exchange refused the order",
+  "2026-10-11 20:25:36 ERROR [exec] Order placement returned None for 'SE Palmeiras vs. SC Corinthians Paulista': exchange refused (HTTP 400): not enough balance: we hold 5.04 shares, the order asked for 4.99",
+  "2026-10-11 20:34:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-11 20:44:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-11 21:21:05 INFO  [ops] settled: 'open $5.00' -> 'paid $9.09' | won +4.09 on 'ES Troyes AC vs. Olympique de Marseille:' (0x5213eb85, tier 1b)",
+  "2026-10-11 21:21:06 INFO  [ops] push:settled: None -> '✅ <b>WON +$4.09</b>\\n<b>ES Troyes AC vs. Olympique de Marseille: O/U 8.5 Total Corne</b>\\nPick: <b>Over</b>\\nStaked $5.00, '",
+  "2026-10-11 21:32:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-11 21:57:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-11 21:58:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-11 22:06:27 WARNING [disk-watch] still tripped: free 6.7G shrinking 493MB/day → hits 2.5G floor in ~9d",
   "2026-10-11 03:23:52 INFO  [recovery] No pending orders to recover",
   "2026-10-11 03:42:27 INFO  [recovery] No pending orders to recover",
   "2026-10-11 03:50:36 TRADE [LIVE] BUY $5.00 on 'Will Vegalta Sendai win on 2026-10-11?' @ 0.5000, order 0xa0c58e60d5...",
@@ -2240,12 +2265,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791745268.2386427,
-   "count": 829,
+   "last": 1791755966.4923165,
+   "count": 836,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791745268.2386427
+    1791754400.9441934,
+    1791755844.1938314,
+    1791755966.4923165
    ],
    "action": null,
    "action_ts": null,
@@ -2254,12 +2281,12 @@
   },
   "534614711c15": {
    "first": 1790149814.5631363,
-   "last": 1791746708.6844049,
-   "count": 4,
+   "last": 1791750432.429511,
+   "count": 5,
    "sample": "2026-09-23 07:49:59 ERROR [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/order body={\"error\":\"not enough balance / allowance: the balance is not enough -\\u003e balance: 22860000, order amount: 23700000\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/order body={'S':'S'}",
    "recent": [
-    1791746708.6844049
+    1791750432.429511
    ],
    "action": null,
    "action_ts": null,
@@ -2764,12 +2791,12 @@
   },
   "59f5d5ebf4a6": {
    "first": 1790415658.8132656,
-   "last": 1791746708.6844049,
-   "count": 89,
+   "last": 1791750432.429511,
+   "count": 90,
    "sample": "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)",
    "recent": [
-    1791746708.6844049
+    1791750432.429511
    ],
    "action": null,
    "action_ts": null,
@@ -3237,13 +3264,12 @@
   },
   "4162a3122f5e": {
    "first": 1790869754.4189043,
-   "last": 1791741789.629593,
-   "count": 32,
+   "last": 1791753679.546853,
+   "count": 33,
    "sample": "2026-10-01 15:48:57 INFO  [ops] settled: 'open $6.40' -> 'paid $9.85' | won +3.45 on 'Counter-Strike: BIG vs fnatic (BO3) - St' (0x19585131, tier 1b)",
    "norm": "INFO [ops] settled: 'S' -> 'S' | won N on 'S' (<hex>, tier Nb)",
    "recent": [
-    1791741189.447936,
-    1791741789.629593
+    1791753679.546853
    ],
    "action": null,
    "action_ts": null,
@@ -4171,12 +4197,12 @@
   },
   "d7d42c1f33f7": {
    "first": 1791629042.6847835,
-   "last": 1791749229.8427842,
-   "count": 21,
+   "last": 1791753679.546853,
+   "count": 22,
    "sample": "2026-10-10 10:43:05 INFO  [ops] push:settled: None -> '❌ <b>LOST -$6.23</b>\\n<b>Shanghai Rolex Masters: Yunchaokete Bu vs Casper Ruud</b>\\nPick: <b>Yunchaokete Bu</b>\\nStaked $6.'",
    "norm": "INFO [ops] push:settled: None -> 'S'",
    "recent": [
-    1791749229.8427842
+    1791753679.546853
    ],
    "action": null,
    "action_ts": null,
@@ -4185,12 +4211,12 @@
   },
   "e744f581f5ba": {
    "first": 1791645839.7396958,
-   "last": 1791727732.1321833,
-   "count": 4,
+   "last": 1791756446.7841375,
+   "count": 5,
    "sample": "2026-10-10 15:23:17 WARNING [disk-watch] still tripped: free 6.8G shrinking 434MB/day → hits 2.5G floor in ~10d",
    "norm": "WARNING [disk-watch] still tripped: free NG shrinking NMB/day → hits NG floor in ~Nd",
    "recent": [
-    1791727732.1321833
+    1791756446.7841375
    ],
    "action": null,
    "action_ts": null,
@@ -4288,12 +4314,12 @@
   },
   "d1dd2f7954db": {
    "first": 1791742029.7096536,
-   "last": 1791746708.6844049,
-   "count": 2,
+   "last": 1791750432.429511,
+   "count": 3,
    "sample": "2026-10-11 18:05:59 ERROR [exec] Order placement failed: PolyApiException[status_code=400, error_message={'error': 'not enough balance / allowance: the balance is not enough to cover the fee estimate -> balance: 5035923, order amount: 4998200, fee estimate: 82470, required total: 5080670'}]",
    "norm": "ERROR [exec] Order placement failed: PolyApiException[status_code=N, error_message={'S': 'S'}]",
    "recent": [
-    1791746708.6844049
+    1791750432.429511
    ],
    "action": null,
    "action_ts": null,
@@ -4302,12 +4328,12 @@
   },
   "6f9aea53fcce": {
    "first": 1791742029.7096536,
-   "last": 1791746708.6844049,
-   "count": 2,
+   "last": 1791750432.429511,
+   "count": 3,
    "sample": "2026-10-11 18:05:59 INFO  [daily-cap] -$5.00 (copy:1b) released, post failed | total today $110.00",
    "norm": "INFO [daily-cap] -$N (copy:Nb) released, post failed | total today $N",
    "recent": [
-    1791746708.6844049
+    1791750432.429511
    ],
    "action": null,
    "action_ts": null,
@@ -4316,12 +4342,12 @@
   },
   "f3fd163e1f77": {
    "first": 1791742029.7096536,
-   "last": 1791746708.6844049,
-   "count": 2,
+   "last": 1791750432.429511,
+   "count": 3,
    "sample": "2026-10-11 18:05:59 INFO  [daily-cap] $5.00 reservation released: the exchange refused the order",
    "norm": "INFO [daily-cap] $N reservation released: the exchange refused the order",
    "recent": [
-    1791746708.6844049
+    1791750432.429511
    ],
    "action": null,
    "action_ts": null,
@@ -4330,12 +4356,12 @@
   },
   "81040bfa3630": {
    "first": 1791742029.7096536,
-   "last": 1791746708.6844049,
-   "count": 2,
+   "last": 1791750432.429511,
+   "count": 3,
    "sample": "2026-10-11 18:05:59 ERROR [exec] Order placement returned None for 'Will Santos FC win on 2026-10-11?': exchange refused (HTTP 400): not enough balance: we hold 5.04 shares, the order asked for 5.00",
    "norm": "ERROR [exec] Order placement returned None for 'S': exchange refused (HTTP N): not enough balance: we hold N shares, the order asked for N",
    "recent": [
-    1791746708.6844049
+    1791750432.429511
    ],
    "action": null,
    "action_ts": null,
