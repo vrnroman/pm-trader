@@ -1,14 +1,12 @@
 {
-    "id": "2026-10-11T00:42:27Z-3f75",
-    "ts": 1791679347,
-    "kind": "nothing",
-    "message": "Armed, equity 51.84 above the 30 floor, today net +14.28 (2 won, 0 lost), spend $0 of the 45 daily-loss stop; the clob /price 404s and RPC 403s are long-standing and already ruled benign by the bot's own watcher; no self-disarm, no guard failure, daily line for 2026-10-10 already sent.",
+    "id": "2026-10-11T06:41:37Z-6fe5",
+    "ts": 1791700897,
+    "kind": "wallet_action",
+    "action": "bench",
+    "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+    "message": "0x9f15613e is sliding toward break-even: 202 settled, 57% won vs 53% needed is only 4 points of cushion, net is just +0.5% on $804,577, and the worst day was -49,257, so the bar's in-form call looks stale even though it still clears the bar.",
     "evidence": [
-        "## money state {\"cash\": 45.442443, \"open_cost\": 6.4, \"equity\": 51.84, \"floor\": 30.0, \"armed\": true, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"day\": \"2026-10-11\"}",
-        "state.json watch: day_pnl 14.28, day_won 2, day_lost 0, loss_streak 0, guard_fail_streak 0, daily_line_sent true (day 2026-10-10)",
-        "54ac26fb3ff1 x784 last 0.0h ago :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price (bot's own watcher on 2026-10-09 concluded this is a price read against resolved/closed markets, not a money-path fault)",
-        "2026-10-11 ledger: won +6.41 on Botev Plovdiv/Slavia Sofia, won +7.87 on FC Salzburg (0x9f15613e, 0x5213eb85, tier 1b)",
-        "rearms: {\"2026-10-06:no trade data for\": 1} (none today, OPS_REARM_MAX_PER_DAY 3 not approached)"
+        "in form  0x9f15613e: 202 settled, 57% won vs 53% needed, net +0.5% on $804,577, worst day -49,257, 11 of 14 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)"
     ],
     "commit": null
 }
