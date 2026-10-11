@@ -1,12 +1,14 @@
 {
-    "id": "2026-10-11T06:41:37Z-6fe5",
-    "ts": 1791700897,
-    "kind": "wallet_action",
-    "action": "bench",
-    "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "message": "0x9f15613e is sliding toward break-even: 202 settled, 57% won vs 53% needed is only 4 points of cushion, net is just +0.5% on $804,577, and the worst day was -49,257, so the bar's in-form call looks stale even though it still clears the bar.",
+    "id": "2026-10-11T12:42:28Z-ae26",
+    "ts": 1791722548,
+    "kind": "nothing",
+    "message": "Armed and trading normally: live fills landing, wins and losses settling, no new ERROR or Traceback, no self-disarm, spend inside caps. Leaving the 0x9f15613e bench in place since its net only moved from +0.5% to +1.3% with the same win-rate cushion, not a clear recovery.",
     "evidence": [
-        "in form  0x9f15613e: 202 settled, 57% won vs 53% needed, net +0.5% on $804,577, worst day -49,257, 11 of 14 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)"
+        "## arm: {\"armed\": true, \"ts\": 1791286264.991414, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}",
+        "## money state: {\"cash\": 14.462153, \"open_cost\": 16.38, \"equity\": 30.84, \"floor\": 10.0, \"armed\": true, \"spend\": {\"spent_usd\": 50.0, \"daily_loss_stop_usd\": 45.0, \"closed_reason\": \"\"}}",
+        "in form  0x9f15613e: 190 settled, 57% won vs 53% needed, net +1.3% on $724,243, worst day -47,198, 11 of 14 exits under 10 min",
+        "2026-10-11 08:11:23 INFO  [ops] settled: 'open $5.00' -> 'paid $10.19' | won +5.19 on 'Sydney Kings vs. Adelaide 36ers: O/U 190' (0x5213eb85, tier 1b)",
+        "2026-10-11 08:25:07 TRADE [verify] FILLED: BUY 7.94 shares on 'China Open (Doubles): Siniakova/Zhang vs' @ 0.6300"
     ],
     "commit": null
 }
