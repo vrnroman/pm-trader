@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-10T18:41:58Z-c2ca",
-    "ts": 1791657718,
+    "id": "2026-10-11T00:42:27Z-3f75",
+    "ts": 1791679347,
     "kind": "nothing",
-    "message": "Armed, equity 43.76 above the 30 floor, today net -21.8 (2 won, 5 lost), well inside the 45 daily-loss stop; both the 10% daily-loss alert and the under-$50 milestone already reached the owner by direct push; overnight RPC 403 run was escalated in an earlier window and the data-api fallback carried copies through it; digest fresh at 18:34.",
+    "message": "Armed, equity 51.84 above the 30 floor, today net +14.28 (2 won, 0 lost), spend $0 of the 45 daily-loss stop; the clob /price 404s and RPC 403s are long-standing and already ruled benign by the bot's own watcher; no self-disarm, no guard failure, daily line for 2026-10-10 already sent.",
     "evidence": [
-        "## money state {\"cash\": 19.532443, \"open_cost\": 24.23, \"equity\": 43.76, \"floor\": 30.0, \"armed\": true, \"spend\": {\"spent_usd\": 59.76, \"daily_loss_stop_usd\": 45.0, \"closed_reason\": \"\"}, \"day\": \"2026-10-10\"}",
-        "state.json watch: day_pnl -21.8, day_won 2, day_lost 5, loss_streak 3",
-        "2026-10-10 12:16:07 INFO [ops] push:daily_loss: None -> 'Down $12.40 today, 19% of the $64.39 bankroll (the alert line is 10%)'",
-        "2026-10-10 17:31:32 INFO [ops] push:milestone: None -> 'Bankroll fell under $50: $49.96.'",
-        "2026-10-10 15:50:12 INFO [daily-cap] +$5.44 (copy:1b) reserved | total today $59.76 / no spend cap (the day stops after $45 lost)"
+        "## money state {\"cash\": 45.442443, \"open_cost\": 6.4, \"equity\": 51.84, \"floor\": 30.0, \"armed\": true, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"day\": \"2026-10-11\"}",
+        "state.json watch: day_pnl 14.28, day_won 2, day_lost 0, loss_streak 0, guard_fail_streak 0, daily_line_sent true (day 2026-10-10)",
+        "54ac26fb3ff1 x784 last 0.0h ago :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price (bot's own watcher on 2026-10-09 concluded this is a price read against resolved/closed markets, not a money-path fault)",
+        "2026-10-11 ledger: won +6.41 on Botev Plovdiv/Slavia Sofia, won +7.87 on FC Salzburg (0x9f15613e, 0x5213eb85, tier 1b)",
+        "rearms: {\"2026-10-06:no trade data for\": 1} (none today, OPS_REARM_MAX_PER_DAY 3 not approached)"
     ],
     "commit": null
 }
