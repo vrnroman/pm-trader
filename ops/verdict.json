@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-11T18:42:53Z-dffe",
-    "ts": 1791744173,
-    "kind": "nothing",
-    "message": "Armed and trading normally: day_pnl +30.13 on 9 wins vs 3 losses, no new ERROR or self-disarm, spend $110 today is capital recycling at $5 flat per copy, well inside the $45 daily loss stop. The cash bottom (down to $4.14 at 12:43) was already pushed to the owner by the bot's own sre_escalate and cash has since recovered to $5.04. Leaving the 0x9f15613e bench in place: still only a 3 point win-rate cushion over break-even, not a clear recovery.",
+    "id": "2026-10-12T12:43:04Z-8cd5",
+    "ts": 1791808984,
+    "kind": "escalation",
+    "message": "Cash is $3.88, under the $5 minimum bet. Lower than yesterday's $4.14 dip that the bot already pushed. 188 tier exposure skips (a cash symptom, not a tier cap) and 87 missed on paper copies are open with no action yet, both climbing in the last hours. Equity $20.28, open cost $16.40, floor $10. Spend today $25 of the $45 stop. Bot is armed, no disarm. No fresh push sent for this drop. Wallet needs funds added to resume live copying.",
     "evidence": [
-        "## money state {\"cash\": 5.035923, \"open_cost\": 16.4, \"equity\": 21.44, \"spend\": {\"spent_usd\": 110.0, \"daily_loss_stop_usd\": 45.0, \"closed_reason\": \"\"}, \"armed\": true}",
-        "day_pnl 30.13, day_won 9, day_lost 3 (state.json watch block, 2026-10-11)",
-        "sre_escalate 'owner told': Wallet cash is $4.14, under the $5 min bet, so live copying has stalled since 07:23 and missed 68 signals today, only 2 live fills squeezed out; top up the wall (push: BOT, already delivered)",
-        "in form  0x9f15613e: 185 settled, 56% won vs 53% needed, net +2.9% on $686,748, worst day -34,146, 10 of 13 exits under 10 min",
-        "## arm {\"armed\": true, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}"
+        "## money state {\"cash\": 3.876393, \"open_cost\": 16.4, \"equity\": 20.28, \"floor\": 10.0, \"spend\": {\"spent_usd\": 25.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
+        "1781e8e2f42a x188 last 0.1h ago [open: 188 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'",
+        "21b542768c8e x87 last 0.1h ago [open: 87 hits, no action yet] :: INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)",
+        "{\"ts\": 1791737786.4784358, \"kind\": \"sre_escalate\", \"detail\": \"Wallet cash is $4.14, under the $5 min bet, so live copying has stalled since 07:23 and missed 68 signals today\", \"push\": \"BOT\"}",
+        "## spend today {\"date\": \"2026-10-12\", \"spent_usd\": 25.0}"
     ],
     "commit": null
 }
