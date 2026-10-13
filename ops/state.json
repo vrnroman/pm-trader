@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-13T21:29:21.276882+00:00",
+ "generated": "2026-10-13T23:17:59.411742+00:00",
  "money": {
   "cash": 4.842563,
   "open_cost": 6.4,
@@ -21,7 +21,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1791926899.613334,
+  "ts": 1791933356.2131383,
   "day": "2026-10-13"
  },
  "arm": {
@@ -361,7 +361,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-12T12:43:04Z-8cd5",
-  "admit_scan_ts": 1791920649.2646213,
+  "admit_scan_ts": 1791931501.7818704,
   "day_loss_pushed": "2026-10-10",
   "loss_streak": 0,
   "day_pnl": 6.81,
@@ -703,17 +703,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1791846754.8822873,
-   "day": "2026-10-12",
-   "kind": "settle_pending",
-   "before": "0x9f15613e open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'Wuhan Tennis Open: Ann Li vs Camila Osor' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "91922604096008002394684069700623556261487419143416366928702684311893089705358",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
-  {
    "ts": 1791851307.1391947,
    "day": "2026-10-13",
    "kind": "push:floor_near",
@@ -1024,20 +1013,20 @@
    "after": "watching",
    "detail": "tick 120s",
    "push": null
+  },
+  {
+   "ts": 1791933355.656486,
+   "day": "2026-10-13",
+   "kind": "settle_pending",
+   "before": "0x9f15613e open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Wuhan Tennis Open: Ann Li vs Camila Osor' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "91922604096008002394684069700623556261487419143416366928702684311893089705358",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
   }
  ],
  "important": [
-  "2026-10-12 21:53:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-12 22:10:25 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $40.00 / no spend cap (the day stops after $45 lost)",
-  "2026-10-12 22:10:26 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $11.40 / $200.00",
-  "2026-10-12 23:02:37 ERROR Onchain: chunk 95427086-95427243 SKIPPED after 5 refused reads (read refused: CTF [95427086-95427243]: 403 Client Error: Forbidden for url: https://polygon-bor-rpc.publicnode.com/); a set-Z fill in those blocks reaches the bot through the data api only",
-  "2026-10-12 23:06:10 INFO  [missed] on paper: $5.00 on 'Will CA Gimnasia y Esgrima de Mendoza wi' @ 0.631 (live refused: Tier 1b exposure full: remaining=$4.92 < min_bet=$5.00)",
-  "2026-10-12 23:10:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-12 23:10:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-12 23:11:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-12 23:11:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-12 23:12:34 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $6.40",
-  "2026-10-12 23:12:35 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Wuhan Tennis Open: Ann Li vs Camila Osor' left the wallet; booked when Polymarket's row shows",
   "2026-10-12 23:28:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-12 23:44:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-13 00:09:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1201,9 +1190,14 @@
   "2026-10-13 20:59:08 INFO  [missed] on paper: $5.00 on 'Florida International vs. Jacksonville S' @ 0.500 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-13 21:16:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-13 21:22:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-12 22:10:26 TRADE [LIVE] BUY $5.00 on 'Wuhan Tennis Open: Ann Li vs Camila Osor' @ 0.4500, order 0x6c7096a78a...",
-  "2026-10-12 22:10:27 TRADE [verify] FILLED: BUY 11.11 shares on 'Wuhan Tennis Open: Ann Li vs Camila Osor' @ 0.4500",
-  "2026-10-12 23:06:10 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.92 < min_bet=$5.00: BUY $258.00 on 'Will CA Gimnasia y Esgrima de Mendoza wi'",
+  "2026-10-13 21:37:03 ERROR Onchain: chunk 95481401-95481407 SKIPPED after 5 refused reads (head race: NEG_RISK_CTF [95481401-95481407]: {'code': -32000, 'message': 'invalid block range params'}); a set-Z fill in those blocks reaches the bot through the data api only",
+  "2026-10-13 21:52:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-13 21:57:39 INFO  [missed] on paper: $5.00 on 'Olbia: Andrea Guerrieri vs Maks Kasnikow' @ 0.440 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-13 22:12:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-13 22:23:33 INFO  [missed] on paper: $5.00 on 'Dana White's Contender Series: Ilias Bul' @ 0.460 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-13 22:37:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-13 22:57:02 INFO  [missed] on paper: $5.00 on 'AD San Carlos vs. Inter San Carlos: O/U ' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-13 23:15:56 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Wuhan Tennis Open: Ann Li vs Camila Osor' left the wallet; booked when Polymarket's row shows",
   "2026-10-13 00:11:38 TRADE [LIVE] BUY $5.00 on 'Bills 1H Team Total: O/U 12.5' @ 0.4800, order 0x2b0596171b...",
   "2026-10-13 00:11:38 TRADE [verify] FILLED: BUY 10.42 shares on 'Bills 1H Team Total: O/U 12.5' @ 0.4800",
   "2026-10-13 00:13:42 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $28.94 on 'Blake Corum: Anytime Touchdown'",
@@ -1280,7 +1274,10 @@
   "2026-10-13 20:29:58 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $49.10 on 'Spread: FC Bayern München (-1.5)'",
   "2026-10-13 20:50:50 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $2.47 on 'RB Leipzig vs. PSV: O/U 1.5'",
   "2026-10-13 20:57:43 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Delaware vs. Middle Tennessee'",
-  "2026-10-13 20:59:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Florida International vs. Jacksonville S'"
+  "2026-10-13 20:59:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Florida International vs. Jacksonville S'",
+  "2026-10-13 21:57:39 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $155.49 on 'Olbia: Andrea Guerrieri vs Maks Kasnikow'",
+  "2026-10-13 22:23:33 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Dana White's Contender Series: Ilias Bul'",
+  "2026-10-13 22:57:02 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $236.21 on 'AD San Carlos vs. Inter San Carlos: O/U '"
  ],
  "watcher": [
   {
@@ -1369,6 +1366,20 @@
    "concluded": "A new zset eviction-reason variant fired and dropped 0x5213eb85 from set Z because its own money is -22% over 69 signals since 10-10 while it held 28 of 34 live slots. The eviction subsystem is routine (x3 on 10-01, x7 on 10-10, etc); this is a new reason string, not a fault. The box stayed healthy through it: scheduler polls=253638 errors=0, onchain cursor==head lag 0, chain reader 30 refused chunks retried 0 skipped, COPY-PAPER cadence steady before and after 18:25:29. Removing a wallet is the safe direction and cannot place, size or double an order; live copying is already stalled on cash 4",
    "confidence": 0.78,
    "cost_usd": 0.753935,
+   "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1791930222.724169,
+   "day": "2026-10-13",
+   "woke_because": "4637a9736ebd, 3e4374d2ae05",
+   "fingerprint": "3e4374d2ae05",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The tier 1b exposure guard refused the live copy because cash is $4.84 and below the $5.00 min_bet, so this is correct protective behaviour, not a fault. I counted 68 exposure-full refusals in bot-2026-10-13.log all at remaining=$4.84, running since 20:57, with a normal tier 1b release of $5.00 at 01:14. The box is healthy alongside: chain reader reading at lag 0 blocks, last good read 10s ago, and COPY-PAPER and Onchain cursor lines logging steadily. The $360 signal was sized to the bot's own budget then refused, so nothing placed or doubled wrongly. The only real state is that the wallet is ",
+   "confidence": 0.9,
+   "cost_usd": 0.3195475,
    "did": "noted",
    "proof": "",
    "question": ""
@@ -1602,15 +1613,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791926621.3220935,
-   "count": 930,
+   "last": 1791931138.3990984,
+   "count": 933,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791923256.3099813,
-    1791923976.425989,
-    1791926261.2957816,
-    1791926621.3220935
+    1791928422.0963395,
+    1791929622.6891644,
+    1791931138.3990984
    ],
    "action": null,
    "action_ts": null,
@@ -2671,12 +2681,12 @@
   },
   "d3a278c17ca5": {
    "first": 1790960528.7135174,
-   "last": 1791918432.0417008,
-   "count": 59,
+   "last": 1791933418.5803525,
+   "count": 60,
    "sample": "2026-10-02 17:01:50 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
    "norm": "INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows",
    "recent": [
-    1791918432.0417008
+    1791933418.5803525
    ],
    "action": null,
    "action_ts": null,
@@ -3285,16 +3295,12 @@
   },
   "1781e8e2f42a": {
    "first": 1791482341.4384031,
-   "last": 1791925177.0291395,
-   "count": 266,
+   "last": 1791932338.4679155,
+   "count": 268,
    "sample": "2026-10-08 17:58:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: BUY $500.00 on ''",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'",
    "recent": [
-    1791922175.579443,
-    1791922295.7929285,
-    1791922896.0871127,
-    1791925177.0291395,
-    1791925177.0291395
+    1791932338.4679155
    ],
    "action": null,
    "action_ts": null,
@@ -3552,18 +3558,12 @@
   },
   "21b542768c8e": {
    "first": 1791703402.439332,
-   "last": 1791925177.0291395,
-   "count": 185,
+   "last": 1791932338.4679155,
+   "count": 187,
    "sample": "2026-10-11 07:23:17 INFO  [missed] on paper: $5.00 on 'KCC Egis vs. Sonic Boom' @ 0.390 (live refused: Tier 1b exposure full: remaining=$4.56 < min_bet=$5.00)",
    "norm": "INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)",
    "recent": [
-    1791922175.579443,
-    1791922295.7929285,
-    1791922896.0871127,
-    1791923616.3848724,
-    1791924456.7543406,
-    1791925177.0291395,
-    1791925177.0291395
+    1791932338.4679155
    ],
    "action": null,
    "action_ts": null,
@@ -3726,12 +3726,12 @@
   },
   "cc2194138690": {
    "first": 1791889784.1600165,
-   "last": 1791889784.1600165,
-   "count": 1,
+   "last": 1791927461.3960273,
+   "count": 2,
    "sample": "2026-10-13 11:09:42 ERROR Onchain: chunk 95456318-95456324 SKIPPED after 5 refused reads (head race: NEG_RISK_CTF [95456318-95456324]: {'code': -32000, 'message': 'invalid block range params'}); a set-Z fill in those blocks reaches the bot through the data api only",
    "norm": "ERROR Onchain: chunk NN SKIPPED after N refused reads (head race: NEG_RISK_CTF [NN]: {'S': N, 'S': 'S'}); a set-Z fill in those blocks reaches the bot through the data api only",
    "recent": [
-    1791889784.1600165
+    1791927461.3960273
    ],
    "action": null,
    "action_ts": null,
@@ -3774,6 +3774,34 @@
    "norm": "INFO [ops] evict: 'S' -> 'S' | owner NNN: N on N signals on its own money since NN, took N of N live slots",
    "recent": [
     1791915963.3927848
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "4637a9736ebd": {
+   "first": 1791930222.724169,
+   "last": 1791930222.724169,
+   "count": 1,
+   "sample": "2026-10-13 22:23:33 INFO  [missed] on paper: $5.00 on 'Dana White's Contender Series: Ilias Bul' @ 0.460 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+   "norm": "INFO [missed] on paper: $N on 'S's Contender Series: Ilias Bul' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)",
+   "recent": [
+    1791930222.724169
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "3e4374d2ae05": {
+   "first": 1791930222.724169,
+   "last": 1791930222.724169,
+   "count": 1,
+   "sample": "2026-10-13 22:23:33 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Dana White's Contender Series: Ilias Bul'",
+   "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S's Contender Series: Ilias Bul'",
+   "recent": [
+    1791930222.724169
    ],
    "action": null,
    "action_ts": null,
