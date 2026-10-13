@@ -209,7 +209,12 @@ jobs:
           # overrides win over the two fractions above.
           # Owner, 2026-10-11: floor lowered $30 -> $10 so the ~$50 that is
           # there can actually be used ($5 bets, no top-up for now).
-          ensure_env LIVE_FLOOR_USD 10
+          # Owner, 2026-10-14: no floor at all ("remove the $10 limit"); the
+          # $45 daily-loss stop is the only equity stop left.
+          sed -i '/^LIVE_FLOOR_USD=/d' .env
+          ensure_env LIVE_FLOOR_USD off
+          # Owner, 2026-10-14: at most 3 of the open slots per wallet.
+          ensure_env LIVE_MAX_OPEN_PER_WALLET 3
           # Owner, 2026-10-11: every live copy is $5 flat, up to $50 open at
           # once (capped by what the wallet holds); refusals for money are
           # kept on paper in the missed book (/missed).
@@ -241,7 +246,8 @@ jobs:
           # above zero), copied without the form bench and held to the end
           # (src/copy_trading/owner_picks.py). An eviction still removes one.
           sed -i '/^LIVE_HOLD_WALLETS=/d' .env
-          ensure_env LIVE_HOLD_WALLETS 0x5213eb85fcd465c8927a8382f95dd2dc22306a35,0x1985327e5782c62362dbbdf714c423d40d8f51ab,0x09b045baad1fbe115c70785635a261411774a3b6,0xd970693a3384dc762b191707a4927ac3814bbbba,0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3,0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333
+          # 0x5213 removed 2026-10-14 (owner): -22% on 69 signals on its own money.
+          ensure_env LIVE_HOLD_WALLETS 0x1985327e5782c62362dbbdf714c423d40d8f51ab,0x09b045baad1fbe115c70785635a261411774a3b6,0xd970693a3384dc762b191707a4927ac3814bbbba,0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3,0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333
           # Paper-only: the owner's friend (2026-10-02), $5 BTC windows, measured not traded.
           ensure_env COPY_PAPER_WALLET_MIN_USD 0x5a8f802ebad4f45e85d68ac1cbde86579fc9a6f5:1
 

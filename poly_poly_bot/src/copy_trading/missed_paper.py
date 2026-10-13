@@ -38,6 +38,9 @@ MONEY_REASONS = (
     "spend guard closed",
     "cash on chain",
     "disarmed",
+    # Not money, but capacity the owner chose (3 open per wallet, 2026-10-14):
+    # booked so the cap can be judged against what it turned away.
+    "wallet slots full",
 )
 
 
@@ -195,7 +198,17 @@ def summary(since_ts: float = 0.0) -> dict:
         "spent": round(spent, 2), "pnl": round(pnl, 2),
         "roi": (pnl / spent) if spent else None,
         "by_wallet": by_wallet,
+        "by_reason": _reason_counts(rows),
     }
+
+
+def _reason_counts(rows) -> dict:
+    out: dict[str, int] = {}
+    for p in rows:
+        r = (p.slug or "").lower()
+        k = next((m for m in MONEY_REASONS if m in r), "other")
+        out[k] = out.get(k, 0) + 1
+    return out
 
 
 def summary_lines(since_ts: float = 0.0) -> list[str]:
@@ -209,4 +222,7 @@ def summary_lines(since_ts: float = 0.0) -> list[str]:
            f"  settled {s['settled']}: {s['won']} won · P&L ${s['pnl']:+.2f} · ROI {roi}"]
     for w, (n, won, spent, pnl) in sorted(s["by_wallet"].items(), key=lambda kv: kv[1][3]):
         out.append(f"  {w[:6]}…{w[-4:]}: {n} settled, {won} won, ${pnl:+.2f}")
+    if s.get("by_reason"):
+        out.append("  refused because: " + ", ".join(
+            f"{k} {v}" for k, v in sorted(s["by_reason"].items(), key=lambda kv: -kv[1])))
     return out

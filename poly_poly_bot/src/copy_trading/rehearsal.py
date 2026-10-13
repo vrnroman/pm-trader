@@ -409,7 +409,7 @@ def real_money_line(now: Optional[float] = None) -> str:
                     f"{paid_txt} · realized by the bot ${realized:+,.2f} ({len(rows)} redeem(s))")
         equity = live_budget.equity_usd(bal, open_cost)
         floor_txt = (f" · floor ${floor:,.0f} · distance ${equity - floor:+,.2f}"
-                     if floor is not None else " · no floor (LIVE_BUDGET_USD unset)")
+                     if floor is not None else " · no floor")
         line = (f"💵 real money: bankroll ${equity:,.2f} (USDC ${bal:,.2f} + open at cost "
                 f"${open_cost:,.2f}){floor_txt} · {paid_txt} · realized by the bot ${realized:+,.2f} "
                 f"({len(rows)} redeem(s))")

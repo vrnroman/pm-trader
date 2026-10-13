@@ -78,6 +78,11 @@ def _abs(name: str) -> Optional[float]:
 
 
 FLOOR_ABS = _abs("LIVE_FLOOR_USD")
+# Owner, 2026-10-14: "remove the $10 limit". LIVE_FLOOR_USD=off means NO
+# floor at all: the guard never disarms on equity, only the $45 daily-loss
+# stop and the exchange's own refusals remain. (0 or unset keeps the old
+# fraction-of-budget floor; "off" is explicit so a typo cannot remove it.)
+FLOOR_OFF = os.environ.get("LIVE_FLOOR_USD", "").strip().lower() in ("off", "none", "no")
 DAILY_ABS = _abs("LIVE_DAILY_USD")
 # Owner, 2026-10-11: "fix all bets to $5", up to ten open at once on the ~$50
 # that is there. With equity at $38 the 8% fraction sized a copy at $3, under
@@ -324,7 +329,7 @@ def daily_cap(*, live: Optional[bool] = None) -> float:
 def floor_usd() -> Optional[float]:
     """The bankroll below which the guard pulls the arm, or None when closed."""
     stated = stated_budget()
-    if stated is None:
+    if stated is None or FLOOR_OFF:
         return None
     if FLOOR_ABS is not None and FLOOR_ABS < stated:
         return round(FLOOR_ABS, 2)

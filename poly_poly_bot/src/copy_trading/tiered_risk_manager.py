@@ -181,6 +181,14 @@ _load_state()
 # Core evaluation
 # ---------------------------------------------------------------------------
 
+def max_open_per_wallet() -> int:
+    """Open copies one wallet may hold at once; 0 disables (LIVE_MAX_OPEN_PER_WALLET)."""
+    try:
+        return max(0, int(float(os.environ.get("LIVE_MAX_OPEN_PER_WALLET", "3") or 0)))
+    except ValueError:
+        return 3
+
+
 def _evaluate_tiered_trade_with_state(
     trade: DetectedTrade,
     tier: StrategyTier,
@@ -281,6 +289,18 @@ def _evaluate_tiered_trade_with_state(
         )
 
     size = round_cents(size)
+
+    # Owner, 2026-10-14: at most LIVE_MAX_OPEN_PER_WALLET of the open slots
+    # may belong to one wallet. The open cap was first-come-first-served and
+    # 0x5213, betting most often, took 28 of 34 live copies 10-10..10-13 and
+    # lost on them; the wallets it crowded out were up on paper (/missed).
+    if trade.side == "BUY":
+        per_wallet = max_open_per_wallet()
+        who = (trade.trader_address or "").lower()
+        mine = sum(1 for p in exposure.placements if str(p.get("trader") or "").lower() == who)
+        if per_wallet and mine >= per_wallet:
+            return skip(f"wallet slots full: {mine} of {per_wallet} open copies already "
+                        f"follow {who[:10]}")
 
     # Global daily-spend cap (BUY only; SELLs are exits, not new exposure)
     if trade.side == "BUY":

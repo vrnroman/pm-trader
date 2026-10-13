@@ -2241,9 +2241,12 @@ def _real_header_lines() -> list[str]:
 
     stated = live_budget.stated_budget()
     floor = live_budget.floor_usd()
-    if stated is not None:
+    if stated is not None and floor is not None:
         lines.append(f"  Budget: ${stated:,.0f} stated · floor ${floor:,.0f} "
                      f"(the guard disarms below it)")
+    elif stated is not None:
+        lines.append(f"  Budget: ${stated:,.0f} stated · no floor (owner, 2026-10-14): "
+                     f"only the daily-loss stop disarms")
     else:
         lines.append("  Budget: ❌ LIVE_BUDGET_USD is not set, so live copies are refused")
 
