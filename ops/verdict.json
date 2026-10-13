@@ -1,13 +1,14 @@
 {
-    "id": "2026-10-12T18:43:02Z-23f3",
-    "ts": 1791830582,
+    "id": "2026-10-13T00:41:54Z-4428",
+    "ts": 1791852114,
     "kind": "nothing",
-    "message": "Cash is $3.95, about the same as the $3.88 already pushed, still under the $5 min bet; spend is $35 of the $45 stop with net +$5.70 today (3 won, 2 lost), so this is the same unresolved cash squeeze, not worse, already told to the owner.",
+    "message": "Armed, copies landing (0x5213eb85 and 0x9f15613e), spend $40 of the $45 loss stop with net about +6.81 today, cash recovered to $9.92 from the earlier $3.88 squeeze (already pushed to the owner), equity $16.32 above the $10 floor, no new errors beyond the recurring 404/network lines already seen in prior digests.",
     "evidence": [
-        "## money state {\"cash\": 3.949163, \"open_cost\": 11.4, \"equity\": 15.35, \"floor\": 10.0, \"spend\": {\"spent_usd\": 35.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
-        "1781e8e2f42a x197 last 0.7h ago [open: 197 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'",
-        "21b542768c8e x101 last 0.7h ago [open: 101 hits, no action yet] :: INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)",
-        "## spend today: {\"date\": \"2026-10-12\", \"spent_usd\": 35.0, \"wallet_copies\": {\"0x5213eb85fcd465c8927a8382f95dd2dc22306a35\": 5, \"0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3\": 2}}"
+        "## money state {\"cash\": 9.922183, \"open_cost\": 6.4, \"equity\": 16.32, \"floor\": 10.0, \"spend\": {\"spent_usd\": 40.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
+        "2026-10-12 22:10:26 TRADE [LIVE] BUY $5.00 on 'Wuhan Tennis Open: Ann Li vs Camila Osor' @ 0.4500, order 0x6c7096a78a...",
+        "2026-10-12 21:25:18 INFO [ops] settled: 'open $5.00' -> 'paid $11.11' | won +6.11 on 'Levante UD vs. Sevilla FC: O/U 2.5' (0x5213eb85, tier 1b)",
+        "2026-10-12 20:27:25 INFO [ops] push:floor_near: None -> 'Bankroll $10.35 is within 20% of the $10 floor...' (already pushed)",
+        "in form 0x5213eb85: 247 settled, 48% won vs 42% needed, net +11.7%; in form 0x9f15613e: 190 settled, 57% won vs 53% needed, net +14.6%"
     ],
     "commit": null
 }
