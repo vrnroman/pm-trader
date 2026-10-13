@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-13T00:41:54Z-4428",
-    "ts": 1791852114,
+    "id": "2026-10-13T06:41:59Z-dc53",
+    "ts": 1791873719,
     "kind": "nothing",
-    "message": "Armed, copies landing (0x5213eb85 and 0x9f15613e), spend $40 of the $45 loss stop with net about +6.81 today, cash recovered to $9.92 from the earlier $3.88 squeeze (already pushed to the owner), equity $16.32 above the $10 floor, no new errors beyond the recurring 404/network lines already seen in prior digests.",
+    "message": "Armed, copies landing (0x9f15613e filled 00:11 UTC), spend $5 of the $45 stop on the new day, equity $11.24 above the $10 floor (floor_near already pushed to the owner twice), no new errors beyond the recurring 404/network lines already seen, no self-disarm, no in-form wallet is losing now.",
     "evidence": [
-        "## money state {\"cash\": 9.922183, \"open_cost\": 6.4, \"equity\": 16.32, \"floor\": 10.0, \"spend\": {\"spent_usd\": 40.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true}",
-        "2026-10-12 22:10:26 TRADE [LIVE] BUY $5.00 on 'Wuhan Tennis Open: Ann Li vs Camila Osor' @ 0.4500, order 0x6c7096a78a...",
-        "2026-10-12 21:25:18 INFO [ops] settled: 'open $5.00' -> 'paid $11.11' | won +6.11 on 'Levante UD vs. Sevilla FC: O/U 2.5' (0x5213eb85, tier 1b)",
-        "2026-10-12 20:27:25 INFO [ops] push:floor_near: None -> 'Bankroll $10.35 is within 20% of the $10 floor...' (already pushed)",
-        "in form 0x5213eb85: 247 settled, 48% won vs 42% needed, net +11.7%; in form 0x9f15613e: 190 settled, 57% won vs 53% needed, net +14.6%"
+        "## money state {\"cash\": 4.842563, \"open_cost\": 6.4, \"equity\": 11.24, \"floor\": 10.0, \"armed\": true, \"spend\": {\"spent_usd\": 5.0, \"daily_loss_stop_usd\": 45.0}}",
+        "2026-10-13 00:11:38 TRADE [verify] FILLED: BUY 10.42 shares on 'Bills 1H Team Total: O/U 12.5' @ 0.4800",
+        "in form 0x5213eb85: 247 settled, 49% won vs 42% needed, net +13.3%, worst day -2,802",
+        "in form 0x9f15613e: 185 settled, 58% won vs 53% needed, net +13.4%, worst day -30,818",
+        "2026-10-13 00:28:27 INFO [ops] push:floor_near: None -> 'Bankroll $11.24 is within 20% of the $10 floor...' (already pushed)"
     ],
     "commit": null
 }
