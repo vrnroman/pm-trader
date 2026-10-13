@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-13T01:12:04.105466+00:00",
+ "generated": "2026-10-13T03:33:37.710515+00:00",
  "money": {
   "cash": 4.842563,
   "open_cost": 6.4,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 84,
   "tier": {
    "1a": 0,
-   "1b": 11.4,
+   "1b": 6.4,
    "1c": 0
   },
-  "ts": 1791853761.0025735,
+  "ts": 1791862328.8645682,
   "day": "2026-10-13"
  },
  "arm": {
@@ -54,7 +54,7 @@
    "placements": []
   },
   "1b": {
-   "open_total": 11.4,
+   "open_total": 6.4,
    "daily_date": "2026-10-13",
    "daily_volume": 5.0,
    "placements": [
@@ -64,13 +64,6 @@
      "ts": 1791474936.6025627,
      "trader": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
      "title": "Will Liverpool FC win on 2026-10-14?"
-    },
-    {
-     "token_id": "86541468169648084032186461050528168561369845357622355203577534177036847348539",
-     "cost": 5.0,
-     "ts": 1791850298.4280753,
-     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Bills 1H Team Total: O/U 12.5"
     }
    ]
   },
@@ -414,7 +407,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-12T12:43:04Z-8cd5",
-  "admit_scan_ts": 1791844124.4064224,
+  "admit_scan_ts": 1791854972.4535415,
   "day_loss_pushed": "2026-10-10",
   "loss_streak": 0,
   "day_pnl": 6.81,
@@ -775,29 +768,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1791768832.306636,
-   "day": "2026-10-12",
-   "kind": "settled",
-   "before": "open $5.00",
-   "after": "paid $7.69",
-   "detail": "won +2.69 on 'Will St. Louis City SC win on 2026-10-11' (0x9f15613e, tier 1b)",
-   "push": null,
-   "token_id": "90982027579128509551177634795582451432739270531454509434581272426571302134633",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-   "pnl": 2.69,
-   "won": true,
-   "cost": 5.0
-  },
-  {
-   "ts": 1791768832.306636,
-   "day": "2026-10-12",
-   "kind": "push:settled",
-   "before": null,
-   "after": "✅ <b>WON +$2.69</b>\n<b>Will St. Louis City SC win on 2026-10-11?</b>\nPick: <b>Yes</b>\nStaked $5.00, paid out $7.69\nCopie",
-   "detail": "",
-   "push": "DEAL"
-  },
   {
    "ts": 1791782740.8618226,
    "day": "2026-10-12",
@@ -1184,12 +1154,46 @@
    "after": "⚠️ <b>Bankroll $11.24 is within 20% of the $10 floor.</b> A top-up of about $6 would restore the margin; under the floor",
    "detail": "",
    "push": "DEAL"
+  },
+  {
+   "ts": 1791854062.942552,
+   "day": "2026-10-13",
+   "kind": "settle_pending",
+   "before": "0x9f15613e open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Bills 1H Team Total: O/U 12.5' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "86541468169648084032186461050528168561369845357622355203577534177036847348539",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
+  },
+  {
+   "ts": 1791854972.4535415,
+   "day": "2026-10-13",
+   "kind": "decay_recovered",
+   "before": "0x00110b8e below the door 3 day(s)",
+   "after": "passes the door again",
+   "detail": "does not lose at the prices we would really pay",
+   "push": "WALLET",
+   "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
+   "days": 3
+  },
+  {
+   "ts": 1791854972.4535415,
+   "day": "2026-10-13",
+   "kind": "decay_day",
+   "before": "0xd970693a in set Z",
+   "after": "below the door 4 of 7",
+   "detail": "does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
+   "push": null,
+   "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
+   "days": 4,
+   "window": 7,
+   "fails": [
+    "does not lose at the prices we would really pay"
+   ]
   }
  ],
  "important": [
-  "2026-10-12 01:19:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-12 01:33:52 INFO  [ops] settled: 'open $5.00' -> 'paid $7.69' | won +2.69 on 'Will St. Louis City SC win on 2026-10-11' (0x9f15613e, tier 1b)",
-  "2026-10-12 01:33:53 INFO  [ops] push:settled: None -> '✅ <b>WON +$2.69</b>\\n<b>Will St. Louis City SC win on 2026-10-11?</b>\\nPick: <b>Yes</b>\\nStaked $5.00, paid out $7.69\\nCopie'",
   "2026-10-12 03:50:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-12 03:55:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-12 04:17:57 ERROR [inventory] API sync failed: ",
@@ -1319,6 +1323,15 @@
   "2026-10-13 00:11:38 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $11.40 / $200.00",
   "2026-10-13 00:21:11 INFO  [missed] on paper: $5.00 on 'Will Cruzeiro EC win on 2026-10-12?' @ 0.850 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-13 00:28:27 INFO  [ops] push:floor_near: None -> '⚠️ <b>Bankroll $11.24 is within 20% of the $10 floor.</b> A top-up of about $6 would restore the margin; under the floor'",
+  "2026-10-13 01:14:22 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $6.40",
+  "2026-10-13 01:14:23 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Bills 1H Team Total: O/U 12.5' left the wallet; booked when Polymarket's row shows",
+  "2026-10-13 01:24:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-13 01:30:56 INFO  [ops] decay_recovered: '0x00110b8e below the door 3 day(s)' -> 'passes the door again' | does not lose at the prices we would really pay",
+  "2026-10-13 01:30:57 INFO  [ops] decay_day: '0xd970693a in set Z' -> 'below the door 4 of 7' | does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
+  "2026-10-13 02:15:53 INFO  [missed] on paper: $5.00 on 'World Championship of Legends: India Cha' @ 0.630 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-13 02:15:54 INFO  [missed] on paper: $5.00 on 'World Championship of Legends: India Cha' @ 0.630 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-13 02:28:03 INFO  [missed] on paper: $5.00 on 'Al Sadd SC vs. Al Hilal SFC: O/U 3.5' @ 0.500 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-13 02:55:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-12 05:29:50 TRADE [LIVE] BUY $5.00 on 'Catania: Pavel Lagutin vs Oleksandr Ovch' @ 0.3200, order 0xc0487164ba...",
   "2026-10-12 05:29:52 TRADE [verify] FILLED: BUY 15.62 shares on 'Catania: Pavel Lagutin vs Oleksandr Ovch' @ 0.3200",
   "2026-10-12 06:03:32 TRADE [LIVE] BUY $5.00 on 'Wuhan Tennis Open: Jasmine Paolini vs Sa' @ 0.5100, order 0x1dca9b6b85...",
@@ -1369,7 +1382,10 @@
   "2026-10-13 00:11:38 TRADE [LIVE] BUY $5.00 on 'Bills 1H Team Total: O/U 12.5' @ 0.4800, order 0x2b0596171b...",
   "2026-10-13 00:11:38 TRADE [verify] FILLED: BUY 10.42 shares on 'Bills 1H Team Total: O/U 12.5' @ 0.4800",
   "2026-10-13 00:13:42 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $28.94 on 'Blake Corum: Anytime Touchdown'",
-  "2026-10-13 00:21:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $439.45 on 'Will Cruzeiro EC win on 2026-10-12?'"
+  "2026-10-13 00:21:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $439.45 on 'Will Cruzeiro EC win on 2026-10-12?'",
+  "2026-10-13 01:40:28 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $91.30 on 'Red Bull Bragantino vs. Cruzeiro EC: O/U'",
+  "2026-10-13 02:15:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $338.39 on 'World Championship of Legends: India Cha'",
+  "2026-10-13 02:28:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $245.40 on 'Al Sadd SC vs. Al Hilal SFC: O/U 3.5'"
  ],
  "watcher": [
   {
@@ -1405,6 +1421,20 @@
    "concluded": "The cause is the floor-near warning feature firing for the first time, which registers as a new fingerprint. This is the ops push path notifying the owner that equity $10.35 is within 20% of the $10.00 floor; it fired once and the message went to his phone (push:floor_near None -> message, 1 occurrence in bot-2026-10-12.log). Equity still sits above the floor and cash $3.95 is under the $5 minimum bet so the bot cannot place or oversize a live order, it falls to paper, and an escalation about low cash was already delivered. The notification is the system handling the condition itself, so there",
    "confidence": 0.9,
    "cost_usd": 0.21488800000000002,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1791855092.7283993,
+   "day": "2026-10-13",
+   "woke_because": "8635d522b6fb",
+   "fingerprint": "8635d522b6fb",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The wake was a benign decay_recovered INFO line reporting that copied wallet 0x00110b8e passed the quality door again after 3 days below it. This same event fired on 10-04, 10-09 and 10-10; it only earned a new fingerprint because its trailing reason text differs, not because anything broke. The wallet is in form with 147 settled at 82 percent won and net +13.2 percent, so a recovery is expected routine, not a fault. Box is healthy: chain reader last good read -3s ago at 0 block lag, and no order, sizing or arm path is involved. No action.",
+   "confidence": 0.95,
+   "cost_usd": 0.29994049999999994,
    "did": "nothing",
    "proof": "",
    "question": ""
@@ -1483,12 +1513,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1791846809.4923618,
-   "count": 101,
+   "last": 1791854131.6607878,
+   "count": 102,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1791846809.4923618
+    1791854131.6607878
    ],
    "action": null,
    "action_ts": null,
@@ -1642,25 +1672,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791850170.159593,
-   "count": 877,
+   "last": 1791860188.0449805,
+   "count": 879,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791846689.4387798,
-    1791846689.4387798,
-    1791846689.4387798,
-    1791846689.4387798,
-    1791846689.4387798,
-    1791846689.4387798,
-    1791846689.4387798,
-    1791846689.4387798,
-    1791846809.4923618,
-    1791846809.4923618,
-    1791847769.811188,
-    1791848729.9152074,
-    1791848729.9152074,
-    1791850170.159593
+    1791860188.0449805
    ],
    "action": null,
    "action_ts": null,
@@ -2517,13 +2534,12 @@
   },
   "b2b604f5f44b": {
    "first": 1790868517.9549832,
-   "last": 1791767370.751828,
-   "count": 16,
+   "last": 1791855092.7283993,
+   "count": 17,
    "sample": "2026-10-01 15:27:05 INFO  [ops] decay_day: '0x00110b8e in set Z' -> 'below the door 1 of 7' | does not lose at the prices we would really pay: -0% at real quotes over 70 matched copies",
    "norm": "INFO [ops] decay_day: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched copies",
    "recent": [
-    1791767370.751828,
-    1791767370.751828
+    1791855092.7283993
    ],
    "action": null,
    "action_ts": null,
@@ -2721,12 +2737,12 @@
   },
   "d3a278c17ca5": {
    "first": 1790960528.7135174,
-   "last": 1791846809.4923618,
-   "count": 46,
+   "last": 1791854131.6607878,
+   "count": 47,
    "sample": "2026-10-02 17:01:50 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
    "norm": "INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows",
    "recent": [
-    1791846809.4923618
+    1791854131.6607878
    ],
    "action": null,
    "action_ts": null,
@@ -3318,12 +3334,12 @@
   },
   "3fd84e7cc412": {
    "first": 1791481911.1137545,
-   "last": 1791850530.4165335,
-   "count": 78,
+   "last": 1791855746.8495817,
+   "count": 79,
    "sample": "2026-10-08 17:50:40 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: SELL $2554.71 on 'Gemini 4.0 released by October 15, 2026?'",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: SELL $N on 'S'",
    "recent": [
-    1791850530.4165335
+    1791855746.8495817
    ],
    "action": null,
    "action_ts": null,
@@ -3332,12 +3348,13 @@
   },
   "1781e8e2f42a": {
    "first": 1791482341.4384031,
-   "last": 1791850890.5583904,
-   "count": 214,
+   "last": 1791858507.629951,
+   "count": 216,
    "sample": "2026-10-08 17:58:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: BUY $500.00 on ''",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'",
    "recent": [
-    1791850890.5583904
+    1791857787.1549144,
+    1791858507.629951
    ],
    "action": null,
    "action_ts": null,
@@ -3595,12 +3612,14 @@
   },
   "21b542768c8e": {
    "first": 1791703402.439332,
-   "last": 1791850890.5583904,
-   "count": 120,
+   "last": 1791858507.629951,
+   "count": 123,
    "sample": "2026-10-11 07:23:17 INFO  [missed] on paper: $5.00 on 'KCC Egis vs. Sonic Boom' @ 0.390 (live refused: Tier 1b exposure full: remaining=$4.56 < min_bet=$5.00)",
    "norm": "INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)",
    "recent": [
-    1791850890.5583904
+    1791857787.1549144,
+    1791857787.1549144,
+    1791858507.629951
    ],
    "action": null,
    "action_ts": null,
@@ -3727,6 +3746,20 @@
    "norm": "INFO [ops] push:floor_near: None -> 'S'",
    "recent": [
     1791851370.877918
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "8635d522b6fb": {
+   "first": 1791855092.7283993,
+   "last": 1791855092.7283993,
+   "count": 1,
+   "sample": "2026-10-13 01:30:56 INFO  [ops] decay_recovered: '0x00110b8e below the door 3 day(s)' -> 'passes the door again' | does not lose at the prices we would really pay",
+   "norm": "INFO [ops] decay_recovered: 'S' -> 'S' | does not lose at the prices we would really pay",
+   "recent": [
+    1791855092.7283993
    ],
    "action": null,
    "action_ts": null,
