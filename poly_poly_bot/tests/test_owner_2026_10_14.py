@@ -99,3 +99,37 @@ def test_deploy_turns_the_floor_off_caps_wallets_and_drops_0x5213():
     assert "ensure_env LIVE_MAX_OPEN_PER_WALLET 3" in src
     hold = [l for l in src.splitlines() if "ensure_env LIVE_HOLD_WALLETS" in l][0]
     assert "0x5213eb85" not in hold and "0x9f15613e" in hold
+
+
+# ---- no entry under 0.35 ----
+
+def _priced(price, side="BUY"):
+    t = _trade("0xCCC"); t.price = price; t.side = side
+    return t
+
+
+def test_a_buy_under_35_cents_is_refused(monkeypatch):
+    monkeypatch.setenv("LIVE_MIN_ENTRY_PRICE", "0.35")
+    monkeypatch.setattr(trm, "can_spend", lambda amt: (True, ""))
+    d = trm._evaluate_tiered_trade_with_state(_priced(0.30), "1b", _exposure(), _cfg_1b())
+    assert not d.should_copy and "entry under 0.35" in d.reason
+    assert missed_paper.is_money_reason(d.reason), "kept on paper so the rule can be judged"
+    d = trm._evaluate_tiered_trade_with_state(_priced(0.35), "1b", _exposure(), _cfg_1b())
+    assert d.should_copy, "0.35 itself is allowed"
+
+
+def test_a_sell_under_35_cents_is_still_an_exit(monkeypatch):
+    monkeypatch.setenv("LIVE_MIN_ENTRY_PRICE", "0.35")
+    d = trm._evaluate_tiered_trade_with_state(_priced(0.30, "SELL"), "1b", _exposure(), _cfg_1b())
+    assert "entry under" not in (d.reason or "")
+
+
+def test_entry_floor_defaults_to_35_and_zero_disables(monkeypatch):
+    monkeypatch.delenv("LIVE_MIN_ENTRY_PRICE", raising=False)
+    assert trm.min_entry_price() == 0.35
+    monkeypatch.setenv("LIVE_MIN_ENTRY_PRICE", "0")
+    monkeypatch.setattr(trm, "can_spend", lambda amt: (True, ""))
+    d = trm._evaluate_tiered_trade_with_state(_priced(0.12), "1b", _exposure(), _cfg_1b())
+    assert "entry under" not in (d.reason or "")
+    src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
+    assert "ensure_env LIVE_MIN_ENTRY_PRICE 0.35" in src

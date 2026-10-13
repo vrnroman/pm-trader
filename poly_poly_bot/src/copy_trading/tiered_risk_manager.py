@@ -181,6 +181,15 @@ _load_state()
 # Core evaluation
 # ---------------------------------------------------------------------------
 
+def min_entry_price() -> float:
+    """Lowest price a live BUY may enter at; 0 disables (LIVE_MIN_ENTRY_PRICE)."""
+    try:
+        v = float(os.environ.get("LIVE_MIN_ENTRY_PRICE", "0.35") or 0.0)
+    except ValueError:
+        v = 0.35
+    return v if 0.0 <= v < 1.0 else 0.35
+
+
 def max_open_per_wallet() -> int:
     """Open copies one wallet may hold at once; 0 disables (LIVE_MAX_OPEN_PER_WALLET)."""
     try:
@@ -244,6 +253,15 @@ def _evaluate_tiered_trade_with_state(
             return skip(
                 f"Trader bet ${trade.size:.2f} < min_trader_bet ${floor:.2f} for tier {tier} ({why})"
             )
+
+    # Owner, 2026-10-14: no live ENTRY under LIVE_MIN_ENTRY_PRICE (0.35).
+    # Over the 145 signals of 10-10..10-13 the <0.35 long shots won 22% of
+    # the time (-18%); 0 of the 5 we took came in. Entries only: a SELL at a
+    # low price is an exit we hold, and refusing it would strand the position.
+    if trade.side == "BUY":
+        entry_floor = min_entry_price()
+        if entry_floor and trade.price < entry_floor:
+            return skip(f"entry under {entry_floor:.2f}: price {trade.price:.4f} is a long shot")
 
     # 4. Price bounds
     if trade.price < cfg.min_price:

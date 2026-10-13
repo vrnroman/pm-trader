@@ -41,6 +41,9 @@ MONEY_REASONS = (
     # Not money, but capacity the owner chose (3 open per wallet, 2026-10-14):
     # booked so the cap can be judged against what it turned away.
     "wallet slots full",
+    # Owner's long-shot rule (no entry under 0.35, 2026-10-14): booked for
+    # the same reason, so the rule is judged against what it turned away.
+    "entry under",
 )
 
 
