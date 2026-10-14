@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-14T20:33:04.807989+00:00",
+ "generated": "2026-10-14T22:19:03.280648+00:00",
  "money": {
   "cash": 4.842563,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1792009940.0512335,
+  "ts": 1792016117.6652071,
   "day": "2026-10-14"
  },
  "arm": {
@@ -973,16 +973,6 @@
   }
  ],
  "important": [
-  "2026-10-13 20:38:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 20:45:51 INFO  [missed] on paper: $5.00 on 'Will Club Brugge KV win on 2026-10-13?' @ 0.889 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 20:57:43 INFO  [missed] on paper: $5.00 on 'Delaware vs. Middle Tennessee' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 20:59:08 INFO  [missed] on paper: $5.00 on 'Florida International vs. Jacksonville S' @ 0.500 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 21:16:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 21:22:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 21:37:03 ERROR Onchain: chunk 95481401-95481407 SKIPPED after 5 refused reads (head race: NEG_RISK_CTF [95481401-95481407]: {'code': -32000, 'message': 'invalid block range params'}); a set-Z fill in those blocks reaches the bot through the data api only",
-  "2026-10-13 21:52:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 21:57:39 INFO  [missed] on paper: $5.00 on 'Olbia: Andrea Guerrieri vs Maks Kasnikow' @ 0.440 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 22:12:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-13 22:23:33 INFO  [missed] on paper: $5.00 on 'Dana White's Contender Series: Ilias Bul' @ 0.460 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-13 22:37:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-13 22:57:02 INFO  [missed] on paper: $5.00 on 'AD San Carlos vs. Inter San Carlos: O/U ' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
@@ -1109,10 +1099,15 @@
   "2026-10-14 19:52:21 INFO  [missed] on paper: $5.00 on 'Charleston Battery leading at halftime?' @ 0.670 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-14 19:52:23 INFO  [missed] on paper: $5.00 on 'Charleston Battery leading at halftime?' @ 0.670 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-14 20:13:08 INFO  [missed] on paper: $5.00 on 'Aston Villa FC vs. Fenerbahçe SK: O/U 4.' @ 0.610 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 20:50:50 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $2.47 on 'RB Leipzig vs. PSV: O/U 1.5'",
-  "2026-10-13 20:57:43 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Delaware vs. Middle Tennessee'",
-  "2026-10-13 20:59:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Florida International vs. Jacksonville S'",
-  "2026-10-13 21:57:39 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $155.49 on 'Olbia: Andrea Guerrieri vs Maks Kasnikow'",
+  "2026-10-14 20:42:25 INFO  [missed] on paper: $5.00 on 'Nashville SC vs. Sporting Kansas City: O' @ 0.520 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 20:42:26 INFO  [missed] on paper: $5.00 on 'Nashville SC vs. Sporting Kansas City: O' @ 0.520 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 21:13:11 ERROR Onchain: chunk 95538033-95538043 SKIPPED after 5 refused reads (head race: CTF [95538033-95538043]: {'code': -32000, 'message': 'invalid block range params'}); a set-Z fill in those blocks reaches the bot through the data api only",
+  "2026-10-14 21:16:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-14 21:25:25 INFO  [missed] on paper: $5.00 on 'Will Birmingham Legion FC win on 2026-10' @ 0.460 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 21:32:34 INFO  [missed] on paper: $5.00 on 'Spread: Notre Dame (-8.5)' @ 0.560 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 21:35:15 INFO  [missed] on paper: $5.00 on 'Spread: LSU (-13.5)' @ 0.570 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 21:45:11 INFO  [missed] on paper: $5.00 on 'CA Mineiro vs. Montevideo City Torque: O' @ 0.480 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 22:15:20 INFO  [missed] on paper: $5.00 on 'CA Mineiro vs. Montevideo City Torque: 1' @ 0.827 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-13 22:23:33 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Dana White's Contender Series: Ilias Bul'",
   "2026-10-13 22:57:02 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $236.21 on 'AD San Carlos vs. Inter San Carlos: O/U '",
   "2026-10-14 01:27:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $966.59 on 'Will CA Bucaramanga win on 2026-08-25?'",
@@ -1158,7 +1153,15 @@
   "2026-10-14 20:13:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $91.30 on 'Aston Villa FC vs. Fenerbahçe SK: O/U 3.'",
   "2026-10-14 20:15:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $28.56 on 'ŠK Slovan Bratislava vs. VfB Stuttgart: '",
   "2026-10-14 20:28:53 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $55.65 on 'Will AS Roma win on 2026-10-14?'",
-  "2026-10-14 20:29:30 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $1.65 on 'AS Roma vs. Real Madrid CF: 2nd Half O/U'"
+  "2026-10-14 20:29:30 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $1.65 on 'AS Roma vs. Real Madrid CF: 2nd Half O/U'",
+  "2026-10-14 20:39:33 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $5.21 on 'Exact Score: AS Roma 3 - 1 Real Madrid C'",
+  "2026-10-14 20:40:34 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $69.09 on 'AS Roma vs. Real Madrid CF: O/U 4.5'",
+  "2026-10-14 20:42:25 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $302.64 on 'Nashville SC vs. Sporting Kansas City: O'",
+  "2026-10-14 21:25:25 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $469.12 on 'Will Birmingham Legion FC win on 2026-10'",
+  "2026-10-14 21:32:34 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Spread: Notre Dame (-8.5)'",
+  "2026-10-14 21:35:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Spread: LSU (-13.5)'",
+  "2026-10-14 21:45:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $144.00 on 'CA Mineiro vs. Montevideo City Torque: O'",
+  "2026-10-14 22:15:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $509.28 on 'CA Mineiro vs. Montevideo City Torque: 1'"
  ],
  "watcher": [
   {
@@ -1477,18 +1480,12 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792006566.0558772,
-   "count": 989,
+   "last": 1792012571.3382688,
+   "count": 990,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792003134.0966134,
-    1792003134.0966134,
-    1792004094.2758079,
-    1792005005.6826992,
-    1792006206.0008569,
-    1792006566.0558772,
-    1792006566.0558772
+    1792012571.3382688
    ],
    "action": null,
    "action_ts": null,
@@ -2107,12 +2104,12 @@
   },
   "27c57bdbc2c6": {
    "first": 1790567993.3468313,
-   "last": 1791999320.5863762,
-   "count": 4,
+   "last": 1792012449.078532,
+   "count": 5,
    "sample": "2026-09-28 03:57:56 ERROR Onchain: chunk 94575150-94575156 SKIPPED after 5 refused reads (head race: CTF [94575150-94575156]: {'code': -32000, 'message': 'invalid block range params'}); a set-Z fill in those blocks reaches the bot through the data api only",
    "norm": "ERROR Onchain: chunk NN SKIPPED after N refused reads (head race: CTF [NN]: {'S': N, 'S': 'S'}); a set-Z fill in those blocks reaches the bot through the data api only",
    "recent": [
-    1791999320.5863762
+    1792012449.078532
    ],
    "action": null,
    "action_ts": null,
@@ -3145,15 +3142,17 @@
   },
   "3fd84e7cc412": {
    "first": 1791481911.1137545,
-   "last": 1792009807.1646698,
-   "count": 106,
+   "last": 1792010527.4512784,
+   "count": 108,
    "sample": "2026-10-08 17:50:40 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: SELL $2554.71 on 'Gemini 4.0 released by October 15, 2026?'",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: SELL $N on 'S'",
    "recent": [
     1792008846.3984947,
     1792008966.747607,
     1792009807.1646698,
-    1792009807.1646698
+    1792009807.1646698,
+    1792010407.3942943,
+    1792010527.4512784
    ],
    "action": null,
    "action_ts": null,
@@ -3162,15 +3161,16 @@
   },
   "1781e8e2f42a": {
    "first": 1791482341.4384031,
-   "last": 1792008846.3984947,
-   "count": 301,
+   "last": 1792016174.4303555,
+   "count": 307,
    "sample": "2026-10-08 17:58:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: BUY $500.00 on ''",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'",
    "recent": [
-    1792005965.8657203,
-    1792006206.0008569,
-    1792007646.1665134,
-    1792008846.3984947
+    1792013172.8252354,
+    1792013653.249254,
+    1792013773.5064468,
+    1792014373.7649608,
+    1792016174.4303555
    ],
    "action": null,
    "action_ts": null,
@@ -3427,16 +3427,16 @@
   },
   "21b542768c8e": {
    "first": 1791703402.439332,
-   "last": 1792008846.3984947,
-   "count": 224,
+   "last": 1792016174.4303555,
+   "count": 231,
    "sample": "2026-10-11 07:23:17 INFO  [missed] on paper: $5.00 on 'KCC Egis vs. Sonic Boom' @ 0.390 (live refused: Tier 1b exposure full: remaining=$4.56 < min_bet=$5.00)",
    "norm": "INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)",
    "recent": [
-    1792005965.8657203,
-    1792006206.0008569,
-    1792007646.1665134,
-    1792007646.1665134,
-    1792008846.3984947
+    1792013172.8252354,
+    1792013653.249254,
+    1792013773.5064468,
+    1792014373.7649608,
+    1792016174.4303555
    ],
    "action": null,
    "action_ts": null,
