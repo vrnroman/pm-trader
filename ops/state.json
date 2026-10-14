@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-13T23:17:59.411742+00:00",
+ "generated": "2026-10-14T00:34:29.552562+00:00",
  "money": {
   "cash": 4.842563,
   "open_cost": 6.4,
@@ -7,8 +7,8 @@
   "floor": null,
   "stated": 80.0,
   "spend": {
-   "date": "2026-10-13",
-   "spent_usd": 5.0,
+   "date": "2026-10-14",
+   "spent_usd": 0.0,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -21,8 +21,8 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1791933356.2131383,
-  "day": "2026-10-13"
+  "ts": 1791937919.5088286,
+  "day": "2026-10-14"
  },
  "arm": {
   "armed": true,
@@ -34,16 +34,13 @@
   "daily_loss_override_day": null
  },
  "spend": {
-  "date": "2026-10-13",
-  "spent_usd": 5.0,
-  "wallet_copies": {
+  "date": "2026-10-14",
+  "spent_usd": 0.0,
+  "wallet_copies": {},
+  "wallet_copies_yesterday": {
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 1
   },
-  "wallet_copies_yesterday": {
-   "0x5213eb85fcd465c8927a8382f95dd2dc22306a35": 5,
-   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 3
-  },
-  "yesterday": "2026-10-12",
+  "yesterday": "2026-10-13",
   "closed_reason": ""
  },
  "tier": {
@@ -703,15 +700,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1791851307.1391947,
-   "day": "2026-10-13",
-   "kind": "push:floor_near",
-   "before": null,
-   "after": "⚠️ <b>Bankroll $11.24 is within 20% of the $10 floor.</b> A top-up of about $6 would restore the margin; under the floor",
-   "detail": "",
-   "push": "DEAL"
-  },
-  {
    "ts": 1791854062.942552,
    "day": "2026-10-13",
    "kind": "settle_pending",
@@ -1027,13 +1015,6 @@
   }
  ],
  "important": [
-  "2026-10-12 23:28:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-12 23:44:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 00:09:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 00:11:37 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $5.00 / no spend cap (the day stops after $45 lost)",
-  "2026-10-13 00:11:38 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $11.40 / $200.00",
-  "2026-10-13 00:21:11 INFO  [missed] on paper: $5.00 on 'Will Cruzeiro EC win on 2026-10-12?' @ 0.850 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 00:28:27 INFO  [ops] push:floor_near: None -> '⚠️ <b>Bankroll $11.24 is within 20% of the $10 floor.</b> A top-up of about $6 would restore the margin; under the floor'",
   "2026-10-13 01:14:22 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $6.40",
   "2026-10-13 01:14:23 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Bills 1H Team Total: O/U 12.5' left the wallet; booked when Polymarket's row shows",
   "2026-10-13 01:24:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1198,10 +1179,6 @@
   "2026-10-13 22:37:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-13 22:57:02 INFO  [missed] on paper: $5.00 on 'AD San Carlos vs. Inter San Carlos: O/U ' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-13 23:15:56 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Wuhan Tennis Open: Ann Li vs Camila Osor' left the wallet; booked when Polymarket's row shows",
-  "2026-10-13 00:11:38 TRADE [LIVE] BUY $5.00 on 'Bills 1H Team Total: O/U 12.5' @ 0.4800, order 0x2b0596171b...",
-  "2026-10-13 00:11:38 TRADE [verify] FILLED: BUY 10.42 shares on 'Bills 1H Team Total: O/U 12.5' @ 0.4800",
-  "2026-10-13 00:13:42 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $28.94 on 'Blake Corum: Anytime Touchdown'",
-  "2026-10-13 00:21:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $439.45 on 'Will Cruzeiro EC win on 2026-10-12?'",
   "2026-10-13 01:40:28 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $91.30 on 'Red Bull Bragantino vs. Cruzeiro EC: O/U'",
   "2026-10-13 02:15:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $338.39 on 'World Championship of Legends: India Cha'",
   "2026-10-13 02:28:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $245.40 on 'Al Sadd SC vs. Al Hilal SFC: O/U 3.5'",
