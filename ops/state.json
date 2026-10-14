@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-14T11:38:52.160708+00:00",
+ "generated": "2026-10-14T13:45:04.586230+00:00",
  "money": {
   "cash": 4.842563,
   "open_cost": 6.4,
@@ -21,7 +21,7 @@
    "1b": 6.4,
    "1c": 0
   },
-  "ts": 1791977670.7321453,
+  "ts": 1791985255.2979395,
   "day": "2026-10-14"
  },
  "arm": {
@@ -490,7 +490,7 @@
    "36530939623863152695788995622142453693332589082859678930137958034167307336235",
    "7677938088779680870531521894927795000102600480023362260344277808047697371001"
   ],
-  "form_scan_ts": 1791961379.8778467,
+  "form_scan_ts": 1791983300.7050798,
   "daily_line_attempt_day": "2026-10-14",
   "daily_line_sent": true,
   "daily_line_day": "2026-10-14",
@@ -529,7 +529,7 @@
   }
  },
  "form": {
-  "ts": 1791961381.2309754,
+  "ts": 1791983321.1981945,
   "version": 4,
   "wallets": {
    "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
@@ -542,13 +542,13 @@
     "worst_day": -1020.05,
     "ok": false,
     "reason": "scalper: 52% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791961381.2309754,
+    "ts": 1791983321.1981945,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 29,
     "flips": 15,
-    "last_trade_ts": 1791947533.0,
+    "last_trade_ts": 1791981708.0,
     "hit": 0.8024,
     "net_pct": 12.2
    },
@@ -562,7 +562,7 @@
     "worst_day": -241.42,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791961381.2309754,
+    "ts": 1791983321.1981945,
     "rows": 2000,
     "covered_days": 14.0,
     "capped": false,
@@ -574,23 +574,23 @@
    },
    "0x10658d371ae1f09eed503a3a14c8ac6a1a936218": {
     "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
-    "n": 24,
-    "won": 14,
-    "cost": 30294.64,
-    "back": 33333.92,
-    "avg_price": 0.6416298892976013,
+    "n": 22,
+    "won": 13,
+    "cost": 28440.45,
+    "back": 30960.19,
+    "avg_price": 0.6438926092467825,
     "worst_day": -1637.76,
     "ok": false,
-    "reason": "only 24 settled bets on our slice in 14 days (need 30)",
-    "ts": 1791961381.2309754,
+    "reason": "only 22 settled bets on our slice in 14 days (need 30)",
+    "ts": 1791983321.1981945,
     "rows": 1000,
     "covered_days": 14.0,
     "capped": false,
     "exits": 0,
     "flips": 0,
-    "last_trade_ts": 1791928509.0,
-    "hit": 0.5833,
-    "net_pct": 10.03
+    "last_trade_ts": 1791972973.0,
+    "hit": 0.5909,
+    "net_pct": 8.86
    },
    "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
@@ -602,7 +602,7 @@
     "worst_day": -285.38,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791961381.2309754,
+    "ts": 1791983321.1981945,
     "rows": 2000,
     "covered_days": 14.0,
     "capped": false,
@@ -622,7 +622,7 @@
     "worst_day": -1337.16,
     "ok": false,
     "reason": "58% came out ahead vs 56% needed (+2 points, need +3)",
-    "ts": 1791961381.2309754,
+    "ts": 1791983321.1981945,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
@@ -634,23 +634,23 @@
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "n": 181,
+    "n": 183,
     "won": 108,
-    "cost": 600662.28,
+    "cost": 601836.44,
     "back": 656663.32,
-    "avg_price": 0.527246157063021,
+    "avg_price": 0.5271449277127049,
     "worst_day": -30817.73,
     "ok": false,
     "reason": "scalper: 58% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791961381.2309754,
+    "ts": 1791983321.1981945,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 12,
     "flips": 7,
-    "last_trade_ts": 1791959054.0,
-    "hit": 0.5967,
-    "net_pct": 9.32
+    "last_trade_ts": 1791982646.0,
+    "hit": 0.5902,
+    "net_pct": 9.11
    },
    "0xd970693a3384dc762b191707a4927ac3814bbbba": {
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
@@ -662,7 +662,7 @@
     "worst_day": -360.14,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791961381.2309754,
+    "ts": 1791983321.1981945,
     "rows": 2500,
     "covered_days": 14.0,
     "capped": false,
@@ -682,7 +682,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1791961381.2309754,
+    "ts": 1791983321.1981945,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
@@ -1048,18 +1048,6 @@
   }
  ],
  "important": [
-  "2026-10-13 11:53:21 INFO  [missed] on paper: $5.00 on 'Will Finland win on 2026-10-13?' @ 0.340 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 12:09:53 INFO  [missed] on paper: $5.00 on 'Galatasaray SK vs. FC Barcelona: O/U 10.' @ 0.440 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 12:10:44 INFO  [missed] on paper: $5.00 on 'Olbia: Hynek Barton vs Maxim Mrva' @ 0.590 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 12:39:16 INFO  [missed] on paper: $5.00 on 'Olimpia Milano vs. Real Madrid' @ 0.360 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 12:55:24 INFO  [missed] on paper: $5.00 on 'Birmingham City FC vs. Preston North End' @ 0.470 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 13:00:12 INFO  [missed] on paper: $5.00 on 'Wrexham AFC vs. West Bromwich Albion FC:' @ 0.470 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 13:04:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 13:12:07 INFO  [missed] on paper: $5.00 on 'Will Al-Ittihad Club win on 2026-10-13?' @ 0.430 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 13:13:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 13:19:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 13:29:11 INFO  [missed] on paper: $5.00 on 'Knicks vs. Raptors' @ 0.760 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 13:44:56 INFO  [missed] on paper: $5.00 on 'FC Internazionale Milano vs. Club Brugge' @ 0.610 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-13 13:50:14 ERROR Network error fetching 0xeef6...cd4c: Server disconnected without sending a response.",
   "2026-10-13 13:50:15 ERROR Network error fetching 0x5213...6a35: Server disconnected without sending a response.",
   "2026-10-13 14:24:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1214,15 +1202,17 @@
   "2026-10-14 11:13:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-14 11:23:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-14 11:29:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 11:53:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $500.00 on 'Will Finland win on 2026-10-13?'",
-  "2026-10-13 12:09:53 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $460.52 on 'Galatasaray SK vs. FC Barcelona: O/U 10.'",
-  "2026-10-13 12:10:44 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $745.55 on 'Olbia: Hynek Barton vs Maxim Mrva'",
-  "2026-10-13 12:39:16 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $143.02 on 'Olimpia Milano vs. Real Madrid'",
-  "2026-10-13 12:55:24 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $499.99 on 'Birmingham City FC vs. Preston North End'",
-  "2026-10-13 13:00:12 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $236.75 on 'Wrexham AFC vs. West Bromwich Albion FC:'",
-  "2026-10-13 13:12:07 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $313.57 on 'Will Al-Ittihad Club win on 2026-10-13?'",
-  "2026-10-13 13:29:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1464.29 on 'Knicks vs. Raptors'",
-  "2026-10-13 13:44:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $200.97 on 'FC Internazionale Milano vs. Club Brugge'",
+  "2026-10-14 12:04:51 INFO  [missed] on paper: $5.00 on 'Will ŠK Slovan Bratislava win on 2026-10' @ 0.870 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 12:05:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-14 12:07:33 INFO  [missed] on paper: $5.00 on 'Persib Bandung vs. The Cong - Viettel FC' @ 0.620 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 12:10:42 INFO  [missed] on paper: $5.00 on 'Persib Bandung vs. The Cong - Viettel FC' @ 0.430 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 12:20:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-14 12:49:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-14 12:50:29 INFO  [missed] on paper: $5.00 on 'Chicago Fire FC vs. Philadelphia Union: ' @ 0.480 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 12:54:05 INFO  [missed] on paper: $5.00 on 'Will SV Waldhof Mannheim 07 win on 2026-' @ 0.480 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 12:57:37 INFO  [missed] on paper: $5.00 on 'Set Handicap: Leylah Fernandez (-1.5) vs' @ 0.450 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 13:36:25 INFO  [missed] on paper: $5.00 on 'PFC Nasaf vs. Al Wahda FC (UAE): O/U 2.5' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 13:41:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-13 14:26:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $195.00 on 'Austria vs. Kosovo: Both Teams to Score'",
   "2026-10-13 14:50:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $12828.46 on 'Spread: FC Barcelona (-1.5)'",
   "2026-10-13 14:51:18 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $508.23 on 'Will Portsmouth FC win on 2026-10-14?'",
@@ -1275,7 +1265,15 @@
   "2026-10-14 03:12:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1218.82 on 'Will Inter San Carlos win on 2026-10-13?'",
   "2026-10-14 04:22:50 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $2804.03 on 'Will Manchester City FC win on 2026-10-1'",
   "2026-10-14 10:15:07 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $156.58 on 'UD Santarém vs. Gil Vicente FC: O/U 2.5'",
-  "2026-10-14 11:20:41 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $4.90 on 'Game Spread: Aryna Sabalenka (-5.5) vs A'"
+  "2026-10-14 11:20:41 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $4.90 on 'Game Spread: Aryna Sabalenka (-5.5) vs A'",
+  "2026-10-14 12:04:51 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $50000.00 on 'Will ŠK Slovan Bratislava win on 2026-10'",
+  "2026-10-14 12:07:33 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $157.68 on 'Persib Bandung vs. The Cong - Viettel FC'",
+  "2026-10-14 12:12:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $8.48 on 'Spread: Persib Bandung (-1.5)'",
+  "2026-10-14 12:41:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $34.66 on 'Batman Petrolspor vs. Istanbulspor AS: O'",
+  "2026-10-14 12:50:29 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $858.31 on 'Chicago Fire FC vs. Philadelphia Union: '",
+  "2026-10-14 12:54:05 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $315.86 on 'Will SV Waldhof Mannheim 07 win on 2026-'",
+  "2026-10-14 12:57:37 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $160.45 on 'Set Handicap: Leylah Fernandez (-1.5) vs'",
+  "2026-10-14 13:36:25 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $147.34 on 'PFC Nasaf vs. Al Wahda FC (UAE): O/U 2.5'"
  ],
  "watcher": [
   {
@@ -1594,16 +1592,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1791977463.875275,
-   "count": 960,
+   "last": 1791985390.8005888,
+   "count": 964,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791974103.0995746,
-    1791974103.0995746,
-    1791976503.5251093,
-    1791977103.8282344,
-    1791977463.875275
+    1791982265.3436773,
+    1791985390.8005888
    ],
    "action": null,
    "action_ts": null,
@@ -3261,12 +3256,13 @@
   },
   "3fd84e7cc412": {
    "first": 1791481911.1137545,
-   "last": 1791976863.7730591,
-   "count": 97,
+   "last": 1791981785.063774,
+   "count": 99,
    "sample": "2026-10-08 17:50:40 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: SELL $2554.71 on 'Gemini 4.0 released by October 15, 2026?'",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: SELL $N on 'S'",
    "recent": [
-    1791976863.7730591
+    1791979984.4218233,
+    1791981785.063774
    ],
    "action": null,
    "action_ts": null,
@@ -3275,12 +3271,15 @@
   },
   "1781e8e2f42a": {
    "first": 1791482341.4384031,
-   "last": 1791973022.9857519,
-   "count": 272,
+   "last": 1791985028.6142743,
+   "count": 278,
    "sample": "2026-10-08 17:58:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: BUY $500.00 on ''",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'",
    "recent": [
-    1791973022.9857519
+    1791982265.3436773,
+    1791982506.121279,
+    1791982746.6153107,
+    1791985028.6142743
    ],
    "action": null,
    "action_ts": null,
@@ -3538,12 +3537,15 @@
   },
   "21b542768c8e": {
    "first": 1791703402.439332,
-   "last": 1791973022.9857519,
-   "count": 191,
+   "last": 1791985028.6142743,
+   "count": 198,
    "sample": "2026-10-11 07:23:17 INFO  [missed] on paper: $5.00 on 'KCC Egis vs. Sonic Boom' @ 0.390 (live refused: Tier 1b exposure full: remaining=$4.56 < min_bet=$5.00)",
    "norm": "INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)",
    "recent": [
-    1791973022.9857519
+    1791982265.3436773,
+    1791982506.121279,
+    1791982746.6153107,
+    1791985028.6142743
    ],
    "action": null,
    "action_ts": null,
