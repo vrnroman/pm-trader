@@ -1,14 +1,13 @@
 {
-    "id": "2026-10-13T18:41:48Z-e424",
-    "ts": 1791916908,
-    "kind": "nothing",
-    "message": "Armed, equity $11.24, cash $4.84 still under the $5 min bet so new buys wait (already escalated and pushed), spend $5.00 of the $45 stop, copies still landing (0x5213eb85 settle_pending clearing through the day), no self-disarm, no new errors beyond the recurring 404 and RPC lines, the RPC 403 fingerprint has not fired in 17.3h, no in-form wallet losing now.",
+    "id": "2026-10-14T00:42:58Z-210d",
+    "ts": 1791938578,
+    "kind": "wallet_action",
+    "action": "bench",
+    "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
+    "message": "0xd970693a is in form by the 14-day bar (19 settled, 58% won vs 50% needed, net +5.5%) but at the prices we would really pay it has failed the door 4 of the last 7 days and nets -7% over 39 matched copies, so benching it now.",
     "evidence": [
-        "## money state {\"cash\": 4.842563, \"open_cost\": 6.4, \"equity\": 11.24, \"floor\": 10.0, \"armed\": true, \"spend\": {\"spent_usd\": 5.0, \"daily_loss_stop_usd\": 45.0}}",
-        "in form  0x5213eb85: 249 settled, 47% won vs 42% needed, net +11.0% on $157,556, worst day -3,226, 1 of 15 exits under 10 min",
-        "in form  0x9f15613e: 183 settled, 57% won vs 53% needed, net +13.8% on $580,570, worst day -30,818, 9 of 14 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "2026-10-13 16:15:06 INFO  [ops] settle_pending: '0x5213eb85 open $5.46' -> 'payout not in the activity yet' | 'Amici Pallacanestro Udinese vs. Aquila B' left the wallet; booked when Polymarket's row shows",
-        "54cedf8fb5c2 x56 last 17.3h ago [open: 56 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (read refused: CTF [NN]: N Client Error: Forbidden for url: https:"
+        "in form  0xd970693a: 19 settled, 58% won vs 50% needed, net +5.5% on $7,254, worst day -360, 19 of 19 exits under 10 min",
+        "2026-10-13 01:30:57 INFO  [ops] decay_day: '0xd970693a in set Z' -> 'below the door 4 of 7' | does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies"
     ],
     "commit": null
 }
