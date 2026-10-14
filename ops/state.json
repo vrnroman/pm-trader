@@ -1,9 +1,9 @@
 {
- "generated": "2026-10-14T18:38:32.351017+00:00",
+ "generated": "2026-10-14T20:33:04.807989+00:00",
  "money": {
   "cash": 4.842563,
-  "open_cost": 6.4,
-  "equity": 11.24,
+  "open_cost": 0.0,
+  "equity": 4.84,
   "floor": null,
   "stated": 80.0,
   "spend": {
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 84,
   "tier": {
    "1a": 0,
-   "1b": 6.4,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1792002925.5678155,
+  "ts": 1792009940.0512335,
   "day": "2026-10-14"
  },
  "arm": {
@@ -46,27 +46,19 @@
  "tier": {
   "1a": {
    "open_total": 0,
-   "daily_date": "2026-10-13",
+   "daily_date": "2026-10-14",
    "daily_volume": 0.0,
    "placements": []
   },
   "1b": {
-   "open_total": 6.4,
-   "daily_date": "2026-10-13",
-   "daily_volume": 5.0,
-   "placements": [
-    {
-     "token_id": "25047259068419465775237994155977557323657851862064375566808011125788823973687",
-     "cost": 6.4,
-     "ts": 1791474936.6025627,
-     "trader": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
-     "title": "Will Liverpool FC win on 2026-10-14?"
-    }
-   ]
+   "open_total": 0,
+   "daily_date": "2026-10-14",
+   "daily_volume": 0.0,
+   "placements": []
   },
   "1c": {
    "open_total": 0,
-   "daily_date": "2026-10-13",
+   "daily_date": "2026-10-14",
    "daily_volume": 0.0,
    "placements": []
   }
@@ -256,52 +248,6 @@
    },
    "floor_usd": null
   },
-  "0x10658d371ae1f09eed503a3a14c8ac6a1a936218": {
-   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
-   "tier": "1b",
-   "ts": 1790572258.9952836,
-   "source": "telegram-gate",
-   "floor_row": {
-    "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1791997531.1062024,
-    "n_acts": 4000,
-    "n_resolved_markets": 1234,
-    "era": 1784976482.215206,
-    "bars": {
-     "min_n": 15,
-     "min_roi": 0.1,
-     "trimmed_min": 0.0
-    },
-    "at": {
-     "300": {
-      "n": 169,
-      "roi": -0.0317,
-      "trimmed": -0.0723,
-      "ok": false
-     },
-     "200": {
-      "n": 248,
-      "roi": -0.039,
-      "trimmed": -0.0792,
-      "ok": false
-     },
-     "150": {
-      "n": 322,
-      "roi": -0.0032,
-      "trimmed": -0.0479,
-      "ok": false
-     },
-     "100": {
-      "n": 420,
-      "roi": -0.046,
-      "trimmed": -0.0815,
-      "ok": false
-     }
-    },
-    "chosen": null
-   },
-   "floor_usd": null
-  },
   "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e": {
    "wallet": "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e",
    "tier": "1b",
@@ -351,18 +297,18 @@
  },
  "watch": {
   "floor_near": true,
-  "last_equity": 11.24,
+  "last_equity": 4.84,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-14T00:42:58Z-210d",
-  "admit_scan_ts": 1791997528.552859,
-  "day_loss_pushed": "2026-10-10",
-  "loss_streak": 0,
-  "day_pnl": 6.81,
-  "day_pnl_day": "2026-10-12",
+  "admit_scan_ts": 1792008595.5625813,
+  "day_loss_pushed": "2026-10-14",
+  "loss_streak": 1,
+  "day_pnl": -6.4,
+  "day_pnl_day": "2026-10-14",
   "settled_tokens": [
    "6691701803539626176077488709374004737591849995522510168757367609925258534749",
    "111426907502041127672975490206099880504280577275905396462330907920963353499778",
@@ -488,9 +434,10 @@
    "58526704115534894848094119625316785786953142256187339954968772750838994919912",
    "42503833023427859994542116458064672165858941613163419440000793688391427234043",
    "36530939623863152695788995622142453693332589082859678930137958034167307336235",
-   "7677938088779680870531521894927795000102600480023362260344277808047697371001"
+   "7677938088779680870531521894927795000102600480023362260344277808047697371001",
+   "25047259068419465775237994155977557323657851862064375566808011125788823973687"
   ],
-  "form_scan_ts": 1791983300.7050798,
+  "form_scan_ts": 1792005116.4719052,
   "daily_line_attempt_day": "2026-10-14",
   "daily_line_sent": true,
   "daily_line_day": "2026-10-14",
@@ -499,8 +446,8 @@
   "rearms": {
    "2026-10-06:no trade data for": 1
   },
-  "day_won": 4,
-  "day_lost": 3
+  "day_won": 0,
+  "day_lost": 1
  },
  "probation": {
   "0x09b045baad1fbe115c70785635a261411774a3b6": {
@@ -518,99 +465,74 @@
    "settled": 0,
    "held_said": true
   },
-  "0x10658d371ae1f09eed503a3a14c8ac6a1a936218": {
-   "since": 1790572249.31929,
-   "settled": 0,
-   "held_said": true
-  },
   "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e": {
    "since": 1791428035.2346768,
    "settled": 0
   }
  },
  "form": {
-  "ts": 1791983321.1981945,
+  "ts": 1792005117.4311907,
   "version": 4,
   "wallets": {
    "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
     "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
-    "n": 167,
-    "won": 134,
-    "cost": 182140.4,
-    "back": 204357.68,
-    "avg_price": 0.6972112071609798,
+    "n": 168,
+    "won": 135,
+    "cost": 185173.72,
+    "back": 208287.51,
+    "avg_price": 0.6984806502886122,
     "worst_day": -1020.05,
     "ok": false,
     "reason": "scalper: 52% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791983321.1981945,
+    "ts": 1792005117.4311907,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 29,
     "flips": 15,
-    "last_trade_ts": 1791981708.0,
-    "hit": 0.8024,
-    "net_pct": 12.2
+    "last_trade_ts": 1792004428.0,
+    "hit": 0.8036,
+    "net_pct": 12.48
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
     "n": 25,
-    "won": 16,
-    "cost": 9671.61,
-    "back": 10381.15,
-    "avg_price": 0.5797476418317704,
+    "won": 15,
+    "cost": 9673.42,
+    "back": 10296.13,
+    "avg_price": 0.5762980881049291,
     "worst_day": -241.42,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791983321.1981945,
+    "ts": 1792005117.4311907,
     "rows": 2000,
     "covered_days": 14.0,
     "capped": false,
     "exits": 25,
     "flips": 25,
-    "last_trade_ts": 1791921433.0,
-    "hit": 0.64,
-    "net_pct": 7.34
-   },
-   "0x10658d371ae1f09eed503a3a14c8ac6a1a936218": {
-    "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
-    "n": 22,
-    "won": 13,
-    "cost": 28440.45,
-    "back": 30960.19,
-    "avg_price": 0.6438926092467825,
-    "worst_day": -1637.76,
-    "ok": false,
-    "reason": "only 22 settled bets on our slice in 14 days (need 30)",
-    "ts": 1791983321.1981945,
-    "rows": 1000,
-    "covered_days": 14.0,
-    "capped": false,
-    "exits": 0,
-    "flips": 0,
-    "last_trade_ts": 1791972973.0,
-    "hit": 0.5909,
-    "net_pct": 8.86
+    "last_trade_ts": 1791995932.0,
+    "hit": 0.6,
+    "net_pct": 6.44
    },
    "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-    "n": 33,
-    "won": 19,
-    "cost": 12479.83,
-    "back": 13451.5,
-    "avg_price": 0.47394009920129787,
+    "n": 32,
+    "won": 18,
+    "cost": 12100.72,
+    "back": 12947.69,
+    "avg_price": 0.4703861936244146,
     "worst_day": -285.38,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791983321.1981945,
+    "ts": 1792005117.4311907,
     "rows": 2000,
     "covered_days": 14.0,
     "capped": false,
-    "exits": 33,
-    "flips": 33,
+    "exits": 32,
+    "flips": 32,
     "last_trade_ts": 1791916557.0,
-    "hit": 0.5758,
-    "net_pct": 7.79
+    "hit": 0.5625,
+    "net_pct": 7.0
    },
    "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e": {
     "wallet": "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e",
@@ -622,55 +544,55 @@
     "worst_day": -1337.16,
     "ok": false,
     "reason": "58% came out ahead vs 56% needed (+2 points, need +3)",
-    "ts": 1791983321.1981945,
+    "ts": 1792005117.4311907,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
     "exits": 2,
     "flips": 1,
-    "last_trade_ts": 1791934518.0,
+    "last_trade_ts": 1792001319.0,
     "hit": 0.5789,
     "net_pct": 0.34
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "n": 183,
-    "won": 108,
-    "cost": 601836.44,
-    "back": 656663.32,
-    "avg_price": 0.5271449277127049,
+    "n": 188,
+    "won": 111,
+    "cost": 621549.02,
+    "back": 698598.56,
+    "avg_price": 0.5240586595132181,
     "worst_day": -30817.73,
     "ok": false,
     "reason": "scalper: 58% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791983321.1981945,
+    "ts": 1792005117.4311907,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 12,
     "flips": 7,
-    "last_trade_ts": 1791982646.0,
-    "hit": 0.5902,
-    "net_pct": 9.11
+    "last_trade_ts": 1792001994.0,
+    "hit": 0.5904,
+    "net_pct": 12.4
    },
    "0xd970693a3384dc762b191707a4927ac3814bbbba": {
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
-    "n": 19,
+    "n": 20,
     "won": 11,
-    "cost": 7253.68,
-    "back": 7652.1,
-    "avg_price": 0.49797835683284514,
+    "cost": 7653.72,
+    "back": 8007.73,
+    "avg_price": 0.506390800475842,
     "worst_day": -360.14,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1791983321.1981945,
+    "ts": 1792005117.4311907,
     "rows": 2500,
     "covered_days": 14.0,
     "capped": false,
-    "exits": 19,
-    "flips": 19,
-    "last_trade_ts": 1791922801.0,
-    "hit": 0.5789,
-    "net_pct": 5.49
+    "exits": 20,
+    "flips": 20,
+    "last_trade_ts": 1791995932.0,
+    "hit": 0.55,
+    "net_pct": 4.63
    },
    "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c": {
     "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
@@ -682,7 +604,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1791983321.1981945,
+    "ts": 1792005117.4311907,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
@@ -705,26 +627,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1791918348.2497008,
-   "day": "2026-10-13",
-   "kind": "settle_pending",
-   "before": "0x5213eb85 open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'Will Deportivo Madryn win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "94494526273499823034840014174269302273573882715673244773354081833140433995137",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
-  },
-  {
-   "ts": 1791920734.27054,
-   "day": "2026-10-13",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
   {
    "ts": 1791933355.656486,
    "day": "2026-10-13",
@@ -998,47 +900,79 @@
    "floor_before": null,
    "floor_after": null,
    "live": false
+  },
+  {
+   "ts": 1792004059.6238894,
+   "day": "2026-10-14",
+   "kind": "settled",
+   "before": "open $6.40",
+   "after": "paid $0.00",
+   "detail": "lost -6.40 on 'Will Liverpool FC win on 2026-10-14?' (0x10658d37, tier 1b)",
+   "push": null,
+   "token_id": "25047259068419465775237994155977557323657851862064375566808011125788823973687",
+   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+   "pnl": -6.4,
+   "won": false,
+   "cost": 6.4
+  },
+  {
+   "ts": 1792004059.6238894,
+   "day": "2026-10-14",
+   "kind": "push:settled",
+   "before": null,
+   "after": "❌ <b>LOST -$6.40</b>\n<b>Will Liverpool FC win on 2026-10-14?</b>\nStaked $6.40, paid out $0.00\nCopied 0x1065…6218, tier 1",
+   "detail": "",
+   "push": "DEAL"
+  },
+  {
+   "ts": 1792004059.6238894,
+   "day": "2026-10-14",
+   "kind": "push:daily_loss",
+   "before": null,
+   "after": "📉 <b>Down $6.40 today</b>\nThat is 57% of the $11.24 bankroll (the alert line is 10%)",
+   "detail": "",
+   "push": "DEAL"
+  },
+  {
+   "ts": 1792004173.9521039,
+   "day": "2026-10-14",
+   "kind": "evict",
+   "before": "0x10658d37 in set Z",
+   "after": "evicted (sticky)",
+   "detail": "probation failed: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)",
+   "push": null,
+   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218"
+  },
+  {
+   "ts": 1792004172.8058274,
+   "day": "2026-10-14",
+   "kind": "probation_failed",
+   "before": "0x10658d37 on probation (10 days on probation)",
+   "after": "evicted: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)",
+   "detail": "lost -6.40 on 'Will Liverpool FC win o | Evict is reversible: /zset readmit",
+   "push": "WALLET",
+   "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218",
+   "trial": [
+    {
+     "token_id": "25047259068419465775237994155977557323657851862064375566808011125788823973687",
+     "pnl": -6.4,
+     "won": false
+    }
+   ]
+  },
+  {
+   "ts": 1792004801.6486273,
+   "day": "2026-10-14",
+   "kind": "settle_pending",
+   "before": "0x5213eb85 open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Will Deportivo Madryn win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "94494526273499823034840014174269302273573882715673244773354081833140433995137",
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
   }
  ],
  "important": [
-  "2026-10-13 18:38:39 INFO  [missed] on paper: $5.00 on 'Club Atlético de Madrid vs. Manchester U' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 18:45:26 INFO  [missed] on paper: $5.00 on 'Pendikspor vs. Van Spor FK: O/U 2.5' @ 0.492 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 18:45:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 18:56:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 18:57:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 18:57:18 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
-  "2026-10-13 19:05:49 INFO  [ops] settle_pending: '0x5213eb85 open $5.00' -> 'payout not in the activity yet' | 'Will Deportivo Madryn win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
-  "2026-10-13 19:07:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:09:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:11:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:11:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:13:24 INFO  [missed] on paper: $5.00 on 'RB Leipzig vs. PSV: O/U 3.5' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 19:16:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:31:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:34:45 INFO  [missed] on paper: $5.00 on 'Set Handicap: Luis Guto Miguel (-1.5) vs' @ 0.410 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 19:36:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:36:44 INFO  [missed] on paper: $5.00 on 'Will Club Brugge KV win on 2026-10-13?' @ 0.150 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 19:36:46 INFO  [missed] on paper: $5.00 on 'Will FC Internazionale Milano win on 202' @ 0.361 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 19:37:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:38:39 INFO  [missed] on paper: $5.00 on 'Viking FK vs. FC Bayern München: O/U 2.5' @ 0.820 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 19:42:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:45:17 INFO  Received signal 15, shutting down...",
-  "2026-10-13 19:45:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-10-13 19:45:44 INFO  Bot started. Monitoring trades...",
-  "2026-10-13 19:46:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:46:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:46:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:46:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:46:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:55:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 19:55:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 20:06:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 20:09:02 INFO  [missed] on paper: $5.00 on 'Counter-Strike: Butterfly vs Fire Flux E' @ 0.470 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 20:10:58 INFO  [missed] on paper: $5.00 on 'LASK Linz vs. Liverpool FC: Liverpool FC' @ 0.460 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 20:16:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 20:19:51 INFO  [missed] on paper: $5.00 on 'Viking FK vs. FC Bayern München: O/U 6.5' @ 0.654 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-13 20:27:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 20:31:57 INFO  [missed] on paper: $5.00 on 'Viking FK vs. FC Bayern München: O/U 6.5' @ 0.735 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-13 20:38:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-13 20:45:51 INFO  [missed] on paper: $5.00 on 'Will Club Brugge KV win on 2026-10-13?' @ 0.889 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-13 20:57:43 INFO  [missed] on paper: $5.00 on 'Delaware vs. Middle Tennessee' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
@@ -1156,20 +1090,25 @@
   "2026-10-14 18:33:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-14 18:33:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-14 18:38:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-13 18:45:26 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $398.38 on 'Pendikspor vs. Van Spor FK: O/U 2.5'",
-  "2026-10-13 19:13:24 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $181.42 on 'RB Leipzig vs. PSV: O/U 3.5'",
-  "2026-10-13 19:34:45 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $627.36 on 'Set Handicap: Luis Guto Miguel (-1.5) vs'",
-  "2026-10-13 19:36:44 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $261.08 on 'Will Club Brugge KV win on 2026-10-13?'",
-  "2026-10-13 19:36:46 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $412.92 on 'Will FC Internazionale Milano win on 202'",
-  "2026-10-13 19:38:39 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1499.68 on 'Viking FK vs. FC Bayern München: O/U 2.5'",
-  "2026-10-13 19:45:44 INFO  [recovery] No pending orders to recover",
-  "2026-10-13 19:46:01 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $34.86 on 'Will Club Brugge KV win on 2026-10-13?'",
-  "2026-10-13 19:57:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $2.09 on 'Will Charlton Athletic FC win on 2026-10'",
-  "2026-10-13 20:09:02 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $133.77 on 'Counter-Strike: Butterfly vs Fire Flux E'",
-  "2026-10-13 20:10:58 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $345.36 on 'LASK Linz vs. Liverpool FC: Liverpool FC'",
-  "2026-10-13 20:19:51 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $177.95 on 'Viking FK vs. FC Bayern München: O/U 6.5'",
-  "2026-10-13 20:20:02 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $41.62 on 'Will FC Bayern München win on 2026-10-13'",
-  "2026-10-13 20:29:58 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $49.10 on 'Spread: FC Bayern München (-1.5)'",
+  "2026-10-14 18:39:50 INFO  [missed] on paper: $5.00 on 'Feyenoord Rotterdam vs. Como 1907: O/U 4' @ 0.775 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 18:53:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-14 18:54:19 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Will Liverpool FC win on 2026-10-14?' (0x10658d37, tier 1b)",
+  "2026-10-14 18:54:20 INFO  [ops] push:settled: None -> '❌ <b>LOST -$6.40</b>\\n<b>Will Liverpool FC win on 2026-10-14?</b>\\nStaked $6.40, paid out $0.00\\nCopied 0x1065…6218, tier 1'",
+  "2026-10-14 18:54:21 INFO  [ops] push:daily_loss: None -> '📉 <b>Down $6.40 today</b>\\nThat is 57% of the $11.24 bankroll (the alert line is 10%)'",
+  "2026-10-14 18:56:12 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $0.00",
+  "2026-10-14 18:56:13 WARNING [zset] EVICTED 0x10658d371ae1f09eed503a3a14c8ac6a1a936218 from set Z: probation failed: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)",
+  "2026-10-14 18:56:13 INFO  [ops] evict: '0x10658d37 in set Z' -> 'evicted (sticky)' | probation failed: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)",
+  "2026-10-14 18:56:13 INFO  [ops] probation_failed: '0x10658d37 on probation (10 days on probation)' -> 'evicted: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)' | lost -6.40 on 'Will Liverpool FC win o | Evict is reversible: /zset readmit",
+  "2026-10-14 19:06:42 INFO  [ops] settle_pending: '0x5213eb85 open $5.00' -> 'payout not in the activity yet' | 'Will Deportivo Madryn win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
+  "2026-10-14 19:08:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-14 19:25:30 INFO  [missed] on paper: $5.00 on 'Will AS Roma win on 2026-10-14?' @ 0.590 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 19:28:58 INFO  [missed] on paper: $5.00 on 'Will Portsmouth FC win on 2026-10-14?' @ 0.590 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 19:30:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-14 19:34:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-14 19:35:09 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-14 19:52:21 INFO  [missed] on paper: $5.00 on 'Charleston Battery leading at halftime?' @ 0.670 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 19:52:23 INFO  [missed] on paper: $5.00 on 'Charleston Battery leading at halftime?' @ 0.670 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
+  "2026-10-14 20:13:08 INFO  [missed] on paper: $5.00 on 'Aston Villa FC vs. Fenerbahçe SK: O/U 4.' @ 0.610 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-13 20:50:50 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $2.47 on 'RB Leipzig vs. PSV: O/U 1.5'",
   "2026-10-13 20:57:43 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Delaware vs. Middle Tennessee'",
   "2026-10-13 20:59:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Florida International vs. Jacksonville S'",
@@ -1209,7 +1148,17 @@
   "2026-10-14 18:02:18 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $365.18 on 'Spread: Northwestern (-7.5)'",
   "2026-10-14 18:06:37 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Spread: Kennesaw State (-2.5)'",
   "2026-10-14 18:08:41 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Wisconsin vs. UCLA'",
-  "2026-10-14 18:19:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $21151.60 on 'Will FK Bodø/Glimt win on 2026-10-14?'"
+  "2026-10-14 18:19:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $21151.60 on 'Will FK Bodø/Glimt win on 2026-10-14?'",
+  "2026-10-14 18:39:50 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $2999.65 on 'Feyenoord Rotterdam vs. Como 1907: O/U 4'",
+  "2026-10-14 19:25:30 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $200.60 on 'Will AS Roma win on 2026-10-14?'",
+  "2026-10-14 19:26:36 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $14.89 on 'Will Real Madrid CF win on 2026-10-14?'",
+  "2026-10-14 19:28:58 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $599.33 on 'Will Portsmouth FC win on 2026-10-14?'",
+  "2026-10-14 19:52:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $127.04 on 'Charleston Battery leading at halftime?'",
+  "2026-10-14 20:13:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $100.04 on 'Aston Villa FC vs. Fenerbahçe SK: O/U 4.'",
+  "2026-10-14 20:13:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $91.30 on 'Aston Villa FC vs. Fenerbahçe SK: O/U 3.'",
+  "2026-10-14 20:15:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $28.56 on 'ŠK Slovan Bratislava vs. VfB Stuttgart: '",
+  "2026-10-14 20:28:53 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $55.65 on 'Will AS Roma win on 2026-10-14?'",
+  "2026-10-14 20:29:30 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $1.65 on 'AS Roma vs. Real Madrid CF: 2nd Half O/U'"
  ],
  "watcher": [
   {
@@ -1281,6 +1230,20 @@
    "concluded": "The exposure guard refused a live bet because Tier 1b remaining budget ($4.84) is below the $5.00 minimum, so the signal was logged to paper; this is the guard working, not a fault. The two new fingerprints (c6cd365f1336, 015a3c1dc257) are the same benign event as the bulk ones (1781e8e2f42a x290, 21b542768c8e x211); they fingerprinted separately only because the title 'New Mexico vs. Hawai'i: O/U 45.5' contains apostrophes that break the quoted-string normalization. The condition has fired 54 times today since 01:27 with identical numbers, while the box stays healthy: scheduler polls=104884 e",
    "confidence": 0.9,
    "cost_usd": 0.457999,
+   "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1792004214.3577778,
+   "day": "2026-10-14",
+   "woke_because": "0b2366f0d2d9",
+   "fingerprint": "0b2366f0d2d9",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "A benched wallet 0x10658d37 was copied for one $6.40 bet on Liverpool, the market resolved against it, and the probation rule (needs 2 won and -10%) evicted it after 0 of 1 won at -100%. This fingerprint is new only because the probation_failed ledger line now carries a 'lost N on <market> | Evict is reversible' suffix; it is a cousin of the already-known evict fingerprints 89a855d4a192 and b04bf1a60c1d. The flow is correct end to end: redeemer settled 30.48 sh for $0.00 (bot-2026-10-14.log:15575), ops booked the loss and pushed it to the phone, zset evicted (sticky). Chain reader is live, cur",
+   "confidence": 0.9,
+   "cost_usd": 0.39456199999999997,
    "did": "noted",
    "proof": "",
    "question": ""
@@ -1359,12 +1322,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1791854131.6607878,
-   "count": 102,
+   "last": 1792004214.3577778,
+   "count": 103,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1791854131.6607878
+    1792004214.3577778
    ],
    "action": null,
    "action_ts": null,
@@ -1373,12 +1336,12 @@
   },
   "2497cd50ff7d": {
    "first": 1790098332.9559617,
-   "last": 1791836907.5894148,
-   "count": 32,
+   "last": 1792004094.2758079,
+   "count": 33,
    "sample": "2026-09-21 00:52:20 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Counter-Strike: Bounty Hunters Esports v' (0x57b25849, tier 1b)",
    "norm": "INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)",
    "recent": [
-    1791836907.5894148
+    1792004094.2758079
    ],
    "action": null,
    "action_ts": null,
@@ -1514,21 +1477,18 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792002894.0387526,
-   "count": 982,
+   "last": 1792006566.0558772,
+   "count": 989,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1791999560.7406704,
-    1791999800.8439515,
-    1792001333.7315123,
-    1792001333.7315123,
-    1792001333.7315123,
-    1792002053.8144083,
-    1792002533.9539149,
-    1792002533.9539149,
-    1792002894.0387526,
-    1792002894.0387526
+    1792003134.0966134,
+    1792003134.0966134,
+    1792004094.2758079,
+    1792005005.6826992,
+    1792006206.0008569,
+    1792006566.0558772,
+    1792006566.0558772
    ],
    "action": null,
    "action_ts": null,
@@ -1650,12 +1610,12 @@
   },
   "b04bf1a60c1d": {
    "first": 1790266414.9428663,
-   "last": 1791425316.4953368,
-   "count": 11,
+   "last": 1792004214.3577778,
+   "count": 12,
    "sample": "2026-09-24 16:11:52 WARNING [zset] EVICTED 0x05878ac343c1387d592042d788424412733ac40b from set Z: probation failed: 0 of 2 won, realized -99.9% on $12.80 (pass needs 2 won and -10%)",
    "norm": "WARNING [zset] EVICTED <hex> from set Z: probation failed: N of N won, realized N on $N (pass needs N won and N)",
    "recent": [
-    1791425316.4953368
+    1792004214.3577778
    ],
    "action": null,
    "action_ts": null,
@@ -1664,12 +1624,12 @@
   },
   "89a855d4a192": {
    "first": 1790266414.9428663,
-   "last": 1791425316.4953368,
-   "count": 11,
+   "last": 1792004214.3577778,
+   "count": 12,
    "sample": "2026-09-24 16:11:52 INFO  [ops] evict: '0x05878ac3 in set Z' -> 'evicted (sticky)' | probation failed: 0 of 2 won, realized -99.9% on $12.80 (pass needs 2 won and -10%)",
    "norm": "INFO [ops] evict: 'S' -> 'S' | probation failed: N of N won, realized N on $N (pass needs N won and N)",
    "recent": [
-    1791425316.4953368
+    1792004214.3577778
    ],
    "action": null,
    "action_ts": null,
@@ -1906,13 +1866,12 @@
   },
   "1bd07071cf73": {
    "first": 1790364989.5143719,
-   "last": 1791556667.9703004,
-   "count": 8,
+   "last": 1792006566.0558772,
+   "count": 9,
    "sample": "2026-09-25 19:35:34 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
-    1791555347.8765173,
-    1791556667.9703004
+    1792006566.0558772
    ],
    "action": null,
    "action_ts": null,
@@ -2204,12 +2163,12 @@
   },
   "a19634278c3d": {
    "first": 1790599473.6040406,
-   "last": 1791634639.0265102,
-   "count": 3,
+   "last": 1792004094.2758079,
+   "count": 4,
    "sample": "2026-09-28 12:43:39 INFO  [ops] push:daily_loss: None -> \"📉 <b>Today's losses reach $12.80</b> (10% of the $91.68 bankroll).\"",
    "norm": "INFO [ops] push:daily_loss: None -> 'S'",
    "recent": [
-    1791634639.0265102
+    1792004094.2758079
    ],
    "action": null,
    "action_ts": null,
@@ -2589,14 +2548,12 @@
   },
   "d3a278c17ca5": {
    "first": 1790960528.7135174,
-   "last": 1791997279.8562932,
-   "count": 72,
+   "last": 1792004885.6713054,
+   "count": 73,
    "sample": "2026-10-02 17:01:50 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
    "norm": "INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows",
    "recent": [
-    1791994878.8651893,
-    1791996079.538428,
-    1791997279.8562932
+    1792004885.6713054
    ],
    "action": null,
    "action_ts": null,
@@ -3188,13 +3145,15 @@
   },
   "3fd84e7cc412": {
    "first": 1791481911.1137545,
-   "last": 1791997159.7242396,
-   "count": 101,
+   "last": 1792009807.1646698,
+   "count": 106,
    "sample": "2026-10-08 17:50:40 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: SELL $2554.71 on 'Gemini 4.0 released by October 15, 2026?'",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: SELL $N on 'S'",
    "recent": [
-    1791997039.7078545,
-    1791997159.7242396
+    1792008846.3984947,
+    1792008966.747607,
+    1792009807.1646698,
+    1792009807.1646698
    ],
    "action": null,
    "action_ts": null,
@@ -3203,20 +3162,15 @@
   },
   "1781e8e2f42a": {
    "first": 1791482341.4384031,
-   "last": 1792002053.8144083,
-   "count": 296,
+   "last": 1792008846.3984947,
+   "count": 301,
    "sample": "2026-10-08 17:58:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: BUY $500.00 on ''",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'",
    "recent": [
-    1792000520.9304862,
-    1792000641.004674,
-    1792000641.004674,
-    1792000853.506994,
-    1792000853.506994,
-    1792000973.660964,
-    1792001213.694813,
-    1792001333.7315123,
-    1792002053.8144083
+    1792005965.8657203,
+    1792006206.0008569,
+    1792007646.1665134,
+    1792008846.3984947
    ],
    "action": null,
    "action_ts": null,
@@ -3417,13 +3371,12 @@
   },
   "d7d42c1f33f7": {
    "first": 1791629042.6847835,
-   "last": 1791840429.7749135,
-   "count": 29,
+   "last": 1792004094.2758079,
+   "count": 30,
    "sample": "2026-10-10 10:43:05 INFO  [ops] push:settled: None -> '❌ <b>LOST -$6.23</b>\\n<b>Shanghai Rolex Masters: Yunchaokete Bu vs Casper Ruud</b>\\nPick: <b>Yunchaokete Bu</b>\\nStaked $6.'",
    "norm": "INFO [ops] push:settled: None -> 'S'",
    "recent": [
-    1791836907.5894148,
-    1791840429.7749135
+    1792004094.2758079
    ],
    "action": null,
    "action_ts": null,
@@ -3474,21 +3427,16 @@
   },
   "21b542768c8e": {
    "first": 1791703402.439332,
-   "last": 1792002053.8144083,
-   "count": 218,
+   "last": 1792008846.3984947,
+   "count": 224,
    "sample": "2026-10-11 07:23:17 INFO  [missed] on paper: $5.00 on 'KCC Egis vs. Sonic Boom' @ 0.390 (live refused: Tier 1b exposure full: remaining=$4.56 < min_bet=$5.00)",
    "norm": "INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)",
    "recent": [
-    1792000520.9304862,
-    1792000641.004674,
-    1792000641.004674,
-    1792000853.506994,
-    1792000853.506994,
-    1792000853.506994,
-    1792000973.660964,
-    1792001213.694813,
-    1792001333.7315123,
-    1792002053.8144083
+    1792005965.8657203,
+    1792006206.0008569,
+    1792007646.1665134,
+    1792007646.1665134,
+    1792008846.3984947
    ],
    "action": null,
    "action_ts": null,
@@ -3783,6 +3731,20 @@
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'i: O/U N'",
    "recent": [
     1792000641.004674
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "0b2366f0d2d9": {
+   "first": 1792004214.3577778,
+   "last": 1792004214.3577778,
+   "count": 1,
+   "sample": "2026-10-14 18:56:13 INFO  [ops] probation_failed: '0x10658d37 on probation (10 days on probation)' -> 'evicted: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)' | lost -6.40 on 'Will Liverpool FC win o | Evict is reversible: /zset readmit",
+   "norm": "INFO [ops] probation_failed: 'S' -> 'S' | lost N on 'Will Liverpool FC win o | Evict is reversible: /zset readmit",
+   "recent": [
+    1792004214.3577778
    ],
    "action": null,
    "action_ts": null,
