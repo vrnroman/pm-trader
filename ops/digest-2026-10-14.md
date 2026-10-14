@@ -1,7 +1,7 @@
-# ops digest 2026-10-14T22:18:09.772099+00:00 (last 24h)
+# ops digest 2026-10-14T23:48:10.023921+00:00 (last 24h)
 
 ## money state
-{"cash": 4.842563, "open_cost": 0.0, "equity": 4.84, "floor": null, "stated": 80.0, "spend": {"date": "2026-10-14", "spent_usd": 0.0, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 84, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1792016117.6652071, "day": "2026-10-14"}
+{"cash": 4.842563, "open_cost": 0.0, "equity": 4.84, "floor": null, "stated": 80.0, "spend": {"date": "2026-10-14", "spent_usd": 0.0, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 84, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1792021514.2223406, "day": "2026-10-14"}
 
 ## arm: {"armed": true, "ts": 1791286264.991414, "by": "watcher:no trade data for", "reason": "watcher: 'no trade data for' clear for 15 min", "first_armed_ts": 1788617432.0499406, "floor_override": false, "daily_loss_override_day": null}
 ## spend today: {"date": "2026-10-14", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {"0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 1}, "yesterday": "2026-10-13", "closed_reason": ""}
@@ -16,11 +16,10 @@ benched  0x28ef6f21: 57 settled, 58% won vs 56% needed, net +0.3% on $22,470, wo
 in form  0x9f15613e: 188 settled, 59% won vs 52% needed, net +12.4% on $621,549, worst day -30,818, 7 of 12 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
 in form  0xd970693a: 20 settled, 55% won vs 51% needed, net +4.6% on $7,654, worst day -360, 20 of 20 exits under 10 min
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
-two clocks: 43 matched fills over 1.0 d, api lag p50 3.2s, chain lag p50 15.2s, chain earlier by -11.9s at the median; api-only 1, chain-only 445, replayed rows 0; CHAIN IS PRIMARY
-⏱ api lag cost, last 7d (estimate): +3.99 USD over 2530 fills at $5.00 each, +0.000 USD a fill at the median, chain earlier by 13.6s
+two clocks: 43 matched fills over 1.0 d, api lag p50 3.2s, chain lag p50 15.2s, chain earlier by -11.9s at the median; api-only 1, chain-only 474, replayed rows 0; CHAIN IS PRIMARY
+⏱ api lag cost, last 7d (estimate): +6.90 USD over 2537 fills at $5.00 each, +0.000 USD a fill at the median, chain earlier by 13.6s
 
-## watcher (7 wakes in 24h)
-{"ts": 1791930222.724169, "kind": "note", "woke_because": "4637a9736ebd, 3e4374d2ae05", "concluded": "The tier 1b exposure guard refused the live copy because cash is $4.84 and below the $5.00 min_bet, so this is correct protective behaviour, not a fault. I counted 68 exposure-full refusals in bot-2026-10-13.log all at remaining=$4.84, running since 20:57, with a normal tier 1b release of $5.00 at
+## watcher (6 wakes in 24h)
 {"ts": 1791943262.2668526, "kind": "nothing", "woke_because": "b979d127d8ac, 9c2dd3e3edf7", "concluded": "The cause is a routine [ops] form action that un-benched wallet 0xd970693a back to in form by the 14-day bar (19 settled, 58% won vs 50% needed, net +5.5%), and a paired escalation_delivered line reporting that action as applied. Both are INFO ops lines logged once each; this is the same routi
 {"ts": 1791957669.258078, "kind": "analyst", "woke_because": "daily study", "concluded": "84 of the 99 resolved-unclaimed positions are worth under $1 (nothing to collect) and the other 15 are neg-risk skipped by design, so the 10-13 'trapped winnings, fix RPC' call is wrong: 10-14 activity reads are OK (no 403), the $4.84 cash is real drawdown near the $10 floor, and much of it came from now-evic
 {"ts": 1791957669.258078, "kind": "analyst", "woke_because": "daily study", "concluded": "One wallet (0x5213eb85) took 28 of 34 live slots while running -22% on 69 signals, so capping per-wallet-day copies at 14 (down from 20) blunts single-wallet domination while leaving the top winning wallets (~13 copies/day) untouched, consistent with the wallet_cap studies showing ROI holds at tighter caps.",
@@ -28,20 +27,21 @@ two clocks: 43 matched fills over 1.0 d, api lag p50 3.2s, chain lag p50 15.2s, 
 {"ts": 1792000641.004674, "kind": "note", "woke_because": "c6cd365f1336, 015a3c1dc257", "concluded": "The exposure guard refused a live bet because Tier 1b remaining budget ($4.84) is below the $5.00 minimum, so the signal was logged to paper; this is the guard working, not a fault. The two new fingerprints (c6cd365f1336, 015a3c1dc257) are the same benign event as the bulk ones (1781e8e2f42a x290,
 {"ts": 1792004214.3577778, "kind": "note", "woke_because": "0b2366f0d2d9", "concluded": "A benched wallet 0x10658d37 was copied for one $6.40 bet on Liverpool, the market resolved against it, and the probation rule (needs 2 won and -10%) evicted it after 0 of 1 won at -100%. This fingerprint is new only because the probation_failed ledger line now carries a 'lost N on <market> | Evict is reversibl
 ## live limits (owner's number, and the analyst's where one is in force)
-LIVE_MAX_PER_WALLET_DAY: 14 (analyst, 7.7 h left, owner 20): One wallet (0x5213eb85) took 28 of 34 live slots while running -22% on 69 signal
+LIVE_MAX_PER_WALLET_DAY: 14 (analyst, 6.2 h left, owner 20): One wallet (0x5213eb85) took 28 of 34 live slots while running -22% on 69 signal
 FETCH_INTERVAL: 3.0 (owner) band 2..5
 OPS_REARM_CLEAR_S: 900.0 (owner) band 600.0..1800.0
 OPS_REARM_MAX_PER_DAY: 3 (owner) band 1..3
 FORM_DAYS: 14.0 (owner) band 7.0..21.0
 ## book B at each slice floor (raw numbers; the gate reads the one marked)
-b300 (floor $300): 9793 settled, 339 open, realized +1.8%, at their price +2.8% (net -7.9%), win rate 57%, feeds the Z gate
-b150 (floor $150): 3276 settled, 266 open, realized +3.7%, at their price +4.7% (net -5.3%), win rate 59%
-b100 (floor $100): 3520 settled, 231 open, realized +2.0%, at their price +3.0% (net -6.8%), win rate 57%
-## near the Z door (43 wallets within 2 fails; 7 pass and wait)
+b300 (floor $300): 9799 settled, 342 open, realized +1.7%, at their price +2.7% (net -7.9%), win rate 57%, feeds the Z gate
+b150 (floor $150): 3281 settled, 263 open, realized +3.7%, at their price +4.7% (net -5.3%), win rate 60%
+b100 (floor $100): 3527 settled, 225 open, realized +2.0%, at their price +3.0% (net -6.8%), win rate 58%
+## near the Z door (44 wallets within 2 fails; 6 pass and wait)
 0x00110b8e: 1 fail(s): not a scalper at our latency (scalper: 52% of exits within 10 min; uncopyable at our latency)
 0x05878ac3: 1 fail(s): active within 14d (21d ago)
 0x074a3a0f: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (15 clean (of 15 all-time))
 0x09b045ba: 1 fail(s): not a scalper at our latency (scalper: 100% of exits within 10 min; uncopyable at our latency)
+0x10658d37: 1 fail(s): still positive with its best 3 copies deleted (-3% over 42 copies with its best 3 deleted)
 0x141a5834: 1 fail(s): promotion floor still holds (copy ROI +9% < floor +10%)
 0x1985327e: 1 fail(s): not a scalper at our latency (scalper: 100% of exits within 10 min; uncopyable at our latency)
 0x3968f7c9: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (20 clean (of 20 all-time))
@@ -49,7 +49,6 @@ b100 (floor $100): 3520 settled, 231 open, realized +2.0%, at their price +3.0% 
 0x4abdea21: 1 fail(s): promotion floor still holds (copy ROI +2% < floor +10%)
 0x612f885b: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (26 clean (of 26 all-time))
 0x6739f528: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (19 clean (of 19 all-time))
-0x68e1e8ef: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (22 clean (of 22 all-time))
 ## experiments (the analyst's cards; one live at a time)
 min150-r1        void   slice floor 300 to 150                             n 138 +10.6 pp  (min150-r1 <- min150, study 2026-09-24-min_usd-cdc749c5)
 min150           void   slice floor 300 to 150                             n 128 -1.9 pp  (min150 <- study 2026-09-24-min_usd-cdc749c5)
@@ -59,39 +58,38 @@ study 2026-09-25-wallet_cap-178163d7: wallets in 32 -> 34 (stay 32, enter 2, lea
 study 2026-09-27-form-c2308d97: wallets in 6 -> 6 (stay 5, enter 1, leave 1); copies 3007 -> 2073; ROI at their price +3.2% -> +2.9%
 study 2026-10-10-wallet_cap-195d4691: wallets in 35 -> 35 (stay 32, enter 3, leave 3); copies 2402 -> 3230; ROI at their price +12.7% -> +11.8%
 ## fingerprints (30 shown)
-1781e8e2f42a x307 last 0.0h ago [open: 307 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'
-21b542768c8e x231 last 0.0h ago [open: 231 hits, no action yet] :: INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)
-54ac26fb3ff1 x990 last 1.0h ago [open: 990 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
-27c57bdbc2c6 x5 last 1.1h ago [open: 5 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (head race: CTF [NN]: {'S': N, 'S': 'S'}); a set-Z fill in those b
-3fd84e7cc412 x108 last 1.6h ago [open: 108 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: SELL $N on 'S'
-1bd07071cf73 x9 last 2.7h ago [open: 9 hits, no action yet] :: ERROR Onchain poll error: ('S', RemoteDisconnected('S'))
-d3a278c17ca5 x73 last 3.2h ago [open: 73 hits, no action yet] :: INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows
-c6d91d798e54 x103 last 3.4h ago [open: 103 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
-b04bf1a60c1d x12 last 3.4h ago [open: 12 hits, no action yet] :: WARNING [zset] EVICTED <hex> from set Z: probation failed: N of N won, realized N on $N (pass needs N won and N)
-89a855d4a192 x12 last 3.4h ago [open: 12 hits, no action yet] :: INFO [ops] evict: 'S' -> 'S' | probation failed: N of N won, realized N on $N (pass needs N won and N)
-0b2366f0d2d9 x1 last 3.4h ago [open: 1 hits, no action yet] :: INFO [ops] probation_failed: 'S' -> 'S' | lost N on 'Will Liverpool FC win o | Evict is reversible: /zset readmit
-2497cd50ff7d x33 last 3.4h ago [open: 33 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
-a19634278c3d x4 last 3.4h ago [open: 4 hits, no action yet] :: INFO [ops] push:daily_loss: None -> 'S'
-d7d42c1f33f7 x30 last 3.4h ago [open: 30 hits, no action yet] :: INFO [ops] push:settled: None -> 'S'
-c6cd365f1336 x1 last 4.3h ago [open: 1 hits, no action yet] :: INFO [missed] on paper: $N on 'S'i: O/U N' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)
-015a3c1dc257 x1 last 4.3h ago [open: 1 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'i: O/U N'
-727577d69f4e x32 last 5.1h ago [open: 32 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
-7dfc4a226f73 x114 last 5.1h ago [open: 114 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
-74647a944e17 x11 last 14.3h ago [open: 11 hits, no action yet] :: INFO [AB-RACE] daily snapshot SEND FAILED (era_day=N, era_floor=N)
-c51c5e128ab1 x9 last 14.3h ago [open: 9 hits, no action yet] :: INFO [AB-RACE] rehearsal line held/failed, real-money line sent
-b979d127d8ac x1 last 20.3h ago [open: 1 hits, no action yet] :: INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> is in form by the N-day bar (N settled, N won vs N needed, net N) b
-9c2dd3e3edf7 x1 last 20.3h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> is in form by the N-day bar (N settled, N won vs N needed, net N) bu
-b2b604f5f44b x19 last 20.5h ago [open: 19 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched copi
-8635d522b6fb x2 last 20.5h ago [open: 2 hits, no action yet] :: INFO [ops] decay_recovered: 'S' -> 'S' | does not lose at the prices we would really pay
-4637a9736ebd x1 last 23.9h ago [open: 1 hits, no action yet] :: INFO [missed] on paper: $N on 'S's Contender Series: Ilias Bul' @ N (live refused: Tier Nb exposure full: remaining=$N <
-3e4374d2ae05 x1 last 23.9h ago [open: 1 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S's Contender Series: Ilias Bul'
-cc2194138690 x2 last 24.7h ago [open: 2 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (head race: NEG_RISK_CTF [NN]: {'S': N, 'S': 'S'}); a set-Z fill i
-6f12d4998994 x46 last 26.5h ago [open: 46 hits, no action yet] :: INFO [recovery] No pending orders to recover
-6b829965c182 x46 last 26.5h ago [open: 46 hits, no action yet] :: INFO Bot started. Monitoring trades...
-9d8a6d2794ec x42 last 26.5h ago [open: 42 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
+1781e8e2f42a x316 last 0.2h ago [open: 316 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'
+21b542768c8e x242 last 0.2h ago [open: 242 hits, no action yet] :: INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)
+3fd84e7cc412 x112 last 0.3h ago [open: 112 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: SELL $N on 'S'
+d3a278c17ca5 x74 last 0.5h ago [open: 74 hits, no action yet] :: INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows
+54ac26fb3ff1 x993 last 0.9h ago [open: 993 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
+27c57bdbc2c6 x5 last 2.6h ago [open: 5 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (head race: CTF [NN]: {'S': N, 'S': 'S'}); a set-Z fill in those b
+1bd07071cf73 x9 last 4.2h ago [open: 9 hits, no action yet] :: ERROR Onchain poll error: ('S', RemoteDisconnected('S'))
+c6d91d798e54 x103 last 4.9h ago [open: 103 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
+b04bf1a60c1d x12 last 4.9h ago [open: 12 hits, no action yet] :: WARNING [zset] EVICTED <hex> from set Z: probation failed: N of N won, realized N on $N (pass needs N won and N)
+89a855d4a192 x12 last 4.9h ago [open: 12 hits, no action yet] :: INFO [ops] evict: 'S' -> 'S' | probation failed: N of N won, realized N on $N (pass needs N won and N)
+0b2366f0d2d9 x1 last 4.9h ago [open: 1 hits, no action yet] :: INFO [ops] probation_failed: 'S' -> 'S' | lost N on 'Will Liverpool FC win o | Evict is reversible: /zset readmit
+2497cd50ff7d x33 last 4.9h ago [open: 33 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
+a19634278c3d x4 last 4.9h ago [open: 4 hits, no action yet] :: INFO [ops] push:daily_loss: None -> 'S'
+d7d42c1f33f7 x30 last 4.9h ago [open: 30 hits, no action yet] :: INFO [ops] push:settled: None -> 'S'
+c6cd365f1336 x1 last 5.8h ago [open: 1 hits, no action yet] :: INFO [missed] on paper: $N on 'S'i: O/U N' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)
+015a3c1dc257 x1 last 5.8h ago [open: 1 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'i: O/U N'
+727577d69f4e x32 last 6.6h ago [open: 32 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
+7dfc4a226f73 x114 last 6.6h ago [open: 114 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
+74647a944e17 x11 last 15.8h ago [open: 11 hits, no action yet] :: INFO [AB-RACE] daily snapshot SEND FAILED (era_day=N, era_floor=N)
+c51c5e128ab1 x9 last 15.8h ago [open: 9 hits, no action yet] :: INFO [AB-RACE] rehearsal line held/failed, real-money line sent
+b979d127d8ac x1 last 21.8h ago [open: 1 hits, no action yet] :: INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> is in form by the N-day bar (N settled, N won vs N needed, net N) b
+9c2dd3e3edf7 x1 last 21.8h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> is in form by the N-day bar (N settled, N won vs N needed, net N) bu
+b2b604f5f44b x19 last 22.0h ago [open: 19 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched copi
+8635d522b6fb x2 last 22.0h ago [open: 2 hits, no action yet] :: INFO [ops] decay_recovered: 'S' -> 'S' | does not lose at the prices we would really pay
+4637a9736ebd x1 last 25.4h ago [open: 1 hits, no action yet] :: INFO [missed] on paper: $N on 'S's Contender Series: Ilias Bul' @ N (live refused: Tier Nb exposure full: remaining=$N <
+3e4374d2ae05 x1 last 25.4h ago [open: 1 hits, no action yet] :: SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S's Contender Series: Ilias Bul'
+cc2194138690 x2 last 26.2h ago [open: 2 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (head race: NEG_RISK_CTF [NN]: {'S': N, 'S': 'S'}); a set-Z fill i
+6f12d4998994 x46 last 28.0h ago [open: 46 hits, no action yet] :: INFO [recovery] No pending orders to recover
+6b829965c182 x46 last 28.0h ago [open: 46 hits, no action yet] :: INFO Bot started. Monitoring trades...
+9d8a6d2794ec x42 last 28.0h ago [open: 42 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
 
 ## ledger (30 rows)
-{"ts": 1791933355.656486, "day": "2026-10-13", "kind": "settle_pending", "before": "0x9f15613e open $5.00", "after": "payout not in the activity yet", "detail": "'Wuhan Tennis Open: Ann Li vs Camila Osor' left the wallet; booked when Polymarket's row shows", "push": null, "token_id": "91922604096008002394684069700623556261487419143416366928702684311893089705358", "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"}
 {"ts": 1791940679.7064557, "day": "2026-10-14", "kind": "settle_pending", "before": "0x9f15613e open $5.00", "after": "payout not in the activity yet", "detail": "'Bills 1H Team Total: O/U 12.5' left the wallet; booked when Polymarket's row shows", "push": null, "token_id": "86541468169648084032186461050528168561369845357622355203577534177036847348539", "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"}
 {"ts": 1791942510.3338842, "day": "2026-10-14", "kind": "decay_recovered", "before": "0x00110b8e below the door 1 day(s)", "after": "passes the door again", "detail": "does not lose at the prices we would really pay", "push": "WALLET", "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333", "days": 1}
 {"ts": 1791942510.3338842, "day": "2026-10-14", "kind": "decay_day", "before": "0xd970693a in set Z", "after": "below the door 5 of 7", "detail": "does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies", "push": null, "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba", "days": 5, "window": 7, "fails": ["does not lose at the prices we would really pay"]}
@@ -121,12 +119,9 @@ cc2194138690 x2 last 24.7h ago [open: 2 hits, no action yet] :: ERROR Onchain: c
 {"ts": 1792004173.9521039, "day": "2026-10-14", "kind": "evict", "before": "0x10658d37 in set Z", "after": "evicted (sticky)", "detail": "probation failed: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)", "push": null, "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218"}
 {"ts": 1792004172.8058274, "day": "2026-10-14", "kind": "probation_failed", "before": "0x10658d37 on probation (10 days on probation)", "after": "evicted: 0 of 1 won, realized -100.0% on $6.40 (pass needs 2 won and -10%)", "detail": "lost -6.40 on 'Will Liverpool FC win o | Evict is reversible: /zset readmit", "push": "WALLET", "wallet": "0x10658d371ae1f09eed503a3a14c8ac6a1a936218", "trial": [{"token_id": "25047259068419465775237994155977557323657851862064375566808011125788823973687", "pnl": -6.4, "won": false}]}
 {"ts": 1792004801.6486273, "day": "2026-10-14", "kind": "settle_pending", "before": "0x5213eb85 open $5.00", "after": "payout not in the activity yet", "detail": "'Will Deportivo Madryn win on 2026-10-11?' left the wallet; booked when Polymarket's row shows", "push": null, "token_id": "94494526273499823034840014174269302273573882715673244773354081833140433995137", "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"}
+{"ts": 1792019961.8472085, "day": "2026-10-14", "kind": "settle_pending", "before": "0x9f15613e open $5.00", "after": "payout not in the activity yet", "detail": "'Wuhan Tennis Open: Ann Li vs Camila Osor' left the wallet; booked when Polymarket's row shows", "push": null, "token_id": "91922604096008002394684069700623556261487419143416366928702684311893089705358", "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"}
 
-## important lines (189)
-2026-10-13 22:23:33 INFO  [missed] on paper: $5.00 on 'Dana White's Contender Series: Ilias Bul' @ 0.460 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
-2026-10-13 22:37:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
-2026-10-13 22:57:02 INFO  [missed] on paper: $5.00 on 'AD San Carlos vs. Inter San Carlos: O/U ' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
-2026-10-13 23:15:56 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Wuhan Tennis Open: Ann Li vs Camila Osor' left the wallet; booked when Polymarket's row shows
+## important lines (210)
 2026-10-14 01:18:00 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Bills 1H Team Total: O/U 12.5' left the wallet; booked when Polymarket's row shows
 2026-10-14 01:27:48 INFO  [missed] on paper: $5.00 on 'Will CA Bucaramanga win on 2026-08-25?' @ 0.789 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
 2026-10-14 01:49:45 INFO  [ops] decay_recovered: '0x00110b8e below the door 1 day(s)' -> 'passes the door again' | does not lose at the prices we would really pay
@@ -258,8 +253,20 @@ cc2194138690 x2 last 24.7h ago [open: 2 hits, no action yet] :: ERROR Onchain: c
 2026-10-14 21:35:15 INFO  [missed] on paper: $5.00 on 'Spread: LSU (-13.5)' @ 0.570 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
 2026-10-14 21:45:11 INFO  [missed] on paper: $5.00 on 'CA Mineiro vs. Montevideo City Torque: O' @ 0.480 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
 2026-10-14 22:15:20 INFO  [missed] on paper: $5.00 on 'CA Mineiro vs. Montevideo City Torque: 1' @ 0.827 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
-2026-10-13 22:23:33 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Dana White's Contender Series: Ilias Bul'
-2026-10-13 22:57:02 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $236.21 on 'AD San Carlos vs. Inter San Carlos: O/U '
+2026-10-14 22:24:17 INFO  [missed] on paper: $5.00 on 'Los Angeles Dodgers Team Total: O/U 4.5' @ 0.540 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 22:24:54 INFO  [missed] on paper: $5.00 on 'D.C. United SC vs. New York Red Bulls: O' @ 0.430 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 22:28:31 INFO  [missed] on paper: $5.00 on 'Kennesaw State vs. Missouri State: O/U 5' @ 0.520 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 22:40:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-10-14 22:50:35 INFO  [missed] on paper: $5.00 on 'CDPJuniorFC vs. Deportivo Pereira: O/U 2' @ 0.737 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 22:55:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+2026-10-14 23:07:41 INFO  [missed] on paper: $5.00 on 'Will Atlanta United FC win on 2026-10-14' @ 0.610 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 23:19:22 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Wuhan Tennis Open: Ann Li vs Camila Osor' left the wallet; booked when Polymarket's row shows
+2026-10-14 23:20:59 INFO  [missed] on paper: $5.00 on 'Western Kentucky vs. Sam Houston' @ 0.520 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 23:22:16 INFO  [missed] on paper: $5.00 on 'Will CA River Plate win on 2026-10-07?' @ 0.815 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 23:24:24 INFO  [missed] on paper: $5.00 on 'CA Sarmiento vs. CA River Plate: O/U 2.5' @ 0.703 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 23:24:24 INFO  [missed] on paper: $5.00 on 'CA Sarmiento vs. CA River Plate: Both Te' @ 0.420 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 23:24:26 INFO  [missed] on paper: $5.00 on 'Will CA Sarmiento win on 2026-10-07?' @ 0.470 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
+2026-10-14 23:35:09 INFO  [missed] on paper: $5.00 on 'Spread: Nashville SC (-2.5)' @ 0.560 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)
 2026-10-14 01:27:48 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $966.59 on 'Will CA Bucaramanga win on 2026-08-25?'
 2026-10-14 03:12:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1218.82 on 'Will Inter San Carlos win on 2026-10-13?'
 2026-10-14 04:22:50 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $2804.03 on 'Will Manchester City FC win on 2026-10-1'
@@ -312,3 +319,16 @@ cc2194138690 x2 last 24.7h ago [open: 2 hits, no action yet] :: ERROR Onchain: c
 2026-10-14 21:35:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Spread: LSU (-13.5)'
 2026-10-14 21:45:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $144.00 on 'CA Mineiro vs. Montevideo City Torque: O'
 2026-10-14 22:15:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $509.28 on 'CA Mineiro vs. Montevideo City Torque: 1'
+2026-10-14 22:24:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $383.87 on 'Los Angeles Dodgers Team Total: O/U 4.5'
+2026-10-14 22:24:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1282.92 on 'D.C. United SC vs. New York Red Bulls: O'
+2026-10-14 22:28:31 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Kennesaw State vs. Missouri State: O/U 5'
+2026-10-14 22:50:35 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $115.97 on 'CDPJuniorFC vs. Deportivo Pereira: O/U 2'
+2026-10-14 23:07:41 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $398.97 on 'Will Atlanta United FC win on 2026-10-14'
+2026-10-14 23:16:44 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $9.24 on 'Will CA River Plate win on 2026-10-07?'
+2026-10-14 23:20:59 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $207.19 on 'Western Kentucky vs. Sam Houston'
+2026-10-14 23:24:19 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $723.96 on 'Will CA Sarmiento win on 2026-10-07?'
+2026-10-14 23:24:24 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1500.00 on 'CA Sarmiento vs. CA River Plate: O/U 2.5'
+2026-10-14 23:24:24 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $377.21 on 'CA Sarmiento vs. CA River Plate: Both Te'
+2026-10-14 23:27:19 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $7.79 on 'Columbus Crew vs. Charlotte FC: Charlott'
+2026-10-14 23:27:21 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $2.90 on 'Columbus Crew vs. Charlotte FC: Columbus'
+2026-10-14 23:35:09 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $3894.42 on 'Spread: Nashville SC (-2.5)'
