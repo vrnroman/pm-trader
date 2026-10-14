@@ -1,13 +1,14 @@
 {
-    "id": "2026-10-14T00:42:58Z-210d",
-    "ts": 1791938578,
-    "kind": "wallet_action",
-    "action": "bench",
-    "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
-    "message": "0xd970693a is in form by the 14-day bar (19 settled, 58% won vs 50% needed, net +5.5%) but at the prices we would really pay it has failed the door 4 of the last 7 days and nets -7% over 39 matched copies, so benching it now.",
+    "id": "2026-10-14T06:43:08Z-2d50",
+    "ts": 1791960188,
+    "kind": "nothing",
+    "message": "Armed, equity $11.24, cash $4.84 still under the $5 min bet which was already escalated and pushed on the prior crunch, spend $0.00 of the $45 stop, no self-disarm, no new ERROR or Traceback pattern, the RPC 403 fingerprint has not fired since well before this window, and the bench on 0xd970693a from the last cycle still holds within its 24 hour window so no new wallet_action is needed.",
     "evidence": [
-        "in form  0xd970693a: 19 settled, 58% won vs 50% needed, net +5.5% on $7,254, worst day -360, 19 of 19 exits under 10 min",
-        "2026-10-13 01:30:57 INFO  [ops] decay_day: '0xd970693a in set Z' -> 'below the door 4 of 7' | does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies"
+        "## money state {\"cash\": 4.842563, \"open_cost\": 6.4, \"equity\": 11.24, \"floor\": null, \"armed\": true, \"resolved_unclaimed\": 84}",
+        "## arm: {\"armed\": true, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}",
+        "## spend today: {\"date\": \"2026-10-14\", \"spent_usd\": 0.0, \"closed_reason\": \"\"}",
+        "2026-10-13 ops note: tier 1b exposure guard refused the live copy because cash is $4.84 and below the $5.00 min_bet, so this is correct protective behaviour, not a fault",
+        "in form  0xd970693a: 19 settled, 58% won vs 50% needed, net +5.5% on $7,254, worst day -360 (already benched by prior verdict, 2026-10-14T00:42:58Z-210d)"
     ],
     "commit": null
 }
