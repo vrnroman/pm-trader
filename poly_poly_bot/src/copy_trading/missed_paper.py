@@ -228,4 +228,40 @@ def summary_lines(since_ts: float = 0.0) -> list[str]:
     if s.get("by_reason"):
         out.append("  refused because: " + ", ".join(
             f"{k} {v}" for k, v in sorted(s["by_reason"].items(), key=lambda kv: -kv[1])))
+    # The owner tops up after a "stable 3-day winning streak" on this book
+    # (2026-10-15): one line per UTC day of settlement, and the streak.
+    days = by_day(since_ts)
+    if days:
+        out.append("  by day settled (UTC):")
+        for d, (n, won, pnl) in days[-7:]:
+            out.append(f"    {d}: {n} settled, {won} won, ${pnl:+.2f}")
+        streak = winning_streak(days)
+        out.append(f"  winning days in a row: {streak}" + (" ✅ (3 reached)" if streak >= 3 else " (top-up at 3)"))
     return out
+
+
+def by_day(since_ts: float = 0.0) -> list:
+    """[(YYYY-MM-DD, settled, won, pnl)] per UTC day of settlement, ascending."""
+    led = PaperCopyLedger(ledger_path())
+    d: dict[str, list] = {}
+    for p in led.positions.values():
+        if not p.closed or p.opened_ts < since_ts:
+            continue
+        k = time.strftime("%Y-%m-%d", time.gmtime(p.closed_ts))
+        b = d.setdefault(k, [0, 0, 0.0])
+        b[0] += 1
+        b[1] += bool(p.won)
+        b[2] += p.pnl
+    return sorted((k, (v[0], v[1], round(v[2], 2))) for k, v in d.items())
+
+
+def winning_streak(days: list, now: Optional[float] = None) -> int:
+    """Consecutive positive days ending with the last day that has settled
+    bets. A day with no settlements breaks nothing and counts nothing."""
+    n = 0
+    for _, (cnt, _won, pnl) in reversed(days):
+        if cnt and pnl > 0:
+            n += 1
+        else:
+            break
+    return n

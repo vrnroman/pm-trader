@@ -185,3 +185,23 @@ def test_the_executor_books_every_money_refusal():
     assert 'missed_paper.record(trade, "disarmed: the arm is off")' in src
     import main
     assert "missed_paper.settle()" in inspect.getsource(main._live_guard_loop)
+
+
+def test_by_day_and_the_winning_streak(book):
+    day = 86400.0
+    missed_paper.record(_trade(i="a", token="tokA", price=0.4), "exposure full", now=1.0 * day)
+    missed_paper.record(_trade(i="b", token="tokA", price=0.4), "exposure full", now=2.0 * day)
+    missed_paper.record(_trade(i="c", token="tokB", price=0.6), "exposure full", now=3.0 * day)
+    led = PaperCopyLedger(str(book))
+    led.positions["a-tokA"].realize(True, now=1.5 * day)   # day 1 +
+    led.positions["b-tokA"].realize(True, now=2.5 * day)   # day 2 +
+    led.positions["c-tokB"].realize(False, now=3.5 * day)  # day 3 -
+    led.save()
+    days = missed_paper.by_day()
+    assert [d for d, _ in days] == ["1970-01-02", "1970-01-03", "1970-01-04"]
+    assert days[0][1] == (1, 1, 7.5) and days[2][1] == (1, 0, -5.0)
+    assert missed_paper.winning_streak(days) == 0, "a losing last day resets"
+    assert missed_paper.winning_streak(days[:2]) == 2
+    lines = missed_paper.summary_lines()
+    assert any("winning days in a row: 0" in x for x in lines)
+    assert any("1970-01-02: 1 settled, 1 won, $+7.50" in x for x in lines)
