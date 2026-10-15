@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-15T21:30:42.581820+00:00",
+ "generated": "2026-10-15T22:05:54.662086+00:00",
  "money": {
   "cash": 4.842563,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1792099699.0687773,
+  "ts": 1792101653.8799279,
   "day": "2026-10-15"
  },
  "arm": {
@@ -888,9 +888,6 @@
   }
  ],
  "important": [
-  "2026-10-14 21:32:34 INFO  [missed] on paper: $5.00 on 'Spread: Notre Dame (-8.5)' @ 0.560 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-14 21:35:15 INFO  [missed] on paper: $5.00 on 'Spread: LSU (-13.5)' @ 0.570 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-14 21:45:11 INFO  [missed] on paper: $5.00 on 'CA Mineiro vs. Montevideo City Torque: O' @ 0.480 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-14 22:15:20 INFO  [missed] on paper: $5.00 on 'CA Mineiro vs. Montevideo City Torque: 1' @ 0.827 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-14 22:24:17 INFO  [missed] on paper: $5.00 on 'Los Angeles Dodgers Team Total: O/U 4.5' @ 0.540 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-14 22:24:54 INFO  [missed] on paper: $5.00 on 'D.C. United SC vs. New York Red Bulls: O' @ 0.430 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
@@ -1068,9 +1065,8 @@
   "2026-10-15 20:50:04 INFO  [missed] on paper: $5.00 on 'Will Juventus FC win on 2026-10-15?' @ 0.782 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 21:03:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-15 21:03:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-14 21:32:34 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Spread: Notre Dame (-8.5)'",
-  "2026-10-14 21:35:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'Spread: LSU (-13.5)'",
-  "2026-10-14 21:45:11 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $144.00 on 'CA Mineiro vs. Montevideo City Torque: O'",
+  "2026-10-15 21:50:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-15 21:55:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-14 22:15:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $509.28 on 'CA Mineiro vs. Montevideo City Torque: 1'",
   "2026-10-14 22:24:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $383.87 on 'Los Angeles Dodgers Team Total: O/U 4.5'",
   "2026-10-14 22:24:54 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1282.92 on 'D.C. United SC vs. New York Red Bulls: O'",
@@ -1417,17 +1413,15 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792098202.877885,
-   "count": 1098,
+   "last": 1792101327.0121608,
+   "count": 1100,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792095921.6431055,
-    1792096161.920579,
-    1792097122.2169976,
-    1792097122.2169976,
     1792098202.877885,
-    1792098202.877885
+    1792098202.877885,
+    1792101085.6103742,
+    1792101327.0121608
    ],
    "action": null,
    "action_ts": null,
