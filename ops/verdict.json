@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-14T18:41:22Z-bb6e",
-    "ts": 1792003282,
+    "id": "2026-10-15T00:42:02Z-d1e4",
+    "ts": 1792024922,
     "kind": "nothing",
-    "message": "Armed, equity $11.24, cash $4.84, unchanged from the last cycle and still under the $5 min bet, same stuck-cash condition already escalated and pushed on a prior crunch. Spend $0.00 of the $45 stop, no self-disarm, no new ERROR or Traceback pattern since the last cycle. The bench on 0xd970693a from verdict 2026-10-14T00:42:58Z-210d still holds within its 24 hour window, so no new wallet_action is needed.",
+    "message": "Armed throughout, no self-disarm, no new ERROR or Traceback pattern. Equity fell to $4.84 (cash $4.84, open_cost $0.00) after the $6.40 Liverpool loss already pushed to the owner at 18:54 UTC; spend today $0.00 against the $45 stop. Cash stays below the $5 min bet so Tier 1b keeps skipping to paper, same stuck-cash condition as prior cycles. The prior bench on 0xd970693a has run past its 24h window and the bar now reads it in form again (20 settled, 55% won vs 51% needed, net +4.6%), so no new wallet_action.",
     "evidence": [
-        "## money state {\"cash\": 4.842563, \"open_cost\": 6.4, \"equity\": 11.24, \"floor\": null, \"armed\": true, \"resolved_unclaimed\": 84}",
+        "## money state {\"cash\": 4.842563, \"open_cost\": 0.0, \"equity\": 4.84, \"floor\": null, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}, \"armed\": true, \"resolved_unclaimed\": 84}",
         "## arm: {\"armed\": true, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}",
-        "## spend today: {\"date\": \"2026-10-14\", \"spent_usd\": 0.0, \"closed_reason\": \"\"}",
-        "2026-10-14 18:19:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $21151.60 on 'Will FK Bodø/Glimt win on 2026-10-14?' (same known condition, not a new fault)",
-        "in form  0xd970693a: 19 settled, 58% won vs 50% needed, net +5.5% on $7,254, worst day -360 (bar reading overridden by prior verdict 2026-10-14T00:42:58Z-210d, still within its 24h window)"
+        "2026-10-14 18:54:21 INFO [ops] push:daily_loss: None -> 'Down $6.40 today / That is 57% of the $11.24 bankroll (the alert line is 10%)'",
+        "2026-10-14 18:19:56 SKIP [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $21151.60 on 'Will FK Bodø/Glimt win on 2026-10-14?'",
+        "in form  0xd970693a: 20 settled, 55% won vs 51% needed, net +4.6% on $7,654, worst day -360, 20 of 20 exits under 10 min"
     ],
     "commit": null
 }
