@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-15T06:42:26Z-7687",
-    "ts": 1792046546,
+    "id": "2026-10-15T12:42:05Z-608b",
+    "ts": 1792068125,
     "kind": "nothing",
-    "message": "Armed throughout, no self-disarm, no new ERROR or Traceback pattern beyond known fingerprints. Cash stays at $4.84, still below the $5.00 min bet, so Tier 1b keeps skipping live copies to paper, same stuck-cash condition as last cycle. Two restarts (03:03 and 03:17 UTC) came back clean with no pending orders to recover. The $6.40 Liverpool loss and the probation eviction it caused were already pushed to the owner on 2026-10-14. 0xd970693a is now 6 of 7 days below the real-quotes decay door, but the form table itself still reads it in form at 55% won vs 51% needed, net +4.6%, so no wallet_action.",
+    "message": "Armed throughout the window, no self-disarm, no rearm-cap hit, no new ERROR or Traceback pattern beyond known fingerprints (404 price-lookup on resolved markets, AB-RACE snapshot send fail, inventory API sync). Cash still $4.84, same stuck-cash condition as last cycle, so Tier 1b keeps papering every signal; spend today $0.00, no losses. The $6.40 Liverpool loss and its probation eviction were already pushed before this window and are unchanged. 0xd970693a holds at 6 of 7 days below the real-quotes decay door (not worse than last cycle) and the form table still reads it in form at 55% won vs 51% needed, net +4.6%, so no wallet_action. 0x00110b8e recovered to 1 of 7 below that door. No followed wallet in the form table shows a losing streak or a worst day out of proportion to its volume.",
     "evidence": [
+        "## money state {\"cash\": 4.842563, \"armed\": true, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}}",
         "in form  0xd970693a: 20 settled, 55% won vs 51% needed, net +4.6% on $7,654, worst day -360, 20 of 20 exits under 10 min",
-        "2026-10-15 02:16:10 INFO  [ops] decay_day: '0xd970693a in set Z' -> 'below the door 6 of 7' | does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
-        "2026-10-15 03:58:36 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $135.57 on 'Will Gangwon FC win on 2026-10-15?'",
-        "2026-10-15 03:17:38 INFO  [recovery] No pending orders to recover",
-        "## money state {\"cash\": 4.842563, \"armed\": true, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}}"
+        "2026-10-15 08:19:03 INFO  [ops] decay_day: '0x00110b8e in set Z' -> 'below the door 1 of 7' | does not lose at the prices we would really pay: -0% at real quotes over 116 matched copies",
+        "2026-10-15 07:34:35 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $107.48 on 'Brighton & Hove Albion FC vs. FK Kauno Ž'",
+        "54ac26fb3ff1 x1070 last 0.6h ago [open: 1070 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}"
     ],
     "commit": null
 }
