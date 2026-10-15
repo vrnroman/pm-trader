@@ -132,4 +132,4 @@ def test_entry_floor_defaults_to_35_and_zero_disables(monkeypatch):
     d = trm._evaluate_tiered_trade_with_state(_priced(0.12), "1b", _exposure(), _cfg_1b())
     assert "entry under" not in (d.reason or "")
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
-    assert "ensure_env LIVE_MIN_ENTRY_PRICE 0.35" in src
+    assert "ensure_env LIVE_MIN_ENTRY_PRICE 0" in src  # owner, 2026-10-15: off (was 0.35 for a day)

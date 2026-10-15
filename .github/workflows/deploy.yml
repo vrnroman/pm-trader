@@ -215,8 +215,10 @@ jobs:
           ensure_env LIVE_FLOOR_USD off
           # Owner, 2026-10-14: at most 3 of the open slots per wallet.
           ensure_env LIVE_MAX_OPEN_PER_WALLET 3
-          # Owner, 2026-10-14: no live entry under 0.35 (long shots won 22%).
-          ensure_env LIVE_MIN_ENTRY_PRICE 0.35
+          # Owner, 2026-10-15: the 0.35 entry floor is OFF again. It rested on
+          # 23 bets (-18%); the next 31 long shots on paper were +34%: noise.
+          sed -i '/^LIVE_MIN_ENTRY_PRICE=/d' .env
+          ensure_env LIVE_MIN_ENTRY_PRICE 0
           # Owner, 2026-10-11: every live copy is $5 flat, up to $50 open at
           # once (capped by what the wallet holds); refusals for money are
           # kept on paper in the missed book (/missed).
