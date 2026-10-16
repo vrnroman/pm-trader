@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-16T15:30:31.429045+00:00",
+ "generated": "2026-10-16T16:39:17.411119+00:00",
  "money": {
-  "cash": 150.148679,
-  "open_cost": 0.0,
-  "equity": 150.15,
+  "cash": 129.729459,
+  "open_cost": 5.0,
+  "equity": 134.73,
   "floor": null,
   "stated": 80.0,
   "spend": {
    "date": "2026-10-16",
-   "spent_usd": 0.0,
+   "spent_usd": 20.0,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 84,
   "tier": {
    "1a": 0,
-   "1b": 0,
+   "1b": 15.0,
    "1c": 0
   },
-  "ts": 1792164370.5627081,
+  "ts": 1792168592.7335591,
   "day": "2026-10-16"
  },
  "arm": {
@@ -35,9 +35,9 @@
  },
  "spend": {
   "date": "2026-10-16",
-  "spent_usd": 5.0,
+  "spent_usd": 20.0,
   "wallet_copies": {
-   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 1
+   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 4
   },
   "wallet_copies_yesterday": {},
   "yesterday": "2026-10-15",
@@ -51,16 +51,30 @@
    "placements": []
   },
   "1b": {
-   "open_total": 5.0,
+   "open_total": 15.0,
    "daily_date": "2026-10-16",
-   "daily_volume": 5.0,
+   "daily_volume": 20.0,
    "placements": [
     {
-     "token_id": "26397738037836577166912888335020707493204350731115385243932172376216172977657",
+     "token_id": "44697220442657921900190298627898907527266719492541998672323057781782620382782",
      "cost": 5.0,
-     "ts": 1792164462.4231806,
+     "ts": 1792165662.8784368,
      "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Japan Women's Open, Qualification: Sara Sorribes Tormo vs Ma"
+     "title": "Will Wieczysta Krakow win on 2026-10-16?"
+    },
+    {
+     "token_id": "57131757629865468772455646717726198387493960106673610059309134123845812999564",
+     "cost": 5.0,
+     "ts": 1792166722.6293156,
+     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+     "title": "Will CD Los Chankas win on 2026-10-16?"
+    },
+    {
+     "token_id": "57517882709734746507226474273749419290404305577409262813502274649370035970123",
+     "cost": 5.0,
+     "ts": 1792168455.4674752,
+     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+     "title": "Will Çorum FK vs. Çaykur Rizespor end in a draw?"
     }
    ]
   },
@@ -305,11 +319,11 @@
  },
  "watch": {
   "floor_near": true,
-  "last_equity": 150.15,
+  "last_equity": 134.73,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
-  "no_copy_pushed": true,
+  "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-16T06:42:47Z-3771",
   "admit_scan_ts": 1792161772.4362905,
@@ -655,17 +669,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1792081210.2264864,
-   "day": "2026-10-15",
-   "kind": "settle_pending",
-   "before": "0x5213eb85 open $5.46",
-   "after": "payout not in the activity yet",
-   "detail": "'Amici Pallacanestro Udinese vs. Aquila B' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "95703664735749791183731390699614891695664225860385656324496051741755131064190",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
-  },
   {
    "ts": 1792082443.1944935,
    "day": "2026-10-15",
@@ -1026,16 +1029,31 @@
    "push": null,
    "token_id": "52073234488152194195674323124881596236931618613088958541294941061139462257181",
    "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
+  },
+  {
+   "ts": 1792167620.0075898,
+   "day": "2026-10-16",
+   "kind": "settle_pending",
+   "before": "0x5213eb85 open $5.46",
+   "after": "payout not in the activity yet",
+   "detail": "'Amici Pallacanestro Udinese vs. Aquila B' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "95703664735749791183731390699614891695664225860385656324496051741755131064190",
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
+  },
+  {
+   "ts": 1792168267.130678,
+   "day": "2026-10-16",
+   "kind": "settle_pending",
+   "before": "0x9f15613e open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Japan Women's Open, Qualification: Sara ' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "26397738037836577166912888335020707493204350731115385243932172376216172977657",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
   }
  ],
  "important": [
-  "2026-10-15 15:40:06 INFO  [missed] on paper: $5.00 on 'Al Hazem SC vs. Al Fateh Saudi Club: O/U' @ 0.850 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-15 15:53:30 INFO  [missed] on paper: $5.00 on 'Will AFC Ajax win on 2026-10-15?' @ 0.560 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-15 16:00:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 16:00:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 16:03:20 ERROR Onchain: chunk 95583243-95583249 SKIPPED after 5 refused reads (head race: NEG_RISK_CTF [95583243-95583249]: {'code': -32000, 'message': 'invalid block range params'}); a set-Z fill in those blocks reaches the bot through the data api only",
-  "2026-10-15 16:20:10 INFO  [ops] settle_pending: '0x5213eb85 open $5.46' -> 'payout not in the activity yet' | 'Amici Pallacanestro Udinese vs. Aquila B' left the wallet; booked when Polymarket's row shows",
-  "2026-10-15 16:30:38 INFO  [missed] on paper: $5.00 on 'Al Khaleej Saudi Club vs. Al Fayha Saudi' @ 0.557 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 16:39:57 INFO  [missed] on paper: $5.00 on 'Manisa Futbol Kulubu vs. Esenler Erokspo' @ 0.580 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 16:40:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-15 16:40:43 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Will Pogon Szczecin win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
@@ -1186,11 +1204,19 @@
   "2026-10-16 14:52:58 INFO  [ops] settle_pending: '0x5213eb85 open $5.00' -> 'payout not in the activity yet' | 'Catania: Sean Cuenin vs Izan Almazan Val' left the wallet; booked when Polymarket's row shows",
   "2026-10-16 15:27:41 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $5.00 / no spend cap (the day stops after $45 lost)",
   "2026-10-16 15:27:42 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $5.00 / $200.00",
-  "2026-10-15 15:40:06 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $223.55 on 'Al Hazem SC vs. Al Fateh Saudi Club: O/U'",
-  "2026-10-15 15:40:24 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $2.10 on 'FC Red Bull Salzburg vs. AC Milan: FC Re'",
-  "2026-10-15 15:43:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $195.92 on 'Will Al Fateh Saudi Club win on 2026-10-'",
-  "2026-10-15 15:53:30 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $102.94 on 'Will AFC Ajax win on 2026-10-15?'",
-  "2026-10-15 16:30:38 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $678.24 on 'Al Khaleej Saudi Club vs. Al Fayha Saudi'",
+  "2026-10-16 15:47:39 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $10.00 / no spend cap (the day stops after $45 lost)",
+  "2026-10-16 15:47:42 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $10.00 / $200.00",
+  "2026-10-16 15:54:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 16:03:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 16:05:21 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $15.00 / no spend cap (the day stops after $45 lost)",
+  "2026-10-16 16:05:22 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $15.00 / $200.00",
+  "2026-10-16 16:09:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 16:20:21 INFO  [ops] settle_pending: '0x5213eb85 open $5.46' -> 'payout not in the activity yet' | 'Amici Pallacanestro Udinese vs. Aquila B' left the wallet; booked when Polymarket's row shows",
+  "2026-10-16 16:24:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 16:31:07 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $10.00",
+  "2026-10-16 16:31:09 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Japan Women's Open, Qualification: Sara ' left the wallet; booked when Polymarket's row shows",
+  "2026-10-16 16:34:02 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $20.00 / no spend cap (the day stops after $45 lost)",
+  "2026-10-16 16:34:15 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $15.00 / $200.00",
   "2026-10-15 16:39:57 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $116.58 on 'Manisa Futbol Kulubu vs. Esenler Erokspo'",
   "2026-10-15 16:48:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $18.24 on 'Olympique Lyonnais vs. Crystal Palace FC'",
   "2026-10-15 16:48:52 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $26.46 on 'NK Celje vs. AS Omónoia Leukosías: O/U 2'",
@@ -1244,7 +1270,13 @@
   "2026-10-16 13:48:22 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $207.20 on 'Will Madura United win on 2026-10-16?'",
   "2026-10-16 14:09:59 INFO  [recovery] No pending orders to recover",
   "2026-10-16 15:27:42 TRADE [LIVE] BUY $5.00 on 'Japan Women's Open, Qualification: Sara ' @ 0.4900, order 0xa0509d45df...",
-  "2026-10-16 15:27:42 TRADE [verify] FILLED: BUY 10.19 shares on 'Japan Women's Open, Qualification: Sara ' @ 0.4900"
+  "2026-10-16 15:27:42 TRADE [verify] FILLED: BUY 10.19 shares on 'Japan Women's Open, Qualification: Sara ' @ 0.4900",
+  "2026-10-16 15:47:40 TRADE [LIVE] BUY $5.00 on 'Will Wieczysta Krakow win on 2026-10-16?' @ 0.5000, order 0xe0bc41efdd...",
+  "2026-10-16 15:47:43 TRADE [verify] FILLED: BUY 10.00 shares on 'Will Wieczysta Krakow win on 2026-10-16?' @ 0.5000",
+  "2026-10-16 16:05:21 TRADE [LIVE] BUY $5.00 on 'Will CD Los Chankas win on 2026-10-16?' @ 0.5700, order 0x215baaa839...",
+  "2026-10-16 16:05:24 TRADE [verify] FILLED: BUY 8.77 shares on 'Will CD Los Chankas win on 2026-10-16?' @ 0.5700",
+  "2026-10-16 16:34:04 TRADE [LIVE] BUY $5.00 on 'Will Çorum FK vs. Çaykur Rizespor end in' @ 0.7400, order 0x6c76daec2f...",
+  "2026-10-16 16:34:15 TRADE [verify] FILLED: BUY 6.76 shares on 'Will Çorum FK vs. Çaykur Rizespor end in' @ 0.7400"
  ],
  "watcher": [
   {
@@ -1336,6 +1368,20 @@
    "did": "noted",
    "proof": "",
    "question": ""
+  },
+  {
+   "ts": 1792168332.6353457,
+   "day": "2026-10-16",
+   "woke_because": "49f062c24462",
+   "fingerprint": "49f062c24462",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "A resolved 0x9f15613e position left the wallet and is awaiting its payout row in Polymarket's activity feed, the ordinary settle_pending lifecycle. This is the same [ops] settle_pending flow as fingerprint d3a278c17ca5 (x98) and the 0x5213eb85 lines; all 11 settle_pending lines in bot-2026-10-16.log today resolve to the benign 'payout not in the activity yet' and none failed. It only earned a distinct fingerprint because the market title 'Japan Women's Open, Qualification: Sara' carries apostrophes that leaked through the string masker where it normally collapses to 'S', so the normalised line",
+   "confidence": 0.95,
+   "cost_usd": 0.2316265,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -1355,12 +1401,14 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1791850410.2939825,
-   "count": 116,
+   "last": 1792168561.702017,
+   "count": 119,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1791850410.2939825
+    1792165689.62455,
+    1792166771.4230456,
+    1792168561.702017
    ],
    "action": null,
    "action_ts": null,
@@ -1369,12 +1417,14 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1792164485.5434432,
-   "count": 117,
+   "last": 1792168561.702017,
+   "count": 120,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1792164485.5434432
+    1792165689.62455,
+    1792166771.4230456,
+    1792168561.702017
    ],
    "action": null,
    "action_ts": null,
@@ -1383,12 +1433,14 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1791850410.2939825,
-   "count": 113,
+   "last": 1792168561.702017,
+   "count": 116,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1791850410.2939825
+    1792165689.62455,
+    1792166771.4230456,
+    1792168561.702017
    ],
    "action": null,
    "action_ts": null,
@@ -1411,12 +1463,12 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1792004214.3577778,
-   "count": 103,
+   "last": 1792168332.6353457,
+   "count": 104,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1792004214.3577778
+    1792168332.6353457
    ],
    "action": null,
    "action_ts": null,
@@ -1566,13 +1618,15 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792160643.7748117,
-   "count": 1159,
+   "last": 1792167972.495844,
+   "count": 1163,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792159923.1801605,
-    1792160643.7748117
+    1792166050.6352253,
+    1792166651.370079,
+    1792167011.6819036,
+    1792167972.495844
    ],
    "action": null,
    "action_ts": null,
@@ -2091,12 +2145,14 @@
   },
   "59f5d5ebf4a6": {
    "first": 1790415658.8132656,
-   "last": 1792164485.5434432,
-   "count": 101,
+   "last": 1792168561.702017,
+   "count": 104,
    "sample": "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)",
    "recent": [
-    1792164485.5434432
+    1792165689.62455,
+    1792166771.4230456,
+    1792168561.702017
    ],
    "action": null,
    "action_ts": null,
@@ -2632,13 +2688,12 @@
   },
   "d3a278c17ca5": {
    "first": 1790960528.7135174,
-   "last": 1792162444.6599593,
-   "count": 97,
+   "last": 1792167731.9876938,
+   "count": 98,
    "sample": "2026-10-02 17:01:50 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
    "norm": "INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows",
    "recent": [
-    1792161844.1805122,
-    1792162444.6599593
+    1792167731.9876938
    ],
    "action": null,
    "action_ts": null,
@@ -3967,6 +4022,20 @@
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S's Open, Qualification: Sara ' @ N",
    "recent": [
     1792164485.5434432
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "49f062c24462": {
+   "first": 1792168332.6353457,
+   "last": 1792168332.6353457,
+   "count": 1,
+   "sample": "2026-10-16 16:31:09 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Japan Women's Open, Qualification: Sara ' left the wallet; booked when Polymarket's row shows",
+   "norm": "INFO [ops] settle_pending: 'S' -> 'S' | 'S's Open, Qualification: Sara 'S's row shows",
+   "recent": [
+    1792168332.6353457
    ],
    "action": null,
    "action_ts": null,
