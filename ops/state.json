@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-16T22:01:46.651182+00:00",
+ "generated": "2026-10-16T22:51:35.459507+00:00",
  "money": {
-  "cash": 135.951809,
-  "open_cost": 0.0,
-  "equity": 135.95,
+  "cash": 130.859669,
+  "open_cost": 5.0,
+  "equity": 135.86,
   "floor": null,
   "stated": 80.0,
   "spend": {
    "date": "2026-10-16",
-   "spent_usd": 45.0,
+   "spent_usd": 50.0,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 84,
   "tier": {
    "1a": 0,
-   "1b": 0,
+   "1b": 5.0,
    "1c": 0
   },
-  "ts": 1792187978.6734822,
+  "ts": 1792191043.7785268,
   "day": "2026-10-16"
  },
  "arm": {
@@ -35,9 +35,9 @@
  },
  "spend": {
   "date": "2026-10-16",
-  "spent_usd": 45.0,
+  "spent_usd": 50.0,
   "wallet_copies": {
-   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 8,
+   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 9,
    "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": 1
   },
   "wallet_copies_yesterday": {},
@@ -52,10 +52,18 @@
    "placements": []
   },
   "1b": {
-   "open_total": 0,
+   "open_total": 5.0,
    "daily_date": "2026-10-16",
-   "daily_volume": 45.0,
-   "placements": []
+   "daily_volume": 50.0,
+   "placements": [
+    {
+     "token_id": "5654781851078148830235839906186577241018170316487203055608894313236067740954",
+     "cost": 5.0,
+     "ts": 1792190780.6395633,
+     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+     "title": ""
+    }
+   ]
   },
   "1c": {
    "open_total": 0,
@@ -298,7 +306,7 @@
  },
  "watch": {
   "floor_near": true,
-  "last_equity": 135.95,
+  "last_equity": 135.86,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
@@ -1162,11 +1170,6 @@
   }
  ],
  "important": [
-  "2026-10-15 22:20:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 22:21:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 22:21:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 22:35:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 22:49:52 INFO  [missed] on paper: $5.00 on 'Will CSD Cobán Imperial win on 2026-10-1' @ 0.888 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 22:56:03 INFO  [missed] on paper: $5.00 on 'East Carolina vs. UAB: O/U 47.5' @ 0.560 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 23:00:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-15 23:02:03 INFO  [missed] on paper: $5.00 on 'Spread: Seahawks (-3.5)' @ 0.590 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
@@ -1339,7 +1342,18 @@
   "2026-10-16 21:27:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 21:32:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 21:32:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 22:49:52 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $252.79 on 'Will CSD Cobán Imperial win on 2026-10-1'",
+  "2026-10-16 22:02:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 22:08:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 22:17:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 22:37:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 22:37:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 22:43:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 22:43:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 22:46:19 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $50.00 / no spend cap (the day stops after $45 lost)",
+  "2026-10-16 22:46:20 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $5.00 / $200.00",
+  "2026-10-16 22:49:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 22:49:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 22:49:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-15 22:56:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $360.00 on 'East Carolina vs. UAB: O/U 47.5'",
   "2026-10-15 23:02:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $172.00 on 'Spread: Seahawks (-3.5)'",
   "2026-10-15 23:28:04 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $132.11 on 'Bo Nix: Passing Completions O/U 21.5'",
@@ -1386,7 +1400,9 @@
   "2026-10-16 19:53:38 TRADE [LIVE] BUY $5.00 on 'CSyD Defensa y Justicia leading at halft' @ 0.7300, order 0xc6a2be8a77...",
   "2026-10-16 19:53:39 TRADE [verify] FILLED: BUY 6.85 shares on 'CSyD Defensa y Justicia leading at halft' @ 0.7300",
   "2026-10-16 20:07:19 TRADE [LIVE] BUY $5.00 on 'Eintracht Frankfurt vs. 1. FC Köln: O/U ' @ 0.7700, order 0x859af473e4...",
-  "2026-10-16 20:07:21 INFO  [verify] UNFILLED, cancelled order 0x859af473e4..."
+  "2026-10-16 20:07:21 INFO  [verify] UNFILLED, cancelled order 0x859af473e4...",
+  "2026-10-16 22:46:20 TRADE [LIVE] BUY $5.00 on '' @ 0.6200, order 0x645eb2c514...",
+  "2026-10-16 22:46:21 TRADE [verify] FILLED: BUY 8.06 shares on '' @ 0.6200"
  ],
  "watcher": [
   {
@@ -1497,13 +1513,12 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1792181285.6314263,
-   "count": 124,
+   "last": 1792190887.763918,
+   "count": 125,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1792180445.0699487,
-    1792181285.6314263
+    1792190887.763918
    ],
    "action": null,
    "action_ts": null,
@@ -1512,13 +1527,12 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1792181285.6314263,
-   "count": 125,
+   "last": 1792190887.763918,
+   "count": 126,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1792180445.0699487,
-    1792181285.6314263
+    1792190887.763918
    ],
    "action": null,
    "action_ts": null,
@@ -1527,12 +1541,12 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1792180445.0699487,
-   "count": 120,
+   "last": 1792190887.763918,
+   "count": 121,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1792180445.0699487
+    1792190887.763918
    ],
    "action": null,
    "action_ts": null,
@@ -1710,17 +1724,24 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792186447.004852,
-   "count": 1182,
+   "last": 1792191007.7962322,
+   "count": 1195,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792183085.9668734,
-    1792185726.7002063,
-    1792186086.8814008,
-    1792186086.8814008,
-    1792186326.9763608,
-    1792186447.004852
+    1792188247.4587529,
+    1792188487.476886,
+    1792189087.5437047,
+    1792190287.6404142,
+    1792190287.6404142,
+    1792190647.7462585,
+    1792190647.7462585,
+    1792191007.7962322,
+    1792191007.7962322,
+    1792191007.7962322,
+    1792191007.7962322,
+    1792191007.7962322,
+    1792191007.7962322
    ],
    "action": null,
    "action_ts": null,
@@ -2238,13 +2259,12 @@
   },
   "59f5d5ebf4a6": {
    "first": 1790415658.8132656,
-   "last": 1792181285.6314263,
-   "count": 109,
+   "last": 1792190887.763918,
+   "count": 110,
    "sample": "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)",
    "recent": [
-    1792180445.0699487,
-    1792181285.6314263
+    1792190887.763918
    ],
    "action": null,
    "action_ts": null,
