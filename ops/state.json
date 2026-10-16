@@ -1,14 +1,14 @@
 {
- "generated": "2026-10-16T16:39:17.411119+00:00",
+ "generated": "2026-10-16T19:00:38.686117+00:00",
  "money": {
-  "cash": 129.729459,
-  "open_cost": 5.0,
-  "equity": 134.73,
+  "cash": 114.459809,
+  "open_cost": 0.0,
+  "equity": 114.46,
   "floor": null,
   "stated": 80.0,
   "spend": {
    "date": "2026-10-16",
-   "spent_usd": 20.0,
+   "spent_usd": 35.0,
    "cap_usd": null,
    "remaining_usd": null,
    "daily_loss_stop_usd": 45.0,
@@ -21,7 +21,7 @@
    "1b": 15.0,
    "1c": 0
   },
-  "ts": 1792168592.7335591,
+  "ts": 1792177088.8298922,
   "day": "2026-10-16"
  },
  "arm": {
@@ -35,9 +35,9 @@
  },
  "spend": {
   "date": "2026-10-16",
-  "spent_usd": 20.0,
+  "spent_usd": 35.0,
   "wallet_copies": {
-   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 4
+   "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": 7
   },
   "wallet_copies_yesterday": {},
   "yesterday": "2026-10-15",
@@ -53,28 +53,28 @@
   "1b": {
    "open_total": 15.0,
    "daily_date": "2026-10-16",
-   "daily_volume": 20.0,
+   "daily_volume": 35.0,
    "placements": [
     {
-     "token_id": "44697220442657921900190298627898907527266719492541998672323057781782620382782",
+     "token_id": "91109441057476015548790845128484865840908575137177779692651470719304734366286",
      "cost": 5.0,
-     "ts": 1792165662.8784368,
+     "ts": 1792173862.162762,
      "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Will Wieczysta Krakow win on 2026-10-16?"
+     "title": "Will Widzew Lodz vs. Wisla Krakow end in a draw?"
     },
     {
-     "token_id": "57131757629865468772455646717726198387493960106673610059309134123845812999564",
+     "token_id": "85371095176448374159068611132832998991620337721426404188845472589511845613895",
      "cost": 5.0,
-     "ts": 1792166722.6293156,
+     "ts": 1792174919.7271202,
      "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Will CD Los Chankas win on 2026-10-16?"
+     "title": "Spread: Ravens (-3.5)"
     },
     {
-     "token_id": "57517882709734746507226474273749419290404305577409262813502274649370035970123",
+     "token_id": "17246830630840850879487319204516692984293081721264101367591517184508472700265",
      "cost": 5.0,
-     "ts": 1792168455.4674752,
+     "ts": 1792174960.8853097,
      "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Will Çorum FK vs. Çaykur Rizespor end in a draw?"
+     "title": "Eintracht Frankfurt vs. 1. FC Köln: 1st Half O/U 1.5"
     }
    ]
   },
@@ -93,9 +93,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792084904.475108,
+    "ts": 1792172601.6622875,
     "n_acts": 4000,
-    "n_resolved_markets": 1264,
+    "n_resolved_markets": 1267,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -104,27 +104,27 @@
     },
     "at": {
      "300": {
-      "n": 490,
-      "roi": 0.0753,
-      "trimmed": 0.0401,
+      "n": 493,
+      "roi": 0.0822,
+      "trimmed": 0.0473,
       "ok": false
      },
      "200": {
-      "n": 568,
-      "roi": 0.0615,
-      "trimmed": 0.0312,
+      "n": 569,
+      "roi": 0.0752,
+      "trimmed": 0.0449,
       "ok": false
      },
      "150": {
-      "n": 632,
-      "roi": 0.0607,
-      "trimmed": 0.0334,
+      "n": 634,
+      "roi": 0.074,
+      "trimmed": 0.0468,
       "ok": false
      },
      "100": {
-      "n": 725,
-      "roi": 0.0632,
-      "trimmed": 0.0394,
+      "n": 727,
+      "roi": 0.0813,
+      "trimmed": 0.0576,
       "ok": false
      }
     },
@@ -139,9 +139,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792084904.475108,
+    "ts": 1792172601.6622875,
     "n_acts": 4000,
-    "n_resolved_markets": 1053,
+    "n_resolved_markets": 1017,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -150,27 +150,27 @@
     },
     "at": {
      "300": {
-      "n": 199,
-      "roi": 0.2782,
-      "trimmed": 0.2306,
+      "n": 193,
+      "roi": 0.2821,
+      "trimmed": 0.2331,
       "ok": true
      },
      "200": {
-      "n": 270,
-      "roi": 0.4298,
-      "trimmed": 0.3458,
+      "n": 263,
+      "roi": 0.4243,
+      "trimmed": 0.3379,
       "ok": true
      },
      "150": {
-      "n": 316,
-      "roi": 0.4535,
-      "trimmed": 0.3609,
+      "n": 307,
+      "roi": 0.4328,
+      "trimmed": 0.3373,
       "ok": true
      },
      "100": {
-      "n": 367,
-      "roi": 0.5007,
-      "trimmed": 0.4215,
+      "n": 357,
+      "roi": 0.4884,
+      "trimmed": 0.4068,
       "ok": true
      }
     },
@@ -185,9 +185,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792084904.475108,
+    "ts": 1792172601.6622875,
     "n_acts": 4000,
-    "n_resolved_markets": 702,
+    "n_resolved_markets": 703,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -196,27 +196,27 @@
     },
     "at": {
      "300": {
-      "n": 163,
-      "roi": 0.3071,
-      "trimmed": 0.2444,
+      "n": 158,
+      "roi": 0.3004,
+      "trimmed": 0.2356,
       "ok": true
      },
      "200": {
-      "n": 216,
-      "roi": 0.2901,
-      "trimmed": 0.2242,
+      "n": 212,
+      "roi": 0.2786,
+      "trimmed": 0.2113,
       "ok": true
      },
      "150": {
-      "n": 234,
-      "roi": 0.3314,
-      "trimmed": 0.2671,
+      "n": 230,
+      "roi": 0.3215,
+      "trimmed": 0.256,
       "ok": true
      },
      "100": {
-      "n": 268,
-      "roi": 0.3375,
-      "trimmed": 0.2816,
+      "n": 263,
+      "roi": 0.3248,
+      "trimmed": 0.2676,
       "ok": true
      }
     },
@@ -231,9 +231,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792084904.475108,
+    "ts": 1792172601.6622875,
     "n_acts": 4000,
-    "n_resolved_markets": 643,
+    "n_resolved_markets": 657,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -242,27 +242,27 @@
     },
     "at": {
      "300": {
-      "n": 159,
-      "roi": -0.0398,
-      "trimmed": -0.0688,
+      "n": 160,
+      "roi": -0.0458,
+      "trimmed": -0.0748,
       "ok": false
      },
      "200": {
-      "n": 257,
-      "roi": -0.0023,
-      "trimmed": -0.0261,
+      "n": 264,
+      "roi": -0.0011,
+      "trimmed": -0.0242,
       "ok": false
      },
      "150": {
-      "n": 317,
-      "roi": -0.0144,
-      "trimmed": -0.0338,
+      "n": 329,
+      "roi": -0.0224,
+      "trimmed": -0.0411,
       "ok": false
      },
      "100": {
-      "n": 388,
-      "roi": -0.0276,
-      "trimmed": -0.0444,
+      "n": 399,
+      "roi": -0.0313,
+      "trimmed": -0.0477,
       "ok": false
      }
     },
@@ -319,14 +319,14 @@
  },
  "watch": {
   "floor_near": true,
-  "last_equity": 134.73,
+  "last_equity": 114.46,
   "guard_fail_streak": 0,
   "guard_last_error": "",
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-16T06:42:47Z-3771",
-  "admit_scan_ts": 1792161772.4362905,
+  "admit_scan_ts": 1792172598.5877779,
   "day_loss_pushed": "2026-10-14",
   "loss_streak": 1,
   "day_pnl": -6.4,
@@ -670,80 +670,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1792082443.1944935,
-   "day": "2026-10-15",
-   "kind": "settle_pending",
-   "before": "0x9f15613e open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'Will Pogon Szczecin win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "75280859599971363180762069148986484561411802520626956616106354896289569847100",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
-  {
-   "ts": 1792083673.6433692,
-   "day": "2026-10-15",
-   "kind": "settle_pending",
-   "before": "0x5213eb85 open $5.44",
-   "after": "payout not in the activity yet",
-   "detail": "'RAAL La Louviere vs. Club Brugge: O/U 3.' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "79526462851058709823614944505523970379398154036049915250316185683094804579926",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
-  },
-  {
-   "ts": 1792084904.475108,
-   "day": "2026-10-15",
-   "kind": "floor_row",
-   "before": "0x09b045ba floor 100.0",
-   "after": "floor 100.0 (same)",
-   "detail": "copies at $100: 300 yes +28% (n=199, trimmed +23%) · 200 yes +43% (n=270, trimmed +35%) · 150 yes +45% (n=316, trimmed +36%) · 100 YES +50% (n=367, trimmed +42%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-   "floor_before": 100.0,
-   "floor_after": 100.0,
-   "live": false
-  },
-  {
-   "ts": 1792084904.475108,
-   "day": "2026-10-15",
-   "kind": "floor_row",
-   "before": "0x1985327e floor 100.0",
-   "after": "floor 100.0 (same)",
-   "detail": "copies at $100: 300 yes +31% (n=163, trimmed +24%) · 200 yes +29% (n=216, trimmed +22%) · 150 yes +33% (n=234, trimmed +27%) · 100 YES +34% (n=268, trimmed +28%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-   "floor_before": 100.0,
-   "floor_after": 100.0,
-   "live": false
-  },
-  {
-   "ts": 1792084904.475108,
-   "day": "2026-10-15",
-   "kind": "floor_row",
-   "before": "0x9f15613e floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no +8% (n=490, trimmed +4%) · 200 no +6% (n=568, trimmed +3%) · 150 no +6% (n=632, trimmed +3%) · 100 no +6% (n=725, trimmed +4%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1792084904.475108,
-   "day": "2026-10-15",
-   "kind": "floor_row",
-   "before": "0xeef6ad0e floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no -4% (n=159, trimmed -7%) · 200 no -0% (n=257, trimmed -3%) · 150 no -1% (n=317, trimmed -3%) · 100 no -3% (n=388, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
    "ts": 1792091273.6604407,
    "day": "2026-10-15",
    "kind": "settle_pending",
@@ -1051,31 +977,116 @@
    "push": null,
    "token_id": "26397738037836577166912888335020707493204350731115385243932172376216172977657",
    "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
+  },
+  {
+   "ts": 1792168915.9790263,
+   "day": "2026-10-16",
+   "kind": "settle_pending",
+   "before": "0x9f15613e open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Will Pogon Szczecin win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "75280859599971363180762069148986484561411802520626956616106354896289569847100",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
+  },
+  {
+   "ts": 1792169531.4394577,
+   "day": "2026-10-16",
+   "kind": "settle_pending",
+   "before": "0x9f15613e open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Will Wieczysta Krakow win on 2026-10-16?' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "44697220442657921900190298627898907527266719492541998672323057781782620382782",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
+  },
+  {
+   "ts": 1792170144.0950046,
+   "day": "2026-10-16",
+   "kind": "settle_pending",
+   "before": "0x5213eb85 open $5.44",
+   "after": "payout not in the activity yet",
+   "detail": "'RAAL La Louviere vs. Club Brugge: O/U 3.' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "79526462851058709823614944505523970379398154036049915250316185683094804579926",
+   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
+  },
+  {
+   "ts": 1792170452.00429,
+   "day": "2026-10-16",
+   "kind": "settle_pending",
+   "before": "0x9f15613e open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Will CD Los Chankas win on 2026-10-16?' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "57131757629865468772455646717726198387493960106673610059309134123845812999564",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
+  },
+  {
+   "ts": 1792172292.1179287,
+   "day": "2026-10-16",
+   "kind": "settle_pending",
+   "before": "0x9f15613e open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Will Çorum FK vs. Çaykur Rizespor end in' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "57517882709734746507226474273749419290404305577409262813502274649370035970123",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
+  },
+  {
+   "ts": 1792172601.6622875,
+   "day": "2026-10-16",
+   "kind": "floor_row",
+   "before": "0x09b045ba floor 100.0",
+   "after": "floor 100.0 (same)",
+   "detail": "copies at $100: 300 yes +28% (n=193, trimmed +23%) · 200 yes +42% (n=263, trimmed +34%) · 150 yes +43% (n=307, trimmed +34%) · 100 YES +49% (n=357, trimmed +41%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+   "floor_before": 100.0,
+   "floor_after": 100.0,
+   "live": false
+  },
+  {
+   "ts": 1792172601.6622875,
+   "day": "2026-10-16",
+   "kind": "floor_row",
+   "before": "0x1985327e floor 100.0",
+   "after": "floor 100.0 (same)",
+   "detail": "copies at $100: 300 yes +30% (n=158, trimmed +24%) · 200 yes +28% (n=212, trimmed +21%) · 150 yes +32% (n=230, trimmed +26%) · 100 YES +32% (n=263, trimmed +27%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+   "floor_before": 100.0,
+   "floor_after": 100.0,
+   "live": false
+  },
+  {
+   "ts": 1792172601.6622875,
+   "day": "2026-10-16",
+   "kind": "floor_row",
+   "before": "0x9f15613e floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +8% (n=493, trimmed +5%) · 200 no +8% (n=569, trimmed +4%) · 150 no +7% (n=634, trimmed +5%) · 100 no +8% (n=727, trimmed +6%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1792172601.6622875,
+   "day": "2026-10-16",
+   "kind": "floor_row",
+   "before": "0xeef6ad0e floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -5% (n=160, trimmed -7%) · 200 no -0% (n=264, trimmed -2%) · 150 no -2% (n=329, trimmed -4%) · 100 no -3% (n=399, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-10-15 16:39:57 INFO  [missed] on paper: $5.00 on 'Manisa Futbol Kulubu vs. Esenler Erokspo' @ 0.580 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-15 16:40:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 16:40:43 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Will Pogon Szczecin win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
-  "2026-10-15 16:54:08 INFO  [missed] on paper: $5.00 on 'NK Celje vs. AS Omónoia Leukosías: Both ' @ 0.570 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-15 17:01:14 INFO  [ops] settle_pending: '0x5213eb85 open $5.44' -> 'payout not in the activity yet' | 'RAAL La Louviere vs. Club Brugge: O/U 3.' left the wallet; booked when Polymarket's row shows",
-  "2026-10-15 17:23:33 INFO  [missed] on paper: $5.00 on 'SC União Torreense vs. Sunderland AFC: O' @ 0.780 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-15 17:23:38 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +28% (n=199, trimmed +23%) · 200 yes +43% (n=270, trimmed +35%) · 150 yes +45% (n=316, trimmed +36%) · 100 YES +50% (n=367, trimmed +42%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-15 17:23:52 INFO  [ops] floor_row: '0x1985327e floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +31% (n=163, trimmed +24%) · 200 yes +29% (n=216, trimmed +22%) · 150 yes +33% (n=234, trimmed +27%) · 100 YES +34% (n=268, trimmed +28%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-15 17:24:13 INFO  [ops] floor_row: '0x9f15613e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +8% (n=490, trimmed +4%) · 200 no +6% (n=568, trimmed +3%) · 150 no +6% (n=632, trimmed +3%) · 100 no +6% (n=725, trimmed +4%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-15 17:24:28 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=159, trimmed -7%) · 200 no -0% (n=257, trimmed -3%) · 150 no -1% (n=317, trimmed -3%) · 100 no -3% (n=388, trimmed -4%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-15 17:41:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 17:46:17 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 17:46:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 17:50:56 INFO  [missed] on paper: $5.00 on 'AZ vs. MH Hapoel Be'er Sheva: O/U 2.5' @ 0.420 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-15 17:52:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 18:17:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 18:25:47 INFO  [missed] on paper: $5.00 on 'Mansfield Town FC vs. Oxford United FC: ' @ 0.540 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-15 18:36:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 18:37:11 INFO  [missed] on paper: $5.00 on '' @ 0.777 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-15 18:51:12 INFO  [missed] on paper: $5.00 on 'RC Celta de Vigo vs. Juventus FC: O/U 8.' @ 0.490 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-15 18:51:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-15 18:52:17 INFO  [missed] on paper: $5.00 on 'RC Celta de Vigo vs. Juventus FC: O/U 8.' @ 0.480 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 19:07:54 INFO  [ops] settle_pending: '0x5213eb85 open $5.00' -> 'payout not in the activity yet' | 'Will Deportivo Madryn win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
   "2026-10-15 19:22:57 INFO  [missed] on paper: $5.00 on 'FC Twente vs. FC Utrecht: O/U 3.5' @ 0.440 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 19:42:51 INFO  [missed] on paper: $5.00 on 'Will Olympique de Marseille vs. Olympiak' @ 0.650 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
@@ -1217,20 +1228,32 @@
   "2026-10-16 16:31:09 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Japan Women's Open, Qualification: Sara ' left the wallet; booked when Polymarket's row shows",
   "2026-10-16 16:34:02 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $20.00 / no spend cap (the day stops after $45 lost)",
   "2026-10-16 16:34:15 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $15.00 / $200.00",
-  "2026-10-15 16:39:57 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $116.58 on 'Manisa Futbol Kulubu vs. Esenler Erokspo'",
-  "2026-10-15 16:48:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $18.24 on 'Olympique Lyonnais vs. Crystal Palace FC'",
-  "2026-10-15 16:48:52 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $26.46 on 'NK Celje vs. AS Omónoia Leukosías: O/U 2'",
-  "2026-10-15 16:54:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $142.50 on 'NK Celje vs. AS Omónoia Leukosías: Both '",
-  "2026-10-15 17:05:00 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $33.90 on 'Will Sunderland AFC win on 2026-10-15?'",
-  "2026-10-15 17:11:13 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $10.20 on 'SC União Torreense vs. Sunderland AFC: D'",
-  "2026-10-15 17:14:08 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $1.00 on 'Spread: Bayer 04 Leverkusen (-2.5)'",
-  "2026-10-15 17:23:33 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $192.66 on 'SC União Torreense vs. Sunderland AFC: O'",
-  "2026-10-15 17:50:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $148.94 on 'AZ vs. MH Hapoel Be'er Sheva: O/U 2.5'",
-  "2026-10-15 17:58:30 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $29.76 on ''",
-  "2026-10-15 18:25:47 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1074.42 on 'Mansfield Town FC vs. Oxford United FC: '",
-  "2026-10-15 18:33:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $5.06 on 'Will AC Sparta Praha vs. Lillestrøm SK e'",
-  "2026-10-15 18:33:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $13.94 on 'Will AC Sparta Praha win on 2026-10-15?'",
-  "2026-10-15 18:51:12 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $147.00 on 'RC Celta de Vigo vs. Juventus FC: O/U 8.'",
+  "2026-10-16 16:41:56 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Will Pogon Szczecin win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
+  "2026-10-16 16:46:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 16:46:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 16:52:11 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $10.00",
+  "2026-10-16 16:52:11 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Will Wieczysta Krakow win on 2026-10-16?' left the wallet; booked when Polymarket's row shows",
+  "2026-10-16 17:02:24 INFO  [ops] settle_pending: '0x5213eb85 open $5.44' -> 'payout not in the activity yet' | 'RAAL La Louviere vs. Club Brugge: O/U 3.' left the wallet; booked when Polymarket's row shows",
+  "2026-10-16 17:07:32 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $5.00",
+  "2026-10-16 17:07:32 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Will CD Los Chankas win on 2026-10-16?' left the wallet; booked when Polymarket's row shows",
+  "2026-10-16 17:38:12 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $0.00",
+  "2026-10-16 17:38:12 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Will Çorum FK vs. Çaykur Rizespor end in' left the wallet; booked when Polymarket's row shows",
+  "2026-10-16 17:45:35 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +28% (n=193, trimmed +23%) · 200 yes +42% (n=263, trimmed +34%) · 150 yes +43% (n=307, trimmed +34%) · 100 YES +49% (n=357, trimmed +41%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-16 17:45:52 INFO  [ops] floor_row: '0x1985327e floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +30% (n=158, trimmed +24%) · 200 yes +28% (n=212, trimmed +21%) · 150 yes +32% (n=230, trimmed +26%) · 100 YES +32% (n=263, trimmed +27%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-16 17:46:13 INFO  [ops] floor_row: '0x9f15613e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +8% (n=493, trimmed +5%) · 200 no +8% (n=569, trimmed +4%) · 150 no +7% (n=634, trimmed +5%) · 100 no +8% (n=727, trimmed +6%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-16 17:46:29 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -5% (n=160, trimmed -7%) · 200 no -0% (n=264, trimmed -2%) · 150 no -2% (n=329, trimmed -4%) · 100 no -3% (n=399, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-16 18:04:21 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $25.00 / no spend cap (the day stops after $45 lost)",
+  "2026-10-16 18:04:22 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $5.00 / $200.00",
+  "2026-10-16 18:04:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 18:10:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 18:21:59 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $30.00 / no spend cap (the day stops after $45 lost)",
+  "2026-10-16 18:21:59 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $10.00 / $200.00",
+  "2026-10-16 18:22:39 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $35.00 / no spend cap (the day stops after $45 lost)",
+  "2026-10-16 18:22:40 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $15.00 / $200.00",
+  "2026-10-16 18:29:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 18:31:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 18:46:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 18:55:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-15 19:04:39 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $16.79 on 'Ferencvárosi TC vs. FC Viktoria Plzeň: B'",
   "2026-10-15 19:19:28 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $11.32 on 'Will Juventus FC win on 2026-10-15?'",
   "2026-10-15 19:22:57 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $173.54 on 'FC Twente vs. FC Utrecht: O/U 3.5'",
@@ -1276,23 +1299,15 @@
   "2026-10-16 16:05:21 TRADE [LIVE] BUY $5.00 on 'Will CD Los Chankas win on 2026-10-16?' @ 0.5700, order 0x215baaa839...",
   "2026-10-16 16:05:24 TRADE [verify] FILLED: BUY 8.77 shares on 'Will CD Los Chankas win on 2026-10-16?' @ 0.5700",
   "2026-10-16 16:34:04 TRADE [LIVE] BUY $5.00 on 'Will Çorum FK vs. Çaykur Rizespor end in' @ 0.7400, order 0x6c76daec2f...",
-  "2026-10-16 16:34:15 TRADE [verify] FILLED: BUY 6.76 shares on 'Will Çorum FK vs. Çaykur Rizespor end in' @ 0.7400"
+  "2026-10-16 16:34:15 TRADE [verify] FILLED: BUY 6.76 shares on 'Will Çorum FK vs. Çaykur Rizespor end in' @ 0.7400",
+  "2026-10-16 18:04:22 TRADE [LIVE] BUY $5.00 on 'Will Widzew Lodz vs. Wisla Krakow end in' @ 0.7300, order 0x7a738bd7ca...",
+  "2026-10-16 18:04:22 TRADE [verify] FILLED: BUY 6.85 shares on 'Will Widzew Lodz vs. Wisla Krakow end in' @ 0.7300",
+  "2026-10-16 18:21:59 TRADE [LIVE] BUY $5.00 on 'Spread: Ravens (-3.5)' @ 0.4600, order 0xafa7bf88f4...",
+  "2026-10-16 18:22:00 TRADE [verify] FILLED: BUY 10.87 shares on 'Spread: Ravens (-3.5)' @ 0.4600",
+  "2026-10-16 18:22:40 TRADE [LIVE] BUY $5.00 on 'Eintracht Frankfurt vs. 1. FC Köln: 1st ' @ 0.5100, order 0x8713dbbccf...",
+  "2026-10-16 18:22:41 TRADE [verify] FILLED: BUY 9.80 shares on 'Eintracht Frankfurt vs. 1. FC Köln: 1st ' @ 0.5100"
  ],
  "watcher": [
-  {
-   "ts": 1792086700.7684793,
-   "day": "2026-10-15",
-   "woke_because": "1085601df5c5, 19a06952eaae",
-   "fingerprint": "1085601df5c5",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The wallet is down to $4.84 cash so the Tier 1b remaining budget ($4.84) sits below the $5.00 min_bet, and the exposure guard correctly refuses the live copy and records it as missed on paper. This is the sizing guardrail working as designed, not a fault: no live order was placed and no money is at risk. It fired 29 times today and every one fell to paper (29 missed-on-paper lines matching 29 exposure-full refusals), so the two new fingerprints are the same known guardrail (siblings 1781e8e2f42a x341 and 21b542768c8e x270) hitting a new market string. The low cash is not stuck payouts: the gua",
-   "confidence": 0.88,
-   "cost_usd": 0.38444400000000006,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1792109613.6315563,
    "day": "2026-10-16",
@@ -1401,14 +1416,14 @@
   },
   "eb7da12386c6": {
    "first": 1790098332.9559617,
-   "last": 1792168561.702017,
-   "count": 119,
+   "last": 1792175043.9054036,
+   "count": 122,
    "sample": "2026-09-21 00:06:10 TRADE [LIVE] BUY $6.40 on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500, order 0x5523b0f873...",
    "norm": "TRADE [LIVE] BUY $N on 'S' @ N, order <hex>...",
    "recent": [
-    1792165689.62455,
-    1792166771.4230456,
-    1792168561.702017
+    1792173963.6225634,
+    1792174923.893284,
+    1792175043.9054036
    ],
    "action": null,
    "action_ts": null,
@@ -1417,14 +1432,14 @@
   },
   "a77088f7944a": {
    "first": 1790098332.9559617,
-   "last": 1792168561.702017,
-   "count": 120,
+   "last": 1792175043.9054036,
+   "count": 123,
    "sample": "2026-09-21 00:06:22 INFO  [tiered-risk] Recorded tier 1b placement: $6.40 | open: $12.80 / $200.00",
    "norm": "INFO [tiered-risk] Recorded tier Nb placement: $N | open: $N / $N",
    "recent": [
-    1792165689.62455,
-    1792166771.4230456,
-    1792168561.702017
+    1792173963.6225634,
+    1792174923.893284,
+    1792175043.9054036
    ],
    "action": null,
    "action_ts": null,
@@ -1433,14 +1448,14 @@
   },
   "d7140f640d29": {
    "first": 1790098332.9559617,
-   "last": 1792168561.702017,
-   "count": 116,
+   "last": 1792175043.9054036,
+   "count": 119,
    "sample": "2026-09-21 00:06:23 TRADE [verify] FILLED: BUY 7.53 shares on 'Will Deportivo Toluca FC win on 2026-09-' @ 0.8500",
    "norm": "TRADE [verify] FILLED: BUY N shares on 'S' @ N",
    "recent": [
-    1792165689.62455,
-    1792166771.4230456,
-    1792168561.702017
+    1792173963.6225634,
+    1792174923.893284,
+    1792175043.9054036
    ],
    "action": null,
    "action_ts": null,
@@ -1463,12 +1478,14 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1792168332.6353457,
-   "count": 104,
+   "last": 1792172403.2105489,
+   "count": 107,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1792168332.6353457
+    1792169642.9065275,
+    1792170482.9971454,
+    1792172403.2105489
    ],
    "action": null,
    "action_ts": null,
@@ -1618,15 +1635,17 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792167972.495844,
-   "count": 1163,
+   "last": 1792176964.2065272,
+   "count": 1172,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792166050.6352253,
-    1792166651.370079,
-    1792167011.6819036,
-    1792167972.495844
+    1792173963.6225634,
+    1792174203.823234,
+    1792175403.9604607,
+    1792175523.9743385,
+    1792176484.1318738,
+    1792176964.2065272
    ],
    "action": null,
    "action_ts": null,
@@ -2145,14 +2164,14 @@
   },
   "59f5d5ebf4a6": {
    "first": 1790415658.8132656,
-   "last": 1792168561.702017,
-   "count": 104,
+   "last": 1792175043.9054036,
+   "count": 107,
    "sample": "2026-09-26 09:39:10 INFO  [daily-cap] +$6.40 (copy:1b) reserved | total today $6.40 / no spend cap (the day stops after $45 lost)",
    "norm": "INFO [daily-cap] +$N (copy:Nb) reserved | total today $N / no spend cap (the day stops after $N lost)",
    "recent": [
-    1792165689.62455,
-    1792166771.4230456,
-    1792168561.702017
+    1792173963.6225634,
+    1792174923.893284,
+    1792175043.9054036
    ],
    "action": null,
    "action_ts": null,
@@ -2189,13 +2208,13 @@
   },
   "727577d69f4e": {
    "first": 1790495657.6745641,
-   "last": 1792085140.5287433,
-   "count": 34,
+   "last": 1792172763.3697617,
+   "count": 36,
    "sample": "2026-09-27 07:54:00 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +30% (n=190, trimmed +25%) · 200 yes +44% (n=256, trimmed +35%) · 150 yes +46% (n=294, trimmed +36%) · 100 YES +50% (n=339, trimmed +41%); backward replay (copy-and-hold at their pri",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
    "recent": [
-    1792085020.4835515,
-    1792085140.5287433
+    1792172763.3697617,
+    1792172763.3697617
    ],
    "action": null,
    "action_ts": null,
@@ -2204,12 +2223,13 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1792139981.1234615,
-   "count": 118,
+   "last": 1792172883.3944952,
+   "count": 120,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1792139981.1234615
+    1792172883.3944952,
+    1792172883.3944952
    ],
    "action": null,
    "action_ts": null,
@@ -2688,12 +2708,16 @@
   },
   "d3a278c17ca5": {
    "first": 1790960528.7135174,
-   "last": 1792167731.9876938,
-   "count": 98,
+   "last": 1792172403.2105489,
+   "count": 103,
    "sample": "2026-10-02 17:01:50 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
    "norm": "INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows",
    "recent": [
-    1792167731.9876938
+    1792168922.6976705,
+    1792169642.9065275,
+    1792170242.9751596,
+    1792170482.9971454,
+    1792172403.2105489
    ],
    "action": null,
    "action_ts": null,
