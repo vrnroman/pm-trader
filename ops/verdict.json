@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-15T18:42:05Z-c052",
-    "ts": 1792089725,
-    "kind": "nothing",
-    "message": "Armed throughout the window, no self-disarm, no rearm-cap hit. No new ERROR or Traceback pattern beyond known fingerprints (404 price lookups on resolved markets, onchain chunk skips, AB-RACE snapshot send fail, inventory API sync). Cash still $4.84, same stuck-cash condition as last cycle, so Tier 1b keeps papering every signal; spend today $0.00, no losses today. Form table shows no followed wallet with a losing streak or a worst day out of proportion to its volume, so no wallet_action. 0xd970693a holds at 6 of 7 days below the real-quotes decay door, unchanged from last cycle.",
+    "id": "2026-10-16T00:41:54Z-502b",
+    "ts": 1792111314,
+    "kind": "wallet_action",
+    "action": "bench",
+    "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+    "message": "0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points on 2026-10-14 to -1 point today (59% won vs 60% needed), settled count down from 25 to 22 in the same stretch, so benching it now.",
     "evidence": [
-        "## money state {\"cash\": 4.842563, \"armed\": true, \"spend\": {\"spent_usd\": 0.0, \"daily_loss_stop_usd\": 45.0}}",
-        "in form  0xd970693a: 20 settled, 55% won vs 51% needed, net +4.6% on $7,654, worst day -360, 20 of 20 exits under 10 min",
-        "2026-10-15 18:25:47 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1074.42 on 'Mansfield Town FC vs. Oxford United FC: '",
-        "54ac26fb3ff1 x1085 last 0.3h ago [open: 1085 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
-        "## arm: {\"armed\": true, \"reason\": \"watcher: 'no trade data for' clear for 15 min\"}"
+        "in form  0x09b045ba: 22 settled, 59% won vs 60% needed, net +6.7% on $8,574, worst day -241, 22 of 22 exits under 10 min",
+        "digest-2026-10-14: in form  0x09b045ba: 25 settled, 60% won vs 58% needed, net +6.4% on $9,673, worst day -241, 25 of 25 exits under 10 min",
+        "digest-2026-10-13: in form  0x09b045ba: 25 settled, 64% won vs 58% needed, net +7.3% on $9,672, worst day -241, 25 of 25 exits under 10 min"
     ],
     "commit": null
 }
