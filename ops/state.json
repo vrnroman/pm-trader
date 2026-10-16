@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-16T11:04:03.356965+00:00",
+ "generated": "2026-10-16T11:20:50.873281+00:00",
  "money": {
   "cash": 4.842563,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1792148508.4677153,
+  "ts": 1792149431.2859163,
   "day": "2026-10-16"
  },
  "arm": {
@@ -347,7 +347,7 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": true,
   "daily_line_missing_day": "2026-10-08",
-  "last_escalation_id": "2026-10-16T00:41:54Z-502b",
+  "last_escalation_id": "2026-10-16T06:42:47Z-3771",
   "admit_scan_ts": 1792139867.9264047,
   "day_loss_pushed": "2026-10-14",
   "loss_streak": 1,
@@ -981,6 +981,24 @@
    "push": null,
    "token_id": "110165769614796457929614034541464389029112682997255770936769945379512698362290",
    "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
+  },
+  {
+   "ts": 1792148817.863483,
+   "day": "2026-10-16",
+   "kind": "routine_wallet_action",
+   "before": "0xd970693a",
+   "after": "bench REFUSED, now unchanged",
+   "detail": "0xd970693a is in form by the bar but its edge is sliding: hit rate margin went from 8 points on 2026-10-13 to 4 points o",
+   "push": null
+  },
+  {
+   "ts": 1792148817.863483,
+   "day": "2026-10-16",
+   "kind": "escalation_delivered",
+   "before": "routine wallet_action",
+   "after": "refused",
+   "detail": "0xd970693a is in form by the bar but its edge is sliding: hit rate margin went from 8 points on 2026-10-13 to 4 points o",
+   "push": null
   }
  ],
  "important": [
@@ -1119,6 +1137,11 @@
   "2026-10-16 10:39:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 10:48:53 INFO  [missed] on paper: $5.00 on 'RC Deportivo A Coruña vs. Levante UD: O/' @ 0.480 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-16 11:02:50 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-16 11:06:45 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-16 11:06:58 INFO  [ops] routine_wallet_action: '0xd970693a' -> 'bench REFUSED, now unchanged' | 0xd970693a is in form by the bar but its edge is sliding: hit rate margin went from 8 points on 2026-10-13 to 4 points o",
+  "2026-10-16 11:06:58 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'refused' | 0xd970693a is in form by the bar but its edge is sliding: hit rate margin went from 8 points on 2026-10-13 to 4 points o",
+  "2026-10-16 11:09:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-16 11:12:09 INFO  [missed] on paper: $5.00 on 'Henan FC vs. Tianjin Jinmen Hu FC: O/U 9' @ 0.500 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 12:07:44 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $244.32 on 'Will Shanghai Shenhua FC win on 2026-10-'",
   "2026-10-15 12:08:03 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $138.82 on 'PKR Svay Rieng vs. Shanghai Shenhua FC: '",
   "2026-10-15 12:58:52 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $625.90 on 'Spread: AGMK FC (-1.5)'",
@@ -1168,7 +1191,9 @@
   "2026-10-16 10:01:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $427.90 on 'Game Spread: Daniil Medvedev (-2.5) vs T'",
   "2026-10-16 10:05:53 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $505.78 on 'SK Rapid vs. TSV Hartberg: O/U 3.5'",
   "2026-10-16 10:06:40 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $171.04 on 'Psim Yogyakarta vs. PSM Makassar: O/U 2.'",
-  "2026-10-16 10:48:53 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $8081.20 on 'RC Deportivo A Coruña vs. Levante UD: O/'"
+  "2026-10-16 10:48:53 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $8081.20 on 'RC Deportivo A Coruña vs. Levante UD: O/'",
+  "2026-10-16 11:12:09 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $150.00 on 'Henan FC vs. Tianjin Jinmen Hu FC: O/U 9'",
+  "2026-10-16 11:16:36 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $10.20 on 'Spread: Shamakhi FK (-1.5)'"
  ],
  "watcher": [
   {
@@ -1466,15 +1491,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792147184.0671892,
-   "count": 1151,
+   "last": 1792148984.6637583,
+   "count": 1152,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792143942.9913433,
-    1792144183.0789793,
-    1792145383.7560942,
-    1792147184.0671892
+    1792147184.0671892,
+    1792148984.6637583
    ],
    "action": null,
    "action_ts": null,
@@ -1852,12 +1875,13 @@
   },
   "1bd07071cf73": {
    "first": 1790364989.5143719,
-   "last": 1792148624.2996998,
-   "count": 10,
+   "last": 1792148864.605261,
+   "count": 11,
    "sample": "2026-09-25 19:35:34 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
-    1792148624.2996998
+    1792148624.2996998,
+    1792148864.605261
    ],
    "action": null,
    "action_ts": null,
@@ -3131,12 +3155,12 @@
   },
   "3fd84e7cc412": {
    "first": 1791481911.1137545,
-   "last": 1792141061.4160776,
-   "count": 130,
+   "last": 1792149464.87077,
+   "count": 131,
    "sample": "2026-10-08 17:50:40 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: SELL $2554.71 on 'Gemini 4.0 released by October 15, 2026?'",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: SELL $N on 'S'",
    "recent": [
-    1792141061.4160776
+    1792149464.87077
    ],
    "action": null,
    "action_ts": null,
@@ -3145,15 +3169,13 @@
   },
   "1781e8e2f42a": {
    "first": 1791482341.4384031,
-   "last": 1792147784.1382747,
-   "count": 359,
+   "last": 1792149224.7313,
+   "count": 360,
    "sample": "2026-10-08 17:58:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.00 < min_bet=$5.00: BUY $500.00 on ''",
    "norm": "SKIP [exec] Tier Nb skip: Tier Nb exposure full: remaining=$N < min_bet=$N: BUY $N on 'S'",
    "recent": [
-    1792144903.2545576,
-    1792145263.7163503,
-    1792145263.7163503,
-    1792147784.1382747
+    1792147784.1382747,
+    1792149224.7313
    ],
    "action": null,
    "action_ts": null,
@@ -3410,15 +3432,13 @@
   },
   "21b542768c8e": {
    "first": 1791703402.439332,
-   "last": 1792147784.1382747,
-   "count": 290,
+   "last": 1792149224.7313,
+   "count": 291,
    "sample": "2026-10-11 07:23:17 INFO  [missed] on paper: $5.00 on 'KCC Egis vs. Sonic Boom' @ 0.390 (live refused: Tier 1b exposure full: remaining=$4.56 < min_bet=$5.00)",
    "norm": "INFO [missed] on paper: $N on 'S' @ N (live refused: Tier Nb exposure full: remaining=$N < min_bet=$N)",
    "recent": [
-    1792144903.2545576,
-    1792145263.7163503,
-    1792145263.7163503,
-    1792147784.1382747
+    1792147784.1382747,
+    1792149224.7313
    ],
    "action": null,
    "action_ts": null,
@@ -3791,12 +3811,12 @@
   },
   "fd501e9b165d": {
    "first": 1792129659.4414153,
-   "last": 1792129659.4414153,
-   "count": 1,
+   "last": 1792148864.605261,
+   "count": 2,
    "sample": "2026-10-16 05:47:06 INFO  [ops] routine_wallet_action: '0x09b045ba' -> 'bench applied, now in form' | 0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points o",
    "norm": "INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> is in form by the bar but its edge is sliding: hit rate margin went from N points on NNN to N points o",
    "recent": [
-    1792129659.4414153
+    1792148864.605261
    ],
    "action": null,
    "action_ts": null,
@@ -3805,12 +3825,12 @@
   },
   "beef6f5e5784": {
    "first": 1792129659.4414153,
-   "last": 1792129659.4414153,
-   "count": 1,
+   "last": 1792148864.605261,
+   "count": 2,
    "sample": "2026-10-16 05:47:06 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points o",
    "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> is in form by the bar but its edge is sliding: hit rate margin went from N points on NNN to N points o",
    "recent": [
-    1792129659.4414153
+    1792148864.605261
    ],
    "action": null,
    "action_ts": null,
