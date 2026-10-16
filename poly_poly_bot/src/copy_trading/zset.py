@@ -468,6 +468,13 @@ def evict(wallet: str, reason: str = "") -> bool:
                      f"Refusing to report an eviction that would not stick.")
         return False
     gone = promotion_state.remove_promoted(wallet, scope=SCOPE)
+    if not gone:
+        # Not in the promoted store (an owner pick is in Z by LIVE_HOLD_WALLETS
+        # alone): the eviction record above is what keeps it out of
+        # ``wallets()``, so the eviction is real. Reporting it as FAILED
+        # here put "EVICTION FAILED, still in Z" on the phone for 0xd970
+        # (2026-10-16) while real money could no longer follow it.
+        gone = (wallet or "").lower() not in wallet_set()
     try:
         from src.copy_trading import ops_watch
         ops_watch.probation_end(wallet)

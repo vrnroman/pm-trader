@@ -335,6 +335,20 @@ def check(members: Iterable[str], *, b_positions, a_positions, era: Optional[flo
         st[w] = {"days": n, "since": since, "last_day": today, "fails": labels}
         roster[w] = dict(st[w])
         changed = True
+        if n >= window and _is_owner_pick(w):
+            # The owner's picks (LIVE_HOLD_WALLETS) leave by his decision,
+            # not the door's: 0xd970 was decayed out on 2026-10-16 while the
+            # owner was restoring exactly that set. Said once a day on the
+            # phone, never evicted here.
+            ops_watch.receipt(
+                "decay_hold", before=f"{w[:10]} below the door {n} day(s)",
+                after="stays: owner pick", detail=detail, push="WALLET", now=now,
+                extra={"wallet": w, "days": n, "window": window, "fails": labels})
+            _say(send, f"⚠️ <b>Owner pick below the door {n} day(s)</b> <code>{w}</code>\n"
+                       f"{_esc(detail)}\nIt stays because it is your pick; "
+                       f"<code>/zset drop {w[:10]}</code> if you agree with the door.")
+            out["red"].append(w)
+            continue
         if n >= window:
             reason = (f"decayed: below the door {n} consecutive days "
                       f"(window {window}); {detail}")
@@ -382,6 +396,14 @@ def check(members: Iterable[str], *, b_positions, a_positions, era: Optional[flo
                    f"and the wallet leaves on its own. Sample-size and idle checks never count. "
                    f"Counters start from the history, not from zero:\n" + "\n".join(lines))
     return out
+
+
+def _is_owner_pick(wallet: str) -> bool:
+    try:
+        from src.copy_trading import owner_picks
+        return owner_picks.is_pick(wallet)
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def _esc(s: str) -> str:

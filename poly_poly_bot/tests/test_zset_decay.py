@@ -219,8 +219,10 @@ def test_a_corrupt_state_file_reopens_the_door_from_the_history(env, monkeypatch
     monkeypatch.setattr(zc, "evaluate", lambda w, b, a, *, era, now, book_corr: Cand(FAIL_FLOOR))
     sent = []
     out = _run([W1], T0, send=lambda t, kb=None: sent.append(t))
-    assert out["red"] == [W1]
-    assert zd.state()[W1]["days"] >= 1
+    # Re-seeded from the history it is 15 days below the door, so the door
+    # closes on it at once. (Before 2026-10-16 this read "red": evict() of
+    # a wallet with no promoted record was reported as a failure.)
+    assert out["evicted"] == [W1] and W1 in zset.evicted_set()
     assert any("exit door is open" in m for m in sent), "a torn file is a re-open, not a silent zero"
 
 

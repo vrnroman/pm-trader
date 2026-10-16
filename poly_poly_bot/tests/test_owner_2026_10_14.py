@@ -133,3 +133,29 @@ def test_entry_floor_defaults_to_35_and_zero_disables(monkeypatch):
     assert "entry under" not in (d.reason or "")
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
     assert "ensure_env LIVE_MIN_ENTRY_PRICE 0" in src  # owner, 2026-10-15: off (was 0.35 for a day)
+
+
+# ---- owner picks and the exit door (2026-10-16) ----
+
+def test_evicting_an_owner_pick_is_reported_as_done(tmp_path, monkeypatch):
+    from src.copy_trading import zset, promotion_state, owner_picks
+    monkeypatch.setattr(promotion_state, "DATA_DIR", str(tmp_path), raising=False)
+    monkeypatch.setattr(promotion_state, "promoted_path", lambda scope="": str(tmp_path / f"p{scope}.json"))
+    monkeypatch.setattr(promotion_state, "retired_path", lambda scope="": str(tmp_path / f"r{scope}.json"))
+    w = "0xd970693a3384dc762b191707a4927ac3814bbbba"
+    monkeypatch.setattr(owner_picks, "hold_wallets", lambda: {w})
+    assert w in zset.wallet_set(), "a pick is in Z without a promoted record"
+    assert zset.evict(w, "test") is True
+    assert w not in zset.wallet_set()
+    assert zset.readmit(w, "test") is True
+    assert w in zset.wallet_set()
+
+
+def test_the_exit_door_never_evicts_an_owner_pick(monkeypatch):
+    import inspect
+    from src.copy_trading import zset_decay
+    src = inspect.getsource(zset_decay.check)
+    assert "_is_owner_pick(w)" in src
+    assert src.index("_is_owner_pick(w)") < src.index("evicted = zset.evict(w, reason=reason)")
+    monkeypatch.setattr(zset_decay, "_is_owner_pick", lambda w: w == "0xpick")
+    assert zset_decay._is_owner_pick("0xpick") and not zset_decay._is_owner_pick("0xother")
