@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-16T05:40:38.600785+00:00",
+ "generated": "2026-10-16T05:51:43.821712+00:00",
  "money": {
   "cash": 4.842563,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1792128915.3756618,
+  "ts": 1792129619.024693,
   "day": "2026-10-16"
  },
  "arm": {
@@ -347,7 +347,7 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": true,
   "daily_line_missing_day": "2026-10-08",
-  "last_escalation_id": "2026-10-14T00:42:58Z-210d",
+  "last_escalation_id": "2026-10-16T00:41:54Z-502b",
   "admit_scan_ts": 1792128915.409305,
   "day_loss_pushed": "2026-10-14",
   "loss_streak": 1,
@@ -683,7 +683,13 @@
     "net_pct": 0.0
    }
   },
-  "overrides": {},
+  "overrides": {
+   "0x09b045baad1fbe115c70785635a261411774a3b6": {
+    "action": "bench",
+    "why": "0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points on 2026-10-14 to -1 point today (59% won vs 60% needed), settled count down from ",
+    "ts": 1792129625.7981598
+   }
+  },
   "unread": {},
   "paused": false,
   "paused_told": false
@@ -992,10 +998,27 @@
    "fails": [
     "does not lose at the prices we would really pay"
    ]
+  },
+  {
+   "ts": 1792129625.7981598,
+   "day": "2026-10-16",
+   "kind": "routine_wallet_action",
+   "before": "0x09b045ba",
+   "after": "bench applied, now in form",
+   "detail": "0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points o",
+   "push": "WALLET"
+  },
+  {
+   "ts": 1792129625.7981598,
+   "day": "2026-10-16",
+   "kind": "escalation_delivered",
+   "before": "routine wallet_action",
+   "after": "applied",
+   "detail": "0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points o",
+   "push": null
   }
  ],
  "important": [
-  "2026-10-15 05:43:33 INFO  [missed] on paper: $5.00 on 'FC Twente vs. FC Thun: O/U 3.5' @ 0.450 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 06:09:32 INFO  [missed] on paper: $5.00 on 'Wuhan Tennis Open: Jasmine Paolini vs So' @ 0.440 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 06:36:20 INFO  [missed] on paper: $5.00 on 'Set Handicap: Alejandro Davidovich Fokin' @ 0.260 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-15 06:36:23 INFO  [missed] on paper: $5.00 on 'Set Handicap: Alejandro Davidovich Fokin' @ 0.260 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
@@ -1128,7 +1151,8 @@
   "2026-10-16 04:19:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 04:29:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 05:22:36 ERROR [inventory] API sync failed: ",
-  "2026-10-15 05:43:33 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $353.95 on 'FC Twente vs. FC Thun: O/U 3.5'",
+  "2026-10-16 05:47:06 INFO  [ops] routine_wallet_action: '0x09b045ba' -> 'bench applied, now in form' | 0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points o",
+  "2026-10-16 05:47:06 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points o",
   "2026-10-15 06:09:32 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $1306.56 on 'Wuhan Tennis Open: Jasmine Paolini vs So'",
   "2026-10-15 06:36:20 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $967.73 on 'Set Handicap: Alejandro Davidovich Fokin'",
   "2026-10-15 07:34:35 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $107.48 on 'Brighton & Hove Albion FC vs. FK Kauno Ž'",
@@ -1225,6 +1249,20 @@
    "confidence": 0.86,
    "cost_usd": 0.472627,
    "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1792129659.4414153,
+   "day": "2026-10-16",
+   "woke_because": "fd501e9b165d, beef6f5e5784",
+   "fingerprint": "fd501e9b165d",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "A periodic wallet-form review fired a routine_wallet_action on 0x09b045ba whose hit-rate margin slid from 6 to 2 points, and the paired escalation_delivered line shows the bot already pushed that notice to the owner (after='applied'). Both fingerprints are new only because the normalised text shape is new; each appeared exactly once at 05:47:06 in important-2026-10-16.log and in the bot log. They are INFO [ops] governance lines, not errors, and they touch no money path. Surrounding cadence is healthy: the 05:47:50 scheduler heartbeat reads errors=0 rate=1.7/s, the onchain reader has lag 0 bloc",
+   "confidence": 0.9,
+   "cost_usd": 0.24367100000000003,
+   "did": "nothing",
    "proof": "",
    "question": ""
   }
@@ -3774,6 +3812,34 @@
    "norm": "INFO [ops] no_copy: 'S' -> 'S'",
    "recent": [
     1792109613.6315563
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "fd501e9b165d": {
+   "first": 1792129659.4414153,
+   "last": 1792129659.4414153,
+   "count": 1,
+   "sample": "2026-10-16 05:47:06 INFO  [ops] routine_wallet_action: '0x09b045ba' -> 'bench applied, now in form' | 0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points o",
+   "norm": "INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> is in form by the bar but its edge is sliding: hit rate margin went from N points on NNN to N points o",
+   "recent": [
+    1792129659.4414153
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "beef6f5e5784": {
+   "first": 1792129659.4414153,
+   "last": 1792129659.4414153,
+   "count": 1,
+   "sample": "2026-10-16 05:47:06 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x09b045ba is in form by the bar but its edge is sliding: hit rate margin went from 6 points on 2026-10-13 to 2 points o",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> is in form by the bar but its edge is sliding: hit rate margin went from N points on NNN to N points o",
+   "recent": [
+    1792129659.4414153
    ],
    "action": null,
    "action_ts": null,
