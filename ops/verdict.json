@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-16T12:43:56Z-8fa0",
-    "ts": 1792154636,
+    "id": "2026-10-16T18:42:52Z-ed34",
+    "ts": 1792176172,
     "kind": "nothing",
-    "message": "Armed with equity $4.84 below the $5.00 min_bet, so copies paper by design; owner already got the no-copy push. Spend $0.00 today, inside caps. Form table stable for 0x00110b8e, 0x9f15613e and 0x1985327e; no bar wallet needs a watcher bench or unbench this cycle.",
+    "message": "Armed with equity $134.73 after the bankroll crossed $100, spend $20.00 today with no spend cap (stop at $45), and four live copies filled since 15:27 once Tier 1b exposure freed up, clearing the earlier no-copy freeze. 0x09b045ba and 0xd970693a show the same settled counts and percentages as the benches already applied in earlier verdicts within the last 24 hours, so no new wallet action is needed this cycle.",
     "evidence": [
-        "cash: 4.842563, equity: 4.84, armed: true, spent_usd: 0.0 (money state)",
-        "push:no_copy: No copy in 3 days while the followed wallets made 127 qualifying trades and the arm is on",
-        "in form  0x00110b8e: 180 settled, 81% won vs 70% needed, net +13.2% on $195,799, worst day -190",
-        "in form  0x9f15613e: 197 settled, 60% won vs 54% needed, net +8.6% on $694,639, worst day -30,818",
-        "in form  0x1985327e: 27 settled, 59% won vs 46% needed, net +4.9% on $10,282, worst day -285"
+        "cash: 129.729459, equity: 134.73, armed: true, spent_usd: 20.0 (money state)",
+        "2026-10-16 16:34:04 TRADE [LIVE] BUY $5.00 on 'Will Çorum FK vs. Çaykur Rizespor end in' @ 0.7400, order 0x6c76daec2f...",
+        "2026-10-16 13:52:39 INFO [ops] push:milestone: None -> 'Bankroll crossed $100 upward: $150.15.'",
+        "in form 0x09b045ba: 22 settled, 59% won vs 60% needed, net +6.7% on $8,574, worst day -241, 22 of 22 exits under 10 min",
+        "in form 0xd970693a: 19 settled, 53% won vs 51% needed, net -1.5% on $7,254, worst day -360, 19 of 19 exits under 10 min"
     ],
     "commit": null
 }
