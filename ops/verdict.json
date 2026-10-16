@@ -1,15 +1,14 @@
 {
-    "id": "2026-10-16T06:42:47Z-3771",
-    "ts": 1792132967,
-    "kind": "wallet_action",
-    "action": "bench",
-    "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
-    "message": "0xd970693a is in form by the bar but its edge is sliding: hit rate margin went from 8 points on 2026-10-13 to 4 points on 2026-10-14 and 2026-10-15 to 2 points today, and net flipped from plus 5.5% on 2026-10-13 to minus 1.5% today, so benching it now.",
+    "id": "2026-10-16T12:43:56Z-8fa0",
+    "ts": 1792154636,
+    "kind": "nothing",
+    "message": "Armed with equity $4.84 below the $5.00 min_bet, so copies paper by design; owner already got the no-copy push. Spend $0.00 today, inside caps. Form table stable for 0x00110b8e, 0x9f15613e and 0x1985327e; no bar wallet needs a watcher bench or unbench this cycle.",
     "evidence": [
-        "in form  0xd970693a: 19 settled, 53% won vs 51% needed, net -1.5% on $7,254, worst day -360, 19 of 19 exits under 10 min",
-        "digest-2026-10-15: in form  0xd970693a: 20 settled, 55% won vs 51% needed, net +4.6% on $7,654, worst day -360, 20 of 20 exits under 10 min",
-        "digest-2026-10-14: in form  0xd970693a: 20 settled, 55% won vs 51% needed, net +4.6% on $7,654, worst day -360, 20 of 20 exits under 10 min",
-        "digest-2026-10-13: in form  0xd970693a: 19 settled, 58% won vs 50% needed, net +5.5% on $7,254, worst day -360, 19 of 19 exits under 10 min"
+        "cash: 4.842563, equity: 4.84, armed: true, spent_usd: 0.0 (money state)",
+        "push:no_copy: No copy in 3 days while the followed wallets made 127 qualifying trades and the arm is on",
+        "in form  0x00110b8e: 180 settled, 81% won vs 70% needed, net +13.2% on $195,799, worst day -190",
+        "in form  0x9f15613e: 197 settled, 60% won vs 54% needed, net +8.6% on $694,639, worst day -30,818",
+        "in form  0x1985327e: 27 settled, 59% won vs 46% needed, net +4.9% on $10,282, worst day -285"
     ],
     "commit": null
 }
