@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T00:25:11.618902+00:00",
+ "generated": "2026-10-17T01:19:19.264158+00:00",
  "money": {
   "cash": 122.460309,
   "open_cost": 0.0,
@@ -18,10 +18,10 @@
   "resolved_unclaimed": 84,
   "tier": {
    "1a": 0,
-   "1b": 10.0,
+   "1b": 0,
    "1c": 0
   },
-  "ts": 1792196542.408871,
+  "ts": 1792199724.0221732,
   "day": "2026-10-17"
  },
  "arm": {
@@ -54,25 +54,10 @@
    "placements": []
   },
   "1b": {
-   "open_total": 10.0,
+   "open_total": 0,
    "daily_date": "2026-10-17",
    "daily_volume": 5.0,
-   "placements": [
-    {
-     "token_id": "84292576989906155759138654092157995150945177571889099986009368949505751981990",
-     "cost": 5.0,
-     "ts": 1792194896.3986657,
-     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Appalachian State vs. Coastal Carolina"
-    },
-    {
-     "token_id": "21275745079659101638799069995175605377089085151473290899601188871431728279183",
-     "cost": 5.0,
-     "ts": 1792195311.6868575,
-     "trader": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-     "title": "Spread: Maryland (-5.5)"
-    }
-   ]
+   "placements": []
   },
   "1c": {
    "open_total": 0,
@@ -650,17 +635,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1792113541.7906988,
-   "day": "2026-10-16",
-   "kind": "settle_pending",
-   "before": "0x9f15613e open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'Bills 1H Team Total: O/U 12.5' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "86541468169648084032186461050528168561369845357622355203577534177036847348539",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
-  {
    "ts": 1792117911.7386801,
    "day": "2026-10-16",
    "kind": "decay_day",
@@ -1182,20 +1156,31 @@
    "after": "✅ <b>WON +$1.85</b>\n<b>CSyD Defensa y Justicia leading at halftime?</b>\nPick: <b>No</b>\nStaked $5.00, paid out $6.85\nCop",
    "detail": "",
    "push": "DEAL"
+  },
+  {
+   "ts": 1792198801.7438781,
+   "day": "2026-10-17",
+   "kind": "settle_pending",
+   "before": "0x9f15613e open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Appalachian State vs. Coastal Carolina' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "84292576989906155759138654092157995150945177571889099986009368949505751981990",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
+  },
+  {
+   "ts": 1792199113.5464628,
+   "day": "2026-10-17",
+   "kind": "settle_pending",
+   "before": "0x9f15613e open $5.00",
+   "after": "payout not in the activity yet",
+   "detail": "'Spread: Maryland (-5.5)' left the wallet; booked when Polymarket's row shows",
+   "push": null,
+   "token_id": "21275745079659101638799069995175605377089085151473290899601188871431728279183",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
   }
  ],
  "important": [
-  "2026-10-16 00:43:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 00:43:15 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 00:47:57 INFO  [missed] on paper: $5.00 on 'Will Deportes Quindio win on 2026-10-15?' @ 0.600 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-16 00:53:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 00:57:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 01:02:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 01:13:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 01:17:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 01:17:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 01:17:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 01:19:02 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Bills 1H Team Total: O/U 12.5' left the wallet; booked when Polymarket's row shows",
   "2026-10-16 01:23:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 01:23:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 01:28:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1392,8 +1377,15 @@
   "2026-10-17 00:22:21 INFO  [ops] settled: 'open $5.00' -> 'paid $6.85' | won +1.85 on 'CSyD Defensa y Justicia leading at halft' (0x9f15613e, tier 1b)",
   "2026-10-17 00:22:22 INFO  [ops] push:settled: None -> '✅ <b>WON +$1.85</b>\\n<b>CSyD Defensa y Justicia leading at halftime?</b>\\nPick: <b>No</b>\\nStaked $5.00, paid out $6.85\\nCop'",
   "2026-10-17 00:24:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 00:47:57 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $769.58 on 'Will Deportes Quindio win on 2026-10-15?'",
-  "2026-10-16 00:49:09 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $7.00 on 'Will Gimnasia y Esgrima de La Plata win '",
+  "2026-10-17 00:25:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 00:44:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 01:00:01 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $5.00",
+  "2026-10-17 01:00:02 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Appalachian State vs. Coastal Carolina' left the wallet; booked when Polymarket's row shows",
+  "2026-10-17 01:03:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 01:03:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 01:03:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 01:05:13 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $0.00",
+  "2026-10-17 01:05:13 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Spread: Maryland (-5.5)' left the wallet; booked when Polymarket's row shows",
   "2026-10-16 01:45:42 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $178.48 on 'AC Horsens vs. Randers FC: AC Horsens O/'",
   "2026-10-16 08:57:34 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $4.99 on 'Sydney FC vs. Western Sydney Wanderers F'",
   "2026-10-16 10:01:17 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $427.90 on 'Game Spread: Daniil Medvedev (-2.5) vs T'",
@@ -1532,6 +1524,20 @@
    "did": "noted",
    "proof": "",
    "question": ""
+  },
+  {
+   "ts": 1792196793.951845,
+   "day": "2026-10-17",
+   "woke_because": "54ac26fb3ff1",
+   "fingerprint": "54ac26fb3ff1",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The 404s are price lookups on tokens whose markets already resolved, so Polymarket has torn down the orderbook and returns 'No orderbook exists'. It is a library-level GET /price error that does not place, size or double any order, and our own orders are confirmed through the CLOB (the 00:01:51 LIVE BUY FILLED at 00:01:52, settlement booked +1.85 at 00:22:21). Rate is normal: 15 in the first 27 min today, against 93 yesterday and 124 the day before, with yesterday's busy hours already at 13 to 16 per hour; the mild tick up tracks the 84 resolved_unclaimed positions being re-priced each cycle. ",
+   "confidence": 0.86,
+   "cost_usd": 0.678299,
+   "did": "noted",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -1610,13 +1616,13 @@
   },
   "c6d91d798e54": {
    "first": 1790098332.9559617,
-   "last": 1792195352.2893689,
-   "count": 112,
+   "last": 1792199148.6990974,
+   "count": 114,
    "sample": "2026-09-21 00:52:20 INFO  [tiered-risk] tier 1b: released $6.40 of exposure from resolved or closed positions | open now: $6.40",
    "norm": "INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N",
    "recent": [
-    1792194752.0255153,
-    1792195352.2893689
+    1792198908.6057167,
+    1792199148.6990974
    ],
    "action": null,
    "action_ts": null,
@@ -1766,20 +1772,11 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792196433.4686375,
-   "count": 1224,
+   "last": 1792199148.6990974,
+   "count": 1230,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792193310.532287,
-    1792193431.2742934,
-    1792193671.525977,
-    1792194511.9897547,
-    1792195232.2034333,
-    1792195472.601936,
-    1792195472.601936,
-    1792195472.601936,
-    1792195472.601936,
     1792195833.0620995,
     1792196433.4686375,
     1792196433.4686375,
@@ -1788,7 +1785,13 @@
     1792196433.4686375,
     1792196433.4686375,
     1792196433.4686375,
-    1792196433.4686375
+    1792196433.4686375,
+    1792196793.951845,
+    1792196793.951845,
+    1792197947.9490445,
+    1792199028.6719387,
+    1792199028.6719387,
+    1792199148.6990974
    ],
    "action": null,
    "action_ts": null,
@@ -2852,14 +2855,13 @@
   },
   "d3a278c17ca5": {
    "first": 1790960528.7135174,
-   "last": 1792195352.2893689,
-   "count": 111,
+   "last": 1792199148.6990974,
+   "count": 113,
    "sample": "2026-10-02 17:01:50 INFO  [ops] settle_pending: '0xd25156e2 open $6.40' -> 'payout not in the activity yet' | 'Will the highest temperature in Manila b' left the wallet; booked when Polymarket's row shows",
    "norm": "INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows",
    "recent": [
-    1792193431.2742934,
-    1792194752.0255153,
-    1792195352.2893689
+    1792198908.6057167,
+    1792199148.6990974
    ],
    "action": null,
    "action_ts": null,
