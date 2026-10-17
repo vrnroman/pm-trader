@@ -44,6 +44,9 @@ MONEY_REASONS = (
     # Owner's long-shot rule (no entry under 0.35, 2026-10-14): booked for
     # the same reason, so the rule is judged against what it turned away.
     "entry under",
+    # Market-quality refusals (price drift, spread): booked since 2026-10-18
+    # because the drift rail was keeping the losers (see trade_executor).
+    "market quality",
 )
 
 

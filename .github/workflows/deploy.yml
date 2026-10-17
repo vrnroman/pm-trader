@@ -218,6 +218,12 @@ jobs:
           ensure_env LIVE_FLOOR_USD off
           # Owner, 2026-10-14: at most 3 of the open slots per wallet.
           ensure_env LIVE_MAX_OPEN_PER_WALLET 3
+          # Owner, 2026-10-18: price-drift tolerance 3% -> 7%. The 3% rail refused
+          # the target's bets that had already gone right (6 of 7 settled won)
+          # and kept the ones that had not: the live book was the paper book's
+          # worse half. Drift refusals are booked in the missed book now.
+          sed -i '/^MAX_PRICE_DRIFT_BPS=/d' .env
+          ensure_env MAX_PRICE_DRIFT_BPS 700
           # Owner, 2026-10-15: the 0.35 entry floor is OFF again. It rested on
           # 23 bets (-18%); the next 31 long shots on paper were +34%: noise.
           sed -i '/^LIVE_MIN_ENTRY_PRICE=/d' .env

@@ -763,6 +763,12 @@ async def place_trade_orders(
                 # what this rail turns away; the retries stay off the record.
                 if increment_retry(trade.id) == 1:
                     _skip_row(record_trade_history, trade, qt, f"market quality: {quality_issue}")
+                    # Measured from now on (2026-10-18): the drift refusals
+                    # since the top-up were the target's bets that went right
+                    # fast (6 of 7 settled won), so this rail's cost is booked
+                    # on paper like a money refusal. One row per trade.
+                    if trade.side == "BUY":
+                        missed_paper.record(trade, f"market quality: {quality_issue}")
                 continue
 
             # --- The flip gate (owner, 2026-09-24): a buy the target has
