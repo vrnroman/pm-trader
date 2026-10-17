@@ -210,3 +210,46 @@ def test_the_redeemer_reads_positions_through_the_same_pager():
     import inspect
     from src.copy_trading import auto_redeemer
     assert "fetch_all_positions(client, url, params)" in inspect.getsource(auto_redeemer._fetch_redeemable_positions)
+
+
+# ---- settlements: a parked row never doubles a fresh one (2026-10-17) ----
+
+def _settle_env(tmp_path, monkeypatch):
+    from src.copy_trading import ops_watch as ow
+    monkeypatch.setattr(ow.CONFIG, "data_dir", str(tmp_path), raising=False)
+    monkeypatch.setattr(ow, "_p", lambda name: str(tmp_path / name))
+    return ow
+
+
+def test_a_parked_gone_row_is_superseded_by_the_fresh_release(tmp_path, monkeypatch):
+    import json
+    ow = _settle_env(tmp_path, monkeypatch)
+    tok = "7" * 20
+    (tmp_path / ow.PENDING_FILE).write_text(json.dumps({"rows": [
+        {"token_id": tok, "cost": 5.0, "why": "gone", "ts": 1.0, "trader": "0xabc", "tier": "1b", "title": "t"}],
+        "said": {}, "ts": 1.0}))
+    fresh = [{"token_id": tok, "cost": 5.0, "why": "resolved", "ts": 2.0, "trader": "0xabc", "tier": "1b", "title": "t"}]
+    sent = []
+    out = ow.settle_released(fresh, redeemable=[{"tokenId": tok, "size": 10.0, "curPrice": 0.0, "currentValue": 0.0, "title": "t"}],
+                             fetch_activity=lambda since: [], equity=100.0, stated=150.0, floor=None,
+                             send=lambda *a, **k: sent.append(a), now=10.0)
+    rows = [json.loads(l) for l in open(tmp_path / "ops-ledger.jsonl") if l.strip()]
+    st = [r for r in rows if r.get("kind") == "settled"]
+    assert len(st) == 1 and st[0]["cost"] == 5.0 and st[0]["pnl"] == -5.0, "once, at $5, not $10"
+    assert out["pending"] == 0
+
+
+def test_a_parked_gone_row_the_chain_lists_as_resolved_is_booked_as_a_loss(tmp_path, monkeypatch):
+    import json
+    ow = _settle_env(tmp_path, monkeypatch)
+    tok = "8" * 20
+    (tmp_path / ow.PENDING_FILE).write_text(json.dumps({"rows": [
+        {"token_id": tok, "cost": 5.0, "why": "gone", "ts": 1.0, "trader": "0xabc", "tier": "1b", "title": "t"}],
+        "said": {}, "ts": 1.0}))
+    out = ow.settle_released([], redeemable=[{"tokenId": tok, "size": 10.0, "curPrice": 0.0, "currentValue": 0.0, "title": "t"}],
+                             fetch_activity=lambda since: [], equity=100.0, stated=150.0, floor=None,
+                             send=lambda *a, **k: None, now=10.0)
+    rows = [json.loads(l) for l in open(tmp_path / "ops-ledger.jsonl") if l.strip()]
+    st = [r for r in rows if r.get("kind") == "settled"]
+    assert len(st) == 1 and st[0]["won"] is False and st[0]["pnl"] == -5.0
+    assert out["pending"] == 0, "no longer parked"

@@ -398,6 +398,19 @@ def settle_released(released_rows: list, redeemable: list, *, fetch_activity: Ca
     # earlier pass) is not held again: a loser that never gets a payout row
     # sat in settle-pending.json for days after it was booked (2026-10-10).
     already = set(_read_json(_p(STATE_FILE)).get("settled_tokens") or [])
+    # A held row is superseded by a fresh release of the same token: the
+    # exposure state was rewritten (the 2026-10-17 re-seed after the
+    # positions page bug) and the same placement came through twice, once
+    # parked as "gone", once "resolved"; summing both booked a $5 loss as
+    # $10 on three tickets.
+    fresh = {str(r.get("token_id") or "") for r in (released_rows or [])}
+    held = [h for h in held if str(h.get("token_id") or "") not in fresh]
+    # A held "gone" row whose token the chain now lists as resolved is a
+    # resolved row: a loser has no payout row in the activity, so it sat
+    # parked forever (18 of them on 2026-10-17, never booked).
+    for h in held:
+        if h.get("why") == "gone" and str(h.get("token_id") or "") in by_tok:
+            h["why"] = "resolved"
     rows = [r for r in list(released_rows or []) + held
             if str(r.get("token_id") or "") not in already]
     gone = [r for r in rows if r.get("why") == "gone"]
