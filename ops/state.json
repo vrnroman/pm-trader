@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T18:33:03.159932+00:00",
+ "generated": "2026-10-17T19:08:35.964985+00:00",
  "money": {
   "cash": 102.311769,
   "open_cost": 34.99,
@@ -21,7 +21,7 @@
    "1b": 34.99,
    "1c": 0
   },
-  "ts": 1792261898.204391,
+  "ts": 1792263880.2980957,
   "day": "2026-10-17"
  },
  "arm": {
@@ -713,28 +713,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1792177702.9819465,
-   "day": "2026-10-16",
-   "kind": "settle_pending",
-   "before": "0x9f15613e open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'Will Widzew Lodz vs. Wisla Krakow end in' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "91109441057476015548790845128484865840908575137177779692651470719304734366286",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
-  {
-   "ts": 1792177702.9819465,
-   "day": "2026-10-16",
-   "kind": "settle_pending",
-   "before": "0x5213eb85 open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'Will Deportivo Madryn win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "94494526273499823034840014174269302273573882715673244773354081833140433995137",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
-  },
   {
    "ts": 1792178628.547839,
    "day": "2026-10-16",
@@ -1437,11 +1415,6 @@
   }
  ],
  "important": [
-  "2026-10-16 18:46:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 18:55:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 19:08:22 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $10.00",
-  "2026-10-16 19:08:23 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Will Widzew Lodz vs. Wisla Krakow end in' left the wallet; booked when Polymarket's row shows",
-  "2026-10-16 19:08:23 INFO  [ops] settle_pending: '0x5213eb85 open $5.00' -> 'payout not in the activity yet' | 'Will Deportivo Madryn win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
   "2026-10-16 19:12:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 19:21:06 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-16 19:23:48 INFO  [tiered-risk] tier 1b: released $10.00 of exposure from resolved or closed positions | open now: $0.00",
@@ -1691,6 +1664,7 @@
   "2026-10-17 17:59:07 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -5% (n=158, trimmed -7%) · 200 no -1% (n=260, trimmed -3%) · 150 no -3% (n=322, trimmed -5%) · 100 no -3% (n=388, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-17 18:20:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 18:25:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 19:03:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 19:53:38 TRADE [LIVE] BUY $5.00 on 'CSyD Defensa y Justicia leading at halft' @ 0.7300, order 0xc6a2be8a77...",
   "2026-10-16 19:53:39 TRADE [verify] FILLED: BUY 6.85 shares on 'CSyD Defensa y Justicia leading at halft' @ 0.7300",
   "2026-10-16 20:07:19 TRADE [LIVE] BUY $5.00 on 'Eintracht Frankfurt vs. 1. FC Köln: O/U ' @ 0.7700, order 0x859af473e4...",
@@ -2107,14 +2081,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792261573.4579828,
-   "count": 1282,
+   "last": 1792263854.3407297,
+   "count": 1283,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792259048.6156173,
     1792261333.2640698,
-    1792261573.4579828
+    1792261573.4579828,
+    1792263854.3407297
    ],
    "action": null,
    "action_ts": null,
