@@ -1,14 +1,12 @@
 {
-    "id": "2026-10-17T00:42:36Z-6c90",
-    "ts": 1792197756,
+    "id": "2026-10-17T06:42:07Z-4edf",
+    "ts": 1792219327,
     "kind": "wallet_action",
     "action": "bench",
-    "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
-    "message": "0xd970693a is in form by the bar right now but its numbers say it is losing: 17 settled, 47% won vs 49% needed, net -3.6% on $6,521, worst day -360.",
+    "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+    "message": "0x09b045ba is in form by the bar right now but its numbers say it is losing: 21 settled, 57% won vs 60% needed, net +3.9% on $8,174, worst day -241.",
     "evidence": [
-        "in form  0xd970693a: 17 settled, 47% won vs 49% needed, net -3.6% on $6,521, worst day -360, 17 of 17 exits under 10 min",
-        "2026-10-16 13:58:46 INFO [ops] form: '0xd970693a unknown' -> 'benched' | 0xd970693a: 19 settled, 53% won vs 51% needed, net -1.5% on $7,254, worst day -360, 19 of 19 exits under 10 min",
-        "2026-10-16 11:06:58 INFO [ops] routine_wallet_action: '0xd970693a' -> 'bench REFUSED, now unchanged' | 0xd970693a is in form by the bar but its edge is sliding: hit rate margin went from 8 points on 2026-10-13 to 4 points o"
+        "in form  0x09b045ba: 21 settled, 57% won vs 60% needed, net +3.9% on $8,174, worst day -241, 21 of 21 exits under 10 min"
     ],
     "commit": null
 }
