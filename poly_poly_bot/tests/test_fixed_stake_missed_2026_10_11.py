@@ -214,4 +214,6 @@ def test_a_drift_refusal_is_scored_at_the_market_price(book):
     assert (p.their_price, p.entry_price, p.spent) == (0.50, 0.56, 5.0)
     assert p.shares == pytest.approx(5.0 / 0.56, abs=1e-3) and p.drag_bps == 1200
     p.realize(True)
-    assert p.pnl == pytest.approx(5.0 / 0.56 - 5.0) and p.ideal_pnl == pytest.approx(5.0 / 0.56 - (5.0 / 0.56) * 0.50)
+    # shares are stored to 4 decimals, so the payout is approximate at the cent
+    assert p.pnl == pytest.approx(5.0 / 0.56 - 5.0, abs=1e-3)
+    assert p.ideal_pnl == pytest.approx(5.0 / 0.56 - (5.0 / 0.56) * 0.50, abs=1e-3)
