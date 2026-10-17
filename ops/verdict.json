@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-17T12:44:11Z-e937",
-    "ts": 1792241051,
+    "id": "2026-10-17T18:43:22Z-93c4",
+    "ts": 1792262602,
     "kind": "nothing",
-    "message": "Armed, copies landing normally, spend and losses inside caps; 0x09b045ba stays benched under the prior verdict with unchanged numbers.",
+    "message": "Armed, copies landing normally; spend $50 and day pnl -12.4 are inside the $45 daily-loss-stop's reach but not past it; 0x09b045ba and 0xd970693a are already benched by the bot's own routine action today; today's booked-twice settle corrections trace to the positions page bug that commits 5b7c763 and 7352b8e already fixed on main.",
     "evidence": [
-        "## arm: {\"armed\": true, ...}",
-        "in form  0x09b045ba: 21 settled, 57% won vs 60% needed, net +3.9% on $8,174, worst day -241, 21 of 21 exits under 10 min",
+        "## arm: {\"armed\": true, \"ts\": 1791286264.991414, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\", ...}",
         "## spend today: {\"date\": \"2026-10-17\", \"spent_usd\": 50.0, \"wallet_copies\": {\"0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3\": 10}, ...}",
-        "2026-10-16 20:07:18 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $45.00 / no spend cap (the day stops after $45 lost)",
-        "{\"ts\": 1792228666.5135412, \"day\": \"2026-10-17\", \"kind\": \"push:daily_loss\", \"after\": \"\\ud83d\\udcc9 <b>Down $17.39 today</b>\\nThat is 13% of the $137.30 bankroll (the alert line is 10%)\", \"push\": \"DEAL\"}"
+        "{\"ts\": 1792220182.3111184, \"kind\": \"routine_wallet_action\", \"before\": \"0x09b045ba\", \"after\": \"bench applied, now in form\", \"detail\": \"0x09b045ba is in form by the bar right now but its numbers say it is losing: 21 settled, 57% won vs 60% needed, net +3.9\"}",
+        "{\"ts\": 1792227848.9287498, \"kind\": \"settled\", \"detail\": \"lost -5.00 on 'Ōita Trinita vs. Albirex Niigata: O/U 2.' (0x9f15613e, tier 1b) [corrected 2026-10-17: booked twice under the positions page bug]\"}",
+        "in form  0x9f15613e: 214 settled, 57% won vs 54% needed, net +8.8% on $740,978, worst day -30,818, 10 of 18 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)"
     ],
     "commit": null
 }
