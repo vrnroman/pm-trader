@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-16T18:42:52Z-ed34",
-    "ts": 1792176172,
-    "kind": "nothing",
-    "message": "Armed with equity $134.73 after the bankroll crossed $100, spend $20.00 today with no spend cap (stop at $45), and four live copies filled since 15:27 once Tier 1b exposure freed up, clearing the earlier no-copy freeze. 0x09b045ba and 0xd970693a show the same settled counts and percentages as the benches already applied in earlier verdicts within the last 24 hours, so no new wallet action is needed this cycle.",
+    "id": "2026-10-17T00:42:36Z-6c90",
+    "ts": 1792197756,
+    "kind": "wallet_action",
+    "action": "bench",
+    "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
+    "message": "0xd970693a is in form by the bar right now but its numbers say it is losing: 17 settled, 47% won vs 49% needed, net -3.6% on $6,521, worst day -360.",
     "evidence": [
-        "cash: 129.729459, equity: 134.73, armed: true, spent_usd: 20.0 (money state)",
-        "2026-10-16 16:34:04 TRADE [LIVE] BUY $5.00 on 'Will Çorum FK vs. Çaykur Rizespor end in' @ 0.7400, order 0x6c76daec2f...",
-        "2026-10-16 13:52:39 INFO [ops] push:milestone: None -> 'Bankroll crossed $100 upward: $150.15.'",
-        "in form 0x09b045ba: 22 settled, 59% won vs 60% needed, net +6.7% on $8,574, worst day -241, 22 of 22 exits under 10 min",
-        "in form 0xd970693a: 19 settled, 53% won vs 51% needed, net -1.5% on $7,254, worst day -360, 19 of 19 exits under 10 min"
+        "in form  0xd970693a: 17 settled, 47% won vs 49% needed, net -3.6% on $6,521, worst day -360, 17 of 17 exits under 10 min",
+        "2026-10-16 13:58:46 INFO [ops] form: '0xd970693a unknown' -> 'benched' | 0xd970693a: 19 settled, 53% won vs 51% needed, net -1.5% on $7,254, worst day -360, 19 of 19 exits under 10 min",
+        "2026-10-16 11:06:58 INFO [ops] routine_wallet_action: '0xd970693a' -> 'bench REFUSED, now unchanged' | 0xd970693a is in form by the bar but its edge is sliding: hit rate margin went from 8 points on 2026-10-13 to 4 points o"
     ],
     "commit": null
 }
