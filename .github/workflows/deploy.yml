@@ -150,7 +150,10 @@ jobs:
           # $64 (about ten positions), floor $56. If the balance falls under
           # about $62 a copy stops clearing $5 and the governor refuses rather
           # than quietly trading a size nobody chose.
-          ensure_env LIVE_BUDGET_USD 80
+          # Owner, 2026-10-17: the wallet holds $150 since the top-up; the
+          # stated budget follows it so the open cap below can exceed $80.
+          sed -i '/^LIVE_BUDGET_USD=/d' .env
+          ensure_env LIVE_BUDGET_USD 150
           ensure_env LIVE_BUDGET_PER_COPY_FRAC 0.08
           # 0.40 of $80 is $32: exactly 5 copies at $6.40, the owner's "1 to 5
           # deals a day". And no single wallet may take more than 2 of them.
@@ -223,7 +226,11 @@ jobs:
           # once (capped by what the wallet holds); refusals for money are
           # kept on paper in the missed book (/missed).
           ensure_env LIVE_PER_COPY_USD 5
-          ensure_env LIVE_EXPOSURE_USD 50
+          # Owner, 2026-10-17: $95 open at once (19 slots). 0x9f15 held all
+          # ten of the $50 while the positions page bug hid them; the other
+          # wallets get nine slots now instead of waiting for those to settle.
+          sed -i '/^LIVE_EXPOSURE_USD=/d' .env
+          ensure_env LIVE_EXPOSURE_USD 95
           # Owner, 2026-09-24 (part 3 R1): 15 settled copies open the Z gate; the
           # +10% ROI floor stays. Rewritten in place too, in case the secret
           # still says 30 (ensure_env never overrides a defined key).

@@ -90,7 +90,7 @@ def test_the_fractions_still_rule_when_the_dollars_are_unset(fixed, monkeypatch)
 def test_deploy_sets_five_dollars_and_fifty_open():
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
     assert "ensure_env LIVE_PER_COPY_USD 5" in src
-    assert "ensure_env LIVE_EXPOSURE_USD 50" in src
+    assert "ensure_env LIVE_EXPOSURE_USD 95" in src  # owner, 2026-10-17 (was 50)
 
 
 # ---- the missed book ----

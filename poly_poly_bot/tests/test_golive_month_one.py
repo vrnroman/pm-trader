@@ -1503,7 +1503,7 @@ def test_the_deploy_sizes_the_governor_to_a_real_ticket():
     """At the funded balance a copy must clear Polymarket's $5 order minimum,
     or the governor refuses everything and the bot trades nothing."""
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
-    assert "ensure_env LIVE_BUDGET_USD 80" in src
+    assert "ensure_env LIVE_BUDGET_USD 150" in src  # owner, 2026-10-17 (was 80)
     assert "ensure_env LIVE_BUDGET_PER_COPY_FRAC 0.08" in src
     per_copy = 80 * 0.08
     assert per_copy >= 5.0, "a ticket must clear the exchange minimum"
