@@ -768,7 +768,8 @@ async def place_trade_orders(
                     # fast (6 of 7 settled won), so this rail's cost is booked
                     # on paper like a money refusal. One row per trade.
                     if trade.side == "BUY":
-                        missed_paper.record(trade, f"market quality: {quality_issue}")
+                        missed_paper.record(trade, f"market quality: {quality_issue}",
+                                            entry_price=(snapshot or {}).get("midpoint"))
                 continue
 
             # --- The flip gate (owner, 2026-09-24): a buy the target has

@@ -257,9 +257,9 @@ def test_a_parked_gone_row_the_chain_lists_as_resolved_is_booked_as_a_loss(tmp_p
 
 # ---- price drift 7%, drift refusals on paper (2026-10-18) ----
 
-def test_deploy_sets_drift_tolerance_to_seven_percent():
+def test_deploy_keeps_drift_tolerance_at_three_percent():
     src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
-    assert "ensure_env MAX_PRICE_DRIFT_BPS 700" in src
+    assert "ensure_env MAX_PRICE_DRIFT_BPS 300" in src  # 7% for a day on 2026-10-18, mis-priced
 
 
 def test_drift_check_uses_the_configured_tolerance(monkeypatch):
@@ -276,5 +276,7 @@ def test_market_quality_refusals_are_booked_on_paper():
     import inspect
     from src.copy_trading import trade_executor as te
     src = inspect.getsource(te.place_trade_orders)
-    assert 'missed_paper.record(trade, f"market quality: {quality_issue}")' in src
+    assert 'missed_paper.record(trade, f"market quality: {quality_issue}",' in src
+    assert 'entry_price=(snapshot or {}).get("midpoint")' in src
     assert missed_paper.is_money_reason("market quality: Price drift too high: 597bps > 300bps")
+

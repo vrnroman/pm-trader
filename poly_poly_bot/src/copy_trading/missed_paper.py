@@ -68,7 +68,8 @@ def is_money_reason(reason: str) -> bool:
 
 
 def record(trade, reason: str, *, now: Optional[float] = None,
-           max_per_token: Optional[int] = None) -> bool:
+           max_per_token: Optional[int] = None,
+           entry_price: Optional[float] = None) -> bool:
     """Book a refused live BUY on paper. Returns True when a row was written.
     Never raises: a paper bookkeeping failure must not touch the live path."""
     try:
@@ -78,6 +79,10 @@ def record(trade, reason: str, *, now: Optional[float] = None,
         token = str(getattr(trade, "token_id", "") or "")
         if not (0.0 < price < 1.0) or not token:
             return False
+        # The price WE would pay when it differs from the target's: a drift
+        # refusal is scored at the market's price at refusal (2026-10-18:
+        # scoring those at the target's price overstated them by $17 on 20).
+        fill = float(entry_price) if entry_price and 0.0 < float(entry_price) < 1.0 else price
         if max_per_token is None:
             from src.config import CONFIG
             max_per_token = int(getattr(CONFIG, "max_copies_per_market_side", 2) or 2)
@@ -99,12 +104,13 @@ def record(trade, reason: str, *, now: Optional[float] = None,
                 copy_id=copy_id, target=target,
                 condition_id=str(getattr(trade, "condition_id", "") or ""),
                 token_id=token, outcome_index=-1, category="missed",
-                their_price=price, entry_price=price,
-                shares=round(stake / price, 4), spent=stake, drag_bps=0,
+                their_price=price, entry_price=fill,
+                shares=round(stake / fill, 4), spent=stake,
+                drag_bps=int(round((fill - price) / price * 10000)),
                 opened_ts=now, title=str(getattr(trade, "market", "") or "")[:120],
                 slug=str(reason or "")[:160]))
         logger.info(f"[missed] on paper: ${stake:.2f} on "
-                    f"'{str(getattr(trade, 'market', ''))[:40]}' @ {price:.3f} "
+                    f"'{str(getattr(trade, 'market', ''))[:40]}' @ {fill:.3f} "
                     f"(live refused: {str(reason)[:80]})")
         return True
     except Exception as exc:  # noqa: BLE001

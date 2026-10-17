@@ -205,3 +205,13 @@ def test_by_day_and_the_winning_streak(book):
     lines = missed_paper.summary_lines()
     assert any("winning days in a row: 0" in x for x in lines)
     assert any("1970-01-02: 1 settled, 1 won, $+7.50" in x for x in lines)
+
+
+def test_a_drift_refusal_is_scored_at_the_market_price(book):
+    t = _trade(i="d1", token="tokD", price=0.50)
+    assert missed_paper.record(t, "market quality: Price drift too high", entry_price=0.56)
+    p = PaperCopyLedger(str(book)).positions["d1-tokD"]
+    assert (p.their_price, p.entry_price, p.spent) == (0.50, 0.56, 5.0)
+    assert p.shares == pytest.approx(5.0 / 0.56, abs=1e-3) and p.drag_bps == 1200
+    p.realize(True)
+    assert p.pnl == pytest.approx(5.0 / 0.56 - 5.0) and p.ideal_pnl == pytest.approx(5.0 / 0.56 - (5.0 / 0.56) * 0.50)
