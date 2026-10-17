@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T15:32:39.902597+00:00",
+ "generated": "2026-10-17T16:38:48.173308+00:00",
  "money": {
   "cash": 102.311769,
   "open_cost": 34.99,
@@ -21,7 +21,7 @@
    "1b": 34.99,
    "1c": 0
   },
-  "ts": 1792250863.9021475,
+  "ts": 1792254877.429286,
   "day": "2026-10-17"
  },
  "arm": {
@@ -713,28 +713,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1792167620.0075898,
-   "day": "2026-10-16",
-   "kind": "settle_pending",
-   "before": "0x5213eb85 open $5.46",
-   "after": "payout not in the activity yet",
-   "detail": "'Amici Pallacanestro Udinese vs. Aquila B' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "95703664735749791183731390699614891695664225860385656324496051741755131064190",
-   "wallet": "0x5213eb85fcd465c8927a8382f95dd2dc22306a35"
-  },
-  {
-   "ts": 1792168267.130678,
-   "day": "2026-10-16",
-   "kind": "settle_pending",
-   "before": "0x9f15613e open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'Japan Women's Open, Qualification: Sara ' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "26397738037836577166912888335020707493204350731115385243932172376216172977657",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
   {
    "ts": 1792168915.9790263,
    "day": "2026-10-16",
@@ -1505,19 +1483,6 @@
   }
  ],
  "important": [
-  "2026-10-16 15:47:39 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $10.00 / no spend cap (the day stops after $45 lost)",
-  "2026-10-16 15:47:42 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $10.00 / $200.00",
-  "2026-10-16 15:54:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 16:03:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 16:05:21 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $15.00 / no spend cap (the day stops after $45 lost)",
-  "2026-10-16 16:05:22 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $15.00 / $200.00",
-  "2026-10-16 16:09:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 16:20:21 INFO  [ops] settle_pending: '0x5213eb85 open $5.46' -> 'payout not in the activity yet' | 'Amici Pallacanestro Udinese vs. Aquila B' left the wallet; booked when Polymarket's row shows",
-  "2026-10-16 16:24:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 16:31:07 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $10.00",
-  "2026-10-16 16:31:09 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Japan Women's Open, Qualification: Sara ' left the wallet; booked when Polymarket's row shows",
-  "2026-10-16 16:34:02 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $20.00 / no spend cap (the day stops after $45 lost)",
-  "2026-10-16 16:34:15 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $15.00 / $200.00",
   "2026-10-16 16:41:56 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Will Pogon Szczecin win on 2026-10-11?' left the wallet; booked when Polymarket's row shows",
   "2026-10-16 16:46:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 16:46:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1776,12 +1741,11 @@
   "2026-10-17 14:32:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 14:42:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 14:57:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 15:47:40 TRADE [LIVE] BUY $5.00 on 'Will Wieczysta Krakow win on 2026-10-16?' @ 0.5000, order 0xe0bc41efdd...",
-  "2026-10-16 15:47:43 TRADE [verify] FILLED: BUY 10.00 shares on 'Will Wieczysta Krakow win on 2026-10-16?' @ 0.5000",
-  "2026-10-16 16:05:21 TRADE [LIVE] BUY $5.00 on 'Will CD Los Chankas win on 2026-10-16?' @ 0.5700, order 0x215baaa839...",
-  "2026-10-16 16:05:24 TRADE [verify] FILLED: BUY 8.77 shares on 'Will CD Los Chankas win on 2026-10-16?' @ 0.5700",
-  "2026-10-16 16:34:04 TRADE [LIVE] BUY $5.00 on 'Will Çorum FK vs. Çaykur Rizespor end in' @ 0.7400, order 0x6c76daec2f...",
-  "2026-10-16 16:34:15 TRADE [verify] FILLED: BUY 6.76 shares on 'Will Çorum FK vs. Çaykur Rizespor end in' @ 0.7400",
+  "2026-10-17 15:58:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 16:03:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 16:08:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 16:30:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 16:34:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-16 18:04:22 TRADE [LIVE] BUY $5.00 on 'Will Widzew Lodz vs. Wisla Krakow end in' @ 0.7300, order 0x7a738bd7ca...",
   "2026-10-16 18:04:22 TRADE [verify] FILLED: BUY 6.85 shares on 'Will Widzew Lodz vs. Wisla Krakow end in' @ 0.7300",
   "2026-10-16 18:21:59 TRADE [LIVE] BUY $5.00 on 'Spread: Ravens (-3.5)' @ 0.4600, order 0xafa7bf88f4...",
@@ -1824,20 +1788,6 @@
   "2026-10-17 09:37:05 INFO  [recovery] No pending orders to recover"
  ],
  "watcher": [
-  {
-   "ts": 1792168332.6353457,
-   "day": "2026-10-16",
-   "woke_because": "49f062c24462",
-   "fingerprint": "49f062c24462",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "A resolved 0x9f15613e position left the wallet and is awaiting its payout row in Polymarket's activity feed, the ordinary settle_pending lifecycle. This is the same [ops] settle_pending flow as fingerprint d3a278c17ca5 (x98) and the 0x5213eb85 lines; all 11 settle_pending lines in bot-2026-10-16.log today resolve to the benign 'payout not in the activity yet' and none failed. It only earned a distinct fingerprint because the market title 'Japan Women's Open, Qualification: Sara' carries apostrophes that leaked through the string masker where it normally collapses to 'S', so the normalised line",
-   "confidence": 0.95,
-   "cost_usd": 0.2316265,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1792192809.2964785,
    "day": "2026-10-16",
@@ -2225,19 +2175,16 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792249037.2839181,
-   "count": 1269,
+   "last": 1792254918.0591903,
+   "count": 1274,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792245796.838499,
-    1792245796.838499,
-    1792245796.838499,
-    1792245796.838499,
-    1792246396.88793,
-    1792247597.0726,
-    1792248197.2300498,
-    1792249037.2839181
+    1792252757.5490124,
+    1792253117.830919,
+    1792253357.8538435,
+    1792254677.988117,
+    1792254918.0591903
    ],
    "action": null,
    "action_ts": null,
