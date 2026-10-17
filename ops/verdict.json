@@ -1,12 +1,14 @@
 {
-    "id": "2026-10-17T06:42:07Z-4edf",
-    "ts": 1792219327,
-    "kind": "wallet_action",
-    "action": "bench",
-    "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-    "message": "0x09b045ba is in form by the bar right now but its numbers say it is losing: 21 settled, 57% won vs 60% needed, net +3.9% on $8,174, worst day -241.",
+    "id": "2026-10-17T12:44:11Z-e937",
+    "ts": 1792241051,
+    "kind": "nothing",
+    "message": "Armed, copies landing normally, spend and losses inside caps; 0x09b045ba stays benched under the prior verdict with unchanged numbers.",
     "evidence": [
-        "in form  0x09b045ba: 21 settled, 57% won vs 60% needed, net +3.9% on $8,174, worst day -241, 21 of 21 exits under 10 min"
+        "## arm: {\"armed\": true, ...}",
+        "in form  0x09b045ba: 21 settled, 57% won vs 60% needed, net +3.9% on $8,174, worst day -241, 21 of 21 exits under 10 min",
+        "## spend today: {\"date\": \"2026-10-17\", \"spent_usd\": 50.0, \"wallet_copies\": {\"0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3\": 10}, ...}",
+        "2026-10-16 20:07:18 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $45.00 / no spend cap (the day stops after $45 lost)",
+        "{\"ts\": 1792228666.5135412, \"day\": \"2026-10-17\", \"kind\": \"push:daily_loss\", \"after\": \"\\ud83d\\udcc9 <b>Down $17.39 today</b>\\nThat is 13% of the $137.30 bankroll (the alert line is 10%)\", \"push\": \"DEAL\"}"
     ],
     "commit": null
 }
