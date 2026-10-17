@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T11:39:19.266959+00:00",
+ "generated": "2026-10-17T13:08:36.347100+00:00",
  "money": {
   "cash": 102.311769,
   "open_cost": 34.99,
@@ -21,7 +21,7 @@
    "1b": 34.99,
    "1c": 0
   },
-  "ts": 1792237054.014245,
+  "ts": 1792242384.7000453,
   "day": "2026-10-17"
  },
  "arm": {
@@ -357,7 +357,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-17T06:42:07Z-4edf",
-  "admit_scan_ts": 1792227220.925973,
+  "admit_scan_ts": 1792238083.185955,
   "day_loss_pushed": "2026-10-17",
   "loss_streak": 3,
   "day_pnl": -12.4,
@@ -1574,18 +1574,6 @@
   }
  ],
  "important": [
-  "2026-10-16 11:51:22 INFO  [missed] on paper: $5.00 on 'Spread: Kendal Tornado FC (-1.5)' @ 0.510 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-16 12:02:07 INFO  [missed] on paper: $5.00 on 'Henan FC vs. Tianjin Jinmen Hu FC: O/U 1' @ 0.769 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-16 12:02:07 INFO  [missed] on paper: $5.00 on 'Henan FC vs. Tianjin Jinmen Hu FC: 1st H' @ 0.875 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-16 12:03:31 INFO  [missed] on paper: $5.00 on 'Will FK Neftchi Fargona win on 2026-10-1' @ 0.370 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-16 12:03:52 INFO  [missed] on paper: $5.00 on 'En Avant Guingamp vs. Pau FC: O/U 2.5' @ 0.470 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-16 12:35:36 INFO  [missed] on paper: $5.00 on 'Will FK Neftchi Fargona win on 2026-10-1' @ 0.350 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-16 12:35:47 INFO  [missed] on paper: $5.00 on 'Will VfB Stuttgart II win on 2026-10-16?' @ 0.660 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-16 12:40:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 12:45:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 12:50:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-16 12:51:15 INFO  [missed] on paper: $5.00 on 'Will Djurgardens IF win on 2026-10-16?' @ 0.620 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
-  "2026-10-16 12:52:22 INFO  [missed] on paper: $5.00 on 'Jalen Brooks: Receiving Yards O/U 19.5' @ 0.430 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-16 13:31:56 INFO  [missed] on paper: $5.00 on 'Sivasspor vs. Sariyer SK: O/U 2.5' @ 0.530 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-16 13:48:22 INFO  [missed] on paper: $5.00 on 'Will Madura United win on 2026-10-16?' @ 0.400 (live refused: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00)",
   "2026-10-16 13:52:36 INFO  [ops] push:milestone: None -> '🏁 <b>Bankroll crossed $50</b> upward: $150.15.'",
@@ -1858,14 +1846,9 @@
   "2026-10-17 11:38:02 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
   "2026-10-17 11:38:02 ERROR Network error fetching 0x1985...51ab: Server disconnected without sending a response.",
   "2026-10-17 11:38:02 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
-  "2026-10-16 11:51:22 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $155.08 on 'Spread: Kendal Tornado FC (-1.5)'",
-  "2026-10-16 12:02:07 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $122.27 on 'Henan FC vs. Tianjin Jinmen Hu FC: O/U 1'",
-  "2026-10-16 12:02:07 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $111.82 on 'Henan FC vs. Tianjin Jinmen Hu FC: 1st H'",
-  "2026-10-16 12:03:31 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $347.39 on 'Will FK Neftchi Fargona win on 2026-10-1'",
-  "2026-10-16 12:03:52 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $233.97 on 'En Avant Guingamp vs. Pau FC: O/U 2.5'",
-  "2026-10-16 12:35:47 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $384.81 on 'Will VfB Stuttgart II win on 2026-10-16?'",
-  "2026-10-16 12:51:15 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $133.36 on 'Will Djurgardens IF win on 2026-10-16?'",
-  "2026-10-16 12:52:22 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $191.29 on 'Jalen Brooks: Receiving Yards O/U 19.5'",
+  "2026-10-17 12:01:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 12:15:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-17 12:29:50 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-16 13:08:38 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $83.74 on 'Henan FC vs. Tianjin Jinmen Hu FC: O/U 1'",
   "2026-10-16 13:18:00 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: SELL $9.94 on 'Will Java United FC win on 2026-10-16?'",
   "2026-10-16 13:31:56 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$4.84 < min_bet=$5.00: BUY $274.79 on 'Sivasspor vs. Sariyer SK: O/U 2.5'",
@@ -2350,15 +2333,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792235113.871456,
-   "count": 1253,
+   "last": 1792239436.184461,
+   "count": 1255,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792234753.7261598,
-    1792235113.871456,
-    1792235113.871456,
-    1792235113.871456
+    1792238475.5642767,
+    1792239436.184461
    ],
    "action": null,
    "action_ts": null,
@@ -2738,12 +2719,12 @@
   },
   "1bd07071cf73": {
    "first": 1790364989.5143719,
-   "last": 1792231628.1149106,
-   "count": 20,
+   "last": 1792240276.3102918,
+   "count": 21,
    "sample": "2026-09-25 19:35:34 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
-    1792231628.1149106
+    1792240276.3102918
    ],
    "action": null,
    "action_ts": null,
