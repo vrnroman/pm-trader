@@ -239,6 +239,33 @@ def get_inventory_summary() -> dict:
     }
 
 
+# The data-api's default page is 100 rows and the proxy wallet carries ~110:
+# about a hundred resolved losers nothing ever redeems, plus the live bets.
+# One unpaged read dropped the NEWEST open positions off the page, the
+# reconcile released their exposure as "gone", and on 2026-10-16/17 the
+# $50 open cap and the 3-per-wallet cap both failed to hold (10 open
+# copies of one wallet, the ledger showing 2). Page until a short page.
+POSITIONS_PAGE = 500
+
+
+async def fetch_all_positions(client, url: str, params: dict) -> list:
+    """Every row of /positions for the user, across pages. Raises on a failed
+    page so the caller treats the whole read as failed, never as a short list."""
+    out: list = []
+    offset = 0
+    while True:
+        page_params = dict(params, limit=POSITIONS_PAGE, offset=offset)
+        resp = await client.get(url, params=page_params)
+        resp.raise_for_status()
+        page = resp.json()
+        if not isinstance(page, list):
+            return page  # the caller's own shape check reports it
+        out.extend(page)
+        if len(page) < POSITIONS_PAGE:
+            return out
+        offset += POSITIONS_PAGE
+
+
 async def sync_inventory_from_api(proxy_wallet: str) -> int:
     """Sync local inventory from the Polymarket Data API.
 
@@ -254,9 +281,7 @@ async def sync_inventory_from_api(proxy_wallet: str) -> int:
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.get(url, params=params)
-            resp.raise_for_status()
-            data = resp.json()
+            data = await fetch_all_positions(client, url, params)
     except Exception as e:
         logger.error(f"[inventory] API sync failed: {e}")
         return 0

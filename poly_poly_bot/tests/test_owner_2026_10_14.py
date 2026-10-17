@@ -159,3 +159,54 @@ def test_the_exit_door_never_evicts_an_owner_pick(monkeypatch):
     assert src.index("_is_owner_pick(w)") < src.index("evicted = zset.evict(w, reason=reason)")
     monkeypatch.setattr(zset_decay, "_is_owner_pick", lambda w: w == "0xpick")
     assert zset_decay._is_owner_pick("0xpick") and not zset_decay._is_owner_pick("0xother")
+
+
+# ---- /positions is paged (2026-10-17) ----
+
+def test_positions_are_read_across_pages():
+    import asyncio
+    from src.copy_trading import inventory
+
+    class Resp:
+        def __init__(self, rows): self._rows = rows
+        def raise_for_status(self): pass
+        def json(self): return self._rows
+
+    class Client:
+        calls = []
+        async def get(self, url, params=None):
+            Client.calls.append(dict(params))
+            off = params["offset"]; lim = params["limit"]
+            rows = [{"asset": f"t{i}", "size": 1} for i in range(off, min(off + lim, 1203))]
+            return Resp(rows)
+
+    rows = asyncio.run(inventory.fetch_all_positions(Client(), "u", {"user": "0xp"}))
+    assert len(rows) == 1203 and rows[-1]["asset"] == "t1202"
+    assert [c["offset"] for c in Client.calls] == [0, 500, 1000]
+    assert all(c["limit"] == 500 and c["user"] == "0xp" for c in Client.calls)
+
+
+def test_a_failed_page_fails_the_whole_read():
+    import asyncio
+    from src.copy_trading import inventory
+
+    class Resp:
+        def __init__(self, rows, ok=True): self._rows, self._ok = rows, ok
+        def raise_for_status(self):
+            if not self._ok: raise RuntimeError("502")
+        def json(self): return self._rows
+
+    class Client:
+        async def get(self, url, params=None):
+            if params["offset"] == 0:
+                return Resp([{"asset": f"t{i}"} for i in range(500)])
+            return Resp([], ok=False)
+
+    with pytest.raises(RuntimeError):
+        asyncio.run(inventory.fetch_all_positions(Client(), "u", {"user": "0xp"}))
+
+
+def test_the_redeemer_reads_positions_through_the_same_pager():
+    import inspect
+    from src.copy_trading import auto_redeemer
+    assert "fetch_all_positions(client, url, params)" in inspect.getsource(auto_redeemer._fetch_redeemable_positions)

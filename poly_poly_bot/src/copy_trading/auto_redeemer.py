@@ -85,9 +85,11 @@ async def _fetch_redeemable_positions(
     for attempt, delay in enumerate(attempts, start=1):
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                resp = await client.get(url, params=params)
-                resp.raise_for_status()
-                data = resp.json()
+                # Paged: the proxy carries more rows than one page (see
+                # inventory.fetch_all_positions), and a short read here
+                # hides resolved positions from the equity and the release.
+                from src.copy_trading.inventory import fetch_all_positions
+                data = await fetch_all_positions(client, url, params)
             break
         except Exception as exc:
             if delay is None:
