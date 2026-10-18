@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-18T08:48:49.071130+00:00",
+ "generated": "2026-10-18T09:40:34.252141+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -278,9 +278,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792227234.7998018,
-    "n_acts": 721,
-    "n_resolved_markets": 331,
+    "ts": 1792314401.5816727,
+    "n_acts": 736,
+    "n_resolved_markets": 324,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -289,27 +289,27 @@
     },
     "at": {
      "300": {
-      "n": 139,
-      "roi": 0.035,
-      "trimmed": 0.008,
+      "n": 142,
+      "roi": 0.0108,
+      "trimmed": -0.0143,
       "ok": false
      },
      "200": {
-      "n": 175,
-      "roi": 0.037,
-      "trimmed": 0.0116,
+      "n": 178,
+      "roi": 0.0176,
+      "trimmed": -0.0068,
       "ok": false
      },
      "150": {
-      "n": 237,
-      "roi": 0.0433,
-      "trimmed": 0.0082,
+      "n": 232,
+      "roi": 0.0576,
+      "trimmed": 0.022,
       "ok": false
      },
      "100": {
-      "n": 296,
-      "roi": 0.0677,
-      "trimmed": 0.0364,
+      "n": 288,
+      "roi": 0.0644,
+      "trimmed": 0.0358,
       "ok": false
      }
     },
@@ -327,7 +327,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-18T00:42:35Z-93c3",
-  "admit_scan_ts": 1792303443.484376,
+  "admit_scan_ts": 1792314367.0801911,
   "day_loss_pushed": "2026-10-17",
   "loss_streak": 6,
   "day_pnl": -10.0,
@@ -683,124 +683,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1792227233.4534004,
-   "day": "2026-10-17",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792227234.7998018,
-   "day": "2026-10-17",
-   "kind": "floor_row",
-   "before": "0x28ef6f21 floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no +4% (n=139, trimmed +1%) · 200 no +4% (n=175, trimmed +1%) · 150 no +4% (n=237, trimmed +1%) · 100 no +7% (n=296, trimmed +4%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1792227848.9287498,
-   "day": "2026-10-17",
-   "kind": "settled",
-   "before": "open $5.00",
-   "after": "paid $0.00",
-   "detail": "lost -5.00 on 'Ōita Trinita vs. Albirex Niigata: O/U 2.' (0x9f15613e, tier 1b) [corrected 2026-10-17: booked twice under the positions page bug]",
-   "push": null,
-   "token_id": "71401200374119802578096028109353843203154196697792296774712704209274267113452",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-   "pnl": -5.0,
-   "won": false,
-   "cost": 5.0
-  },
-  {
-   "ts": 1792227848.9287498,
-   "day": "2026-10-17",
-   "kind": "push:settled",
-   "before": null,
-   "after": "❌ <b>LOST -$10.00</b>\n<b>Ōita Trinita vs. Albirex Niigata: O/U 2.5</b>\nPick: <b>Under</b>\nStaked $10.00, paid out $0.00\n",
-   "detail": "",
-   "push": "DEAL"
-  },
-  {
-   "ts": 1792227933.4687839,
-   "day": "2026-10-17",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792228285.78688,
-   "day": "2026-10-17",
-   "kind": "settled",
-   "before": "open $5.00",
-   "after": "paid $0.00",
-   "detail": "lost -5.00 on 'Japan Women's Open, Qualification: Sara ' (0x9f15613e, tier 1b) [corrected 2026-10-17: booked twice under the positions page bug]",
-   "push": null,
-   "token_id": "26397738037836577166912888335020707493204350731115385243932172376216172977657",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-   "pnl": -5.0,
-   "won": false,
-   "cost": 5.0
-  },
-  {
-   "ts": 1792228285.78688,
-   "day": "2026-10-17",
-   "kind": "push:settled",
-   "before": null,
-   "after": "❌ <b>LOST -$9.99</b>\n<b>Japan Women's Open, Qualification: Sara Sorribes Tormo vs Ma</b>\nPick: <b>Sara Sorribes Tormo</b",
-   "detail": "",
-   "push": "DEAL"
-  },
-  {
-   "ts": 1792228666.5135412,
-   "day": "2026-10-17",
-   "kind": "settled",
-   "before": "open $5.00",
-   "after": "paid $0.00",
-   "detail": "lost -5.00 on 'Will Urawa Red Diamonds win on 2026-10-1' (0x9f15613e, tier 1b) [corrected 2026-10-17: booked twice under the positions page bug]",
-   "push": null,
-   "token_id": "100362606532604879705626202753859444251206944969345819059566827436053769581568",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-   "pnl": -5.0,
-   "won": false,
-   "cost": 5.0
-  },
-  {
-   "ts": 1792228666.5135412,
-   "day": "2026-10-17",
-   "kind": "push:settled",
-   "before": null,
-   "after": "❌ <b>LOST -$10.00</b>\n<b>Will Urawa Red Diamonds win on 2026-10-17?</b>\nPick: <b>No</b>\nStaked $10.00, paid out $0.00\nCo",
-   "detail": "",
-   "push": "DEAL"
-  },
-  {
-   "ts": 1792228666.5135412,
-   "day": "2026-10-17",
-   "kind": "push:daily_loss",
-   "before": null,
-   "after": "📉 <b>Down $17.39 today</b>\nThat is 13% of the $137.30 bankroll (the alert line is 10%)",
-   "detail": "",
-   "push": "DEAL"
-  },
-  {
-   "ts": 1792229825.8437228,
-   "day": "2026-10-17",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
    "ts": 1792255205.6750028,
    "day": "2026-10-17",
    "kind": "sre_started",
@@ -1047,40 +929,22 @@
    "after": "watching",
    "detail": "tick 120s",
    "push": null
+  },
+  {
+   "ts": 1792314401.5816727,
+   "day": "2026-10-18",
+   "kind": "floor_row",
+   "before": "0x28ef6f21 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +1% (n=142, trimmed -1%) · 200 no +2% (n=178, trimmed -1%) · 150 no +6% (n=232, trimmed +2%) · 100 no +6% (n=288, trimmed +4%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-10-17 08:50:25 INFO  [missed] on paper: $5.00 on 'Piratas Veracruz vs. Tepatitlan FC: O/U ' @ 0.460 (live refused: Tier 1b exposure full: remaining=$0.02 < min_bet=$5.00)",
-  "2026-10-17 08:53:13 INFO  Received signal 15, shutting down...",
-  "2026-10-17 08:53:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-10-17 08:53:39 INFO  Bot started. Monitoring trades...",
-  "2026-10-17 08:55:18 INFO  [ops] floor_row: '0x28ef6f21 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +4% (n=139, trimmed +1%) · 200 no +4% (n=175, trimmed +1%) · 150 no +4% (n=237, trimmed +1%) · 100 no +7% (n=296, trimmed +4%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-17 09:04:00 ERROR Network error fetching 0x28ef...ff5e: ",
-  "2026-10-17 09:04:00 ERROR Network error fetching 0xeef6...cd4c: ",
-  "2026-10-17 09:04:00 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
-  "2026-10-17 09:04:00 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
-  "2026-10-17 09:04:08 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $44.98",
-  "2026-10-17 09:04:11 INFO  [ops] settled: 'open $10.00' -> 'paid $0.00' | lost -10.00 on 'Ōita Trinita vs. Albirex Niigata: O/U 2.' (0x9f15613e, tier 1b)",
-  "2026-10-17 09:04:12 INFO  [ops] push:settled: None -> '❌ <b>LOST -$10.00</b>\\n<b>Ōita Trinita vs. Albirex Niigata: O/U 2.5</b>\\nPick: <b>Under</b>\\nStaked $10.00, paid out $0.00\\n'",
-  "2026-10-17 09:05:11 INFO  Received signal 15, shutting down...",
-  "2026-10-17 09:05:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-10-17 09:05:48 INFO  Bot started. Monitoring trades...",
-  "2026-10-17 09:11:25 INFO  [tiered-risk] tier 1b: released $4.99 of exposure from resolved or closed positions | open now: $39.99",
-  "2026-10-17 09:11:29 INFO  [ops] settled: 'open $9.99' -> 'paid $0.00' | lost -9.99 on 'Japan Women's Open, Qualification: Sara ' (0x9f15613e, tier 1b)",
-  "2026-10-17 09:11:32 INFO  [ops] push:settled: None -> \"❌ <b>LOST -$9.99</b>\\n<b>Japan Women's Open, Qualification: Sara Sorribes Tormo vs Ma</b>\\nPick: <b>Sara Sorribes Tormo</b\"",
-  "2026-10-17 09:17:46 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $34.99",
-  "2026-10-17 09:17:47 INFO  [ops] settled: 'open $10.00' -> 'paid $0.00' | lost -10.00 on 'Will Urawa Red Diamonds win on 2026-10-1' (0x9f15613e, tier 1b)",
-  "2026-10-17 09:17:49 INFO  [ops] push:settled: None -> '❌ <b>LOST -$10.00</b>\\n<b>Will Urawa Red Diamonds win on 2026-10-17?</b>\\nPick: <b>No</b>\\nStaked $10.00, paid out $0.00\\nCo'",
-  "2026-10-17 09:17:50 INFO  [ops] push:daily_loss: None -> '📉 <b>Down $17.39 today</b>\\nThat is 13% of the $137.30 bankroll (the alert line is 10%)'",
-  "2026-10-17 09:19:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 09:36:31 INFO  Received signal 15, shutting down...",
-  "2026-10-17 09:37:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-10-17 09:37:05 INFO  Bot started. Monitoring trades...",
-  "2026-10-17 09:37:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 09:37:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 09:38:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 09:38:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 09:38:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 09:51:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 09:53:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 09:55:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1218,10 +1082,7 @@
   "2026-10-18 08:21:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 08:30:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 08:30:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 08:50:25 SKIP  [exec] Tier 1b skip: Tier 1b exposure full: remaining=$0.02 < min_bet=$5.00: BUY $236.57 on 'Piratas Veracruz vs. Tepatitlan FC: O/U '",
-  "2026-10-17 08:53:39 INFO  [recovery] No pending orders to recover",
-  "2026-10-17 09:05:48 INFO  [recovery] No pending orders to recover",
-  "2026-10-17 09:37:05 INFO  [recovery] No pending orders to recover",
+  "2026-10-18 09:12:16 INFO  [ops] floor_row: '0x28ef6f21 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +1% (n=142, trimmed -1%) · 200 no +2% (n=178, trimmed -1%) · 150 no +6% (n=232, trimmed +2%) · 100 no +6% (n=288, trimmed +4%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-17 16:40:11 INFO  [recovery] No pending orders to recover",
   "2026-10-17 23:47:43 INFO  [recovery] No pending orders to recover",
   "2026-10-18 02:28:00 TRADE [LIVE] BUY $5.00 on 'Will CF América win on 2026-10-17?' @ 0.8800, order 0xf216b66441...",
@@ -1233,20 +1094,6 @@
   "2026-10-18 08:21:31 INFO  [recovery] No pending orders to recover"
  ],
  "watcher": [
-  {
-   "ts": 1792228294.5036376,
-   "day": "2026-10-17",
-   "woke_because": "69621dac3ace",
-   "fingerprint": "69621dac3ace",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The wake is a correctly booked settled loss whose market name defeated the log normaliser, so it spawned a new singleton fingerprint instead of folding into the generic settle fingerprint 2497cd50ff7d. The line is 'open $9.99 -> paid $0.00', net -9.99 on 0x9f15613e tier 1b, one of 6 settles today (4 at $5.00, 1 ten dollar win payout, this 9.99 loss); it booked once with no duplicate BUY or double settle. The day is net positive: equity 142.3 against day start 125.69, up about 16.6, and the 45 dollar daily loss stop is nowhere near. Tier 1b open is 39.99 inside its cap with exposure-full skips ",
-   "confidence": 0.9,
-   "cost_usd": 0.5148935,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1792270095.182155,
    "day": "2026-10-17",
@@ -2140,12 +1987,12 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1792260012.627519,
-   "count": 122,
+   "last": 1792314819.8642397,
+   "count": 123,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1792260012.627519
+    1792314819.8642397
    ],
    "action": null,
    "action_ts": null,
