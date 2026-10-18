@@ -242,13 +242,36 @@ def token_ever_bought(token_id: str) -> bool:
 record_trade_history = append_trade_history
 
 
-# market+side -> how many history rows, built once and then advanced by the
-# bytes appended since the last call. It replaced a full parse of the history
-# per trade: at 39 MB that scan was 47% of the event loop on 2026-10-06, so
-# after a 49-hour outage the executor fell behind its own queue (52 -> 116
-# and climbing) and the live poller's reads timed out behind it. Rebuilt from
-# scratch whenever the file shrinks or is replaced (reset_pnl truncates it).
+# market+side -> the distinct copies PLACED there, built once and then advanced
+# by the bytes appended since the last call. It replaced a full parse of the
+# history per trade: at 39 MB that scan was 47% of the event loop on
+# 2026-10-06, so after a 49-hour outage the executor fell behind its own queue
+# (52 -> 116 and climbing) and the live poller's reads timed out behind it.
+# Rebuilt from scratch whenever the file shrinks or is replaced (reset_pnl
+# truncates it).
+#
+# 2026-10-18: it used to count EVERY row. One filled copy writes PLACED and
+# FILLED (two rows, the cap of two), and two refusals wrote two SKIPPED rows,
+# so a market closed to every wallet after one copy or two refusals, and
+# the live fills were the ones that happened to be first, selected by
+# latency rather than by the rails. Now a copy is one order id (or one
+# (timestamp, trader) when there is none), counted once however many rows
+# its life writes, and only when it reached a book: PLACED, FILLED, PARTIAL,
+# and PREVIEW in a paper process. SKIPPED, FAILED, UNFILLED, DISARMED and
+# ALERT_ONLY never count.
 _dup_index: dict = {"path": None, "ino": None, "head": b"", "offset": 0, "counts": {}}
+_PLACED_STATUSES = frozenset({"PLACED", "FILLED", "PARTIAL"})
+
+
+def _copy_identity(rec: dict) -> Optional[str]:
+    """One string per placed copy, whichever of its rows this is."""
+    oid = rec.get("order_id")
+    if oid:
+        return f"o:{oid}"
+    ts, who = rec.get("timestamp"), rec.get("trader_address")
+    if ts:
+        return f"t:{ts}|{str(who or '').lower()}"
+    return None
 
 
 def _dup_counts() -> dict:
@@ -281,27 +304,40 @@ def _dup_counts() -> dict:
             continue
         if not isinstance(rec, dict):
             continue
+        status = rec.get("status")
+        if status not in _PLACED_STATUSES and status != "PREVIEW":
+            continue
+        ident = _copy_identity(rec)
+        if ident is None:
+            continue
         side = rec.get("side")
-        # A row counts once for each distinct key it can be asked by, the
-        # display string the executor uses or the condition id.
+        # A copy counts once for each distinct key it can be asked by, the
+        # display string the executor uses or the condition id; a paper
+        # copy sits in its own set so a live process can leave it out.
         for key in {rec.get("market"), rec.get("condition_id")}:
             if key:
-                counts[(side, key)] = counts.get((side, key), 0) + 1
+                slot = counts.setdefault((side, key), {"live": set(), "preview": set()})
+                slot["preview" if status == "PREVIEW" else "live"].add(ident)
     idx["offset"] += end
     return counts
 
 
 def get_duplicate_count(market_key: str, side: str) -> int:
-    """Count how many trades we've already recorded for ``market_key`` on ``side``.
+    """How many distinct copies we have placed on ``market_key`` on ``side``.
 
     Used by the executor to enforce ``max_copies_per_market_side``: if we've
     already copied this market+side N times, the next attempt is skipped.
-    Matches a row's ``market`` or its ``condition_id``.
+    Matches a row's ``market`` or its ``condition_id``. Paper copies count
+    in a paper process only: the live ledger must not be closed by the
+    paper era's rows in the same file.
     """
     if not market_key:
         return 0
     try:
-        return _dup_counts().get((side, market_key), 0)
+        slot = _dup_counts().get((side, market_key))
+        if not slot:
+            return 0
+        return len(slot["live"]) + (len(slot["preview"]) if CONFIG.preview_mode else 0)
     except Exception as e:
         logger.warn(f"[trade-store] get_duplicate_count read failed: {e}")
         return 0

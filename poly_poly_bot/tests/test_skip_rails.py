@@ -142,7 +142,8 @@ def test_the_executor_refuses_a_never_held_exit_before_asking_the_api():
 
 def test_a_market_quality_refusal_writes_one_skip_row_on_its_first_retry():
     src = (SRC / "src" / "copy_trading" / "trade_executor.py").read_text()
-    block = src[src.index("# --- Market quality check ---"):src.index("# --- The flip gate")]
+    # the flip gate moved AHEAD of the snapshot on 2026-10-18; the next section is the preview branch
+    block = src[src.index("# --- Market quality check"):src.index("# --- Preview mode ---")]
     assert "if increment_retry(trade.id) == 1:" in block
     assert '_skip_row(record_trade_history, trade, qt, f"market quality: {quality_issue}")' in block
     assert "mark_trade_as_seen" not in block, "the refusal still retries; only the record changed"

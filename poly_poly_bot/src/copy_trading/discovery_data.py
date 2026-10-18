@@ -84,10 +84,15 @@ def _sleep_unless_stopped(ev: threading.Event | None, secs: float) -> None:
         time.sleep(secs)
 
 
-def _get(session, base, path, **params):
-    for _ in range(4):
+def _get(session, base, path, timeout_s: float = 30.0, tries: int = 4, **params):
+    """One data-api read with the sweep's patience by default. The executor's
+    hot path passes its own ``timeout_s`` / ``tries`` (2026-10-18): a 30 s x
+    4 read between the book snapshot and the post is where a live copy's
+    quote went stale."""
+    tries = max(1, int(tries))
+    for i in range(tries):
         try:
-            r = session.get(base + path, params=params, timeout=30)
+            r = session.get(base + path, params=params, timeout=timeout_s)
             if r.status_code == 200:
                 return r.json()
             if r.status_code == 429:
@@ -105,7 +110,8 @@ def _get(session, base, path, **params):
             # else 5xx — fall through to the backoff sleep and retry
         except requests.RequestException:
             pass
-        time.sleep(0.25)
+        if i + 1 < tries:  # no backoff after the last try: the hot path's single try returns at once
+            time.sleep(0.25)
     return None
 
 

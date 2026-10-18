@@ -2510,7 +2510,10 @@ def test_an_unfilled_copy_releases_its_own_row_not_the_oldest(monkeypatch, tmp_p
     assert exp.open_total == 6.0
     from src.copy_trading import trade_executor
     src = inspect.getsource(trade_executor)
-    assert src.count("token_id=po.trade.token_id") == 5, "every release call site names the order's token"
+    # 2026-10-18: the four unfilled/abandoned sites release through one
+    # helper, the sell fill through another; both name the order's token.
+    assert src.count("_release_reserved(release_tiered_exposure, adjust_placement, po,") == 4
+    assert src.count("token_id=po.trade.token_id") == 2, "every release call site names the order's token"
 
 
 def test_a_corrupt_tier_state_goes_aside_with_one_error_and_one_push(monkeypatch, tmp_path, caplog):
@@ -3064,22 +3067,24 @@ def _sell_po(copy_size=10.0, accounted_usd=0.0, tier="1b"):
                         accounted_filled_usd=accounted_usd)
 
 
-def test_a_sell_fill_releases_its_reservation_and_the_buy_exposure_it_closed():
+def test_a_sell_fill_releases_the_buy_exposure_it_closed():
     """#34.2: the SELL's placement reserved copy_size and no fill released it;
     only the reconcile dropped the row once the token was gone, so a partial
-    exit sat double-counted and refused later copies as exposure full."""
+    exit sat double-counted and refused later copies as exposure full.
+    Since 2026-10-18 a SELL reserves nothing at the post, so the fill releases
+    the proceeds' worth of the BUY row and nothing else."""
     from src.copy_trading import trade_executor
     released: list = []
     rel = lambda tier, amount, token_id=None: released.append((tier, amount, token_id))
     po = _sell_po(copy_size=10.0)
-    # a $4 partial: $4 of the reservation filled + $4 of the buy row closed
-    assert trade_executor._release_sell_fill(rel, po, 4.0, 4.0, final=False) == 8.0
+    # a $4 partial: $4 of the buy row closed
+    assert trade_executor._release_sell_fill(rel, po, 4.0) == 4.0
     po.accounted_filled_usd = 4.0
-    # final at $9 total: $5 more filled, $1 of reservation never used, $5 more of buy closed
-    assert trade_executor._release_sell_fill(rel, po, 5.0, 9.0, final=True) == 11.0
-    assert released == [("1b", 8.0, "tokS"), ("1b", 11.0, "tokS")]
-    assert sum(a for _, a, _ in released) == 10.0 + 9.0, "reservation + proceeds, once each"
-    assert trade_executor._release_sell_fill(rel, _sell_po(tier=None), 4.0, 4.0, final=False) == 0.0
+    # final at $9 total: $5 more of the buy row closed; no reservation to give back
+    assert trade_executor._release_sell_fill(rel, po, 5.0) == 5.0
+    assert released == [("1b", 4.0, "tokS"), ("1b", 5.0, "tokS")]
+    assert sum(a for _, a, _ in released) == 9.0, "the proceeds, once"
+    assert trade_executor._release_sell_fill(rel, _sell_po(tier=None), 4.0) == 0.0
     assert len(released) == 2, "a legacy (untiered) order is not the tiered ledger's"
 
 
@@ -3115,7 +3120,7 @@ def test_the_verifier_releases_on_a_filled_sell(monkeypatch):
     monkeypatch.setattr(canary, "record_test_fill", lambda oid, fill: None)
     _run(trade_executor.process_verifications([_sell_po(copy_size=10.0)], clob_client=None))
     assert sold == [("tokS", 20.0)]
-    assert released == [("1b", 20.0, "tokS")], "the $10 reservation and the $10 of buy row it closed"
+    assert released == [("1b", 10.0, "tokS")], "the $10 of buy row the proceeds closed; a SELL reserves nothing (2026-10-18)"
 
 
 def test_a_study_tap_writes_a_request_and_the_daily_line_carries_the_buttons(tmp_path, monkeypatch):

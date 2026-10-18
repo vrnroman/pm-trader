@@ -7,7 +7,15 @@ import os
 from src.copy_trading import trade_store
 
 
+_seq = [0]
+
+
 def _row(**kw):
+    # Since 2026-10-18 only a placed copy counts, once per order id; each
+    # row here is its own placed copy unless the test says otherwise.
+    _seq[0] += 1
+    kw.setdefault("status", "PLACED")
+    kw.setdefault("order_id", f"ord-{_seq[0]}")
     return json.dumps(kw) + "\n"
 
 
@@ -58,21 +66,21 @@ def test_appends_are_picked_up_without_rereading(tmp_path, monkeypatch):
 
 def test_half_written_row_waits_for_its_newline(tmp_path, monkeypatch):
     path = _setup(tmp_path, monkeypatch)
-    full = _row(side="BUY", market="M")
-    path.write_text(full + full[:10])
+    full, second = _row(side="BUY", market="M"), _row(side="BUY", market="M")
+    path.write_text(full + second[:10])
     assert trade_store.get_duplicate_count("M", "BUY") == 1
     with open(path, "a") as f:
-        f.write(full[10:])
+        f.write(second[10:])
     assert trade_store.get_duplicate_count("M", "BUY") == 2
 
 
 def test_truncation_rebuilds_even_when_the_file_regrows(tmp_path, monkeypatch):
     path = _setup(tmp_path, monkeypatch)
-    path.write_text(_row(side="BUY", market="OLD") * 3)
+    path.write_text("".join(_row(side="BUY", market="OLD") for _ in range(3)))
     assert trade_store.get_duplicate_count("OLD", "BUY") == 3
     # reset_pnl truncates in place; new rows land before the next lookup.
     with open(path, "w") as f:
-        f.write(_row(side="BUY", market="NEW-MARKET-LONGER") * 4)
+        f.write("".join(_row(side="BUY", market="NEW-MARKET-LONGER") for _ in range(4)))
     assert trade_store.get_duplicate_count("OLD", "BUY") == 0
     assert trade_store.get_duplicate_count("NEW-MARKET-LONGER", "BUY") == 4
 

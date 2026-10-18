@@ -32,6 +32,10 @@ def _env_f(name: str, default: float) -> float:
 
 
 FETCH_TTL_S = _env_f("COPY_FLIP_FETCH_TTL_S", 30.0)
+# The executor's budget for the remote fallback (2026-10-18): it sits on the
+# money path, so one try, 3 s, and a read that does not make it is a read
+# that did not happen (the gate never refuses on a read it could not do).
+HOT_PATH_TIMEOUT_S = _env_f("COPY_FLIP_HOT_PATH_TIMEOUT_S", 3.0)
 KEEP_PER_WALLET = 300
 _lock = threading.Lock()
 _rows: dict[str, deque] = {}
@@ -68,13 +72,15 @@ def clear() -> None:
         _fetched.clear()
 
 
-def _fetch_activity(trader: str) -> Optional[list]:
-    """The data-api's newest 50 rows for the wallet, as flip rows."""
+def _fetch_activity(trader: str, timeout_s: Optional[float] = None) -> Optional[list]:
+    """The data-api's newest 50 rows for the wallet, as flip rows. With
+    ``timeout_s`` the read is one try inside that many seconds."""
     try:
         import requests
 
         from src.copy_trading.discovery_data import DATA_API, _get
-        rows = _get(requests.Session(), DATA_API, "/activity", user=trader, limit=50)
+        budget = {"timeout_s": float(timeout_s), "tries": 1} if timeout_s else {}
+        rows = _get(requests.Session(), DATA_API, "/activity", user=trader, limit=50, **budget)
     except Exception:  # noqa: BLE001
         return None
     if rows is None:
@@ -91,13 +97,14 @@ def _fetch_activity(trader: str) -> Optional[list]:
     return out
 
 
-def _remote_rows(trader: str, now: float, fetch: Optional[Callable[[str], Optional[list]]]) -> Optional[list]:
+def _remote_rows(trader: str, now: float, fetch: Optional[Callable[[str], Optional[list]]],
+                 timeout_s: Optional[float] = None) -> Optional[list]:
     w = trader.lower()
     with _lock:
         hit = _fetched.get(w)
     if hit and now - hit[0] < FETCH_TTL_S:
         return hit[1]
-    rows = (fetch or _fetch_activity)(trader)
+    rows = fetch(trader) if fetch else _fetch_activity(trader, timeout_s=timeout_s)
     if rows is None:
         return None
     with _lock:
@@ -106,9 +113,12 @@ def _remote_rows(trader: str, now: float, fetch: Optional[Callable[[str], Option
 
 
 def target_already_exited(trader: str, token_id: str, buy_ts, buy_shares: float, *,
-                          now: Optional[float] = None, fetch: Optional[Callable] = None) -> tuple[bool, str]:
+                          now: Optional[float] = None, fetch: Optional[Callable] = None,
+                          timeout_s: Optional[float] = None) -> tuple[bool, str]:
     """Did the target SELL this token after the buy we are about to copy?
-    ``(exited, reason)``; the reason names the share sold and the delay."""
+    ``(exited, reason)``; the reason names the share sold and the delay.
+    ``timeout_s`` caps the remote fallback (the executor passes
+    HOT_PATH_TIMEOUT_S); None keeps the sweep's default patience."""
     now = time.time() if now is None else now
     if buy_shares <= 0 or not token_id:
         return (False, "")
@@ -119,7 +129,7 @@ def target_already_exited(trader: str, token_id: str, buy_ts, buy_shares: float,
     if not any(r["token"] == str(token_id) and r["side"] == "SELL" for r in newer):
         # nothing newer on record for this wallet: one read, cached
         if not any(r["ts"] > t0 for r in rows):
-            remote = _remote_rows(trader, now, fetch)
+            remote = _remote_rows(trader, now, fetch, timeout_s=timeout_s)
             if remote:
                 newer = [r for r in remote if r["ts"] >= t0 - 1.0]
     sells = [r for r in newer if r["token"] == str(token_id) and r["side"] == "SELL"]

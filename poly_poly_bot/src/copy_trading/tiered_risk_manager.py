@@ -263,10 +263,13 @@ def _evaluate_tiered_trade_with_state(
         if entry_floor and trade.price < entry_floor:
             return skip(f"entry under {entry_floor:.2f}: price {trade.price:.4f} is a long shot")
 
-    # 4. Price bounds
-    if trade.price < cfg.min_price:
+    # 4. Price bounds, ENTRIES ONLY (2026-10-18). The band says which prices
+    # are worth entering at. Applied to their SELLS it refused our own exits
+    # exactly when they matter: a position that fell under min_price was the
+    # one we most needed to leave, and a refused exit is a held loser.
+    if trade.side == "BUY" and trade.price < cfg.min_price:
         return skip(f"Price {trade.price:.4f} < tier {tier} min {cfg.min_price}")
-    if trade.price > cfg.max_price:
+    if trade.side == "BUY" and trade.price > cfg.max_price:
         return skip(f"Price {trade.price:.4f} > tier {tier} max {cfg.max_price}")
     if trade.side == "BUY":
         # The price the exchange really charges is the price plus its fee
@@ -293,18 +296,24 @@ def _evaluate_tiered_trade_with_state(
     #    Step 3: size = min(size, MAX_BET)
     size = min(size, cfg.max_bet)
 
-    #    Step 4: remaining = MAX_TOTAL_EXPOSURE - current_open_total
-    remaining = cfg.max_total_exposure - exposure.open_total
+    #    Steps 4-6 are for ENTRIES (2026-10-18): an exit REDUCES exposure, so
+    #    "exposure full" cannot be a reason to refuse one. With 19 open
+    #    positions at the floor every mirrored SELL was refused here and the
+    #    positions sat held to resolution while the target had left. A SELL
+    #    is sized in shares from what we hold at the post, not from this.
+    if trade.side == "BUY":
+        #    Step 4: remaining = MAX_TOTAL_EXPOSURE - current_open_total
+        remaining = cfg.max_total_exposure - exposure.open_total
 
-    #    Step 5: if size > remaining: size = remaining
-    if size > remaining:
-        size = remaining
+        #    Step 5: if size > remaining: size = remaining
+        if size > remaining:
+            size = remaining
 
-    #    Step 6: if size < MIN_BET: SKIP
-    if size < cfg.min_bet:
-        return skip(
-            f"Tier {tier} exposure full: remaining=${remaining:.2f} < min_bet=${cfg.min_bet:.2f}"
-        )
+        #    Step 6: if size < MIN_BET: SKIP
+        if size < cfg.min_bet:
+            return skip(
+                f"Tier {tier} exposure full: remaining=${remaining:.2f} < min_bet=${cfg.min_bet:.2f}"
+            )
 
     size = round_cents(size)
 

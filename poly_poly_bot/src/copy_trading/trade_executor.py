@@ -242,6 +242,14 @@ def _check_market_quality(
     if snapshot is None:
         return "Could not fetch order book"
 
+    # An exit is judged on its own merits (2026-10-18): the drift and spread
+    # rails price an ENTRY against the book. A mirrored SELL after a price
+    # drop is the normal case, and refusing it left us holding the loser
+    # the target had already left; the exit is priced at the bid we just
+    # read, so a wide spread is its price, not a reason to stay in.
+    if trade.side == "SELL":
+        return None
+
     # Drift check: how far has the market moved since the trader's execution?
     mid = snapshot["midpoint"]
     drift = abs(mid - trade.price)
@@ -319,6 +327,39 @@ _exit_fracs: dict = {}
 
 def post_failure(trade_id: str) -> tuple[str, bool]:
     return _post_failures.pop(trade_id, ("order placement returned no result", False))
+
+
+# The phone is told AFTER the post and off the loop (2026-10-18). Each deal
+# message was awaited inside the batch, so a slow Telegram (10 s timeout,
+# then a plain-text retry) held the NEXT trade's post behind it; the fills
+# we got were the ones that did not have to wait. The task keeps a strong
+# reference until it is done; a failure is logged, never raised into the
+# loop. The text is unchanged.
+_bg_sends: set = set()
+
+
+def _send_in_background(coro, what: str) -> None:
+    try:
+        import asyncio
+        task = asyncio.ensure_future(coro)
+    except Exception as exc:  # noqa: BLE001  no loop, or a coroutine that is not one
+        logger.warn(f"[exec] {what} message not scheduled: {error_message(exc)}")
+        try:
+            coro.close()
+        except Exception:  # noqa: BLE001
+            pass
+        return
+    _bg_sends.add(task)
+
+    def _done(t) -> None:
+        _bg_sends.discard(t)
+        try:
+            exc = None if t.cancelled() else t.exception()
+        except Exception:  # noqa: BLE001
+            exc = None
+        if exc is not None:
+            logger.warn(f"[exec] {what} message failed: {error_message(exc)}")
+    task.add_done_callback(_done)
 
 
 def _note_failure(trade_id: str, why: str, *, definite: bool) -> None:
@@ -753,7 +794,31 @@ async def place_trade_orders(
                 logger.info(f"[exec] exit share for {trade.token_id[:12]}: "
                             f"{'full' if _exit_fracs[trade.id] >= 1.0 else f'{_exit_fracs[trade.id]:.0%}'} ({_how})")
 
-            # --- Market quality check ---
+            # --- The flip gate (owner, 2026-09-24): a buy the target has
+            # already left is not traded, in preview and live alike. ---
+            # BEFORE the book is read (2026-10-18): its fallback is a remote
+            # /activity read, and between the snapshot and the post it aged
+            # the quote by up to 30 s x 4 tries while the fills we did get
+            # were the ones that happened to be fast. The read is capped at
+            # HOT_PATH_TIMEOUT_S here; a gate that cannot read does not refuse.
+            from src.copy_trading import owner_picks as _op
+            if trade.side == "BUY" and not _op.is_pick(trade.trader_address):
+                try:
+                    from src.copy_trading import flip_gate
+                    _shares = float(trade.size) / float(trade.price) if trade.price and trade.price > 0 else 0.0
+                    _exited, _why_f = flip_gate.target_already_exited(
+                        trade.trader_address, trade.token_id, trade.timestamp, _shares,
+                        timeout_s=flip_gate.HOT_PATH_TIMEOUT_S)
+                except Exception as exc:  # noqa: BLE001  a gate that cannot read does not refuse
+                    _exited, _why_f = False, ""
+                    logger.warn(f"[exec] flip gate could not read {trade.trader_address[:10]}: {exc}")
+                if _exited:
+                    logger.skip(f"[exec] {trade.trader_address[:10]} {_why_f}: not copied")
+                    _skip_row(record_trade_history, trade, qt, _why_f)
+                    mark_trade_as_seen(trade.id)
+                    continue
+
+            # --- Market quality check: the last read before the post ---
             snapshot = await _get_market_snapshot(clob_client, trade.token_id)
             quality_issue = _check_market_quality(trade, snapshot)
             if quality_issue is not None:
@@ -771,24 +836,6 @@ async def place_trade_orders(
                         missed_paper.record(trade, f"market quality: {quality_issue}",
                                             entry_price=(snapshot or {}).get("midpoint"))
                 continue
-
-            # --- The flip gate (owner, 2026-09-24): a buy the target has
-            # already left is not traded, in preview and live alike. ---
-            from src.copy_trading import owner_picks as _op
-            if trade.side == "BUY" and not _op.is_pick(trade.trader_address):
-                try:
-                    from src.copy_trading import flip_gate
-                    _shares = float(trade.size) / float(trade.price) if trade.price and trade.price > 0 else 0.0
-                    _exited, _why_f = flip_gate.target_already_exited(
-                        trade.trader_address, trade.token_id, trade.timestamp, _shares)
-                except Exception as exc:  # noqa: BLE001  a gate that cannot read does not refuse
-                    _exited, _why_f = False, ""
-                    logger.warn(f"[exec] flip gate could not read {trade.trader_address[:10]}: {exc}")
-                if _exited:
-                    logger.skip(f"[exec] {trade.trader_address[:10]} {_why_f}: not copied")
-                    _skip_row(record_trade_history, trade, qt, _why_f)
-                    mark_trade_as_seen(trade.id)
-                    continue
 
             # --- Preview mode ---
             # The single gate between this loop and real money. It reads the
@@ -885,9 +932,10 @@ async def place_trade_orders(
                     outcome=trade.outcome,
                 ))
 
-                await tg.trade_placed(trade.market, trade.side, copy_size, trade.price,
-                                      outcome=trade.outcome, trader=trade.trader_address,
-                                      their_price=trade.price)
+                _send_in_background(
+                    tg.trade_placed(trade.market, trade.side, copy_size, trade.price,
+                                    outcome=trade.outcome, trader=trade.trader_address,
+                                    their_price=trade.price), "paper placed")
                 mark_trade_as_seen(trade.id)
                 placed += 1
                 continue
@@ -1067,8 +1115,9 @@ async def place_trade_orders(
                 # (part 2 C): a FAILED row, so /pnl, /real and the no-copy
                 # clock see it; today there was no row at all.
                 _failed_row(record_trade_history, trade, qt, copy_size, why, order_submitted_at)
-                await tg.trade_failed(trade.market, why if trade.side == "BUY" else f"the sell was not placed: {why}",
-                                      outcome=trade.outcome)
+                _send_in_background(
+                    tg.trade_failed(trade.market, why if trade.side == "BUY" else f"the sell was not placed: {why}",
+                                    outcome=trade.outcome), "failed post")
                 if canary_shot:
                     canary.record_post_failed(why)
                     try:
@@ -1100,12 +1149,12 @@ async def place_trade_orders(
                 canary.record_fired(order_id=result.order_id, order_price=result.order_price)
                 try:
                     from src.copy_trading.telegram_notifier import _escape_html, _send_message
-                    await _send_message(
+                    _send_in_background(_send_message(
                         f"🐤 <b>Test copy placed</b>: ${copy_size:.2f} on "
                         f"'{_escape_html(trade.market[:50])}' at {result.order_price:.4f} "
                         f"(the wallet paid {trade.price:.4f}). Trading is paused until "
                         f"you send /live CONFIRM again; the fill report follows when "
-                        f"the exchange confirms it.")
+                        f"the exchange confirms it."), "canary fired")
                 except Exception as exc:
                     logger.warn(f"[canary] fired message failed: {exc}")
 
@@ -1141,8 +1190,15 @@ async def place_trade_orders(
                 # into the legacy one, so its cap never grew (issue #34.1).
                 # Every release site below matches this test.
                 if tier is not None:
-                    record_tiered_placement(tier, copy_size, token_id=trade.token_id,
-                                            trader=trade.trader_address, title=trade.market)
+                    # An exit is not new exposure (2026-10-18): a SELL used
+                    # to reserve its copy_size here, so until the fill
+                    # released it twice (and a cancelled one never did) the
+                    # tier read fuller than it was and refused the next
+                    # entry as "exposure full". Only a BUY reserves; the
+                    # release sites test `po.side` the same way.
+                    if trade.side == "BUY":
+                        record_tiered_placement(tier, copy_size, token_id=trade.token_id,
+                                                trader=trade.trader_address, title=trade.market)
                 else:
                     record_placement_fn(trade, copy_size)
                 if trade.side == "BUY":
@@ -1156,9 +1212,10 @@ async def place_trade_orders(
                              f"its accounting failed: {error_message(exc)}. The daily cap "
                              f"and tier ledgers may under-count until the next reconcile.")
 
-            await tg.trade_placed(trade.market, trade.side, copy_size, result.order_price,
-                                  outcome=trade.outcome, trader=trade.trader_address,
-                                  their_price=trade.price)
+            _send_in_background(
+                tg.trade_placed(trade.market, trade.side, copy_size, result.order_price,
+                                outcome=trade.outcome, trader=trade.trader_address,
+                                their_price=trade.price), "live placed")
 
             record_trade_history(TradeRecord(
                 timestamp=trade.timestamp,
@@ -1220,25 +1277,36 @@ async def place_trade_orders(
 MAX_UNCERTAIN_CYCLES = 5
 
 
-def _release_sell_fill(release_tiered_exposure, po: PendingOrder, new_usd: float,
-                       filled_usd_total: float, final: bool) -> float:
-    """A SELL that fills is not open exposure. `record_tiered_placement` runs
-    for both sides, so a SELL reserved its copy_size against the tier, and
-    nothing released it on a fill: only the reconcile dropped the row once the
-    token had left the wallet, so a partial exit sat double-counted (buy +
-    sell) and refused later copies as "exposure full" (issue #34.2).
+def _release_sell_fill(release_tiered_exposure, po: PendingOrder, new_usd: float) -> float:
+    """A SELL that fills closes exposure: the proceeds' worth of the BUY row
+    for the same token comes off the tier, because those shares are gone.
+    Returns the amount released.
 
-    Releases, off the order's own token: the reservation as it fills, the
-    reservation left over once the order is final (a fill under copy_size),
-    and the proceeds' worth of the BUY row for the same token, because those
-    shares are gone. Returns the amount released."""
+    Until 2026-10-18 the SELL had reserved its own copy_size at the post
+    (issue #34.2 then released it here, twice over, plus the unfilled rest
+    on the final fill). A SELL reserves nothing now, so a fill releases the
+    BUY exposure it closed and nothing else; releasing the old 2x would
+    have eaten the next token's row."""
     if po.tier is None or new_usd <= 0:
         return 0.0
-    amount = new_usd * 2  # the sell's own reservation + the buy exposure it closed
-    if final:
-        amount += max(float(po.copy_size) - float(filled_usd_total), 0.0)
+    amount = float(new_usd)
     release_tiered_exposure(po.tier, round(amount, 6), token_id=po.trade.token_id)
     return amount
+
+
+def _release_reserved(release_tiered_exposure, adjust_placement, po: PendingOrder,
+                      amount: float) -> None:
+    """Give back what the POST reserved for an order that did not fill (or
+    whose fate is unknown). On the tiered ledger only a BUY reserved
+    anything (2026-10-18); releasing a SELL's copy_size off its token would
+    take it out of the BUY row for the same token, which is still held."""
+    if amount <= 0:
+        return
+    if po.tier is not None:
+        if po.side == "BUY":
+            release_tiered_exposure(po.tier, amount, token_id=po.trade.token_id)
+    else:
+        adjust_placement(po.trade, -amount)
 
 
 async def process_verifications(
@@ -1293,8 +1361,7 @@ async def process_verifications(
                         )
                     elif trade.side == "SELL":
                         record_sell(trade.token_id, new_shares)
-                        _release_sell_fill(release_tiered_exposure, po, new_usd,
-                                           fill.filled_usd, final=True)
+                        _release_sell_fill(release_tiered_exposure, po, new_usd)
 
                 logger.trade(
                     f"[verify] FILLED: {trade.side} {fill.filled_shares:.2f} shares "
@@ -1354,8 +1421,7 @@ async def process_verifications(
                         )
                     elif trade.side == "SELL":
                         record_sell(trade.token_id, new_shares)
-                        _release_sell_fill(release_tiered_exposure, po, new_usd,
-                                           fill.filled_usd, final=False)
+                        _release_sell_fill(release_tiered_exposure, po, new_usd)
 
                     po.accounted_filled_shares = fill.filled_shares
                     po.accounted_filled_usd = fill.filled_usd
@@ -1376,11 +1442,7 @@ async def process_verifications(
 
                     # Adjust risk accounting: refund the unexecuted portion
                     unfilled_usd = po.copy_size - po.accounted_filled_usd
-                    if unfilled_usd > 0:
-                        if po.tier is not None:
-                            release_tiered_exposure(po.tier, unfilled_usd, token_id=po.trade.token_id)
-                        else:
-                            adjust_placement(trade, -unfilled_usd)
+                    _release_reserved(release_tiered_exposure, adjust_placement, po, unfilled_usd)
 
                     record_trade_history(TradeRecord(
                         timestamp=trade.timestamp,
@@ -1415,10 +1477,7 @@ async def process_verifications(
                             f"after {MAX_UNCERTAIN_CYCLES} uncertain cycles"
                         )
                         # Release full exposure as a safety measure
-                        if po.tier is not None:
-                            release_tiered_exposure(po.tier, po.copy_size, token_id=po.trade.token_id)
-                        else:
-                            adjust_placement(trade, -po.copy_size)
+                        _release_reserved(release_tiered_exposure, adjust_placement, po, po.copy_size)
 
                         record_trade_history(TradeRecord(
                             timestamp=trade.timestamp,
@@ -1452,10 +1511,7 @@ async def process_verifications(
                         f"after {MAX_UNCERTAIN_CYCLES} unknown cycles"
                     )
                     # Release full exposure
-                    if po.tier is not None:
-                        release_tiered_exposure(po.tier, po.copy_size, token_id=po.trade.token_id)
-                    else:
-                        adjust_placement(trade, -po.copy_size)
+                    _release_reserved(release_tiered_exposure, adjust_placement, po, po.copy_size)
 
                     record_trade_history(TradeRecord(
                         timestamp=trade.timestamp,
@@ -1573,11 +1629,7 @@ async def recover_pending_orders(clob_client: ClobClient) -> None:
 
                 # Release risk exposure for unfilled portion
                 unfilled_usd = po.copy_size - po.accounted_filled_usd
-                if unfilled_usd > 0:
-                    if po.tier is not None:
-                        release_tiered_exposure(po.tier, unfilled_usd, token_id=po.trade.token_id)
-                    else:
-                        adjust_placement(trade, -unfilled_usd)
+                _release_reserved(release_tiered_exposure, adjust_placement, po, unfilled_usd)
 
                 status_str = "cancelled" if cancelled else "cancel attempt"
                 logger.info(
