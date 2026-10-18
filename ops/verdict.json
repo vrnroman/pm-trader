@@ -1,14 +1,16 @@
 {
-    "id": "2026-10-17T18:43:22Z-93c4",
-    "ts": 1792262602,
-    "kind": "nothing",
-    "message": "Armed, copies landing normally; spend $50 and day pnl -12.4 are inside the $45 daily-loss-stop's reach but not past it; 0x09b045ba and 0xd970693a are already benched by the bot's own routine action today; today's booked-twice settle corrections trace to the positions page bug that commits 5b7c763 and 7352b8e already fixed on main.",
+    "id": "2026-10-18T00:42:35Z-93c3",
+    "ts": 1792284155,
+    "kind": "wallet_action",
+    "action": "bench",
+    "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+    "message": "0x9f15613e is in form by the bar right now but its numbers say it is losing: 216 settled, 55% won vs 54% needed, net +2.3% on $746,289, worst day -30818, down from 57% won vs 54% needed and net +8.8% six hours ago, after 4 losses in a row today on this wallet.",
     "evidence": [
-        "## arm: {\"armed\": true, \"ts\": 1791286264.991414, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\", ...}",
-        "## spend today: {\"date\": \"2026-10-17\", \"spent_usd\": 50.0, \"wallet_copies\": {\"0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3\": 10}, ...}",
-        "{\"ts\": 1792220182.3111184, \"kind\": \"routine_wallet_action\", \"before\": \"0x09b045ba\", \"after\": \"bench applied, now in form\", \"detail\": \"0x09b045ba is in form by the bar right now but its numbers say it is losing: 21 settled, 57% won vs 60% needed, net +3.9\"}",
-        "{\"ts\": 1792227848.9287498, \"kind\": \"settled\", \"detail\": \"lost -5.00 on 'Ōita Trinita vs. Albirex Niigata: O/U 2.' (0x9f15613e, tier 1b) [corrected 2026-10-17: booked twice under the positions page bug]\"}",
-        "in form  0x9f15613e: 214 settled, 57% won vs 54% needed, net +8.8% on $740,978, worst day -30,818, 10 of 18 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)"
+        "in form  0x9f15613e: 216 settled, 55% won vs 54% needed, net +2.3% on $746,289, worst day -30,818, 10 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
+        "in form  0x9f15613e: 214 settled, 57% won vs 54% needed, net +8.8% on $740,978, worst day -30,818, 10 of 18 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
+        "2026-10-17 19:46:06 INFO  [ops] settled: 'open $4.99' -> 'paid $0.00' | lost -4.99 on 'Northwestern vs. Michigan State: O/U 49.' (0x9f15613e, tier 1b)",
+        "2026-10-17 19:46:08 INFO  [ops] push:loss_streak: None -> '📉 <b>4 losses in a row</b>\nToday so far: -$17.39\nBankroll: $132.31'",
+        "0x9f15613e floor global -> floor 100.0 (moved) | copies at $100: 300 no +10% (n=421, trimmed +6%) · 200 no +10% (n=480, trimmed +6%) · 150 no +10% (n=536, trimmed +6%) · 100 YES +10% (n=597, trimmed +7%)"
     ],
     "commit": null
 }
