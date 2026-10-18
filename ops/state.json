@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-18T09:40:34.252141+00:00",
+ "generated": "2026-10-18T13:07:31.278541+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -327,10 +327,10 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-18T00:42:35Z-93c3",
-  "admit_scan_ts": 1792314367.0801911,
-  "day_loss_pushed": "2026-10-17",
-  "loss_streak": 6,
-  "day_pnl": -10.0,
+  "admit_scan_ts": 1792325206.5391443,
+  "day_loss_pushed": "2026-10-18",
+  "loss_streak": 7,
+  "day_pnl": -15.0,
   "day_pnl_day": "2026-10-18",
   "settled_tokens": [
    "6691701803539626176077488709374004737591849995522510168757367609925258534749",
@@ -489,7 +489,8 @@
    "95703664735749791183731390699614891695664225860385656324496051741755131064190",
    "89201338025952219315358685116923655746018720951219735483922641978635524025866",
    "105569327869778323024935030875323249036218041153643991812818134368765662706974",
-   "81590020427043842613092785777908802343565727502554819527317910299079893723010"
+   "81590020427043842613092785777908802343565727502554819527317910299079893723010",
+   "31875456602995884681359741938057426161525862195964797074350542114152896078914"
   ],
   "form_scan_ts": 1792309434.625923,
   "daily_line_attempt_day": "2026-10-18",
@@ -501,7 +502,7 @@
    "2026-10-06:no trade data for": 1
   },
   "day_won": 0,
-  "day_lost": 2
+  "day_lost": 3
  },
  "probation": {
   "0x09b045baad1fbe115c70785635a261411774a3b6": {
@@ -942,25 +943,41 @@
    "floor_before": null,
    "floor_after": null,
    "live": false
+  },
+  {
+   "ts": 1792328112.5148287,
+   "day": "2026-10-18",
+   "kind": "settled",
+   "before": "open $5.00",
+   "after": "paid $0.00",
+   "detail": "lost -5.00 on 'Udinese Calcio vs. US Lecce: O/U 2.5' (0x9f15613e, tier 1b)",
+   "push": null,
+   "token_id": "31875456602995884681359741938057426161525862195964797074350542114152896078914",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+   "pnl": -5.0,
+   "won": false,
+   "cost": 5.0
+  },
+  {
+   "ts": 1792328112.5148287,
+   "day": "2026-10-18",
+   "kind": "push:settled",
+   "before": null,
+   "after": "❌ <b>LOST -$5.00</b>\n<b>Udinese Calcio vs. US Lecce: O/U 2.5</b>\nStaked $5.00, paid out $0.00\nCopied 0x9f15…bdb3, tier 1",
+   "detail": "",
+   "push": "DEAL"
+  },
+  {
+   "ts": 1792328112.5148287,
+   "day": "2026-10-18",
+   "kind": "push:daily_loss",
+   "before": null,
+   "after": "📉 <b>Down $15.00 today</b>\nThat is 11% of the $134.58 bankroll (the alert line is 10%)",
+   "detail": "",
+   "push": "DEAL"
   }
  ],
  "important": [
-  "2026-10-17 09:51:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 09:53:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 09:55:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 09:55:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 10:05:19 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-10-17 10:59:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 11:04:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 11:04:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 11:38:02 ERROR Network error fetching 0xeef6...cd4c: Server disconnected without sending a response.",
-  "2026-10-17 11:38:02 ERROR Network error fetching 0x28ef...ff5e: Server disconnected without sending a response.",
-  "2026-10-17 11:38:02 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
-  "2026-10-17 11:38:02 ERROR Network error fetching 0x1985...51ab: Server disconnected without sending a response.",
-  "2026-10-17 11:38:02 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
-  "2026-10-17 12:01:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 12:15:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 12:29:50 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-17 13:21:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 13:31:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 13:36:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1083,6 +1100,18 @@
   "2026-10-18 08:30:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 08:30:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 09:12:16 INFO  [ops] floor_row: '0x28ef6f21 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +1% (n=142, trimmed -1%) · 200 no +2% (n=178, trimmed -1%) · 150 no +6% (n=232, trimmed +2%) · 100 no +6% (n=288, trimmed +4%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-18 09:55:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-18 10:47:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-18 10:56:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-18 11:06:47 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-18 11:11:39 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-18 11:19:41 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-18 11:22:01 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-18 12:02:54 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-18 12:55:12 INFO  [ops] settled: 'open $5.00' -> 'paid $0.00' | lost -5.00 on 'Udinese Calcio vs. US Lecce: O/U 2.5' (0x9f15613e, tier 1b)",
+  "2026-10-18 12:55:13 INFO  [ops] push:settled: None -> '❌ <b>LOST -$5.00</b>\\n<b>Udinese Calcio vs. US Lecce: O/U 2.5</b>\\nStaked $5.00, paid out $0.00\\nCopied 0x9f15…bdb3, tier 1'",
+  "2026-10-18 12:55:14 INFO  [ops] push:daily_loss: None -> '📉 <b>Down $15.00 today</b>\\nThat is 11% of the $134.58 bankroll (the alert line is 10%)'",
+  "2026-10-18 12:56:22 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-17 16:40:11 INFO  [recovery] No pending orders to recover",
   "2026-10-17 23:47:43 INFO  [recovery] No pending orders to recover",
   "2026-10-18 02:28:00 TRADE [LIVE] BUY $5.00 on 'Will CF América win on 2026-10-17?' @ 0.8800, order 0xf216b66441...",
@@ -1091,7 +1120,8 @@
   "2026-10-18 04:13:42 TRADE [verify] FILLED: BUY 10.19 shares on 'Wuhan San Zhen FC vs. Shanghai Shenhua F' @ 0.4900",
   "2026-10-18 04:18:00 TRADE [LIVE] BUY $5.00 on '' @ 0.5200, order 0x62a7302bcb...",
   "2026-10-18 04:18:01 TRADE [verify] FILLED: BUY 9.61 shares on '' @ 0.5200",
-  "2026-10-18 08:21:31 INFO  [recovery] No pending orders to recover"
+  "2026-10-18 08:21:31 INFO  [recovery] No pending orders to recover",
+  "2026-10-18 12:18:40 TRADE [DISARMED] would BUY $5.00 on 'Will Sønderjyske Fodbold win on 2026-10-' @ 0.8459 (from 0x0011...4333); the arm is off"
  ],
  "watcher": [
   {
@@ -1259,13 +1289,12 @@
   },
   "2497cd50ff7d": {
    "first": 1790098332.9559617,
-   "last": 1792297099.4288347,
-   "count": 38,
+   "last": 1792328159.6169565,
+   "count": 39,
    "sample": "2026-09-21 00:52:20 INFO  [ops] settled: 'open $6.40' -> 'paid $0.00' | lost -6.40 on 'Counter-Strike: Bounty Hunters Esports v' (0x57b25849, tier 1b)",
    "norm": "INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)",
    "recent": [
-    1792294334.725045,
-    1792297099.4288347
+    1792328159.6169565
    ],
    "action": null,
    "action_ts": null,
@@ -1401,15 +1430,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792312298.5367115,
-   "count": 1332,
+   "last": 1792321077.5463548,
+   "count": 1335,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792311338.5607314,
-    1792311817.089352,
-    1792312298.5367115,
-    1792312298.5367115
+    1792320477.0669272,
+    1792321077.5463548
    ],
    "action": null,
    "action_ts": null,
@@ -1789,12 +1816,13 @@
   },
   "1bd07071cf73": {
    "first": 1790364989.5143719,
-   "last": 1792311817.089352,
-   "count": 24,
+   "last": 1792328279.8642983,
+   "count": 30,
    "sample": "2026-09-25 19:35:34 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
-    1792311817.089352
+    1792325038.9940012,
+    1792328279.8642983
    ],
    "action": null,
    "action_ts": null,
@@ -1817,12 +1845,12 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1790413246.5798569,
-   "count": 11,
+   "last": 1792325999.1500328,
+   "count": 12,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1790413246.5798569
+    1792325999.1500328
    ],
    "action": null,
    "action_ts": null,
@@ -2086,12 +2114,12 @@
   },
   "a19634278c3d": {
    "first": 1790599473.6040406,
-   "last": 1792228705.2440767,
-   "count": 5,
+   "last": 1792328159.6169565,
+   "count": 6,
    "sample": "2026-09-28 12:43:39 INFO  [ops] push:daily_loss: None -> \"📉 <b>Today's losses reach $12.80</b> (10% of the $91.68 bankroll).\"",
    "norm": "INFO [ops] push:daily_loss: None -> 'S'",
    "recent": [
-    1792228705.2440767
+    1792328159.6169565
    ],
    "action": null,
    "action_ts": null,
@@ -3289,13 +3317,12 @@
   },
   "d7d42c1f33f7": {
    "first": 1791629042.6847835,
-   "last": 1792297099.4288347,
-   "count": 43,
+   "last": 1792328159.6169565,
+   "count": 44,
    "sample": "2026-10-10 10:43:05 INFO  [ops] push:settled: None -> '❌ <b>LOST -$6.23</b>\\n<b>Shanghai Rolex Masters: Yunchaokete Bu vs Casper Ruud</b>\\nPick: <b>Yunchaokete Bu</b>\\nStaked $6.'",
    "norm": "INFO [ops] push:settled: None -> 'S'",
    "recent": [
-    1792294334.725045,
-    1792297099.4288347
+    1792328159.6169565
    ],
    "action": null,
    "action_ts": null,
