@@ -1,16 +1,14 @@
 {
-    "id": "2026-10-18T00:42:35Z-93c3",
-    "ts": 1792284155,
-    "kind": "wallet_action",
-    "action": "bench",
-    "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "message": "0x9f15613e is in form by the bar right now but its numbers say it is losing: 216 settled, 55% won vs 54% needed, net +2.3% on $746,289, worst day -30818, down from 57% won vs 54% needed and net +8.8% six hours ago, after 4 losses in a row today on this wallet.",
+    "id": "2026-10-18T06:42:57Z-9eba",
+    "ts": 1792305777,
+    "kind": "nothing",
+    "message": "Armed, spend $15 of a $45 daily-loss stop, no cap hit, no self-disarm, no new error pattern. The 0x9f15613e bench I set 6h ago still holds and still fits; nothing new to act on.",
     "evidence": [
-        "in form  0x9f15613e: 216 settled, 55% won vs 54% needed, net +2.3% on $746,289, worst day -30,818, 10 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "in form  0x9f15613e: 214 settled, 57% won vs 54% needed, net +8.8% on $740,978, worst day -30,818, 10 of 18 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "2026-10-17 19:46:06 INFO  [ops] settled: 'open $4.99' -> 'paid $0.00' | lost -4.99 on 'Northwestern vs. Michigan State: O/U 49.' (0x9f15613e, tier 1b)",
-        "2026-10-17 19:46:08 INFO  [ops] push:loss_streak: None -> '📉 <b>4 losses in a row</b>\nToday so far: -$17.39\nBankroll: $132.31'",
-        "0x9f15613e floor global -> floor 100.0 (moved) | copies at $100: 300 no +10% (n=421, trimmed +6%) · 200 no +10% (n=480, trimmed +6%) · 150 no +10% (n=536, trimmed +6%) · 100 YES +10% (n=597, trimmed +7%)"
+        "{\"cash\": 119.594219, \"open_cost\": 14.99, \"equity\": 134.58, \"floor\": null, \"stated\": 150.0, \"spend\": {\"date\": \"2026-10-18\", \"spent_usd\": 15.0, \"cap_usd\": null, \"remaining_usd\": null, \"daily_loss_stop_usd\": 45.0, \"closed_reason\": \"\"}, \"armed\": true, \"resolved_unclaimed\": 111, \"tier\": {\"1a\": 0, \"1b\": 15.0, \"1c\": 0}, \"ts\": 1792297622.966654, \"day\": \"2026-10-18\"}",
+        "in form  0x9f15613e: 210 settled, 55% won vs 52% needed, net -1.1% on $652,670, worst day -30,818, 9 of 19 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
+        "{\"ts\": 1792295534.8855782, \"kind\": \"nothing\", \"woke_because\": \"201e6a399821, 8cb14a8960a8\", \"concluded\": \"The bot's routine wallet governance flagged live-copied wallet 0x9f15613e as still passing the win-rate bar (55% vs 54% needed) while its net is thin, applied its soft bench routine, and delivered the note to the owner, all by design. Both woke fingerprints are INFO [ops] lines, not errors\"}",
+        "{\"ts\": 1792270095.182155, \"kind\": \"nothing\", \"woke_because\": \"54ac26fb3ff1\", \"concluded\": \"The 404 on /price is the py_clob library trying to read an orderbook for tokens that have already resolved, which no longer have a book.\"}",
+        "## arm: {\"armed\": true, \"ts\": 1791286264.991414, \"by\": \"watcher:no trade data for\", \"reason\": \"watcher: 'no trade data for' clear for 15 min\", \"first_armed_ts\": 1788617432.0499406, \"floor_override\": false, \"daily_loss_override_day\": null}"
     ],
     "commit": null
 }
