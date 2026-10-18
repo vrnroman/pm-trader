@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-17T23:58:50.418416+00:00",
+ "generated": "2026-10-18T00:04:50.719619+00:00",
  "money": {
   "cash": 121.501769,
   "open_cost": 20.0,
@@ -21,7 +21,7 @@
    "1b": 20.0,
    "1c": 0
   },
-  "ts": 1792281203.135948,
+  "ts": 1792281559.8753748,
   "day": "2026-10-17"
  },
  "arm": {
@@ -336,7 +336,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-17T06:42:07Z-4edf",
-  "admit_scan_ts": 1792270685.4922936,
+  "admit_scan_ts": 1792281559.887074,
   "day_loss_pushed": "2026-10-17",
   "loss_streak": 4,
   "day_pnl": -17.39,
@@ -693,17 +693,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1792195272.1891413,
-   "day": "2026-10-17",
-   "kind": "settle_pending",
-   "before": "0x9f15613e open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'FC Supra Du Quebec vs. Inter Toronto FC:' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "89305247657950159648228139943292750823976961639187475647796860658104756389843",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
   {
    "ts": 1792196540.086641,
    "day": "2026-10-17",
@@ -1306,13 +1295,6 @@
   }
  ],
  "important": [
-  "2026-10-17 00:01:11 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $5.00",
-  "2026-10-17 00:01:12 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'FC Supra Du Quebec vs. Inter Toronto FC:' left the wallet; booked when Polymarket's row shows",
-  "2026-10-17 00:01:50 INFO  [daily-cap] +$5.00 (copy:1b) reserved | total today $5.00 / no spend cap (the day stops after $45 lost)",
-  "2026-10-17 00:01:51 INFO  [tiered-risk] Recorded tier 1b placement: $5.00 | open: $10.00 / $200.00",
-  "2026-10-17 00:04:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 00:04:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 00:04:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 00:09:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 00:18:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 00:18:45 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1537,8 +1519,7 @@
   "2026-10-17 23:48:17 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 23:48:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 23:49:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 00:01:51 TRADE [LIVE] BUY $5.00 on 'Spread: Maryland (-5.5)' @ 0.4800, order 0xbd571a3560...",
-  "2026-10-17 00:01:52 TRADE [verify] FILLED: BUY 10.42 shares on 'Spread: Maryland (-5.5)' @ 0.4800",
+  "2026-10-18 00:01:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 02:33:18 TRADE [LIVE] BUY $5.00 on 'Atlante FC vs. Pumas de la UNAM: O/U 2.5' @ 0.4600, order 0x92d470f267...",
   "2026-10-17 02:33:19 TRADE [verify] FILLED: BUY 10.87 shares on 'Atlante FC vs. Pumas de la UNAM: O/U 2.5' @ 0.4600",
   "2026-10-17 03:13:42 TRADE [LIVE] BUY $5.00 on 'Will Gamba Ōsaka win on 2026-10-17?' @ 0.6500, order 0x884fa42760...",
@@ -1940,16 +1921,16 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792281000.566141,
-   "count": 1320,
+   "last": 1792281721.1196294,
+   "count": 1321,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792277412.7213023,
     1792281000.566141,
     1792281000.566141,
     1792281000.566141,
-    1792281000.566141
+    1792281000.566141,
+    1792281721.1196294
    ],
    "action": null,
    "action_ts": null,
