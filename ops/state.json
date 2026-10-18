@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-18T16:46:25.950170+00:00",
+ "generated": "2026-10-18T17:22:00.348727+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -969,9 +969,6 @@
   }
  ],
  "important": [
-  "2026-10-17 17:06:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 17:09:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 17:12:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 17:43:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 17:58:29 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +28% (n=167, trimmed +22%) · 200 yes +42% (n=225, trimmed +32%) · 150 yes +39% (n=255, trimmed +30%) · 100 YES +46% (n=288, trimmed +38%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-17 17:58:41 INFO  [ops] floor_row: '0x1985327e floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +28% (n=152, trimmed +22%) · 200 yes +26% (n=201, trimmed +19%) · 150 yes +31% (n=216, trimmed +24%) · 100 YES +31% (n=245, trimmed +24%); backward replay (copy-and-hold at their price, first entry, clean era)",
@@ -1094,6 +1091,7 @@
   "2026-10-18 15:59:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 16:29:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 16:45:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-18 16:55:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 23:47:43 INFO  [recovery] No pending orders to recover",
   "2026-10-18 02:28:00 TRADE [LIVE] BUY $5.00 on 'Will CF América win on 2026-10-17?' @ 0.8800, order 0xf216b66441...",
   "2026-10-18 02:28:02 INFO  [verify] UNFILLED, cancelled order 0xf216b66441...",
@@ -1412,15 +1410,15 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792341962.7318716,
-   "count": 1347,
+   "last": 1792342562.780789,
+   "count": 1348,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792338601.9370203,
     1792339202.007924,
     1792341002.207109,
-    1792341962.7318716
+    1792341962.7318716,
+    1792342562.780789
    ],
    "action": null,
    "action_ts": null,
