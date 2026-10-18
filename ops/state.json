@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-18T20:40:52.227403+00:00",
+ "generated": "2026-10-18T21:45:54.760072+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -419,7 +419,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-18T00:42:35Z-93c3",
-  "admit_scan_ts": 1792347205.1000357,
+  "admit_scan_ts": 1792358129.6186075,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -824,17 +824,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1792270376.4781773,
-   "day": "2026-10-17",
-   "kind": "settle_pending",
-   "before": "0x9f15613e open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'Spread: Maryland (-5.5)' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "21275745079659101638799069995175605377089085151473290899601188871431728279183",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
-  {
    "ts": 1792280864.0967755,
    "day": "2026-10-17",
    "kind": "settle_pending",
@@ -1121,16 +1110,6 @@
   }
  ],
  "important": [
-  "2026-10-17 20:47:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 20:47:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 20:47:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 20:48:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 20:52:56 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $25.00",
-  "2026-10-17 20:52:56 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Spread: Maryland (-5.5)' left the wallet; booked when Polymarket's row shows",
-  "2026-10-17 21:18:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 21:18:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 21:23:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 21:44:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 21:54:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 22:10:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 22:49:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1242,6 +1221,7 @@
   "2026-10-18 19:07:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-10-18 19:58:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 20:27:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-18 21:07:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-17 23:47:43 INFO  [recovery] No pending orders to recover",
   "2026-10-18 02:28:00 TRADE [LIVE] BUY $5.00 on 'Will CF América win on 2026-10-17?' @ 0.8800, order 0xf216b66441...",
   "2026-10-18 02:28:02 INFO  [verify] UNFILLED, cancelled order 0xf216b66441...",
@@ -1258,23 +1238,12 @@
   "2026-10-18 18:48:33 TRADE [DISARMED] would BUY $5.00 on 'Will Olympique Lyonnais win on 2026-10-1' @ 0.4700 (from 0x3d42...5bf3); the arm is off",
   "2026-10-18 19:25:41 TRADE [DISARMED] would BUY $5.00 on 'Counter-Strike: FURIA vs BetBoom Team - ' @ 0.5900 (from 0x3d42...5bf3); the arm is off",
   "2026-10-18 20:18:27 TRADE [DISARMED] would BUY $5.00 on 'Will Estudiantes de La Plata win on 2026' @ 0.4500 (from 0x154c...658e); the arm is off",
-  "2026-10-18 20:20:22 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: James Kent Trotter vs Gavin ' @ 0.4600 (from 0x3d42...5bf3); the arm is off"
+  "2026-10-18 20:20:22 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: James Kent Trotter vs Gavin ' @ 0.4600 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-18 20:48:57 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: salamit vs Power Rangers - Game ' @ 0.4800 (from 0x154c...658e); the arm is off",
+  "2026-10-18 20:49:24 TRADE [DISARMED] would BUY $5.00 on 'Spread: Bills (-1.5)' @ 0.3900 (from 0x154c...658e); the arm is off",
+  "2026-10-18 20:54:42 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Cooper Woestendick vs Bor Ar' @ 0.8700 (from 0x3d42...5bf3); the arm is off"
  ],
  "watcher": [
-  {
-   "ts": 1792270095.182155,
-   "day": "2026-10-17",
-   "woke_because": "54ac26fb3ff1",
-   "fingerprint": "54ac26fb3ff1",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The 404 on /price is the py_clob library trying to read an orderbook for tokens that have already resolved, which no longer have a book. Every cluster sits between an inventory sync and the guard line 'equity excludes 137 resolved position(s) still awaiting redemption' (e.g. 20:47:28 cluster is bracketed by 'Synced 143 positions' at 20:44:32 and 'equity excludes 137 resolved' at 20:47:43), so the valuation loop prices resolved-but-unredeemed holdings and the guard correctly drops them from equity. It is steady background noise, not a spike: 98 today against 51, 55, 38, 57, 61, 124, 93 over the",
-   "confidence": 0.88,
-   "cost_usd": 0.5953430000000001,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1792295534.8855782,
    "day": "2026-10-18",
@@ -1567,13 +1536,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792355290.4819672,
-   "count": 1359,
+   "last": 1792357690.8476093,
+   "count": 1360,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792353609.964467,
-    1792355290.4819672
+    1792355290.4819672,
+    1792357690.8476093
    ],
    "action": null,
    "action_ts": null,
@@ -1983,14 +1952,16 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792354930.4560082,
-   "count": 20,
+   "last": 1792356970.7475903,
+   "count": 23,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792351568.980605,
     1792354810.387694,
-    1792354930.4560082
+    1792354930.4560082,
+    1792356610.7035956,
+    1792356610.7035956,
+    1792356970.7475903
    ],
    "action": null,
    "action_ts": null,
