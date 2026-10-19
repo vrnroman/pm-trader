@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T04:35:06.598996+00:00",
+ "generated": "2026-10-19T06:14:50.133799+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -1003,7 +1003,6 @@
   }
  ],
  "important": [
-  "2026-10-18 05:17:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 07:05:50 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-18 07:18:54 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-18 07:40:58 WARNING [live] DISARMED by owner:claude-session, back to paper",
@@ -1092,6 +1091,9 @@
   "2026-10-19 04:12:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-19 04:22:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-19 04:34:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-19 04:50:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-19 05:23:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-19 06:04:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 08:21:31 INFO  [recovery] No pending orders to recover",
   "2026-10-18 12:18:40 TRADE [DISARMED] would BUY $5.00 on 'Will Sønderjyske Fodbold win on 2026-10-' @ 0.8459 (from 0x0011...4333); the arm is off",
   "2026-10-18 14:25:16 TRADE [DISARMED] would BUY $5.00 on 'Will Como 1907 win on 2026-10-18?' @ 0.8594 (from 0x0011...4333); the arm is off",
@@ -1126,37 +1128,6 @@
  ],
  "watcher": [
   {
-   "ts": 1792303221.59047,
-   "day": "2026-10-18",
-   "kind": "analyst",
-   "proposal": "note",
-   "woke_because": "daily study",
-   "concluded": "57 price-drift BUYs were declined and 6 of the 7 settled 'would have won +9.83', but that is priced at the trader's entry (e.g. 0.78) while the gate fired because the market had already run 1474bps past it to ~0.92, so we could never fill there: the gate is working and that number argues for nothing, do not loosen it.",
-   "counterfactual": "",
-   "did": "noted",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1792303221.59047,
-   "day": "2026-10-18",
-   "kind": "analyst",
-   "proposal": "note",
-   "woke_because": "daily study",
-   "concluded": "Today is down $17.39, 13% of the $134 bankroll and past the 10% line, on a 4-loss streak all from 0x9f15613e, yet the copied slice stays positive (0x9f15613e +10% net, trimmed +6%, n=421; thin wallets trimmed +22%), so this is variance not a broken strategy; the $45 daily-loss-stop is 33% of freshly-recovered equity and is the owner's lever while the account is thin.",
-   "counterfactual": "",
-   "did": "noted",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1792303221.59047,
-   "day": "2026-10-18",
-   "kind": "analyst",
-   "woke_because": "daily study",
-   "concluded": "No param move supported: slice healthy, price-drift 'winners' are a stale-price artifact; flagging today's -13% streak is variance and the $45 stop is 33% of thin equity (owner's call).",
-   "did": "2 proposal(s): noted; noted",
-   "cost_usd": 0.8648865000000001
-  },
-  {
    "ts": 1792309356.5142374,
    "day": "2026-10-18",
    "woke_because": "1b05767a0e3b",
@@ -1169,6 +1140,15 @@
    "did": "nothing",
    "proof": "",
    "question": ""
+  },
+  {
+   "ts": 1792389623.1827323,
+   "day": "2026-10-19",
+   "kind": "analyst",
+   "woke_because": "daily study",
+   "concluded": "no usable answer",
+   "did": "nothing",
+   "cost_usd": 0.0
   }
  ],
  "fingerprints": {
@@ -1403,15 +1383,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792384461.552172,
-   "count": 1377,
+   "last": 1792389876.6017876,
+   "count": 1380,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792383020.2683973,
-    1792383260.4436498,
-    1792383861.1771417,
-    1792384461.552172
+    1792387462.9197228,
+    1792389876.6017876
    ],
    "action": null,
    "action_ts": null,
