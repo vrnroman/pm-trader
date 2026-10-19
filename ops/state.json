@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-18T23:11:22.860621+00:00",
+ "generated": "2026-10-19T00:02:14.396387+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -824,26 +824,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1792280864.0967755,
-   "day": "2026-10-17",
-   "kind": "settle_pending",
-   "before": "0x9f15613e open $5.00",
-   "after": "payout not in the activity yet",
-   "detail": "'Will CSD Independiente del Valle win on ' left the wallet; booked when Polymarket's row shows",
-   "push": null,
-   "token_id": "83300827286959695614144529742328240449069027356450501828238496963863245749419",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3"
-  },
-  {
-   "ts": 1792280879.360005,
-   "day": "2026-10-17",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
    "ts": 1792289189.22983,
    "day": "2026-10-18",
    "kind": "settle_pending",
@@ -1110,15 +1090,6 @@
   }
  ],
  "important": [
-  "2026-10-17 23:47:24 INFO  Received signal 15, shutting down...",
-  "2026-10-17 23:47:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=400 url=https://clob.polymarket.com/auth/api-key body={\"error\":\"Could not create api key\"}",
-  "2026-10-17 23:47:43 INFO  Bot started. Monitoring trades...",
-  "2026-10-17 23:47:44 INFO  [tiered-risk] tier 1b: released $5.00 of exposure from resolved or closed positions | open now: $20.00",
-  "2026-10-17 23:47:44 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Will CSD Independiente del Valle win on ' left the wallet; booked when Polymarket's row shows",
-  "2026-10-17 23:48:17 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 23:48:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 23:49:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-18 00:01:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 00:11:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 00:35:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 01:36:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1222,7 +1193,9 @@
   "2026-10-18 21:57:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 22:38:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 23:08:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-17 23:47:43 INFO  [recovery] No pending orders to recover",
+  "2026-10-18 23:33:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-18 23:43:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-18 23:48:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-18 02:28:00 TRADE [LIVE] BUY $5.00 on 'Will CF América win on 2026-10-17?' @ 0.8800, order 0xf216b66441...",
   "2026-10-18 02:28:02 INFO  [verify] UNFILLED, cancelled order 0xf216b66441...",
   "2026-10-18 04:13:41 TRADE [LIVE] BUY $5.00 on 'Wuhan San Zhen FC vs. Shanghai Shenhua F' @ 0.4900, order 0x9eba243015...",
@@ -1243,7 +1216,8 @@
   "2026-10-18 20:49:24 TRADE [DISARMED] would BUY $5.00 on 'Spread: Bills (-1.5)' @ 0.3900 (from 0x154c...658e); the arm is off",
   "2026-10-18 20:54:42 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Cooper Woestendick vs Bor Ar' @ 0.8700 (from 0x3d42...5bf3); the arm is off",
   "2026-10-18 22:05:33 TRADE [DISARMED] would BUY $5.00 on 'Bills vs. Raiders: O/U 54.5' @ 0.5300 (from 0x154c...658e); the arm is off",
-  "2026-10-18 22:27:09 TRADE [DISARMED] would BUY $5.00 on 'CA Belgrano vs. CA River Plate: O/U 2.5' @ 0.3900 (from 0x154c...658e); the arm is off"
+  "2026-10-18 22:27:09 TRADE [DISARMED] would BUY $5.00 on 'CA Belgrano vs. CA River Plate: O/U 2.5' @ 0.3900 (from 0x154c...658e); the arm is off",
+  "2026-10-18 23:43:45 TRADE [DISARMED] would BUY $5.00 on 'Cowboys vs. Packers' @ 0.4900 (from 0x154c...658e); the arm is off"
  ],
  "watcher": [
   {
@@ -1538,13 +1512,15 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792365012.296267,
-   "count": 1363,
+   "last": 1792367412.5802464,
+   "count": 1366,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792363212.1323807,
-    1792365012.296267
+    1792365012.296267,
+    1792366452.4957895,
+    1792367052.5519602,
+    1792367412.5802464
    ],
    "action": null,
    "action_ts": null,
@@ -1954,13 +1930,12 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792362491.9718177,
-   "count": 25,
+   "last": 1792367052.5519602,
+   "count": 26,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792361171.7182474,
-    1792362491.9718177
+    1792367052.5519602
    ],
    "action": null,
    "action_ts": null,
