@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-20T22:19:39.036407+00:00",
+ "generated": "2026-10-20T23:05:05.834966+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -1155,8 +1155,6 @@
   "2026-10-20 21:40:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 21:44:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 21:44:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-19 22:40:02 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Jenson Brooksby vs Mitchell ' @ 0.8100 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-19 22:50:53 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Jenson Brooksby vs Mitchell ' @ 0.7300 (from 0x3d42...5bf3); the arm is off",
   "2026-10-19 23:15:13 TRADE [DISARMED] would BUY $5.00 on 'Spread: Golden State Valkyries (-1.5)' @ 0.5100 (from 0x28ef...ff5e); the arm is off",
   "2026-10-20 00:04:30 TRADE [DISARMED] would BUY $5.00 on 'Commanders vs. 49ers: O/U 52.5' @ 0.5400 (from 0x3d42...5bf3); the arm is off",
   "2026-10-20 00:10:15 TRADE [DISARMED] would BUY $5.00 on 'Spread: 49ers (-10.5)' @ 0.6100 (from 0x3d42...5bf3); the arm is off",
