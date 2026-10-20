@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-20T15:08:45.464027+00:00",
+ "generated": "2026-10-20T15:53:03.014477+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -460,7 +460,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-18T00:42:35Z-93c3",
-  "admit_scan_ts": 1792500632.6767287,
+  "admit_scan_ts": 1792511483.5342596,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -1033,12 +1033,27 @@
    "detail": "0x9f6a4549: 18 settled, 72% won vs 80% needed, net +33.2% on $29,454, worst day -761, 1 of 8 exits under 10 min",
    "push": null,
    "wallet": "0x9f6a4549f14154a7f2c74d03efd8de903a61eb61"
+  },
+  {
+   "ts": 1792509433.233169,
+   "day": "2026-10-20",
+   "kind": "sre_no_verdict",
+   "before": "5a80a08ceeba",
+   "after": "no verdict",
+   "detail": "",
+   "push": null
+  },
+  {
+   "ts": 1792510829.0556285,
+   "day": "2026-10-20",
+   "kind": "sre_no_verdict",
+   "before": "1281617aae14",
+   "after": "no verdict",
+   "detail": "",
+   "push": null
   }
  ],
  "important": [
-  "2026-10-19 15:11:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-19 15:37:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-19 15:42:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-19 16:18:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-19 16:53:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-19 17:14:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1135,13 +1150,17 @@
   "2026-10-20 14:32:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 14:37:06 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-20 15:03:50 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-10-19 15:16:58 TRADE [DISARMED] would BUY $5.00 on 'Lisbon: Tristan Boyer vs Elmer Moeller' @ 0.5428 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-19 15:19:25 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Dawn Bulls vs CyberHero - Game 1' @ 0.6600 (from 0x154c...658e); the arm is off",
-  "2026-10-19 15:20:23 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Dawn Bulls vs CyberHero - Game 1' @ 0.6684 (from 0x154c...658e); the arm is off",
-  "2026-10-19 15:21:14 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Dawn Bulls vs CyberHero - Game 1' @ 0.6700 (from 0x154c...658e); the arm is off",
-  "2026-10-19 15:28:51 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Mikhail Kukushkin vs Stefan' @ 0.5317 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-19 15:43:31 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Mikhail Kukushkin vs Stefan' @ 0.4200 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-19 15:44:01 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Mikhail Kukushkin vs Stefan' @ 0.4400 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-20 15:15:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: _ssl.c:993: The handshake operation timed out",
+  "2026-10-20 15:17:23 ERROR [inventory] API sync failed: ",
+  "2026-10-20 15:21:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-20 15:21:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-20 15:33:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-20 15:37:00 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-20 15:37:14 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-20 15:39:56 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-20 15:40:15 ERROR Onchain: chunk 95870268-95870296 SKIPPED after 5 refused reads (read refused: CTF [95870268-95870296]: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))); a set-Z fill in those blocks reaches the bot through the data api only",
+  "2026-10-20 15:48:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-20 15:51:23 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-19 16:08:41 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Mikhail Kukushkin vs Stefan' @ 0.5100 (from 0x3d42...5bf3); the arm is off",
   "2026-10-19 16:09:20 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Mikhail Kukushkin vs Stefan' @ 0.5700 (from 0x3d42...5bf3); the arm is off",
   "2026-10-19 16:23:34 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Mikhail Kukushkin vs Stefan' @ 0.5000 (from 0x3d42...5bf3); the arm is off",
@@ -1171,7 +1190,10 @@
   "2026-10-20 10:26:11 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Power Rangers vs HULIGANI - Game' @ 0.3900 (from 0x154c...658e); the arm is off",
   "2026-10-20 10:48:11 TRADE [DISARMED] would BUY $5.00 on 'Lisbon: Patrick Schoen vs Svyatoslav Gul' @ 0.2300 (from 0x3d42...5bf3); the arm is off",
   "2026-10-20 13:14:54 TRADE [DISARMED] would BUY $5.00 on '' @ 0.7399 (from 0x154c...658e); the arm is off",
-  "2026-10-20 13:15:20 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Team Lynx vs Power Rangers - Gam' @ 0.7900 (from 0x154c...658e); the arm is off"
+  "2026-10-20 13:15:20 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Team Lynx vs Power Rangers - Gam' @ 0.7900 (from 0x154c...658e); the arm is off",
+  "2026-10-20 15:16:05 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Team Synapse vs Yellow Submarine' @ 0.8100 (from 0x154c...658e); the arm is off",
+  "2026-10-20 15:17:15 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Team Synapse vs Yellow Submarine' @ 0.8400 (from 0x154c...658e); the arm is off",
+  "2026-10-20 15:17:28 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Team Synapse vs Yellow Submarine' @ 0.8500 (from 0x154c...658e); the arm is off"
  ],
  "watcher": [
   {
@@ -1189,6 +1211,24 @@
    "kind": "analyst",
    "woke_because": "daily study",
    "concluded": "no usable answer",
+   "did": "nothing",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1792509433.233169,
+   "day": "2026-10-20",
+   "woke_because": "5a80a08ceeba",
+   "kind": "no-verdict",
+   "concluded": "the model gave no usable verdict",
+   "did": "nothing",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1792510829.0556285,
+   "day": "2026-10-20",
+   "woke_because": "1281617aae14",
+   "kind": "no-verdict",
+   "concluded": "the model gave no usable verdict",
    "did": "nothing",
    "cost_usd": 0.0
   }
@@ -1424,19 +1464,15 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792506790.3699543,
-   "count": 1447,
+   "last": 1792511344.0482256,
+   "count": 1451,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792504389.8952794,
-    1792504750.0209298,
-    1792504990.037741,
-    1792504990.037741,
-    1792505230.0570884,
-    1792505830.2159388,
-    1792506430.2991273,
-    1792506790.3699543
+    1792509748.0077262,
+    1792509748.0077262,
+    1792510468.5359933,
+    1792511344.0482256
    ],
    "action": null,
    "action_ts": null,
@@ -1816,13 +1852,16 @@
   },
   "1bd07071cf73": {
    "first": 1790364989.5143719,
-   "last": 1792508710.856123,
-   "count": 49,
+   "last": 1792511585.0155618,
+   "count": 53,
    "sample": "2026-09-25 19:35:34 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
-    1792507030.4422908,
-    1792508710.856123
+    1792508710.856123,
+    1792510708.802476,
+    1792510708.802476,
+    1792510829.0556285,
+    1792511585.0155618
    ],
    "action": null,
    "action_ts": null,
@@ -1845,13 +1884,14 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792502229.4706142,
-   "count": 96,
+   "last": 1792509627.7696202,
+   "count": 99,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792502109.4127972,
-    1792502229.4706142
+    1792509433.233169,
+    1792509627.7696202,
+    1792509627.7696202
    ],
    "action": null,
    "action_ts": null,
@@ -1888,12 +1928,12 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1792490704.9594786,
-   "count": 119,
+   "last": 1792509627.7696202,
+   "count": 120,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1792490704.9594786
+    1792509627.7696202
    ],
    "action": null,
    "action_ts": null,
@@ -3968,6 +4008,34 @@
    "norm": "ERROR HTTP N fetching activity for <hex>",
    "recent": [
     1792432143.6358278
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "5a80a08ceeba": {
+   "first": 1792509433.233169,
+   "last": 1792509433.233169,
+   "count": 1,
+   "sample": "2026-10-20 15:15:51 ERROR [py_clob_client_v2] request error: _ssl.c:993: The handshake operation timed out",
+   "norm": "ERROR [py_clob_client_v2] request error: _ssl.c:N: The handshake operation timed out",
+   "recent": [
+    1792509433.233169
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "1281617aae14": {
+   "first": 1792510829.0556285,
+   "last": 1792510829.0556285,
+   "count": 1,
+   "sample": "2026-10-20 15:40:15 ERROR Onchain: chunk 95870268-95870296 SKIPPED after 5 refused reads (read refused: CTF [95870268-95870296]: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))); a set-Z fill in those blocks reaches the bot through the data api only",
+   "norm": "ERROR Onchain: chunk NN SKIPPED after N refused reads (read refused: CTF [NN]: ('S', RemoteDisconnected('S'))); a set-Z fill in those blocks reaches the bot through the data api only",
+   "recent": [
+    1792510829.0556285
    ],
    "action": null,
    "action_ts": null,
