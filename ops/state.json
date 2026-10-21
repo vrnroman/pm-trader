@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21T01:36:10.953198+00:00",
+ "generated": "2026-10-21T01:58:41.832029+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -32,11 +32,11 @@
   "first_armed_ts": 1788617432.0499406
  },
  "spend": {
-  "date": "2026-10-20",
+  "date": "2026-10-21",
   "spent_usd": 0.0,
   "wallet_copies": {},
   "wallet_copies_yesterday": {},
-  "yesterday": "2026-10-19",
+  "yesterday": "2026-10-20",
   "closed_reason": ""
  },
  "tier": {
@@ -1045,9 +1045,6 @@
   }
  ],
  "important": [
-  "2026-10-20 01:36:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-20 01:42:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-20 01:52:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 02:04:30 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-20 02:09:20 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-20 03:12:37 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
@@ -1169,7 +1166,6 @@
   "2026-10-21 01:22:26 INFO  [ops] decay_hold: '0x00110b8e below the door 7 day(s)' -> 'stays: owner pick' | does not lose at the prices we would really pay: -2% at real quotes over 129 matched copies",
   "2026-10-21 01:22:27 INFO  [ops] decay_hold: '0xd970693a below the door 12 day(s)' -> 'stays: owner pick' | does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
   "2026-10-21 01:23:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-20 01:57:34 TRADE [DISARMED] would BUY $5.00 on 'Commanders vs. 49ers: O/U 47.5' @ 0.5400 (from 0x154c...658e); the arm is off",
   "2026-10-20 05:54:29 TRADE [DISARMED] would BUY $5.00 on 'Will WTI Crude Oil (WTI) hit (HIGH) $100' @ 0.8800 (from 0x154c...658e); the arm is off",
   "2026-10-20 07:58:49 TRADE [DISARMED] would BUY $5.00 on 'Lyon Open: Matteo Berrettini vs Kyrian J' @ 0.4400 (from 0x3d42...5bf3); the arm is off",
   "2026-10-20 08:02:17 ERROR Network error fetching 0xeef6...cd4c: Server disconnected without sending a response.",
@@ -1198,7 +1194,9 @@
   "2026-10-20 19:47:06 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Dawn Bulls - Game 2 W' @ 0.8400 (from 0x154c...658e); the arm is off",
   "2026-10-20 20:41:18 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Dawn Bulls (BO3) - EP' @ 0.8400 (from 0x154c...658e); the arm is off",
   "2026-10-20 23:17:24 TRADE [DISARMED] would BUY $5.00 on 'Missouri State vs. Delaware: O/U 53.5' @ 0.5800 (from 0x154c...658e); the arm is off",
-  "2026-10-21 01:06:28 ERROR [inventory] API sync failed: Server disconnected without sending a response."
+  "2026-10-21 01:06:28 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
+  "2026-10-21 01:40:06 TRADE [DISARMED] would BUY $5.00 on 'Thunder vs. Spurs' @ 0.5000 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-21 01:43:55 TRADE [DISARMED] would BUY $5.00 on 'Will Atlético San Luis win on 2026-10-20' @ 0.5300 (from 0x154c...658e); the arm is off"
  ],
  "watcher": [
   {
@@ -1879,12 +1877,13 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792538363.3069904,
-   "count": 113,
+   "last": 1792547134.666947,
+   "count": 115,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792538363.3069904
+    1792546894.0109046,
+    1792547134.666947
    ],
    "action": null,
    "action_ts": null,
