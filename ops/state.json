@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21T21:59:14.679938+00:00",
+ "generated": "2026-10-21T22:20:10.377196+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -460,7 +460,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-18T00:42:35Z-93c3",
-  "admit_scan_ts": 1792609762.2333648,
+  "admit_scan_ts": 1792620719.737028,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -1164,6 +1164,8 @@
   "2026-10-21 21:50:09 ERROR Network error fetching 0x1985...51ab: ",
   "2026-10-21 21:50:09 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
   "2026-10-21 21:50:09 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
+  "2026-10-21 22:14:17 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
+  "2026-10-21 22:14:38 ERROR [inventory] API sync failed: ",
   "2026-10-20 23:17:24 TRADE [DISARMED] would BUY $5.00 on 'Missouri State vs. Delaware: O/U 53.5' @ 0.5800 (from 0x154c...658e); the arm is off",
   "2026-10-21 01:06:28 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
   "2026-10-21 01:40:06 TRADE [DISARMED] would BUY $5.00 on 'Thunder vs. Spurs' @ 0.5000 (from 0x3d42...5bf3); the arm is off",
@@ -1710,13 +1712,14 @@
   },
   "6eca45f47973": {
    "first": 1790342544.7724473,
-   "last": 1792619495.1461647,
-   "count": 196,
+   "last": 1792620936.1238923,
+   "count": 197,
    "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
    "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
    "recent": [
     1792619495.1461647,
-    1792619495.1461647
+    1792619495.1461647,
+    1792620936.1238923
    ],
    "action": null,
    "action_ts": null,
@@ -1904,13 +1907,12 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1792612167.7260199,
-   "count": 125,
+   "last": 1792620936.1238923,
+   "count": 126,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1792610484.7343478,
-    1792612167.7260199
+    1792620936.1238923
    ],
    "action": null,
    "action_ts": null,
