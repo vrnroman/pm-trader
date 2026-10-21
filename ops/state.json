@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-20T23:05:05.834966+00:00",
+ "generated": "2026-10-21T01:36:10.953198+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -460,7 +460,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-18T00:42:35Z-93c3",
-  "admit_scan_ts": 1792533362.4902873,
+  "admit_scan_ts": 1792544317.9121811,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -883,36 +883,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1792456732.5342503,
-   "day": "2026-10-20",
-   "kind": "decay_day",
-   "before": "0x00110b8e in set Z",
-   "after": "below the door 6 of 7",
-   "detail": "does not lose at the prices we would really pay: -1% at real quotes over 125 matched copies",
-   "push": null,
-   "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
-   "days": 6,
-   "window": 7,
-   "fails": [
-    "does not lose at the prices we would really pay"
-   ]
-  },
-  {
-   "ts": 1792456732.5342503,
-   "day": "2026-10-20",
-   "kind": "decay_hold",
-   "before": "0xd970693a below the door 11 day(s)",
-   "after": "stays: owner pick",
-   "detail": "does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
-   "push": "WALLET",
-   "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
-   "days": 11,
-   "window": 7,
-   "fails": [
-    "does not lose at the prices we would really pay"
-   ]
-  },
-  {
    "ts": 1792489715.2192464,
    "day": "2026-10-20",
    "kind": "auto_admit",
@@ -1042,13 +1012,39 @@
    "floor_before": null,
    "floor_after": null,
    "live": false
+  },
+  {
+   "ts": 1792544317.9121811,
+   "day": "2026-10-21",
+   "kind": "decay_hold",
+   "before": "0x00110b8e below the door 7 day(s)",
+   "after": "stays: owner pick",
+   "detail": "does not lose at the prices we would really pay: -2% at real quotes over 129 matched copies",
+   "push": "WALLET",
+   "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
+   "days": 7,
+   "window": 7,
+   "fails": [
+    "does not lose at the prices we would really pay"
+   ]
+  },
+  {
+   "ts": 1792544317.9121811,
+   "day": "2026-10-21",
+   "kind": "decay_hold",
+   "before": "0xd970693a below the door 12 day(s)",
+   "after": "stays: owner pick",
+   "detail": "does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
+   "push": "WALLET",
+   "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
+   "days": 12,
+   "window": 7,
+   "fails": [
+    "does not lose at the prices we would really pay"
+   ]
   }
  ],
  "important": [
-  "2026-10-19 23:59:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-20 00:42:31 INFO  [ops] decay_day: '0x00110b8e in set Z' -> 'below the door 6 of 7' | does not lose at the prices we would really pay: -1% at real quotes over 125 matched copies",
-  "2026-10-20 00:42:32 INFO  [ops] decay_hold: '0xd970693a below the door 11 day(s)' -> 'stays: owner pick' | does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
-  "2026-10-20 01:06:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 01:36:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 01:42:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 01:52:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1155,11 +1151,24 @@
   "2026-10-20 21:40:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 21:44:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 21:44:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-19 23:15:13 TRADE [DISARMED] would BUY $5.00 on 'Spread: Golden State Valkyries (-1.5)' @ 0.5100 (from 0x28ef...ff5e); the arm is off",
-  "2026-10-20 00:04:30 TRADE [DISARMED] would BUY $5.00 on 'Commanders vs. 49ers: O/U 52.5' @ 0.5400 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-20 00:10:15 TRADE [DISARMED] would BUY $5.00 on 'Spread: 49ers (-10.5)' @ 0.6100 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-20 00:17:40 TRADE [DISARMED] would BUY $5.00 on 'Commanders vs. 49ers' @ 0.2300 (from 0x154c...658e); the arm is off",
-  "2026-10-20 00:47:33 TRADE [DISARMED] would BUY $5.00 on 'Commanders vs. 49ers: O/U 56.5' @ 0.5400 (from 0x154c...658e); the arm is off",
+  "2026-10-20 23:10:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-20 23:16:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 00:22:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 00:22:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 00:43:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 00:54:32 ERROR Network error fetching 0x28ef...ff5e: Server disconnected without sending a response.",
+  "2026-10-21 01:01:29 ERROR Network error fetching 0x9f6a...eb61: Server disconnected without sending a response.",
+  "2026-10-21 01:01:30 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.",
+  "2026-10-21 01:06:29 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
+  "2026-10-21 01:06:36 ERROR Network error fetching 0x1985...51ab: ",
+  "2026-10-21 01:09:17 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 01:11:58 ERROR [inventory] API sync failed: ",
+  "2026-10-21 01:17:06 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
+  "2026-10-21 01:18:44 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 01:18:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 01:22:26 INFO  [ops] decay_hold: '0x00110b8e below the door 7 day(s)' -> 'stays: owner pick' | does not lose at the prices we would really pay: -2% at real quotes over 129 matched copies",
+  "2026-10-21 01:22:27 INFO  [ops] decay_hold: '0xd970693a below the door 12 day(s)' -> 'stays: owner pick' | does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
+  "2026-10-21 01:23:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-20 01:57:34 TRADE [DISARMED] would BUY $5.00 on 'Commanders vs. 49ers: O/U 47.5' @ 0.5400 (from 0x154c...658e); the arm is off",
   "2026-10-20 05:54:29 TRADE [DISARMED] would BUY $5.00 on 'Will WTI Crude Oil (WTI) hit (HIGH) $100' @ 0.8800 (from 0x154c...658e); the arm is off",
   "2026-10-20 07:58:49 TRADE [DISARMED] would BUY $5.00 on 'Lyon Open: Matteo Berrettini vs Kyrian J' @ 0.4400 (from 0x3d42...5bf3); the arm is off",
@@ -1187,7 +1196,9 @@
   "2026-10-20 19:27:25 TRADE [DISARMED] would BUY $5.00 on 'Paris Saint-Germain FC vs. FC Barcelona:' @ 0.5700 (from 0x3d42...5bf3); the arm is off",
   "2026-10-20 19:47:00 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Dawn Bulls - Game 2 W' @ 0.8000 (from 0x154c...658e); the arm is off",
   "2026-10-20 19:47:06 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Dawn Bulls - Game 2 W' @ 0.8400 (from 0x154c...658e); the arm is off",
-  "2026-10-20 20:41:18 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Dawn Bulls (BO3) - EP' @ 0.8400 (from 0x154c...658e); the arm is off"
+  "2026-10-20 20:41:18 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Dawn Bulls (BO3) - EP' @ 0.8400 (from 0x154c...658e); the arm is off",
+  "2026-10-20 23:17:24 TRADE [DISARMED] would BUY $5.00 on 'Missouri State vs. Delaware: O/U 53.5' @ 0.5800 (from 0x154c...658e); the arm is off",
+  "2026-10-21 01:06:28 ERROR [inventory] API sync failed: Server disconnected without sending a response."
  ],
  "watcher": [
   {
@@ -1449,14 +1460,16 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792532720.0449512,
-   "count": 1477,
+   "last": 1792545812.689122,
+   "count": 1487,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792532479.0672927,
-    1792532720.0449512,
-    1792532720.0449512
+    1792543409.3762093,
+    1792544971.6466036,
+    1792545572.5305805,
+    1792545572.5305805,
+    1792545812.689122
    ],
    "action": null,
    "action_ts": null,
@@ -1711,15 +1724,14 @@
   },
   "6eca45f47973": {
    "first": 1790342544.7724473,
-   "last": 1792490704.9594786,
-   "count": 176,
+   "last": 1792544490.884039,
+   "count": 179,
    "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
    "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
    "recent": [
-    1792490704.9594786,
-    1792490704.9594786,
-    1792490704.9594786,
-    1792490704.9594786
+    1792544130.125547,
+    1792544490.884039,
+    1792544490.884039
    ],
    "action": null,
    "action_ts": null,
@@ -1728,14 +1740,12 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1792484223.4116864,
-   "count": 146,
+   "last": 1792544851.162964,
+   "count": 147,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1792484223.4116864,
-    1792484223.4116864,
-    1792484223.4116864
+    1792544851.162964
    ],
    "action": null,
    "action_ts": null,
@@ -1854,12 +1864,13 @@
   },
   "13ad3e5ddfe8": {
    "first": 1790378100.0295238,
-   "last": 1792478913.7993119,
-   "count": 11,
+   "last": 1792545452.491102,
+   "count": 13,
    "sample": "2026-09-25 23:13:05 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
    "norm": "ERROR [inventory] API sync failed: Server disconnected without sending a response.",
    "recent": [
-    1792478913.7993119
+    1792544851.162964,
+    1792545452.491102
    ],
    "action": null,
    "action_ts": null,
@@ -1868,14 +1879,12 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792528998.104647,
-   "count": 112,
+   "last": 1792538363.3069904,
+   "count": 113,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792525637.0881808,
-    1792525637.0881808,
-    1792528998.104647
+    1792538363.3069904
    ],
    "action": null,
    "action_ts": null,
@@ -1912,12 +1921,12 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1792509627.7696202,
-   "count": 120,
+   "last": 1792545212.3830125,
+   "count": 121,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1792509627.7696202
+    1792545212.3830125
    ],
    "action": null,
    "action_ts": null,
@@ -3903,12 +3912,13 @@
   },
   "e109d2da998c": {
    "first": 1792205703.7957911,
-   "last": 1792457000.2207778,
-   "count": 4,
+   "last": 1792545812.689122,
+   "count": 6,
    "sample": "2026-10-17 02:54:38 INFO  [ops] decay_hold: '0xd970693a below the door 8 day(s)' -> 'stays: owner pick' | does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
    "norm": "INFO [ops] decay_hold: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched copies",
    "recent": [
-    1792457000.2207778
+    1792545812.689122,
+    1792545812.689122
    ],
    "action": null,
    "action_ts": null,
