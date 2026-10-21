@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21T07:22:08.835593+00:00",
+ "generated": "2026-10-21T07:37:42.051015+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -1054,7 +1054,6 @@
   }
  ],
  "important": [
-  "2026-10-20 07:31:28 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-20 07:37:42 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-20 07:49:44 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-20 07:57:30 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
@@ -1181,6 +1180,7 @@
   "2026-10-21 07:05:09 ERROR Network error fetching 0x1985...51ab: ",
   "2026-10-21 07:05:09 ERROR Network error fetching 0xeef6...cd4c: ",
   "2026-10-21 07:05:09 ERROR Network error fetching 0x28ef...ff5e: ",
+  "2026-10-21 07:26:43 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-20 07:58:49 TRADE [DISARMED] would BUY $5.00 on 'Lyon Open: Matteo Berrettini vs Kyrian J' @ 0.4400 (from 0x3d42...5bf3); the arm is off",
   "2026-10-20 08:02:17 ERROR Network error fetching 0xeef6...cd4c: Server disconnected without sending a response.",
   "2026-10-20 09:37:08 TRADE [DISARMED] would BUY $5.00 on 'Lisbon: Raul Brancaccio vs Calvin Hemery' @ 0.2800 (from 0x3d42...5bf3); the arm is off",
@@ -1870,16 +1870,12 @@
   },
   "1bd07071cf73": {
    "first": 1790364989.5143719,
-   "last": 1792559988.1530755,
-   "count": 59,
+   "last": 1792567613.8504379,
+   "count": 60,
    "sample": "2026-09-25 19:35:34 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
-    1792559027.0502703,
-    1792559027.0502703,
-    1792559148.0346146,
-    1792559268.0634878,
-    1792559988.1530755
+    1792567613.8504379
    ],
    "action": null,
    "action_ts": null,
