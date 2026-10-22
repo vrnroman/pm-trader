@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-22T22:19:56.070466+00:00",
+ "generated": "2026-10-22T23:19:45.482369+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -460,7 +460,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-22T06:42:29Z-059e",
-  "admit_scan_ts": 1792697565.021181,
+  "admit_scan_ts": 1792708670.2848036,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -1039,12 +1039,25 @@
    "floor_before": null,
    "floor_after": null,
    "live": false
+  },
+  {
+   "ts": 1792708670.2848036,
+   "day": "2026-10-22",
+   "kind": "decay_day",
+   "before": "0x154ca10d in set Z",
+   "after": "below the door 1 of 7",
+   "detail": "promotion floor still holds: copy ROI +8% < floor +10%; still positive with its best 3 copies deleted: -3% over 38 copies with its best 3 deleted",
+   "push": "WALLET",
+   "wallet": "0x154ca10dfee317dcfb9337788db7da858cba658e",
+   "days": 1,
+   "window": 7,
+   "fails": [
+    "promotion floor still holds",
+    "still positive with its best 3 copies deleted"
+   ]
   }
  ],
  "important": [
-  "2026-10-21 22:28:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-21 22:58:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-21 23:08:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-21 23:28:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 01:18:39 INFO  [ops] decay_hold: '0x00110b8e below the door 8 day(s)' -> 'stays: owner pick' | does not lose at the prices we would really pay: -1% at real quotes over 133 matched copies",
   "2026-10-22 01:18:41 INFO  [ops] decay_hold: '0xd970693a below the door 13 day(s)' -> 'stays: owner pick' | does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies",
@@ -1217,6 +1230,9 @@
   "2026-10-22 22:13:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 22:13:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 22:18:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-22 22:40:15 INFO  [ops] decay_day: '0x154ca10d in set Z' -> 'below the door 1 of 7' | promotion floor still holds: copy ROI +8% < floor +10%; still positive with its best 3 copies deleted: -3% over 38 copies with its best 3 deleted",
+  "2026-10-22 22:48:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-22 22:53:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 05:49:01 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Terence Atmane vs Mattia Be' @ 0.5391 (from 0x154c...658e); the arm is off",
   "2026-10-22 10:40:35 TRADE [DISARMED] would BUY $5.00 on 'Florence: Samuele Pieri vs Sandro Kopp' @ 0.5091 (from 0x3d42...5bf3); the arm is off",
   "2026-10-22 10:40:39 TRADE [DISARMED] would BUY $5.00 on 'Florence: Samuele Pieri vs Sandro Kopp' @ 0.5000 (from 0x154c...658e); the arm is off",
@@ -1556,8 +1572,8 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792707538.7525468,
-   "count": 1677,
+   "last": 1792709699.9556155,
+   "count": 1679,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
@@ -1582,8 +1598,6 @@
     1792706948.4776707,
     1792706948.4776707,
     1792706948.4776707,
-    1792706948.4776707,
-    1792706948.4776707,
     1792707298.6530926,
     1792707298.6530926,
     1792707298.6530926,
@@ -1600,7 +1614,9 @@
     1792707298.6530926,
     1792707298.6530926,
     1792707298.6530926,
-    1792707538.7525468
+    1792707538.7525468,
+    1792709339.4059198,
+    1792709699.9556155
    ],
    "action": null,
    "action_ts": null,
@@ -2764,12 +2780,12 @@
   },
   "c99109dc5185": {
    "first": 1791075743.8280725,
-   "last": 1791341077.8253825,
-   "count": 4,
+   "last": 1792708859.1035695,
+   "count": 5,
    "sample": "2026-10-04 01:00:38 INFO  [ops] decay_day: '0x4980930d in set Z' -> 'below the door 2 of 7' | promotion floor still holds: copy ROI +8% < floor +10%; still positive with its best 3 copies deleted: -5% over 43 copies with its best 3 deleted",
    "norm": "INFO [ops] decay_day: 'S' -> 'S' | promotion floor still holds: copy ROI N < floor N; still positive with its best N copies deleted: N over N copies with its best N deleted",
    "recent": [
-    1791341077.8253825
+    1792708859.1035695
    ],
    "action": null,
    "action_ts": null,
