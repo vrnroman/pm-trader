@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-21T22:20:10.377196+00:00",
+ "generated": "2026-10-22T00:32:37.313517+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -32,11 +32,11 @@
   "first_armed_ts": 1788617432.0499406
  },
  "spend": {
-  "date": "2026-10-21",
+  "date": "2026-10-22",
   "spent_usd": 0.0,
   "wallet_copies": {},
   "wallet_copies_yesterday": {},
-  "yesterday": "2026-10-20",
+  "yesterday": "2026-10-21",
   "closed_reason": ""
  },
  "tier": {
@@ -1027,10 +1027,6 @@
   }
  ],
  "important": [
-  "2026-10-20 23:10:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-20 23:16:10 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-21 00:22:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-21 00:22:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-21 00:43:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-21 00:54:32 ERROR Network error fetching 0x28ef...ff5e: Server disconnected without sending a response.",
   "2026-10-21 01:01:29 ERROR Network error fetching 0x9f6a...eb61: Server disconnected without sending a response.",
@@ -1166,7 +1162,10 @@
   "2026-10-21 21:50:09 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
   "2026-10-21 22:14:17 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
   "2026-10-21 22:14:38 ERROR [inventory] API sync failed: ",
-  "2026-10-20 23:17:24 TRADE [DISARMED] would BUY $5.00 on 'Missouri State vs. Delaware: O/U 53.5' @ 0.5800 (from 0x154c...658e); the arm is off",
+  "2026-10-21 22:28:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 22:58:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 23:08:14 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-21 23:28:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-21 01:06:28 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
   "2026-10-21 01:40:06 TRADE [DISARMED] would BUY $5.00 on 'Thunder vs. Spurs' @ 0.5000 (from 0x3d42...5bf3); the arm is off",
   "2026-10-21 01:43:55 TRADE [DISARMED] would BUY $5.00 on 'Will Atlético San Luis win on 2026-10-20' @ 0.5300 (from 0x154c...658e); the arm is off",
@@ -1448,16 +1447,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792619495.1461647,
-   "count": 1555,
+   "last": 1792625378.3753865,
+   "count": 1559,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792616730.7394316,
-    1792616730.7394316,
-    1792619012.643111,
-    1792619012.643111,
-    1792619495.1461647
+    1792623578.1148984,
+    1792624178.1944733,
+    1792625378.3753865
    ],
    "action": null,
    "action_ts": null,
