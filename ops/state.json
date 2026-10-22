@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-22T05:56:53.103853+00:00",
+ "generated": "2026-10-22T07:33:41.106065+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -460,7 +460,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-18T00:42:35Z-93c3",
-  "admit_scan_ts": 1792642744.8811102,
+  "admit_scan_ts": 1792653631.7142613,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -883,15 +883,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1792565557.7640543,
-   "day": "2026-10-21",
-   "kind": "sre_no_verdict",
-   "before": "12f30223bece",
-   "after": "no verdict",
-   "detail": "",
-   "push": null
-  },
-  {
    "ts": 1792577143.5754092,
    "day": "2026-10-21",
    "kind": "floor_row",
@@ -1027,18 +1018,6 @@
   }
  ],
  "important": [
-  "2026-10-21 06:22:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-21 06:51:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=502 url=https://clob.polymarket.com/price body=<!DOCTYPE html>",
-  "2026-10-21 06:51:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=502 url=https://clob.polymarket.com/price body=<!DOCTYPE html>",
-  "2026-10-21 06:51:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=502 url=https://clob.polymarket.com/price body=<!DOCTYPE html>",
-  "2026-10-21 07:02:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-10-21 07:04:29 ERROR [inventory] API sync failed: ",
-  "2026-10-21 07:05:09 ERROR Network error fetching 0x9f15...bdb3: ",
-  "2026-10-21 07:05:09 ERROR Network error fetching 0x09b0...a3b6: ",
-  "2026-10-21 07:05:09 ERROR Network error fetching 0x1985...51ab: ",
-  "2026-10-21 07:05:09 ERROR Network error fetching 0xeef6...cd4c: ",
-  "2026-10-21 07:05:09 ERROR Network error fetching 0x28ef...ff5e: ",
-  "2026-10-21 07:26:43 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-21 07:43:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-21 08:00:08 INFO  [AB-RACE] daily snapshot SEND FAILED (era_day=87.8, era_floor=1784976482)",
   "2026-10-21 08:02:34 INFO  [AB-RACE] rehearsal line held/failed, real-money line sent",
@@ -1153,6 +1132,19 @@
   "2026-10-22 04:53:46 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 05:12:07 ERROR Network error fetching 0xd970...bbba: ",
   "2026-10-22 05:12:07 ERROR Network error fetching 0x9f6a...eb61: ",
+  "2026-10-22 06:05:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-22 06:45:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-22 06:52:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-22 07:05:52 ERROR Network error fetching 0xd970...bbba: Server disconnected without sending a response.",
+  "2026-10-22 07:05:52 ERROR Network error fetching 0x154c...658e: Server disconnected without sending a response.",
+  "2026-10-22 07:05:52 ERROR Network error fetching 0x0011...4333: Server disconnected without sending a response.",
+  "2026-10-22 07:05:52 ERROR Network error fetching 0x9f6a...eb61: Server disconnected without sending a response.",
+  "2026-10-22 07:19:16 ERROR Network error fetching 0x28ef...ff5e: ",
+  "2026-10-22 07:24:49 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-22 07:26:35 ERROR [inventory] API sync failed: ",
+  "2026-10-22 07:29:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-22 07:33:48 INFO  [ops] routine_wallet_action: '0x9f15613e' -> 'bench applied, now in form' | 0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 poi",
+  "2026-10-22 07:33:48 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 poi",
   "2026-10-21 08:06:52 TRADE [DISARMED] would BUY $5.00 on 'Will FC Bayern München win on 2026-10-21' @ 0.4600 (from 0x28ef...ff5e); the arm is off",
   "2026-10-21 08:10:42 TRADE [DISARMED] would BUY $5.00 on 'FC Internazionale Milano vs. FK Shakhtar' @ 0.5500 (from 0x28ef...ff5e); the arm is off",
   "2026-10-21 08:41:18 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Mattia Bellucci vs Tomas Et' @ 0.5100 (from 0x3d42...5bf3); the arm is off",
@@ -1183,22 +1175,24 @@
  ],
  "watcher": [
   {
-   "ts": 1792562508.6874323,
-   "day": "2026-10-21",
+   "ts": 1792648912.6361544,
+   "day": "2026-10-22",
    "kind": "analyst",
+   "proposal": "note",
    "woke_because": "daily study",
-   "concluded": "no usable answer",
-   "did": "nothing",
+   "concluded": "3 straight daily studies (2026-10-19/20/21) returned 'no usable answer' plus 5 sre_no_verdict wakes, so the oversight loop has produced nothing for 3 days while the strategy itself is fine: at the $300 floor 0x9f15613e reads +11% net trimmed +8% (n=467) and the thin wallets +20%+, and the bot has been intentionally on paper since the owner disarmed it 2026-10-18; the verdict/study path (not the bo",
+   "counterfactual": "",
+   "did": "noted",
    "cost_usd": 0.0
   },
   {
-   "ts": 1792565557.7640543,
-   "day": "2026-10-21",
-   "woke_because": "12f30223bece",
-   "kind": "no-verdict",
-   "concluded": "the model gave no usable verdict",
-   "did": "nothing",
-   "cost_usd": 0.0
+   "ts": 1792648912.6361544,
+   "day": "2026-10-22",
+   "kind": "analyst",
+   "woke_because": "daily study",
+   "concluded": "Slice healthy and bot paper since 10-18 by your hand; the analyst loop, not the strategy, is broken: 3 days of 'no usable answer' plus the recurring experiment-void harness gap.",
+   "did": "1 proposal(s): noted",
+   "cost_usd": 0.639364
   }
  ],
  "fingerprints": {
@@ -1432,13 +1426,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792644828.793328,
-   "count": 1565,
+   "last": 1792654163.501968,
+   "count": 1569,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792644828.793328,
-    1792644828.793328
+    1792651638.075295,
+    1792652000.416487,
+    1792654163.501968
    ],
    "action": null,
    "action_ts": null,
@@ -1693,14 +1688,15 @@
   },
   "6eca45f47973": {
    "first": 1790342544.7724473,
-   "last": 1792620936.1238923,
-   "count": 197,
+   "last": 1792652841.9238682,
+   "count": 201,
    "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
    "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
    "recent": [
-    1792619495.1461647,
-    1792619495.1461647,
-    1792620936.1238923
+    1792652841.9238682,
+    1792652841.9238682,
+    1792652841.9238682,
+    1792652841.9238682
    ],
    "action": null,
    "action_ts": null,
@@ -1709,13 +1705,12 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1792646030.3404474,
-   "count": 159,
+   "last": 1792653563.0570312,
+   "count": 160,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1792646030.3404474,
-    1792646030.3404474
+    1792653563.0570312
    ],
    "action": null,
    "action_ts": null,
@@ -1816,12 +1811,12 @@
   },
   "1bd07071cf73": {
    "first": 1790364989.5143719,
-   "last": 1792640023.179733,
-   "count": 65,
+   "last": 1792653923.2460902,
+   "count": 66,
    "sample": "2026-09-25 19:35:34 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
-    1792640023.179733
+    1792653923.2460902
    ],
    "action": null,
    "action_ts": null,
@@ -1886,12 +1881,12 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1792620936.1238923,
-   "count": 126,
+   "last": 1792654043.2777863,
+   "count": 127,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1792620936.1238923
+    1792654043.2777863
    ],
    "action": null,
    "action_ts": null,
