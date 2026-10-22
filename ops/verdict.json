@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-22T06:42:29Z-059e",
-    "ts": 1792651349,
-    "kind": "wallet_action",
-    "action": "bench",
-    "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "message": "0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 point margin, net -13.1% on $974,040, worst day -166,272, down from net -1.1% four days ago.",
+    "id": "2026-10-22T12:42:18Z-8101",
+    "ts": 1792672938,
+    "kind": "nothing",
+    "message": "Arm stays off on the owner's own 2026-10-18 pause, not a new fault; today's spend is $0.00 with no cap hit, and the 0x9f15613e bench this morning still holds with net improved to -3.1% from -13.1% but not yet at the +2% needed to unbench.",
     "evidence": [
-        "in form  0x9f15613e: 262 settled, 55% won vs 54% needed, net -13.1% on $974,040, worst day -166,272, 8 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "{\"id\": \"2026-10-18T06:42:57Z-9eba\", ... \"in form  0x9f15613e: 210 settled, 55% won vs 52% needed, net -1.1% on $652,670, worst day -30,818, 9 of 19 exits under 10 min\"}",
-        "## arm: {\"armed\": false, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}"
+        "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\", \"first_armed_ts\": 1788617432.0499406}",
+        "## spend today: {\"date\": \"2026-10-22\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-21\", \"closed_reason\": \"\"}",
+        "in form  0x9f15613e: 277 settled, 57% won vs 54% needed, net -3.1% on $1,105,616, worst day -166,272, 8 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
+        "2026-10-22 07:33:48 INFO  [ops] routine_wallet_action: '0x9f15613e' -> 'bench applied, now in form' | 0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 poi",
+        "# ops digest 2026-10-22T11:28:31.009070+00:00 (last 24h)"
     ],
     "commit": null
 }
