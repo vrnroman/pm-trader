@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-23T00:41:38Z-bd88",
-    "ts": 1792716098,
+    "id": "2026-10-23T06:42:14Z-8403",
+    "ts": 1792737734,
     "kind": "nothing",
-    "message": "Arm stays off on the owner's 2026-10-18 pause, not a new fault; spend today is $0.00 with no cap hit, and the 0x9f15613e bench applied yesterday morning still holds since net is -3.1%, still short of the +2% needed to unbench.",
+    "message": "Arm stays off on the owner's 2026-10-18 pause, not a new fault; the 0x9f15613e bench from yesterday morning still holds (expires about 07:33 UTC) since net is still -3.1%; spend today is $0.00 with no cap hit and no new ERROR pattern.",
     "evidence": [
         "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\", \"first_armed_ts\": 1788617432.0499406}",
-        "## spend today: {\"date\": \"2026-10-22\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-21\", \"closed_reason\": \"\"}",
+        "## spend today: {\"date\": \"2026-10-23\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-22\", \"closed_reason\": \"\"}",
         "in form  0x9f15613e: 278 settled, 57% won vs 54% needed, net -3.1% on $1,105,433, worst day -166,272, 8 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "2026-10-22 07:33:48 INFO  [ops] routine_wallet_action: '0x9f15613e' -> 'bench applied, now in form' | 0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 poi",
-        "# ops digest 2026-10-22T23:16:24.693971+00:00 (last 24h)"
+        "overrides: {\"0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3\": {\"action\": \"bench\", \"why\": \"0x9f15613e is in form by the bar right now but its numbers say it is losing...\", \"ts\": 1792654426.1334546}}",
+        "# ops digest 2026-10-23T01:48:50.104706+00:00 (last 24h)"
     ],
     "commit": null
 }
