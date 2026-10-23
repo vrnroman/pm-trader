@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-23T06:42:14Z-8403",
-    "ts": 1792737734,
-    "kind": "nothing",
-    "message": "Arm stays off on the owner's 2026-10-18 pause, not a new fault; the 0x9f15613e bench from yesterday morning still holds (expires about 07:33 UTC) since net is still -3.1%; spend today is $0.00 with no cap hit and no new ERROR pattern.",
+    "id": "2026-10-23T12:42:18Z-2073",
+    "ts": 1792759338,
+    "kind": "escalation",
+    "message": "Ops digest has gone stale. Last digest commit 2026-10-23T07:29:59Z, now 2026-10-23T12:42:18Z: about 5 hours 12 minutes with no new digest, past the 3 hour bar. Before the gap: arm off since 2026-10-18 (owner pause), spend $0.00 today, no new ERROR pattern, wallet 0x9f15613e net -1.4% with its 24h bench expiring near 07:34Z and no fresher check since. Cannot confirm bot health for the last 5+ hours. Check the ops-digest workflow and the VM.",
     "evidence": [
-        "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\", \"first_armed_ts\": 1788617432.0499406}",
-        "## spend today: {\"date\": \"2026-10-23\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-22\", \"closed_reason\": \"\"}",
-        "in form  0x9f15613e: 278 settled, 57% won vs 54% needed, net -3.1% on $1,105,433, worst day -166,272, 8 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "overrides: {\"0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3\": {\"action\": \"bench\", \"why\": \"0x9f15613e is in form by the bar right now but its numbers say it is losing...\", \"ts\": 1792654426.1334546}}",
-        "# ops digest 2026-10-23T01:48:50.104706+00:00 (last 24h)"
+        "# ops digest 2026-10-23T07:29:32.200897+00:00 (last 24h)",
+        "last digest commit ffb6563 ops: digest 2026-10-23T07:29:59Z (most recent on origin/ops-digest as of this check)",
+        "in form  0x9f15613e: 283 settled, 58% won vs 54% needed, net -1.4% on $1,120,622, worst day -166,272, 8 of 21 exits under 10 min",
+        "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
+        "overrides: {\"0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3\": {\"action\": \"bench\", \"ts\": 1792654426.1334546}} (24h bench expires ~07:34 UTC 2026-10-23)"
     ],
     "commit": null
 }
