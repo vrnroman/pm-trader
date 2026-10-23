@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-23T17:53:56.035527+00:00",
+ "generated": "2026-10-23T18:23:11.760438+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -1054,7 +1054,6 @@
   }
  ],
  "important": [
-  "2026-10-22 17:54:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 18:34:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 18:49:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 18:51:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1184,8 +1183,14 @@
   "2026-10-23 16:53:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-23 17:22:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-23 17:30:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 18:08:28 TRADE [DISARMED] would BUY $5.00 on 'UFC 333: Alexander Volkanovski vs. Movsa' @ 0.5000 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-22 18:13:28 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Kaylan Bigun vs Aidan Mayo' @ 0.5800 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 17:57:30 ERROR [inventory] API sync failed: ",
+  "2026-10-23 17:59:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 18:03:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 18:20:54 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-10-23 18:20:54 ERROR Network error fetching 0x09b0...a3b6: ",
+  "2026-10-23 18:20:54 ERROR Network error fetching 0x1985...51ab: ",
+  "2026-10-23 18:20:54 ERROR Network error fetching 0xeef6...cd4c: ",
+  "2026-10-23 18:20:54 ERROR Network error fetching 0x28ef...ff5e: ",
   "2026-10-22 18:23:52 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Kaylan Bigun vs Aidan Mayo' @ 0.6300 (from 0x3d42...5bf3); the arm is off",
   "2026-10-22 18:27:33 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Zero Tenacity - Game ' @ 0.7900 (from 0x154c...658e); the arm is off",
   "2026-10-22 18:27:58 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Zero Tenacity - Game ' @ 0.7800 (from 0x154c...658e); the arm is off",
@@ -1220,7 +1225,11 @@
   "2026-10-23 16:06:05 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Alexander Bublik vs Karen K' @ 0.4900 (from 0x154c...658e); the arm is off",
   "2026-10-23 16:33:59 TRADE [DISARMED] would BUY $5.00 on 'Will Manchester City FC win on 2026-10-2' @ 0.6100 (from 0x3d42...5bf3); the arm is off",
   "2026-10-23 17:33:51 TRADE [DISARMED] would BUY $5.00 on 'Grizzlies vs. Warriors: O/U 237.5' @ 0.4930 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-23 17:34:20 TRADE [DISARMED] would BUY $5.00 on 'Grizzlies vs. Warriors: O/U 237.5' @ 0.4913 (from 0x3d42...5bf3); the arm is off"
+  "2026-10-23 17:34:20 TRADE [DISARMED] would BUY $5.00 on 'Grizzlies vs. Warriors: O/U 237.5' @ 0.4913 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 18:08:39 TRADE [DISARMED] would BUY $5.00 on 'LoL: Hanwha Life Esports vs Top Esports ' @ 0.7800 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 18:14:12 TRADE [DISARMED] would BUY $5.00 on 'LoL: Hanwha Life Esports vs Top Esports ' @ 0.7900 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 18:20:44 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI - Game ' @ 0.4900 (from 0x154c...658e); the arm is off",
+  "2026-10-23 18:20:50 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI - Game ' @ 0.4900 (from 0x154c...658e); the arm is off"
  ],
  "watcher": [
   {
@@ -1531,16 +1540,16 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792776664.0879447,
-   "count": 1715,
+   "last": 1792778708.8307064,
+   "count": 1717,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792773783.644471,
-    1792774503.7052352,
     1792776184.0383613,
     1792776664.0879447,
-    1792776664.0879447
+    1792776664.0879447,
+    1792778468.317656,
+    1792778708.8307064
    ],
    "action": null,
    "action_ts": null,
@@ -1813,15 +1822,16 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1792753519.2198498,
-   "count": 166,
+   "last": 1792779669.571179,
+   "count": 171,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1792753519.2198498,
-    1792753519.2198498,
-    1792753519.2198498,
-    1792753519.2198498
+    1792779669.571179,
+    1792779669.571179,
+    1792779669.571179,
+    1792779669.571179,
+    1792779669.571179
    ],
    "action": null,
    "action_ts": null,
@@ -1953,13 +1963,17 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792776904.1279938,
-   "count": 189,
+   "last": 1792779669.571179,
+   "count": 193,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
     1792776904.1279938,
-    1792776904.1279938
+    1792776904.1279938,
+    1792778949.0724506,
+    1792779309.335004,
+    1792779669.571179,
+    1792779669.571179
    ],
    "action": null,
    "action_ts": null,
@@ -1996,12 +2010,12 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1792749196.4538329,
-   "count": 129,
+   "last": 1792778345.0829177,
+   "count": 130,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1792749196.4538329
+    1792778345.0829177
    ],
    "action": null,
    "action_ts": null,
