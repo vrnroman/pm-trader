@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-23T12:49:27.369968+00:00",
+ "generated": "2026-10-23T13:24:59.829601+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -459,7 +459,7 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
-  "last_escalation_id": "2026-10-22T06:42:29Z-059e",
+  "last_escalation_id": "2026-10-23T12:42:18Z-2073",
   "admit_scan_ts": 1792752427.5082643,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
@@ -1042,11 +1042,18 @@
    "floor_before": null,
    "floor_after": null,
    "live": false
+  },
+  {
+   "ts": 1792759847.8645542,
+   "day": "2026-10-23",
+   "kind": "escalation_delivered",
+   "before": "routine escalation",
+   "after": "sent",
+   "detail": "Ops digest has gone stale. Last digest commit 2026-10-23T07:29:59Z, now 2026-10-23T12:42:18Z: about 5 hours 12 minutes w",
+   "push": "BOT"
   }
  ],
  "important": [
-  "2026-10-22 12:54:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 13:18:16 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-22 14:25:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 14:37:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 15:10:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1171,6 +1178,8 @@
   "2026-10-23 11:10:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-23 11:37:31 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-23 12:23:17 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-23 12:50:48 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest has gone stale. Last digest commit 2026-10-23T07:29:59Z, now 2026-10-23T12:42:18Z: about 5 hours 12 minutes w",
+  "2026-10-23 12:52:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 14:30:31 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Team Liquid vs 1win - Game 1 Win' @ 0.5900 (from 0x154c...658e); the arm is off",
   "2026-10-22 14:49:57 TRADE [DISARMED] would BUY $5.00 on 'Will Al Shabab Saudi Club win on 2026-10' @ 0.5311 (from 0x0011...4333); the arm is off",
   "2026-10-22 14:50:04 TRADE [DISARMED] would BUY $5.00 on 'Will Al Shabab Saudi Club win on 2026-10' @ 0.4500 (from 0x0011...4333); the arm is off",
@@ -1270,6 +1279,20 @@
    "concluded": "No param/study supported (gates reject net-negative declines, caps are noise); the experiment harness is the broken piece: fixed 1.5pp void tolerance vs a ~+-22pp chance band void'd min150 twice.",
    "did": "1 proposal(s): noted",
    "cost_usd": 0.649113
+  },
+  {
+   "ts": 1792759880.6665907,
+   "day": "2026-10-23",
+   "woke_because": "6b39481d7b71",
+   "fingerprint": "6b39481d7b71",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "An external Ops digest commit stopped refreshing at 07:29:59Z and the bot's liveness check fired a routine escalation that it already delivered to the owner ('routine escalation' -> 'sent'). This is an ops reporting artifact, not the money path; 'digest' appears once in today's bot log and that single line is the escalation itself. The same digest-stale escalation self-delivered on Oct 6, 7, 8 and 9, so the mechanism is working as designed. The bot is healthy with 631 lines in the last 60 min, chain reader last good read -3s ago at lag 0 blocks, and inventory syncing. Real money is already dis",
+   "confidence": 0.82,
+   "cost_usd": 0.39970150000000004,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -1503,18 +1526,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792753879.4019856,
-   "count": 1701,
+   "last": 1792760099.3569062,
+   "count": 1704,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792751598.2875926,
-    1792751718.3086329,
-    1792752798.7885466,
-    1792753038.8255453,
-    1792753639.2334669,
-    1792753879.4019856,
-    1792753879.4019856
+    1792760099.3569062,
+    1792760099.3569062,
+    1792760099.3569062
    ],
    "action": null,
    "action_ts": null,
@@ -4151,6 +4170,20 @@
    "norm": "INFO [ops] decay_recovered: 'S' -> 'S' | promotion floor still holds; still positive with its best N copies deleted",
    "recent": [
     1792720279.9657967
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "6b39481d7b71": {
+   "first": 1792759880.6665907,
+   "last": 1792759880.6665907,
+   "count": 1,
+   "sample": "2026-10-23 12:50:48 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest has gone stale. Last digest commit 2026-10-23T07:29:59Z, now 2026-10-23T12:42:18Z: about 5 hours 12 minutes w",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Ops digest has gone stale. Last digest commit NNNT0N:N:NZ, now NNNT1N:N:NZ: about N hours N minutes w",
+   "recent": [
+    1792759880.6665907
    ],
    "action": null,
    "action_ts": null,
