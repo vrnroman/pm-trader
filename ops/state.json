@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-23T07:16:05.515911+00:00",
+ "generated": "2026-10-23T07:29:57.009262+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -1069,10 +1069,6 @@
   }
  ],
  "important": [
-  "2026-10-22 07:19:16 ERROR Network error fetching 0x28ef...ff5e: ",
-  "2026-10-22 07:24:49 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-10-22 07:26:35 ERROR [inventory] API sync failed: ",
-  "2026-10-22 07:29:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 07:33:48 INFO  [ops] routine_wallet_action: '0x9f15613e' -> 'bench applied, now in form' | 0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 poi",
   "2026-10-22 07:33:48 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 poi",
   "2026-10-22 07:44:43 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
@@ -1246,6 +1242,7 @@
   "2026-10-23 04:57:35 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-23 05:29:57 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-23 07:01:25 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-23 07:26:31 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-22 10:40:35 TRADE [DISARMED] would BUY $5.00 on 'Florence: Samuele Pieri vs Sandro Kopp' @ 0.5091 (from 0x3d42...5bf3); the arm is off",
   "2026-10-22 10:40:39 TRADE [DISARMED] would BUY $5.00 on 'Florence: Samuele Pieri vs Sandro Kopp' @ 0.5000 (from 0x154c...658e); the arm is off",
   "2026-10-22 11:50:18 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Tomas Machac vs Karen Khach' @ 0.5058 (from 0x154c...658e); the arm is off",
@@ -1989,12 +1986,13 @@
   },
   "1bd07071cf73": {
    "first": 1790364989.5143719,
-   "last": 1792738988.6817336,
-   "count": 79,
+   "last": 1792740429.5261364,
+   "count": 80,
    "sample": "2026-09-25 19:35:34 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
-    1792738988.6817336
+    1792738988.6817336,
+    1792740429.5261364
    ],
    "action": null,
    "action_ts": null,

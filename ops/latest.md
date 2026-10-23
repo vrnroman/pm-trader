@@ -1,4 +1,4 @@
-# ops digest 2026-10-23T07:15:29.579402+00:00 (last 24h)
+# ops digest 2026-10-23T07:29:32.200897+00:00 (last 24h)
 
 ## money state
 {"cash": 119.594219, "open_cost": 14.99, "equity": 134.58, "floor": null, "stated": 150.0, "spend": {"date": "2026-10-18", "spent_usd": 15.0, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": true, "resolved_unclaimed": 111, "tier": {"1a": 0, "1b": 15.0, "1c": 0}, "ts": 1792309130.559064, "day": "2026-10-18"}
@@ -19,8 +19,8 @@ in form  0x9f15613e: 283 settled, 58% won vs 54% needed, net -1.4% on $1,120,622
 benched  0x9f6a4549: 14 settled, 71% won vs 62% needed, net +48.3% on $9,549, worst day -761, 1 of 8 exits under 10 min
 in form  0xd970693a: 10 settled, 60% won vs 62% needed, net +10.1% on $3,913, worst day -44, 10 of 10 exits under 10 min
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
-two clocks: 38 matched fills over 1.0 d, api lag p50 18.8s, chain lag p50 3.4s, chain earlier by 5.9s at the median; api-only 110, chain-only 289, replayed rows 0; CHAIN IS PRIMARY
-⏱ api lag cost, last 7d (estimate): +94.95 USD over 2241 fills at $5.00 each, +0.000 USD a fill at the median, chain earlier by 13.9s
+two clocks: 38 matched fills over 1.0 d, api lag p50 18.8s, chain lag p50 3.4s, chain earlier by 5.9s at the median; api-only 105, chain-only 290, replayed rows 0; CHAIN IS PRIMARY
+⏱ api lag cost, last 7d (estimate): +94.95 USD over 2242 fills at $5.00 each, +0.000 USD a fill at the median, chain earlier by 13.9s
 
 ## watcher (7 wakes in 24h)
 {"ts": 1792654523.570907, "kind": "note", "woke_because": "e78eb1001f1c, 4e73446f7cfa", "concluded": "The win-rate bar rates wallet 0x9f15613e as in form (55% won vs 54% needed, a 1 point margin) while its realized PnL is deeply negative, and the by-design wallet-maintenance routine flagged that contradiction, applied a bench, and delivered an escalation (the paired fingerprint 4e73446f7cfa is the
@@ -37,9 +37,9 @@ OPS_REARM_CLEAR_S: 900.0 (owner) band 600.0..1800.0
 OPS_REARM_MAX_PER_DAY: 3 (owner) band 1..3
 FORM_DAYS: 14.0 (owner) band 7.0..21.0
 ## book B at each slice floor (raw numbers; the gate reads the one marked)
-b300 (floor $300): 10861 settled, 438 open, realized +1.4%, at their price +2.4% (net -8.2%), win rate 57%, feeds the Z gate
-b150 (floor $150): 4704 settled, 401 open, realized +3.3%, at their price +4.2% (net -5.8%), win rate 58%
-b100 (floor $100): 5049 settled, 334 open, realized +1.6%, at their price +2.5% (net -7.3%), win rate 57%
+b300 (floor $300): 10862 settled, 438 open, realized +1.4%, at their price +2.4% (net -8.2%), win rate 57%, feeds the Z gate
+b150 (floor $150): 4705 settled, 401 open, realized +3.3%, at their price +4.2% (net -5.8%), win rate 58%
+b100 (floor $100): 5049 settled, 335 open, realized +1.6%, at their price +2.5% (net -7.3%), win rate 57%
 ## near the Z door (43 wallets within 2 fails; 8 pass and wait)
 0x05878ac3: 1 fail(s): active within 14d (30d ago)
 0x074a3a0f: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (28 clean (of 28 all-time))
@@ -65,36 +65,36 @@ study 2026-10-17-wallet_cap-e3fd61e4: wallets in 32 -> 32 (stay 32, enter 0, lea
 ## questions the study menu could not compute (last 7 days)
 2026-10-17 after study 2026-10-17-wallet_cap-e3fd61e4: Pooling all 32 book-B wallets, do within-day rank-15-and-up buys as a class underperform rank 1-14 at their price across hundreds of settled copies, enough to set the cap on evidence rather than on 57 marginal copies? (missing: This menu re-runs one book at two fixed caps and never buckets copies by within-day arrival rank, so even with the turned-away line it only exposes about 57 marginal copies, far short of the hundreds needed to clear 2 standard errors.)
 ## fingerprints (30 shown)
-1bd07071cf73 x79 last 0.2h ago [open: 79 hits, no action yet] :: ERROR Onchain poll error: ('S', RemoteDisconnected('S'))
-54ac26fb3ff1 x1692 last 2.8h ago [open: 1692 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
-84e240524773 x175 last 4.0h ago [open: 175 hits, no action yet] :: TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off
-e109d2da998c x10 last 5.4h ago [open: 10 hits, no action yet] :: INFO [ops] decay_hold: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched cop
-657cdb060a20 x1 last 5.4h ago [open: 1 hits, no action yet] :: INFO [ops] decay_recovered: 'S' -> 'S' | promotion floor still holds; still positive with its best N copies deleted
-907b728a6b72 x128 last 7.9h ago [open: 128 hits, no action yet] :: ERROR [inventory] API sync failed:
-c99109dc5185 x5 last 8.6h ago [open: 5 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | promotion floor still holds: copy ROI N < floor N; still positive with its best N cop
-4dfeb5117a8b x54 last 10.8h ago [open: 54 hits, no action yet] :: ERROR HTTP N fetching activity for <hex>
-727577d69f4e x48 last 11.6h ago [open: 48 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
-7dfc4a226f73 x136 last 11.6h ago [open: 136 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
-5e388c7bc7b2 x5 last 11.6h ago [open: 5 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, tri
-3946dd43df40 x1 last 11.6h ago [open: 1 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N no N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N no N (n=N, trimm
-7a8d58f20915 x162 last 15.1h ago [open: 162 hits, no action yet] :: ERROR Network error fetching <hex>:
-c51c5e128ab1 x17 last 23.2h ago [open: 17 hits, no action yet] :: INFO [AB-RACE] rehearsal line held/failed, real-money line sent
-74647a944e17 x19 last 23.2h ago [open: 19 hits, no action yet] :: INFO [AB-RACE] daily snapshot SEND FAILED (era_day=N, era_floor=N)
-e78eb1001f1c x1 last 23.7h ago [open: 1 hits, no action yet] :: INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> is in form by the bar right now but its numbers say it is losing: N
-4e73446f7cfa x1 last 23.7h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> is in form by the bar right now but its numbers say it is losing: N 
-6eca45f47973 x201 last 24.1h ago [open: 201 hits, no action yet] :: ERROR Network error fetching <hex>: Server disconnected without sending a response.
-5a80a08ceeba x2 last 26.7h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error: _ssl.c:N: The handshake operation timed out
-7629a2eecebd x3 last 35.6h ago [open: 3 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N no N (n=N, trim
-e7b471403f60 x7 last 35.7h ago [open: 7 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimm
-13ad3e5ddfe8 x14 last 42.1h ago [open: 14 hits, no action yet] :: ERROR [inventory] API sync failed: Server disconnected without sending a response.
-41cab7e764a5 x44 last 48.2h ago [open: 44 hits, no action yet] :: ERROR [py_clob_client_v2] request error: The read operation timed out
-12f30223bece x4 last 48.4h ago [open: 4 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body=<!DOCTYPE html>
-df29d6690f77 x10 last 60.2h ago [open: 10 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, tri
-1281617aae14 x1 last 63.6h ago [open: 1 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (read refused: CTF [NN]: ('S', RemoteDisconnected('S'))); a set-Z 
-c3db66a087f7 x17 last 69.4h ago [open: 17 hits, no action yet] :: WARNING [zset] ADMITTED <hex> to set Z (N over N copies with its best N deleted). Real money may now follow it once arme
-9d498e122ffb x39 last 69.4h ago [open: 39 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
-b36205e25762 x13 last 69.4h ago [open: 13 hits, no action yet] :: INFO [ops] auto_admit: 'S' -> 'S' | N settled paper copies, paper ROI N, trimmed N, ideal N, real quotes N over N matche
-b2b604f5f44b x26 last 78.5h ago [open: 26 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched copi
+1bd07071cf73 x80 last 0.0h ago [open: 80 hits, no action yet] :: ERROR Onchain poll error: ('S', RemoteDisconnected('S'))
+54ac26fb3ff1 x1692 last 3.0h ago [open: 1692 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
+84e240524773 x175 last 4.3h ago [open: 175 hits, no action yet] :: TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off
+e109d2da998c x10 last 5.6h ago [open: 10 hits, no action yet] :: INFO [ops] decay_hold: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched cop
+657cdb060a20 x1 last 5.6h ago [open: 1 hits, no action yet] :: INFO [ops] decay_recovered: 'S' -> 'S' | promotion floor still holds; still positive with its best N copies deleted
+907b728a6b72 x128 last 8.1h ago [open: 128 hits, no action yet] :: ERROR [inventory] API sync failed:
+c99109dc5185 x5 last 8.8h ago [open: 5 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | promotion floor still holds: copy ROI N < floor N; still positive with its best N cop
+4dfeb5117a8b x54 last 11.0h ago [open: 54 hits, no action yet] :: ERROR HTTP N fetching activity for <hex>
+727577d69f4e x48 last 11.9h ago [open: 48 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
+7dfc4a226f73 x136 last 11.9h ago [open: 136 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
+5e388c7bc7b2 x5 last 11.9h ago [open: 5 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, tri
+3946dd43df40 x1 last 11.9h ago [open: 1 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N no N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N no N (n=N, trimm
+7a8d58f20915 x162 last 15.4h ago [open: 162 hits, no action yet] :: ERROR Network error fetching <hex>:
+c51c5e128ab1 x17 last 23.4h ago [open: 17 hits, no action yet] :: INFO [AB-RACE] rehearsal line held/failed, real-money line sent
+74647a944e17 x19 last 23.5h ago [open: 19 hits, no action yet] :: INFO [AB-RACE] daily snapshot SEND FAILED (era_day=N, era_floor=N)
+e78eb1001f1c x1 last 23.9h ago [open: 1 hits, no action yet] :: INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> is in form by the bar right now but its numbers say it is losing: N
+4e73446f7cfa x1 last 23.9h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> is in form by the bar right now but its numbers say it is losing: N 
+6eca45f47973 x201 last 24.4h ago [open: 201 hits, no action yet] :: ERROR Network error fetching <hex>: Server disconnected without sending a response.
+5a80a08ceeba x2 last 26.9h ago [open: 2 hits, no action yet] :: ERROR [py_clob_client_v2] request error: _ssl.c:N: The handshake operation timed out
+7629a2eecebd x3 last 35.8h ago [open: 3 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N no N (n=N, trim
+e7b471403f60 x7 last 35.9h ago [open: 7 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimm
+13ad3e5ddfe8 x14 last 42.3h ago [open: 14 hits, no action yet] :: ERROR [inventory] API sync failed: Server disconnected without sending a response.
+41cab7e764a5 x44 last 48.4h ago [open: 44 hits, no action yet] :: ERROR [py_clob_client_v2] request error: The read operation timed out
+12f30223bece x4 last 48.6h ago [open: 4 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body=<!DOCTYPE html>
+df29d6690f77 x10 last 60.5h ago [open: 10 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, tri
+1281617aae14 x1 last 63.8h ago [open: 1 hits, no action yet] :: ERROR Onchain: chunk NN SKIPPED after N refused reads (read refused: CTF [NN]: ('S', RemoteDisconnected('S'))); a set-Z 
+c3db66a087f7 x17 last 69.6h ago [open: 17 hits, no action yet] :: WARNING [zset] ADMITTED <hex> to set Z (N over N copies with its best N deleted). Real money may now follow it once arme
+9d498e122ffb x39 last 69.6h ago [open: 39 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
+b36205e25762 x13 last 69.6h ago [open: 13 hits, no action yet] :: INFO [ops] auto_admit: 'S' -> 'S' | N settled paper copies, paper ROI N, trimmed N, ideal N, real quotes N over N matche
+b2b604f5f44b x26 last 78.8h ago [open: 26 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched copi
 
 ## ledger (14 rows)
 {"ts": 1792654426.1334546, "day": "2026-10-22", "kind": "routine_wallet_action", "before": "0x9f15613e", "after": "bench applied, now in form", "detail": "0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 poi", "push": "WALLET"}
@@ -112,11 +112,7 @@ b2b604f5f44b x26 last 78.5h ago [open: 26 hits, no action yet] :: INFO [ops] dec
 {"ts": 1792719712.2967017, "day": "2026-10-23", "kind": "decay_recovered", "before": "0x154ca10d below the door 1 day(s)", "after": "passes the door again", "detail": "promotion floor still holds; still positive with its best 3 copies deleted", "push": "WALLET", "wallet": "0x154ca10dfee317dcfb9337788db7da858cba658e", "days": 1}
 {"ts": 1792719712.2967017, "day": "2026-10-23", "kind": "decay_hold", "before": "0xd970693a below the door 14 day(s)", "after": "stays: owner pick", "detail": "does not lose at the prices we would really pay: -7% at real quotes over 39 matched copies", "push": "WALLET", "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba", "days": 14, "window": 7, "fails": ["does not lose at the prices we would really pay"]}
 
-## important lines (211)
-2026-10-22 07:19:16 ERROR Network error fetching 0x28ef...ff5e: 
-2026-10-22 07:24:49 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
-2026-10-22 07:26:35 ERROR [inventory] API sync failed: 
-2026-10-22 07:29:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={"error":"No orderbook exists for the requested token id"}
+## important lines (208)
 2026-10-22 07:33:48 INFO  [ops] routine_wallet_action: '0x9f15613e' -> 'bench applied, now in form' | 0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 poi
 2026-10-22 07:33:48 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x9f15613e is in form by the bar right now but its numbers say it is losing: 262 settled, 55% won vs 54% needed, a 1 poi
 2026-10-22 07:44:43 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
@@ -290,6 +286,7 @@ b2b604f5f44b x26 last 78.5h ago [open: 26 hits, no action yet] :: INFO [ops] dec
 2026-10-23 04:57:35 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
 2026-10-23 05:29:57 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
 2026-10-23 07:01:25 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2026-10-23 07:26:31 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
 2026-10-22 10:40:35 TRADE [DISARMED] would BUY $5.00 on 'Florence: Samuele Pieri vs Sandro Kopp' @ 0.5091 (from 0x3d42...5bf3); the arm is off
 2026-10-22 10:40:39 TRADE [DISARMED] would BUY $5.00 on 'Florence: Samuele Pieri vs Sandro Kopp' @ 0.5000 (from 0x154c...658e); the arm is off
 2026-10-22 11:50:18 TRADE [DISARMED] would BUY $5.00 on 'Almaty Open: Tomas Machac vs Karen Khach' @ 0.5058 (from 0x154c...658e); the arm is off
