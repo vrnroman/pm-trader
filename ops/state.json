@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-23T18:23:11.760438+00:00",
+ "generated": "2026-10-23T21:13:53.110816+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -89,9 +89,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792697568.907307,
+    "ts": 1792785292.5434914,
     "n_acts": 4000,
-    "n_resolved_markets": 1396,
+    "n_resolved_markets": 1360,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -100,33 +100,33 @@
     },
     "at": {
      "300": {
-      "n": 537,
-      "roi": 0.1055,
-      "trimmed": 0.0772,
+      "n": 535,
+      "roi": 0.1098,
+      "trimmed": 0.0814,
       "ok": true
      },
      "200": {
-      "n": 620,
-      "roi": 0.1035,
-      "trimmed": 0.079,
+      "n": 617,
+      "roi": 0.1084,
+      "trimmed": 0.0838,
       "ok": true
      },
      "150": {
-      "n": 703,
-      "roi": 0.1002,
-      "trimmed": 0.0785,
+      "n": 699,
+      "roi": 0.1061,
+      "trimmed": 0.0844,
       "ok": true
      },
      "100": {
-      "n": 808,
-      "roi": 0.0963,
-      "trimmed": 0.0775,
+      "n": 809,
+      "roi": 0.0955,
+      "trimmed": 0.0767,
       "ok": false
      }
     },
-    "chosen": 200.0
+    "chosen": 150.0
    },
-   "floor_usd": 200.0
+   "floor_usd": 150.0
   },
   "0x09b045baad1fbe115c70785635a261411774a3b6": {
    "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
@@ -135,9 +135,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792697568.907307,
+    "ts": 1792785292.5434914,
     "n_acts": 4000,
-    "n_resolved_markets": 588,
+    "n_resolved_markets": 595,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -146,27 +146,27 @@
     },
     "at": {
      "300": {
-      "n": 139,
-      "roi": 0.3333,
-      "trimmed": 0.2659,
+      "n": 138,
+      "roi": 0.3251,
+      "trimmed": 0.2571,
       "ok": true
      },
      "200": {
-      "n": 189,
-      "roi": 0.4664,
-      "trimmed": 0.3464,
+      "n": 188,
+      "roi": 0.4611,
+      "trimmed": 0.3404,
       "ok": true
      },
      "150": {
-      "n": 220,
-      "roi": 0.4309,
-      "trimmed": 0.3276,
+      "n": 219,
+      "roi": 0.4263,
+      "trimmed": 0.3224,
       "ok": true
      },
      "100": {
-      "n": 257,
-      "roi": 0.5009,
-      "trimmed": 0.4103,
+      "n": 254,
+      "roi": 0.5089,
+      "trimmed": 0.4174,
       "ok": true
      }
     },
@@ -181,9 +181,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792697568.907307,
+    "ts": 1792785292.5434914,
     "n_acts": 4000,
-    "n_resolved_markets": 544,
+    "n_resolved_markets": 558,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -192,27 +192,27 @@
     },
     "at": {
      "300": {
-      "n": 123,
-      "roi": 0.3112,
-      "trimmed": 0.2289,
+      "n": 122,
+      "roi": 0.3307,
+      "trimmed": 0.2482,
       "ok": true
      },
      "200": {
-      "n": 167,
-      "roi": 0.2663,
-      "trimmed": 0.1802,
+      "n": 164,
+      "roi": 0.296,
+      "trimmed": 0.2088,
       "ok": true
      },
      "150": {
-      "n": 179,
-      "roi": 0.3058,
-      "trimmed": 0.2211,
+      "n": 178,
+      "roi": 0.3344,
+      "trimmed": 0.2497,
       "ok": true
      },
      "100": {
-      "n": 204,
-      "roi": 0.3047,
-      "trimmed": 0.2305,
+      "n": 203,
+      "roi": 0.3298,
+      "trimmed": 0.2555,
       "ok": true
      }
     },
@@ -227,9 +227,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792697568.907307,
+    "ts": 1792785292.5434914,
     "n_acts": 4000,
-    "n_resolved_markets": 632,
+    "n_resolved_markets": 621,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -238,27 +238,27 @@
     },
     "at": {
      "300": {
-      "n": 153,
-      "roi": -0.0648,
-      "trimmed": -0.0956,
+      "n": 154,
+      "roi": -0.0462,
+      "trimmed": -0.0764,
       "ok": false
      },
      "200": {
-      "n": 255,
-      "roi": -0.0079,
-      "trimmed": -0.032,
+      "n": 253,
+      "roi": 0.0078,
+      "trimmed": -0.0163,
       "ok": false
      },
      "150": {
-      "n": 319,
-      "roi": -0.0371,
-      "trimmed": -0.0566,
+      "n": 315,
+      "roi": -0.0185,
+      "trimmed": -0.038,
       "ok": false
      },
      "100": {
-      "n": 388,
-      "roi": -0.0365,
-      "trimmed": -0.0534,
+      "n": 385,
+      "roi": -0.0291,
+      "trimmed": -0.046,
       "ok": false
      }
     },
@@ -319,9 +319,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792697568.907307,
+    "ts": 1792785292.5434914,
     "n_acts": 4000,
-    "n_resolved_markets": 1400,
+    "n_resolved_markets": 1408,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -330,27 +330,27 @@
     },
     "at": {
      "300": {
-      "n": 253,
-      "roi": 0.0761,
-      "trimmed": 0.0557,
+      "n": 256,
+      "roi": 0.0778,
+      "trimmed": 0.0573,
       "ok": false
      },
      "200": {
-      "n": 318,
-      "roi": 0.0522,
-      "trimmed": 0.0358,
+      "n": 323,
+      "roi": 0.0527,
+      "trimmed": 0.0363,
       "ok": false
      },
      "150": {
-      "n": 476,
-      "roi": 0.0327,
-      "trimmed": 0.0146,
+      "n": 482,
+      "roi": 0.0282,
+      "trimmed": 0.0103,
       "ok": false
      },
      "100": {
-      "n": 652,
-      "roi": 0.0052,
-      "trimmed": -0.0097,
+      "n": 657,
+      "roi": 0.0005,
+      "trimmed": -0.0143,
       "ok": false
      }
     },
@@ -365,9 +365,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792697568.907307,
-    "n_acts": 2061,
-    "n_resolved_markets": 498,
+    "ts": 1792785292.5434914,
+    "n_acts": 2085,
+    "n_resolved_markets": 511,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -376,33 +376,33 @@
     },
     "at": {
      "300": {
-      "n": 193,
-      "roi": 0.0872,
-      "trimmed": 0.0348,
+      "n": 203,
+      "roi": 0.0568,
+      "trimmed": 0.0066,
       "ok": false
      },
      "200": {
-      "n": 238,
-      "roi": 0.1182,
-      "trimmed": 0.0667,
-      "ok": true
+      "n": 250,
+      "roi": 0.0912,
+      "trimmed": 0.0419,
+      "ok": false
      },
      "150": {
-      "n": 253,
-      "roi": 0.0876,
-      "trimmed": 0.0388,
+      "n": 265,
+      "roi": 0.0635,
+      "trimmed": 0.0167,
       "ok": false
      },
      "100": {
-      "n": 323,
-      "roi": 0.0741,
-      "trimmed": 0.0274,
+      "n": 336,
+      "roi": 0.0575,
+      "trimmed": 0.0125,
       "ok": false
      }
     },
-    "chosen": 200.0
+    "chosen": null
    },
-   "floor_usd": 200.0
+   "floor_usd": null
   },
   "0x9f6a4549f14154a7f2c74d03efd8de903a61eb61": {
    "wallet": "0x9f6a4549f14154a7f2c74d03efd8de903a61eb61",
@@ -460,7 +460,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-23T12:42:18Z-2073",
-  "admit_scan_ts": 1792774239.905279,
+  "admit_scan_ts": 1792785262.547695,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -625,7 +625,7 @@
    "81590020427043842613092785777908802343565727502554819527317910299079893723010",
    "31875456602995884681359741938057426161525862195964797074350542114152896078914"
   ],
-  "form_scan_ts": 1792767098.4013827,
+  "form_scan_ts": 1792788936.9171765,
   "daily_line_attempt_day": "2026-10-23",
   "daily_line_sent": true,
   "daily_line_day": "2026-10-23",
@@ -672,28 +672,28 @@
   }
  },
  "form": {
-  "ts": 1792767099.4331653,
+  "ts": 1792788937.8108327,
   "version": 4,
   "wallets": {
    "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
     "wallet": "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333",
-    "n": 224,
-    "won": 179,
-    "cost": 245839.36,
-    "back": 273636.64,
-    "avg_price": 0.6443326921642596,
+    "n": 219,
+    "won": 175,
+    "cost": 244040.64,
+    "back": 272665.29,
+    "avg_price": 0.6433183825505024,
     "worst_day": -2618.2,
     "ok": false,
-    "reason": "scalper: 41% of exits within 10 min; uncopyable at our latency",
-    "ts": 1792767099.4331653,
+    "reason": "scalper: 38% of exits within 10 min; uncopyable at our latency",
+    "ts": 1792788937.8108327,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 39,
-    "flips": 16,
-    "last_trade_ts": 1792766277.0,
+    "flips": 15,
+    "last_trade_ts": 1792787939.0,
     "hit": 0.7991,
-    "net_pct": 11.31
+    "net_pct": 11.73
    },
    "0x09b045baad1fbe115c70785635a261411774a3b6": {
     "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
@@ -705,35 +705,35 @@
     "worst_day": -126.02,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1792767099.4331653,
+    "ts": 1792788937.8108327,
     "rows": 1500,
     "covered_days": 14.0,
     "capped": false,
     "exits": 15,
     "flips": 15,
-    "last_trade_ts": 1792693014.0,
+    "last_trade_ts": 1792785368.0,
     "hit": 0.6,
     "net_pct": 7.35
    },
    "0x154ca10dfee317dcfb9337788db7da858cba658e": {
     "wallet": "0x154ca10dfee317dcfb9337788db7da858cba658e",
-    "n": 119,
+    "n": 121,
     "won": 74,
-    "cost": 194094.21,
-    "back": 210455.68,
-    "avg_price": 0.5473500111594193,
+    "cost": 200045.46,
+    "back": 219731.14,
+    "avg_price": 0.545369964236424,
     "worst_day": -9670.68,
     "ok": true,
-    "reason": "62% came out ahead vs 55% needed, net +8.4%",
-    "ts": 1792767099.4331653,
+    "reason": "61% came out ahead vs 55% needed, net +9.8%",
+    "ts": 1792788937.8108327,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 0,
     "flips": 0,
-    "last_trade_ts": 1792766472.0,
-    "hit": 0.6218,
-    "net_pct": 8.43
+    "last_trade_ts": 1792788881.0,
+    "hit": 0.6116,
+    "net_pct": 9.84
    },
    "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
     "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
@@ -745,95 +745,95 @@
     "worst_day": -285.38,
     "ok": false,
     "reason": "scalper: 100% of exits within 10 min; uncopyable at our latency",
-    "ts": 1792767099.4331653,
+    "ts": 1792788937.8108327,
     "rows": 1500,
     "covered_days": 14.0,
     "capped": false,
     "exits": 15,
     "flips": 15,
-    "last_trade_ts": 1792693017.0,
+    "last_trade_ts": 1792785368.0,
     "hit": 0.6667,
     "net_pct": 10.73
    },
    "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e": {
     "wallet": "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e",
-    "n": 43,
+    "n": 41,
     "won": 17,
-    "cost": 16350.25,
+    "cost": 15618.51,
     "back": 12616.94,
-    "avg_price": 0.541195247799537,
+    "avg_price": 0.5392077348872987,
     "worst_day": -1428.73,
     "ok": false,
-    "reason": "40% came out ahead vs 54% needed (-15 points, need +3)",
-    "ts": 1792767099.4331653,
+    "reason": "41% came out ahead vs 54% needed (-12 points, need +3)",
+    "ts": 1792788937.8108327,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
     "exits": 3,
     "flips": 1,
     "last_trade_ts": 1792696748.0,
-    "hit": 0.3953,
-    "net_pct": -22.83
+    "hit": 0.4146,
+    "net_pct": -19.22
    },
    "0x3d42e45cbf1c671733fbb8470924ec1bef165bf3": {
     "wallet": "0x3d42e45cbf1c671733fbb8470924ec1bef165bf3",
-    "n": 132,
-    "won": 79,
-    "cost": 226711.69,
-    "back": 241613.48,
-    "avg_price": 0.5365491853724402,
+    "n": 136,
+    "won": 81,
+    "cost": 237167.32,
+    "back": 254644.79,
+    "avg_price": 0.5380817890638112,
     "worst_day": -18470.86,
     "ok": true,
-    "reason": "60% came out ahead vs 54% needed, net +6.6%",
-    "ts": 1792767099.4331653,
+    "reason": "60% came out ahead vs 54% needed, net +7.4%",
+    "ts": 1792788937.8108327,
     "rows": 1500,
     "covered_days": 14.0,
     "capped": false,
-    "exits": 12,
+    "exits": 14,
     "flips": 0,
-    "last_trade_ts": 1792749084.0,
-    "hit": 0.5985,
-    "net_pct": 6.57
+    "last_trade_ts": 1792788651.0,
+    "hit": 0.5956,
+    "net_pct": 7.37
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "n": 292,
-    "won": 163,
-    "cost": 1143944.64,
-    "back": 1136208.62,
-    "avg_price": 0.5333277803214704,
+    "n": 296,
+    "won": 166,
+    "cost": 1190253.79,
+    "back": 1206186.34,
+    "avg_price": 0.5382929728269169,
     "worst_day": -149979.0,
     "ok": false,
     "reason": "scalper: 43% of exits within 10 min; uncopyable at our latency",
-    "ts": 1792767099.4331653,
+    "ts": 1792788937.8108327,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 21,
     "flips": 9,
-    "last_trade_ts": 1792766753.0,
-    "hit": 0.5582,
-    "net_pct": -0.68
+    "last_trade_ts": 1792787418.0,
+    "hit": 0.5608,
+    "net_pct": 1.34
    },
    "0x9f6a4549f14154a7f2c74d03efd8de903a61eb61": {
     "wallet": "0x9f6a4549f14154a7f2c74d03efd8de903a61eb61",
-    "n": 15,
-    "won": 10,
-    "cost": 9920.52,
-    "back": 14325.04,
-    "avg_price": 0.6119184599707875,
+    "n": 13,
+    "won": 8,
+    "cost": 8827.73,
+    "back": 12244.16,
+    "avg_price": 0.6043770899329265,
     "worst_day": -834.76,
     "ok": false,
-    "reason": "only 15 settled bets on our slice in 14 days (need 30)",
-    "ts": 1792767099.4331653,
+    "reason": "only 13 settled bets on our slice in 14 days (need 30)",
+    "ts": 1792788937.8108327,
     "rows": 2500,
     "covered_days": 14.0,
     "capped": false,
     "exits": 9,
     "flips": 1,
-    "last_trade_ts": 1792754100.0,
-    "hit": 0.6667,
-    "net_pct": 44.4
+    "last_trade_ts": 1792770780.0,
+    "hit": 0.6154,
+    "net_pct": 38.7
    },
    "0xd970693a3384dc762b191707a4927ac3814bbbba": {
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
@@ -845,13 +845,13 @@
     "worst_day": -44.41,
     "ok": false,
     "reason": "only 9 settled bets on our slice in 14 days (need 30)",
-    "ts": 1792767099.4331653,
+    "ts": 1792788937.8108327,
     "rows": 1500,
     "covered_days": 14.0,
     "capped": false,
     "exits": 9,
     "flips": 9,
-    "last_trade_ts": 1792692986.0,
+    "last_trade_ts": 1792784742.0,
     "hit": 0.6667,
     "net_pct": 13.15
    },
@@ -865,7 +865,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1792767099.4331653,
+    "ts": 1792788937.8108327,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
@@ -882,84 +882,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1792697568.907307,
-   "day": "2026-10-22",
-   "kind": "floor_row",
-   "before": "0x09b045ba floor 100.0",
-   "after": "floor 100.0 (same)",
-   "detail": "copies at $100: 300 yes +33% (n=139, trimmed +27%) · 200 yes +47% (n=189, trimmed +35%) · 150 yes +43% (n=220, trimmed +33%) · 100 YES +50% (n=257, trimmed +41%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-   "floor_before": 100.0,
-   "floor_after": 100.0,
-   "live": false
-  },
-  {
-   "ts": 1792697568.907307,
-   "day": "2026-10-22",
-   "kind": "floor_row",
-   "before": "0x154ca10d floor 300.0",
-   "after": "floor global (moved)",
-   "detail": "no floor clears the bars, global floor stays: 300 no +8% (n=253, trimmed +6%) · 200 no +5% (n=318, trimmed +4%) · 150 no +3% (n=476, trimmed +1%) · 100 no +1% (n=652, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": "WALLET",
-   "wallet": "0x154ca10dfee317dcfb9337788db7da858cba658e",
-   "floor_before": 300.0,
-   "floor_after": null,
-   "live": false
-  },
-  {
-   "ts": 1792697568.907307,
-   "day": "2026-10-22",
-   "kind": "floor_row",
-   "before": "0x1985327e floor 100.0",
-   "after": "floor 100.0 (same)",
-   "detail": "copies at $100: 300 yes +31% (n=123, trimmed +23%) · 200 yes +27% (n=167, trimmed +18%) · 150 yes +31% (n=179, trimmed +22%) · 100 YES +30% (n=204, trimmed +23%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
-   "floor_before": 100.0,
-   "floor_after": 100.0,
-   "live": false
-  },
-  {
-   "ts": 1792697568.907307,
-   "day": "2026-10-22",
-   "kind": "floor_row",
-   "before": "0x3d42e45c floor 200.0",
-   "after": "floor 200.0 (same)",
-   "detail": "copies at $200: 300 no +9% (n=193, trimmed +3%) · 200 YES +12% (n=238, trimmed +7%) · 150 no +9% (n=253, trimmed +4%) · 100 no +7% (n=323, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0x3d42e45cbf1c671733fbb8470924ec1bef165bf3",
-   "floor_before": 200.0,
-   "floor_after": 200.0,
-   "live": false
-  },
-  {
-   "ts": 1792697568.907307,
-   "day": "2026-10-22",
-   "kind": "floor_row",
-   "before": "0x9f15613e floor 300.0",
-   "after": "floor 200.0 (moved)",
-   "detail": "copies at $200: 300 yes +11% (n=537, trimmed +8%) · 200 YES +10% (n=620, trimmed +8%) · 150 yes +10% (n=703, trimmed +8%) · 100 no +10% (n=808, trimmed +8%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": "WALLET",
-   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-   "floor_before": 300.0,
-   "floor_after": 200.0,
-   "live": false
-  },
-  {
-   "ts": 1792697568.907307,
-   "day": "2026-10-22",
-   "kind": "floor_row",
-   "before": "0xeef6ad0e floor global",
-   "after": "floor global (same)",
-   "detail": "no floor clears the bars, global floor stays: 300 no -6% (n=153, trimmed -10%) · 200 no -1% (n=255, trimmed -3%) · 150 no -4% (n=319, trimmed -6%) · 100 no -4% (n=388, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
-   "floor_before": null,
-   "floor_after": null,
-   "live": false
-  },
   {
    "ts": 1792708670.2848036,
    "day": "2026-10-22",
@@ -1051,26 +973,87 @@
    "after": "sent",
    "detail": "Ops digest has gone stale. Last digest commit 2026-10-23T07:29:59Z, now 2026-10-23T12:42:18Z: about 5 hours 12 minutes w",
    "push": "BOT"
+  },
+  {
+   "ts": 1792785292.5434914,
+   "day": "2026-10-23",
+   "kind": "floor_row",
+   "before": "0x09b045ba floor 100.0",
+   "after": "floor 100.0 (same)",
+   "detail": "copies at $100: 300 yes +33% (n=138, trimmed +26%) · 200 yes +46% (n=188, trimmed +34%) · 150 yes +43% (n=219, trimmed +32%) · 100 YES +51% (n=254, trimmed +42%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+   "floor_before": 100.0,
+   "floor_after": 100.0,
+   "live": false
+  },
+  {
+   "ts": 1792785292.5434914,
+   "day": "2026-10-23",
+   "kind": "floor_row",
+   "before": "0x154ca10d floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +8% (n=256, trimmed +6%) · 200 no +5% (n=323, trimmed +4%) · 150 no +3% (n=482, trimmed +1%) · 100 no +0% (n=657, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x154ca10dfee317dcfb9337788db7da858cba658e",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1792785292.5434914,
+   "day": "2026-10-23",
+   "kind": "floor_row",
+   "before": "0x1985327e floor 100.0",
+   "after": "floor 100.0 (same)",
+   "detail": "copies at $100: 300 yes +33% (n=122, trimmed +25%) · 200 yes +30% (n=164, trimmed +21%) · 150 yes +33% (n=178, trimmed +25%) · 100 YES +33% (n=203, trimmed +26%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+   "floor_before": 100.0,
+   "floor_after": 100.0,
+   "live": false
+  },
+  {
+   "ts": 1792785292.5434914,
+   "day": "2026-10-23",
+   "kind": "floor_row",
+   "before": "0x3d42e45c floor 200.0",
+   "after": "floor global (moved)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +6% (n=203, trimmed +1%) · 200 no +9% (n=250, trimmed +4%) · 150 no +6% (n=265, trimmed +2%) · 100 no +6% (n=336, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": "WALLET",
+   "wallet": "0x3d42e45cbf1c671733fbb8470924ec1bef165bf3",
+   "floor_before": 200.0,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1792785292.5434914,
+   "day": "2026-10-23",
+   "kind": "floor_row",
+   "before": "0x9f15613e floor 200.0",
+   "after": "floor 150.0 (moved)",
+   "detail": "copies at $150: 300 yes +11% (n=535, trimmed +8%) · 200 yes +11% (n=617, trimmed +8%) · 150 YES +11% (n=699, trimmed +8%) · 100 no +10% (n=809, trimmed +8%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": "WALLET",
+   "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
+   "floor_before": 200.0,
+   "floor_after": 150.0,
+   "live": false
+  },
+  {
+   "ts": 1792785292.5434914,
+   "day": "2026-10-23",
+   "kind": "floor_row",
+   "before": "0xeef6ad0e floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -5% (n=154, trimmed -8%) · 200 no +1% (n=253, trimmed -2%) · 150 no -2% (n=315, trimmed -4%) · 100 no -3% (n=385, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xeef6ad0e40c33f6703de88327f27f5e3d4aecd4c",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-10-22 18:34:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 18:49:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 18:51:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 18:54:49 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 18:54:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 18:59:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 19:04:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 19:05:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 19:35:46 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +33% (n=139, trimmed +27%) · 200 yes +47% (n=189, trimmed +35%) · 150 yes +43% (n=220, trimmed +33%) · 100 YES +50% (n=257, trimmed +41%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-22 19:36:12 INFO  [ops] floor_row: '0x154ca10d floor 300.0' -> 'floor global (moved)' | no floor clears the bars, global floor stays: 300 no +8% (n=253, trimmed +6%) · 200 no +5% (n=318, trimmed +4%) · 150 no +3% (n=476, trimmed +1%) · 100 no +1% (n=652, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-22 19:36:27 INFO  [ops] floor_row: '0x1985327e floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +31% (n=123, trimmed +23%) · 200 yes +27% (n=167, trimmed +18%) · 150 yes +31% (n=179, trimmed +22%) · 100 YES +30% (n=204, trimmed +23%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-22 19:36:32 INFO  [ops] floor_row: '0x3d42e45c floor 200.0' -> 'floor 200.0 (same)' | copies at $200: 300 no +9% (n=193, trimmed +3%) · 200 YES +12% (n=238, trimmed +7%) · 150 no +9% (n=253, trimmed +4%) · 100 no +7% (n=323, trimmed +3%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-22 19:36:52 INFO  [ops] floor_row: '0x9f15613e floor 300.0' -> 'floor 200.0 (moved)' | copies at $200: 300 yes +11% (n=537, trimmed +8%) · 200 YES +10% (n=620, trimmed +8%) · 150 yes +10% (n=703, trimmed +8%) · 100 no +10% (n=808, trimmed +8%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-22 19:37:08 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -6% (n=153, trimmed -10%) · 200 no -1% (n=255, trimmed -3%) · 150 no -4% (n=319, trimmed -6%) · 100 no -4% (n=388, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-22 19:55:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-22 20:25:55 ERROR HTTP 502 fetching activity for 0x9f6a...eb61",
-  "2026-10-22 20:26:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 21:32:52 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 21:38:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-22 21:48:34 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1191,21 +1174,39 @@
   "2026-10-23 18:20:54 ERROR Network error fetching 0x1985...51ab: ",
   "2026-10-23 18:20:54 ERROR Network error fetching 0xeef6...cd4c: ",
   "2026-10-23 18:20:54 ERROR Network error fetching 0x28ef...ff5e: ",
-  "2026-10-22 18:23:52 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Kaylan Bigun vs Aidan Mayo' @ 0.6300 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-22 18:27:33 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Zero Tenacity - Game ' @ 0.7900 (from 0x154c...658e); the arm is off",
-  "2026-10-22 18:27:58 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Zero Tenacity - Game ' @ 0.7800 (from 0x154c...658e); the arm is off",
-  "2026-10-22 18:29:39 TRADE [DISARMED] would BUY $5.00 on 'Celtic FC vs. RC Celta de Vigo: Celtic F' @ 0.5800 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-22 19:09:22 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: PARIVISION vs Astra Invicta - Ga' @ 0.8000 (from 0x154c...658e); the arm is off",
-  "2026-10-22 19:10:31 TRADE [DISARMED] would BUY $5.00 on 'Air Force vs. Wyoming: O/U 45.5' @ 0.5200 (from 0x28ef...ff5e); the arm is off",
-  "2026-10-22 19:13:34 TRADE [DISARMED] would BUY $5.00 on 'Rice vs. Florida Atlantic: O/U 53.5' @ 0.5400 (from 0x28ef...ff5e); the arm is off",
-  "2026-10-22 19:15:49 TRADE [DISARMED] would BUY $5.00 on 'San Jose State vs. Nevada: O/U 45.5' @ 0.5400 (from 0x28ef...ff5e); the arm is off",
-  "2026-10-22 19:25:00 TRADE [DISARMED] would BUY $5.00 on 'Will Sport Lisboa e Benfica win on 2026-' @ 0.8600 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-22 19:28:40 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: TheBot$ vs Zero Tenacity - Game ' @ 0.8300 (from 0x154c...658e); the arm is off",
-  "2026-10-22 19:31:02 TRADE [DISARMED] would BUY $5.00 on 'Will RSC Anderlecht win on 2026-10-22?' @ 0.7600 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-22 20:16:01 TRADE [DISARMED] would BUY $5.00 on 'Cavaliers vs. 76ers' @ 0.4400 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-22 20:16:41 TRADE [DISARMED] would BUY $5.00 on 'Spread: James Madison (-14.5)' @ 0.4200 (from 0x154c...658e); the arm is off",
-  "2026-10-22 20:29:03 TRADE [DISARMED] would BUY $5.00 on 'Will Olympiakós SFP win on 2026-10-22?' @ 0.4500 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-22 20:29:37 TRADE [DISARMED] would BUY $5.00 on 'Will Olympiakós SFP vs. AC Sparta Praha ' @ 0.5068 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 18:28:47 ERROR Network error fetching 0x3d42...5bf3: ",
+  "2026-10-23 18:28:47 ERROR Network error fetching 0x9f6a...eb61: ",
+  "2026-10-23 18:28:47 ERROR Network error fetching 0x154c...658e: ",
+  "2026-10-23 18:28:47 ERROR Network error fetching 0x0011...4333: ",
+  "2026-10-23 18:34:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 18:46:54 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 18:49:38 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 19:04:39 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 19:04:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 19:19:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 19:44:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-23 19:56:46 ERROR Network error fetching 0x09b0...a3b6: ",
+  "2026-10-23 19:56:46 ERROR Network error fetching 0x1985...51ab: ",
+  "2026-10-23 19:56:46 ERROR Network error fetching 0x9f15...bdb3: ",
+  "2026-10-23 19:56:46 ERROR Network error fetching 0xeef6...cd4c: ",
+  "2026-10-23 20:05:13 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +33% (n=138, trimmed +26%) · 200 yes +46% (n=188, trimmed +34%) · 150 yes +43% (n=219, trimmed +32%) · 100 YES +51% (n=254, trimmed +42%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-23 20:06:36 INFO  [ops] floor_row: '0x154ca10d floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +8% (n=256, trimmed +6%) · 200 no +5% (n=323, trimmed +4%) · 150 no +3% (n=482, trimmed +1%) · 100 no +0% (n=657, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-23 20:07:08 INFO  [ops] floor_row: '0x1985327e floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +33% (n=122, trimmed +25%) · 200 yes +30% (n=164, trimmed +21%) · 150 yes +33% (n=178, trimmed +25%) · 100 YES +33% (n=203, trimmed +26%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-23 20:07:21 INFO  [ops] floor_row: '0x3d42e45c floor 200.0' -> 'floor global (moved)' | no floor clears the bars, global floor stays: 300 no +6% (n=203, trimmed +1%) · 200 no +9% (n=250, trimmed +4%) · 150 no +6% (n=265, trimmed +2%) · 100 no +6% (n=336, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-23 20:08:02 INFO  [ops] floor_row: '0x9f15613e floor 200.0' -> 'floor 150.0 (moved)' | copies at $150: 300 yes +11% (n=535, trimmed +8%) · 200 yes +11% (n=617, trimmed +8%) · 150 YES +11% (n=699, trimmed +8%) · 100 no +10% (n=809, trimmed +8%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-23 20:08:48 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -5% (n=154, trimmed -8%) · 200 no +1% (n=253, trimmed -2%) · 150 no -2% (n=315, trimmed -4%) · 100 no -3% (n=385, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-23 20:26:07 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-23 20:26:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-10-23 20:40:40 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 20:48:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-23 20:48:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-23 20:51:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-23 20:51:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-10-23 20:51:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-23 20:51:27 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-10-23 20:52:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-23 20:52:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-10-23 21:06:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-23 00:09:48 TRADE [DISARMED] would BUY $5.00 on 'Patriots vs. Bears: O/U 50.5' @ 0.5100 (from 0x3d42...5bf3); the arm is off",
   "2026-10-23 00:35:37 TRADE [DISARMED] would BUY $5.00 on 'East Carolina vs. Memphis: O/U 51.5' @ 0.5000 (from 0x154c...658e); the arm is off",
   "2026-10-23 01:57:50 TRADE [DISARMED] would BUY $5.00 on 'Ningbo Open: Iva Jovic vs Diana Shnaider' @ 0.5500 (from 0x3d42...5bf3); the arm is off",
@@ -1229,23 +1230,24 @@
   "2026-10-23 18:08:39 TRADE [DISARMED] would BUY $5.00 on 'LoL: Hanwha Life Esports vs Top Esports ' @ 0.7800 (from 0x3d42...5bf3); the arm is off",
   "2026-10-23 18:14:12 TRADE [DISARMED] would BUY $5.00 on 'LoL: Hanwha Life Esports vs Top Esports ' @ 0.7900 (from 0x3d42...5bf3); the arm is off",
   "2026-10-23 18:20:44 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI - Game ' @ 0.4900 (from 0x154c...658e); the arm is off",
-  "2026-10-23 18:20:50 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI - Game ' @ 0.4900 (from 0x154c...658e); the arm is off"
+  "2026-10-23 18:20:50 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI - Game ' @ 0.4900 (from 0x154c...658e); the arm is off",
+  "2026-10-23 18:24:59 TRADE [DISARMED] would BUY $5.00 on 'LoL: Hanwha Life Esports vs Top Esports ' @ 0.7700 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 18:53:55 TRADE [DISARMED] would BUY $5.00 on 'Will VfB Stuttgart win on 2026-10-23?' @ 0.8600 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 20:04:04 TRADE [DISARMED] would BUY $5.00 on 'Will Torino FC win on 2026-10-23?' @ 0.3500 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 20:04:26 TRADE [DISARMED] would BUY $5.00 on 'Will Torino FC vs. AC Monza end in a dra' @ 0.4600 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 20:26:14 TRADE [DISARMED] would BUY $5.00 on 'LoL: Anyone's Legend vs Karmine Corp (BO' @ 0.7130 (from 0x154c...658e); the arm is off",
+  "2026-10-23 20:26:37 TRADE [DISARMED] would BUY $5.00 on 'LoL: Anyone's Legend vs Karmine Corp (BO' @ 0.6500 (from 0x154c...658e); the arm is off",
+  "2026-10-23 20:43:51 TRADE [DISARMED] would BUY $5.00 on 'Lyon Open: Luca Van Assche vs Lorenzo Mu' @ 0.4900 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 20:43:53 TRADE [DISARMED] would BUY $5.00 on 'Lyon Open: Luca Van Assche vs Lorenzo Mu' @ 0.4900 (from 0x154c...658e); the arm is off",
+  "2026-10-23 20:47:45 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Alexander Maarten Jong vs Ai' @ 0.6500 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 20:49:05 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Alexander Maarten Jong vs Ai' @ 0.6800 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 20:50:13 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Alexander Maarten Jong vs Ai' @ 0.6800 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 20:50:36 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Alexander Maarten Jong vs Ai' @ 0.6800 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-23 20:51:30 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI (BO3) -' @ 0.7500 (from 0x154c...658e); the arm is off",
+  "2026-10-23 20:51:30 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI (BO3) -' @ 0.7300 (from 0x154c...658e); the arm is off",
+  "2026-10-23 20:54:43 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI (BO3) -' @ 0.7898 (from 0x154c...658e); the arm is off"
  ],
  "watcher": [
-  {
-   "ts": 1792697864.5282927,
-   "day": "2026-10-22",
-   "woke_because": "3946dd43df40",
-   "fingerprint": "3946dd43df40",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The waking line is routine floor_row analytics, INFO [ops], wallet 0x3d42e45c's backward-replay bars from the 19:35 analysis sweep. floor_row is emitted once per tracked wallet per sweep and runs at a steady 8 lines/day (bot-2026-10-21: 8, bot-2026-10-22: 8 so far across the 10:25 and 19:35 sweeps); nothing failed next to it. It minted a new fingerprint only because its yes/YES/no bar permutation differs from prior rows, which is also why seven other benign floor_row fingerprints (727577, 7dfc42, 5e388b, 7629a2, e7b471, df29d6 plus this) sit open with no action. No money path touched and the a",
-   "confidence": 0.95,
-   "cost_usd": 0.357336,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1792706948.4776707,
    "day": "2026-10-22",
@@ -1304,6 +1306,34 @@
    "concluded": "An external Ops digest commit stopped refreshing at 07:29:59Z and the bot's liveness check fired a routine escalation that it already delivered to the owner ('routine escalation' -> 'sent'). This is an ops reporting artifact, not the money path; 'digest' appears once in today's bot log and that single line is the escalation itself. The same digest-stale escalation self-delivered on Oct 6, 7, 8 and 9, so the mechanism is working as designed. The bot is healthy with 631 lines in the last 60 min, chain reader last good read -3s ago at lag 0 blocks, and inventory syncing. Real money is already dis",
    "confidence": 0.82,
    "cost_usd": 0.39970150000000004,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1792786155.61398,
+   "day": "2026-10-23",
+   "woke_because": "e8c866ffa1ce",
+   "fingerprint": "e8c866ffa1ce",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The cause is a routine [ops] floor_row report, the periodic per-wallet promotion-floor computation, logging that wallet 0x9f15613e's floor moved from $200 to $150. It is a new fingerprint only because this is the first floor_row whose selected row sat at the $150 level in this normalised form; the uppercase YES merely marks the chosen floor level, and it is the same INFO class as fingerprints 7dfc4a226f73 and 727577d69f4e. I found 8 floor_row lines today beside 8723 COPY-PAPER progress lines over the last day, so the floor engine is working, not failing. No money path is touched: the arm has b",
+   "confidence": 0.95,
+   "cost_usd": 0.228413,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1792787254.872307,
+   "day": "2026-10-23",
+   "woke_because": "d4fbacabb6af",
+   "fingerprint": "d4fbacabb6af",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "This is a new fingerprint only because the market title 'LoL: Anyone's Legend vs Karmine Corp (BO' contains an apostrophe and a paren that normalised differently from the usual disarmed paper-trade line, so it split off from the existing 84e240524773 family (197 hits of the same 'would BUY ... the arm is off' message). The arm is off (arm record armed:false, by owner, reason 'pause real money' set 2026-10-18) and every one of the 30 DISARMED would-BUY lines in today's important log ends with 'the arm is off'. A grep for any [ARMED] or placed/real order in bot-2026-10-23.log returned zero hits,",
+   "confidence": 0.95,
+   "cost_usd": 0.311928,
    "did": "nothing",
    "proof": "",
    "question": ""
@@ -1540,16 +1570,14 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792778708.8307064,
-   "count": 1717,
+   "last": 1792789702.4289489,
+   "count": 1728,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792776184.0383613,
-    1792776664.0879447,
-    1792776664.0879447,
-    1792778468.317656,
-    1792778708.8307064
+    1792788142.1017969,
+    1792788622.2159371,
+    1792789702.4289489
    ],
    "action": null,
    "action_ts": null,
@@ -1600,17 +1628,22 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1792770662.9962916,
-   "count": 130,
+   "last": 1792788742.264018,
+   "count": 143,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1792768142.704825,
-    1792768142.704825,
-    1792770662.9962916,
-    1792770662.9962916,
-    1792770662.9962916,
-    1792770662.9962916
+    1792787254.872307,
+    1792787254.872307,
+    1792788622.2159371,
+    1792788622.2159371,
+    1792788622.2159371,
+    1792788742.264018,
+    1792788742.264018,
+    1792788742.264018,
+    1792788742.264018,
+    1792788742.264018,
+    1792788742.264018
    ],
    "action": null,
    "action_ts": null,
@@ -1822,16 +1855,15 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1792779669.571179,
-   "count": 171,
+   "last": 1792785434.8038585,
+   "count": 179,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1792779669.571179,
-    1792779669.571179,
-    1792779669.571179,
-    1792779669.571179,
-    1792779669.571179
+    1792785434.8038585,
+    1792785434.8038585,
+    1792785434.8038585,
+    1792785434.8038585
    ],
    "action": null,
    "action_ts": null,
@@ -1887,14 +1919,15 @@
   },
   "41cab7e764a5": {
    "first": 1790351832.0916538,
-   "last": 1792770783.036032,
-   "count": 47,
+   "last": 1792788742.264018,
+   "count": 51,
    "sample": "2026-09-25 15:57:06 ERROR [py_clob_client_v2] request error: The read operation timed out",
    "norm": "ERROR [py_clob_client_v2] request error: The read operation timed out",
    "recent": [
-    1792768142.704825,
-    1792770662.9962916,
-    1792770783.036032
+    1792787254.872307,
+    1792788742.264018,
+    1792788742.264018,
+    1792788742.264018
    ],
    "action": null,
    "action_ts": null,
@@ -1963,17 +1996,22 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792779669.571179,
-   "count": 193,
+   "last": 1792788982.3517988,
+   "count": 206,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792776904.1279938,
-    1792776904.1279938,
-    1792778949.0724506,
-    1792779309.335004,
-    1792779669.571179,
-    1792779669.571179
+    1792785914.9614158,
+    1792785914.9614158,
+    1792788262.1135504,
+    1792788262.1135504,
+    1792788502.180285,
+    1792788622.2159371,
+    1792788622.2159371,
+    1792788742.264018,
+    1792788742.264018,
+    1792788742.264018,
+    1792788982.3517988
    ],
    "action": null,
    "action_ts": null,
@@ -2123,13 +2161,13 @@
   },
   "727577d69f4e": {
    "first": 1790495657.6745641,
-   "last": 1792697864.5282927,
-   "count": 48,
+   "last": 1792786035.4839497,
+   "count": 50,
    "sample": "2026-09-27 07:54:00 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +30% (n=190, trimmed +25%) · 200 yes +44% (n=256, trimmed +35%) · 150 yes +46% (n=294, trimmed +36%) · 100 YES +50% (n=339, trimmed +41%); backward replay (copy-and-hold at their pri",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
    "recent": [
-    1792697864.5282927,
-    1792697864.5282927
+    1792785914.9614158,
+    1792786035.4839497
    ],
    "action": null,
    "action_ts": null,
@@ -2138,13 +2176,14 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1792753639.2334669,
-   "count": 138,
+   "last": 1792786155.61398,
+   "count": 141,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1792753639.2334669,
-    1792753639.2334669
+    1792786035.4839497,
+    1792786155.61398,
+    1792786155.61398
    ],
    "action": null,
    "action_ts": null,
@@ -4207,6 +4246,35 @@
    "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Ops digest has gone stale. Last digest commit NNNT0N:N:NZ, now NNNT1N:N:NZ: about N hours N minutes w",
    "recent": [
     1792759880.6665907
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "e8c866ffa1ce": {
+   "first": 1792786155.61398,
+   "last": 1792786155.61398,
+   "count": 1,
+   "sample": "2026-10-23 20:08:02 INFO  [ops] floor_row: '0x9f15613e floor 200.0' -> 'floor 150.0 (moved)' | copies at $150: 300 yes +11% (n=535, trimmed +8%) · 200 yes +11% (n=617, trimmed +8%) · 150 YES +11% (n=699, trimmed +8%) · 100 no +10% (n=809, trimmed +8%); backward replay (copy-and-hold at their price, ",
+   "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "recent": [
+    1792786155.61398
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "d4fbacabb6af": {
+   "first": 1792787254.872307,
+   "last": 1792787254.872307,
+   "count": 2,
+   "sample": "2026-10-23 20:26:14 TRADE [DISARMED] would BUY $5.00 on 'LoL: Anyone's Legend vs Karmine Corp (BO' @ 0.7130 (from 0x154c...658e); the arm is off",
+   "norm": "TRADE [DISARMED] would BUY $N on 'S's Legend vs Karmine Corp (BO' @ N (from <hex>); the arm is off",
+   "recent": [
+    1792787254.872307,
+    1792787254.872307
    ],
    "action": null,
    "action_ts": null,
