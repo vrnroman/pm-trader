@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-24T12:42:07Z-be23",
-    "ts": 1792845727,
+    "id": "2026-10-24T18:42:12Z-5276",
+    "ts": 1792867332,
     "kind": "nothing",
-    "message": "Armed off since 2026-10-18 by owner choice, still off, digest fresh (committed 10:56:26Z), no spend today, no self-disarm or rearm-cap events, no new error pattern beyond the same long-running benign counters (404 price lookups, onchain poll resets, inventory 429s, AB-RACE snapshot send fails), 0x9f15613e still in form at net +4.2% (comfortably over its 53% break-even bar and the +2% net floor), no other in-form wallet showing current-day weakness, no prior ops bench still active to lift, no action needed.",
+    "message": "Armed off since 2026-10-18 by owner choice, still off, digest fresh (committed 18:07:56Z), no spend today, no self-disarm or re-arm-cap events, no new error pattern beyond the same long-running benign counters (404 price lookups, onchain poll resets, inventory 429s, Server disconnected, AB-RACE snapshot send fails), 0x9f15613e in form at net +5.0% (healthy margin over its 54% break-even bar, up from +4.2% last cycle), no in-form wallet showing current weakness, the 2026-10-22 ops bench on 0x9f15613e already lapsed on its own and its numbers have since recovered, no action needed.",
     "evidence": [
+        "# ops digest 2026-10-24T18:07:56.708863+00:00 (last 24h)",
         "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
         "## spend today: {\"date\": \"2026-10-24\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-23\", \"closed_reason\": \"\"}",
-        "in form  0x9f15613e: 316 settled, 57% won vs 53% needed, net +4.2% on $1,319,909, worst day -149,979, 9 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "# ops digest 2026-10-24T10:56:26.816382+00:00 (last 24h)",
-        "54ac26fb3ff1 x1774 last 0.4h ago [open: 1774 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}"
+        "in form  0x9f15613e: 308 settled, 58% won vs 54% needed, net +5.0% on $1,310,210, worst day -149,979, 9 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
+        "54ac26fb3ff1 x1812 last 0.5h ago [open: 1812 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}"
     ],
     "commit": null
 }
