@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-24T00:41:46Z-6765",
-    "ts": 1792802506,
+    "id": "2026-10-24T06:41:38Z-e640",
+    "ts": 1792824098,
     "kind": "nothing",
-    "message": "Armed off since 2026-10-18 by owner choice, digest fresh (committed 23:58:08Z), no spend today, no self-disarm or new error pattern (404/onchain/inventory errors are the same long-running benign counters), wallet 0x9f15613e still recovering (net -19.1% to +1.3% over the run), no action needed.",
+    "message": "Armed off since 2026-10-18 by owner choice, still off, digest fresh (committed 05:50:36Z), no spend today, no self-disarm or rearm-cap events, no new error pattern (404/onchain/inventory/network errors are the same long-running benign counters), wallet 0x9f15613e still recovering (net +1.3% to +5.3% over the run), no other in-form wallet showing current-day weakness, no action needed.",
     "evidence": [
         "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
-        "## spend today: {\"date\": \"2026-10-23\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-22\", \"closed_reason\": \"\"}",
-        "in form  0x9f15613e: 296 settled, 56% won vs 54% needed, net +1.3% on $1,190,254, worst day -149,979, 9 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "# ops digest 2026-10-23T23:58:08.363498+00:00 (last 24h)",
-        "54ac26fb3ff1 x1733 last 0.4h ago [open: 1733 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}"
+        "## spend today: {\"date\": \"2026-10-24\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-23\", \"closed_reason\": \"\"}",
+        "in form  0x9f15613e: 310 settled, 57% won vs 54% needed, net +5.3% on $1,283,313, worst day -149,979, 9 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
+        "# ops digest 2026-10-24T05:50:36.526900+00:00 (last 24h)",
+        "54ac26fb3ff1 x1753 last -0.0h ago [open: 1753 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}"
     ],
     "commit": null
 }
