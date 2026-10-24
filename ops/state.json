@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-24T16:56:09.950191+00:00",
+ "generated": "2026-10-24T18:08:55.321290+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -552,7 +552,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-23T12:42:18Z-2073",
-  "admit_scan_ts": 1792850802.06997,
+  "admit_scan_ts": 1792861730.0780315,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -1232,11 +1232,6 @@
   }
  ],
  "important": [
-  "2026-10-23 17:22:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-23 17:30:06 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-23 17:57:30 ERROR [inventory] API sync failed: ",
-  "2026-10-23 17:59:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-23 18:03:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-23 18:20:54 ERROR Network error fetching 0x9f15...bdb3: ",
   "2026-10-23 18:20:54 ERROR Network error fetching 0x09b0...a3b6: ",
   "2026-10-23 18:20:54 ERROR Network error fetching 0x1985...51ab: ",
@@ -1390,9 +1385,13 @@
   "2026-10-24 16:48:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 16:53:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-10-24 16:53:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-10-23 17:33:51 TRADE [DISARMED] would BUY $5.00 on 'Grizzlies vs. Warriors: O/U 237.5' @ 0.4930 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-23 17:34:20 TRADE [DISARMED] would BUY $5.00 on 'Grizzlies vs. Warriors: O/U 237.5' @ 0.4913 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-23 18:08:39 TRADE [DISARMED] would BUY $5.00 on 'LoL: Hanwha Life Esports vs Top Esports ' @ 0.7800 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-24 16:57:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-24 17:13:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-24 17:36:59 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-24 18:07:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-24 18:07:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-10-24 18:07:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-24 18:07:33 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
   "2026-10-23 18:14:12 TRADE [DISARMED] would BUY $5.00 on 'LoL: Hanwha Life Esports vs Top Esports ' @ 0.7900 (from 0x3d42...5bf3); the arm is off",
   "2026-10-23 18:20:44 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI - Game ' @ 0.4900 (from 0x154c...658e); the arm is off",
   "2026-10-23 18:20:50 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: Inner Circle vs HULIGANI - Game ' @ 0.4900 (from 0x154c...658e); the arm is off",
@@ -1444,7 +1443,15 @@
   "2026-10-24 15:08:23 TRADE [DISARMED] would BUY $5.00 on 'Counter-Strike: Legacy vs Nemiga - Map 2' @ 0.3905 (from 0xc402...c7f1); the arm is off",
   "2026-10-24 15:49:05 TRADE [DISARMED] would BUY $5.00 on 'Counter-Strike: G2 vs Natus Vincere (BO3' @ 0.4400 (from 0xc402...c7f1); the arm is off",
   "2026-10-24 16:53:46 TRADE [DISARMED] would BUY $5.00 on 'Will Villarreal CF win on 2026-10-24?' @ 0.4800 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-24 16:55:00 TRADE [DISARMED] would BUY $5.00 on 'LoL: Top Esports vs Anyone's Legend (BO1' @ 0.6400 (from 0x3d42...5bf3); the arm is off"
+  "2026-10-24 16:55:00 TRADE [DISARMED] would BUY $5.00 on 'LoL: Top Esports vs Anyone's Legend (BO1' @ 0.6400 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-24 17:10:20 TRADE [DISARMED] would BUY $5.00 on 'UFC 333: Aaron Pico vs. Losene Keita (Fe' @ 0.5600 (from 0x28ef...ff5e); the arm is off",
+  "2026-10-24 17:13:14 TRADE [DISARMED] would BUY $5.00 on 'UFC 333: Alexander Volkov vs. Rizvan Kun' @ 0.5500 (from 0x28ef...ff5e); the arm is off",
+  "2026-10-24 17:14:22 TRADE [DISARMED] would BUY $5.00 on 'UFC 333: Ramazan Temirov vs. Lone'er Kav' @ 0.5200 (from 0x28ef...ff5e); the arm is off",
+  "2026-10-24 17:19:01 TRADE [DISARMED] would BUY $5.00 on 'BV Borussia 09 Dortmund vs. Eintracht Fr' @ 0.8752 (from 0xd47e...4e60); the arm is off",
+  "2026-10-24 17:20:19 TRADE [DISARMED] would BUY $5.00 on 'Chelsea FC vs. Tottenham Hotspur FC: O/U' @ 0.8314 (from 0xd47e...4e60); the arm is off",
+  "2026-10-24 17:34:36 TRADE [DISARMED] would BUY $5.00 on 'Counter-Strike: G2 vs Natus Vincere (BO3' @ 0.3000 (from 0xc402...c7f1); the arm is off",
+  "2026-10-24 17:50:13 TRADE [DISARMED] would BUY $5.00 on 'Spread: Spurs (-13.5)' @ 0.5200 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-24 18:07:35 TRADE [DISARMED] would BUY $5.00 on 'Will Tottenham Hotspur FC win on 2026-10' @ 0.8304 (from 0x0011...4333); the arm is off"
  ],
  "watcher": [
   {
@@ -1505,6 +1512,34 @@
    "concluded": "Slice healthy, bot paper 6 days; harness PR blocked because no repo is mounted in the analyst box this cycle, only logs.",
    "did": "2 proposal(s): noted; noted",
    "cost_usd": 0.772079
+  },
+  {
+   "ts": 1792861018.3758852,
+   "day": "2026-10-24",
+   "woke_because": "e73bec8b337c",
+   "fingerprint": "e73bec8b337c",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "This is the disarm path working as designed: the arm has been off since 2026-10-18 by owner request (reason: pause real money, -15% on 20 live bets), and the bot correctly logged that it would BUY $5 on a LoL esports market but placed nothing because the arm is off. It is a new fingerprint only because the market name string 'Anyone's Legend (BO1' is new; it is the same pattern as the existing 84e240524773 (238 hits) and d4fbacabb6af. Today's bot log shows 30 DISARMED/live-refused lines, in line with prior days (55, 32, 27, 29, 42), and zero ARMED or real-buy lines in bot-2026-10-24.log. No re",
+   "confidence": 0.97,
+   "cost_usd": 0.23087000000000002,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1792862151.619453,
+   "day": "2026-10-24",
+   "woke_because": "509256811c0d",
+   "fingerprint": "509256811c0d",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The new fingerprint is a DISARMED would-buy line whose only novelty is a new market name string ('UFC 333: Ramazan Temirov vs. Lone'er Kav'), so it hashed to a fresh id. The arm has been off since the owner paused real money on 2026-10-18, and this line is the arm gate doing its job: the bot wanted to place a $5 copy and did not. The important log for today shows 33 such DISARMED would-buy lines across many wallets (0x3d42, 0x0011, 0x28ef, 0xd47e, 0xc402), all ending 'the arm is off', which proves the disarm is holding and no real order went out. The source wallet 0x28ef is benched and its pap",
+   "confidence": 0.95,
+   "cost_usd": 0.365562,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
   }
  ],
  "fingerprints": {
@@ -1739,20 +1774,17 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792860538.2882414,
-   "count": 1809,
+   "last": 1792863531.0010612,
+   "count": 1812,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792857536.965491,
-    1792857897.7217352,
-    1792858737.7857995,
-    1792858977.876496,
-    1792859337.9666033,
-    1792859337.9666033,
     1792859938.0966353,
     1792860178.1487591,
-    1792860538.2882414
+    1792860538.2882414,
+    1792861191.5027692,
+    1792862031.6055627,
+    1792863531.0010612
    ],
    "action": null,
    "action_ts": null,
@@ -1803,13 +1835,15 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1792860898.3440037,
-   "count": 149,
+   "last": 1792865331.129796,
+   "count": 153,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1792860898.3440037,
-    1792860898.3440037
+    1792865331.129796,
+    1792865331.129796,
+    1792865331.129796,
+    1792865331.129796
    ],
    "action": null,
    "action_ts": null,
@@ -2086,12 +2120,13 @@
   },
   "41cab7e764a5": {
    "first": 1790351832.0916538,
-   "last": 1792860898.3440037,
-   "count": 54,
+   "last": 1792865331.129796,
+   "count": 56,
    "sample": "2026-09-25 15:57:06 ERROR [py_clob_client_v2] request error: The read operation timed out",
    "norm": "ERROR [py_clob_client_v2] request error: The read operation timed out",
    "recent": [
-    1792860898.3440037
+    1792865331.129796,
+    1792865331.129796
    ],
    "action": null,
    "action_ts": null,
@@ -2161,12 +2196,18 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792860898.3440037,
-   "count": 238,
+   "last": 1792865331.129796,
+   "count": 245,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792860898.3440037
+    1792861911.5566902,
+    1792862031.6055627,
+    1792862450.855312,
+    1792862450.855312,
+    1792863290.9560812,
+    1792864251.0603018,
+    1792865331.129796
    ],
    "action": null,
    "action_ts": null,
@@ -4434,6 +4475,34 @@
    "recent": [
     1792787254.872307,
     1792787254.872307
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "e73bec8b337c": {
+   "first": 1792861018.3758852,
+   "last": 1792861018.3758852,
+   "count": 1,
+   "sample": "2026-10-24 16:55:00 TRADE [DISARMED] would BUY $5.00 on 'LoL: Top Esports vs Anyone's Legend (BO1' @ 0.6400 (from 0x3d42...5bf3); the arm is off",
+   "norm": "TRADE [DISARMED] would BUY $N on 'S's Legend (BO1' @ N (from <hex>); the arm is off",
+   "recent": [
+    1792861018.3758852
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "509256811c0d": {
+   "first": 1792862151.619453,
+   "last": 1792862151.619453,
+   "count": 1,
+   "sample": "2026-10-24 17:14:22 TRADE [DISARMED] would BUY $5.00 on 'UFC 333: Ramazan Temirov vs. Lone'er Kav' @ 0.5200 (from 0x28ef...ff5e); the arm is off",
+   "norm": "TRADE [DISARMED] would BUY $N on 'S'er Kav' @ N (from <hex>); the arm is off",
+   "recent": [
+    1792862151.619453
    ],
    "action": null,
    "action_ts": null,
