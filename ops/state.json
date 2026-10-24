@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-24T10:57:02.280032+00:00",
+ "generated": "2026-10-24T13:37:28.881070+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -273,9 +273,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792752511.0248647,
-    "n_acts": 759,
-    "n_resolved_markets": 355,
+    "ts": 1792839839.9184048,
+    "n_acts": 774,
+    "n_resolved_markets": 359,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -411,9 +411,9 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792752511.0248647,
+    "ts": 1792839839.9184048,
     "n_acts": 4000,
-    "n_resolved_markets": 439,
+    "n_resolved_markets": 437,
     "era": 1784976482.215206,
     "bars": {
      "min_n": 15,
@@ -422,27 +422,27 @@
     },
     "at": {
      "300": {
-      "n": 93,
-      "roi": 0.0738,
-      "trimmed": 0.0184,
+      "n": 90,
+      "roi": 0.0726,
+      "trimmed": 0.0152,
       "ok": false
      },
      "200": {
-      "n": 147,
-      "roi": 0.0723,
-      "trimmed": 0.029,
+      "n": 144,
+      "roi": 0.0714,
+      "trimmed": 0.0272,
       "ok": false
      },
      "150": {
-      "n": 191,
-      "roi": 0.0278,
-      "trimmed": -0.0107,
+      "n": 189,
+      "roi": 0.0273,
+      "trimmed": -0.0116,
       "ok": false
      },
      "100": {
-      "n": 227,
-      "roi": 0.0597,
-      "trimmed": 0.0027,
+      "n": 224,
+      "roi": 0.0402,
+      "trimmed": -0.01,
       "ok": false
      }
     },
@@ -460,7 +460,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-23T12:42:18Z-2073",
-  "admit_scan_ts": 1792828897.6795914,
+  "admit_scan_ts": 1792839834.7798874,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -883,15 +883,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1792759847.8645542,
-   "day": "2026-10-23",
-   "kind": "escalation_delivered",
-   "before": "routine escalation",
-   "after": "sent",
-   "detail": "Ops digest has gone stale. Last digest commit 2026-10-23T07:29:59Z, now 2026-10-23T12:42:18Z: about 5 hours 12 minutes w",
-   "push": "BOT"
-  },
-  {
    "ts": 1792785292.5434914,
    "day": "2026-10-23",
    "kind": "floor_row",
@@ -1028,24 +1019,35 @@
    "fails": [
     "does not lose at the prices we would really pay"
    ]
+  },
+  {
+   "ts": 1792839839.9184048,
+   "day": "2026-10-24",
+   "kind": "floor_row",
+   "before": "0x28ef6f21 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no -0% (n=157, trimmed -3%) · 200 no +2% (n=194, trimmed -1%) · 150 no +3% (n=256, trimmed -1%) · 100 no +5% (n=317, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x28ef6f21a99d56b9d8a4a7c56ea56e624064ff5e",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
+  },
+  {
+   "ts": 1792839839.9184048,
+   "day": "2026-10-24",
+   "kind": "floor_row",
+   "before": "0x9f6a4549 floor global",
+   "after": "floor global (same)",
+   "detail": "no floor clears the bars, global floor stays: 300 no +7% (n=90, trimmed +2%) · 200 no +7% (n=144, trimmed +3%) · 150 no +3% (n=189, trimmed -1%) · 100 no +4% (n=224, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0x9f6a4549f14154a7f2c74d03efd8de903a61eb61",
+   "floor_before": null,
+   "floor_after": null,
+   "live": false
   }
  ],
  "important": [
-  "2026-10-23 11:02:00 ERROR Network error fetching 0xd970...bbba: Server disconnected without sending a response.",
-  "2026-10-23 11:04:07 ERROR Network error fetching 0x3d42...5bf3: ",
-  "2026-10-23 11:04:08 ERROR Network error fetching 0x9f6a...eb61: ",
-  "2026-10-23 11:04:08 ERROR Network error fetching 0x0011...4333: ",
-  "2026-10-23 11:04:08 ERROR Network error fetching 0xd970...bbba: ",
-  "2026-10-23 11:05:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-23 11:05:50 INFO  [ops] floor_row: '0x28ef6f21 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -0% (n=157, trimmed -3%) · 200 no +2% (n=194, trimmed -1%) · 150 no +3% (n=256, trimmed -1%) · 100 no +5% (n=317, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-23 11:06:13 INFO  [ops] floor_row: '0x9f6a4549 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +7% (n=93, trimmed +2%) · 200 no +7% (n=147, trimmed +3%) · 150 no +3% (n=191, trimmed -1%) · 100 no +6% (n=227, trimmed +0%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-23 11:10:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-23 11:10:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-23 11:37:31 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-10-23 12:23:17 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
-  "2026-10-23 12:50:48 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest has gone stale. Last digest commit 2026-10-23T07:29:59Z, now 2026-10-23T12:42:18Z: about 5 hours 12 minutes w",
-  "2026-10-23 12:52:11 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-23 13:29:47 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-23 14:02:41 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
   "2026-10-23 14:29:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-23 14:29:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1165,6 +1167,17 @@
   "2026-10-24 10:04:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 10:18:43 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 10:29:26 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-24 11:06:05 INFO  [ops] floor_row: '0x28ef6f21 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -0% (n=157, trimmed -3%) · 200 no +2% (n=194, trimmed -1%) · 150 no +3% (n=256, trimmed -1%) · 100 no +5% (n=317, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-24 11:06:19 INFO  [ops] floor_row: '0x9f6a4549 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +7% (n=90, trimmed +2%) · 200 no +7% (n=144, trimmed +3%) · 150 no +3% (n=189, trimmed -1%) · 100 no +4% (n=224, trimmed -1%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-24 11:07:04 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-24 11:08:25 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-24 11:49:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-24 11:54:02 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-24 11:58:57 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-24 12:04:32 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-24 12:14:09 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-24 12:29:57 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
+  "2026-10-24 13:10:28 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-23 14:41:17 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: BetBoom Team vs Astra Invicta - ' @ 0.6000 (from 0x154c...658e); the arm is off",
   "2026-10-23 15:49:56 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: BetBoom Team vs Astra Invicta - ' @ 0.6289 (from 0x154c...658e); the arm is off",
   "2026-10-23 15:50:44 TRADE [DISARMED] would BUY $5.00 on 'Dota 2: BetBoom Team vs Astra Invicta - ' @ 0.6200 (from 0x154c...658e); the arm is off",
@@ -1202,23 +1215,13 @@
   "2026-10-24 01:33:05 TRADE [DISARMED] would BUY $5.00 on 'Pelicans vs. Jazz' @ 0.5100 (from 0x3d42...5bf3); the arm is off",
   "2026-10-24 02:51:29 TRADE [DISARMED] would BUY $5.00 on 'Club Necaxa vs. FC Juárez: O/U 2.5' @ 0.6305 (from 0x0011...4333); the arm is off",
   "2026-10-24 04:01:48 TRADE [DISARMED] would BUY $5.00 on 'Spread: Arsenal FC (-1.5)' @ 0.3900 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-24 05:05:01 ERROR Network error fetching 0xeef6...cd4c: Server disconnected without sending a response."
+  "2026-10-24 05:05:01 ERROR Network error fetching 0xeef6...cd4c: Server disconnected without sending a response.",
+  "2026-10-24 11:57:29 TRADE [DISARMED] would BUY $5.00 on 'Will Manchester City FC win on 2026-10-2' @ 0.4100 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-24 11:57:50 TRADE [DISARMED] would BUY $5.00 on 'Will Aston Villa FC vs. Manchester City ' @ 0.2500 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-24 12:03:30 TRADE [DISARMED] would BUY $5.00 on 'Lyon Open: Flavio Cobolli vs Lorenzo Mus' @ 0.5600 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-24 12:41:18 TRADE [DISARMED] would BUY $5.00 on 'Erste Bank Open, Qualification: Alex Mol' @ 0.5900 (from 0x3d42...5bf3); the arm is off"
  ],
  "watcher": [
-  {
-   "ts": 1792759880.6665907,
-   "day": "2026-10-23",
-   "woke_because": "6b39481d7b71",
-   "fingerprint": "6b39481d7b71",
-   "kind": "nothing",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "An external Ops digest commit stopped refreshing at 07:29:59Z and the bot's liveness check fired a routine escalation that it already delivered to the owner ('routine escalation' -> 'sent'). This is an ops reporting artifact, not the money path; 'digest' appears once in today's bot log and that single line is the escalation itself. The same digest-stale escalation self-delivered on Oct 6, 7, 8 and 9, so the mechanism is working as designed. The bot is healthy with 631 lines in the last 60 min, chain reader last good read -3s ago at lag 0 blocks, and inventory syncing. Real money is already dis",
-   "confidence": 0.82,
-   "cost_usd": 0.39970150000000004,
-   "did": "nothing",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1792786155.61398,
    "day": "2026-10-23",
@@ -1510,16 +1513,13 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792837835.982809,
-   "count": 1774,
+   "last": 1792847443.282692,
+   "count": 1780,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792834474.380138,
-    1792836274.8836837,
-    1792836274.8836837,
-    1792837235.5960484,
-    1792837835.982809
+    1792844079.215842,
+    1792847443.282692
    ],
    "action": null,
    "action_ts": null,
@@ -1909,13 +1909,13 @@
   },
   "1bd07071cf73": {
    "first": 1790364989.5143719,
-   "last": 1792772703.4877224,
-   "count": 99,
+   "last": 1792845040.0118372,
+   "count": 103,
    "sample": "2026-09-25 19:35:34 ERROR Onchain poll error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))",
    "norm": "ERROR Onchain poll error: ('S', RemoteDisconnected('S'))",
    "recent": [
-    1792772463.3303678,
-    1792772703.4877224
+    1792843478.4700232,
+    1792845040.0118372
    ],
    "action": null,
    "action_ts": null,
@@ -1938,12 +1938,15 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792814557.1660798,
-   "count": 216,
+   "last": 1792845761.7180316,
+   "count": 220,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792814557.1660798
+    1792843118.3689365,
+    1792843118.3689365,
+    1792843478.4700232,
+    1792845761.7180316
    ],
    "action": null,
    "action_ts": null,
@@ -2108,14 +2111,13 @@
   },
   "7dfc4a226f73": {
    "first": 1790495881.4863753,
-   "last": 1792786155.61398,
-   "count": 141,
+   "last": 1792839996.242665,
+   "count": 143,
    "sample": "2026-09-27 07:56:06 INFO  [ops] floor_row: '0x3f3aa700 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=385, trimmed -4%) · 200 no +0% (n=439, trimmed -2%) · 150 no +0% (n=461, trimmed -2%) · 100 no +1% (n=498, trimmed -1%); backward replay (copy-a",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first ent",
    "recent": [
-    1792786035.4839497,
-    1792786155.61398,
-    1792786155.61398
+    1792839996.242665,
+    1792839996.242665
    ],
    "action": null,
    "action_ts": null,
