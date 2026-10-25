@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-24T18:42:12Z-5276",
-    "ts": 1792867332,
+    "id": "2026-10-25T00:42:08Z-55ef",
+    "ts": 1792888928,
     "kind": "nothing",
-    "message": "Armed off since 2026-10-18 by owner choice, still off, digest fresh (committed 18:07:56Z), no spend today, no self-disarm or re-arm-cap events, no new error pattern beyond the same long-running benign counters (404 price lookups, onchain poll resets, inventory 429s, Server disconnected, AB-RACE snapshot send fails), 0x9f15613e in form at net +5.0% (healthy margin over its 54% break-even bar, up from +4.2% last cycle), no in-form wallet showing current weakness, the 2026-10-22 ops bench on 0x9f15613e already lapsed on its own and its numbers have since recovered, no action needed.",
+    "message": "Armed off since 2026-10-18 by owner choice, still off. No spend today, no self-disarm, no re-arm cap hit, no guard failure. Daily line sent for 2026-10-24. Same long-running benign errors persist (404 price lookups, server disconnects, 429s). All set Z wallets' form stable: 0x9f15613e recovered to net +7.4% from +5.0% last cycle, 0x3d42e45c thinnest at net +3.3% with no losing streak. No action needed.",
     "evidence": [
-        "# ops digest 2026-10-24T18:07:56.708863+00:00 (last 24h)",
+        "# ops digest 2026-10-25T00:08:41.635396+00:00 (last 24h)",
         "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
         "## spend today: {\"date\": \"2026-10-24\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-23\", \"closed_reason\": \"\"}",
-        "in form  0x9f15613e: 308 settled, 58% won vs 54% needed, net +5.0% on $1,310,210, worst day -149,979, 9 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "54ac26fb3ff1 x1812 last 0.5h ago [open: 1812 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}"
+        "in form  0x9f15613e: 327 settled, 59% won vs 54% needed, net +7.4% on $1,542,920, worst day -149,979, 9 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
+        "in form  0x3d42e45c: 145 settled, 59% won vs 54% needed, net +3.3% on $257,017, worst day -18,471, 0 of 13 exits under 10 min"
     ],
     "commit": null
 }
