@@ -130,9 +130,10 @@ def build_prompt(item, candidates: Iterable, freshness_by_token: Mapping[str, An
         f"probability by at least {MATERIAL_POINTS} points from the quotes shown. Old news, rumours "
         "already reflected in the price, vague commentary, or an item that fits no candidate -> "
         "material=false with market_id=null.",
-        "- outcome_index is the outcome the item makes MORE likely; direction is \"yes\" when a trader "
-        "should buy that outcome, \"no\" when the item makes it LESS likely. market_id and "
-        "outcome_index must come from the list above.",
+        "- outcome_index is the outcome to BUY: the one the item makes MORE likely. direction is "
+        "\"yes\" for that outcome; answer \"no\" only if you name the outcome the item makes LESS "
+        "likely, and then the other outcome is bought. market_id and outcome_index must come from "
+        "the list above.",
         "- implied_prob: your probability (0..1) that the chosen outcome resolves YES after this item. "
         "confidence: 0..1 in your own call. already_priced: true if the quotes already reflect the item.",
         "- Do not use tools or search. Answer with ONLY this JSON object, no prose, no code fences:",
@@ -243,6 +244,19 @@ def validate_judgement(data: Mapping[str, Any], candidates: Iterable) -> dict | 
         return None
     if material and (market_id is None or outcome_index is None or direction is None):
         return None
+    # "This outcome, direction no" means buy the other side. The runner buys
+    # outcome_index as given, so a "no" is turned into the complement here:
+    # the backtest of 2026-10-25 bought YES on "Eby next Premier" from a
+    # "Conservatives win a landslide" flash with implied_prob 0.02.
+    if direction == "no" and outcome_index is not None and market_id is not None:
+        outs = by_id[market_id].outcomes
+        if len(outs) == 2:
+            outcome_index = 1 - outcome_index
+            direction = "yes"
+            if implied is not None:
+                implied = round(1.0 - implied, 4)
+        elif material:
+            return None    # no single complement to buy
     return {
         "material": material, "market_id": market_id, "outcome_index": outcome_index,
         "direction": direction, "implied_prob": implied, "confidence": confidence,

@@ -258,3 +258,11 @@ def test_an_answer_naming_the_list_position_maps_to_that_market():
 def test_the_prompt_carries_no_list_numbers():
     p = build_prompt(Item(), CANDS, FRESH)
     assert "[1]" not in p and f"market_id={CANDS[0].market_id}" in p
+
+
+def test_direction_no_buys_the_other_outcome():
+    # backtest 2026-10-25: "Conservatives win a landslide" -> YES on "Eby next Premier", implied 0.02
+    v = validate_judgement({**GOOD, "outcome_index": 0, "direction": "no", "implied_prob": 0.02}, CANDS)
+    assert v["outcome_index"] == 1 and v["direction"] == "yes" and v["implied_prob"] == 0.98
+    same = validate_judgement({**GOOD, "outcome_index": 1, "direction": "yes", "implied_prob": 0.98}, CANDS)
+    assert same["outcome_index"] == 1 and same["implied_prob"] == 0.98
