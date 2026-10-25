@@ -19,6 +19,17 @@ from __future__ import annotations
 
 import os
 
+# freezegun's start() walks every loaded module with dir(); dateutil's own
+# __dir__ iterates its package globals, and a dateutil submodule imported
+# lazily at that moment (pandas and requests both do it on first use) adds
+# a key under the iteration: "dictionary changed size during iteration" at
+# the fixture's setup, once per full run, never alone (2026-10-25, the news
+# bot's 200 tests moved the timing). Import them up front so nothing is
+# left to add later.
+import dateutil.parser  # noqa: F401
+import dateutil.relativedelta  # noqa: F401
+import dateutil.tz  # noqa: F401
+
 import pytest
 
 _DAYS = float(os.environ.get("CLOCK_DRIFT_DAYS", "0") or 0)
