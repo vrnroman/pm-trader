@@ -17,6 +17,7 @@ import os
 import re
 import threading
 from dataclasses import asdict, dataclass, field
+import unicodedata
 from typing import Iterable, Optional
 
 from src.logger import logger
@@ -29,8 +30,14 @@ _STOP = {"the", "and", "for", "with", "will", "that", "this", "from", "have", "h
          "polymarket", "odds", "win", "wins", "2026", "october", "november", "december"}
 
 
+def fold(text: str) -> str:
+    """Strip accents so "Vučić" and "Vucic" are one word; without it the
+    tokenizer split the Serbian PM's name into nothing (2026-10-25 election)."""
+    return "".join(ch for ch in unicodedata.normalize("NFKD", text or "") if not unicodedata.combining(ch))
+
+
 def tokens(text: str) -> set:
-    return {w for w in _WORD.findall((text or "").lower()) if w not in _STOP}
+    return {w for w in _WORD.findall(fold(text).lower()) if w not in _STOP}
 
 
 def stems(text: str) -> set:
@@ -52,7 +59,10 @@ _GENERIC = {"will", "president", "minister", "prime", "government", "senate", "c
             "october", "november", "december", "january", "february", "march", "april", "may",
             "june", "july", "august", "september", "monday", "tuesday", "wednesday", "thursday",
             "friday", "saturday", "sunday", "before", "after", "between", "above", "below", "over",
-            "under", "up", "down", "win", "lose", "the", "and", "or", "of", "in", "on", "at", "by"}
+            "under", "up", "down", "win", "lose", "the", "and", "or", "of", "in", "on", "at", "by",
+            # title-case question words ("Which Bloc Wins More Seats?" matched a
+            # JPMorgan headline on "More", 2026-10-25)
+            "more", "most", "less", "other", "any", "which", "best", "exact", "total", "wins", "seats"}
 
 
 def proper_stems(text: str) -> set:
@@ -61,7 +71,7 @@ def proper_stems(text: str) -> set:
     MARKET question, whose casing is reliable; a lowercase tweet still matches
     when it shares that stem (verifier, 2026-10-25: "starlink" was dropped and
     "*PRESIDENT TO ADDRESS NATION*" was matched)."""
-    return {w[:5].lower() for w in _CAPWORD.findall(text or "") if w.lower() not in _GENERIC}
+    return {w[:5].lower() for w in _CAPWORD.findall(fold(text)) if w.lower() not in _GENERIC}
 
 
 def overlap(a: str, b: str) -> int:
@@ -76,6 +86,18 @@ def overlap(a: str, b: str) -> int:
     if proper:
         return max(2, len(shared))
     return min(1, len(shared))
+
+
+def explains(item_text: str, question: str) -> bool:
+    """The stricter bar for pinning a price jump on a headline, which the
+    tape-first book then trades with no model in the loop: at least two shared
+    stems, one of them a proper noun of the market. One shared entity is enough
+    to ASK the judge about an item (``overlap``), never to claim it moved the
+    price: on the 2026-10-25 replay every one-stem attribution was wrong (an
+    Israel-Hebron story for the Israel election bloc market, a JPMorgan story
+    via "More", an Algerian parliament story via "parliamentary vote")."""
+    shared = stems(item_text) & stems(question)
+    return len(shared) >= 2 and bool(shared & proper_stems(question))
 
 
 def ledger_dir() -> str:
@@ -194,10 +216,11 @@ class LeadLedger:
         published_ts, title, text, id, source) published in the ``lookback_s``
         before the jump (and up to 2 min after, for a source that posts the
         move itself). ``pick(jump, candidates) -> item | None`` is the LLM
-        when given; without it the best token overlap wins (>= 2 tokens)."""
+        when given; without it the best token overlap wins. A candidate must
+        clear ``explains``, the two-stem bar, not the judge's one-entity bar."""
         cands = [it for it in items
                  if jump.ts - lookback_s <= float(getattr(it, "published_ts", 0) or 0) <= jump.ts + 120
-                 and overlap(jump.question, f"{getattr(it, 'title', '')} {getattr(it, 'text', '')}") >= 2]
+                 and explains(f"{getattr(it, 'title', '')} {getattr(it, 'text', '')}", jump.question)]
         jump.candidates_n = len(cands)
         chosen = None
         if cands:

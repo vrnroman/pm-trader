@@ -282,3 +282,22 @@ def test_overlap_matches_demonyms_and_single_proper_nouns():
     # two common words shared are not a match either
     assert leads.overlap("Underdog promo code: play $10, get $50 on the game tonight", "Will the game go to overtime tonight?") <= 1
     assert leads.overlap("Fanatics promo for Chiefs vs Seahawks", "Chiefs vs. Seahawks: O/U 47.5") >= 2, "the market's teams are proper nouns"
+
+
+def test_explains_needs_two_stems_and_a_market_entity_2026_10_25_replay():
+    # the four attributions the live box made on the Serbian/Israeli election day
+    assert not leads.explains("JPMorgan's Private Bank Using AI to Make Advisers More Efficient",
+                              "Israel Election: Which Bloc Wins More Seats?")
+    assert not leads.explains("Why Israel's latest assault on Hebron is so significant for the West Bank",
+                              "Israel Election: Which Bloc Wins More Seats?"), "one shared entity is not an explanation"
+    assert not leads.explains("Algerian parliament's upper house approves troop deployment to Niger",
+                              "Will US win 45-50% of the vote in the 2026 Serbian parliamentary election?")
+    # the real story does explain the market, accents and all
+    assert leads.explains("Serbia's student protesters take on Vučić at the polls",
+                          "Will Aleksandar Vučić be the next Prime Minister of Serbia?")
+    assert leads.explains("Vucic concedes as Serbia counts", "Will Aleksandar Vučić be the next Prime Minister of Serbia?")
+
+
+def test_fold_strips_accents_so_names_tokenize():
+    assert "vucic" in leads.tokens("Aleksandar Vučić")
+    assert "vucic" in leads.proper_stems("Will Aleksandar Vučić win?")
