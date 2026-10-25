@@ -342,3 +342,13 @@ def test_a_flash_naming_only_the_markets_person_reaches_the_judge_round4():
     # the item has to write the name as a name
     assert leads.overlap("the bolsonaro of it all, says columnist about Brazilian football", "Will Jair Bolsonaro win the 2026 Brazil runoff?") >= 2, "a lowercase item carries no casing"
     assert leads.overlap("Weekend: the hegseth farm reopens. Visitors welcome", "Pete Hegseth out as Secretary of Defense by October 31?") <= 1
+
+
+def test_a_surname_beside_another_name_is_someone_else_round5():
+    assert leads.overlap("Martin Scorsese new film premieres", "Will Margo Martin be the next White House Press Secretary?") <= 1
+    assert leads.overlap("Harris County flooding closes roads", "Will Kamala Harris win the 2028 Democratic nomination?") <= 1
+    assert leads.overlap("Angel Reese blocks influencer", "Will Karen Bass win the 2026 Los Angeles mayoral election?") <= 1
+    # the market's own first name beside the surname is the same person
+    assert leads.overlap("Pete Hegseth resigns", "Pete Hegseth out as Secretary of Defense by October 31?") >= 2
+    assert leads.overlap("Kamala Harris endorses Newsom", "Will Kamala Harris win the 2028 Democratic nomination?") >= 2
+    assert leads.overlap("Hegseth resigns, White House says", "Pete Hegseth out as Secretary of Defense by October 31?") >= 2

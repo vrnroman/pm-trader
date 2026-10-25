@@ -471,3 +471,18 @@ def test_the_boot_line_in_news_mode_says_paper_and_never_copy_live(monkeypatch):
 def test_main_sends_the_shared_boot_line():
     src = open(os.path.join(os.path.dirname(__file__), "..", "main.py"), encoding="utf-8").read()
     assert "telegram_bot.startup_text()" in src and "<b>Bot Started</b>" not in src
+
+
+def test_a_denial_is_never_a_repeat_and_link_digits_are_no_count(rig, monkeypatch):
+    # verifier round 5: "confirms" then "denies" within 30 min was skipped
+    r, sent = rig
+    r.hourly_cap = 10
+    calls = []
+    fake = _fake_claude(material=False, market=None, idx=None)
+    monkeypatch.setattr(judge_mod, "run_claude", lambda p, **kw: calls.append(1) or fake(p, **kw))
+    r.process_item(_item(i="k1", title="Anthropic confirms IPO plan, Dario says"), now=1700.0)
+    r.process_item(_item(i="k2", title="Anthropic denies IPO plan, Dario says"), now=1710.0)
+    assert len(calls) == 2
+    # the same story with only a different link is a repeat
+    r.process_item(_item(i="k3", title="Anthropic denies IPO plan, Dario says https://bloom.bg/5080001"), now=1720.0)
+    assert len(calls) == 2 and sum(r.day_repeat.values()) == 1

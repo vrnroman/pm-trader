@@ -43,6 +43,22 @@ from src.newsbot.tape import clob_ws, jumps as jumps_mod, livedata
 
 
 _NUM = re.compile(r"\d+(?:[.,:]\d+)?")  # numbers in an item; a changed count is news
+_URL = re.compile(r"https?://\S+|\b\S+\.(?:com|org|net|io|co|news)/\S*")
+# A reversal of a report on the same markets is the item that moves the
+# price: "Kremlin denies Putin-Trump summit" right after "confirms" is no
+# repeat (verifier round 5, 2026-10-25).
+_REVERSAL = {"deny", "denies", "denied", "no", "not", "never", "refuse", "refuses", "refused",
+             "reject", "rejects", "rejected", "false", "fake", "cancel", "cancels", "cancelled",
+             "canceled", "postpone", "postponed", "postpones", "confirm", "confirms", "confirmed",
+             "withdraw", "withdraws", "withdrew", "retract", "retracts", "deny", "dismiss", "dismisses"}
+
+
+def _signals(text: str) -> tuple[frozenset, frozenset]:
+    """The numbers (links stripped first: their digits are no count) and the
+    reversal words of an item, the two things that make a near-duplicate news."""
+    bare = _URL.sub(" ", text or "")
+    words = {w for w in re.findall(r"[a-z']+", bare.lower())}
+    return frozenset(_NUM.findall(bare)), frozenset(words & _REVERSAL)
 
 def _env(name: str, default):
     raw = os.environ.get(name, "")
@@ -267,8 +283,9 @@ class Runner:
             return None
         item_stems = leads_mod.stems(text)
         cand_ids = {str(c.market_id) for c in cands}
-        item_nums = frozenset(_NUM.findall(text))
-        if item.source != "owner" and self._is_repeat(item_stems, cand_ids, now, item_nums=item_nums):
+        item_nums, item_rev = _signals(text)
+        if item.source != "owner" and self._is_repeat(item_stems, cand_ids, now, item_nums=item_nums,
+                                                      item_rev=item_rev):
             self.day_repeat[day] = self.day_repeat.get(day, 0) + 1
             return None
         hour = time.strftime("%Y-%m-%dT%H", time.gmtime(now))
@@ -301,7 +318,7 @@ class Runner:
         if j is None:
             return None
         self.day_judged[day] = self.day_judged.get(day, 0) + 1
-        self.judged_recent.append((now, frozenset(item_stems), frozenset(cand_ids), item_nums))
+        self.judged_recent.append((now, frozenset(item_stems), frozenset(cand_ids), item_nums, item_rev))
         if j.material:
             self.day_material[day] = self.day_material.get(day, 0) + 1
         if not j.material or j.market_id is None or j.outcome_index is None:
@@ -466,14 +483,15 @@ class Runner:
         return n
 
     def _is_repeat(self, item_stems: set, cand_ids: set, now: float, window_s: float = 1800.0,
-                   min_jaccard: float = 0.5, item_nums: frozenset = frozenset()) -> bool:
+                   min_jaccard: float = 0.5, item_nums: frozenset = frozenset(),
+                   item_rev: frozenset = frozenset()) -> bool:
         """Mostly the same words on the same markets inside the window. Items
         whose numbers differ are never repeats: a running count ("Lula 50.8%
         with 62% counted" then "49.6% with 92%") is the news (verifier round 4)."""
-        for ts, st, ids, nums in reversed(self.judged_recent):
+        for ts, st, ids, nums, rev in reversed(self.judged_recent):
             if now - ts > window_s:
                 break
-            if not (ids & cand_ids) or not st or nums != item_nums:
+            if not (ids & cand_ids) or not st or nums != item_nums or rev != item_rev:
                 continue
             union = len(st | item_stems)
             if union and len(st & item_stems) / union >= min_jaccard:

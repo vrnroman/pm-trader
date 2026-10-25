@@ -99,6 +99,26 @@ def person_stems(text: str) -> set:
     return out
 
 
+def _other_name_beside(item: str, stem: str, market: str) -> bool:
+    """The item puts a different capitalised word right beside the surname:
+    "Martin Scorsese" is not Margo Martin, "Harris County" not Kamala
+    Harris, "Los Angeles" not Karen Bass's city (verifier round 5). Words
+    the market itself carries ("Pete Hegseth") or generic ones do not count."""
+    t = fold(item)
+    market_stems = {w[:5].lower() for w in _CAPWORD.findall(fold(market))}
+    words = re.findall(r"[A-Za-z]+", t)
+    for i, w in enumerate(words):
+        if w[:5].lower() != stem or not w[:1].isupper():
+            continue
+        for j in (i - 1, i + 1):
+            if 0 <= j < len(words):
+                n = words[j]
+                if (n[:1].isupper() and len(n) >= 3 and not n.isupper()
+                        and n.lower() not in _GENERIC and n[:5].lower() not in market_stems):
+                    return True
+    return False
+
+
 def _capitalised_in(text: str, stem: str) -> bool:
     """The item writes the name with a capital, or carries no casing at all
     (an ALL-CAPS wire flash, a lowercase tweet)."""
@@ -125,7 +145,8 @@ def overlap(a: str, b: str) -> int:
         return 0
     if shared & proper_stems(b) and len(shared) >= 2:
         return len(shared)
-    if any(_capitalised_in(a, st) for st in shared & person_stems(b)):
+    if any(_capitalised_in(a, st) and not _other_name_beside(a, st, b)
+           for st in shared & person_stems(b)):
         return 2
     return 1
 
