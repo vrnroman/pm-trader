@@ -237,7 +237,9 @@ jobs:
           # this container. Copy threads are not started; the live guard and
           # the redeemer keep booking the positions the copy era still holds.
           sed -i '/^NEWS_MODE=/d' .env
-          ensure_env NEWS_MODE 1
+          # The value is the literal "true": config._opt_bool accepts nothing else
+          # (the first deploy wrote 1 and the copy bot started as before, 2026-10-25).
+          ensure_env NEWS_MODE true
           ensure_env NEWS_STAKE_USD 5
           ensure_env NEWS_JUDGE_MODEL claude-sonnet-5-5
           ensure_env NEWS_LLM_DAILY_BUDGET 300

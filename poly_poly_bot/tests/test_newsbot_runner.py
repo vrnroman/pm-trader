@@ -261,3 +261,17 @@ def test_an_owner_forward_explains_a_dark_jump_and_the_brief_says_so(rig, monkey
     assert j.owner_explained and j.owner_late_s == pytest.approx((base + 150 + 1800) - j.ts, abs=1.0)
     text = r.report_text(now=base + 4000)
     assert "explained later by owner 1" in text and "watched 1" in text
+
+
+def test_deploy_sets_news_mode_in_the_form_config_reads(monkeypatch):
+    """Guard the production call site: the deploy file's value must parse to
+    True through config._opt_bool, which accepts only the literal "true". The
+    first deploy wrote 1 and the copy bot started as before (2026-10-25)."""
+    import re
+    from src import config as cfg
+    src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
+    m = re.search(r"ensure_env NEWS_MODE (\S+)", src)
+    assert m, "deploy.yml must set NEWS_MODE"
+    monkeypatch.setenv("NEWS_MODE", m.group(1))
+    assert cfg._opt_bool("NEWS_MODE", False) is True
+    assert "sed -i '/^NEWS_MODE=/d' .env" in src, "a stale value in the secret must not win"
