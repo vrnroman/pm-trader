@@ -112,8 +112,10 @@ def build_prompt(item, candidates: Iterable, freshness_by_token: Mapping[str, An
         "of each outcome's token; tape is the price-feed verdict for that token: fresh = no "
         "recent move, moving = a move is under way now, late = it already moved, unknown = no tape)",
     ]
-    for n, c in enumerate(cands, 1):
-        lines.append(f"[{n}] market_id={c.market_id} | event: {c.event_title or '-'} | "
+    for c in cands:
+        # No "[n]" list numbers: on 2026-10-25 the model answered market_id
+        # "1" (the label) for the day's only material call and it was lost.
+        lines.append(f"- market_id={c.market_id} | event: {c.event_title or '-'} | "
                      f"question: {c.question} | ends {_iso(c.end_ts)}"
                      + (" | SPORTS" if getattr(c, "is_sports", False) else ""))
         for i, outcome in enumerate(c.outcomes):
@@ -198,6 +200,7 @@ def validate_judgement(data: Mapping[str, Any], candidates: Iterable) -> dict | 
     """DESIGN.md's schema, or None. A non-material answer needs only a sane
     confidence; a material one must name a candidate we offered and one of its
     outcomes, with a direction."""
+    candidates = list(candidates)
     by_id = {str(c.market_id): c for c in candidates}
     material = _as_bool(data.get("material"))
     if material is None:
@@ -221,7 +224,12 @@ def validate_judgement(data: Mapping[str, Any], candidates: Iterable) -> dict | 
         return None
 
     if market_id is not None and market_id not in by_id:
-        return None
+        # An answer that names a list position instead of the id ("1" for the
+        # first market) is mapped when it is in range and no real id.
+        if market_id.isdigit() and 1 <= int(market_id) <= len(candidates):
+            market_id = str(candidates[int(market_id) - 1].market_id)
+        else:
+            return None
     if outcome_index is not None:
         if isinstance(outcome_index, bool) or not isinstance(outcome_index, (int, float, str)):
             return None

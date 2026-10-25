@@ -500,3 +500,15 @@ def test_package_exports_the_public_surface():
 
     assert tape.TradeBuckets is TradeBuckets and tape.QuoteBook is QuoteBook and tape.JumpDetector is JumpDetector
     assert jumps.Jump is tape.Jump
+
+
+def test_a_jump_needs_money_and_trades_behind_it():
+    # bid-ask bounce on $60 is not a move (verifier round 3, 2026-10-25)
+    b = TradeBuckets(window_min=60)
+    b.add(_trade(0.20, 100, T0 + 10, cid="thin"))
+    b.add(_trade(0.40, 100, T0 + 70, cid="thin"))     # $20 + $40, two trades
+    for k in range(4):
+        b.add(_trade(0.40 + 0.03 * k, 200, T0 + 10 + k * 20))   # $80+ each, four trades
+    det = JumpDetector(b, jump_cents=8, window_min=10, min_trades=3, min_notional=150)
+    found = {j.condition_id for j in det.scan(T0 + 100)}
+    assert found == {CID} and det.below_bar == 1

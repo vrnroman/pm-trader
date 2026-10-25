@@ -38,6 +38,7 @@ class JumpDetector:
         window_min: int,
         exclude: Callable[[str], bool] = lambda cid: False,
         min_trades: int = 2,
+        min_notional: float = 0.0,
         max_tracked: int = 20_000,
     ) -> None:
         if jump_cents <= 0 or window_min < 1:
@@ -49,6 +50,11 @@ class JumpDetector:
         # A single print cannot be a move; two is the floor for first != last
         # to mean anything (a sample count counts independent observations).
         self.min_trades = int(min_trades)
+        # Bid-ask bounce on a thin book is not a move: the Student List 50%
+        # market "jumped" five times in 40 minutes between 0.2 and 0.4 on
+        # $60-130 a window, the Israel bloc market +14c on two trades and $12.
+        self.min_notional = float(min_notional)
+        self.below_bar = 0  # windows over the cents bar but under the money or trade bar
         self.max_tracked = int(max_tracked)
         self._fired: OrderedDict[str, float] = OrderedDict()  # cid -> ts reported
         self.reported = 0
@@ -67,10 +73,13 @@ class JumpDetector:
             if self.in_cooldown(cid, now):
                 continue
             w = self.buckets.window(cid, self.window_min, now)
-            if w is None or w.n < self.min_trades:
+            if w is None:
                 continue
             delta = w.delta_cents
             if abs(delta) < self.jump_cents:
+                continue
+            if w.n < self.min_trades or w.notional < self.min_notional:
+                self.below_bar += 1
                 continue
             if self.exclude(cid):
                 self.excluded += 1

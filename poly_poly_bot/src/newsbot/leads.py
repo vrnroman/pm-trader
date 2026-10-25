@@ -27,7 +27,10 @@ _STOP = {"the", "and", "for", "with", "will", "that", "this", "from", "have", "h
          "was", "were", "been", "its", "than", "then", "into", "over", "after", "before",
          "about", "says", "said", "new", "news", "breaking", "update", "report", "reports",
          "market", "markets", "price", "yes", "not", "who", "what", "when", "where", "which",
-         "polymarket", "odds", "win", "wins", "2026", "october", "november", "december"}
+         "polymarket", "odds", "win", "wins", "2026", "october", "november", "december",
+         # carry no topic: "More" in a title-case question matched any story (2026-10-25)
+         "more", "most", "less", "jan", "feb", "mar", "apr", "jun", "jul", "aug", "sep", "sept",
+         "oct", "nov", "dec", "may"}
 
 
 def fold(text: str) -> str:
@@ -62,7 +65,9 @@ _GENERIC = {"will", "president", "minister", "prime", "government", "senate", "c
             "under", "up", "down", "win", "lose", "the", "and", "or", "of", "in", "on", "at", "by",
             # title-case question words ("Which Bloc Wins More Seats?" matched a
             # JPMorgan headline on "More", 2026-10-25)
-            "more", "most", "less", "other", "any", "which", "best", "exact", "total", "wins", "seats"}
+            "more", "most", "less", "other", "any", "which", "best", "exact", "total", "wins", "seats",
+            "jan", "feb", "mar", "apr", "jun", "jul", "aug", "sep", "sept", "oct", "nov", "dec",
+            "ever", "nothing", "happens", "list", "social", "winter", "summer", "spring", "fall"}
 
 
 def proper_stems(text: str) -> set:
@@ -77,15 +82,17 @@ def proper_stems(text: str) -> set:
 def overlap(a: str, b: str) -> int:
     """Shared stems between an item ``a`` and a market ``b``, scored for the
     relevance bar: a shared stem that is a proper noun of the market counts as
-    two on its own (the one entity the market is about), common words alone
-    count one each and never clear the bar by themselves."""
+    toward the bar only with a second shared stem beside it, and common words
+    alone never clear it. The verifier's audit (2026-10-25) found half the
+    day's judge calls spent on one shared capitalised word: "Social" (Truth
+    Social) for a Social Security scam, "Florida" for a WWE arrest, "Winter"
+    for daylight saving."""
     shared = stems(a) & stems(b)
     if not shared:
         return 0
-    proper = shared & proper_stems(b)
-    if proper:
-        return max(2, len(shared))
-    return min(1, len(shared))
+    if shared & proper_stems(b) and len(shared) >= 2:
+        return len(shared)
+    return 1
 
 
 def explains(item_text: str, question: str) -> bool:
@@ -97,7 +104,11 @@ def explains(item_text: str, question: str) -> bool:
     Israel-Hebron story for the Israel election bloc market, a JPMorgan story
     via "More", an Algerian parliament story via "parliamentary vote")."""
     shared = stems(item_text) & stems(question)
-    return len(shared) >= 2 and bool(shared & proper_stems(question))
+    names = proper_stems(question)
+    # Every name the market has, up to two, must be in the item: "Student
+    # List" was explained by "student protests across France" and the Israel
+    # bloc market by any Israel story (verifier round 3, 2026-10-25).
+    return len(shared) >= 2 and len(shared & names) >= min(2, max(1, len(names)))
 
 
 def ledger_dir() -> str:
@@ -232,7 +243,7 @@ class LeadLedger:
                     logger.warn(f"[news-leads] pick failed, falling back to overlap: {exc}")
                     chosen = None
             if chosen is None and pick is None:
-                chosen = max(cands, key=lambda it: (overlap(jump.question, f"{getattr(it, 'title', '')} {getattr(it, 'text', '')}"),
+                chosen = max(cands, key=lambda it: (overlap(f"{getattr(it, 'title', '')} {getattr(it, 'text', '')}", jump.question),
                                                     -float(getattr(it, "published_ts", 0) or 0)))
                 jump.judged_by = "overlap"
         if chosen is None:

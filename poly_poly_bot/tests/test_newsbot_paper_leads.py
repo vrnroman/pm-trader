@@ -271,12 +271,18 @@ def test_summary_sd_is_the_standard_error_of_the_mean(book):
 
 def test_overlap_matches_demonyms_and_single_proper_nouns():
     assert leads.overlap("Melania Trump says secured ceasefire in Ukrainian city of Oleshky", "Russia x Ukraine ceasefire") >= 2
-    assert leads.overlap("Zelenskiy: Starlink restrictions completely removed", "Will Starlink restore service in Ukraine?") >= 2
-    assert leads.overlap("Brazilian voters head to the polls", "Will Lula win Brazil's election?") >= 2
+    # One shared name alone no longer clears the bar: half of a day's judge
+    # calls went to "Social", "Florida", "Winter" (verifier round 3). The cost
+    # is this one: the item names Starlink but shares no second word.
+    assert leads.overlap("Zelenskiy: Starlink restrictions completely removed", "Will Starlink restore service in Ukraine?") <= 1
+    assert leads.overlap("Starlink restores service across Ukraine", "Will Starlink restore service in Ukraine?") >= 2
+    assert leads.overlap("Lula leads in Brazil's first count", "Will Lula win Brazil's election?") >= 2
+    # a preview naming only the country is left to the stale and judge bars no longer
+    assert leads.overlap("Brazilian voters head to the polls", "Will Lula win Brazil's election?") <= 1
     assert leads.overlap("Jets vs. Dolphins: preview, prediction, what to watch", "Will Macron remain president?") == 0
     assert leads.overlap("a game preview tonight", "Will the game be postponed?") <= 1, "a common word alone is not a match"
     # lowercase tweet, the market carries the casing
-    assert leads.overlap("zelenskiy: starlink restrictions completely removed", "Will Starlink restore service in Ukraine?") >= 2
+    assert leads.overlap("starlink restores service across ukraine", "Will Starlink restore service in Ukraine?") >= 2
     # an ALL-CAPS wire headline brings no proper nouns of its own
     assert leads.overlap("*WHITE HOUSE: PRESIDENT TO ADDRESS NATION TONIGHT*", "Will the President of France resign?") <= 1
     # two common words shared are not a match either
@@ -301,3 +307,22 @@ def test_explains_needs_two_stems_and_a_market_entity_2026_10_25_replay():
 def test_fold_strips_accents_so_names_tokenize():
     assert "vucic" in leads.tokens("Aleksandar Vučić")
     assert "vucic" in leads.proper_stems("Will Aleksandar Vučić win?")
+
+
+def test_round3_junk_no_longer_clears_the_judges_bar():
+    assert leads.overlap("Fake Social Security statement email hides a scam",
+                         "Will Trump post 100+ times on Truth Social this week?") <= 1
+    assert leads.overlap("WWE star arrested for DUI in Florida", "Who will win the Florida governor race?") <= 1
+    assert leads.overlap("Daylight saving ends: clocks go back as winter nears", "Will Ofer Winter be the next IDF chief?") <= 1
+    assert leads.overlap("Fed holds rates as Hormuz tension rises, Oct 28 meeting", "Fed decision in Oct?") <= 1
+
+
+def test_round3_attributions_are_rejected_and_the_real_ones_kept():
+    q_list = "Will the Student List win 40-45% of the vote in the 2026 Serbian parliamentary election?"
+    assert not leads.explains("The week in pictures: student protests across France and Brazilian elections", q_list)
+    q_bloc = "Israel Election: Which Bloc Wins More Seats?"
+    assert not leads.explains("Israel: Demonstrators rally against government ahead of election", q_bloc)
+    assert not leads.explains("Élections en Israël : le racisme s'est intensifié", q_bloc)
+    q_turn = "Will voter turnout in the 2026 Serbian parliamentary election be 70% or more?"
+    assert leads.explains("Serbia: National parliament election Turnout at 1:00 PM CET 2026: 41.10% CRTA", q_turn)
+    assert leads.explains("Student List leads in Serbia's first count", q_list)

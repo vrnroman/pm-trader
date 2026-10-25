@@ -119,7 +119,8 @@ def gist(stats: dict, books: dict, today: dict) -> str:
     lead = a.get("lead_median_s")
     extras = [f"{today['stale']} stale" if today.get("stale") else "",
               f"{today['unmatched']} no market" if today.get("unmatched") else "",
-              f"{today['paced']} paced" if today.get("paced") else ""]
+              f"{today['paced']} paced" if today.get("paced") else "",
+              f"{today['repeat']} repeat" if today.get("repeat") else ""]
     extras = [e for e in extras if e]
     stale = f" ({', '.join(extras)} skipped)" if extras else ""
     judged = f"{today.get('judged', 0)} judged, {today.get('material', 0)} material, " if today.get("judged") is not None else ""

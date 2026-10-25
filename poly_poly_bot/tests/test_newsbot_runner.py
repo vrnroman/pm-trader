@@ -8,6 +8,7 @@ where a ``now`` is supplied.
 
 import json
 import threading
+import time
 
 import pytest
 
@@ -295,7 +296,8 @@ def test_the_hourly_cap_paces_the_budget_but_not_the_owner(rig, monkeypatch):
     r.hourly_cap = 1
     monkeypatch.setattr(judge_mod, "run_claude", _fake_claude())
     assert r.process_item(_item(i="h1"), now=1700.0) is not None
-    assert r.process_item(_item(i="h2"), now=1710.0) is None and sum(r.day_paced.values()) == 1
+    assert r.process_item(_item(i="h2", title="Anthropic delays IPO to 2027 amid market slump"), now=1710.0) is None
+    assert sum(r.day_paced.values()) == 1
     mine = Item(id="own9", source="owner", domains=("corp",), published_ts=1700.0, seen_ts=1700.0,
                 title="Anthropic to announce IPO, Dario says", text="", url="")
     assert r.process_item(mine, now=1720.0) is not None, "the owner's forward is never paced"
@@ -371,7 +373,7 @@ def test_gist_counts_judged_and_material(rig, monkeypatch):
     monkeypatch.setattr(judge_mod, "run_claude", _fake_claude())
     r.process_item(_item(i="j1"), now=1700.0)
     monkeypatch.setattr(judge_mod, "run_claude", _fake_claude(material=False, market=None, idx=None))
-    r.process_item(_item(i="j2", title="Anthropic to announce IPO soon says CEO"), now=1710.0)
+    r.process_item(_item(i="j2", title="Anthropic delays IPO to 2027 amid market slump"), now=1710.0)
     assert "2 judged, 1 material" in r.report_text(now=1800.0)
 
 
@@ -401,3 +403,34 @@ def test_owner_credential_sources_run_only_when_their_keys_exist(rig, monkeypatc
         await asyncio.gather(*tasks)
         return tasks
     assert len(asyncio.run(one_on())) >= 1 and started == ["tgm"]
+
+
+def test_the_same_story_from_another_source_is_not_judged_twice(rig, monkeypatch):
+    # the Saudi intercept was judged three times on 2026-10-25 (verifier round 3)
+    r, sent = rig
+    r.hourly_cap = 10
+    calls = []
+    fake = _fake_claude(material=False, market=None, idx=None)
+    monkeypatch.setattr(judge_mod, "run_claude", lambda p, **kw: calls.append(1) or fake(p, **kw))
+    r.process_item(_item(i="s1", title="Anthropic to announce IPO, Dario says"), now=1700.0)
+    r.process_item(_item(i="s2", src="rss:cnbc-top", title="Anthropic to announce IPO soon, Dario says"), now=1710.0)
+    assert len(calls) == 1 and sum(r.day_repeat.values()) == 1
+    # a different story on the same market is judged
+    r.process_item(_item(i="s3", title="Anthropic delays IPO to 2027 amid market slump"), now=1720.0)
+    assert len(calls) == 2
+    # and the same story half an hour later is judged again
+    later = Item(id="s4", source="bsky:reuters.com", domains=("corp",), published_ts=3495.0, seen_ts=3500.0,
+                 title="Anthropic to announce IPO, Dario says", text="", url="https://x")
+    r.process_item(later, now=1700.0 + 1801)
+    assert len(calls) == 3
+
+
+def test_the_days_funnel_counts_survive_a_restart(rig, monkeypatch):
+    r, sent = rig
+    r.hourly_cap = 10
+    monkeypatch.setattr(judge_mod, "run_claude", _fake_claude(material=False, market=None, idx=None))
+    r.process_item(_item(i="d1"), now=1700.0)
+    r._save_day(now=1800.0)
+    again = runner_mod.Runner(threading.Event())
+    day = time.strftime("%Y-%m-%d", time.gmtime(1700.0))
+    assert again.day_judged.get(day) == 1 and again.day_items.get(day) == 1

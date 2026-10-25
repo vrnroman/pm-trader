@@ -246,3 +246,15 @@ def test_judge_llm_ms_falls_back_to_measured_when_envelope_lacks_it():
         return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(env), stderr="")
     j = judge(Item(), CANDS, FRESH, budget=Budget(), model="m", runner=runner, now=NOW)
     assert j is not None and isinstance(j.llm_ms, int) and j.llm_ms >= 0
+
+
+def test_an_answer_naming_the_list_position_maps_to_that_market():
+    # 2026-10-25: the day's only material call came back as market_id "1"
+    v = validate_judgement({**GOOD, "market_id": "1"}, CANDS)
+    assert v is not None and v["market_id"] == str(CANDS[0].market_id)
+    assert validate_judgement({**GOOD, "market_id": str(len(CANDS) + 1)}, CANDS) is None
+
+
+def test_the_prompt_carries_no_list_numbers():
+    p = build_prompt(Item(), CANDS, FRESH)
+    assert "[1]" not in p and f"market_id={CANDS[0].market_id}" in p

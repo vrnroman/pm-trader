@@ -101,7 +101,9 @@ class Runner:
         self.buckets = livedata.TradeBuckets()
         self.comments = livedata.CommentCounter()
         self.jumps = jumps_mod.JumpDetector(self.buckets, jump_cents=self.jump_cents,
-                                            window_min=self.jump_window_min, exclude=self._exclude_cid)
+                                            window_min=self.jump_window_min, exclude=self._exclude_cid,
+                                            min_trades=int(_env("NEWS_JUMP_MIN_TRADES", 3)),
+                                            min_notional=float(_env("NEWS_JUMP_MIN_USD", 150)))
         self.leads = leads_mod.LeadLedger(os.path.join(d, "leads.jsonl"))
         self.budget = llm_mod.DailyBudget(os.path.join(d, "llm-budget.json"),
                                           int(_env("NEWS_LLM_DAILY_BUDGET", 300)))
@@ -127,6 +129,16 @@ class Runner:
         self.last_item_ts = 0.0
         self.hwm = {"watch": 0, "recent": 0, "queue": 0}
         self._cid_cache: dict = {}
+        # The same story from three sources was judged three times (the Saudi
+        # intercept, 2026-10-25). A judged item is remembered for 30 minutes;
+        # a later item with mostly the same words on the same markets is not
+        # judged again.
+        self.judged_recent: collections.deque = collections.deque(maxlen=400)
+        self.day_repeat: dict[str, int] = {}
+        # The day's funnel counts survive a restart; seven restarts on
+        # 2026-10-25 left the brief's counts unreadable (verifier round 3).
+        self._day_path = os.path.join(d, "day-counters.json")
+        self._load_day()
         _register(self)
 
     # ---- ladders for the paper books: the socket's book, else one REST read ----
@@ -250,6 +262,11 @@ class Runner:
         if not cands:
             self.day_unmatched[day] = self.day_unmatched.get(day, 0) + 1
             return None
+        item_stems = leads_mod.stems(text)
+        cand_ids = {str(c.market_id) for c in cands}
+        if item.source != "owner" and self._is_repeat(item_stems, cand_ids, now):
+            self.day_repeat[day] = self.day_repeat.get(day, 0) + 1
+            return None
         hour = time.strftime("%Y-%m-%dT%H", time.gmtime(now))
         if self.hour_calls.get(hour, 0) >= self.hourly_cap and item.source != "owner":
             self.day_paced[day] = self.day_paced.get(day, 0) + 1
@@ -280,6 +297,7 @@ class Runner:
         if j is None:
             return None
         self.day_judged[day] = self.day_judged.get(day, 0) + 1
+        self.judged_recent.append((now, frozenset(item_stems), frozenset(cand_ids)))
         if j.material:
             self.day_material[day] = self.day_material.get(day, 0) + 1
         if not j.material or j.market_id is None or j.outcome_index is None:
@@ -443,6 +461,44 @@ class Runner:
                 logger.warn(f"[news] settle failed for {b.book}: {exc}")
         return n
 
+    def _is_repeat(self, item_stems: set, cand_ids: set, now: float, window_s: float = 1800.0,
+                   min_jaccard: float = 0.5) -> bool:
+        for ts, st, ids in reversed(self.judged_recent):
+            if now - ts > window_s:
+                break
+            if not (ids & cand_ids) or not st:
+                continue
+            union = len(st | item_stems)
+            if union and len(st & item_stems) / union >= min_jaccard:
+                return True
+        return False
+
+    _DAY_FIELDS = ("day_items", "day_stale", "day_unmatched", "day_paced", "day_judged", "day_material",
+                   "day_repeat")
+
+    def _load_day(self) -> None:
+        try:
+            with open(self._day_path, encoding="utf-8") as f:
+                data = json.load(f)
+        except (OSError, ValueError):
+            return
+        for name in self._DAY_FIELDS:
+            row = data.get(name)
+            if isinstance(row, dict):
+                getattr(self, name).update({str(k): int(v) for k, v in row.items() if isinstance(v, (int, float))})
+
+    def _save_day(self, now: Optional[float] = None) -> None:
+        now = time.time() if now is None else now
+        keep = {time.strftime("%Y-%m-%d", time.gmtime(now - 86400 * i)) for i in range(3)}
+        data = {name: {k: v for k, v in getattr(self, name).items() if k in keep} for name in self._DAY_FIELDS}
+        try:
+            tmp = self._day_path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(data, f)
+            os.replace(tmp, self._day_path)
+        except OSError as exc:
+            logger.warn(f"[news] day counters not saved: {exc}")
+
     def _load_recent(self) -> list:
         out = []
         try:
@@ -513,7 +569,8 @@ class Runner:
         day = time.strftime("%Y-%m-%d", time.gmtime(now))
         today = {"items": self.day_items.get(day, 0), "stale": self.day_stale.get(day, 0),
                  "unmatched": self.day_unmatched.get(day, 0), "paced": self.day_paced.get(day, 0),
-                 "judged": self.day_judged.get(day, 0), "material": self.day_material.get(day, 0)}
+                 "judged": self.day_judged.get(day, 0), "material": self.day_material.get(day, 0),
+                 "repeat": self.day_repeat.get(day, 0)}
         llm = {"today": self.budget.count_today(), "limit": self.budget.limit,
                "exhausted": self.budget.count_today() >= self.budget.limit}
         return brief_mod.brief_text(stats=stats, books=books, today=today, roster=self.counters.snapshot(),
@@ -587,11 +644,12 @@ class Runner:
                 self.counters.save(now)
                 self.dedup.save()
                 self._save_recent()
+                self._save_day(now)
                 if now - last_hwm > 3600:
                     last_hwm = now
                     logger.info(f"[news] high-water: watch {self.hwm['watch']} tokens, recent {self.hwm['recent']} "
                                 f"items, queue {self.hwm['queue']}, buckets {len(list(self.buckets.keys()))} markets, "
-                                f"llm {self.budget.count_today()}/{self.budget.limit}")
+                                f"llm {self.budget.count_today()}/{self.budget.limit}, jumps under the money bar {self.jumps.below_bar}")
             except Exception as exc:  # noqa: BLE001
                 logger.warn(f"[news] periodic failed: {exc}")
             try:
