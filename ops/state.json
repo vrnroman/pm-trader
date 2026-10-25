@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25T21:47:37.113868+00:00",
+ "generated": "2026-10-25T23:31:14.827049+00:00",
  "money": {
   "cash": 129.784219,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1792964783.272366,
+  "ts": 1792970891.686711,
   "day": "2026-10-25"
  },
  "arm": {
@@ -1430,18 +1430,6 @@
   }
  ],
  "important": [
-  "2026-10-24 21:49:00 ERROR [inventory] API sync failed: Server disconnected without sending a response.",
-  "2026-10-24 21:54:31 ERROR [inventory] API sync failed: ",
-  "2026-10-24 22:05:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 22:05:18 ERROR [inventory] API sync failed: ",
-  "2026-10-24 23:13:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 23:15:02 ERROR Network error fetching 0x28ef...ff5e: Server disconnected without sending a response.",
-  "2026-10-24 23:17:53 ERROR Network error fetching 0x1985...51ab: ",
-  "2026-10-24 23:17:53 ERROR Network error fetching 0x28ef...ff5e: ",
-  "2026-10-24 23:17:53 ERROR Network error fetching 0xeef6...cd4c: ",
-  "2026-10-24 23:17:53 ERROR [inventory] API sync failed: ",
-  "2026-10-24 23:17:54 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
-  "2026-10-24 23:17:54 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
   "2026-10-25 00:11:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-25 00:24:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-25 00:42:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1551,10 +1539,6 @@
   "2026-10-25 20:34:01 INFO  [ops] floor_row: '0x9f15613e floor 300.0' -> 'floor 200.0 (moved)' | copies at $200: 300 yes +14% (n=475, trimmed +11%) · 200 YES +15% (n=535, trimmed +12%) · 150 yes +14% (n=596, trimmed +12%) · 100 yes +13% (n=673, trimmed +11%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-25 20:34:16 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=155, trimmed -7%) · 200 no -2% (n=251, trimmed -4%) · 150 no -4% (n=309, trimmed -6%) · 100 no -3% (n=372, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-25 21:15:49 INFO  [ops] form: '0xd47e7b93 in form' -> 'benched' | 0xd47e7b93: 45 settled, 82% won vs 73% needed, net +0.1% on $36,419, worst day -5,490, 0 of 9 exits under 10 min",
-  "2026-10-24 21:55:34 TRADE [DISARMED] would BUY $5.00 on 'CR Vasco da Gama vs. SC Corinthians Paul' @ 0.6300 (from 0xd47e...4e60); the arm is off",
-  "2026-10-24 21:57:13 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Jenson Brooksby vs Gabriel D' @ 0.7100 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-24 21:57:35 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Jenson Brooksby vs Gabriel D' @ 0.7100 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-24 21:58:10 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Jenson Brooksby vs Gabriel D' @ 0.7200 (from 0x3d42...5bf3); the arm is off",
   "2026-10-25 00:13:08 TRADE [DISARMED] would BUY $5.00 on 'Spread: Steelers (-2.5)' @ 0.5600 (from 0x28ef...ff5e); the arm is off",
   "2026-10-25 00:18:51 TRADE [DISARMED] would BUY $5.00 on 'Spread: Browns (-2.5)' @ 0.5200 (from 0x28ef...ff5e); the arm is off",
   "2026-10-25 00:20:49 TRADE [DISARMED] would BUY $5.00 on 'Spread: Bengals (-2.5)' @ 0.4700 (from 0x28ef...ff5e); the arm is off",
