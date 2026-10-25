@@ -352,3 +352,15 @@ def test_a_surname_beside_another_name_is_someone_else_round5():
     assert leads.overlap("Pete Hegseth resigns", "Pete Hegseth out as Secretary of Defense by October 31?") >= 2
     assert leads.overlap("Kamala Harris endorses Newsom", "Will Kamala Harris win the 2028 Democratic nomination?") >= 2
     assert leads.overlap("Hegseth resigns, White House says", "Pete Hegseth out as Secretary of Defense by October 31?") >= 2
+
+
+def test_wire_flash_formats_keep_the_person_round6():
+    q = "Pete Hegseth out as Secretary of Defense by October 31?"
+    for h in ("Trump: Hegseth resigns", "Pentagon: Hegseth resigns", "Hegseth Resigns", "Trump Fires Hegseth"):
+        assert leads.overlap(h, q) >= 2, h
+    assert leads.overlap("Globo: Bolsonaro concedes", "Will Jair Bolsonaro win the 2026 Brazil runoff?") >= 2
+    assert leads.overlap("Netanyahu Concedes Defeat", "Will Benjamin Netanyahu be the next Prime Minister of Israel?") >= 2
+    assert leads.overlap("Vucic Declares Victory", "Will Aleksandar Vučić be the next Prime Minister of Serbia?") >= 2
+    # the collisions stay out
+    assert leads.overlap("Martin Scorsese new film premieres", "Will Margo Martin be the next White House Press Secretary?") <= 1
+    assert leads.overlap("Harris County flooding closes roads", "Will Kamala Harris win the 2028 Democratic nomination?") <= 1

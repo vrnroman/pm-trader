@@ -43,7 +43,7 @@ from src.newsbot.tape import clob_ws, jumps as jumps_mod, livedata
 
 
 _NUM = re.compile(r"\d+(?:[.,:]\d+)?")  # numbers in an item; a changed count is news
-_URL = re.compile(r"https?://\S+|\b\S+\.(?:com|org|net|io|co|news)/\S*")
+_URL = re.compile(r"https?://\S+|\b\S+\.(?:com|org|net|io|co|news)/\S*|\(\?[^)]*\)|%[0-9A-Fa-f]{2}")
 # A reversal of a report on the same markets is the item that moves the
 # price: "Kremlin denies Putin-Trump summit" right after "confirms" is no
 # repeat (verifier round 5, 2026-10-25).
@@ -51,6 +51,16 @@ _REVERSAL = {"deny", "denies", "denied", "no", "not", "never", "refuse", "refuse
              "reject", "rejects", "rejected", "false", "fake", "cancel", "cancels", "cancelled",
              "canceled", "postpone", "postponed", "postpones", "confirm", "confirms", "confirmed",
              "withdraw", "withdraws", "withdrew", "retract", "retracts", "deny", "dismiss", "dismisses"}
+
+
+def _tg_post_key(item) -> Optional[str]:
+    src = str(getattr(item, "source", "") or "")
+    if not (src.startswith("tg:") or src.startswith("tgm:")):
+        return None
+    parts = str(getattr(item, "id", "")).split(":")
+    if len(parts) < 3 or not parts[-1].isdigit():
+        return None
+    return f"tgpost:{parts[1].lower()}:{parts[-1]}"
 
 
 def _signals(text: str) -> tuple[frozenset, frozenset]:
@@ -253,6 +263,13 @@ class Runner:
     def process_item(self, item: Item, now: Optional[float] = None) -> Optional[dict]:
         now = time.time() if now is None else now
         self.last_item_ts = now
+        # One Telegram post reaches us twice when a channel is read by both the
+        # web preview (tg:) and the owner's client (tgm:): Europe Elects post
+        # 25592 became two paper rows on 2026-10-25 (verifier round 6). The
+        # channel and message number are the post; the route is not.
+        post = _tg_post_key(item)
+        if post is not None and not self.dedup.add(post):
+            return None
         day = time.strftime("%Y-%m-%d", time.gmtime(now))
         self.day_items[day] = self.day_items.get(day, 0) + 1
         self.recent.append(item)

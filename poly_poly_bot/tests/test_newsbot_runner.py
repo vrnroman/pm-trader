@@ -486,3 +486,20 @@ def test_a_denial_is_never_a_repeat_and_link_digits_are_no_count(rig, monkeypatc
     # the same story with only a different link is a repeat
     r.process_item(_item(i="k3", title="Anthropic denies IPO plan, Dario says https://bloom.bg/5080001"), now=1720.0)
     assert len(calls) == 2 and sum(r.day_repeat.values()) == 1
+
+
+def test_one_telegram_post_read_by_both_routes_is_one_item(rig, monkeypatch):
+    # Europe Elects 25592 came in as tg: and tgm: and was paper-traded twice
+    r, sent = rig
+    r.hourly_cap = 10
+    calls = []
+    fake = _fake_claude(material=False, market=None, idx=None)
+    monkeypatch.setattr(judge_mod, "run_claude", lambda p, **kw: calls.append(1) or fake(p, **kw))
+    web = Item(id="tg:europeelects:25592", source="tg:europeelects", domains=("corp",), published_ts=1690.0,
+               seen_ts=1695.0, title="Anthropic IPO priced (?q=%23IPO)", text="", url="")
+    client = Item(id="tgm:europeelects:25592", source="tgm:europeelects", domains=("corp",), published_ts=1690.0,
+                  seen_ts=1700.0, title="Anthropic IPO priced", text="", url="")
+    r.process_item(web, now=1700.0)
+    assert r.process_item(client, now=1710.0) is None
+    assert len(calls) == 1 and sum(r.day_items.values()) == 1
+    assert runner_mod._signals("Turnout 46.53% (?q=%23Serbia)")[0] == runner_mod._signals("Turnout 46.53%")[0]

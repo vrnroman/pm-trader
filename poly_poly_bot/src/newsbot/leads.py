@@ -102,21 +102,38 @@ def person_stems(text: str) -> set:
 def _other_name_beside(item: str, stem: str, market: str) -> bool:
     """The item puts a different capitalised word right beside the surname:
     "Martin Scorsese" is not Margo Martin, "Harris County" not Kamala
-    Harris, "Los Angeles" not Karen Bass's city (verifier round 5). Words
-    the market itself carries ("Pete Hegseth") or generic ones do not count."""
+    Harris (verifier round 5). Only a neighbour joined by a plain space
+    counts: "Trump: Hegseth resigns" is a source and a name. A title-case
+    or ALL-CAPS item carries no casing to read, so it is never blocked here
+    ("Hegseth Resigns", round 6). Words the market itself carries ("Pete
+    Hegseth") or generic ones do not count."""
     t = fold(item)
+    if _title_case(t):
+        return False
     market_stems = {w[:5].lower() for w in _CAPWORD.findall(fold(market))}
-    words = re.findall(r"[A-Za-z]+", t)
-    for i, w in enumerate(words):
+    toks = list(re.finditer(r"[A-Za-z]+", t))
+    for i, m in enumerate(toks):
+        w = m.group(0)
         if w[:5].lower() != stem or not w[:1].isupper():
             continue
         for j in (i - 1, i + 1):
-            if 0 <= j < len(words):
-                n = words[j]
-                if (n[:1].isupper() and len(n) >= 3 and not n.isupper()
-                        and n.lower() not in _GENERIC and n[:5].lower() not in market_stems):
-                    return True
+            if not 0 <= j < len(toks):
+                continue
+            lo, hi = (toks[j].end(), m.start()) if j < i else (m.end(), toks[j].start())
+            if t[lo:hi] != " ":
+                continue
+            n = toks[j].group(0)
+            if (n[:1].isupper() and len(n) >= 3 and not n.isupper()
+                    and n.lower() not in _GENERIC and n[:5].lower() not in market_stems):
+                return True
     return False
+
+
+def _title_case(text: str) -> bool:
+    words = [w for w in re.findall(r"[A-Za-z]{3,}", text)]
+    if len(words) < 2:
+        return False
+    return sum(w[0].isupper() for w in words) / len(words) >= 0.6
 
 
 def _capitalised_in(text: str, stem: str) -> bool:
