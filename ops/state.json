@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25T00:11:44.984690+00:00",
+ "generated": "2026-10-25T01:09:50.878921+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -32,11 +32,11 @@
   "first_armed_ts": 1788617432.0499406
  },
  "spend": {
-  "date": "2026-10-24",
+  "date": "2026-10-25",
   "spent_usd": 0.0,
   "wallet_copies": {},
   "wallet_copies_yesterday": {},
-  "yesterday": "2026-10-23",
+  "yesterday": "2026-10-24",
   "closed_reason": ""
  },
  "tier": {
@@ -1217,10 +1217,6 @@
   }
  ],
  "important": [
-  "2026-10-24 00:38:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 00:42:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 00:54:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 01:04:23 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 01:40:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 01:59:45 INFO  [ops] decay_hold: '0x00110b8e below the door 10 day(s)' -> 'stays: owner pick' | does not lose at the prices we would really pay: -2% at real quotes over 147 matched copies",
   "2026-10-24 01:59:46 INFO  [ops] decay_day: '0x9f6a4549 in set Z' -> 'below the door 2 of 7' | promotion floor still holds: copy ROI +8% < floor +10%",
@@ -1378,10 +1374,19 @@
   "2026-10-24 23:17:53 ERROR [inventory] API sync failed: ",
   "2026-10-24 23:17:54 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
   "2026-10-24 23:17:54 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
-  "2026-10-24 00:21:33 TRADE [DISARMED] would BUY $5.00 on 'Knicks vs. Celtics' @ 0.5700 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-24 00:32:25 TRADE [DISARMED] would BUY $5.00 on 'Spread: Air Force (-7.5)' @ 0.5700 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-24 00:37:30 TRADE [DISARMED] would BUY $5.00 on 'UFC 333: Aaron Pico vs. Losene Keita (Fe' @ 0.5800 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-24 00:50:14 TRADE [DISARMED] would BUY $5.00 on 'Army vs. Tulsa' @ 0.6200 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-25 00:11:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-25 00:24:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-25 00:42:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-25 00:49:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-25 00:50:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-10-25 00:50:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
+  "2026-10-25 00:50:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
+  "2026-10-25 00:53:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-25 00:59:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-25 01:03:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-25 01:03:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
+  "2026-10-25 01:05:33 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1&limit=500&offset=0'",
+  "2026-10-25 01:08:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 01:33:05 TRADE [DISARMED] would BUY $5.00 on 'Pelicans vs. Jazz' @ 0.5100 (from 0x3d42...5bf3); the arm is off",
   "2026-10-24 02:51:29 TRADE [DISARMED] would BUY $5.00 on 'Club Necaxa vs. FC Juárez: O/U 2.5' @ 0.6305 (from 0x0011...4333); the arm is off",
   "2026-10-24 04:01:48 TRADE [DISARMED] would BUY $5.00 on 'Spread: Arsenal FC (-1.5)' @ 0.3900 (from 0x3d42...5bf3); the arm is off",
@@ -1436,7 +1441,10 @@
   "2026-10-24 21:55:34 TRADE [DISARMED] would BUY $5.00 on 'CR Vasco da Gama vs. SC Corinthians Paul' @ 0.6300 (from 0xd47e...4e60); the arm is off",
   "2026-10-24 21:57:13 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Jenson Brooksby vs Gabriel D' @ 0.7100 (from 0x3d42...5bf3); the arm is off",
   "2026-10-24 21:57:35 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Jenson Brooksby vs Gabriel D' @ 0.7100 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-24 21:58:10 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Jenson Brooksby vs Gabriel D' @ 0.7200 (from 0x3d42...5bf3); the arm is off"
+  "2026-10-24 21:58:10 TRADE [DISARMED] would BUY $5.00 on 'Fort Worth: Jenson Brooksby vs Gabriel D' @ 0.7200 (from 0x3d42...5bf3); the arm is off",
+  "2026-10-25 00:13:08 TRADE [DISARMED] would BUY $5.00 on 'Spread: Steelers (-2.5)' @ 0.5600 (from 0x28ef...ff5e); the arm is off",
+  "2026-10-25 00:18:51 TRADE [DISARMED] would BUY $5.00 on 'Spread: Browns (-2.5)' @ 0.5200 (from 0x28ef...ff5e); the arm is off",
+  "2026-10-25 00:20:49 TRADE [DISARMED] would BUY $5.00 on 'Spread: Bengals (-2.5)' @ 0.4700 (from 0x28ef...ff5e); the arm is off"
  ],
  "watcher": [
   {
@@ -1731,12 +1739,19 @@
   },
   "54ac26fb3ff1": {
    "first": 1790108373.9015973,
-   "last": 1792883704.2058434,
-   "count": 1830,
+   "last": 1792890559.8754208,
+   "count": 1838,
    "sample": "2026-09-22 20:18:26 ERROR [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
    "norm": "ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}",
    "recent": [
-    1792883704.2058434
+    1792887196.326524,
+    1792887919.432874,
+    1792888999.596894,
+    1792889719.6883757,
+    1792889959.707947,
+    1792890319.802502,
+    1792890319.802502,
+    1792890559.8754208
    ],
    "action": null,
    "action_ts": null,
@@ -1787,20 +1802,15 @@
   },
   "6c813168939b": {
    "first": 1790190387.8260055,
-   "last": 1792872292.926829,
-   "count": 166,
+   "last": 1792889479.6611605,
+   "count": 170,
    "sample": "2026-09-23 19:05:07 ERROR [py_clob_client_v2] request error: Server disconnected",
    "norm": "ERROR [py_clob_client_v2] request error: Server disconnected",
    "recent": [
-    1792869292.2610412,
-    1792869292.2610412,
-    1792870132.506671,
-    1792870132.506671,
-    1792870612.5934498,
-    1792870612.5934498,
-    1792872292.926829,
-    1792872292.926829,
-    1792872292.926829
+    1792889479.6611605,
+    1792889479.6611605,
+    1792889479.6611605,
+    1792889479.6611605
    ],
    "action": null,
    "action_ts": null,
@@ -2078,15 +2088,13 @@
   },
   "41cab7e764a5": {
    "first": 1790351832.0916538,
-   "last": 1792870612.5934498,
-   "count": 61,
+   "last": 1792889479.6611605,
+   "count": 63,
    "sample": "2026-09-25 15:57:06 ERROR [py_clob_client_v2] request error: The read operation timed out",
    "norm": "ERROR [py_clob_client_v2] request error: The read operation timed out",
    "recent": [
-    1792867251.8137991,
-    1792869292.2610412,
-    1792870132.506671,
-    1792870612.5934498
+    1792889479.6611605,
+    1792889479.6611605
    ],
    "action": null,
    "action_ts": null,
@@ -2156,18 +2164,14 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792879140.2360055,
-   "count": 265,
+   "last": 1792887678.782541,
+   "count": 268,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792877214.7040615,
-    1792877455.4464138,
-    1792878536.7035275,
-    1792879020.1940804,
-    1792879140.2360055,
-    1792879140.2360055,
-    1792879140.2360055
+    1792887196.326524,
+    1792887558.5643651,
+    1792887678.782541
    ],
    "action": null,
    "action_ts": null,
@@ -2463,14 +2467,12 @@
   },
   "398dbb2e838a": {
    "first": 1790616244.8723001,
-   "last": 1792820450.1937094,
-   "count": 17,
+   "last": 1792890439.8580449,
+   "count": 18,
    "sample": "2026-09-28 17:24:04 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1'",
    "norm": "ERROR [inventory] API sync failed: Client error 'S' for url 'S'",
    "recent": [
-    1792819007.93349,
-    1792819248.1479385,
-    1792820450.1937094
+    1792890439.8580449
    ],
    "action": null,
    "action_ts": null,
