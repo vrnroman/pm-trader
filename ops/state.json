@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25T05:10:20.385854+00:00",
+ "generated": "2026-10-25T06:07:04.214688+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -552,7 +552,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-23T12:42:18Z-2073",
-  "admit_scan_ts": 1792894476.1890576,
+  "admit_scan_ts": 1792905455.4400551,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 7,
   "day_pnl": -15.0,
@@ -1217,15 +1217,6 @@
   }
  ],
  "important": [
-  "2026-10-24 05:15:55 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1&limit=500&offset=0'",
-  "2026-10-24 05:20:03 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1&limit=500&offset=0'",
-  "2026-10-24 05:39:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 05:40:15 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1&limit=500&offset=0'",
-  "2026-10-24 05:44:00 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 05:48:51 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 05:54:16 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 05:54:17 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 06:04:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 06:24:29 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 06:55:05 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 07:20:21 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1449,40 +1440,10 @@
   "2026-10-25 00:20:49 TRADE [DISARMED] would BUY $5.00 on 'Spread: Bengals (-2.5)' @ 0.4700 (from 0x28ef...ff5e); the arm is off",
   "2026-10-25 02:01:22 TRADE [DISARMED] would BUY $5.00 on 'CF Monterrey vs. CD Guadalajara: O/U 1.5' @ 0.8419 (from 0xd47e...4e60); the arm is off",
   "2026-10-25 02:04:40 TRADE [DISARMED] would BUY $5.00 on 'Houston Dynamo vs. Minnesota United FC: ' @ 0.6942 (from 0xd47e...4e60); the arm is off",
-  "2026-10-25 02:39:57 TRADE [DISARMED] would BUY $5.00 on 'CF Monterrey vs. CD Guadalajara: O/U 1.5' @ 0.6080 (from 0xd47e...4e60); the arm is off"
+  "2026-10-25 02:39:57 TRADE [DISARMED] would BUY $5.00 on 'CF Monterrey vs. CD Guadalajara: O/U 1.5' @ 0.6080 (from 0xd47e...4e60); the arm is off",
+  "2026-10-25 05:38:12 TRADE [DISARMED] would BUY $5.00 on 'Spread: Rams (-3.5)' @ 0.5400 (from 0x28ef...ff5e); the arm is off"
  ],
  "watcher": [
-  {
-   "ts": 1792821650.4570963,
-   "day": "2026-10-24",
-   "kind": "analyst",
-   "proposal": "note",
-   "woke_because": "daily study",
-   "concluded": "0 repo files are mounted in the analyst box this cycle, only /app/logs, so the standing backlog item (the PR fixing the experiment-void tolerance in exp_cards.py that void'd min150 twice) cannot be authored or verified from here; mount the repo checkout alongside the logs and the next cycle can hand in that fix with a pinning test instead of another note.",
-   "counterfactual": "",
-   "did": "noted",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1792821650.4570963,
-   "day": "2026-10-24",
-   "kind": "analyst",
-   "proposal": "note",
-   "woke_because": "daily study",
-   "concluded": "Day 6 of paper/disarmed by your hand (since 10-18) with a healthy slice: every live wallet is positive net and the price-drift plus spread gates declined 26 priced BUYs for -32.80 USD net at $5 each, so the gates are rejecting losers correctly and no param move is supported today.",
-   "counterfactual": "",
-   "did": "noted",
-   "cost_usd": 0.0
-  },
-  {
-   "ts": 1792821650.4570963,
-   "day": "2026-10-24",
-   "kind": "analyst",
-   "woke_because": "daily study",
-   "concluded": "Slice healthy, bot paper 6 days; harness PR blocked because no repo is mounted in the analyst box this cycle, only logs.",
-   "did": "2 proposal(s): noted; noted",
-   "cost_usd": 0.772079
-  },
   {
    "ts": 1792861018.3758852,
    "day": "2026-10-24",
@@ -1510,6 +1471,26 @@
    "did": "nothing",
    "proof": "",
    "question": ""
+  },
+  {
+   "ts": 1792908085.9319482,
+   "day": "2026-10-25",
+   "kind": "analyst",
+   "proposal": "note",
+   "woke_because": "daily study",
+   "concluded": "The min150 void gap was -7.5 pp on n=65, where 2 SE from the paired bootstrap is about +-22 pp, so the harness's fixed 1.5 pp control-vs-bookB void tolerance in exp_cards.py is roughly 15x too tight and void'd a sound experiment twice (09-25, 09-26); the one-line fix is to swap that constant for the same 2-SE paired-bootstrap band the WIN/KILL bars already compute, but I cannot PR or test it this ",
+   "counterfactual": "",
+   "did": "noted",
+   "cost_usd": 0.0
+  },
+  {
+   "ts": 1792908085.9319482,
+   "day": "2026-10-25",
+   "kind": "analyst",
+   "woke_because": "daily study",
+   "concluded": "Slice healthy, bot paper 8 days by your hand; harness 1.5pp void tolerance vs ~+-22pp chance band still the one real fault, PR still blocked by no repo mount (3rd cycle).",
+   "did": "1 proposal(s): noted",
+   "cost_usd": 0.49257949999999995
   }
  ],
  "fingerprints": {
@@ -2171,14 +2152,12 @@
   },
   "84e240524773": {
    "first": 1790398855.3686247,
-   "last": 1792896081.33344,
-   "count": 271,
+   "last": 1792906764.2377117,
+   "count": 272,
    "sample": "2026-09-26 05:00:13 TRADE [DISARMED] would BUY $6.40 on '' @ 0.8276 (from 0xfd3e...5a7a); the arm is off",
    "norm": "TRADE [DISARMED] would BUY $N on 'S' @ N (from <hex>); the arm is off",
    "recent": [
-    1792893800.69344,
-    1792893920.7887406,
-    1792896081.33344
+    1792906764.2377117
    ],
    "action": null,
    "action_ts": null,
