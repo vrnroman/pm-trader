@@ -54,7 +54,8 @@ class JumpDetector:
         # market "jumped" five times in 40 minutes between 0.2 and 0.4 on
         # $60-130 a window, the Israel bloc market +14c on two trades and $12.
         self.min_notional = float(min_notional)
-        self.below_bar = 0  # windows over the cents bar but under the money or trade bar
+        self.below_bar = 0  # markets over the cents bar but under the money or trade bar, once per window
+        self._below: dict[str, float] = {}
         self.max_tracked = int(max_tracked)
         self._fired: OrderedDict[str, float] = OrderedDict()  # cid -> ts reported
         self.reported = 0
@@ -79,7 +80,12 @@ class JumpDetector:
             if abs(delta) < self.jump_cents:
                 continue
             if w.n < self.min_trades or w.notional < self.min_notional:
-                self.below_bar += 1
+                t = self._below.get(cid)
+                if t is None or now - t >= self.window_min * 60:
+                    self._below[cid] = now
+                    self.below_bar += 1
+                    if len(self._below) > self.max_tracked:
+                        self._below.pop(next(iter(self._below)))
                 continue
             if self.exclude(cid):
                 self.excluded += 1

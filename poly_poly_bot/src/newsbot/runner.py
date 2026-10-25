@@ -24,6 +24,7 @@ import collections
 import json
 import os
 import random
+import re
 import threading
 import time
 from typing import Optional
@@ -40,6 +41,8 @@ from src.newsbot.items import DedupStore, Item, make_id
 from src.newsbot.sources import bluesky, poller, roster as roster_mod
 from src.newsbot.tape import clob_ws, jumps as jumps_mod, livedata
 
+
+_NUM = re.compile(r"\d+(?:[.,:]\d+)?")  # numbers in an item; a changed count is news
 
 def _env(name: str, default):
     raw = os.environ.get(name, "")
@@ -264,7 +267,8 @@ class Runner:
             return None
         item_stems = leads_mod.stems(text)
         cand_ids = {str(c.market_id) for c in cands}
-        if item.source != "owner" and self._is_repeat(item_stems, cand_ids, now):
+        item_nums = frozenset(_NUM.findall(text))
+        if item.source != "owner" and self._is_repeat(item_stems, cand_ids, now, item_nums=item_nums):
             self.day_repeat[day] = self.day_repeat.get(day, 0) + 1
             return None
         hour = time.strftime("%Y-%m-%dT%H", time.gmtime(now))
@@ -297,7 +301,7 @@ class Runner:
         if j is None:
             return None
         self.day_judged[day] = self.day_judged.get(day, 0) + 1
-        self.judged_recent.append((now, frozenset(item_stems), frozenset(cand_ids)))
+        self.judged_recent.append((now, frozenset(item_stems), frozenset(cand_ids), item_nums))
         if j.material:
             self.day_material[day] = self.day_material.get(day, 0) + 1
         if not j.material or j.market_id is None or j.outcome_index is None:
@@ -462,11 +466,14 @@ class Runner:
         return n
 
     def _is_repeat(self, item_stems: set, cand_ids: set, now: float, window_s: float = 1800.0,
-                   min_jaccard: float = 0.5) -> bool:
-        for ts, st, ids in reversed(self.judged_recent):
+                   min_jaccard: float = 0.5, item_nums: frozenset = frozenset()) -> bool:
+        """Mostly the same words on the same markets inside the window. Items
+        whose numbers differ are never repeats: a running count ("Lula 50.8%
+        with 62% counted" then "49.6% with 92%") is the news (verifier round 4)."""
+        for ts, st, ids, nums in reversed(self.judged_recent):
             if now - ts > window_s:
                 break
-            if not (ids & cand_ids) or not st:
+            if not (ids & cand_ids) or not st or nums != item_nums:
                 continue
             union = len(st | item_stems)
             if union and len(st & item_stems) / union >= min_jaccard:

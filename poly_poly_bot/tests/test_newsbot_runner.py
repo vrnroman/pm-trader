@@ -434,3 +434,15 @@ def test_the_days_funnel_counts_survive_a_restart(rig, monkeypatch):
     again = runner_mod.Runner(threading.Event())
     day = time.strftime("%Y-%m-%d", time.gmtime(1700.0))
     assert again.day_judged.get(day) == 1 and again.day_items.get(day) == 1
+
+
+def test_a_running_count_is_never_a_repeat(rig, monkeypatch):
+    # verifier round 4: "Lula 50.8% with 62% counted" then "49.6% with 92%"
+    r, sent = rig
+    r.hourly_cap = 10
+    calls = []
+    fake = _fake_claude(material=False, market=None, idx=None)
+    monkeypatch.setattr(judge_mod, "run_claude", lambda p, **kw: calls.append(1) or fake(p, **kw))
+    r.process_item(_item(i="n1", title="Anthropic IPO priced at 120, Dario says"), now=1700.0)
+    r.process_item(_item(i="n2", title="Anthropic IPO priced at 135, Dario says"), now=1710.0)
+    assert len(calls) == 2 and sum(r.day_repeat.values()) == 0

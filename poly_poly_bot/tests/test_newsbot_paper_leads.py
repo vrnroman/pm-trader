@@ -326,3 +326,19 @@ def test_round3_attributions_are_rejected_and_the_real_ones_kept():
     q_turn = "Will voter turnout in the 2026 Serbian parliamentary election be 70% or more?"
     assert leads.explains("Serbia: National parliament election Turnout at 1:00 PM CET 2026: 41.10% CRTA", q_turn)
     assert leads.explains("Student List leads in Serbia's first count", q_list)
+
+
+def test_a_flash_naming_only_the_markets_person_reaches_the_judge_round4():
+    # verifier round 4, 2026-10-25: the most market-moving flashes share one name
+    assert leads.overlap("Hegseth resigns, White House says", "Pete Hegseth out as Secretary of Defense by October 31?") >= 2
+    assert leads.overlap("Bolsonaro concedes defeat to Lula", "Will Jair Bolsonaro win the 2026 Brazil runoff?") >= 2
+    assert leads.overlap("BOLSONARO CONCEDES - GLOBO", "Will Jair Bolsonaro win the 2026 Brazil runoff?") >= 2
+    assert leads.overlap("Netanyahu concedes, calls Eizenkot", "Will Gadi Eizenkot be the next Prime Minister of Israel?") >= 2
+    assert leads.overlap("Vucic: SNS won absolute majority", "Will Aleksandar Vučić be the next Prime Minister of Serbia?") >= 2
+    # first names and title-case event titles are not names to match on
+    assert leads.overlap("Michael Carrick benches Bruno Fernandes", "Will Michael Olise finish 2nd in the Ballon d'Or?") <= 1
+    assert leads.overlap("WWE wrestler busted for DUI in her Florida hometown",
+                         "Will the Republicans win the Florida governor race in 2026? Florida Governor Election Winner") <= 1
+    # the item has to write the name as a name
+    assert leads.overlap("the bolsonaro of it all, says columnist about Brazilian football", "Will Jair Bolsonaro win the 2026 Brazil runoff?") >= 2, "a lowercase item carries no casing"
+    assert leads.overlap("Weekend: the hegseth farm reopens. Visitors welcome", "Pete Hegseth out as Secretary of Defense by October 31?") <= 1

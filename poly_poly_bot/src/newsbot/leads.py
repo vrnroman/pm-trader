@@ -79,6 +79,39 @@ def proper_stems(text: str) -> set:
     return {w[:5].lower() for w in _CAPWORD.findall(fold(text)) if w.lower() not in _GENERIC}
 
 
+_RUN = re.compile(r"\b(?:[A-Z][a-z]{1,}\s+)+[A-Z][a-z]{2,}\b")
+def person_stems(text: str) -> set:
+    """Surname stems of the full names in a market: the last word of a run of
+    two or more capitalised words ("Jair Bolsonaro", "Pete Hegseth",
+    "Aleksandar Vučić"). One of these shared with an item is enough on its
+    own: a concession or a resignation flash names the person and little
+    else (verifier round 4, 2026-10-25: "Hegseth resigns, White House says"
+    was dropped). The surname only, since first names are everywhere
+    ("Michael", "John"); and from the question only, the text before its
+    "?", never the event title after it, which is title case ("Florida
+    Governor Election Winner") and makes every word look like a name."""
+    out = set()
+    question = fold(text).split("?", 1)[0]
+    for run in _RUN.findall(question):
+        words = [w for w in run.split() if w.lower() not in _GENERIC and len(w) >= 3]
+        if len(words) >= 2:
+            out.add(words[-1][:5].lower())
+    return out
+
+
+def _capitalised_in(text: str, stem: str) -> bool:
+    """The item writes the name with a capital, or carries no casing at all
+    (an ALL-CAPS wire flash, a lowercase tweet)."""
+    t = fold(text)
+    letters = [c for c in t if c.isalpha()]
+    if not letters:
+        return False
+    upper = sum(c.isupper() for c in letters) / len(letters)
+    if upper > 0.6 or upper == 0:
+        return True
+    return any(w[:5].lower() == stem for w in _CAPWORD.findall(t))
+
+
 def overlap(a: str, b: str) -> int:
     """Shared stems between an item ``a`` and a market ``b``, scored for the
     relevance bar: a shared stem that is a proper noun of the market counts as
@@ -92,6 +125,8 @@ def overlap(a: str, b: str) -> int:
         return 0
     if shared & proper_stems(b) and len(shared) >= 2:
         return len(shared)
+    if any(_capitalised_in(a, st) for st in shared & person_stems(b)):
+        return 2
     return 1
 
 

@@ -512,3 +512,13 @@ def test_a_jump_needs_money_and_trades_behind_it():
     det = JumpDetector(b, jump_cents=8, window_min=10, min_trades=3, min_notional=150)
     found = {j.condition_id for j in det.scan(T0 + 100)}
     assert found == {CID} and det.below_bar == 1
+
+
+def test_a_thin_window_is_counted_under_the_bar_once_per_window():
+    b = TradeBuckets(window_min=60)
+    b.add(_trade(0.20, 100, T0 + 10, cid="thin"))
+    b.add(_trade(0.40, 100, T0 + 70, cid="thin"))
+    det = JumpDetector(b, jump_cents=8, window_min=10, min_trades=3, min_notional=150)
+    for k in range(10):
+        det.scan(T0 + 100 + k * 30)
+    assert det.below_bar == 1
