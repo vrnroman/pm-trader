@@ -242,7 +242,7 @@ def test_stale_items_are_counted_not_judged(rig, monkeypatch):
                 title="Anthropic to announce IPO", text="", url="")
     monkeypatch.setattr(judge_mod, "run_claude", _fake_claude())
     assert r.process_item(mine, now=1700.0 + 3600) is not None
-    assert "stale skipped" in r.report_text(now=1700.0 + 3600)
+    assert "1 stale" in r.report_text(now=1700.0 + 3600) and "skipped" in r.report_text(now=1700.0 + 3600)
 
 
 def test_an_owner_forward_explains_a_dark_jump_and_the_brief_says_so(rig, monkeypatch):
@@ -275,3 +275,37 @@ def test_deploy_sets_news_mode_in_the_form_config_reads(monkeypatch):
     monkeypatch.setenv("NEWS_MODE", m.group(1))
     assert cfg._opt_bool("NEWS_MODE", False) is True
     assert "sed -i '/^NEWS_MODE=/d' .env" in src, "a stale value in the secret must not win"
+
+
+def test_a_weak_candidate_match_never_reaches_the_llm(rig, monkeypatch):
+    """An NFL preview shares one word with a Macron market: no call (2026-10-25)."""
+    r, sent = rig
+    called = []
+    monkeypatch.setattr(judge_mod, "run_claude", lambda *a, **k: called.append(1))
+    weak = Item(id="w1", source="rss:nypost", domains=("corp",), published_ts=1690.0, seen_ts=1695.0,
+                title="Anthropic sponsors a football game", text="", url="")
+    r.index.cands[0] = _cand("m1", "c1", "Will Anthropic announce an IPO in 2026?", ["ta", "tb"])
+    assert r.process_item(weak, now=1700.0) is None
+    assert not called and sum(r.day_unmatched.values()) == 1
+
+
+def test_the_hourly_cap_paces_the_budget_but_not_the_owner(rig, monkeypatch):
+    r, sent = rig
+    r.hourly_cap = 1
+    monkeypatch.setattr(judge_mod, "run_claude", _fake_claude())
+    assert r.process_item(_item(i="h1"), now=1700.0) is not None
+    assert r.process_item(_item(i="h2"), now=1710.0) is None and sum(r.day_paced.values()) == 1
+    mine = Item(id="own9", source="owner", domains=("corp",), published_ts=1700.0, seen_ts=1700.0,
+                title="Anthropic to announce IPO, Dario says", text="", url="")
+    assert r.process_item(mine, now=1720.0) is not None, "the owner's forward is never paced"
+    assert "paced" in r.report_text(now=1800.0)
+
+
+def test_news_text_from_disk_reads_the_counters_file_shape(tmp_path, monkeypatch):
+    import json as _json
+    monkeypatch.setenv("NEWS_DATA_DIR", str(tmp_path))
+    monkeypatch.setattr(runner_mod, "_RUNNER", None)
+    (tmp_path / "roster.json").write_text(_json.dumps({"saved_ts": 1.0, "sources": {
+        "rss:x": {"items": 3, "errors": 0, "last_ok_ts": 1.0, "last_item_ts": 1.0, "last_error": ""}}}))
+    text = runner_mod.news_text()
+    assert "1 sources, 3 items total" in text

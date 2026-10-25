@@ -77,6 +77,17 @@ class Runner:
         # the owner's own forwards are never stale.
         self.max_item_age_s = float(_env("NEWS_MAX_ITEM_AGE_MIN", 30)) * 60
         self.day_stale: dict[str, int] = {}
+        # The first live hour judged seven items a minute, most of them an
+        # NFL preview against a Macron market: FTS returns a candidate for
+        # almost any sentence. Two bars before the LLM (2026-10-25): the
+        # item and the market must share at least NEWS_MIN_OVERLAP meaningful
+        # words, and the day's budget is paced per hour so the cap is not
+        # gone by lunch (NEWS_LLM_HOURLY_CAP, default budget/12).
+        self.min_overlap = int(_env("NEWS_MIN_OVERLAP", 2))
+        self.hourly_cap = int(_env("NEWS_LLM_HOURLY_CAP", 0)) or max(1, int(_env("NEWS_LLM_DAILY_BUDGET", 300)) // 12)
+        self.hour_calls: dict[str, int] = {}
+        self.day_unmatched: dict[str, int] = {}
+        self.day_paced: dict[str, int] = {}
         # state
         self.roster = roster_mod.load()
         self.counters = roster_mod.Counters(os.path.join(d, "roster.json"))
@@ -204,6 +215,20 @@ class Runner:
             return None
         if not cands:
             return None
+        cands = [c for c in cands if item.source == "owner"
+                 or leads_mod.overlap(text, f"{c.question} {c.event_title}") >= self.min_overlap]
+        if not cands:
+            self.day_unmatched[day] = self.day_unmatched.get(day, 0) + 1
+            return None
+        hour = time.strftime("%Y-%m-%dT%H", time.gmtime(now))
+        if self.hour_calls.get(hour, 0) >= self.hourly_cap and item.source != "owner":
+            self.day_paced[day] = self.day_paced.get(day, 0) + 1
+            logger.info(f"[news] paced: hourly LLM cap {self.hourly_cap} reached, '{item.title[:50]}' not judged")
+            return None
+        self.hour_calls[hour] = self.hour_calls.get(hour, 0) + 1
+        if len(self.hour_calls) > 48:
+            for k in sorted(self.hour_calls)[:-24]:
+                self.hour_calls.pop(k, None)
         if item.source == "owner":
             # The owner's late forward explains a dark jump after the fact
             # (idea 1): FTS only, no LLM, the dark count untouched.
@@ -412,7 +437,8 @@ class Runner:
         books = {b: paper_mod.summary(pb.ledger) for b, pb in self.books.items()}
         stats = self.leads.stats(since_ts=since_ts, move_cents=self.move_cents)
         day = time.strftime("%Y-%m-%d", time.gmtime(now))
-        today = {"items": self.day_items.get(day, 0), "stale": self.day_stale.get(day, 0)}
+        today = {"items": self.day_items.get(day, 0), "stale": self.day_stale.get(day, 0),
+                 "unmatched": self.day_unmatched.get(day, 0), "paced": self.day_paced.get(day, 0)}
         llm = {"today": self.budget.count_today(), "limit": self.budget.limit,
                "exhausted": self.budget.count_today() >= self.budget.limit}
         return brief_mod.brief_text(stats=stats, books=books, today=today, roster=self.counters.snapshot(),

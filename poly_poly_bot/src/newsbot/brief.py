@@ -117,7 +117,11 @@ def gist(stats: dict, books: dict, today: dict) -> str:
     if a.get("owner_explained"):
         dark_s += f" · explained later by owner {a['owner_explained']} (late by {_dur(a.get('owner_late_median_s'))})"
     lead = a.get("lead_median_s")
-    stale = f" ({today['stale']} stale skipped)" if today.get("stale") else ""
+    extras = [f"{today['stale']} stale" if today.get("stale") else "",
+              f"{today['unmatched']} no market" if today.get("unmatched") else "",
+              f"{today['paced']} paced" if today.get("paced") else ""]
+    extras = [e for e in extras if e]
+    stale = f" ({', '.join(extras)} skipped)" if extras else ""
     return (f"{today.get('items', 0)} items{stale}, {a.get('mapped', 0)} mapped, {fired} fired, "
             f"{moved} moved our way · our lag {_dur(a.get('latency_median_s'))} · "
             f"source lead median {_dur(lead)} · {dark_s}")
@@ -158,12 +162,18 @@ def brief_text(*, stats: dict, books: dict, today: dict, roster: dict, llm: dict
 
 
 def load_roster_counters(path: str) -> dict:
+    """The Counters file is {"saved_ts": ..., "sources": {key: row}}; the
+    first /news from disk crashed on reading the top level as rows
+    (2026-10-25). Both shapes are accepted, anything else is empty."""
     try:
         with open(path, encoding="utf-8") as f:
             d = json.load(f)
-        return d if isinstance(d, dict) else {}
     except (OSError, ValueError):
         return {}
+    if not isinstance(d, dict):
+        return {}
+    rows = d.get("sources") if isinstance(d.get("sources"), dict) else d
+    return {k: v for k, v in rows.items() if isinstance(v, dict)}
 
 
 def today_counts(items_seen_path: str) -> dict:
