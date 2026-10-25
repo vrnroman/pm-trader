@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25T18:18:54.393230+00:00",
+ "generated": "2026-10-25T19:05:16.712128+00:00",
  "money": {
   "cash": 129.784219,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1792952172.2242117,
+  "ts": 1792954943.545898,
   "day": "2026-10-25"
  },
  "arm": {
@@ -1411,17 +1411,6 @@
   }
  ],
  "important": [
-  "2026-10-24 18:23:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 18:23:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 18:29:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 18:34:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 18:36:20 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-10-24 18:36:25 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-10-24 18:40:32 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-10-24 18:40:37 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-10-24 18:40:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 18:43:31 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-24 18:55:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 19:14:42 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
   "2026-10-24 19:14:47 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
   "2026-10-24 19:28:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
@@ -1556,10 +1545,7 @@
   "2026-10-25 14:58:52 WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying",
   "2026-10-25 15:41:40 INFO  Received signal 15, shutting down...",
   "2026-10-25 15:57:21 WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying",
-  "2026-10-24 18:32:36 TRADE [DISARMED] would BUY $5.00 on 'CF Montréal vs. Nashville SC: O/U 0.5' @ 0.8252 (from 0xd47e...4e60); the arm is off",
-  "2026-10-24 18:36:26 TRADE [DISARMED] would BUY $5.00 on 'UFC 333: Alexander Volkov vs. Rizvan Kun' @ 0.5600 (from 0xd47e...4e60); the arm is off",
-  "2026-10-24 18:37:09 TRADE [DISARMED] would BUY $5.00 on 'Spurs vs. Mavericks: O/U 230.5' @ 0.5000 (from 0x3d42...5bf3); the arm is off",
-  "2026-10-24 18:40:39 TRADE [DISARMED] would BUY $5.00 on 'UFC 333: Alexander Volkov vs. Rizvan Kun' @ 0.5600 (from 0xd47e...4e60); the arm is off",
+  "2026-10-25 19:07:47 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Self-disarm (no trade data) fired 7 times in the last 24h, last at 15:57, each about 15 minutes after a restart. The pro",
   "2026-10-24 19:11:59 TRADE [DISARMED] would BUY $5.00 on 'Will Racing Club de Lens win on 2026-10-' @ 0.4100 (from 0x3d42...5bf3); the arm is off",
   "2026-10-24 19:15:03 TRADE [DISARMED] would BUY $5.00 on 'Indiana vs. Michigan' @ 0.5900 (from 0x3d42...5bf3); the arm is off",
   "2026-10-24 19:16:28 TRADE [DISARMED] would BUY $5.00 on 'Will Racing Club de Lens vs. Paris FC en' @ 0.3160 (from 0x3d42...5bf3); the arm is off",
@@ -4572,6 +4558,20 @@
    "norm": "TRADE [DISARMED] would BUY $N on 'S'er Kav' @ N (from <hex>); the arm is off",
    "recent": [
     1792862151.619453
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "eedc3d5e112a": {
+   "first": 1792955271.8739903,
+   "last": 1792955271.8739903,
+   "count": 1,
+   "sample": "2026-10-25 19:07:47 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Self-disarm (no trade data) fired 7 times in the last 24h, last at 15:57, each about 15 minutes after a restart. The pro",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Self-disarm (no trade data) fired N times in the last Nh, last at N:N, each about N minutes after a restart. The pro",
+   "recent": [
+    1792955271.8739903
    ],
    "action": null,
    "action_ts": null,
