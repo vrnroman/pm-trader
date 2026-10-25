@@ -69,6 +69,10 @@ V1: tuple[Source, ...] = (
     _tg("wublockchainenglish", "crypto"),
     _tg("WatcherGuru", "crypto", "corp"),
     _tg("fabrizioromano", "sport"),
+    # Elections everywhere, one structured line per official release. On the
+    # 2026-10-25 Serbian election it posted CRTA's 41%-by-13:00 turnout at
+    # 12:24:54 UTC, 10 to 17 minutes before four Serbian markets jumped.
+    _tg("europeelects", "politics", "geo", poll_s=30),
     # --- RSS/Atom: fast general ---
     _rss("nyt-home", "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", "geo", "politics", "corp"),
     _rss("nyt-world", "https://rss.nytimes.com/services/xml/rss/nyt/World.xml", "geo"),
@@ -82,6 +86,9 @@ V1: tuple[Source, ...] = (
     _rss("cbs", "https://www.cbsnews.com/latest/rss/main", "politics", "geo"),
     _rss("fox-latest", "https://moxie.foxnews.com/google-publisher/latest.xml", "politics"),
     _rss("independent", "https://www.independent.co.uk/rss", "geo", "politics"),
+    # Serbia's election watchdog, the primary for turnout estimates: the
+    # 12:15 CET post landed 11:15 UTC, one minute before the first jump.
+    _rss("crta", "https://crta.rs/en/feed/", "politics", "geo"),
     # /feed/ is a 404; /feed/rss/ is the live one (checked 2026-10-25).
     _rss("kyivindependent", "https://kyivindependent.com/feed/rss/", "geo"),
     # --- RSS: corporate / markets ---

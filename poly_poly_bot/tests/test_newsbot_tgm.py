@@ -129,10 +129,10 @@ def test_disabled_when_any_credential_is_missing():
     assert tgm.enabled({}) is False
 
 
-def test_channel_list_defaults_to_the_rosters_twelve_tg_channels():
+def test_channel_list_defaults_to_the_rosters_tg_channels():
     cfg = tgm.config_from_env(FULL_ENV)
     expected = [s.channel for s in roster.V1 if s.kind == "tg"]
-    assert len(expected) == 12
+    assert len(expected) == 13 and "europeelects" in expected
     assert list(cfg.channels) == expected
     assert cfg.api_id == 12345 and cfg.session == "1BQANOTREAL"
 
@@ -144,7 +144,7 @@ def test_channel_list_parses_usernames_links_and_at_names_and_dedups():
     # Env extras come after the roster and never duplicate it.
     cfg = tgm.config_from_env({**FULL_ENV, "NEWS_TGM_CHANNELS": "@financialjuice, https://t.me/extra_chan"})
     assert cfg.channels.count("financialjuice") == 1
-    assert cfg.channels[-1] == "extra_chan" and len(cfg.channels) == 13
+    assert cfg.channels[-1] == "extra_chan" and len(cfg.channels) == len(tgm.roster_channels()) + 1
     assert tgm.normalize_channel("") is None and tgm.normalize_channel("https://t.me/joinchat/abc") is None
 
 
