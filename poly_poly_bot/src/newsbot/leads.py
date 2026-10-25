@@ -41,19 +41,41 @@ def stems(text: str) -> set:
     return {w[:5] for w in tokens(text)}
 
 
-_PROPER = re.compile(r"\b([A-Z][a-zA-Z]{5,})")
+_CAPWORD = re.compile(r"\b([A-Z][a-z]{2,})")
+# Capitalised words that name nothing in particular; a market question has
+# them mid-sentence ("the President of France", "the Senate vote").
+_GENERIC = {"will", "president", "minister", "prime", "government", "senate", "congress", "house",
+            "white", "court", "supreme", "united", "states", "state", "national", "nation", "federal",
+            "reserve", "bank", "central", "election", "elections", "party", "republic", "kingdom",
+            "north", "south", "east", "west", "world", "cup", "league", "open", "final", "finals",
+            "game", "match", "series", "season", "week", "day", "month", "year", "yes", "no",
+            "october", "november", "december", "january", "february", "march", "april", "may",
+            "june", "july", "august", "september", "monday", "tuesday", "wednesday", "thursday",
+            "friday", "saturday", "sunday", "before", "after", "between", "above", "below", "over",
+            "under", "up", "down", "win", "lose", "the", "and", "or", "of", "in", "on", "at", "by"}
+
+
+def proper_stems(text: str) -> set:
+    """Stems of the Capitalised words (first letter upper, the rest lower, so an
+    ALL-CAPS wire headline gives none) that are not generic. Taken from the
+    MARKET question, whose casing is reliable; a lowercase tweet still matches
+    when it shares that stem (verifier, 2026-10-25: "starlink" was dropped and
+    "*PRESIDENT TO ADDRESS NATION*" was matched)."""
+    return {w[:5].lower() for w in _CAPWORD.findall(text or "") if w.lower() not in _GENERIC}
 
 
 def overlap(a: str, b: str) -> int:
-    """Shared stems between two texts. One shared stem that is a proper noun of
-    six letters or more in ``a`` (the item) counts as two: a headline naming the
-    one entity the market is about is a match even when nothing else is."""
+    """Shared stems between an item ``a`` and a market ``b``, scored for the
+    relevance bar: a shared stem that is a proper noun of the market counts as
+    two on its own (the one entity the market is about), common words alone
+    count one each and never clear the bar by themselves."""
     shared = stems(a) & stems(b)
-    if len(shared) == 1:
-        proper = {m[:5].lower() for m in _PROPER.findall(a or "")}
-        if shared & proper:
-            return 2
-    return len(shared)
+    if not shared:
+        return 0
+    proper = shared & proper_stems(b)
+    if proper:
+        return max(2, len(shared))
+    return min(1, len(shared))
 
 
 def ledger_dir() -> str:

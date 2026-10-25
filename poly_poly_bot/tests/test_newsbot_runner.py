@@ -323,5 +323,81 @@ def test_news_mode_keeps_the_redeemer_and_books_settlements_disarmed():
     assert "check_and_redeem_positions(" in news and "redeem_interval_hours" in news
     assert "preview_mode" in news, "the redeemer never runs in a preview process"
     guard = inspect.getsource(main._live_guard_loop)
-    assert "(live_mode.is_armed() or CONFIG.news_mode)" in guard
-    assert guard.index("(live_mode.is_armed() or CONFIG.news_mode)") < guard.index("ops_watch.settle_released(")
+    assert guard.index("if _money_pass_enabled():") < guard.index("ops_watch.settle_released(")
+
+
+def test_money_pass_runs_disarmed_in_news_mode_never_in_preview(monkeypatch):
+    import main
+    from src.copy_trading import live_mode
+    monkeypatch.setattr(live_mode, "is_armed", lambda: False)
+    monkeypatch.setattr(main.CONFIG, "preview_mode", False)
+    monkeypatch.setattr(main.CONFIG, "news_mode", True)
+    assert main._money_pass_enabled() is True
+    monkeypatch.setattr(main.CONFIG, "news_mode", False)
+    assert main._money_pass_enabled() is False, "disarmed copy mode books nothing"
+    monkeypatch.setattr(live_mode, "is_armed", lambda: True)
+    assert main._money_pass_enabled() is True
+    monkeypatch.setattr(main.CONFIG, "preview_mode", True)
+    monkeypatch.setattr(main.CONFIG, "news_mode", True)
+    assert main._money_pass_enabled() is False, "a preview process never touches the money ledger"
+
+
+def test_silent_sources_never_ping_the_phone(rig):
+    r, sent = rig
+    r.counters.ok("rss:slow", 1, now=1000.0, last_item_ts=1000.0)
+    r.last_item_ts = 1000.0 + 10 * 3600
+    r.check_silence(now=1000.0 + 10 * 3600)
+    assert not [t for k, t in sent if "Source silent" in t]
+    assert any("Source silent" not in t for k, t in sent) or not sent
+
+
+def test_recent_window_survives_a_restart_and_the_watch_set_is_seeded(rig, tmp_path):
+    r, sent = rig
+    import time as _t
+    fresh = _item(i="keep1")
+    fresh = Item(**{**fresh.to_dict(), "published_ts": _t.time() - 60})
+    r.recent.append(fresh)
+    r._save_recent()
+    assert (tmp_path / "recent.jsonl").exists()
+    r2 = runner_mod.Runner(threading.Event())
+    assert any(it.id == "keep1" for it in r2.recent)
+    r2.index = r.index
+    assert r2.seed_watch(now=1.0) >= 4 and len(r2.watch) <= 450
+
+
+def test_gist_counts_judged_and_material(rig, monkeypatch):
+    r, sent = rig
+    r.hourly_cap = 10
+    monkeypatch.setattr(judge_mod, "run_claude", _fake_claude())
+    r.process_item(_item(i="j1"), now=1700.0)
+    monkeypatch.setattr(judge_mod, "run_claude", _fake_claude(material=False, market=None, idx=None))
+    r.process_item(_item(i="j2", title="Anthropic to announce IPO soon says CEO"), now=1710.0)
+    assert "2 judged, 1 material" in r.report_text(now=1800.0)
+
+
+def test_owner_credential_sources_run_only_when_their_keys_exist(rig, monkeypatch):
+    import asyncio
+    r, sent = rig
+    from src.newsbot.sources import telegram_mtproto
+    for k in ("TELEGRAM_API_ID", "TELEGRAM_API_HASH", "TELEGRAM_USER_SESSION", "X_AUTH_TOKEN", "X_CT0", "X_LIST_ID"):
+        monkeypatch.delenv(k, raising=False)
+
+    async def none_on():
+        return r.optional_source_tasks()
+    assert asyncio.run(none_on()) == []
+
+    started = []
+
+    async def fake_stream(queue, dedup, counters, *, stop):
+        started.append("tgm")
+        await stop.wait()
+    monkeypatch.setattr(telegram_mtproto, "enabled", lambda env=None: True)
+    monkeypatch.setattr(telegram_mtproto, "stream", fake_stream)
+
+    async def one_on():
+        tasks = r.optional_source_tasks()
+        await asyncio.sleep(0)
+        r.stop.set()
+        await asyncio.gather(*tasks)
+        return tasks
+    assert len(asyncio.run(one_on())) >= 1 and started == ["tgm"]

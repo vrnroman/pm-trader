@@ -126,3 +126,68 @@ not the helper. Empty renders as "collecting, n=0".
   confirm the container and the first socket message). Auto tier.
 - Deferred: #12 LLM roster grader [scope, trigger: deterministic ranking
   ambiguous at the two-week read]; #19 public scoreboard [owner].
+
+## Telegram through the client API (`sources/telegram_mtproto.py`, 2026-10-25)
+
+The t.me/s preview path (`telegram_web.py`) polls every 30-60 s and sees only
+the channels that left the web preview on. `telegram_mtproto.py` logs in as
+the OWNER's user account over MTProto (Telethon) and receives every channel
+post as a push update the moment it is sent, for any channel the account can
+open. It reads only; nothing is ever sent from the account.
+
+- Items: `source = "tgm:<channel>"` (lower-case username), `id = tgm:<channel>:<message id>`,
+  `published_ts` = the message's own date (UTC), `url = https://t.me/<channel>/<id>`,
+  title = first line, text = the full text with URLs kept (hidden text-link
+  URLs appended). Media-only posts are skipped. Domains come from the roster's
+  `tg` entry for the channel; a channel not on the roster gets `("geo",)`.
+  The two Telegram paths are two sources on purpose: their lag is data.
+- `stream(queue, dedup, counters, *, stop, ...)`: connect, resolve the channels,
+  one `NewMessage` handler, a 20-post backfill per channel at connect (deduped),
+  then hold the link; reconnect with exponential backoff 1 s .. 60 s; a
+  FloodWaitError sleeps the seconds Telegram asked (+1) and does not grow the
+  backoff; stops cleanly on `stop`. Counters: `tgm:<channel>` per channel,
+  `tgm` for link-level errors. Logs `[news-tgm] ...`.
+- Env: `TELEGRAM_API_ID`, `TELEGRAM_API_HASH` (https://my.telegram.org,
+  "API development tools"), `TELEGRAM_USER_SESSION` (a Telethon StringSession;
+  it IS the login, as sensitive as the account password; minted once on the
+  owner's Mac with `python -m scripts.telegram_login`, never written to disk),
+  optional `NEWS_TGM_CHANNELS` (comma list of extra usernames / @names / t.me
+  links; the roster's `tg` channels are always followed). `enabled()` is true
+  only when all three credentials are set; the runner starts the stream only then.
+- Dependency: `telethon>=1.36` (requirements.txt).
+
+## X (Twitter) through the owner's session cookies (`sources/x_cookies.py`, 2026-10-25)
+
+There is no free X API. The owner approved, with the terms-of-service risk
+spelled out, using HIS OWN account's two session cookies with an unofficial
+GraphQL client (`twscrape`, 0.20.1 at the time of writing). The volume is
+what a person reading one List would generate: one request every
+`X_POLL_S` seconds (default 50, floor 30) against ONE private List
+timeline, `api.list_timeline(list_id, limit=20)`, never per-account
+timelines, never a tight retry. The owner puts the flash accounts on the
+List; the bot reads the List.
+
+- Items: `id = x:<tweet id>`, `source = x:<username>` (lower-case),
+  `published_ts` = the tweet's own date (UTC), `url` = the tweet's URL,
+  title = the first 200 chars, text = the full text with t.co links
+  expanded. Pure retweets are skipped; quote tweets stay with the quoted
+  text appended (`QT @user: ...`). Domains come from `X_DOMAINS` (comma
+  list applied to every item; default politics,geo,crypto,corp). The roster
+  counter row is `x` (one row per polled thing: the List).
+- `fetch(state, dedup, counters, *, api=None, now=None)`: one page, the new
+  Items oldest first, deduped and counted. A rejected session, a rate limit
+  (twscrape's `NoAccountError`, with the reason read back from its account
+  row) or stale GraphQL query ids raise `SourceError`; transport errors
+  propagate as themselves. `run(queue, dedup, counters, *, stop, api=None,
+  sleep, clock)`: the poll loop; a SourceError doubles the interval (cap
+  30 min) and is logged once per episode; a clean poll restores it. Logs
+  `[news-x] ...`. The api is built with `raise_when_no_account=True`
+  (without it twscrape sleeps forever on a locked account) and the
+  library's PostHog telemetry is switched off (`TWS_TELEMETRY=0`).
+- Env: `X_AUTH_TOKEN`, `X_CT0` (the two cookies of a logged-in x.com
+  session; as sensitive as the password; stored only in twscrape's accounts
+  db at `X_ACCOUNTS_DB`, default `data/news/x-accounts.db`; scrubbed from
+  every log line and counter row), `X_LIST_ID` (numeric; the List URL is
+  accepted), optional `X_POLL_S`, `X_DOMAINS`. `enabled()` is true only when
+  all three are set. Owner steps: `scripts/x_cookies_howto.md`.
+- Dependency: `twscrape>=0.20` (requirements.txt).

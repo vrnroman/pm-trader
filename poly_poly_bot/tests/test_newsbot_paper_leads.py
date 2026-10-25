@@ -275,3 +275,10 @@ def test_overlap_matches_demonyms_and_single_proper_nouns():
     assert leads.overlap("Brazilian voters head to the polls", "Will Lula win Brazil's election?") >= 2
     assert leads.overlap("Jets vs. Dolphins: preview, prediction, what to watch", "Will Macron remain president?") == 0
     assert leads.overlap("a game preview tonight", "Will the game be postponed?") <= 1, "a common word alone is not a match"
+    # lowercase tweet, the market carries the casing
+    assert leads.overlap("zelenskiy: starlink restrictions completely removed", "Will Starlink restore service in Ukraine?") >= 2
+    # an ALL-CAPS wire headline brings no proper nouns of its own
+    assert leads.overlap("*WHITE HOUSE: PRESIDENT TO ADDRESS NATION TONIGHT*", "Will the President of France resign?") <= 1
+    # two common words shared are not a match either
+    assert leads.overlap("Underdog promo code: play $10, get $50 on the game tonight", "Will the game go to overtime tonight?") <= 1
+    assert leads.overlap("Fanatics promo for Chiefs vs Seahawks", "Chiefs vs. Seahawks: O/U 47.5") >= 2, "the market's teams are proper nouns"

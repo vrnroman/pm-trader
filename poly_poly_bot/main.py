@@ -171,6 +171,16 @@ def _followed_activity_3d(now: float) -> tuple[int, int]:
     return signals, copies
 
 
+def _money_pass_enabled() -> bool:
+    """The guard books settlements and writes the money state when real money
+    is armed, or in NEWS_MODE (the copy era's positions settle on their own
+    schedule while the arm is off for good; 2026-10-25). Never in preview."""
+    from src.copy_trading import live_mode
+    if CONFIG.preview_mode:
+        return False
+    return bool(live_mode.is_armed() or CONFIG.news_mode)
+
+
 def _live_guard_loop():
     """Watch real money while nobody is looking (see live_guard).
 
@@ -271,7 +281,7 @@ def _live_guard_loop():
             # the copy era still holds settle on their own schedule; booking
             # them is bookkeeping, not trading, so the money pass runs
             # disarmed too (the verifier found zero settled lines otherwise).
-            if not CONFIG.preview_mode and (live_mode.is_armed() or CONFIG.news_mode):
+            if _money_pass_enabled():
                 bal = live_budget._read_balance()
                 # Resolved positions are NOT worth their cost. The funder on
                 # this box carried dozens of resolved losers whose cost basis

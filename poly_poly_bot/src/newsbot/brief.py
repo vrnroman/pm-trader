@@ -122,7 +122,8 @@ def gist(stats: dict, books: dict, today: dict) -> str:
               f"{today['paced']} paced" if today.get("paced") else ""]
     extras = [e for e in extras if e]
     stale = f" ({', '.join(extras)} skipped)" if extras else ""
-    return (f"{today.get('items', 0)} items{stale}, {a.get('mapped', 0)} mapped, {fired} fired, "
+    judged = f"{today.get('judged', 0)} judged, {today.get('material', 0)} material, " if today.get("judged") is not None else ""
+    return (f"{today.get('items', 0)} items{stale}, {judged}{a.get('mapped', 0)} mapped, {fired} fired, "
             f"{moved} moved our way · our lag {_dur(a.get('latency_median_s'))} · "
             f"source lead median {_dur(lead)} · {dark_s}")
 

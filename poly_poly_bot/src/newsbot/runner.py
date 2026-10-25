@@ -70,7 +70,10 @@ class Runner:
         self.move_cents = float(_env("NEWS_MOVE_CENTS", 5.0))
         self.silent_hours = float(_env("NEWS_SILENT_HOURS", 6.0))
         self.brief_utc = str(_env("NEWS_BRIEF_UTC", "08:00"))
-        self.lead_lookback_s = float(_env("NEWS_LEAD_LOOKBACK_MIN", 15)) * 60
+        self.lead_lookback_s = float(_env("NEWS_LEAD_LOOKBACK_MIN", 60)) * 60
+        self.watch_seed = int(_env("NEWS_WATCH_SEED", 300))
+        self.day_judged: dict[str, int] = {}
+        self.day_material: dict[str, int] = {}
         # A news bot trades fresh news. At boot every feed hands over its
         # whole backlog (about 3,000 items, hours to days old, seen 2026-10-25);
         # judging those would spend the LLM budget on history and seed REST
@@ -106,7 +109,11 @@ class Runner:
         self.books = {b: paper_mod.PaperBook(b, ask_ladder=self._ask_ladder, bid_ladder=self._bid_ladder,
                                              fee_bps=fee_rate.fee_bps) for b in paper_mod.BOOKS}
         self.queue: asyncio.Queue = asyncio.Queue(maxsize=5000)
-        self.recent: collections.deque = collections.deque(maxlen=4000)   # Items of the last day, for leads
+        # Items of the last day, for lead attribution. Persisted: four
+        # restarts on the first day each emptied this window and every jump
+        # in the next hour read "dark" for no reason (owner, 2026-10-25).
+        self._recent_path = os.path.join(d, "recent.jsonl")
+        self.recent: collections.deque = collections.deque(self._load_recent(), maxlen=4000)
         self.watch: collections.OrderedDict = collections.OrderedDict()   # token -> last touched ts
         self.item_by_id: dict[str, Item] = {}
         self.item_dir: dict[str, tuple[str, str]] = {}   # item_id -> (token, direction)
@@ -183,6 +190,25 @@ class Runner:
     def watched_tokens(self) -> list[str]:
         return list(self.watch.keys())
 
+    def seed_watch(self, now: Optional[float] = None) -> int:
+        """Quotes for the biggest markets in our domains from the start, so a
+        jump there is 'watched', not 'unknown': on day one every jump was
+        unwatched because only mapped items filled the set."""
+        now = time.time() if now is None else now
+        try:
+            toks = self.index.all_token_ids(self.domains)[: self.watch_seed]
+        except Exception as exc:  # noqa: BLE001
+            logger.warn(f"[news] watch seed failed: {exc}")
+            return 0
+        n = 0
+        for tok in toks:
+            if tok not in self.watch:
+                self.watch[tok] = now
+                n += 1
+        while len(self.watch) > 450:
+            self.watch.popitem(last=False)
+        return n
+
     # ---- the item path ----
     def freshness_for(self, token: str, condition_id: str, now: float) -> tuple[str, str]:
         if self.book.best(token) is None:
@@ -248,12 +274,14 @@ class Runner:
                 b = self.book.best(tok)
                 if b:
                     quotes_by_tok[tok] = {"bid": b[0], "ask": b[1]}
-        decided_at = None
         j = judge_mod.judge(item, cands, fresh_by_tok, budget=self.budget, model=self.model,
                             quotes_by_token=quotes_by_tok, now=now)
         decided_at = time.time()
         if j is None:
             return None
+        self.day_judged[day] = self.day_judged.get(day, 0) + 1
+        if j.material:
+            self.day_material[day] = self.day_material.get(day, 0) + 1
         if not j.material or j.market_id is None or j.outcome_index is None:
             logger.info(f"[news] not material: {item.source} '{item.title[:60]}' ({j.why[:80]})")
             return None
@@ -415,6 +443,34 @@ class Runner:
                 logger.warn(f"[news] settle failed for {b.book}: {exc}")
         return n
 
+    def _load_recent(self) -> list:
+        out = []
+        try:
+            cutoff = time.time() - 86400
+            with open(self._recent_path, encoding="utf-8") as f:
+                for line in f:
+                    try:
+                        it = Item.from_dict(json.loads(line))
+                    except Exception:  # noqa: BLE001
+                        continue
+                    if it.published_ts >= cutoff:
+                        out.append(it)
+        except OSError:
+            pass
+        return out
+
+    def _save_recent(self) -> None:
+        try:
+            tmp = self._recent_path + ".tmp"
+            cutoff = time.time() - 86400
+            with open(tmp, "w", encoding="utf-8") as f:
+                for it in self.recent:
+                    if it.published_ts >= cutoff:
+                        f.write(json.dumps(it.to_dict()) + "\n")
+            os.replace(tmp, self._recent_path)
+        except OSError as exc:
+            logger.warn(f"[news] recent window not saved: {exc}")
+
     def _load_pinged(self) -> set:
         try:
             with open(self._pinged_path, encoding="utf-8") as f:
@@ -440,12 +496,9 @@ class Runner:
             logger.warn(f"[news] ping failed: {exc}")
 
     def check_silence(self, now: float) -> None:
-        snap = self.counters.snapshot()
-        for key, row in snap.items():
-            last = float(row.get("last_item_ts") or 0)
-            if last and now - last > self.silent_hours * 3600 and f"silent:{key}" not in self.pinged:
-                self.pinged.add(f"silent:{key}")
-                self._ping(brief_mod.silent_source_message(key, (now - last) / 3600))
+        """A silent source is a count in the brief's machinery line, never a
+        message (owner, 2026-10-25: "messages should be when something is
+        found"). The one alarm left is the whole box going quiet."""
         if self.last_item_ts and now - self.last_item_ts > 1800 and "quiet" not in self.pinged:
             self.pinged.add("quiet")
             self._ping(brief_mod.quiet_box_message((now - self.last_item_ts) / 60))
@@ -459,7 +512,8 @@ class Runner:
         stats = self.leads.stats(since_ts=since_ts, move_cents=self.move_cents)
         day = time.strftime("%Y-%m-%d", time.gmtime(now))
         today = {"items": self.day_items.get(day, 0), "stale": self.day_stale.get(day, 0),
-                 "unmatched": self.day_unmatched.get(day, 0), "paced": self.day_paced.get(day, 0)}
+                 "unmatched": self.day_unmatched.get(day, 0), "paced": self.day_paced.get(day, 0),
+                 "judged": self.day_judged.get(day, 0), "material": self.day_material.get(day, 0)}
         llm = {"today": self.budget.count_today(), "limit": self.budget.limit,
                "exhausted": self.budget.count_today() >= self.budget.limit}
         return brief_mod.brief_text(stats=stats, books=books, today=today, roster=self.counters.snapshot(),
@@ -519,6 +573,7 @@ class Runner:
                     last_index = now
                     await loop.run_in_executor(None, self.index.refresh)
                     self._cid_cache = {}
+                    self.seed_watch(now)
                     st = self.index.stats()
                     logger.info(f"[news] index: {st.get('n_markets')} markets")
                 await loop.run_in_executor(None, self.scan_jumps, now)
@@ -531,6 +586,7 @@ class Runner:
                 self.comments.prune(now)
                 self.counters.save(now)
                 self.dedup.save()
+                self._save_recent()
                 if now - last_hwm > 3600:
                     last_hwm = now
                     logger.info(f"[news] high-water: watch {self.hwm['watch']} tokens, recent {self.hwm['recent']} "
@@ -554,6 +610,7 @@ class Runner:
             await loop.run_in_executor(None, self.index.refresh)
         except Exception as exc:  # noqa: BLE001
             logger.warn(f"[news] first index refresh failed: {exc}")
+        self.seed_watch()
         st = self.index.stats()
         logger.info(f"[news] started: {len(self.roster)} sources, domains {','.join(self.domains)}, "
                     f"index {st.get('n_markets')} markets, model {self.model}, "
@@ -584,9 +641,35 @@ class Runner:
             tasks.append(asyncio.create_task(bluesky.stream(
                 self.queue, dids, domains_by_handle=domains_by_handle, stop=self.stop,
                 dedup=self.dedup, counters=self.counters)))
+        tasks.extend(self.optional_source_tasks())
         await asyncio.gather(*tasks, return_exceptions=True)
         self.counters.save(force=True)
         self.dedup.save(force=True)
+
+    def optional_source_tasks(self) -> list:
+        """Sources that need the owner's own credentials (2026-10-25): the
+        Telegram client API (his user session) and X (his cookies). Each runs
+        only when its keys are in the environment; absent keys mean the bot
+        runs on the free sources and says so once."""
+        tasks = []
+        from src.newsbot.sources import telegram_mtproto
+        if telegram_mtproto.enabled():
+            tasks.append(asyncio.create_task(telegram_mtproto.stream(
+                self.queue, self.dedup, self.counters, stop=self.stop)))
+            logger.info("[news] telegram client API source on (owner session)")
+        else:
+            logger.info("[news] telegram client API source off: TELEGRAM_API_ID/HASH/USER_SESSION not set")
+        try:
+            from src.newsbot.sources import x_cookies
+        except ImportError:
+            x_cookies = None
+        if x_cookies is not None and x_cookies.enabled():
+            tasks.append(asyncio.create_task(x_cookies.run(
+                self.queue, self.dedup, self.counters, stop=self.stop)))
+            logger.info("[news] X source on (owner cookies, one List)")
+        else:
+            logger.info("[news] X source off: X_AUTH_TOKEN/X_CT0/X_LIST_ID not set")
+        return tasks
 
     def _on_trade(self, t):
         self.buckets.add(t)
