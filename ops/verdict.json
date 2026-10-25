@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-25T06:41:14Z-a7d4",
-    "ts": 1792910474,
+    "id": "2026-10-25T12:42:24Z-4494",
+    "ts": 1792932144,
     "kind": "nothing",
-    "message": "Armed off since 2026-10-18 by owner choice, still off, spend today $0. No self-disarm, no re-arm cap hit, no guard failure, digest 35 min old. Only chronic benign errors (404 price lookups, server disconnects, 429s). Set Z form stable: 0x9f15613e net +9.4% (was +7.4%), 0x3d42e45c net +4.2% (was +3.3%), both improving with no losing streak. No wallet the bar has in form is losing now; no prior bench to lift. No action needed.",
+    "message": "Armed off since 2026-10-18 by owner choice, still off, spend today $0. Bot restarted a few times near digest time (signal 15) and came back clean each time (Bot started. Monitoring trades...), no self-disarm, no re-arm cap hit, no guard failure, digest fresh. Only chronic benign errors (404 price lookups, server disconnects, 429s). Set Z form stable: 0x9f15613e net +10.0% (was +9.4%), 0x3d42e45c net +4.2% (unchanged), both still in form with no losing streak. No wallet the bar has in form is losing now, no prior bench to lift. No action needed.",
     "evidence": [
-        "# ops digest 2026-10-25T06:06:09.397069+00:00 (last 24h)",
         "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
         "## spend today: {\"date\": \"2026-10-25\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-24\", \"closed_reason\": \"\"}",
-        "in form  0x9f15613e: 337 settled, 60% won vs 54% needed, net +9.4% on $1,580,722, worst day -149,979, 9 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "in form  0x3d42e45c: 147 settled, 60% won vs 54% needed, net +4.2% on $258,124, worst day -17,449, 0 of 13 exits under 10 min"
+        "in form  0x9f15613e: 340 settled, 60% won vs 54% needed, net +10.0% on $1,598,163, worst day -149,979, 9 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
+        "in form  0x3d42e45c: 147 settled, 60% won vs 54% needed, net +4.2% on $258,124, worst day -17,449, 0 of 13 exits under 10 min",
+        "2026-10-25 10:53:05 INFO  Received signal 15, shutting down... / 2026-10-25 10:54:47 INFO  Bot started. Monitoring trades..."
     ],
     "commit": null
 }
