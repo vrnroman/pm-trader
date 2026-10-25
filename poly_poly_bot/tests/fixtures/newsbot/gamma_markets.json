@@ -1,0 +1,2148 @@
+[
+ {
+  "id": "601826",
+  "question": "Will Flávio Bolsonaro win the 2026 Brazilian presidential election?",
+  "slug": "will-flvio-bolsonaro-win-the-2026-brazilian-presidential-election",
+  "description": "A presidential election is scheduled to take place in Brazil on October 4, 2026.\n\nThis market will resolve according to the listed candidate that wins this election.\n\nThis market includes any potential second round. If the result of this election isn't known by June 30, 2027, 11:59 PM ET, the market will resolve to \"Other\".\n\nThis market will resolve based on the result of the election as indicated",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.789\", \"0.211\"]",
+  "clobTokenIds": "[\"109876868437950584369987384406356259939519193117253465815665152916226511121427\", \"38310927461258927563020508025396887688249787380193911540547071417200646834355\"]",
+  "conditionId": "0x1a01bf78f56a507fcb666d564d8c8b91b0750679163ed6e96746102c9b7d285d",
+  "bestBid": 0.788,
+  "bestAsk": 0.79,
+  "lastTradePrice": 0.79,
+  "volume24hr": 1713989.3331920002,
+  "volumeNum": 27935372.442215,
+  "endDate": "2026-10-05T03:59:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Macro Election 2",
+    "slug": "macro-election-2"
+   },
+   {
+    "label": "Main Election",
+    "slug": "main-election"
+   },
+   {
+    "label": "Global Elections",
+    "slug": "global-elections"
+   },
+   {
+    "label": "Brazil",
+    "slug": "brazil"
+   },
+   {
+    "label": "World Elections",
+    "slug": "world-elections"
+   },
+   {
+    "label": "World",
+    "slug": "world"
+   }
+  ],
+  "events": [
+   {
+    "id": "45915",
+    "title": "Brazil Presidential Election",
+    "slug": "brazil-presidential-election",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "601819",
+  "question": "Will Luiz Inácio Lula da Silva win the 2026 Brazilian presidential election?",
+  "slug": "will-luiz-incio-lula-da-silva-win-the-2026-brazilian-presidential-election",
+  "description": "A presidential election is scheduled to take place in Brazil on October 4, 2026.\n\nThis market will resolve according to the listed candidate that wins this election.\n\nThis market includes any potential second round. If the result of this election isn't known by June 30, 2027, 11:59 PM ET, the market will resolve to \"Other\".\n\nThis market will resolve based on the result of the election as indicated",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.215\", \"0.785\"]",
+  "clobTokenIds": "[\"30630994248667897740988010928640156931882346081873066002335460180076741328029\", \"79191939610100241429039499950443680906623179487184628479206155805558220344190\"]",
+  "conditionId": "0xdf8e2dc5860027decbe6164555c3c1c9645c3bd33e16b9dc57ca87125047d4a8",
+  "bestBid": 0.21,
+  "bestAsk": 0.22,
+  "lastTradePrice": 0.21,
+  "volume24hr": 1282702.200085,
+  "volumeNum": 30817806.229035,
+  "endDate": "2026-10-05T03:59:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Macro Election 2",
+    "slug": "macro-election-2"
+   },
+   {
+    "label": "Main Election",
+    "slug": "main-election"
+   },
+   {
+    "label": "Global Elections",
+    "slug": "global-elections"
+   },
+   {
+    "label": "Brazil",
+    "slug": "brazil"
+   },
+   {
+    "label": "World Elections",
+    "slug": "world-elections"
+   },
+   {
+    "label": "World",
+    "slug": "world"
+   }
+  ],
+  "events": [
+   {
+    "id": "45915",
+    "title": "Brazil Presidential Election",
+    "slug": "brazil-presidential-election",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "608540",
+  "question": "Will Kylian Mbappé win the 2026 Ballon d'Or?",
+  "slug": "will-kylian-mbapp-win-the-2026-ballon-dor",
+  "description": "This market will resolve according to the winner of the 2026 Ballon d’Or.\n\nIf no 2026 Ballon d’Or winner is declared by December 31, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThe primary resolution source for this market is official information from France Football (https://www.francefootball.fr/).",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.1725\", \"0.8275\"]",
+  "clobTokenIds": "[\"95640549996905293510297955529586737178285694064878854803914367446504739764113\", \"43681720319477188597878188429504394796986333625436226983885469009299707562545\"]",
+  "conditionId": "0x87091dc5932f015d80c40e71e47cb043c3f8b6098484eb5bc3943cf35ee9afc1",
+  "bestBid": 0.17,
+  "bestAsk": 0.175,
+  "lastTradePrice": 0.171,
+  "volume24hr": 871940.2073939999,
+  "volumeNum": 6573493.943549999,
+  "endDate": "2026-10-27T03:59:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Sports",
+    "slug": "sports"
+   },
+   {
+    "label": "Awards",
+    "slug": "awards"
+   },
+   {
+    "label": "Ballon d'Or",
+    "slug": "ballon-dor"
+   },
+   {
+    "label": "Soccer",
+    "slug": "soccer"
+   }
+  ],
+  "events": [
+   {
+    "id": "48361",
+    "title": "Ballon d'Or Winner 2026",
+    "slug": "ballon-dor-winner-2026",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "5598481",
+  "question": "Will Real Madrid CF win on 2026-10-25?",
+  "slug": "lal-bar-rea-2026-10-25-rea",
+  "description": "In the upcoming game, scheduled for October 25, 2026\nIf Real Madrid CF wins, this market will resolve to \"Yes\".\nOtherwise, this market will resolve to \"No\".\nIf the game is postponed, this market will remain open until the game has been completed.\nIf the game is canceled entirely, with no make-up game, this market will resolve \"No\".\nThis market refers only to the outcome within the first 90 minutes",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.255\", \"0.745\"]",
+  "clobTokenIds": "[\"8853465120832778901717717180523314783482724931998595367133108707023926550591\", \"90883489004081780618656788559830046738681376889831440455435885082986244302734\"]",
+  "conditionId": "0x77706c139c0596bfe18973e428c1dc22a3f08bbf6a6cbe1d41a6e7aac5eb63c1",
+  "bestBid": 0.25,
+  "bestAsk": 0.26,
+  "lastTradePrice": 0.26,
+  "volume24hr": 720150.3573750005,
+  "volumeNum": 986765.312413,
+  "endDate": "2026-10-25T20:00:00Z",
+  "negRisk": true,
+  "sportsMarketType": "moneyline",
+  "gameStartTime": "2026-10-25 20:00:00+00",
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Sports",
+    "slug": "sports"
+   },
+   {
+    "label": "Games",
+    "slug": "games"
+   },
+   {
+    "label": "Soccer",
+    "slug": "soccer"
+   },
+   {
+    "label": "La Liga",
+    "slug": "la-liga"
+   }
+  ],
+  "events": [
+   {
+    "id": "1175548",
+    "title": "FC Barcelona vs. Real Madrid CF",
+    "slug": "lal-bar-rea-2026-10-25",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "2589812",
+  "question": "Will there be no change in Fed interest rates after the October 2026 meeting?",
+  "slug": "will-there-be-no-change-in-fed-interest-rates-after-the-october-2026-meeting-20260617190324031",
+  "description": "The FED interest rates are defined in this market by the upper bound of the target federal funds range. The decisions on the target federal funds range are made by the Federal Open Market Committee (FOMC) meetings.\n\nThis market will resolve to the amount of basis points the upper bound of the target federal funds rate is changed by versus the level it was prior to the Federal Reserve's October 202",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.955\", \"0.045\"]",
+  "clobTokenIds": "[\"111061902544814266207267295505639408607400625795891618462682726460921782993748\", \"42038775866198212615491650114881818219665139981763207699110491615333273795415\"]",
+  "conditionId": "0xdf9bf27ee5757c55b44b8b9826ddc9ec3a8809aa3278634c45edbb7fc8f1a3e3",
+  "bestBid": 0.95,
+  "bestAsk": 0.96,
+  "lastTradePrice": 0.95,
+  "volume24hr": 694982.0367110001,
+  "volumeNum": 18808041.152343,
+  "endDate": "2026-10-29T03:59:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Recurring",
+    "slug": "recurring"
+   },
+   {
+    "label": "US CPI",
+    "slug": "us-cpi"
+   },
+   {
+    "label": "Fed",
+    "slug": "fed"
+   },
+   {
+    "label": "fomc",
+    "slug": "fomc"
+   },
+   {
+    "label": "Trump",
+    "slug": "trump"
+   },
+   {
+    "label": "Economy",
+    "slug": "economy"
+   },
+   {
+    "label": "Fed Rates",
+    "slug": "fed-rates"
+   },
+   {
+    "label": "Kevin Warsh",
+    "slug": "kevin-warsh"
+   },
+   {
+    "label": "Global Rates",
+    "slug": "Global-Rates"
+   },
+   {
+    "label": "Economic Policy",
+    "slug": "economic-policy"
+   },
+   {
+    "label": "Macro Indicators",
+    "slug": "macro-indicators"
+   }
+  ],
+  "events": [
+   {
+    "id": "606422",
+    "title": "Fed Decision in October?",
+    "slug": "fed-decision-in-october-20260617190323537",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "3741671",
+  "question": "Will Russia and Ukraine hold any diplomatic meeting by October 31, 2026?",
+  "slug": "will-russia-and-ukraine-hold-any-diplomatic-meeting-by-october-31-2026",
+  "description": "This market will resolve to \"Yes\" if there is a diplomatic meeting between representatives of Russia and Ukraine by the listed date, 11:59 PM ET. Otherwise, this market will resolve to “No”.\n\nA diplomatic meeting refers to a deliberate meeting between representatives of the listed countries who are acting in an official capacity and are authorized to engage in negotiation or diplomacy regarding Ru",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.9995\", \"0.0005\"]",
+  "clobTokenIds": "[\"86563869614880421092753151558844510871194707336319416240973297556731707428543\", \"25863924423480284180332695214308264907432064482953319563900522136638568696909\"]",
+  "conditionId": "0x7f27abd7cf3b246e1305b494e548020ba744d788195745428bd76d1ccddab1e7",
+  "bestBid": 0.999,
+  "bestAsk": 1,
+  "lastTradePrice": 0.999,
+  "volume24hr": 633482.44,
+  "volumeNum": 2365562.127654,
+  "endDate": "2026-11-01T03:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Russia",
+    "slug": "russia"
+   },
+   {
+    "label": "Ukraine",
+    "slug": "ukraine"
+   },
+   {
+    "label": "zelenskyy",
+    "slug": "zelenskyy"
+   },
+   {
+    "label": "putin",
+    "slug": "putin"
+   },
+   {
+    "label": "zelensky",
+    "slug": "zelensky"
+   },
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   }
+  ],
+  "events": [
+   {
+    "id": "878226",
+    "title": "Russia x Ukraine any diplomatic meeting by...?",
+    "slug": "russia-x-ukraine-any-diplomatic-meeting-byptptpt-20260819",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "2589813",
+  "question": "Will the Fed increase interest rates by 25 bps after the October 2026 meeting?",
+  "slug": "will-the-fed-increase-interest-rates-by-25-bps-after-the-october-2026-meeting-20260617190324032",
+  "description": "The FED interest rates are defined in this market by the upper bound of the target federal funds range. The decisions on the target federal funds range are made by the Federal Open Market Committee (FOMC) meetings.\n\nThis market will resolve to the amount of basis points the upper bound of the target federal funds rate is changed by versus the level it was prior to the Federal Reserve's October 202",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.045\", \"0.955\"]",
+  "clobTokenIds": "[\"55159722761418013044126414276680602270318000841690689684819994448621694923050\", \"78632395083310670734315205502061249602319069653915932320155846460019107676757\"]",
+  "conditionId": "0x12aa13b3da17ceae1b0a59b5d5b77121e91bb79b4bb0b52bf6543ed3f8d0953b",
+  "bestBid": 0.04,
+  "bestAsk": 0.05,
+  "lastTradePrice": 0.04,
+  "volume24hr": 460602.03118000005,
+  "volumeNum": 14516558.538344,
+  "endDate": "2026-10-29T03:59:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Recurring",
+    "slug": "recurring"
+   },
+   {
+    "label": "US CPI",
+    "slug": "us-cpi"
+   },
+   {
+    "label": "Fed",
+    "slug": "fed"
+   },
+   {
+    "label": "fomc",
+    "slug": "fomc"
+   },
+   {
+    "label": "Trump",
+    "slug": "trump"
+   },
+   {
+    "label": "Economy",
+    "slug": "economy"
+   },
+   {
+    "label": "Fed Rates",
+    "slug": "fed-rates"
+   },
+   {
+    "label": "Kevin Warsh",
+    "slug": "kevin-warsh"
+   },
+   {
+    "label": "Global Rates",
+    "slug": "Global-Rates"
+   },
+   {
+    "label": "Economic Policy",
+    "slug": "economic-policy"
+   },
+   {
+    "label": "Macro Indicators",
+    "slug": "macro-indicators"
+   }
+  ],
+  "events": [
+   {
+    "id": "606422",
+    "title": "Fed Decision in October?",
+    "slug": "fed-decision-in-october-20260617190323537",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "5598475",
+  "question": "Will FC Barcelona win on 2026-10-25?",
+  "slug": "lal-bar-rea-2026-10-25-bar",
+  "description": "In the upcoming game, scheduled for October 25, 2026\nIf FC Barcelona wins, this market will resolve to \"Yes\".\nOtherwise, this market will resolve to \"No\".\nIf the game is postponed, this market will remain open until the game has been completed.\nIf the game is canceled entirely, with no make-up game, this market will resolve \"No\".\nThis market refers only to the outcome within the first 90 minutes o",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.595\", \"0.405\"]",
+  "clobTokenIds": "[\"28032922121340574564753529975027027359615112054359670441462060501417320722117\", \"53781445402973928381138196330447206332311283276278686884241494610532113968251\"]",
+  "conditionId": "0x793815e8628516f29709620fcafb8d79da6f8b9eccdbc3a81980eba46cf608d1",
+  "bestBid": 0.59,
+  "bestAsk": 0.6,
+  "lastTradePrice": 0.6,
+  "volume24hr": 405747.42134700005,
+  "volumeNum": 502950.09506999986,
+  "endDate": "2026-10-25T20:00:00Z",
+  "negRisk": true,
+  "sportsMarketType": "moneyline",
+  "gameStartTime": "2026-10-25 20:00:00+00",
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Sports",
+    "slug": "sports"
+   },
+   {
+    "label": "Games",
+    "slug": "games"
+   },
+   {
+    "label": "Soccer",
+    "slug": "soccer"
+   },
+   {
+    "label": "La Liga",
+    "slug": "la-liga"
+   }
+  ],
+  "events": [
+   {
+    "id": "1175548",
+    "title": "FC Barcelona vs. Real Madrid CF",
+    "slug": "lal-bar-rea-2026-10-25",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "5599705",
+  "question": "FC Barcelona vs. Real Madrid CF: O/U 4.5",
+  "slug": "lal-bar-rea-2026-10-25-total-4pt5",
+  "description": "In the upcoming La Liga game between FC Barcelona and Real Madrid CF, scheduled for October 25 at 4:00 PM ET:\n\nThis market will resolve to \"Over\" if FC Barcelona and Real Madrid CF combine to score 5 or more goals in this game.\n\nIf the combined total is less than 5, this market will resolve to \"Under\".\n\nIf the game is postponed, this market will remain open until the game has been completed. If th",
+  "outcomes": "[\"Over\", \"Under\"]",
+  "outcomePrices": "[\"0.405\", \"0.595\"]",
+  "clobTokenIds": "[\"19432791343995156627233123308270218746931996798505906217985887993271623699595\", \"34460712389364399376624762205020746497051709023099065791052851865140869037242\"]",
+  "conditionId": "0x88a786bf629ab8d95fadec85460dfa68f959cb4c622d634a976004439c2b63d2",
+  "bestBid": 0.4,
+  "bestAsk": 0.41,
+  "lastTradePrice": 0.41,
+  "volume24hr": 347719.981896,
+  "volumeNum": 365349.449837,
+  "endDate": "2026-10-25T20:00:00Z",
+  "negRisk": false,
+  "sportsMarketType": "totals",
+  "gameStartTime": "2026-10-25 20:00:00+00",
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Sports",
+    "slug": "sports"
+   },
+   {
+    "label": "La Liga",
+    "slug": "la-liga"
+   },
+   {
+    "label": "Soccer",
+    "slug": "soccer"
+   },
+   {
+    "label": "Games",
+    "slug": "games"
+   }
+  ],
+  "events": [
+   {
+    "id": "1175738",
+    "title": "FC Barcelona vs. Real Madrid CF - More Markets",
+    "slug": "lal-bar-rea-2026-10-25-more-markets",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "682705",
+  "question": "Will Benjamin Netanyahu be the next Prime Minister of Israel?",
+  "slug": "will-benjamin-netanyahu-be-the-next-prime-minister-of-israel",
+  "description": "Legislative elections are schedule to be held in Israel on October 27, 2026. \n\nThis market will resolve to the next individual who is officially appointed and sworn in as Prime Minister of Israel following the 2026 parliamentary election. If an election is called early, this market will immediately resolve to the individual who is officially appointed and sworn in after that election.\n\nTo count fo",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.285\", \"0.715\"]",
+  "clobTokenIds": "[\"20006732765674855733524007935991362439352594042415161039767275461950712817548\", \"54533569528927082430133047556849600511985191158927477533124630301934489498530\"]",
+  "conditionId": "0x7586a96520578acaaaa4ea84a2582f197f84255da1f3392a7aa300386c187b37",
+  "bestBid": 0.28,
+  "bestAsk": 0.29,
+  "lastTradePrice": 0.29,
+  "volume24hr": 333283.49160700006,
+  "volumeNum": 11035619.736089002,
+  "endDate": "2026-10-28T03:59:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Israel Election",
+    "slug": "israel-election"
+   },
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Elections",
+    "slug": "elections"
+   },
+   {
+    "label": "Middle East",
+    "slug": "middle-east"
+   },
+   {
+    "label": "Israel",
+    "slug": "israel"
+   },
+   {
+    "label": "Global Elections",
+    "slug": "global-elections"
+   },
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   },
+   {
+    "label": "World",
+    "slug": "world"
+   },
+   {
+    "label": "Trump-Netanyahu",
+    "slug": "trump-netanyahu"
+   },
+   {
+    "label": "World Elections",
+    "slug": "world-elections"
+   },
+   {
+    "label": "Main Election",
+    "slug": "main-election"
+   }
+  ],
+  "events": [
+   {
+    "id": "81557",
+    "title": "Prime Minister of Israel after the next election?",
+    "slug": "who-will-be-the-next-prime-minister-of-israel-after-the-next-election",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "2589811",
+  "question": "Will the Fed decrease interest rates by 25 bps after the October 2026 meeting?",
+  "slug": "will-the-fed-decrease-interest-rates-by-25-bps-after-the-october-2026-meeting-20260617190324030",
+  "description": "The FED interest rates are defined in this market by the upper bound of the target federal funds range. The decisions on the target federal funds range are made by the Federal Open Market Committee (FOMC) meetings.\n\nThis market will resolve to the amount of basis points the upper bound of the target federal funds rate is changed by versus the level it was prior to the Federal Reserve's October 202",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.0015\", \"0.9985\"]",
+  "clobTokenIds": "[\"33268510350568915228897273528353467773422190590579607471427765079749830445947\", \"110888499829195123034987289109543572302716575133123608254293945182185650232552\"]",
+  "conditionId": "0x9cf563d7b55aa9aa876d5d7e55126347eee473f0ae56d799e325fdef2bf25297",
+  "bestBid": 0.001,
+  "bestAsk": 0.002,
+  "lastTradePrice": 0.001,
+  "volume24hr": 330052.266,
+  "volumeNum": 10860079.562278997,
+  "endDate": "2026-10-29T03:59:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Recurring",
+    "slug": "recurring"
+   },
+   {
+    "label": "US CPI",
+    "slug": "us-cpi"
+   },
+   {
+    "label": "Fed",
+    "slug": "fed"
+   },
+   {
+    "label": "fomc",
+    "slug": "fomc"
+   },
+   {
+    "label": "Trump",
+    "slug": "trump"
+   },
+   {
+    "label": "Economy",
+    "slug": "economy"
+   },
+   {
+    "label": "Fed Rates",
+    "slug": "fed-rates"
+   },
+   {
+    "label": "Kevin Warsh",
+    "slug": "kevin-warsh"
+   },
+   {
+    "label": "Global Rates",
+    "slug": "Global-Rates"
+   },
+   {
+    "label": "Economic Policy",
+    "slug": "economic-policy"
+   },
+   {
+    "label": "Macro Indicators",
+    "slug": "macro-indicators"
+   }
+  ],
+  "events": [
+   {
+    "id": "606422",
+    "title": "Fed Decision in October?",
+    "slug": "fed-decision-in-october-20260617190323537",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "5686982",
+  "question": "US x Iran ceasefire continues through October 28?",
+  "slug": "us-x-iran-ceasefire-continues-through-october-28",
+  "description": "This market will resolve to “No” if the United States takes a qualifying military action against Iran by the specified date, 11:59 PM Iran Standard Time. Otherwise this market will resolve to “Yes.”\n\nA qualifying military action refers to an air strike or a surface-to-surface missile strike, initiated by the United States, that directly impacts Iran. An air strike includes bombs, air-to-surface mi",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.875\", \"0.125\"]",
+  "clobTokenIds": "[\"59350961360345977237495309734862360032649347834826334279255400397300223023885\", \"26877478058153789253786602836735964031119679847477377837423064644260778500729\"]",
+  "conditionId": "0xff019ccfa1337dc7d12968183949ff5877a8b66ab19903e42331a7b94f97cfd7",
+  "bestBid": 0.87,
+  "bestAsk": 0.88,
+  "lastTradePrice": 0.88,
+  "volume24hr": 284315.721715,
+  "volumeNum": 880534.5386059999,
+  "endDate": "2026-10-29T03:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Iran",
+    "slug": "iran"
+   },
+   {
+    "label": "Trump",
+    "slug": "trump"
+   },
+   {
+    "label": "Middle East",
+    "slug": "middle-east"
+   },
+   {
+    "label": "Israel",
+    "slug": "israel"
+   },
+   {
+    "label": "Military",
+    "slug": "military"
+   },
+   {
+    "label": "Military Actions",
+    "slug": "military-action"
+   },
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   },
+   {
+    "label": "Military Strikes",
+    "slug": "military-strikes"
+   },
+   {
+    "label": "Israel x Iran",
+    "slug": "israel-x-iran"
+   }
+  ],
+  "events": [
+   {
+    "id": "1038648",
+    "title": "US-Iran ceasefire continues through...?",
+    "slug": "us-iran-ceasefire-continues-throughptptpt",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "4641065",
+  "question": "US x Iran ceasefire continues through October 31?",
+  "slug": "us-x-iran-ceasefire-continues-through-october-31-20260917",
+  "description": "This market will resolve to “No” if the United States takes a qualifying military action against Iran by the specified date, 11:59 PM Iran Standard Time. Otherwise this market will resolve to “Yes.”\n\nA qualifying military action refers to an air strike or a surface-to-surface missile strike, initiated by the United States, that directly impacts Iran. An air strike includes bombs, air-to-surface mi",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.825\", \"0.175\"]",
+  "clobTokenIds": "[\"67102598924726349989742049657609063097299442010642912942032681022413402597017\", \"114475889232765203212032217024645308497828327658421967586050553616813506019119\"]",
+  "conditionId": "0x3738ad9665480991affe3ba286cd035516e17d1f8b7703e05088ec19c70c21a4",
+  "bestBid": 0.82,
+  "bestAsk": 0.83,
+  "lastTradePrice": 0.83,
+  "volume24hr": 223896.928063,
+  "volumeNum": 6080019.224603,
+  "endDate": "2026-10-31T23:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Iran",
+    "slug": "iran"
+   },
+   {
+    "label": "Trump",
+    "slug": "trump"
+   },
+   {
+    "label": "Israel",
+    "slug": "israel"
+   },
+   {
+    "label": "Military",
+    "slug": "military"
+   },
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   },
+   {
+    "label": "Middle East",
+    "slug": "middle-east"
+   },
+   {
+    "label": "Israel x Iran",
+    "slug": "israel-x-iran"
+   },
+   {
+    "label": "Military Actions",
+    "slug": "military-action"
+   },
+   {
+    "label": "Military Strikes",
+    "slug": "military-strikes"
+   }
+  ],
+  "events": [
+   {
+    "id": "1038648",
+    "title": "US-Iran ceasefire continues through...?",
+    "slug": "us-iran-ceasefire-continues-throughptptpt",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "665374",
+  "question": "Will the U.S. invade Iran before 2027?",
+  "slug": "will-the-us-invade-iran-before-2027",
+  "description": "This market will resolve to \"Yes\" if the United States commences a military offensive intended to establish control over any portion of Iran by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nFor the purposes of this market, land de facto controlled by Iran or the United States as of November 4, 2025 12:00 PM ET, will be considered the sovereign territory of that coun",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.195\", \"0.805\"]",
+  "clobTokenIds": "[\"55115078421062885512539156303747803058407616201213034911037320915726138659123\", \"1910830010387565971650098373488592514702818137344973088263643820608151819241\"]",
+  "conditionId": "0x5db999fad322cea2914535aae5517060c3f80ad6d8c0231cde2124a434d16846",
+  "bestBid": 0.19,
+  "bestAsk": 0.2,
+  "lastTradePrice": 0.2,
+  "volume24hr": 203849.534658,
+  "volumeNum": 75345129.17343001,
+  "endDate": "2027-01-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Military Strikes",
+    "slug": "military-strikes"
+   },
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Iran",
+    "slug": "iran"
+   },
+   {
+    "label": "Trump",
+    "slug": "trump"
+   },
+   {
+    "label": "Middle East",
+    "slug": "middle-east"
+   },
+   {
+    "label": "Israel",
+    "slug": "israel"
+   },
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   },
+   {
+    "label": "World",
+    "slug": "world"
+   }
+  ],
+  "events": [
+   {
+    "id": "73130",
+    "title": "Will the U.S. invade Iran before 2027?",
+    "slug": "will-the-us-invade-iran-before-2027",
+    "negRisk": null,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "3865960",
+  "question": "Will Bitcoin dip to $70,000 by December 31, 2026?",
+  "slug": "will-bitcoin-dip-to-70000-by-december-31-2026-from-august-24",
+  "description": "This market will resolve to “Yes” if any Binance 1-minute candle for Bitcoin (BTC/USDT) from the creation of this market through 11:59 PM ET on the last day of the year specified in the title has a final \"High\" or \"Low\" price equal to or beyond (above for ↑ High Prices, below for ↓ Low Prices) the listed price. Otherwise, this market will resolve to \"No”. Price action before this market's creation",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.39\", \"0.61\"]",
+  "clobTokenIds": "[\"26181023444847865740144968881453381639052456965503182671034643115973725837732\", \"43873895024879972348799332304583852450961083930689783649843650004302588743583\"]",
+  "conditionId": "0x6d7203b2161a636a6ad554a986400e29411aecfdb51f91416a0ef9f7b6685e3b",
+  "bestBid": 0.38,
+  "bestAsk": 0.4,
+  "lastTradePrice": 0.38,
+  "volume24hr": 157589.86673999997,
+  "volumeNum": 1294479.8165250001,
+  "endDate": "2027-01-01T05:00:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Crypto",
+    "slug": "crypto"
+   },
+   {
+    "label": "Bitcoin",
+    "slug": "bitcoin"
+   },
+   {
+    "label": "Crypto Prices",
+    "slug": "crypto-prices"
+   },
+   {
+    "label": "Hit Price",
+    "slug": "hit-price"
+   },
+   {
+    "label": "Yearly",
+    "slug": "yearly"
+   },
+   {
+    "label": "Earn 3.25%",
+    "slug": "earn-4"
+   }
+  ],
+  "events": [
+   {
+    "id": "89502",
+    "title": "What price will Bitcoin hit in 2026?",
+    "slug": "what-price-will-bitcoin-hit-before-2027",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "5598478",
+  "question": "Will FC Barcelona vs. Real Madrid CF end in a draw?",
+  "slug": "lal-bar-rea-2026-10-25-draw",
+  "description": "In the upcoming game, scheduled for October 25, 2026\nIf the game ends in a draw, this market will resolve to \"Yes\".\nOtherwise, this market will resolve to \"No\".\nIf the game is postponed, this market will remain open until the game has been completed.\nIf the game is canceled entirely, with no make-up game, this market will resolve to \"Yes\".\nThis market refers only to the outcome within the first 90",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.155\", \"0.845\"]",
+  "clobTokenIds": "[\"80685655548352255018006352251898342466683775705440478843429580095322705952038\", \"84049078462839284928593842992608322797543702635109044239645347113795676470934\"]",
+  "conditionId": "0xf66e46bcd3f2cdb83b1a03b90cf8282a694673c9c79d79a22658de832123ede6",
+  "bestBid": 0.15,
+  "bestAsk": 0.16,
+  "lastTradePrice": 0.16,
+  "volume24hr": 127826.995718,
+  "volumeNum": 178693.35692,
+  "endDate": "2026-10-25T20:00:00Z",
+  "negRisk": true,
+  "sportsMarketType": "moneyline",
+  "gameStartTime": "2026-10-25 20:00:00+00",
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Sports",
+    "slug": "sports"
+   },
+   {
+    "label": "Games",
+    "slug": "games"
+   },
+   {
+    "label": "Soccer",
+    "slug": "soccer"
+   },
+   {
+    "label": "La Liga",
+    "slug": "la-liga"
+   }
+  ],
+  "events": [
+   {
+    "id": "1175548",
+    "title": "FC Barcelona vs. Real Madrid CF",
+    "slug": "lal-bar-rea-2026-10-25",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "997488",
+  "question": "Will Trump acquire Greenland before 2027?",
+  "slug": "will-trump-acquire-greenland-before-2027",
+  "description": "This market will resolve to \"Yes\" if the United States officially announces that Greenland will come under US sovereignty by December 31, 2026, 11:59 PM ET. Otherwise this market will resolve to \"No\".\n\nSovereignty is defined as the transfer of the majority of the territory of Greenland from its current status as an autonomous territory within the Kingdom of Denmark to being under the formal govern",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.0245\", \"0.9755\"]",
+  "clobTokenIds": "[\"5161623255678193352839985156330393796378434470119114669671615782853260939535\", \"57216272564529548464686463691236811991956032201293786790337952253964682584376\"]",
+  "conditionId": "0xd595eb9b81885ff018738300c79047e3ec89e87294424f57a29a7fa9162bf116",
+  "bestBid": 0.024,
+  "bestAsk": 0.025,
+  "lastTradePrice": 0.024,
+  "volume24hr": 104196.052132,
+  "volumeNum": 35819263.26682601,
+  "endDate": "2027-01-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Trump",
+    "slug": "trump"
+   },
+   {
+    "label": "Denmark",
+    "slug": "denmark"
+   },
+   {
+    "label": "Greenland",
+    "slug": "greenland"
+   },
+   {
+    "label": "Foreign Policy",
+    "slug": "foreign-policy"
+   },
+   {
+    "label": "Davos",
+    "slug": "davos"
+   },
+   {
+    "label": "Parent For Derivative",
+    "slug": "parent-for-derivative"
+   }
+  ],
+  "events": [
+   {
+    "id": "118172",
+    "title": "Will Trump acquire Greenland before 2027?",
+    "slug": "will-trump-acquire-greenland-before-2027",
+    "negRisk": null,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "6084603",
+  "question": "Bitcoin Up or Down on October 25?",
+  "slug": "bitcoin-up-or-down-on-october-25-2026",
+  "description": "This market will resolve to \"Up\" if the \"Close\" price for the Binance 1 minute candle for BTC/USDT Oct 24 '26 12:00 in the ET timezone (noon) is lower than the final \"Close\" price for the Oct 25 '26 12:00 ET candle.\n\nThis market will resolve to \"Down\" if the \"Close\" price for the Binance 1 minute candle for BTC/USDT Oct 24 '26 12:00 in the ET timezone (noon) is higher than the final \"Close\" price ",
+  "outcomes": "[\"Up\", \"Down\"]",
+  "outcomePrices": "[\"0.845\", \"0.155\"]",
+  "clobTokenIds": "[\"48191372915249657133751110668077019051813056504483947908908840568521742782814\", \"34051942675712985421251724731651306446759221618563051389482200364172212391950\"]",
+  "conditionId": "0x45129cadf584e1069d5f76620227c89efc5ece8bf18696dd753d0ab9b65bc780",
+  "bestBid": 0.84,
+  "bestAsk": 0.85,
+  "lastTradePrice": 0.84,
+  "volume24hr": 94295.18307399999,
+  "volumeNum": 94644.113965,
+  "endDate": "2026-10-25T16:00:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Crypto",
+    "slug": "crypto"
+   },
+   {
+    "label": "Crypto Prices",
+    "slug": "crypto-prices"
+   },
+   {
+    "label": "Recurring",
+    "slug": "recurring"
+   },
+   {
+    "label": "Hide From New",
+    "slug": "hide-from-new"
+   },
+   {
+    "label": "Bitcoin",
+    "slug": "bitcoin"
+   },
+   {
+    "label": "Up or Down",
+    "slug": "up-or-down"
+   },
+   {
+    "label": "Today 🚀",
+    "slug": "today"
+   },
+   {
+    "label": "Daily",
+    "slug": "daily"
+   },
+   {
+    "label": "Daily-Close",
+    "slug": "daily-close"
+   }
+  ],
+  "events": [
+   {
+    "id": "1241208",
+    "title": "Bitcoin Up or Down on October 25?",
+    "slug": "bitcoin-up-or-down-on-october-25-2026",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "5170735",
+  "question": "Will Bitcoin reach $87,500 in October?",
+  "slug": "will-bitcoin-reach-87pt5k-in-october-2026",
+  "description": "This market will immediately resolve to \"Yes\" if any Binance 1 minute candle for BTC/USDT during the month specified in the title (from 00:00 AM ET on the first day to 11:59 PM ET on the last), has a final High price equal to or greater than the price specified in the title. Otherwise, this market will resolve to \"No.\"\n\nThe resolution source for this market is Binance, specifically the BTC/USDT Hi",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.085\", \"0.915\"]",
+  "clobTokenIds": "[\"60853708478456543766262549859214991255573301006704578370875039498477095018713\", \"96542630129959650343931842229679432616366799477200535852826422961087489621387\"]",
+  "conditionId": "0x42dc04e485b5d8ec749326fe564820ee37a1c63425f43d7b0755a016afd5c4cb",
+  "bestBid": 0.08,
+  "bestAsk": 0.09,
+  "lastTradePrice": 0.09,
+  "volume24hr": 91670.11827700002,
+  "volumeNum": 977213.443042,
+  "endDate": "2026-11-01T04:00:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Bitcoin",
+    "slug": "bitcoin"
+   },
+   {
+    "label": "Monthly",
+    "slug": "monthly"
+   },
+   {
+    "label": "Hit Price",
+    "slug": "hit-price"
+   },
+   {
+    "label": "Crypto",
+    "slug": "crypto"
+   },
+   {
+    "label": "Crypto Prices",
+    "slug": "crypto-prices"
+   },
+   {
+    "label": "Recurring",
+    "slug": "recurring"
+   }
+  ],
+  "events": [
+   {
+    "id": "1112205",
+    "title": "What price will Bitcoin hit in October?",
+    "slug": "what-price-will-bitcoin-hit-in-october-2026",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "560317",
+  "question": "Putin out as President of Russia by December 31, 2026?",
+  "slug": "putin-out-before-2027-346",
+  "description": "This market will resolve to “Yes” if Vladimir Putin ceases to be President of Russia for any period of time between market creation and the specified date (ET). Otherwise, this market will resolve to “No”.\n\nAn announcement of Vladimir Putin's resignation/removal before this market's end date will immediately resolve this market to \"Yes\", regardless of when the announced resignation/removal goes in",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.0225\", \"0.9775\"]",
+  "clobTokenIds": "[\"350977769852917329387037893294763093471844346281449484439085576212613048126\", \"87073899845581463485186346288398658568334162612963837182986759797304993556208\"]",
+  "conditionId": "0x6bd56627aa21311850825edb27e53434a0e17a4f782be0086bc07f71eee00d0d",
+  "bestBid": 0.022,
+  "bestAsk": 0.023,
+  "lastTradePrice": 0.023,
+  "volume24hr": 90188.244828,
+  "volumeNum": 26498685.27708,
+  "endDate": "2027-01-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "putin",
+    "slug": "putin"
+   },
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   },
+   {
+    "label": "Ukraine",
+    "slug": "ukraine"
+   },
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "World",
+    "slug": "world"
+   },
+   {
+    "label": "Russia",
+    "slug": "russia"
+   },
+   {
+    "label": "Earn 3.25%",
+    "slug": "earn-4"
+   }
+  ],
+  "events": [
+   {
+    "id": "31195",
+    "title": "Putin out as President of Russia by...?",
+    "slug": "putin-out-before-2027",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "5170742",
+  "question": "Will Bitcoin dip to $70,000 in October?",
+  "slug": "will-bitcoin-dip-to-70k-in-october-2026",
+  "description": "This market will immediately resolve to \"Yes\" if any Binance 1 minute candle for BTC/USDT during the month specified in the title (from 00:00 AM ET on the first day to 11:59 PM ET on the last), has a final Low price equal to or lower than the price specified in the title. Otherwise, this market will resolve to \"No.\"\n\nThe resolution source for this market is Binance, specifically the BTC/USDT Low p",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.0335\", \"0.9665\"]",
+  "clobTokenIds": "[\"61652850125251950698207965617627574223915095535247898006231788162915017870855\", \"29664673244174799182114521717774702941585996339705669435041254633816999779157\"]",
+  "conditionId": "0x8feb2a254634f61caacbbe13abd7b9d5b30c296e66fa3666990cab540fb3d0a5",
+  "bestBid": 0.033,
+  "bestAsk": 0.034,
+  "lastTradePrice": 0.034,
+  "volume24hr": 89892.70440700001,
+  "volumeNum": 381197.4623269999,
+  "endDate": "2026-11-01T04:00:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Bitcoin",
+    "slug": "bitcoin"
+   },
+   {
+    "label": "Monthly",
+    "slug": "monthly"
+   },
+   {
+    "label": "Hit Price",
+    "slug": "hit-price"
+   },
+   {
+    "label": "Crypto",
+    "slug": "crypto"
+   },
+   {
+    "label": "Crypto Prices",
+    "slug": "crypto-prices"
+   },
+   {
+    "label": "Recurring",
+    "slug": "recurring"
+   }
+  ],
+  "events": [
+   {
+    "id": "1112205",
+    "title": "What price will Bitcoin hit in October?",
+    "slug": "what-price-will-bitcoin-hit-in-october-2026",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "3399459",
+  "question": "Israel x Iran ceasefire continues through October 31?",
+  "slug": "israel-x-iran-ceasefire-continues-through-october-31",
+  "description": "This market will resolve to \"Yes\" if a state of ceasefire remains in effect between Israel and Iran through the listed date, 11:59 PM Iran Standard Time (IRST). Otherwise this market will resolve to “No”. \n\nA state of ceasefire will be considered to no longer be in effect between Israel and Iran if either Israel or Iran takes a qualifying military action against the other country between market cr",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.86\", \"0.14\"]",
+  "clobTokenIds": "[\"36595575197199846398267481972385180643951985822505187477756829088194676076340\", \"34386684966925037477701889915132575610574649191623462027976379158560146275115\"]",
+  "conditionId": "0xc3d5708780de5528998aeb53ca90e7ade64804f9f2386392a681435d5c42b44d",
+  "bestBid": 0.85,
+  "bestAsk": 0.87,
+  "lastTradePrice": 0.87,
+  "volume24hr": 87659.596504,
+  "volumeNum": 3140580.3726930004,
+  "endDate": "2026-10-31T20:29:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Iran",
+    "slug": "iran"
+   },
+   {
+    "label": "Israel",
+    "slug": "israel"
+   },
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   },
+   {
+    "label": "Israel x Iran",
+    "slug": "israel-x-iran"
+   },
+   {
+    "label": "Israel Election",
+    "slug": "israel-election"
+   }
+  ],
+  "events": [
+   {
+    "id": "711714",
+    "title": "Israel x Iran ceasefire continues through...?",
+    "slug": "israel-x-iran-ceasefire-continues-throughptptpt-20260716224448963",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "616902",
+  "question": "Will no Fed rate cuts happen in 2026?",
+  "slug": "will-no-fed-rate-cuts-happen-in-2026",
+  "description": "This market will resolve according to the exact amount of cuts of 25 basis points in 2026 by the Fed (including any cuts made during the December meeting).\n\nEmergency rate cuts outside of scheduled FOMC meetings will also count toward the total number of cuts in 2026. This market will remain open until December 31, 2026, 11:59 PM ET, to account for any such emergency actions.\n\nFor example, if the ",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.9645\", \"0.0355\"]",
+  "clobTokenIds": "[\"12403602920039269077597917340921667997547115084613238528792639013246536343316\", \"21294592205022969346730955103773391901993330222644504059576935265667917187903\"]",
+  "conditionId": "0xd4e77ba6f29fc093509d24f508631abd445ecf506bbdc9c4c80e60256a318527",
+  "bestBid": 0.964,
+  "bestAsk": 0.965,
+  "lastTradePrice": 0.964,
+  "volume24hr": 70134.882924,
+  "volumeNum": 9112068.99688,
+  "endDate": "2027-01-01T04:59:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Kevin Warsh",
+    "slug": "kevin-warsh"
+   },
+   {
+    "label": "Rewards 200, 4.5, 50 Deprec",
+    "slug": "rewards-200-4pt5-50"
+   },
+   {
+    "label": "Business",
+    "slug": "business"
+   },
+   {
+    "label": "Fed",
+    "slug": "fed"
+   },
+   {
+    "label": "Fed Rates",
+    "slug": "fed-rates"
+   },
+   {
+    "label": "Economic Policy",
+    "slug": "economic-policy"
+   },
+   {
+    "label": "Economy",
+    "slug": "economy"
+   },
+   {
+    "label": "Finance",
+    "slug": "finance"
+   }
+  ],
+  "events": [
+   {
+    "id": "51456",
+    "title": "How many Fed rate cuts in 2026?",
+    "slug": "how-many-fed-rate-cuts-in-2026",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "666861",
+  "question": "Trump out as President before 2027?",
+  "slug": "trump-out-as-president-before-2027",
+  "description": "This market will resolve to “Yes” if Donald Trump resigns or is removed as President or otherwise ceases to be the President of the United States for any period of time by December 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to “No”.\n\nAn announcement of Donald Trump's resignation/removal before this market's end date will immediately resolve this market to \"Yes\", regardless of when ",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.0465\", \"0.9535\"]",
+  "clobTokenIds": "[\"59252515735652674747158950210016502214756531287333895140318848923768750410355\", \"2849827372590072151380088930233312280478318575453624773762283369907909283027\"]",
+  "conditionId": "0x48b0b0bca515f68fccf95af4793dbd0edbfec1f8ec6e8df2c0f69ba74f8c4722",
+  "bestBid": 0.045,
+  "bestAsk": 0.048,
+  "lastTradePrice": 0.049,
+  "volume24hr": 63641.484342,
+  "volumeNum": 13126372.603584,
+  "endDate": "2027-01-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Epstein",
+    "slug": "epstein"
+   },
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Trump",
+    "slug": "trump"
+   },
+   {
+    "label": "Elections",
+    "slug": "elections"
+   },
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   }
+  ],
+  "events": [
+   {
+    "id": "73969",
+    "title": "Trump out as President before 2027?",
+    "slug": "trump-out-as-president-before-2027",
+    "negRisk": null,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "682708",
+  "question": "Will Gadi Eizenkot be the next Prime Minister of Israel?",
+  "slug": "will-gadi-eizenkot-be-the-next-prime-minister-of-israel",
+  "description": "Legislative elections are schedule to be held in Israel on October 27, 2026. \n\nThis market will resolve to the next individual who is officially appointed and sworn in as Prime Minister of Israel following the 2026 parliamentary election. If an election is called early, this market will immediately resolve to the individual who is officially appointed and sworn in after that election.\n\nTo count fo",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.537\", \"0.463\"]",
+  "clobTokenIds": "[\"52487256270918227930942830546248720603566203568229607048093730748840489555808\", \"1507744758511144558263623459899956467548763419522526462308518027912401299177\"]",
+  "conditionId": "0xdbe93b5a701f36076a560fa4b9ba59e365a6e8e2ea6a83764640010657277ca4",
+  "bestBid": 0.536,
+  "bestAsk": 0.538,
+  "lastTradePrice": 0.54,
+  "volume24hr": 60089.289807999994,
+  "volumeNum": 3631097.7519639996,
+  "endDate": "2026-10-28T03:59:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Israel Election",
+    "slug": "israel-election"
+   },
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Elections",
+    "slug": "elections"
+   },
+   {
+    "label": "Middle East",
+    "slug": "middle-east"
+   },
+   {
+    "label": "Israel",
+    "slug": "israel"
+   },
+   {
+    "label": "Global Elections",
+    "slug": "global-elections"
+   },
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   },
+   {
+    "label": "World",
+    "slug": "world"
+   },
+   {
+    "label": "Trump-Netanyahu",
+    "slug": "trump-netanyahu"
+   },
+   {
+    "label": "World Elections",
+    "slug": "world-elections"
+   },
+   {
+    "label": "Main Election",
+    "slug": "main-election"
+   }
+  ],
+  "events": [
+   {
+    "id": "81557",
+    "title": "Prime Minister of Israel after the next election?",
+    "slug": "who-will-be-the-next-prime-minister-of-israel-after-the-next-election",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "5917340",
+  "question": "Barcelona vs. Basket Zaragoza",
+  "slug": "bkligend-bar-bas2-2026-10-25",
+  "description": "In the upcoming Liga Endesa game, scheduled for October 25 at 7:00AM ET:\nIf the Barcelona win, the market will resolve to \"Barcelona\".\nIf the Basket Zaragoza win, the market will resolve to \"Basket Zaragoza\".\nIf the game is postponed, this market will remain open until the game has been completed.\nIf the game is canceled entirely, with no make-up game, this market will resolve 50-50.\nThe result wi",
+  "outcomes": "[\"Barcelona\", \"Basket Zaragoza\"]",
+  "outcomePrices": "[\"0.996\", \"0.004\"]",
+  "clobTokenIds": "[\"43091964327098924729332078478053554223103833273094071248377435224039338225635\", \"110420730892702056879154561410486434380840004838246111268547339985048339005974\"]",
+  "conditionId": "0x77c032af6e35e37698eb4f715a18d5b370650d257b6857f5d7268a99f40fdcbf",
+  "bestBid": 0.992,
+  "bestAsk": 1,
+  "lastTradePrice": 0.992,
+  "volume24hr": 55820.49753,
+  "volumeNum": 55820.49752999999,
+  "endDate": "2026-11-01T11:00:00Z",
+  "negRisk": false,
+  "sportsMarketType": "moneyline",
+  "gameStartTime": "2026-10-25 11:00:00+00",
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Sports",
+    "slug": "sports"
+   },
+   {
+    "label": "Games",
+    "slug": "games"
+   },
+   {
+    "label": "Basketball",
+    "slug": "basketball"
+   },
+   {
+    "label": "Liga Endesa",
+    "slug": "liga-endesa"
+   }
+  ],
+  "events": [
+   {
+    "id": "1216451",
+    "title": "Barcelona vs. Basket Zaragoza",
+    "slug": "bkligend-bar-bas2-2026-10-25",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "5794289",
+  "question": "Will Elon Musk post 240-259 tweets from October 20 to October 27, 2026?",
+  "slug": "elon-musk-of-tweets-october-20-october-27-2026-240-259",
+  "description": "This market will resolve according to the number of times Elon Musk (@elonmusk), posts on X from October 20 12:00 PM ET to October 27, 2026 12:00 PM ET.\n\nFor the purposes of this market, only main feed posts, quote posts and reposts will count.\n\nReplies will NOT count towards the total - however, replies on the main feed such as https://x.com/elonmusk/status/1786073478711353576 will be counted by ",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.0005\", \"0.9995\"]",
+  "clobTokenIds": "[\"92979274877116554096369671018864522999793754560694092827382609790165329071908\", \"73415949747470036195515559782389870112572848140832447808459579987638979018429\"]",
+  "conditionId": "0xa69f4040645528b0eeddabb580ee05b564ea59941bebb722d11823d265de4d4f",
+  "bestBid": null,
+  "bestAsk": 0.001,
+  "lastTradePrice": 0.001,
+  "volume24hr": 46557.124815,
+  "volumeNum": 85458.611368,
+  "endDate": "2026-10-27T16:00:00Z",
+  "negRisk": true,
+  "sportsMarketType": null,
+  "gameStartTime": "2026-10-20 16:00:00+00",
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Culture",
+    "slug": "pop-culture"
+   },
+   {
+    "label": "Politics",
+    "slug": "politics"
+   },
+   {
+    "label": "Tweet Markets",
+    "slug": "tweets-markets"
+   },
+   {
+    "label": "Recurring",
+    "slug": "recurring"
+   }
+  ],
+  "events": [
+   {
+    "id": "1203169",
+    "title": "Elon Musk # tweets October 20 - October 27, 2026?",
+    "slug": "elon-musk-of-tweets-october-20-october-27-2026",
+    "negRisk": true,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "4662585",
+  "question": "Will OpenAI announce bankruptcy by December 31, 2028?",
+  "slug": "will-openai-announce-bankruptcy-by-december-31-2028",
+  "description": "This market will resolve to \"Yes\" if OpenAI announces that it will file for bankruptcy or has filed for bankruptcy of any variety by the listed date, 11:59 PM ET. An announcement will suffice for a \"Yes\" resolution, regardless of if or when the actual filing occurs. The announcement must be made through any of their official or verified channels, as a recorded or written statement by their CEO, le",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.155\", \"0.845\"]",
+  "clobTokenIds": "[\"86968291706354267510922737930105582760781002238147692720861145736832371267240\", \"42006823668170857077242804430008444374156620388634033557961905582686128017624\"]",
+  "conditionId": "0x7057b4656e893ea59788c4fafa58bff19e8429f2c92d3a1ae613bd1d4aa90ef3",
+  "bestBid": 0.15,
+  "bestAsk": 0.16,
+  "lastTradePrice": 0.15,
+  "volume24hr": 44065.348611999994,
+  "volumeNum": 101554.31415600001,
+  "endDate": "2029-01-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Tech",
+    "slug": "tech"
+   },
+   {
+    "label": "OpenAI",
+    "slug": "openai"
+   },
+   {
+    "label": "Finance",
+    "slug": "finance"
+   },
+   {
+    "label": "Business",
+    "slug": "business"
+   },
+   {
+    "label": "Corporate Financials",
+    "slug": "corporate-financials"
+   },
+   {
+    "label": "Earn 3.25%",
+    "slug": "earn-4"
+   }
+  ],
+  "events": [
+   {
+    "id": "1040267",
+    "title": "OpenAI announces bankruptcy by...?",
+    "slug": "openai-announces-bankruptcy-by",
+    "negRisk": false,
+    "tags": []
+   }
+  ]
+ },
+ {
+  "id": "9000001",
+  "question": "Will Anthropic announce an IPO by December 31, 2026?",
+  "slug": "will-anthropic-announce-an-ipo-by-december-31-2026",
+  "description": "This market will resolve to Yes if Anthropic publicly files for or formally announces an initial public offering (IPO) by December 31, 2026.",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.5\", \"0.5\"]",
+  "clobTokenIds": "[\"990000010001\", \"990000010002\"]",
+  "conditionId": "0xsynth00000000000000000000000000895441",
+  "bestBid": 0.12,
+  "bestAsk": 0.14,
+  "lastTradePrice": 0.13,
+  "volume24hr": 85000.0,
+  "volumeNum": 850000.0,
+  "endDate": "2027-01-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Tech",
+    "slug": "tech"
+   },
+   {
+    "label": "Business",
+    "slug": "business"
+   },
+   {
+    "label": "AI",
+    "slug": "ai"
+   },
+   {
+    "label": "Companies",
+    "slug": "companies"
+   },
+   {
+    "label": "IPO",
+    "slug": "ipo"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000001",
+    "title": "Anthropic IPO by...?",
+    "slug": "anthropic-ipo-by",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ },
+ {
+  "id": "9000002",
+  "question": "Will OpenAI announce an IPO by December 31, 2026?",
+  "slug": "will-openai-announce-an-ipo-by-december-31-2026",
+  "description": "Resolves Yes if OpenAI files for or announces an IPO by December 31, 2026.",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.5\", \"0.5\"]",
+  "clobTokenIds": "[\"990000020001\", \"990000020002\"]",
+  "conditionId": "0xsynth00000000000000000000000000895442",
+  "bestBid": 0.05,
+  "bestAsk": 0.07,
+  "lastTradePrice": 0.060000000000000005,
+  "volume24hr": 42000.0,
+  "volumeNum": 420000.0,
+  "endDate": "2027-01-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Tech",
+    "slug": "tech"
+   },
+   {
+    "label": "Business",
+    "slug": "business"
+   },
+   {
+    "label": "OpenAI",
+    "slug": "openai"
+   },
+   {
+    "label": "IPO",
+    "slug": "ipo"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000002",
+    "title": "OpenAI IPO by...?",
+    "slug": "openai-ipo-by",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ },
+ {
+  "id": "9000003",
+  "question": "Will Israel and Hamas agree to a ceasefire in Gaza by November 30, 2026?",
+  "slug": "israel-hamas-gaza-ceasefire-by-november-30-2026",
+  "description": "Resolves Yes if Israel and Hamas publicly announce a ceasefire in the Gaza Strip by November 30, 2026.",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.5\", \"0.5\"]",
+  "clobTokenIds": "[\"990000030001\", \"990000030002\"]",
+  "conditionId": "0xsynth00000000000000000000000000895443",
+  "bestBid": 0.31,
+  "bestAsk": 0.34,
+  "lastTradePrice": 0.325,
+  "volume24hr": 210000.0,
+  "volumeNum": 2100000.0,
+  "endDate": "2026-12-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Geopolitics",
+    "slug": "geopolitics"
+   },
+   {
+    "label": "Israel",
+    "slug": "israel"
+   },
+   {
+    "label": "Middle East",
+    "slug": "middle-east"
+   },
+   {
+    "label": "Gaza",
+    "slug": "gaza"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000003",
+    "title": "Gaza ceasefire by...?",
+    "slug": "gaza-ceasefire-by",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ },
+ {
+  "id": "9000004",
+  "question": "Will the SEC approve a spot Solana ETF by December 31, 2026?",
+  "slug": "sec-approve-spot-solana-etf-by-december-31-2026",
+  "description": "Resolves Yes if the U.S. SEC approves a spot Solana exchange-traded fund (ETF) by December 31, 2026.",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.5\", \"0.5\"]",
+  "clobTokenIds": "[\"990000040001\", \"990000040002\"]",
+  "conditionId": "0xsynth00000000000000000000000000895444",
+  "bestBid": 0.62,
+  "bestAsk": 0.65,
+  "lastTradePrice": 0.635,
+  "volume24hr": 64000.0,
+  "volumeNum": 640000.0,
+  "endDate": "2027-01-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Crypto",
+    "slug": "crypto"
+   },
+   {
+    "label": "Solana",
+    "slug": "solana"
+   },
+   {
+    "label": "SEC",
+    "slug": "sec"
+   },
+   {
+    "label": "ETF",
+    "slug": "etf"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000004",
+    "title": "Solana ETF approved by...?",
+    "slug": "solana-etf-approved-by",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ },
+ {
+  "id": "9000005",
+  "question": "Will a Bitcoin ETF with staking be approved by December 31, 2026?",
+  "slug": "bitcoin-etf-staking-approved-2026",
+  "description": "Resolves Yes if the SEC approves a Bitcoin ETF that includes staking or yield features by December 31, 2026.",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.5\", \"0.5\"]",
+  "clobTokenIds": "[\"990000050001\", \"990000050002\"]",
+  "conditionId": "0xsynth00000000000000000000000000895445",
+  "bestBid": 0.2,
+  "bestAsk": 0.23,
+  "lastTradePrice": 0.21500000000000002,
+  "volume24hr": 31000.0,
+  "volumeNum": 310000.0,
+  "endDate": "2027-01-01T04:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Crypto",
+    "slug": "crypto"
+   },
+   {
+    "label": "Bitcoin",
+    "slug": "bitcoin"
+   },
+   {
+    "label": "ETF",
+    "slug": "etf"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000005",
+    "title": "Bitcoin ETF approved by...?",
+    "slug": "bitcoin-etf-approved-by",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ },
+ {
+  "id": "9000006",
+  "question": "Bitcoin Up or Down - October 25, 3:40PM-3:45PM ET",
+  "slug": "btc-updown-5m-1793043600",
+  "description": "Resolves Up if the BTC/USD price at 3:45PM ET is above the price at 3:40PM ET.",
+  "outcomes": "[\"Up\", \"Down\"]",
+  "outcomePrices": "[\"0.5\", \"0.5\"]",
+  "clobTokenIds": "[\"990000060001\", \"990000060002\"]",
+  "conditionId": "0xsynth00000000000000000000000000895446",
+  "bestBid": 0.48,
+  "bestAsk": 0.52,
+  "lastTradePrice": 0.5,
+  "volume24hr": 90000.0,
+  "volumeNum": 900000.0,
+  "endDate": "2026-10-25T19:45:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Up or Down",
+    "slug": "up-or-down"
+   },
+   {
+    "label": "Crypto",
+    "slug": "crypto"
+   },
+   {
+    "label": "Bitcoin",
+    "slug": "bitcoin"
+   },
+   {
+    "label": "Recurring",
+    "slug": "recurring"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000006",
+    "title": "Bitcoin Up or Down - October 25, 3:40PM-3:45PM ET",
+    "slug": "btc-updown-5m-1793043600",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ },
+ {
+  "id": "9000007",
+  "question": "Ethereum Up or Down - October 25, 3:30PM-3:45PM ET",
+  "slug": "eth-updown-15m-1793043000",
+  "description": "Resolves Up if the ETH/USD price at 3:45PM ET is above the price at 3:30PM ET.",
+  "outcomes": "[\"Up\", \"Down\"]",
+  "outcomePrices": "[\"0.5\", \"0.5\"]",
+  "clobTokenIds": "[\"990000070001\", \"990000070002\"]",
+  "conditionId": "0xsynth00000000000000000000000000895447",
+  "bestBid": 0.49,
+  "bestAsk": 0.51,
+  "lastTradePrice": 0.5,
+  "volume24hr": 70000.0,
+  "volumeNum": 700000.0,
+  "endDate": "2026-10-25T19:45:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Up or Down",
+    "slug": "up-or-down"
+   },
+   {
+    "label": "Crypto",
+    "slug": "crypto"
+   },
+   {
+    "label": "Ethereum",
+    "slug": "ethereum"
+   },
+   {
+    "label": "Recurring",
+    "slug": "recurring"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000007",
+    "title": "Ethereum Up or Down - October 25, 3:30PM-3:45PM ET",
+    "slug": "eth-updown-15m-1793043000",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ },
+ {
+  "id": "9000008",
+  "question": "Will Anthropic release Claude 6 by March 31, 2027?",
+  "slug": "anthropic-claude-6-by-march-2027",
+  "description": "Resolves Yes if Anthropic releases a model named Claude 6.",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.5\", \"0.5\"]",
+  "clobTokenIds": "[\"990000080001\", \"990000080002\"]",
+  "conditionId": "0xsynth00000000000000000000000000895448",
+  "bestBid": 0.4,
+  "bestAsk": 0.45,
+  "lastTradePrice": 0.42500000000000004,
+  "volume24hr": 120.0,
+  "volumeNum": 1200.0,
+  "endDate": "2027-04-01T03:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Tech",
+    "slug": "tech"
+   },
+   {
+    "label": "AI",
+    "slug": "ai"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000008",
+    "title": "Claude 6 release by...?",
+    "slug": "claude-6-release-by",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ },
+ {
+  "id": "9000009",
+  "question": "Will the Kansas City Chiefs win on 2026-10-26?",
+  "slug": "nfl-kc-den-2026-10-26-kc",
+  "description": "Moneyline.",
+  "outcomes": "[\"Yes\", \"No\"]",
+  "outcomePrices": "[\"0.5\", \"0.5\"]",
+  "clobTokenIds": "[\"990000090001\", \"990000090002\"]",
+  "conditionId": "0xsynth00000000000000000000000000895449",
+  "bestBid": 0.55,
+  "bestAsk": 0.57,
+  "lastTradePrice": 0.56,
+  "volume24hr": 30000.0,
+  "volumeNum": 300000.0,
+  "endDate": "2026-10-27T01:00:00Z",
+  "negRisk": false,
+  "sportsMarketType": "moneyline",
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "NFL (All)",
+    "slug": "nfl-(all)"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000009",
+    "title": "Chiefs vs. Broncos",
+    "slug": "nfl-kc-den-2026-10-26",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ },
+ {
+  "id": "9000010",
+  "question": "Who will win the 2026 Oscar for Best Picture?",
+  "slug": "oscar-best-picture-2026",
+  "description": "Resolves to the film that wins Best Picture at the 98th Academy Awards.",
+  "outcomes": "[\"Sinners\", \"Hamnet\", \"One Battle After Another\"]",
+  "outcomePrices": "[\"0.31\", \"0.40\", \"0.29\"]",
+  "clobTokenIds": "[\"990000100000\", \"990000100001\", \"990000100002\"]",
+  "conditionId": "0xsynth0000000000000000000000000089544a",
+  "bestBid": 0.3,
+  "bestAsk": 0.33,
+  "lastTradePrice": 0.315,
+  "volume24hr": 15000.0,
+  "volumeNum": 150000.0,
+  "endDate": "2027-03-16T03:59:00Z",
+  "negRisk": false,
+  "sportsMarketType": null,
+  "gameStartTime": null,
+  "closed": false,
+  "active": true,
+  "tags": [
+   {
+    "label": "Culture",
+    "slug": "culture"
+   },
+   {
+    "label": "Movies",
+    "slug": "movies"
+   },
+   {
+    "label": "Awards",
+    "slug": "awards"
+   }
+  ],
+  "events": [
+   {
+    "id": "e9000010",
+    "title": "Best Picture 2026",
+    "slug": "best-picture-2026",
+    "negRisk": false,
+    "tags": []
+   }
+  ],
+  "_synthetic": "fixture row added 2026-10-25; shape copied from Gamma /markets?include_tag=true"
+ }
+]

@@ -43,6 +43,7 @@ TELEGRAM_API = "https://api.telegram.org/bot{token}"
 # ``tests/test_telegram_handlers.py::test_bot_menu_matches_dispatcher``.
 BOT_MENU_COMMANDS: list[dict] = [
     {"command": "start", "description": "Show all commands"},
+    {"command": "news", "description": "News bot: today's paper fires, the books, the dark fraction"},
     {"command": "help", "description": "Show all commands"},
     {"command": "status", "description": "Balance, positions, daily limits"},
     {"command": "pnl", "description": "P&L by strategy: realized + unrealized + total"},
@@ -119,11 +120,13 @@ KIND_DEAL = "deal"
 KIND_WALLET = "wallet"
 KIND_RESEARCH = "research"
 KIND_BOT = "bot"
+KIND_NEWS = "news"   # the news bot's paper fires and brief (2026-10-25)
 _KIND_PREFIX = {
     KIND_DEAL: "💰 DEAL",
     KIND_WALLET: "👛 WALLET",
     KIND_RESEARCH: "🔬 RESEARCH",
     KIND_BOT: "🤖 BOT",
+    KIND_NEWS: "📰 NEWS",
 }
 _PREFS_FILE = "telegram_prefs.json"
 _suppressed_research: int = 0
@@ -438,6 +441,14 @@ def _handle_command(text: str):
     """Process a telegram command."""
     text = text.strip()
 
+    if text.startswith("/news"):
+        _handle_news(text)
+        return
+    if CONFIG.news_mode and text.split("@", 1)[0].split(None, 1)[0].lower() in _RETIRED_IN_NEWS_MODE:
+        send_message("That command belongs to the copy bot, which is retired in NEWS_MODE "
+                     "(2026-10-25). <code>/news</code> is the live surface; <code>/live</code> "
+                     "and <code>/real</code> still read the wallet.")
+        return
     if text.startswith("/history"):
         _handle_history()
     elif text.startswith("/status"):
@@ -1476,6 +1487,27 @@ def _handle_check():
     lines.append("")
     lines.append("<b>READY</b> ✅" if ok_all else "<b>NOT READY</b> ❌: fix items above before going live (PREVIEW_MODE=false)")
     _send_chunked("\n".join(lines))
+
+
+# Copy-bot commands that mean nothing while the news bot runs (manager ruling
+# 2026-10-25: they answer "retired", never silence). /live, /real, /status,
+# /help, /start, /news stay.
+_RETIRED_IN_NEWS_MODE = {"/wallets", "/gate", "/zset", "/missed", "/refusals", "/golive",
+                         "/speed", "/check", "/pnl", "/history", "/canary", "/verdict"}
+
+# The owner's own thumb as a source (idea 11, 2026-10-25): a non-command text
+# in the owner's chat (a forwarded post, a link) is handed to the news bot as
+# an Item with source "owner". Set by the news runner at boot; None = ignored.
+on_owner_text = None
+
+
+def _handle_news(text: str) -> None:
+    """Handle /news: the news bot's current picture, from its own ledgers."""
+    try:
+        from src.newsbot import runner as news_runner
+        _send_chunked(news_runner.news_text(text))
+    except Exception as exc:  # noqa: BLE001
+        send_message(f"News bot unreadable: <code>{_esc(str(exc))}</code>")
 
 
 def _handle_help():
@@ -2917,6 +2949,13 @@ def _process_update(update: dict) -> None:
         return
 
     if not text:
+        return
+
+    if not text.startswith("/") and on_owner_text is not None:
+        try:
+            on_owner_text(text, msg)
+        except Exception as e:  # noqa: BLE001
+            logger.exception(f"owner text handler error: {e}")
         return
 
     if text.startswith("/"):

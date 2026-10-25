@@ -1,0 +1,101 @@
+[
+ {
+  "did": "did:plc:rew56hf6rh3li77g57fj7bcq",
+  "time_us": 1792922453484385,
+  "cursor": 26413962914,
+  "kind": "commit",
+  "commit": {
+   "rev": "3myox6y7a7i2v",
+   "operation": "create",
+   "collection": "app.bsky.feed.post",
+   "rkey": "3myox6y72dy2v",
+   "record": {
+    "$type": "app.bsky.feed.post",
+    "createdAt": "2026-10-25T10:00:52.349Z",
+    "embed": {
+     "$type": "app.bsky.embed.images",
+     "images": [
+      {
+       "alt": "Flip Flop Frog\n\nWATER / Aqua / Effect • Level 2 • ATK: 500 / DEF: 200\n\nOnce per turn, you can flip this card into face-down Defense Position. When this card is flipped face-up, you can return monsters your opponent controls to their owners' hand up to the number of face-up \"Frog\" monsters you control, except \"Frog the Jam\".",
+       "image": {
+        "$type": "blob",
+        "mimeType": "image/webp",
+        "ref": {
+         "$link": "bafkreieczlp7cvzeczj3pq4rwuq5wxaqlzcxmo6tmgc3cn7qajzsvkeh7a"
+        },
+        "size": 75150
+       }
+      }
+     ]
+    },
+    "facets": [
+     {
+      "features": [
+       {
+        "$type": "app.bsky.richtext.facet#link",
+        "uri": "https://www.excavate.top/card/7943"
+       }
+      ],
+      "index": {
+       "byteEnd": 14,
+       "byteStart": 0
+      }
+     }
+    ],
+    "text": "Flip Flop Frog"
+   },
+   "cid": "bafyreigzj44xv4zhigrty4jeuvnpakuwdrh6poehtme4obfx64vmj4rjk4"
+  }
+ },
+ {
+  "did": "did:plc:me446cjsi7veuxfofx3rozyb",
+  "time_us": 1792922453498514,
+  "cursor": 26413962917,
+  "kind": "commit",
+  "commit": {
+   "rev": "3myox6yvl2t2q",
+   "operation": "create",
+   "collection": "app.bsky.feed.post",
+   "rkey": "3myox6yeops2z",
+   "record": {
+    "$type": "app.bsky.feed.post",
+    "createdAt": "2026-10-25T10:00:52.578Z",
+    "embed": {
+     "$type": "app.bsky.embed.external",
+     "external": {
+      "description": "YouTube video by Gen X-Rated",
+      "thumb": {
+       "$type": "blob",
+       "mimeType": "image/jpeg",
+       "ref": {
+        "$link": "bafkreihxs5yon3cc4chscp5u3xxz7yklsao6f7gvo2ozzzkrsqsqhrcim4"
+       },
+       "size": 57731
+      },
+      "title": "Gen X-Rated-Muddying the Waters",
+      "uri": "https://youtu.be/WYH-aLdL66c"
+     }
+    },
+    "facets": [
+     {
+      "features": [
+       {
+        "$type": "app.bsky.richtext.facet#link",
+        "uri": "https://youtu.be/WYH-aLdL66c"
+       }
+      ],
+      "index": {
+       "byteEnd": 52,
+       "byteStart": 32
+      }
+     }
+    ],
+    "langs": [
+     "en"
+    ],
+    "text": "Gen X-Rated-Muddying the Waters\nyoutu.be/WYH-aLdL66c"
+   },
+   "cid": "bafyreid2cah26c5rae65n5ryrlclwjzcucokvs2pdlhjzvek7hoeqzatqy"
+  }
+ }
+]

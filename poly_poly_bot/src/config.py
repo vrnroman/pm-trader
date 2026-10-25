@@ -145,6 +145,11 @@ class Config:
 
     # --- Global ---
     preview_mode: bool = _opt_bool("PREVIEW_MODE", True)
+    # The news bot replaces the copy bot in the same container (run s-pw9rom,
+    # 2026-10-25): copy threads are not started, the copy code stays in the
+    # tree, the live guard and the redeemer keep booking the positions still
+    # held, and no real-order path is reachable.
+    news_mode: bool = _opt_bool("NEWS_MODE", False)
     telegram_bot_token: str = _optional("TELEGRAM_BOT_TOKEN", "")
     telegram_chat_id: str = _optional("TELEGRAM_CHAT_ID", "")
     # Deliver RESEARCH-class pushes (paper books, discovery, the insider

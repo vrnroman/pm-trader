@@ -233,6 +233,15 @@ jobs:
           # once (capped by what the wallet holds); refusals for money are
           # kept on paper in the missed book (/missed).
           ensure_env LIVE_PER_COPY_USD 5
+          # The news bot (run s-pw9rom, 2026-10-25) replaces the copy bot in
+          # this container. Copy threads are not started; the live guard and
+          # the redeemer keep booking the positions the copy era still holds.
+          sed -i '/^NEWS_MODE=/d' .env
+          ensure_env NEWS_MODE 1
+          ensure_env NEWS_STAKE_USD 5
+          ensure_env NEWS_JUDGE_MODEL claude-sonnet-5-5
+          ensure_env NEWS_LLM_DAILY_BUDGET 300
+          ensure_env NEWS_DOMAINS politics,crypto,geo,corp
           # Owner, 2026-10-17: $95 open at once (19 slots). 0x9f15 held all
           # ten of the $50 while the positions page bug hid them; the other
           # wallets get nine slots now instead of waiting for those to settle.

@@ -1552,6 +1552,22 @@ async def main():
     )
     _consume_claude_drift_marker()
 
+    # NEWS_MODE (run s-pw9rom, 2026-10-25): the news-driven paper trader runs
+    # instead of the copy bot. Started here, before any copy thread: the
+    # live guard below still runs (it books the settlements of the positions
+    # the copy era still holds), everything else of the copy bot does not.
+    if CONFIG.news_mode:
+        from src.newsbot import runner as news_runner
+        threading.Thread(target=news_runner.run_forever, args=(_shutdown_event,),
+                         daemon=True, name="news-bot").start()
+        threading.Thread(target=_live_guard_loop, daemon=True,
+                         name="live-guard").start()
+        logger.info("[news] NEWS_MODE: news bot + live guard started; copy threads not started")
+        while not _shutdown_event.is_set():
+            await asyncio.sleep(1.0)
+        logger.info("[news] shutdown")
+        return
+
     # Start the copy-paper validation harness (Strategy 1b) in a thread.
     # Measurement only — never places real orders — so it is always safe to run.
     # The verdict overlay (a confirmed /verdict decision) outranks env here:
