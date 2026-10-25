@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-24T23:16:11.303911+00:00",
+ "generated": "2026-10-25T00:11:44.984690+00:00",
  "money": {
   "cash": 119.594219,
   "open_cost": 14.99,
@@ -1217,7 +1217,6 @@
   }
  ],
  "important": [
-  "2026-10-23 23:33:35 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 00:38:48 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 00:42:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 00:54:12 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1373,7 +1372,12 @@
   "2026-10-24 22:05:18 ERROR [inventory] API sync failed: ",
   "2026-10-24 23:13:19 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-24 23:15:02 ERROR Network error fetching 0x28ef...ff5e: Server disconnected without sending a response.",
-  "2026-10-23 23:18:43 TRADE [DISARMED] would BUY $5.00 on 'Duke vs. Virginia: O/U 49.5' @ 0.4900 (from 0x154c...658e); the arm is off",
+  "2026-10-24 23:17:53 ERROR Network error fetching 0x1985...51ab: ",
+  "2026-10-24 23:17:53 ERROR Network error fetching 0x28ef...ff5e: ",
+  "2026-10-24 23:17:53 ERROR Network error fetching 0xeef6...cd4c: ",
+  "2026-10-24 23:17:53 ERROR [inventory] API sync failed: ",
+  "2026-10-24 23:17:54 ERROR Network error fetching 0x9f15...bdb3: Server disconnected without sending a response.",
+  "2026-10-24 23:17:54 ERROR Network error fetching 0x09b0...a3b6: Server disconnected without sending a response.",
   "2026-10-24 00:21:33 TRADE [DISARMED] would BUY $5.00 on 'Knicks vs. Celtics' @ 0.5700 (from 0x3d42...5bf3); the arm is off",
   "2026-10-24 00:32:25 TRADE [DISARMED] would BUY $5.00 on 'Spread: Air Force (-7.5)' @ 0.5700 (from 0x3d42...5bf3); the arm is off",
   "2026-10-24 00:37:30 TRADE [DISARMED] would BUY $5.00 on 'UFC 333: Aaron Pico vs. Losene Keita (Fe' @ 0.5800 (from 0x3d42...5bf3); the arm is off",
@@ -1995,12 +1999,14 @@
   },
   "6eca45f47973": {
    "first": 1790342544.7724473,
-   "last": 1792883704.2058434,
-   "count": 206,
+   "last": 1792883951.5115201,
+   "count": 208,
    "sample": "2026-09-25 13:21:41 ERROR Network error fetching 0xd251...4d37: Server disconnected without sending a response.",
    "norm": "ERROR Network error fetching <hex>: Server disconnected without sending a response.",
    "recent": [
-    1792883704.2058434
+    1792883704.2058434,
+    1792883951.5115201,
+    1792883951.5115201
    ],
    "action": null,
    "action_ts": null,
@@ -2009,15 +2015,14 @@
   },
   "7a8d58f20915": {
    "first": 1790346046.2132301,
-   "last": 1792851412.3503842,
-   "count": 183,
+   "last": 1792883951.5115201,
+   "count": 186,
    "sample": "2026-09-25 14:19:32 ERROR Network error fetching 0x984f...9a43:",
    "norm": "ERROR Network error fetching <hex>:",
    "recent": [
-    1792851412.3503842,
-    1792851412.3503842,
-    1792851412.3503842,
-    1792851412.3503842
+    1792883951.5115201,
+    1792883951.5115201,
+    1792883951.5115201
    ],
    "action": null,
    "action_ts": null,
@@ -2201,13 +2206,12 @@
   },
   "907b728a6b72": {
    "first": 1790407524.410194,
-   "last": 1792879620.7438285,
-   "count": 133,
+   "last": 1792883951.5115201,
+   "count": 134,
    "sample": "2026-09-26 07:24:32 ERROR [inventory] API sync failed:",
    "norm": "ERROR [inventory] API sync failed:",
    "recent": [
-    1792878898.2418995,
-    1792879620.7438285
+    1792883951.5115201
    ],
    "action": null,
    "action_ts": null,
