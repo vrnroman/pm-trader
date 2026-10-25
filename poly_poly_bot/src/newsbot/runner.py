@@ -163,6 +163,11 @@ class Runner:
         # a later item with mostly the same words on the same markets is not
         # judged again.
         self.judged_recent: collections.deque = collections.deque(maxlen=400)
+        # ... and that memory survives a restart: a byte-identical Europe
+        # Elects repost was judged and paper-traded again five minutes after
+        # a deploy had emptied it (verifier round 7, 2026-10-25).
+        self._judged_path = os.path.join(d, "judged-recent.jsonl")
+        self._load_judged()
         self.day_repeat: dict[str, int] = {}
         # The day's funnel counts survive a restart; seven restarts on
         # 2026-10-25 left the brief's counts unreadable (verifier round 3).
@@ -515,6 +520,35 @@ class Runner:
                 return True
         return False
 
+    def _load_judged(self, window_s: float = 1800.0) -> None:
+        cutoff = time.time() - window_s
+        try:
+            with open(self._judged_path, encoding="utf-8") as f:
+                for line in f:
+                    try:
+                        d = json.loads(line)
+                        if float(d["ts"]) < cutoff:
+                            continue
+                        self.judged_recent.append((float(d["ts"]), frozenset(d["stems"]), frozenset(d["ids"]),
+                                                   frozenset(d["nums"]), frozenset(d["rev"])))
+                    except (ValueError, KeyError, TypeError):
+                        continue
+        except OSError:
+            pass
+
+    def _save_judged(self, now: Optional[float] = None, window_s: float = 1800.0) -> None:
+        now = time.time() if now is None else now
+        try:
+            tmp = self._judged_path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                for ts, st, ids, nums, rev in self.judged_recent:
+                    if now - ts <= window_s:
+                        f.write(json.dumps({"ts": ts, "stems": sorted(st), "ids": sorted(ids),
+                                            "nums": sorted(nums), "rev": sorted(rev)}) + "\n")
+            os.replace(tmp, self._judged_path)
+        except OSError as exc:
+            logger.warn(f"[news] judged memory not saved: {exc}")
+
     _DAY_FIELDS = ("day_items", "day_stale", "day_unmatched", "day_paced", "day_judged", "day_material",
                    "day_repeat")
 
@@ -687,6 +721,7 @@ class Runner:
                 self.dedup.save()
                 self._save_recent()
                 self._save_day(now)
+                self._save_judged(now)
                 if now - last_hwm > 3600:
                     last_hwm = now
                     logger.info(f"[news] high-water: watch {self.hwm['watch']} tokens, recent {self.hwm['recent']} "
@@ -745,6 +780,7 @@ class Runner:
         await asyncio.gather(*tasks, return_exceptions=True)
         self.counters.save(force=True)
         self.dedup.save(force=True)
+        self._save_judged()
 
     def optional_source_tasks(self) -> list:
         """Sources that need the owner's own credentials (2026-10-25): the

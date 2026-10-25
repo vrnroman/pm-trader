@@ -364,3 +364,19 @@ def test_wire_flash_formats_keep_the_person_round6():
     # the collisions stay out
     assert leads.overlap("Martin Scorsese new film premieres", "Will Margo Martin be the next White House Press Secretary?") <= 1
     assert leads.overlap("Harris County flooding closes roads", "Will Kamala Harris win the 2028 Democratic nomination?") <= 1
+
+
+def test_a_void_row_stays_in_the_ledger_and_leaves_the_numbers(tmp_path):
+    from src.newsbot import paper
+    led = paper.PaperLedger("headline-any", path=str(tmp_path / "p.jsonl"))
+    base = dict(book="headline-any", source="tg:x", domains=("geo",), market_id="m", condition_id="c",
+                token_id="t", outcome="Yes", question="q", published_ts=1.0, seen_ts=1.0, decided_ts=1.0,
+                quote_ts=1.0, freshness="fresh", confidence=0.5, why="", ask_top=0.5, entry_price=0.5,
+                stake=5.0, filled_usd=5.0, fee_bps=0, fee_usd=0.0, shares=10.0)
+    led.add(paper.PaperRow(row_id="a", item_id="i1", marks={"5m": {"pnl": 1.0}}, **base))
+    led.add(paper.PaperRow(row_id="b", item_id="i2", marks={"5m": {"pnl": -1.0}}, **base))
+    assert led.void("b", "transport duplicate of i1") and not led.void("zz", "x")
+    again = paper.PaperLedger("headline-any", path=str(tmp_path / "p.jsonl"))
+    assert again.rows["b"].void == "transport duplicate of i1"
+    s = paper.summary(again)
+    assert s["rows"] == 1 and s["void"] == 1 and s["horizons"]["5m"]["n"] == 1 and s["horizons"]["5m"]["pnl"] == 1.0

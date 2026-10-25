@@ -89,6 +89,10 @@ class PaperRow:
     resolved: Optional[bool] = None                # won / lost at resolution
     resolution_pnl: Optional[float] = None
     closed: bool = False
+    # A row that should never have been a decision (one post booked twice
+    # through two routes, a byte-identical repost): kept with its reason,
+    # left out of every count and number (verifier round 7, 2026-10-25).
+    void: str = ""
 
     def exit_pnl(self, exit_price: float) -> float:
         """Sell everything at ``exit_price`` (the walked bid), fee on the way out
@@ -144,11 +148,24 @@ class PaperLedger:
             self.rows[row.row_id] = row
         self.save()
 
+    def void(self, row_id: str, reason: str) -> bool:
+        """Flag a row void, never delete it. False when there is no such row."""
+        with self._lock:
+            r = self.rows.get(row_id)
+            if r is None:
+                return False
+            r.void = str(reason) or "void"
+        self.save()
+        return True
+
+    def live_rows(self) -> list[PaperRow]:
+        return [r for r in self.rows.values() if not r.void]
+
     def open_rows(self) -> list[PaperRow]:
         return [r for r in self.rows.values() if not r.closed]
 
     def fires_on_day(self, day: str) -> int:
-        return sum(1 for r in self.rows.values()
+        return sum(1 for r in self.live_rows()
                    if time.strftime("%Y-%m-%d", time.gmtime(r.decided_ts)) == day)
 
 
@@ -313,10 +330,11 @@ def pick_random_market(candidates: list, rng: random.Random) -> Optional[tuple]:
 def summary(ledger: PaperLedger) -> dict:
     """Per horizon: n marked, pnl sum, roi on filled dollars, +/- 1 SD of roi;
     plus resolution. Every number carries n; empty is n=0, never a zero."""
-    out: dict = {"book": ledger.book, "rows": len(ledger.rows), "horizons": {}}
+    rows = ledger.live_rows()
+    out: dict = {"book": ledger.book, "rows": len(rows), "void": len(ledger.rows) - len(rows), "horizons": {}}
     import math
     for h in HORIZONS_S:
-        rs = [(r, r.marks[h]) for r in ledger.rows.values() if h in r.marks and r.marks[h].get("pnl") is not None]
+        rs = [(r, r.marks[h]) for r in rows if h in r.marks and r.marks[h].get("pnl") is not None]
         n = len(rs)
         if not n:
             out["horizons"][h] = {"n": 0}
@@ -330,9 +348,9 @@ def summary(ledger: PaperLedger) -> dict:
         mean = sum(rois) / n
         sd = math.sqrt(sum((x - mean) ** 2 for x in rois) / n) / math.sqrt(n)
         out["horizons"][h] = {"n": n, "pnl": round(pnl, 2), "roi": round(pnl / spent, 4) if spent else None,
-                              "sd": round(sd, 4), "unquotable": sum(1 for r in ledger.rows.values()
+                              "sd": round(sd, 4), "unquotable": sum(1 for r in rows
                                                                     if h in r.marks and r.marks[h].get("pnl") is None)}
-    res = [r for r in ledger.rows.values() if r.resolution_pnl is not None]
+    res = [r for r in rows if r.resolution_pnl is not None]
     out["resolution"] = {"n": len(res), "won": sum(1 for r in res if r.resolved),
                          "pnl": round(sum(r.resolution_pnl for r in res), 2)} if res else {"n": 0}
     return out

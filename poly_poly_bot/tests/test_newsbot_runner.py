@@ -503,3 +503,25 @@ def test_one_telegram_post_read_by_both_routes_is_one_item(rig, monkeypatch):
     assert r.process_item(client, now=1710.0) is None
     assert len(calls) == 1 and sum(r.day_items.values()) == 1
     assert runner_mod._signals("Turnout 46.53% (?q=%23Serbia)")[0] == runner_mod._signals("Turnout 46.53%")[0]
+
+
+def test_the_judged_memory_survives_a_restart(rig, monkeypatch):
+    # a byte-identical repost after a deploy was judged and traded again (round 7)
+    r, sent = rig
+    r.hourly_cap = 10
+    calls = []
+    fake = _fake_claude(material=False, market=None, idx=None)
+    monkeypatch.setattr(judge_mod, "run_claude", lambda p, **kw: calls.append(1) or fake(p, **kw))
+    now = time.time()
+    first = Item(id="tg:x:1", source="tg:x", domains=("corp",), published_ts=now - 5, seen_ts=now,
+                 title="Anthropic to announce IPO, Dario says", text="", url="")
+    r.process_item(first, now=now)
+    r._save_judged(now)
+    again = runner_mod.Runner(threading.Event())
+    again.index = r.index
+    again.book = r.book
+    again.hourly_cap = 10
+    repost = Item(id="tg:x:2", source="tg:x", domains=("corp",), published_ts=now + 55, seen_ts=now + 60,
+                  title="Anthropic to announce IPO, Dario says", text="", url="")
+    again.process_item(repost, now=now + 60)
+    assert len(calls) == 1 and sum(again.day_repeat.values()) == 1
