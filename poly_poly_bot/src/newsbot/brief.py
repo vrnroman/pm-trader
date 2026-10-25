@@ -112,7 +112,10 @@ def gist(stats: dict, books: dict, today: dict) -> str:
     fired = a.get("fired", 0)
     moved = a.get("fired_moved_our_way", 0)
     dark = a.get("dark_frac")
-    dark_s = "dark n=0" if dark is None else f"dark {dark * 100:.0f}% of {a.get('jumps', 0)} jumps"
+    dark_s = "dark n=0" if dark is None else (f"dark {dark * 100:.0f}% of {a.get('jumps', 0)} jumps "
+                                                f"(watched {a.get('watched', 0)}, unknown {a.get('unknown', 0)})")
+    if a.get("owner_explained"):
+        dark_s += f" · explained later by owner {a['owner_explained']} (late by {_dur(a.get('owner_late_median_s'))})"
     lead = a.get("lead_median_s")
     stale = f" ({today['stale']} stale skipped)" if today.get("stale") else ""
     return (f"{today.get('items', 0)} items{stale}, {a.get('mapped', 0)} mapped, {fired} fired, "
@@ -130,6 +133,10 @@ def brief_text(*, stats: dict, books: dict, today: dict, roster: dict, llm: dict
         if not d.get("items") and not d.get("jumps"):
             continue
         dk = "n=0" if d.get("dark_frac") is None else f"{d['dark_frac'] * 100:.0f}% of {d['jumps']}"
+        if d.get("unknown"):
+            dk += f" (unknown {d['unknown']})"
+        if d.get("owner_explained"):
+            dk += f" · owner explained {d['owner_explained']}"
         lines.append(f"  {dom}: {d['items']} · {d['mapped']} · {d['fired']} · "
                      f"{d['fired_moved_our_way']}/{d['fired_moved_against']}/{d['fired_flat']} · {dk}"
                      + (f" · lead {_dur(d['lead_median_s'])} (n={d['lead_n']})" if d.get("lead_n") else ""))

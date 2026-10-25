@@ -62,6 +62,17 @@ class JumpRow:
     candidates_n: int = 0
     dark: Optional[bool] = None       # None until judged; True = no free source had it
     judged_by: str = ""               # "llm" | "overlap" | ""
+    # Did the tape have quotes for this market when it jumped? False means the
+    # freshness verdict there would have read "unknown": an unwatched token,
+    # counted as such in the brief, never as a verdict (manager, 2026-10-25).
+    watched: Optional[bool] = None
+    # The owner's late forward that explained a dark jump (idea 1, 2026-10-25).
+    # Additive: the jump stays dark in the dark count; this row is printed
+    # beside it as "explained later by owner", with how late, never in the
+    # lead stats (its lead is negative by construction).
+    owner_explained: bool = False
+    owner_item_id: str = ""
+    owner_late_s: Optional[float] = None
 
 
 @dataclass
@@ -171,6 +182,26 @@ class LeadLedger:
         self.save()
         return jump
 
+    def attribute_owner(self, item, condition_ids: Iterable[str], *, window_s: float = 86400.0) -> int:
+        """An owner forward that maps to a market with a DARK jump in the last
+        ``window_s`` explains it after the fact. Returns how many jumps it
+        explained. The dark flag is left as it is."""
+        cids = {str(c) for c in condition_ids}
+        ts = float(getattr(item, "published_ts", 0) or 0)
+        n = 0
+        for j in self.jumps.values():
+            if not j.dark or j.owner_explained or j.condition_id not in cids:
+                continue
+            if not (ts - window_s <= j.ts <= ts + 120):
+                continue
+            j.owner_explained = True
+            j.owner_item_id = str(getattr(item, "id", ""))
+            j.owner_late_s = round(ts - j.ts, 1)
+            n += 1
+        if n:
+            self.save()
+        return n
+
     # ---- items ----
     def add_item(self, row: ItemRow) -> None:
         with self._lock:
@@ -203,6 +234,11 @@ class LeadLedger:
             lat = [i.decided_ts - i.seen_ts for i in its if i.decided_ts and i.seen_ts]
             out["domains"][dom] = {
                 "jumps": len(js), "dark": sum(1 for j in js if j.dark),
+                "watched": sum(1 for j in js if j.watched is True),
+                "unknown": sum(1 for j in js if j.watched is False),
+                "owner_explained": sum(1 for j in js if j.owner_explained),
+                "owner_late_median_s": (statistics.median([j.owner_late_s for j in js if j.owner_explained and j.owner_late_s is not None])
+                                        if any(j.owner_explained for j in js) else None),
                 "dark_frac": (sum(1 for j in js if j.dark) / len(js)) if js else None,
                 "lead_n": len(leads), "lead_median_s": statistics.median(leads) if leads else None,
                 "lead_positive": sum(1 for x in leads if x > 0),

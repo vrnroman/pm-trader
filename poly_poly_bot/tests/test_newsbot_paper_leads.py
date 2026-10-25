@@ -222,3 +222,37 @@ def test_items_and_stats_with_persistence(lled, tmp_path):
     assert g["jumps"] == 1 and g["dark"] == 1 and g["dark_frac"] == 1.0
     assert g["fired"] == 1 and g["fired_moved_our_way"] == 1 and g["latency_median_s"] == 6.0
     assert s["domains"]["all"]["items"] == 1
+
+
+def test_owner_forward_explains_a_dark_jump_without_touching_the_dark_count(lled):
+    j = _jump(ts=10_000.0)
+    lled.add_jump(j)
+    lled.attribute(j, [], lookback_s=900)
+    assert j.dark is True
+    late = It("owner:1", "owner", 10_000.0 + 2400, "Fed cuts rates, Powell says")
+    assert lled.attribute_owner(late, ["c1"]) == 1
+    assert j.dark is True and j.owner_explained and j.owner_late_s == pytest.approx(2400.0)
+    assert lled.attribute_owner(late, ["c1"]) == 0, "once"
+    # a forward a day and a half later explains nothing
+    stale = It("owner:2", "owner", 10_000.0 + 2 * 86400, "Fed cuts rates")
+    j2 = _jump(ts=10_000.0)
+    j2.jump_id = "c1:other"
+    lled.add_jump(j2)
+    lled.attribute(j2, [], lookback_s=900)
+    assert lled.attribute_owner(stale, ["c1"]) == 0
+    s = lled.stats()
+    a = s["domains"]["all"]
+    assert a["dark"] == 2 and a["owner_explained"] == 1 and a["owner_late_median_s"] == pytest.approx(2400.0)
+
+
+def test_watched_and_unknown_jumps_are_counted(lled):
+    j1 = _jump(ts=10_000.0)
+    j1.watched = True
+    j2 = _jump(ts=20_000.0)
+    j2.jump_id = "c1:b"
+    j2.watched = False
+    for j in (j1, j2):
+        lled.add_jump(j)
+        lled.attribute(j, [], lookback_s=900)
+    a = lled.stats()["domains"]["all"]
+    assert a["jumps"] == 2 and a["watched"] == 1 and a["unknown"] == 1

@@ -243,3 +243,21 @@ def test_stale_items_are_counted_not_judged(rig, monkeypatch):
     monkeypatch.setattr(judge_mod, "run_claude", _fake_claude())
     assert r.process_item(mine, now=1700.0 + 3600) is not None
     assert "stale skipped" in r.report_text(now=1700.0 + 3600)
+
+
+def test_an_owner_forward_explains_a_dark_jump_and_the_brief_says_so(rig, monkeypatch):
+    r, sent = rig
+    base = 1600.0
+    for i, px in enumerate([0.40, 0.44, 0.50, 0.55]):
+        r.buckets.add(livedata.Trade(condition_id="c1", asset="ta", price=px, yes_price=px, size=100, ts=base + i * 30,
+                                     side="BUY", outcome="Yes", title="A", slug="a"))
+    assert r.scan_jumps(now=base + 150) == 1
+    j = next(iter(r.leads.jumps.values()))
+    assert j.dark is True and j.watched is True, "ta has quotes in the rig"
+    monkeypatch.setattr(judge_mod, "run_claude", _fake_claude(material=False, market=None, idx=None))
+    r.owner_text("Dario: Anthropic IPO announce coming", {"message_id": 7, "date": int(base + 150 + 1800)})
+    item = r.queue.get_nowait()
+    r.process_item(item, now=base + 150 + 1800)
+    assert j.owner_explained and j.owner_late_s == pytest.approx((base + 150 + 1800) - j.ts, abs=1.0)
+    text = r.report_text(now=base + 4000)
+    assert "explained later by owner 1" in text and "watched 1" in text

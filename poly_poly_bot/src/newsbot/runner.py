@@ -204,6 +204,12 @@ class Runner:
             return None
         if not cands:
             return None
+        if item.source == "owner":
+            # The owner's late forward explains a dark jump after the fact
+            # (idea 1): FTS only, no LLM, the dark count untouched.
+            n_exp = self.leads.attribute_owner(item, [c.condition_id for c in cands])
+            if n_exp:
+                logger.info(f"[news] owner forward explained {n_exp} dark jump(s): '{item.title[:50]}'")
         fresh_by_tok: dict = {}
         quotes_by_tok: dict = {}
         for c in cands[:2]:          # the top two get a quote seed; the rest ride Gamma's numbers
@@ -304,11 +310,12 @@ class Runner:
             c = self._by_condition(jp.condition_id)
             if c is None:
                 continue
+            watched = any(self.book.best(str(t)) is not None for t in c.token_ids)
             row = leads_mod.JumpRow(jump_id=f"{jp.condition_id}:{int(jp.ts // 60)}", ts=jp.ts,
                                     condition_id=jp.condition_id, market_id=str(c.market_id),
                                     question=c.question, domains=tuple(c.domains), delta_cents=jp.delta_cents,
                                     from_price=jp.from_price, to_price=jp.to_price, notional=jp.notional,
-                                    n_trades=jp.n_trades)
+                                    n_trades=jp.n_trades, watched=watched)
             if not self.leads.add_jump(row):
                 continue
             self.leads.attribute(row, list(self.recent), lookback_s=self.lead_lookback_s)
