@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-25T12:42:24Z-4494",
-    "ts": 1792932144,
-    "kind": "nothing",
-    "message": "Armed off since 2026-10-18 by owner choice, still off, spend today $0. Bot restarted a few times near digest time (signal 15) and came back clean each time (Bot started. Monitoring trades...), no self-disarm, no re-arm cap hit, no guard failure, digest fresh. Only chronic benign errors (404 price lookups, server disconnects, 429s). Set Z form stable: 0x9f15613e net +10.0% (was +9.4%), 0x3d42e45c net +4.2% (unchanged), both still in form with no losing streak. No wallet the bar has in form is losing now, no prior bench to lift. No action needed.",
+    "id": "2026-10-25T18:44:25Z-b14e",
+    "ts": 1792953865,
+    "kind": "escalation",
+    "message": "Self-disarm (no trade data) fired 7 times in the last 24h, last at 15:57, each about 15 minutes after a restart. The process restarted about 68 times today per the fingerprint count, far more than usual. Arm is still off since your 2026-10-18 pause and spend today is $0, so no money moved. No push went out for this pattern. Flagging the restart rate in case it is not what you expect; it looks tied to today's many main pushes, which each redeploy and restart the process.",
     "evidence": [
+        "d0b42a80d314 x7 last 2.3h ago [open: 7 hits, no action yet] :: WARNING [guard] self_disarm: ENTERED: Self-disarmed, back to paper. no trade data for N minutes: copying blind is wors",
+        "c47d62e70341 x68 last 2.6h ago [open: 68 hits, no action yet] :: INFO Received signal N, shutting down...",
         "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
         "## spend today: {\"date\": \"2026-10-25\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-24\", \"closed_reason\": \"\"}",
-        "in form  0x9f15613e: 340 settled, 60% won vs 54% needed, net +10.0% on $1,598,163, worst day -149,979, 9 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)",
-        "in form  0x3d42e45c: 147 settled, 60% won vs 54% needed, net +4.2% on $258,124, worst day -17,449, 0 of 13 exits under 10 min",
-        "2026-10-25 10:53:05 INFO  Received signal 15, shutting down... / 2026-10-25 10:54:47 INFO  Bot started. Monitoring trades..."
+        "2026-10-25 15:57:21 WARNING [guard] self_disarm: ENTERED: Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying"
     ],
     "commit": null
 }
