@@ -282,9 +282,10 @@ def test_a_weak_candidate_match_never_reaches_the_llm(rig, monkeypatch):
     r, sent = rig
     called = []
     monkeypatch.setattr(judge_mod, "run_claude", lambda *a, **k: called.append(1))
+    # one common word in common ("rates"), no proper noun: not a match
     weak = Item(id="w1", source="rss:nypost", domains=("corp",), published_ts=1690.0, seen_ts=1695.0,
-                title="Anthropic sponsors a football game", text="", url="")
-    r.index.cands[0] = _cand("m1", "c1", "Will Anthropic announce an IPO in 2026?", ["ta", "tb"])
+                title="Injury rates in the football league rise again", text="", url="")
+    r.index.cands = [_cand("m2", "c2", "Will the Fed cut rates in December?", ["tc", "td"])]
     assert r.process_item(weak, now=1700.0) is None
     assert not called and sum(r.day_unmatched.values()) == 1
 
@@ -309,3 +310,18 @@ def test_news_text_from_disk_reads_the_counters_file_shape(tmp_path, monkeypatch
         "rss:x": {"items": 3, "errors": 0, "last_ok_ts": 1.0, "last_item_ts": 1.0, "last_error": ""}}}))
     text = runner_mod.news_text()
     assert "1 sources, 3 items total" in text
+
+
+def test_news_mode_keeps_the_redeemer_and_books_settlements_disarmed():
+    """The verifier (2026-10-25) found no redeemer and no settlement booking in
+    NEWS_MODE: the redeemer lived in the copy loop, and the guard's money pass
+    was armed-only. Both run in NEWS_MODE now."""
+    import inspect
+    import main
+    src = inspect.getsource(main.main)
+    news = src[src.index("if CONFIG.news_mode:"):src.index("# Start the copy-paper validation harness")]
+    assert "check_and_redeem_positions(" in news and "redeem_interval_hours" in news
+    assert "preview_mode" in news, "the redeemer never runs in a preview process"
+    guard = inspect.getsource(main._live_guard_loop)
+    assert "(live_mode.is_armed() or CONFIG.news_mode)" in guard
+    assert guard.index("(live_mode.is_armed() or CONFIG.news_mode)") < guard.index("ops_watch.settle_released(")

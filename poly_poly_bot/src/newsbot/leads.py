@@ -33,8 +33,27 @@ def tokens(text: str) -> set:
     return {w for w in _WORD.findall((text or "").lower()) if w not in _STOP}
 
 
+def stems(text: str) -> set:
+    """Crude stems: the first five letters of each meaningful word, so
+    Ukrainian/Ukraine, Brazilian/Brazil and Serbian/Serbia match (the verifier
+    found single-entity geo headlines dropped by exact tokens, 2026-10-25).
+    Words shorter than five letters stay whole."""
+    return {w[:5] for w in tokens(text)}
+
+
+_PROPER = re.compile(r"\b([A-Z][a-zA-Z]{5,})")
+
+
 def overlap(a: str, b: str) -> int:
-    return len(tokens(a) & tokens(b))
+    """Shared stems between two texts. One shared stem that is a proper noun of
+    six letters or more in ``a`` (the item) counts as two: a headline naming the
+    one entity the market is about is a match even when nothing else is."""
+    shared = stems(a) & stems(b)
+    if len(shared) == 1:
+        proper = {m[:5].lower() for m in _PROPER.findall(a or "")}
+        if shared & proper:
+            return 2
+    return len(shared)
 
 
 def ledger_dir() -> str:

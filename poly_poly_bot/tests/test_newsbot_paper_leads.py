@@ -256,3 +256,22 @@ def test_watched_and_unknown_jumps_are_counted(lled):
         lled.attribute(j, [], lookback_s=900)
     a = lled.stats()["domains"]["all"]
     assert a["jumps"] == 2 and a["watched"] == 1 and a["unknown"] == 1
+
+
+def test_summary_sd_is_the_standard_error_of_the_mean(book):
+    b, st = book
+    for i in range(4):
+        _fire(b, item_id=f"s{i}", token_id=f"t{i}")
+    st["now"] = 1400.0
+    st["bid"] = [(0.462, 100)]   # four identical rows
+    b.mark()
+    h = paper.summary(b.ledger)["horizons"]["5m"]
+    assert h["n"] == 4 and h["sd"] == 0.0, "identical ROIs have no spread"
+
+
+def test_overlap_matches_demonyms_and_single_proper_nouns():
+    assert leads.overlap("Melania Trump says secured ceasefire in Ukrainian city of Oleshky", "Russia x Ukraine ceasefire") >= 2
+    assert leads.overlap("Zelenskiy: Starlink restrictions completely removed", "Will Starlink restore service in Ukraine?") >= 2
+    assert leads.overlap("Brazilian voters head to the polls", "Will Lula win Brazil's election?") >= 2
+    assert leads.overlap("Jets vs. Dolphins: preview, prediction, what to watch", "Will Macron remain president?") == 0
+    assert leads.overlap("a game preview tonight", "Will the game be postponed?") <= 1, "a common word alone is not a match"

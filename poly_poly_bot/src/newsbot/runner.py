@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import asyncio
 import collections
+import json
 import os
 import random
 import threading
@@ -110,7 +111,10 @@ class Runner:
         self.item_by_id: dict[str, Item] = {}
         self.item_dir: dict[str, tuple[str, str]] = {}   # item_id -> (token, direction)
         self.day_items: dict[str, int] = {}
-        self.pinged: set = set()
+        # Surprise pings fire once; the set lives on disk so a restart does not
+        # repeat them (verifier, 2026-10-25).
+        self._pinged_path = os.path.join(d, "pinged.json")
+        self.pinged: set = self._load_pinged()
         self.rng = random.Random()
         self.started = time.time()
         self.last_item_ts = 0.0
@@ -411,7 +415,24 @@ class Runner:
                 logger.warn(f"[news] settle failed for {b.book}: {exc}")
         return n
 
+    def _load_pinged(self) -> set:
+        try:
+            with open(self._pinged_path, encoding="utf-8") as f:
+                return set(json.load(f))
+        except (OSError, ValueError):
+            return set()
+
+    def _save_pinged(self) -> None:
+        try:
+            tmp = self._pinged_path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(sorted(self.pinged)[-5000:], f)
+            os.replace(tmp, self._pinged_path)
+        except OSError as exc:
+            logger.warn(f"[news] pinged set not saved: {exc}")
+
     def _ping(self, text: str) -> None:
+        self._save_pinged()
         try:
             from src import telegram_bot
             telegram_bot.send_message(text, kind=telegram_bot.KIND_NEWS)

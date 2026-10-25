@@ -267,7 +267,11 @@ def _live_guard_loop():
                 # The one place the chain is read for the governor: this
                 # thread may block, the executor's loop never does.
                 live_budget.refresh_balance()
-            if not CONFIG.preview_mode and live_mode.is_armed():
+            # NEWS_MODE (2026-10-25): the arm is off for good but the positions
+            # the copy era still holds settle on their own schedule; booking
+            # them is bookkeeping, not trading, so the money pass runs
+            # disarmed too (the verifier found zero settled lines otherwise).
+            if not CONFIG.preview_mode and (live_mode.is_armed() or CONFIG.news_mode):
                 bal = live_budget._read_balance()
                 # Resolved positions are NOT worth their cost. The funder on
                 # this box carried dozens of resolved losers whose cost basis
@@ -1563,7 +1567,27 @@ async def main():
         threading.Thread(target=_live_guard_loop, daemon=True,
                          name="live-guard").start()
         logger.info("[news] NEWS_MODE: news bot + live guard started; copy threads not started")
+        # The redeemer used to live inside the copy strategy's loop, so NEWS_MODE
+        # silently stopped claiming the copy era's winnings (verifier,
+        # 2026-10-25; the 09-16 bug again). Same cadence, same call, here.
+        from src.config import get_private_key
+        from src.copy_trading.auto_redeemer import check_and_redeem_positions
+        redeem_interval_s = CONFIG.redeem_interval_hours * 3600
+        last_redeem = 0.0
         while not _shutdown_event.is_set():
+            now = time.time()
+            if not CONFIG.preview_mode and now - last_redeem >= redeem_interval_s:
+                last_redeem = now
+                try:
+                    result = await check_and_redeem_positions(
+                        get_private_key(),
+                        notify=lambda m: telegram_bot.send_message(m, kind=telegram_bot.KIND_DEAL))
+                    if result.count > 0:
+                        logger.info(f"[news] redeemed {result.count} resolved position(s)")
+                    if result.settled > 0:
+                        logger.info(f"[news] settled {result.settled} resolved position(s) from the API")
+                except Exception as err:
+                    logger.warn(f"[news] auto-redeem failed: {err}")
             await asyncio.sleep(1.0)
         logger.info("[news] shutdown")
         return

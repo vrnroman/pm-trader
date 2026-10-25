@@ -87,9 +87,10 @@ Item(id: str,            # f"{source}:{native_id}" ; dedup key
 
 ## Env knobs (deploy.yml ensure_env, defaults in code)
 
-NEWS_MODE=1, NEWS_STAKE_USD=5, NEWS_JUDGE_MODEL=claude-sonnet-4-5, NEWS_LLM_DAILY_BUDGET=150,
+NEWS_MODE=true (config._opt_bool accepts only the literal "true"), NEWS_STAKE_USD=5,
+NEWS_JUDGE_MODEL=claude-sonnet-5-5, NEWS_LLM_DAILY_BUDGET=300, NEWS_LLM_HOURLY_CAP=budget/12, NEWS_MIN_OVERLAP=2,
 NEWS_FRESH_CENTS=3, NEWS_FRESH_MIN=15, NEWS_JUMP_CENTS=8, NEWS_JUMP_WINDOW_MIN=10,
-NEWS_MOVE_CENTS=5, NEWS_DOMAINS=politics,crypto,geo,corp, NEWS_OBSERVE_ONLY=0,
+NEWS_MOVE_CENTS=5, NEWS_DOMAINS=politics,crypto,geo,corp, NEWS_MAX_ITEM_AGE_MIN=30,
 NEWS_BRIEF_UTC=08:00, NEWS_SILENT_HOURS=6, NEWS_INDEX_VOLUME_MIN=5000.
 
 ## Standing rules carried from the copy bot (handoff.md)

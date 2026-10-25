@@ -324,7 +324,11 @@ def summary(ledger: PaperLedger) -> dict:
         pnl = sum(m["pnl"] for _, m in rs)
         spent = sum(r.filled_usd + r.fee_usd for r, _ in rs)
         rois = [m["pnl"] / max(r.filled_usd + r.fee_usd, 1e-9) for r, m in rs]
-        sd = math.sqrt(sum(x * x for x in rois) / n) / math.sqrt(n)
+        # +/- 1 SD of the MEAN ROI: the population standard deviation over
+        # sqrt(n). The first cut used the root mean square, which printed +/-5
+        # on four identical +10% rows (verifier, 2026-10-25).
+        mean = sum(rois) / n
+        sd = math.sqrt(sum((x - mean) ** 2 for x in rois) / n) / math.sqrt(n)
         out["horizons"][h] = {"n": n, "pnl": round(pnl, 2), "roi": round(pnl / spent, 4) if spent else None,
                               "sd": round(sd, 4), "unquotable": sum(1 for r in ledger.rows.values()
                                                                     if h in r.marks and r.marks[h].get("pnl") is None)}
