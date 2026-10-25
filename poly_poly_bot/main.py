@@ -1559,11 +1559,7 @@ async def main():
         logger.info("Telegram not configured (set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)")
 
     # Startup notification
-    telegram_bot.send_message(kind=telegram_bot.KIND_BOT, text=
-        "<b>Bot Started</b>\n"
-        f"Strategy #1 (Copy): {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"
-        f"Mode: {'PREVIEW' if CONFIG.preview_mode else 'LIVE'}"
-    )
+    telegram_bot.send_message(kind=telegram_bot.KIND_BOT, text=telegram_bot.startup_text())
     _consume_claude_drift_marker()
 
     # NEWS_MODE (run s-pw9rom, 2026-10-25): the news-driven paper trader runs

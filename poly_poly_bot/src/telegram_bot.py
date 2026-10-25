@@ -548,9 +548,47 @@ def _handle_ops(text: str) -> None:
     send_message("\n".join(lines))
 
 
+def _real_money_line() -> str:
+    from src.copy_trading import live_mode
+    try:
+        armed = live_mode.is_armed()
+    except Exception:  # noqa: BLE001
+        return "Real money: unknown (the arm flag could not be read)"
+    if armed:
+        return ("Real money: armed, but nothing places orders in news mode; the wallet is only "
+                "watched for the copy era's open positions")
+    return "Real money: off"
+
+
+def startup_text() -> str:
+    """The boot line. In NEWS_MODE it says what actually runs: the copy
+    bot's banner ("Strategy #1 (Copy): ON, Mode: LIVE") reached the owner's
+    phone after the copy bot was retired, and read as live copying (owner,
+    2026-10-25)."""
+    if CONFIG.news_mode:
+        return ("<b>News bot started</b>\n"
+                "Paper only: news trades are simulated at the real prices, never placed\n"
+                f"{_real_money_line()}\n"
+                "Copy trading: retired\n"
+                "/news for today's funnel and the paper books")
+    return ("<b>Bot Started</b>\n"
+            f"Strategy #1 (Copy): {'ON' if CONFIG.strategy1_enabled else 'OFF'}\n"
+            f"Mode: {'PREVIEW' if CONFIG.preview_mode else 'LIVE'}")
+
+
 def _handle_status():
     """Handle /status command: show Strategy #1 status."""
     now = datetime.now(SGT)
+    if CONFIG.news_mode:
+        send_message("\n".join([
+            "<b>Bot Status</b>",
+            f"Time: {now.strftime('%Y-%m-%d %H:%M SGT')}",
+            "News bot: paper only, no orders placed",
+            _real_money_line(),
+            "Copy trading: retired 2026-10-25",
+            "/news for today's funnel and the paper books",
+        ]))
+        return
 
     lines = [
         f"<b>Bot Status</b>",

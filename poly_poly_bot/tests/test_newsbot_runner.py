@@ -7,6 +7,7 @@ where a ``now`` is supplied.
 """
 
 import json
+import os
 import threading
 import time
 
@@ -446,3 +447,27 @@ def test_a_running_count_is_never_a_repeat(rig, monkeypatch):
     r.process_item(_item(i="n1", title="Anthropic IPO priced at 120, Dario says"), now=1700.0)
     r.process_item(_item(i="n2", title="Anthropic IPO priced at 135, Dario says"), now=1710.0)
     assert len(calls) == 2 and sum(r.day_repeat.values()) == 0
+
+
+def test_the_boot_line_in_news_mode_says_paper_and_never_copy_live(monkeypatch):
+    # the owner got "Strategy #1 (Copy): ON / Mode: LIVE" after the copy bot was retired
+    import src.telegram_bot as tb
+    from src.copy_trading import live_mode
+    monkeypatch.setattr(tb.CONFIG, "news_mode", True, raising=False)
+    monkeypatch.setattr(live_mode, "is_armed", lambda: False)
+    t = tb.startup_text()
+    assert "News bot started" in t and "Paper only" in t and "Real money: off" in t
+    assert "Strategy #1" not in t and "LIVE" not in t
+    monkeypatch.setattr(live_mode, "is_armed", lambda: True)
+    assert "nothing places orders" in tb.startup_text()
+    sent = []
+    monkeypatch.setattr(tb, "send_message", lambda text, **k: sent.append(text))
+    tb._handle_status()
+    assert "paper only" in sent[0] and "Strategy #1" not in sent[0]
+    monkeypatch.setattr(tb.CONFIG, "news_mode", False, raising=False)
+    assert "Strategy #1 (Copy)" in tb.startup_text()
+
+
+def test_main_sends_the_shared_boot_line():
+    src = open(os.path.join(os.path.dirname(__file__), "..", "main.py"), encoding="utf-8").read()
+    assert "telegram_bot.startup_text()" in src and "<b>Bot Started</b>" not in src

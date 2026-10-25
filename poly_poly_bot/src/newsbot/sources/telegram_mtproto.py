@@ -25,6 +25,7 @@ items (two sources, two clocks: that is the lag the thesis measures).
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import re
 import time
@@ -32,6 +33,10 @@ from dataclasses import dataclass
 from datetime import timezone
 
 from src.logger import logger
+
+# Telethon logs every packet at DEBUG; the box log was mostly
+# "Encrypted messages put in a queue to be sent" (2026-10-25).
+logging.getLogger("telethon").setLevel(logging.WARNING)
 from src.newsbot.items import NO_TIMESTAMP_FLAG, Item, first_line, make_id
 
 ENV_API_ID = "TELEGRAM_API_ID"
