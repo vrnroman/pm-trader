@@ -101,10 +101,15 @@ jobs:
           echo "wrote .env ($(wc -l < .env) lines)"
 
           # Owner credential sources: name-only echo, value never logged.
+          # Another session also wired these into the ENV_FILE secret directly,
+          # so skip any key .env already defines: the secret wins, no duplicate
+          # lines, and an individual Actions secret only fills a gap (2026-10-25).
           put_secret() {
-            if [ -n "$2" ]; then
+            if grep -q "^$1=" .env; then
+              echo "  = $1 kept from ENV_FILE secret"
+            elif [ -n "$2" ]; then
               printf '%s=%s\n' "$1" "$2" >> .env
-              echo "  + $1 set from secret (news source)"
+              echo "  + $1 set from Actions secret (news source)"
             else
               echo "  - $1 unset (source stays off)"
             fi

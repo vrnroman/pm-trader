@@ -113,10 +113,10 @@ def test_disabled_when_any_key_is_missing_or_blank():
 
 def test_config_defaults_floor_list_url_and_domain_override():
     cfg = xc.config_from_env(FULL_ENV)
-    assert cfg.list_id == 1234567890123 and cfg.poll_s == 50 and cfg.domains == ("politics", "geo", "crypto", "corp")
+    assert cfg.list_id == 1234567890123 and cfg.poll_s == 75 and cfg.domains == ("politics", "geo", "crypto", "corp")
     assert cfg.cookies == f"auth_token={AUTH}; ct0={CT0}"
     assert xc.config_from_env({**FULL_ENV, "X_POLL_S": "10"}).poll_s == 30       # the floor
-    assert xc.config_from_env({**FULL_ENV, "X_POLL_S": "junk"}).poll_s == 50     # the default
+    assert xc.config_from_env({**FULL_ENV, "X_POLL_S": "junk"}).poll_s == 75     # the default
     assert xc.config_from_env({**FULL_ENV, "X_LIST_ID": "https://x.com/i/lists/987654321?x=1"}).list_id == 987654321
     assert xc.config_from_env({**FULL_ENV, "X_DOMAINS": "crypto, Corp,bogus"}).domains == ("crypto", "corp")
     assert xc.config_from_env({**FULL_ENV, "X_DOMAINS": "bogus"}).domains == xc.DEFAULT_DOMAINS
@@ -280,9 +280,13 @@ async def test_run_backs_off_on_source_errors_doubling_to_the_cap_and_recovers(t
     sleep = FakeSleep(stop=stop, stop_after=7)
     q: asyncio.Queue = asyncio.Queue()
     cfg = xc.config_from_env(FULL_ENV)
+    import random as _r
     await asyncio.wait_for(xc.run(q, dedup, counters, stop=stop, api=api, sleep=sleep, clock=lambda: T0, cfg=cfg,
-                                  max_backoff_s=300), 2)
-    assert sleep.calls == [50.0, 100.0, 200.0, 300.0, 300.0, 50.0, 50.0]
+                                  max_backoff_s=300, rng=_r.Random(0)), 2)
+    # the error backoff doubles from base independently of the jittered success
+    # cadence (calls 0, 5, 6 are successes -> human-shaped, only >= MIN_POLL_S)
+    assert [sleep.calls[i] for i in (1, 2, 3, 4)] == [150.0, 300.0, 300.0, 300.0]  # base 75 -> 150, cap 300
+    assert all(c >= xc.MIN_POLL_S for c in (sleep.calls[0], sleep.calls[5], sleep.calls[6]))
     assert len(api.calls) == 7
     assert [q.get_nowait().id for _ in range(q.qsize())] == ["x:1", "x:2"]
     row = counters.snapshot()["x"]
@@ -296,9 +300,12 @@ async def test_run_keeps_the_base_interval_on_transport_errors(tmp_path):
     stop = asyncio.Event()
     sleep = FakeSleep(stop=stop, stop_after=3)
     q: asyncio.Queue = asyncio.Queue()
+    import random as _r
     await asyncio.wait_for(xc.run(q, dedup, counters, stop=stop, api=api, sleep=sleep, clock=lambda: T0,
-                                  cfg=xc.config_from_env({**FULL_ENV, "X_POLL_S": "45"})), 2)
-    assert sleep.calls == [45.0, 45.0, 45.0]
+                                  cfg=xc.config_from_env({**FULL_ENV, "X_POLL_S": "45"}), rng=_r.Random(0)), 2)
+    # transport errors hold the base backoff (45); the clean read that follows
+    # gets a jittered human interval
+    assert sleep.calls[0] == 45.0 and sleep.calls[1] == 45.0 and sleep.calls[2] >= xc.MIN_POLL_S
     assert counters.snapshot()["x"]["errors"] == 2
 
 
@@ -342,3 +349,25 @@ async def test_make_api_stores_the_cookies_as_one_active_account_and_mutes_telem
     # A second boot with the same path upserts rather than duplicating or failing.
     api2 = await xc.make_api(cfg)
     assert (await api2.pool.get(xc.ACCOUNT_NAME)).cookies["ct0"] == CT0
+
+
+def test_next_interval_is_jittered_not_fixed_and_respects_the_floor():
+    import random as _r
+    from src.newsbot.sources.x_cookies import next_interval, MIN_POLL_S
+    rng = _r.Random(1)
+    day = 10 * 3600.0   # 10:00 local at offset 0 = active
+    vals = [next_interval(75.0, day, rng, quiet_offset_h=0.0) for _ in range(400)]
+    assert len(set(round(v) for v in vals)) > 100, "a fixed cadence is a bot tell"
+    assert min(vals) >= MIN_POLL_S
+    import statistics as st
+    assert 40 < st.median(vals) < 200, st.median(vals)
+
+
+def test_next_interval_slows_overnight():
+    import random as _r
+    import statistics as st
+    from src.newsbot.sources.x_cookies import next_interval
+    rng = _r.Random(2)
+    awake = st.median([next_interval(75.0, 10 * 3600.0, rng, quiet_offset_h=0.0) for _ in range(300)])
+    asleep = st.median([next_interval(75.0, 4 * 3600.0, rng, quiet_offset_h=0.0) for _ in range(300)])
+    assert asleep > awake * 2, (awake, asleep)

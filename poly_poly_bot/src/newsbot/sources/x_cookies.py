@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import random
 import re
 import time
 from dataclasses import dataclass
@@ -57,7 +58,7 @@ ENV_DB = "X_ACCOUNTS_DB"
 KEY = "x"                      # the roster counter row and the id prefix
 ACCOUNT_NAME = "cookie-session"  # twscrape needs a username for its db row; the cookies are the login
 QUEUE = "ListLatestTweetsTimeline"  # twscrape's lock key for the list endpoint
-DEFAULT_POLL_S = 50
+DEFAULT_POLL_S = 75
 MIN_POLL_S = 30
 MAX_BACKOFF_S = 1800
 PAGE_LIMIT = 20                # X's page size: one GraphQL request per poll once the List holds 20 posts
@@ -366,8 +367,35 @@ async def _pause(stop: asyncio.Event, seconds: float, sleep) -> None:
                 fut.cancel()
 
 
+# A fixed poll interval is the easiest bot tell X has: a request landing every
+# N seconds to the millisecond, around the clock. The owner asked for a human
+# shape (2026-10-25). next_interval draws a heavy-tailed jitter around the base
+# (most reads 0.5-2x, a one-in-seven "distracted" long gap), and slows down in
+# the owner's local small hours, so the series looks like a person glancing at a
+# list, not a cron. The base stays the knob (X_POLL_S); the median active gap is
+# about the base, the account never reads faster than MIN_POLL_S.
+def _local_hour(now: float, offset_h: float) -> int:
+    return int(((now / 3600.0) + offset_h) % 24)
+
+
+def _is_quiet(now: float, offset_h: float) -> bool:
+    return 2 <= _local_hour(now, offset_h) < 9     # asleep: 02:00-09:00 local
+
+
+def next_interval(base: float, now: float, rng: random.Random, *,
+                  quiet_offset_h: float = 8.0, min_s: float = MIN_POLL_S) -> float:
+    """A human-looking gap before the next read, in seconds."""
+    iv = base * rng.lognormvariate(0.0, 0.45)      # median 1x, mostly 0.5-2x, heavy tail
+    if rng.random() < 0.15:                        # a glance that did not happen
+        iv *= rng.uniform(3.0, 7.0)
+    if _is_quiet(now, quiet_offset_h):             # fewer reads while the owner sleeps
+        iv *= rng.uniform(2.5, 5.0)
+    return max(float(min_s), iv)
+
+
 async def run(queue: asyncio.Queue, dedup, counters, *, stop: asyncio.Event, api=None, sleep=asyncio.sleep,
-              clock=time.time, env=None, cfg: Config | None = None, max_backoff_s: float = MAX_BACKOFF_S) -> None:
+              clock=time.time, env=None, cfg: Config | None = None, max_backoff_s: float = MAX_BACKOFF_S,
+              rng: random.Random | None = None, quiet_offset_h: float = 8.0) -> None:
     """Poll the List every `poll_s` until `stop` is set, putting new Items on
     `queue`. A SourceError doubles the interval (cap `max_backoff_s`) and is
     logged once per episode; a transport error keeps the base interval; a
@@ -384,20 +412,27 @@ async def run(queue: asyncio.Queue, dedup, counters, *, stop: asyncio.Event, api
             logger.error(f"[news-x] not starting: {scrub(str(e), cfg)}")
             return
     base = max(int(cfg.poll_s), MIN_POLL_S) if cfg.poll_s else DEFAULT_POLL_S
-    interval = base
+    rng = rng or random.Random()
+    # Two clocks: the success cadence is human-shaped (next_interval); the error
+    # backoff doubles from base, independent of it, so a run of failures is a
+    # clean exponential retry, not a jittered one.
+    backoff = float(base)
+    interval = next_interval(base, clock(), rng, quiet_offset_h=quiet_offset_h)
     err_logged = False
     state: dict = {}
-    logger.info(f"[news-x] polling list={cfg.list_id} every {base}s domains={','.join(cfg.domains)}")
+    logger.info(f"[news-x] polling list={cfg.list_id} base={base}s (jittered, human-shaped, slower overnight) "
+                f"domains={','.join(cfg.domains)}")
     while not stop.is_set():
         now = clock()
         try:
             new = await fetch(state, dedup, counters, api=api, now=now, cfg=cfg)
             for it in new:
                 await queue.put(it)
-            if interval != base or err_logged:
-                logger.info(f"[news-x] recovered interval={base}s")
-            interval = base
+            if err_logged:
+                logger.info("[news-x] recovered")
             err_logged = False
+            backoff = float(base)
+            interval = next_interval(base, now, rng, quiet_offset_h=quiet_offset_h)
             if new:
                 lag = now - max(it.published_ts for it in new)
                 logger.info(f"[news-x] read={state.get('last_read')} new={len(new)} newest_lag_s={lag:.0f} "
@@ -410,12 +445,14 @@ async def run(queue: asyncio.Queue, dedup, counters, *, stop: asyncio.Event, api
         except asyncio.CancelledError:
             raise
         except SourceError as e:
-            interval = min(interval * 2, max_backoff_s)
+            backoff = min(backoff * 2, max_backoff_s)
+            interval = backoff
             if not err_logged:
                 logger.warn(f"[news-x] source-error={scrub(str(e), cfg)} backing off interval={interval:.0f}s "
                             f"(max {max_backoff_s:.0f}s)")
                 err_logged = True
         except Exception as e:  # noqa: BLE001 - a transport blip or a parser bug must not end the two weeks
+            interval = backoff
             if not err_logged:
                 logger.warn(f"[news-x] error={type(e).__name__}: {scrub(str(e), cfg)} interval={interval:.0f}s")
                 err_logged = True
