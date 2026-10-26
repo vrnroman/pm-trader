@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-26T06:45:09Z-ad2c",
-    "ts": 1792997109,
+    "id": "2026-10-26T12:46:12Z-607d",
+    "ts": 1793018772,
     "kind": "escalation",
-    "message": "Ops digest has gone stale. Last digest commit 232c8c9 at 2026-10-26T01:42:31Z, now 2026-10-26T06:45:09Z: about 5 hours with no new digest, past the 3 hour bar. Before the gap: arm off since 2026-10-18 owner pause, spend $0.00 today, cash $129.78, equity $129.78. 0x1985327e is also losing now in the same window, 4 settled, 25% won vs 53% needed, net -18.2 percent, not yet acted on. Cannot confirm bot health for the last 5 plus hours. Check the ops-digest workflow and the VM.",
+    "message": "Ops digest is stale again. Last digest commit 899956d at 2026-10-26T07:43:48Z, now 2026-10-26T12:46:12Z, about 5 hours gap, past the 3 hour bar. This repeats the pattern flagged at 06:45:09Z, which resolved briefly then recurred. The hourly digest workflow has missed five scheduled runs, 08:17 through 12:17. Before the gap: arm off since 2026-10-18 owner pause, spend $0.00 today, cash $129.78, equity $129.78. Cannot confirm bot health for the last 5 plus hours. Check the ops-digest GitHub Actions workflow.",
     "evidence": [
-        "# ops digest 2026-10-26T01:36:14.761395+00:00 (last 24h)",
-        "last digest commit 232c8c9 ops: digest 2026-10-26T01:42:31Z (most recent on origin/ops-digest as of this check, now 2026-10-26T06:45:09Z)",
+        "# ops digest 2026-10-26T07:36:58.241239+00:00 (last 24h)",
+        "last digest commit 899956d ops: digest 2026-10-26T07:43:48Z (most recent on origin/ops-digest as of this check, now 2026-10-26T12:46:12Z)",
         "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
-        "in form  0x1985327e: 4 settled, 25% won vs 53% needed, net -18.2% on $1,600, worst day -285, 4 of 4 exits under 10 min",
-        "2026-10-26 01:36:43 INFO  [ops] routine_wallet_action: '0x09b045ba' -> 'bench applied, now in form' | 0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 6"
+        "## money state: {\"cash\": 129.784219, \"equity\": 129.78, \"spend\": {\"spent_usd\": 0.0}}",
+        "previous verdict 2026-10-26T06:45:09Z-ad2c: escalation for the same staleness condition (232c8c9 to then, about 5h), which was briefly resolved by 899956d"
     ],
     "commit": null
 }
