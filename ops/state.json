@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26T13:00:46.197067+00:00",
+ "generated": "2026-10-26T15:03:25.380106+00:00",
  "money": {
   "cash": 129.784219,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1793019576.9809024,
+  "ts": 1793026889.4073844,
   "day": "2026-10-26"
  },
  "arm": {
@@ -435,7 +435,7 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792938193.1638436,
+    "ts": 1793026290.378995,
     "n_acts": 156,
     "n_resolved_markets": 55,
     "era": 1784976482.215206,
@@ -481,7 +481,7 @@
    "source": "telegram-gate",
    "floor_row": {
     "label": "backward replay (copy-and-hold at their price, first entry, clean era)",
-    "ts": 1792938193.1638436,
+    "ts": 1793026290.378995,
     "n_acts": 1980,
     "n_resolved_markets": 759,
     "era": 1784976482.215206,
@@ -530,7 +530,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-26",
   "last_escalation_id": "2026-10-26T12:46:12Z-607d",
-  "admit_scan_ts": 1793015296.9556658,
+  "admit_scan_ts": 1793026285.776844,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 0,
   "day_pnl": 0.19,
@@ -1009,104 +1009,6 @@
  },
  "ledger_tail": [
   {
-   "ts": 1792934745.5652874,
-   "day": "2026-10-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792935335.940938,
-   "day": "2026-10-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792935715.124419,
-   "day": "2026-10-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792936967.4778671,
-   "day": "2026-10-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792937414.1417687,
-   "day": "2026-10-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792937864.095168,
-   "day": "2026-10-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792938193.1638436,
-   "day": "2026-10-25",
-   "kind": "floor_row",
-   "before": "0xc4020444 floor 300.0",
-   "after": "floor 300.0 (same)",
-   "detail": "copies at $300: 300 YES +53% (n=60, trimmed +41%) · 200 yes +45% (n=65, trimmed +33%) · 150 yes +43% (n=66, trimmed +31%) · 100 yes +43% (n=66, trimmed +31%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0xc4020444a9d906a6dde62fa898a8f068634cc7f1",
-   "floor_before": 300.0,
-   "floor_after": 300.0,
-   "live": false
-  },
-  {
-   "ts": 1792938193.1638436,
-   "day": "2026-10-25",
-   "kind": "floor_row",
-   "before": "0xd47e7b93 floor 300.0",
-   "after": "floor 300.0 (same)",
-   "detail": "copies at $300: 300 YES +16% (n=81, trimmed +13%) · 200 no -1% (n=279, trimmed -2%) · 150 no -1% (n=309, trimmed -3%) · 100 no -2% (n=358, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)",
-   "push": null,
-   "wallet": "0xd47e7b93736349b09bc6f39236456d85f58a4e60",
-   "floor_before": 300.0,
-   "floor_after": 300.0,
-   "live": false
-  },
-  {
-   "ts": 1792938453.008119,
-   "day": "2026-10-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792939289.1658847,
-   "day": "2026-10-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
    "ts": 1792942907.6054044,
    "day": "2026-10-25",
    "kind": "sre_started",
@@ -1369,25 +1271,35 @@
    "after": "sent",
    "detail": "Ops digest is stale again. Last digest commit 899956d at 2026-10-26T07:43:48Z, now 2026-10-26T12:46:12Z, about 5 hours g",
    "push": "BOT"
+  },
+  {
+   "ts": 1793026290.378995,
+   "day": "2026-10-26",
+   "kind": "floor_row",
+   "before": "0xc4020444 floor 300.0",
+   "after": "floor 300.0 (same)",
+   "detail": "copies at $300: 300 YES +53% (n=60, trimmed +41%) · 200 yes +45% (n=65, trimmed +33%) · 150 yes +43% (n=66, trimmed +31%) · 100 yes +43% (n=66, trimmed +31%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xc4020444a9d906a6dde62fa898a8f068634cc7f1",
+   "floor_before": 300.0,
+   "floor_after": 300.0,
+   "live": false
+  },
+  {
+   "ts": 1793026290.378995,
+   "day": "2026-10-26",
+   "kind": "floor_row",
+   "before": "0xd47e7b93 floor 300.0",
+   "after": "floor 300.0 (same)",
+   "detail": "copies at $300: 300 YES +16% (n=81, trimmed +13%) · 200 no -1% (n=279, trimmed -2%) · 150 no -1% (n=309, trimmed -3%) · 100 no -2% (n=358, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)",
+   "push": null,
+   "wallet": "0xd47e7b93736349b09bc6f39236456d85f58a4e60",
+   "floor_before": 300.0,
+   "floor_after": 300.0,
+   "live": false
   }
  ],
  "important": [
-  "2026-10-25 13:10:52 WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying",
-  "2026-10-25 13:25:37 INFO  Received signal 15, shutting down...",
-  "2026-10-25 13:35:26 INFO  Received signal 15, shutting down...",
-  "2026-10-25 13:41:50 INFO  Received signal 15, shutting down...",
-  "2026-10-25 13:57:32 WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying",
-  "2026-10-25 14:02:40 INFO  Received signal 15, shutting down...",
-  "2026-10-25 14:10:09 INFO  Received signal 15, shutting down...",
-  "2026-10-25 14:17:39 INFO  Received signal 15, shutting down...",
-  "2026-10-25 14:23:34 INFO  [ops] floor_row: '0xc4020444 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +53% (n=60, trimmed +41%) · 200 yes +45% (n=65, trimmed +33%) · 150 yes +43% (n=66, trimmed +31%) · 100 yes +43% (n=66, trimmed +31%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-25 14:23:50 INFO  [ops] floor_row: '0xd47e7b93 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +16% (n=81, trimmed +13%) · 200 no -1% (n=279, trimmed -2%) · 150 no -1% (n=309, trimmed -3%) · 100 no -2% (n=358, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-25 14:27:18 INFO  Received signal 15, shutting down...",
-  "2026-10-25 14:41:20 INFO  Received signal 15, shutting down...",
-  "2026-10-25 14:43:05 INFO  Received signal 15, shutting down...",
-  "2026-10-25 14:57:37 [websockets.client] DEBUG: < CLOSE 1001 (going away) server shutting down [22 bytes]",
-  "2026-10-25 14:57:37 [websockets.client] DEBUG: > CLOSE 1001 (going away) server shutting down [22 bytes]",
-  "2026-10-25 14:58:52 WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying",
   "2026-10-25 15:41:40 INFO  Received signal 15, shutting down...",
   "2026-10-25 15:57:21 WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying",
   "2026-10-25 19:07:47 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Self-disarm (no trade data) fired 7 times in the last 24h, last at 15:57, each about 15 minutes after a restart. The pro",
@@ -1412,7 +1324,9 @@
   "2026-10-26 11:48:16 INFO  [ops] settle_pending: '0x9f15613e open $5.00' -> 'payout not in the activity yet' | 'Spread: Maryland (-5.5)' left the wallet; booked when Polymarket's row shows",
   "2026-10-26 11:53:29 INFO  [ops] floor_row: '0x28ef6f21 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -1% (n=151, trimmed -3%) · 200 no -1% (n=190, trimmed -3%) · 150 no +4% (n=250, trimmed +1%) · 100 no +5% (n=308, trimmed +2%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-26 11:53:36 INFO  [ops] floor_row: '0x9f6a4549 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +7% (n=81, trimmed +2%) · 200 no +8% (n=133, trimmed +3%) · 150 no +5% (n=177, trimmed +1%) · 100 no +7% (n=211, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-26 12:59:50 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest is stale again. Last digest commit 899956d at 2026-10-26T07:43:48Z, now 2026-10-26T12:46:12Z, about 5 hours g"
+  "2026-10-26 12:59:50 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest is stale again. Last digest commit 899956d at 2026-10-26T07:43:48Z, now 2026-10-26T12:46:12Z, about 5 hours g",
+  "2026-10-26 14:56:09 INFO  [ops] floor_row: '0xc4020444 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +53% (n=60, trimmed +41%) · 200 yes +45% (n=65, trimmed +33%) · 150 yes +43% (n=66, trimmed +31%) · 100 yes +43% (n=66, trimmed +31%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-26 14:56:23 INFO  [ops] floor_row: '0xd47e7b93 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +16% (n=81, trimmed +13%) · 200 no -1% (n=279, trimmed -2%) · 150 no -1% (n=309, trimmed -3%) · 100 no -2% (n=358, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)"
  ],
  "watcher": [
   {
@@ -2309,12 +2223,12 @@
   },
   "7da5b6289516": {
    "first": 1790495657.6745641,
-   "last": 1792960423.0424263,
-   "count": 30,
+   "last": 1793026668.118062,
+   "count": 31,
    "sample": "2026-09-27 07:53:42 INFO  [ops] floor_row: '0x00110b8e floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +22% (n=314, trimmed +18%) · 200 yes +21% (n=394, trimmed +17%) · 150 yes +21% (n=450, trimmed +18%) · 100 yes +21% (n=536, trimmed +18%); backward replay (copy-and-hold at their pri",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
    "recent": [
-    1792960423.0424263
+    1793026668.118062
    ],
    "action": null,
    "action_ts": null,
@@ -3366,12 +3280,12 @@
   },
   "e7b471403f60": {
    "first": 1791373829.6951878,
-   "last": 1792938344.3911812,
-   "count": 8,
+   "last": 1793026668.118062,
+   "count": 9,
    "sample": "2026-10-07 11:49:18 INFO  [ops] floor_row: '0x722abb54 floor global' -> 'floor 300.0 (moved)' | copies at $300: 300 YES +10% (n=201, trimmed +8%) · 200 no +7% (n=219, trimmed +4%) · 150 no +4% (n=249, trimmed +2%) · 100 no +7% (n=293, trimmed +5%); backward replay (copy-and-hold at their price, firs",
    "norm": "INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimmed N); backward replay (copy-and-hold at their price, first entry, clean era)",
    "recent": [
-    1792938344.3911812
+    1793026668.118062
    ],
    "action": null,
    "action_ts": null,
