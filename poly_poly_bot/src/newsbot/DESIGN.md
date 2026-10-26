@@ -1,7 +1,7 @@
 # newsbot: a news-driven Polymarket paper trader (run s-pw9rom, 2026-10-25)
 
-Replaces the copy bot's threads in the same container (`NEWS_MODE=1`). Paper
-only. Free sources only. The LLM is `claude -p` on the owner's subscription,
+The only bot in this repo since 2026-10-27, when the copy bot it replaced was
+deleted (code, commands, sidecar). Paper only; nothing can sign an order. Free sources only. The LLM is `claude -p` on the owner's subscription,
 called only after a deterministic shortlist exists, and bounded per day.
 
 The thesis to test in two weeks: do free sources lead Polymarket's price, by
@@ -87,7 +87,8 @@ Item(id: str,            # f"{source}:{native_id}" ; dedup key
 
 ## Env knobs (deploy.yml ensure_env, defaults in code)
 
-NEWS_MODE=true (config._opt_bool accepts only the literal "true"), NEWS_STAKE_USD=5,
+NEWS_STAKE_USD=5, NEWS_MIN_PRICE=0.05, NEWS_MAX_PRICE=0.95 (entries only inside the band),
+NEWS_JUMP_MIN_TRADES=3, NEWS_JUMP_MIN_USD=150,
 NEWS_JUDGE_MODEL=claude-sonnet-5-5, NEWS_LLM_DAILY_BUDGET=300, NEWS_LLM_HOURLY_CAP=budget/12, NEWS_MIN_OVERLAP=2,
 NEWS_FRESH_CENTS=3, NEWS_FRESH_MIN=15, NEWS_JUMP_CENTS=8, NEWS_JUMP_WINDOW_MIN=10,
 NEWS_MOVE_CENTS=5, NEWS_DOMAINS=politics,crypto,geo,corp, NEWS_MAX_ITEM_AGE_MIN=30,
@@ -116,10 +117,10 @@ not the helper. Empty renders as "collecting, n=0".
 - LLM: one model, one call per item, mapping only (no second pass on fires).
   `NEWS_JUDGE_MODEL` default `claude-sonnet-5-5`; hard daily cap
   `NEWS_LLM_DAILY_BUDGET` default 300; RATE_LIMITED = defer, never fire.
-- NEWS_MODE: copy threads not started, code stays in the tree; the live guard /
-  redeemer / settlement booking for the positions still held keeps running;
-  no real-order path is reachable; copy commands answer "retired in NEWS_MODE".
-  Deleting the copy code is a decide item at the two-week review.
+- The copy bot (and its guard, redeemer, SRE sidecar, commands) was deleted on
+  2026-10-27 at the owner's word; the wallet held no open positions (141
+  resolved, all worth $0). One position per market per book; /pnl is the
+  experiment's money report, in the 08:00 UTC brief as a short block too.
 - Domains: politics (Trump, the positive control), crypto minus 5-minute up/down
   markets, geopolitics, corporate (8-K). Entertainment and sports out.
 - Deploy: the repo's norm (PR, full suite + clock-drift run, merge, gh run watch,

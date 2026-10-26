@@ -14,12 +14,10 @@ Log files
                         BOT_LOG_RETENTION_DAYS (default 2).
 """
 
-import glob
 import logging
 import os
 import re
 import sys
-import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -296,7 +294,7 @@ class BotLogger:
         # which was 93.5% of total log volume (68,889 of 73,666 lines on
         # 2026-07-24) and drowned real signal (~4,500 lines/day).
         for noisy in ("httpcore", "httpx", "httpcore.connection", "httpcore.http11",
-                      "urllib3", "urllib3.connectionpool", "web3", "asyncio", "hpack"):
+                      "urllib3", "urllib3.connectionpool", "asyncio", "hpack"):
             logging.getLogger(noisy).setLevel(logging.WARNING)
 
         log_format = os.environ.get("LOG_FORMAT", "text")
@@ -342,48 +340,6 @@ class BotLogger:
         ops_handler.addFilter(_OperationalFilter())
         ops_handler.addFilter(SecretScrubFilter())
         self._logger.addHandler(ops_handler)
-
-        # -- Important file: the deterministic split the watcher and the
-        # digest read (one regex, ops_watch.is_important). Rolls daily, kept
-        # for a fortnight by the same purge keyed on the filename date.
-        # ops_grammar is a leaf (no import back into this module): the
-        # earlier import of ops_watch was circular, the except swallowed it,
-        # and the file was never written on the VM.
-        from src.copy_trading.ops_grammar import is_important as _is_important
-        if True:
-            imp_handler = _DailyRotatingFileHandler(
-                logs_dir, "important",
-                on_rollover=lambda d: _purge_old_prefixed_logs(d, "important", 14))
-            imp_handler.setLevel(logging.INFO)
-            imp_handler.setFormatter(formatter)
-            # By LEVEL as well as by grammar: the grammar's ERROR pattern reads
-            # the message text, so an error() whose words lack "ERROR"
-            # ("Error fetching CTF events", 400+ a day on 2026-09-25 from the
-            # primary chain reader) never reached the watcher.
-            imp_handler.addFilter(lambda rec: rec.levelno >= logging.ERROR or bool(_is_important(rec.getMessage())))
-            imp_handler.addFilter(SecretScrubFilter())
-            self._logger.addHandler(imp_handler)
-            # Third-party ERRORs too (manager ruling s-qbzbrw, DONE gate): the
-            # CLOB client logs to its own logger, which propagates to root,
-            # never to "poly_poly_bot", so its 400 lines could not reach this
-            # file whatever the grammar said. A twin handler on the root,
-            # gated by LEVEL (ERROR and up), no message grammar for foreign
-            # strings; records from our own tree are excluded so nothing is
-            # written twice.
-            root_handler = _DailyRotatingFileHandler(
-                logs_dir, "important",
-                on_rollover=lambda d: _purge_old_prefixed_logs(d, "important", 14))
-            root_handler.setLevel(logging.ERROR)
-            root_handler.setFormatter(formatter)
-            root_handler.addFilter(lambda rec: not (rec.name == "poly_poly_bot" or rec.name.startswith("poly_poly_bot.")))
-            root_handler.addFilter(SecretScrubFilter())
-            root = logging.getLogger()
-            for h in list(root.handlers):
-                if getattr(h, "_pm_trader_root_important", False):
-                    root.removeHandler(h)
-            root_handler._pm_trader_root_important = True
-            root.addHandler(root_handler)
-            _purge_old_prefixed_logs(logs_dir, "important", 14)
 
         # Purge old operational logs on startup, then on every midnight rollover.
         _purge_old_bot_logs(logs_dir, retention)

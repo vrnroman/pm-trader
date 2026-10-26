@@ -43,6 +43,15 @@ def stake_usd() -> float:
     return _env_f("NEWS_STAKE_USD", 5.0)
 
 
+def price_band() -> tuple[float, float]:
+    """Entries only between these prices. At 98.6c the most a win can make is
+    1.4c a share and the spread is wider than that; the first live night
+    bought "Machado enters Venezuela" at 0.986 and Iotova at 0.91 (owner,
+    2026-10-27). Below 5c a $5 stake is a lottery ticket that the control
+    book then has to match."""
+    return _env_f("NEWS_MIN_PRICE", 0.05), _env_f("NEWS_MAX_PRICE", 0.95)
+
+
 def ledger_dir() -> str:
     return os.environ.get("NEWS_DATA_DIR", "data/news")
 
@@ -211,6 +220,13 @@ class PaperBook:
         self._bid = bid_ladder
         self._fee = fee_bps
         self._now = now
+        self.skipped = {"held": 0, "band": 0}
+
+    def holds(self, condition_id: str) -> bool:
+        """An open, not void row on this market already: one position per
+        market per book. The first live night bought the same Serbian
+        turnout YES six times, once per turnout update (2026-10-26)."""
+        return any(r.condition_id == condition_id and not r.void for r in self.ledger.open_rows())
 
     def fire(self, *, item_id: str, source: str, domains: tuple, market_id: str,
              condition_id: str, token_id: str, outcome: str, question: str,
@@ -222,6 +238,10 @@ class PaperBook:
         row_id = f"{self.book}:{item_id or 'random'}:{token_id}"
         if self.ledger.has(row_id):
             return None
+        if condition_id and self.holds(condition_id):
+            self.skipped["held"] += 1
+            logger.info(f"[news-paper] {self.book}: already holds '{question[:40]}': not booked again")
+            return None
         stake = stake_usd()
         try:
             ladder = self._ask(token_id)
@@ -231,6 +251,12 @@ class PaperBook:
         fill = walk(ladder or [], stake, "ask")
         if fill.avg_price is None:
             logger.info(f"[news-paper] {self.book}: unquotable {token_id[:12]} ({question[:40]}): not booked")
+            return None
+        lo, hi = price_band()
+        if not lo <= fill.avg_price <= hi:
+            self.skipped["band"] += 1
+            logger.info(f"[news-paper] {self.book}: '{question[:40]}' at {fill.avg_price:.3f} is outside "
+                        f"{lo:.2f}-{hi:.2f}: not booked")
             return None
         bps = None
         try:

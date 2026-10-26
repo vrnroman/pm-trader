@@ -8,7 +8,6 @@ import subprocess
 from datetime import datetime, timezone
 
 
-from src.copy_trading import llm_review
 from src.newsbot import llm
 from src.newsbot.llm import RATE_LIMITED, DailyBudget, run_claude
 
@@ -38,8 +37,11 @@ class Script:
         return step
 
 
-def test_sentinel_is_shared_with_the_copy_bot_gate():
-    assert RATE_LIMITED is llm_review.RATE_LIMITED
+def test_rate_limit_replies_are_recognised():
+    assert llm.looks_rate_limited("You've hit your monthly spend limit · raise it at claude.ai/settings/usage")
+    assert llm.looks_rate_limited(None, "Rate limit reached")
+    assert not llm.looks_rate_limited("ok", None)
+    assert RATE_LIMITED is llm.RATE_LIMITED
 
 
 def test_success_envelope_and_argv():

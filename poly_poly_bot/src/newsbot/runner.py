@@ -37,6 +37,7 @@ from src.newsbot import judge as judge_mod
 from src.newsbot import leads as leads_mod
 from src.newsbot import llm as llm_mod
 from src.newsbot import paper as paper_mod
+from src.newsbot import pnl as pnl_mod
 from src.newsbot.items import DedupStore, Item, make_id
 from src.newsbot.sources import bluesky, poller, roster as roster_mod
 from src.newsbot.tape import clob_ws, jumps as jumps_mod, livedata
@@ -136,9 +137,9 @@ class Runner:
         self.leads = leads_mod.LeadLedger(os.path.join(d, "leads.jsonl"))
         self.budget = llm_mod.DailyBudget(os.path.join(d, "llm-budget.json"),
                                           int(_env("NEWS_LLM_DAILY_BUDGET", 300)))
-        from src.copy_trading import fee_rate
+        from src.newsbot import fees
         self.books = {b: paper_mod.PaperBook(b, ask_ladder=self._ask_ladder, bid_ladder=self._bid_ladder,
-                                             fee_bps=fee_rate.fee_bps) for b in paper_mod.BOOKS}
+                                             fee_bps=fees.fee_bps) for b in paper_mod.BOOKS}
         self.queue: asyncio.Queue = asyncio.Queue(maxsize=5000)
         # Items of the last day, for lead attribution. Persisted: four
         # restarts on the first day each emptied this window and every jump
@@ -390,17 +391,27 @@ class Runner:
             toks = self.index.all_token_ids(self.domains)
             if not toks:
                 return
-            tok = self.rng.choice(toks)
-            c = self.index.by_token(tok)
-            if c is None:
-                return
-            i = c.token_ids.index(tok) if tok in c.token_ids else 0
-            self.books["random"].fire(**{**common, "item_id": f"rnd:{common['item_id']}", "source": "random",
-                                         "market_id": str(c.market_id), "condition_id": str(c.condition_id),
-                                         "token_id": tok, "outcome": c.outcomes[i] if i < len(c.outcomes) else "",
-                                         "question": c.question, "freshness": "n/a", "confidence": 0.0,
-                                         "why": "random control"})
-            self._touch(tok, now)
+            lo, hi = paper_mod.price_band()
+            # The control plays by the llm book's rules: a price inside the
+            # band (from the index's quote, then the real ask at fire).
+            for _ in range(20):
+                tok = self.rng.choice(toks)
+                c = self.index.by_token(tok)
+                if c is None:
+                    continue
+                i = c.token_ids.index(tok) if tok in c.token_ids else 0
+                q = c.best_ask if i == 0 else (None if c.best_bid is None else 1 - c.best_bid)
+                if q is None or not lo <= q <= hi:
+                    continue
+                row = self.books["random"].fire(**{**common, "item_id": f"rnd:{common['item_id']}",
+                                                   "source": "random", "market_id": str(c.market_id),
+                                                   "condition_id": str(c.condition_id), "token_id": tok,
+                                                   "outcome": c.outcomes[i] if i < len(c.outcomes) else "",
+                                                   "question": c.question, "freshness": "n/a",
+                                                   "confidence": 0.0, "why": "random control"})
+                if row is not None:
+                    self._touch(tok, now)
+                    return
         except Exception as exc:  # noqa: BLE001
             logger.warn(f"[news] random book fire failed: {exc}")
 
@@ -483,8 +494,7 @@ class Runner:
         return n
 
     def settle_all(self) -> int:
-        from src.copy_trading.copy_paper import REFUNDED
-        from src.copy_trading.copy_paper_live import resolve
+        from src.newsbot.resolve import REFUNDED, resolve
 
         def resolver(condition_id: str):
             idx = resolve(condition_id)
@@ -666,9 +676,39 @@ class Runner:
             except asyncio.TimeoutError:
                 pass
             try:
-                self._ping(self.report_text(since_ts=time.time() - 86400, label="last 24h"))
+                self._ping(self.report_text(since_ts=time.time() - 86400, label="last 24h")
+                           + "\n\n" + self.pnl_text(short=True))
             except Exception as exc:  # noqa: BLE001
                 logger.warn(f"[news] brief failed: {exc}")
+
+    def status_text(self, now: Optional[float] = None) -> str:
+        now = time.time() if now is None else now
+        day = time.strftime("%Y-%m-%d", time.gmtime(now))
+        snap = self.counters.snapshot()
+        silent = [k for k, v in snap.items() if v.get("last_item_ts") and now - v["last_item_ts"] > 6 * 3600]
+        erroring = [k for k, v in snap.items()
+                    if (v.get("errors") or 0) and (not v.get("last_ok_ts") or now - v["last_ok_ts"] > 3600)]
+        up_h = (now - self.started) / 3600
+        last = f"{(now - self.last_item_ts) / 60:.0f} min ago" if self.last_item_ts else "none yet"
+        lines = ["<b>News bot status</b>",
+                 f"Up {up_h:.1f} h · paper only, real money not wired",
+                 f"Sources: {len(self.roster)} in the roster, {len(silent)} silent for 6 h+"
+                 + (f" ({', '.join(silent[:5])})" if silent else ""),
+                 f"Last item read: {last}",
+                 f"Today (UTC): {self.day_items.get(day, 0)} items, {self.day_judged.get(day, 0)} judged, "
+                 f"{self.day_material.get(day, 0)} material",
+                 f"Model budget: {self.budget.count_today()} of {self.budget.limit} calls today",
+                 f"Markets in the index: {self.index.stats().get('n_markets')}, "
+                 f"{len(self.watch)} watched on the quote socket"]
+        if erroring:
+            lines.append(f"Erroring: {', '.join(erroring[:5])}")
+        return "\n".join(lines)
+
+    def pnl_text(self, short: bool = False) -> str:
+        def bid_now(tok: str):
+            b = self.book.best(str(tok))
+            return b[0] if b and b[0] is not None else None
+        return pnl_mod.pnl_text({b: pb.ledger for b, pb in self.books.items()}, bid_now=bid_now, short=short)
 
     # ---- the owner's thumb ----
     def owner_text(self, text: str, msg: dict) -> None:
@@ -829,6 +869,21 @@ def run_forever(shutdown: threading.Event) -> None:
         asyncio.run(r.main())
     except Exception as exc:  # noqa: BLE001
         logger.error(f"[news] runner died: {exc}")
+
+
+def status_text() -> str:
+    if _RUNNER is not None:
+        return _RUNNER.status_text()
+    return "News bot is not running in this process."
+
+
+def pnl_text(command: str = "") -> str:
+    """/pnl: the experiment's money, from the running bot or from disk."""
+    if _RUNNER is not None:
+        return _RUNNER.pnl_text()
+    d = data_dir()
+    return pnl_mod.pnl_text({b: paper_mod.PaperLedger(b, os.path.join(d, f"paper-{b}.jsonl"))
+                             for b in paper_mod.BOOKS})
 
 
 def news_text(command: str = "") -> str:
