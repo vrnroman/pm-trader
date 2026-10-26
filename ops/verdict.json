@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-25T18:44:25Z-b14e",
-    "ts": 1792953865,
-    "kind": "escalation",
-    "message": "Self-disarm (no trade data) fired 7 times in the last 24h, last at 15:57, each about 15 minutes after a restart. The process restarted about 68 times today per the fingerprint count, far more than usual. Arm is still off since your 2026-10-18 pause and spend today is $0, so no money moved. No push went out for this pattern. Flagging the restart rate in case it is not what you expect; it looks tied to today's many main pushes, which each redeploy and restart the process.",
+    "id": "2026-10-26T00:42:58Z-e7dc",
+    "ts": 1792975378,
+    "kind": "wallet_action",
+    "action": "bench",
+    "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
+    "message": "0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 64% needed to break even, net -16.8% on $1,595, down from 67% won and net +11.7% in the 2026-10-24 digest and 60% won and net +7.3% in the 2026-10-23 digest.",
     "evidence": [
-        "d0b42a80d314 x7 last 2.3h ago [open: 7 hits, no action yet] :: WARNING [guard] self_disarm: ENTERED: Self-disarmed, back to paper. no trade data for N minutes: copying blind is wors",
-        "c47d62e70341 x68 last 2.6h ago [open: 68 hits, no action yet] :: INFO Received signal N, shutting down...",
-        "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
-        "## spend today: {\"date\": \"2026-10-25\", \"spent_usd\": 0.0, \"wallet_copies\": {}, \"wallet_copies_yesterday\": {}, \"yesterday\": \"2026-10-24\", \"closed_reason\": \"\"}",
-        "2026-10-25 15:57:21 WARNING [guard] self_disarm: ENTERED: Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying"
+        "in form  0x09b045ba: 4 settled, 0% won vs 64% needed, net -16.8% on $1,595, worst day -126, 4 of 4 exits under 10 min",
+        "in form  0x09b045ba: 12 settled, 67% won vs 66% needed, net +11.7% on $4,688, worst day -126, 12 of 12 exits under 10 min (digest 2026-10-24)",
+        "in form  0x09b045ba: 15 settled, 60% won vs 65% needed, net +7.3% on $5,894, worst day -126, 15 of 15 exits under 10 min (digest 2026-10-23)"
     ],
     "commit": null
 }
