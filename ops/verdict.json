@@ -1,14 +1,12 @@
 {
-    "id": "2026-10-26T12:46:12Z-607d",
-    "ts": 1793018772,
-    "kind": "escalation",
-    "message": "Ops digest is stale again. Last digest commit 899956d at 2026-10-26T07:43:48Z, now 2026-10-26T12:46:12Z, about 5 hours gap, past the 3 hour bar. This repeats the pattern flagged at 06:45:09Z, which resolved briefly then recurred. The hourly digest workflow has missed five scheduled runs, 08:17 through 12:17. Before the gap: arm off since 2026-10-18 owner pause, spend $0.00 today, cash $129.78, equity $129.78. Cannot confirm bot health for the last 5 plus hours. Check the ops-digest GitHub Actions workflow.",
+    "id": "2026-10-26T18:43:10Z-a9c5",
+    "ts": 1793040190,
+    "kind": "wallet_action",
+    "action": "bench",
+    "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab",
+    "message": "0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst day -285.",
     "evidence": [
-        "# ops digest 2026-10-26T07:36:58.241239+00:00 (last 24h)",
-        "last digest commit 899956d ops: digest 2026-10-26T07:43:48Z (most recent on origin/ops-digest as of this check, now 2026-10-26T12:46:12Z)",
-        "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
-        "## money state: {\"cash\": 129.784219, \"equity\": 129.78, \"spend\": {\"spent_usd\": 0.0}}",
-        "previous verdict 2026-10-26T06:45:09Z-ad2c: escalation for the same staleness condition (232c8c9 to then, about 5h), which was briefly resolved by 899956d"
+        "in form  0x1985327e: 3 settled, 33% won vs 52% needed, net -16.1% on $1,205, worst day -285, 3 of 3 exits under 10 min"
     ],
     "commit": null
 }
