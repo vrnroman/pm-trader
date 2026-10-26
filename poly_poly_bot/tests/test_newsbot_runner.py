@@ -7,7 +7,6 @@ where a ``now`` is supplied.
 """
 
 import json
-import os
 import threading
 import time
 
@@ -64,7 +63,7 @@ def rig(tmp_path, monkeypatch):
     # no network anywhere: the roster is loaded but nothing polls in these tests;
     # fee reads and REST books are stubbed
     monkeypatch.setattr(runner_mod.Runner, "_rest_book", lambda self, tok: None)
-    import src.copy_trading.fee_rate as fr
+    import src.newsbot.fees as fr
     monkeypatch.setattr(fr, "fee_bps", lambda tok, now=None: 500)
     sent = []
     import src.telegram_bot as tb
@@ -265,20 +264,6 @@ def test_an_owner_forward_explains_a_dark_jump_and_the_brief_says_so(rig, monkey
     assert "explained later by owner 1" in text and "watched 1" in text
 
 
-def test_deploy_sets_news_mode_in_the_form_config_reads(monkeypatch):
-    """Guard the production call site: the deploy file's value must parse to
-    True through config._opt_bool, which accepts only the literal "true". The
-    first deploy wrote 1 and the copy bot started as before (2026-10-25)."""
-    import re
-    from src import config as cfg
-    src = open("../.github/workflows/deploy.yml", encoding="utf-8").read()
-    m = re.search(r"ensure_env NEWS_MODE (\S+)", src)
-    assert m, "deploy.yml must set NEWS_MODE"
-    monkeypatch.setenv("NEWS_MODE", m.group(1))
-    assert cfg._opt_bool("NEWS_MODE", False) is True
-    assert "sed -i '/^NEWS_MODE=/d' .env" in src, "a stale value in the secret must not win"
-
-
 def test_a_weak_candidate_match_never_reaches_the_llm(rig, monkeypatch):
     """An NFL preview shares one word with a Macron market: no call (2026-10-25)."""
     r, sent = rig
@@ -313,36 +298,6 @@ def test_news_text_from_disk_reads_the_counters_file_shape(tmp_path, monkeypatch
         "rss:x": {"items": 3, "errors": 0, "last_ok_ts": 1.0, "last_item_ts": 1.0, "last_error": ""}}}))
     text = runner_mod.news_text()
     assert "1 sources, 3 items total" in text
-
-
-def test_news_mode_keeps_the_redeemer_and_books_settlements_disarmed():
-    """The verifier (2026-10-25) found no redeemer and no settlement booking in
-    NEWS_MODE: the redeemer lived in the copy loop, and the guard's money pass
-    was armed-only. Both run in NEWS_MODE now."""
-    import inspect
-    import main
-    src = inspect.getsource(main.main)
-    news = src[src.index("if CONFIG.news_mode:"):src.index("# Start the copy-paper validation harness")]
-    assert "check_and_redeem_positions(" in news and "redeem_interval_hours" in news
-    assert "preview_mode" in news, "the redeemer never runs in a preview process"
-    guard = inspect.getsource(main._live_guard_loop)
-    assert guard.index("if _money_pass_enabled():") < guard.index("ops_watch.settle_released(")
-
-
-def test_money_pass_runs_disarmed_in_news_mode_never_in_preview(monkeypatch):
-    import main
-    from src.copy_trading import live_mode
-    monkeypatch.setattr(live_mode, "is_armed", lambda: False)
-    monkeypatch.setattr(main.CONFIG, "preview_mode", False)
-    monkeypatch.setattr(main.CONFIG, "news_mode", True)
-    assert main._money_pass_enabled() is True
-    monkeypatch.setattr(main.CONFIG, "news_mode", False)
-    assert main._money_pass_enabled() is False, "disarmed copy mode books nothing"
-    monkeypatch.setattr(live_mode, "is_armed", lambda: True)
-    assert main._money_pass_enabled() is True
-    monkeypatch.setattr(main.CONFIG, "preview_mode", True)
-    monkeypatch.setattr(main.CONFIG, "news_mode", True)
-    assert main._money_pass_enabled() is False, "a preview process never touches the money ledger"
 
 
 def test_silent_sources_never_ping_the_phone(rig):
@@ -449,30 +404,6 @@ def test_a_running_count_is_never_a_repeat(rig, monkeypatch):
     assert len(calls) == 2 and sum(r.day_repeat.values()) == 0
 
 
-def test_the_boot_line_in_news_mode_says_paper_and_never_copy_live(monkeypatch):
-    # the owner got "Strategy #1 (Copy): ON / Mode: LIVE" after the copy bot was retired
-    import src.telegram_bot as tb
-    from src.copy_trading import live_mode
-    monkeypatch.setattr(tb.CONFIG, "news_mode", True, raising=False)
-    monkeypatch.setattr(live_mode, "is_armed", lambda: False)
-    t = tb.startup_text()
-    assert "News bot started" in t and "Paper only" in t and "Real money: off" in t
-    assert "Strategy #1" not in t and "LIVE" not in t
-    monkeypatch.setattr(live_mode, "is_armed", lambda: True)
-    assert "nothing places orders" in tb.startup_text()
-    sent = []
-    monkeypatch.setattr(tb, "send_message", lambda text, **k: sent.append(text))
-    tb._handle_status()
-    assert "paper only" in sent[0] and "Strategy #1" not in sent[0]
-    monkeypatch.setattr(tb.CONFIG, "news_mode", False, raising=False)
-    assert "Strategy #1 (Copy)" in tb.startup_text()
-
-
-def test_main_sends_the_shared_boot_line():
-    src = open(os.path.join(os.path.dirname(__file__), "..", "main.py"), encoding="utf-8").read()
-    assert "telegram_bot.startup_text()" in src and "<b>Bot Started</b>" not in src
-
-
 def test_a_denial_is_never_a_repeat_and_link_digits_are_no_count(rig, monkeypatch):
     # verifier round 5: "confirms" then "denies" within 30 min was skipped
     r, sent = rig
@@ -525,3 +456,12 @@ def test_the_judged_memory_survives_a_restart(rig, monkeypatch):
                   title="Anthropic to announce IPO, Dario says", text="", url="")
     again.process_item(repost, now=now + 60)
     assert len(calls) == 1 and sum(again.day_repeat.values()) == 1
+
+
+def test_status_and_pnl_from_the_running_bot(rig, monkeypatch):
+    r, sent = rig
+    st = r.status_text(now=2000.0)
+    assert "News bot status" in st and "paper only" in st and "Model budget" in st
+    assert "News bot P&amp;L" in r.pnl_text()
+    import main
+    assert callable(main.main)

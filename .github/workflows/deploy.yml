@@ -38,11 +38,13 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt ruff
+          pip install -r requirements.txt ruff freezegun
       - name: Lint (ruff F821 — undefined names)
         run: ruff check --select F821 src main.py
       - name: Full test suite
         run: python -m pytest tests/ -q
+      - name: Clock-drift suite (no test may depend on the wall clock)
+        run: CLOCK_DRIFT_DAYS=90 python -m pytest tests/ -q -p tests.clock_drift_plugin
 
   deploy:
     name: Deploy to GCP VM
@@ -69,9 +71,6 @@ jobs:
         env:
           ENV_FILE: ${{ secrets.ENV_FILE }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
-          LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
-          SRE_DEPLOY_KEY: ${{ secrets.SRE_DEPLOY_KEY }}
           # Owner credential sources (2026-10-25): individual Actions secrets,
           # injected into .env below name-only. Absent = source logs off.
           X_AUTH_TOKEN: ${{ secrets.X_AUTH_TOKEN }}
@@ -81,29 +80,21 @@ jobs:
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           TELEGRAM_USER_SESSION: ${{ secrets.TELEGRAM_USER_SESSION }}
         run: |
-          # The AI SRE sidecar's write deploy key (s-qbzbrw, 2026-09-22): a
-          # FILE next to .env, never an .env line (docker --env-file cannot
-          # carry a multi-line value). deploy.sh copies it to the VM and
-          # mounts it read-only into the sidecar; the bot container never
-          # sees it. Unset means the sidecar starts without a push path and
-          # says so.
-          if [ -n "$SRE_DEPLOY_KEY" ]; then
-            printf '%s\n' "$SRE_DEPLOY_KEY" > sre_deploy_key && chmod 600 sre_deploy_key
-            echo "wrote sre_deploy_key ($(wc -l < sre_deploy_key) lines)"
-          else
-            echo "  - SRE_DEPLOY_KEY secret unset: the sidecar will run without a push path"
-          fi
           if [ -z "$ENV_FILE" ]; then
             echo "::error::ENV_FILE secret is empty — add it in repo Settings > Secrets"
             exit 1
           fi
           printf '%s' "$ENV_FILE" > .env
           echo "wrote .env ($(wc -l < .env) lines)"
+          # The copy bot was removed on 2026-10-27 and nothing in this build
+          # can sign an order: the wallet's private key is not shipped to the
+          # VM at all (it stays in the ENV_FILE secret). Name-only echo.
+          for k in PRIVATE_KEY; do
+            if grep -q "^$k=" .env; then sed -i "/^$k=/d" .env; echo "  - $k dropped (not used)"; fi
+          done
 
-          # Owner credential sources: name-only echo, value never logged.
-          # Another session also wired these into the ENV_FILE secret directly,
-          # so skip any key .env already defines: the secret wins, no duplicate
-          # lines, and an individual Actions secret only fills a gap (2026-10-25).
+          # Owner credential sources: name-only echo, value never logged. A key
+          # the ENV_FILE secret already defines wins (2026-10-25).
           put_secret() {
             if grep -q "^$1=" .env; then
               echo "  = $1 kept from ENV_FILE secret"
@@ -120,25 +111,11 @@ jobs:
           put_secret TELEGRAM_API_ID "$TELEGRAM_API_ID"
           put_secret TELEGRAM_API_HASH "$TELEGRAM_API_HASH"
           put_secret TELEGRAM_USER_SESSION "$TELEGRAM_USER_SESSION"
+          put_secret CLAUDE_CODE_OAUTH_TOKEN "$CLAUDE_CODE_OAUTH_TOKEN"
 
-          # polygon-rpc.com went 401 ("API key disabled, tenant disabled", 2026-06)
-          # and spammed the balance fetch. Rewrite any pinned value to a keyless
-          # working endpoint, in place — durable across deploys without editing
-          # the ENV_FILE secret (which still pins the dead URL).
-          sed -i -E 's#^RPC_URL=.*polygon-rpc\.com.*#RPC_URL=https://polygon-bor-rpc.publicnode.com#' .env
-          # The ENV_FILE secret pins TRADE_MONITOR_MODE=data-api from before the
-          # chain reader worked (s-qbzbrw, 2026-09-22). Rewrite it in place, the
-          # same way as RPC_URL above: hybrid runs the chain as a SHADOW that
-          # cannot copy until two_clocks' own evidence flips it. To pin either
-          # answer set ONCHAIN_SHADOW in the secret; to leave the chain off
-          # entirely, delete this line.
-          sed -i -E 's#^TRADE_MONITOR_MODE=.*#TRADE_MONITOR_MODE=hybrid#' .env
-
-          # Default-on activation flags. Only appended if the ENV_FILE secret
-          # doesn't already set them, so the secret stays the source of truth —
-          # set the key there to override (e.g. WALLET_DISCOVERY_ENABLED=false).
-          # docker --env-file takes the last value, so appended lines win only
-          # over an absent key, never over one the secret defines earlier.
+          # News bot defaults, appended only when the secret does not set them
+          # (docker --env-file takes the last value; the secret stays the
+          # source of truth).
           ensure_env() {
             if ! grep -q "^$1=" .env; then
               printf '\n%s=%s\n' "$1" "$2" >> .env
@@ -147,188 +124,12 @@ jobs:
               echo "  = $1 kept from secret"
             fi
           }
-          # Same, but the value is a secret (not echoed) and skipped if unset.
-          secret_env() {
-            if [ -n "$2" ] && ! grep -q "^$1=" .env; then
-              printf '\n%s=%s\n' "$1" "$2" >> .env
-              echo "  + $1=*** (from secret)"
-            elif [ -z "$2" ]; then
-              echo "  - $1 secret unset — skipped"
-            else
-              echo "  = $1 kept from secret"
-            fi
-          }
-          ensure_env WALLET_DISCOVERY_ENABLED true
-          ensure_env COPY_PAPER_ENABLED true
-          # LLM wallet gate (Strategy 1c) — activate it + its Langfuse tracing.
-          ensure_env WALLET_DISCOVERY_LLM_REVIEW_ENABLED true
-          ensure_env LANGFUSE_HOST https://jp.cloud.langfuse.com
-          # Clean-era §7 verdict clock aligned to the owner's ~08-22 plan
-          # (s-log7q, 2026-08-02; default 7d would have fired the one-shot memo
-          # 20 days early). Inert once the memo fires — verdict_sent flips.
-          ensure_env AB_RACE_VERDICT_DAYS 27
-          # Bankroll governor (run s-yr3unh, 2026-09-05). Every live cap is a
-          # fraction of this number and live sizing is CLOSED without it.
-          # Sized to the money that is ACTUALLY in the funder wallet (80.41
-          # pUSD), not to the 400 SGD plan: the governor takes
-          # min(stated, on-chain) anyway, and stating a number the wallet does
-          # not hold would only make the panels lie.
-          #
-          # The fractions are set so a ticket clears Polymarket's $5 order
-          # minimum with headroom. At $80: copy $6.40, day $40, open at once
-          # $64 (about ten positions), floor $56. If the balance falls under
-          # about $62 a copy stops clearing $5 and the governor refuses rather
-          # than quietly trading a size nobody chose.
-          # Owner, 2026-10-17: the wallet holds $150 since the top-up; the
-          # stated budget follows it so the open cap below can exceed $80.
-          sed -i '/^LIVE_BUDGET_USD=/d' .env
-          ensure_env LIVE_BUDGET_USD 150
-          ensure_env LIVE_BUDGET_PER_COPY_FRAC 0.08
-          # 0.40 of $80 is $32: exactly 5 copies at $6.40, the owner's "1 to 5
-          # deals a day". And no single wallet may take more than 2 of them.
-          ensure_env LIVE_BUDGET_DAILY_FRAC 0.40
-          # The owner's limits, 2026-09-26 ("remove the 3 trades per address;
-          # 1 a day for a wallet's first 7 days in Z, 20 for the others; no
-          # limit on how much per day is bet, only on how much is lost: more
-          # than 45 a day, disarm and wait for my instructions"). The
-          # ENV_FILE secret still pins the old 3 and the $54 daily spend cap,
-          # so these are rewritten in place, the same way as RPC_URL above.
-          sed -i -E 's#^LIVE_MAX_PER_WALLET_DAY=.*#LIVE_MAX_PER_WALLET_DAY=20#' .env
-          ensure_env LIVE_MAX_PER_WALLET_DAY 20
-          ensure_env ZSET_NEW_WALLET_DAYS 7
-          ensure_env ZSET_NEW_WALLET_COPIES_PER_DAY 1
-          # The daily spend cap is OFF under the loss stop (live_budget reads
-          # LIVE_DAILY_LOSS_USD and returns no cap); the pinned $54 is
-          # removed so no panel prints a ceiling that nothing enforces.
-          sed -i -E '/^LIVE_DAILY_USD=/d' .env
-          sed -i -E '/^ZSET_PROBATION_TOTAL_PER_DAY=/d' .env
-          ensure_env LIVE_DAILY_LOSS_USD 45
-          # Two clocks (s-qbzbrw, 2026-09-22): the chain reader runs next to
-          # the data api as a SHADOW (stamps, never copies) until its own
-          # evidence clears the cutover rule in two_clocks.py; ONCHAIN_SHADOW
-          # pins either answer.
-          ensure_env TRADE_MONITOR_MODE hybrid
-          # The chain is PRIMARY (owner, 2026-09-24: "whatever you did, go live
-          # now, dont wait"). ONCHAIN_SHADOW=false forces primary; =true pins the
-          # shadow; unset lets the bot flip on its own evidence (two_clocks).
-          # At the flip the evidence read: 2,342 matched fills over 1.8 days,
-          # chain lag 2.4 s vs api 18.7 s at the median, chain-only 2, api-only
-          # 143 (5.75% missed, the seven restart gaps; the rule's 5% would have
-          # refused). The data api stays as the deduplicated fallback.
-          ensure_env ONCHAIN_SHADOW false
-          # The AI analyst (scripts/ai_analyst.py, s-qbzbrw): ON since the
-          # owner's Desk verdict of 2026-09-24 (the SRE ledger had shown its
-          # clean day). It runs daily inside the sidecar, moves live limits
-          # inside their bands for a day, and pushes code to analyst/*
-          # branches for the owner to merge. Set ANALYST_ENABLED=false in the
-          # ENV_FILE secret to switch it off again.
-          ensure_env ANALYST_ENABLED true
-          # 150 a day for the experimenting analyst (owner, 2026-09-24: "budget
-          # should go up to 150 for run"); at most 60 a single model call.
-          ensure_env ANALYST_MAX_USD 150
-          ensure_env ANALYST_MAX_USD_PER_CALL 60
-          # Owner, 2026-09-24: SRE fixes go to main directly unless the fix
-          # changes the risk profile (money-path files, or the model's own
-          # risk_change line); those go to a branch with the change in risk
-          # on his phone.
-          ensure_env SRE_PUSH_MAIN true
-          ensure_env WALLET_DISCOVERY_CACHE_MAX_GB 3
-          ensure_env WALLET_DISCOVERY_RES_CACHE_MAX_GB 1
-          ensure_env LIVE_BUDGET_EXPOSURE_FRAC 0.80
-          ensure_env LIVE_BUDGET_DRAWDOWN_FRAC 0.30
-          # Owner, 2026-09-24 (docs/REQUIREMENTS-2026-09-24.md, part 1): the
-          # floor is $30 and the daily cap $54, in dollars. These absolute
-          # overrides win over the two fractions above.
-          # Owner, 2026-10-11: floor lowered $30 -> $10 so the ~$50 that is
-          # there can actually be used ($5 bets, no top-up for now).
-          # Owner, 2026-10-14: no floor at all ("remove the $10 limit"); the
-          # $45 daily-loss stop is the only equity stop left.
-          sed -i '/^LIVE_FLOOR_USD=/d' .env
-          ensure_env LIVE_FLOOR_USD off
-          # Owner, 2026-10-14: at most 3 of the open slots per wallet.
-          ensure_env LIVE_MAX_OPEN_PER_WALLET 3
-          # Price-drift tolerance stays 3%. Raised to 7% on 2026-10-18 on a
-          # mis-priced read (the refused bets scored at the TARGET's price);
-          # at the price we would really pay the 3-7% band was 5W/4L, -$6,
-          # and the big winners sat beyond 7%. Drift refusals are booked in
-          # the missed book at the market price now, so this gets answered.
-          sed -i '/^MAX_PRICE_DRIFT_BPS=/d' .env
-          ensure_env MAX_PRICE_DRIFT_BPS 300
-          # Owner, 2026-10-15: the 0.35 entry floor is OFF again. It rested on
-          # 23 bets (-18%); the next 31 long shots on paper were +34%: noise.
-          sed -i '/^LIVE_MIN_ENTRY_PRICE=/d' .env
-          ensure_env LIVE_MIN_ENTRY_PRICE 0
-          # Owner, 2026-10-11: every live copy is $5 flat, up to $50 open at
-          # once (capped by what the wallet holds); refusals for money are
-          # kept on paper in the missed book (/missed).
-          ensure_env LIVE_PER_COPY_USD 5
-          # The news bot (run s-pw9rom, 2026-10-25) replaces the copy bot in
-          # this container. Copy threads are not started; the live guard and
-          # the redeemer keep booking the positions the copy era still holds.
-          sed -i '/^NEWS_MODE=/d' .env
-          # The value is the literal "true": config._opt_bool accepts nothing else
-          # (the first deploy wrote 1 and the copy bot started as before, 2026-10-25).
-          ensure_env NEWS_MODE true
           ensure_env NEWS_STAKE_USD 5
           ensure_env NEWS_JUDGE_MODEL claude-sonnet-5-5
           ensure_env NEWS_LLM_DAILY_BUDGET 300
           ensure_env NEWS_DOMAINS politics,crypto,geo,corp
-          # Owner, 2026-10-17: $95 open at once (19 slots). 0x9f15 held all
-          # ten of the $50 while the positions page bug hid them; the other
-          # wallets get nine slots now instead of waiting for those to settle.
-          sed -i '/^LIVE_EXPOSURE_USD=/d' .env
-          ensure_env LIVE_EXPOSURE_USD 95
-          # Owner, 2026-09-24 (part 3 R1): 15 settled copies open the Z gate; the
-          # +10% ROI floor stays. Rewritten in place too, in case the secret
-          # still says 30 (ensure_env never overrides a defined key).
-          sed -i 's#^COPY_GOLIVE_MIN_SETTLED=.*#COPY_GOLIVE_MIN_SETTLED=15#' .env
-          ensure_env COPY_GOLIVE_MIN_SETTLED 15
-          # Owner, 2026-09-24 (part 3 §3.4): B300 keeps running unchanged while
-          # B150 and B100 run next to it as paper books; real money keeps
-          # copying from $300 whatever the paper books do.
-          ensure_env COPY_PAPER_B_BOOKS b300:300,b150:150,b100:100
-          # Part 3 R2, explicit: three admissions every 3 h. (The probation share
-          # of the day went with the owner's 2026-09-26 limits; see above.)
-          ensure_env ZSET_AUTO_ADMIT_EVERY_S 10800
-          ensure_env ZSET_AUTO_ADMIT_LIMIT 3
-          # Owner, 2026-10-10: real money copies target buys from $100 (was
-          # $300). Hold-to-resolution backtest of 10,413 followed buys since
-          # go-live: $100+ +6.0% [90% CI +2.7, +10.0] on 3,414 entries vs
-          # $300+ +2.6% [-0.5, +6.2] on 2,094. The secret's value is dropped
-          # so the ensure_env line below is the one place the floor is set
-          # (the analyst's win branch edits that line).
-          sed -i '/^LIVE_MIN_TRADER_BET_USD=/d' .env
-          ensure_env LIVE_MIN_TRADER_BET_USD 100
-          # Owner, 2026-10-10: "put positive wallets, remove negative". The
-          # wallets whose followed buys made money held to resolution (CI
-          # above zero), copied without the form bench and held to the end
-          # (src/copy_trading/owner_picks.py). An eviction still removes one.
-          sed -i '/^LIVE_HOLD_WALLETS=/d' .env
-          # 0x5213 removed 2026-10-14 (owner): -22% on 69 signals on its own money.
-          ensure_env LIVE_HOLD_WALLETS 0x1985327e5782c62362dbbdf714c423d40d8f51ab,0x09b045baad1fbe115c70785635a261411774a3b6,0xd970693a3384dc762b191707a4927ac3814bbbba,0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3,0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333
-          # Paper-only: the owner's friend (2026-10-02), $5 BTC windows, measured not traded.
-          ensure_env COPY_PAPER_WALLET_MIN_USD 0x5a8f802ebad4f45e85d68ac1cbde86579fc9a6f5:1
-
-          # ---- GO LIVE. Merging this PR is turning the owner's key. ----
-          # Together these take the bot off paper on the next deploy: the
-          # process boots live, and LIVE_ARM_ENABLED lets /live CONFIRM do
-          # anything at all. Neither one alone places an order.
-          #
-          # The VM's .env is regenerated from the ENV_FILE secret on every
-          # deploy, so a hand edit on the box does not survive, and that
-          # secret holds the private key. This is the one line in version
-          # control that flips it.
-          #
-          # Checked on chain 2026-09-05 before merging: the funder's
-          # collateral allowance and conditional-token approval are already
-          # set on both current exchanges, so check_and_set_approvals reads
-          # them as satisfied and sends NO transaction. The first live boot
-          # therefore needs no gas.
-          sed -i -E 's#^PREVIEW_MODE=.*#PREVIEW_MODE=false#' .env
-          ensure_env LIVE_ARM_ENABLED true
-          secret_env CLAUDE_CODE_OAUTH_TOKEN "$CLAUDE_CODE_OAUTH_TOKEN"
-          secret_env LANGFUSE_PUBLIC_KEY "$LANGFUSE_PUBLIC_KEY"
-          secret_env LANGFUSE_SECRET_KEY "$LANGFUSE_SECRET_KEY"
+          ensure_env NEWS_MIN_PRICE 0.05
+          ensure_env NEWS_MAX_PRICE 0.95
 
       # deploy.sh builds the image HERE on the runner (native amd64, fast,
       # already GCP-authed), PUSHES it to Artifact Registry, and the VM PULLS it
@@ -348,4 +149,4 @@ jobs:
 
       - name: Scrub secrets from runner
         if: always()
-        run: rm -f .env sre_deploy_key
+        run: rm -f .env

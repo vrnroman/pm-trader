@@ -118,8 +118,8 @@ def test_settle_waits_for_the_last_horizon_then_closes(book):
 
 def test_refund_and_loss_at_resolution(book):
     b, st = book
-    _fire(b, item_id="a", token_id="ta")
-    _fire(b, item_id="b", token_id="tb")
+    _fire(b, item_id="a", token_id="ta", condition_id="ca")
+    _fire(b, item_id="b", token_id="tb", condition_id="cb")
     st["now"] = 1000 + 86401
     b.mark()
     assert b.settle(lambda cid: "REFUND") == 2
@@ -130,7 +130,7 @@ def test_refund_and_loss_at_resolution(book):
 def test_summary_carries_n_and_sd(book):
     b, st = book
     for i in range(3):
-        _fire(b, item_id=f"i{i}", token_id=f"t{i}")
+        _fire(b, item_id=f"i{i}", token_id=f"t{i}", condition_id=f"c{i}")
     st["now"] = 1400.0
     st["bid"] = [(0.45, 100)]
     b.mark()
@@ -261,7 +261,7 @@ def test_watched_and_unknown_jumps_are_counted(lled):
 def test_summary_sd_is_the_standard_error_of_the_mean(book):
     b, st = book
     for i in range(4):
-        _fire(b, item_id=f"s{i}", token_id=f"t{i}")
+        _fire(b, item_id=f"s{i}", token_id=f"t{i}", condition_id=f"c{i}")
     st["now"] = 1400.0
     st["bid"] = [(0.462, 100)]   # four identical rows
     b.mark()
@@ -380,3 +380,27 @@ def test_a_void_row_stays_in_the_ledger_and_leaves_the_numbers(tmp_path):
     assert again.rows["b"].void == "transport duplicate of i1"
     s = paper.summary(again)
     assert s["rows"] == 1 and s["void"] == 1 and s["horizons"]["5m"]["n"] == 1 and s["horizons"]["5m"]["pnl"] == 1.0
+
+
+def test_one_open_position_per_market_per_book(book):
+    # the first live night bought the same Serbian turnout YES six times (2026-10-26)
+    b, st = book
+    assert _fire(b, item_id="u1") is not None
+    assert _fire(b, item_id="u2") is None and b.skipped["held"] == 1
+    assert _fire(b, item_id="u3", condition_id="c-other", token_id="t9") is not None
+    # once the first is closed (resolved), the market can be bought again
+    for r in b.ledger.rows.values():
+        if r.condition_id == "c1":
+            r.closed = True
+    assert _fire(b, item_id="u4") is not None
+
+
+def test_entries_only_inside_the_price_band(book, monkeypatch):
+    # 98.6c leaves 1.4c to win and the spread is wider (Machado, 2026-10-26)
+    b, st = book
+    st["ask"] = [(0.986, 1000)]
+    assert _fire(b, item_id="hi", condition_id="ch") is None and b.skipped["band"] == 1
+    st["ask"] = [(0.03, 1000)]
+    assert _fire(b, item_id="lo", condition_id="cl") is None and b.skipped["band"] == 2
+    monkeypatch.setenv("NEWS_MIN_PRICE", "0.01")
+    assert _fire(b, item_id="lo2", condition_id="cl2") is not None

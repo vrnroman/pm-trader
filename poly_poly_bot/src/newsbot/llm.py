@@ -24,9 +24,18 @@ import time
 from datetime import datetime, timezone
 from typing import Callable
 
-# The same object the copy bot's gate uses, so a caller that already handles one
-# handles both — and so the sentinel is never confused with a real envelope.
-from src.copy_trading.llm_review import RATE_LIMITED, _looks_rate_limited
+# A sentinel no real envelope can be: the subscription is limited, try later.
+RATE_LIMITED = object()
+
+# Markers of a spend/usage/rate-limit reply (a real one: "You've hit your
+# monthly spend limit · raise it at claude.ai/settings/usage"), matched
+# case-insensitively across stderr, stdout and the envelope.
+_RATE_LIMIT_MARKERS = ("spend limit", "usage limit", "rate limit", "claude.ai/settings/usage")
+
+
+def _looks_rate_limited(*texts: str | None) -> bool:
+    blob = " ".join(t for t in texts if t).lower()
+    return any(m in blob for m in _RATE_LIMIT_MARKERS)
 
 logger = logging.getLogger("poly_poly_bot")
 

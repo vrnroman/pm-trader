@@ -96,17 +96,3 @@ green commit and want speed.
 - **No open SSH** — the VM is reached only through IAP; the firewall rule admits
   Google's IAP relay range, not the internet.
 - **Concurrency-guarded** — two deploys can't race onto the VM at once.
-
-## Enabling the copy-paper loop (optional)
-
-The paper-copy harness is default-off. To start it:
-
-1. Generate a watchlist on the VM (Cloud Shell, IAP):
-   `gcloud compute ssh poly-poly-bot --zone=asia-northeast1-a --tunnel-through-iap \
-     --command='cd ~/app && docker run --rm -v ~/app/data:/app/data poly-poly-bot \
-     python -m backtest.two_stage_watchlist --cache-dir data/wcache --output data/copy_watchlist.json'`
-2. Add `COPY_PAPER_ENABLED=true` to your `ENV_FILE` secret.
-3. Run the **Deploy** workflow.
-
-It places no real orders — it only measures copy PnL net of drag, the gate for
-graduating a wallet to real capital.
