@@ -1,7 +1,7 @@
-# ops digest 2026-10-26T15:00:37.004937+00:00 (last 24h)
+# ops digest 2026-10-26T19:17:46.774113+00:00 (last 24h)
 
 ## money state
-{"cash": 129.784219, "open_cost": 0.0, "equity": 129.78, "floor": null, "stated": 150.0, "spend": {"date": "2026-10-26", "spent_usd": 0.0, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": false, "resolved_unclaimed": 113, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1793026285.7750518, "day": "2026-10-26"}
+{"cash": 129.784219, "open_cost": 0.0, "equity": 129.78, "floor": null, "stated": 150.0, "spend": {"date": "2026-10-26", "spent_usd": 0.0, "cap_usd": null, "remaining_usd": null, "daily_loss_stop_usd": 45.0, "closed_reason": ""}, "armed": false, "resolved_unclaimed": 113, "tier": {"1a": 0, "1b": 0, "1c": 0}, "ts": 1793042073.783502, "day": "2026-10-26"}
 
 ## arm: {"armed": false, "ts": 1792309258.1766205, "by": "owner:claude-session", "reason": "owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper", "first_armed_ts": 1788617432.0499406}
 ## spend today: {"date": "2026-10-26", "spent_usd": 0.0, "wallet_copies": {}, "wallet_copies_yesterday": {}, "yesterday": "2026-10-25", "closed_reason": ""}
@@ -14,18 +14,17 @@ in form  0x09b045ba: 3 settled, 0% won vs 68% needed, net -14.2% on $1,201, wors
 in form  0x154ca10d: 116 settled, 61% won vs 55% needed, net +4.5% on $202,946, worst day -9,671 (capped: window read in full, older lookback cut, 5500 rows)
 in form  0x1985327e: 3 settled, 33% won vs 52% needed, net -16.1% on $1,205, worst day -285, 3 of 3 exits under 10 min
 benched  0x28ef6f21: 30 settled, 37% won vs 54% needed, net -26.3% on $11,589, worst day -1,429, 1 of 3 exits under 10 min
-in form  0x3d42e45c: 162 settled, 59% won vs 54% needed, net +3.9% on $271,405, worst day -17,449, 0 of 16 exits under 10 min
-in form  0x9f15613e: 347 settled, 57% won vs 54% needed, net +2.7% on $1,743,078, worst day -149,979, 10 of 20 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
+in form  0x3d42e45c: 162 settled, 59% won vs 55% needed, net +2.7% on $272,967, worst day -17,449, 0 of 16 exits under 10 min
+in form  0x9f15613e: 351 settled, 57% won vs 54% needed, net +2.5% on $1,747,241, worst day -149,979, 11 of 21 exits under 10 min (capped: window read in full, older lookback cut, 5500 rows)
 benched  0x9f6a4549: 20 settled, 65% won vs 73% needed, net +24.3% on $18,662, worst day -835, 1 of 9 exits under 10 min
-in form  0xc4020444: 63 settled, 59% won vs 43% needed, net +19.0% on $89,478, worst day -7,247, 2 of 39 exits under 10 min
-benched  0xd47e7b93: 50 settled, 80% won vs 66% needed, net -3.6% on $40,726, worst day -6,634, 0 of 12 exits under 10 min
+in form  0xc4020444: 69 settled, 57% won vs 42% needed, net +18.2% on $96,114, worst day -7,247, 2 of 40 exits under 10 min
+benched  0xd47e7b93: 49 settled, 80% won vs 66% needed, net -3.7% on $40,424, worst day -6,634, 0 of 12 exits under 10 min
 in form  0xd970693a: 3 settled, 33% won vs 63% needed, net +13.8% on $1,102, worst day -44, 3 of 3 exits under 10 min
 benched  0xeef6ad0e: no settled bets on our slice in 14 days
 two clocks: no fills stamped yet
-⏱ api lag cost, last 7d (estimate): +28.53 USD over 1923 fills at $5.00 each, +0.000 USD a fill at the median, chain earlier by 13.5s
+⏱ api lag cost, last 7d (estimate): +30.38 USD over 1853 fills at $5.00 each, +0.000 USD a fill at the median, chain earlier by 13.5s
 
 ## watcher (8 wakes in 24h)
-{"ts": 1792955271.8739903, "kind": "note", "woke_because": "eedc3d5e112a", "concluded": "The self-disarm fires because 18 deploys today each reset the no-trade-data clock while the deployed build (sha 9c04dfc) boots in NEWS_MODE with copy threads not started, so no trade data ever flows and the 15 minute timer trips after each restart. Hygiene.log and the bot log agree: restarts at 10:52 through 1
 {"ts": 1792971948.265768, "kind": "note", "woke_because": "fffb22075bdc", "concluded": "A benign INFO news feed read was promoted into the important alert channel once and paged the SRE for nothing. Of 132 news-x reads today only this one reached the important log, and zero news-x lines reached it on any prior day. The 18 firstsquawk reads today include many all caps titles, several curly quote ti
 {"ts": 1792978661.2819397, "kind": "nothing", "woke_because": "b8e445dc3bb9, 8d84272137f7", "concluded": "The routine wallet backstop benched 0x09b045ba because it still reads in form by the 14-day bar yet lost all 4 of its settled bets (0% won, net -16.8% on $1,595), which is the backstop working as designed. Both woke fingerprints are the same 01:36:43 event: the action and its own escalation_de
 {"ts": 1792994442.9000316, "kind": "analyst", "woke_because": "daily study", "concluded": "bot-2026-10-25.log is 391 MB across 2.76M lines, ~97% of them websockets.client DEBUG frames, versus a normal ~15k lines and 8 MB a day. A restart at 2026-10-25 11:12 brought the process up with root logging at DEBUG so websockets, telethon and aiosqlite now dump every frame, and it is still flooding through
@@ -33,6 +32,7 @@ two clocks: no fills stamped yet
 {"ts": 1792994442.9000316, "kind": "analyst", "woke_because": "daily study", "concluded": "DEBUG left on since 10-25 11:12 is writing ~400MB/day of websocket frames (97% of the log); harness PR still blocked, no repo mounted (4th cycle).", "did": "2 proposal(s): noted; noted", "cost_usd": 0.6343945}
 {"ts": 1793000356.6873457, "kind": "nothing", "woke_because": "0a443c0ba4cb", "concluded": "The ops-digest staleness escalation fired because the digest commit 232c8c9 has not refreshed in about 5 hours, past the 3 hour limit, and the bot delivered that fact to the owner itself (escalation_delivered -> sent). It is a new fingerprint only because the message now carries a commit sha where the ident
 {"ts": 1793019710.3233943, "kind": "note", "woke_because": "c60da7b3db55", "concluded": "The ops digest is committed on a roughly 6 hour cadence while the staleness alarm trips at about 5 hours, so it fires once every cycle right before the next digest lands. The digest is still being produced: commits 232c8c9 at 01:42Z and 899956d at 07:43Z today, the same pattern as Oct 23 (commit 07:29Z, alarm 
+{"ts": 1793041314.1701038, "kind": "nothing", "woke_because": "f90e6ab86e24", "concluded": "A routine successful news fetch minted a new fingerprint. source=toa logged status=200 3383 times today at steady cadence, this very line among them (seen=50, new=1, newest_lag_s=29), so the news source is working, not down. The only reason it looked new is that this title carried an embedded newline and em
 ## live limits (owner's number, and the analyst's where one is in force)
 LIVE_MAX_PER_WALLET_DAY: 20 (owner) band 1..20
 FETCH_INTERVAL: 3.0 (owner) band 2..5
@@ -52,7 +52,7 @@ b100 (floor $100): 5449 settled, 379 open, realized +1.4%, at their price +2.4% 
 0x722abb54: 1 fail(s): promotion floor still holds (copy ROI +6% < floor +10%)
 0x8342720d: 1 fail(s): still positive with its best 3 copies deleted (-0% over 46 copies with its best 3 deleted)
 0x984ffef1: 1 fail(s): promotion floor still holds (2nd-half ROI -13% < -10% (edge decaying))
-0x9f15613e: 1 fail(s): not a scalper at our latency (scalper: 50% of exits within 10 min; uncopyable at our latency)
+0x9f15613e: 1 fail(s): not a scalper at our latency (scalper: 52% of exits within 10 min; uncopyable at our latency)
 0x9f6a4549: 1 fail(s): promotion floor still holds (copy ROI +8% < floor +10%)
 0xc5d909a1: 1 fail(s): ≥30 settled copies IN THE CLEAN ERA (15 clean (of 15 all-time))
 0xd970693a: 1 fail(s): does not lose at the prices we would really pay (-7% at real quotes over 39 matched copies)
@@ -66,40 +66,38 @@ study 2026-09-27-form-c2308d97: wallets in 6 -> 6 (stay 5, enter 1, leave 1); co
 study 2026-10-10-wallet_cap-195d4691: wallets in 35 -> 35 (stay 32, enter 3, leave 3); copies 2402 -> 3230; ROI at their price +12.7% -> +11.8%
 study 2026-10-17-wallet_cap-e3fd61e4: wallets in 32 -> 32 (stay 32, enter 0, leave 0); copies 3794 -> 3737; ROI at their price +11.5% -> +11.7%
 ## fingerprints (30 shown)
-7da5b6289516 x31 last 0.0h ago [open: 31 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
-e7b471403f60 x9 last 0.0h ago [open: 9 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimm
-c60da7b3db55 x1 last 2.0h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Ops digest is stale again. Last digest commit Nd at NNNT0N:N:NZ, now NNNT1
-7dfc4a226f73 x153 last 3.1h ago [open: 153 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
-d3a278c17ca5 x134 last 3.2h ago [open: 134 hits, no action yet] :: INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows
-9758fc4fa742 x86 last 6.0h ago [open: 86 hits, no action yet] :: INFO [ops] no_daily_line: 'S' -> 'S'
-d76e3169f01d x4 last 6.0h ago [recurred: 1 hit(s) since the disarm 483.7 h ago] :: INFO [ops] push:no_daily_line: None -> 'S'
-0a443c0ba4cb x1 last 7.4h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Ops digest has gone stale. Last digest commit Nc8c9 at NNNT0N:N:NZ, now NN
-cad1f3aebfb9 x6 last 12.3h ago [open: 6 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | promotion floor still holds: copy ROI N < floor N
-e109d2da998c x16 last 12.3h ago [open: 16 hits, no action yet] :: INFO [ops] decay_hold: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched cop
-b8e445dc3bb9 x1 last 13.4h ago [open: 1 hits, no action yet] :: INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> is still in form by the bar but lost all N of its settled bets in t
-8d84272137f7 x1 last 13.4h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> is still in form by the bar but lost all N of its settled bets in th
-fffb22075bdc x1 last 15.2h ago [open: 1 hits, no action yet] :: INFO [news-x] read=N new=N newest_lag_s=N source=x:firstsquawk title='S'
-9d498e122ffb x42 last 17.7h ago [open: 42 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
-df29d6690f77 x11 last 18.4h ago [open: 11 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, tri
-727577d69f4e x52 last 18.4h ago [open: 52 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
-eedc3d5e112a x1 last 19.9h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Self-disarm (no trade data) fired N times in the last Nh, last at N:N, eac
-d0b42a80d314 x7 last 23.0h ago [open: 7 hits, no action yet] :: WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for N minutes: copying blind is wors
-c47d62e70341 x68 last 23.3h ago [open: 68 hits, no action yet] :: INFO Received signal N, shutting down...
-c6d91d798e54 x132 last 27.2h ago [open: 132 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
-2497cd50ff7d x40 last 27.2h ago [open: 40 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
-4162a3122f5e x45 last 27.2h ago [open: 45 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | won N on 'S' (<hex>, tier Nb)
-d7d42c1f33f7 x46 last 27.2h ago [open: 46 hits, no action yet] :: INFO [ops] push:settled: None -> 'S'
-54ac26fb3ff1 x1893 last 28.1h ago [open: 1893 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
-6f12d4998994 x56 last 28.1h ago [open: 56 hits, no action yet] :: INFO [recovery] No pending orders to recover
-6b829965c182 x56 last 28.1h ago [open: 56 hits, no action yet] :: INFO Bot started. Monitoring trades...
-9d8a6d2794ec x52 last 28.1h ago [open: 52 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
-6c813168939b x172 last 28.4h ago [open: 172 hits, no action yet] :: ERROR [py_clob_client_v2] request error: Server disconnected
-41cab7e764a5 x64 last 28.4h ago [open: 64 hits, no action yet] :: ERROR [py_clob_client_v2] request error: The read operation timed out
-6eca45f47973 x210 last 29.4h ago [open: 210 hits, no action yet] :: ERROR Network error fetching <hex>: Server disconnected without sending a response.
+f90e6ab86e24 x1 last 0.3h ago [open: 1 hits, no action yet] :: INFO [news-src] source=toa status=N seen=N new=N newest_lag_s=N title='S'
+7da5b6289516 x31 last 4.3h ago [open: 31 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
+e7b471403f60 x9 last 4.3h ago [open: 9 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N YES N (n=N, trimmed N) · N no N (n=N, trimmed N) · N no N (n=N, trimm
+c60da7b3db55 x1 last 6.3h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Ops digest is stale again. Last digest commit Nd at NNNT0N:N:NZ, now NNNT1
+7dfc4a226f73 x153 last 7.4h ago [open: 153 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | no floor clears the bars, global floor stays: N no N (n=N, trimmed N) · N no N (n=N, 
+d3a278c17ca5 x134 last 7.5h ago [open: 134 hits, no action yet] :: INFO [ops] settle_pending: 'S' -> 'S' | 'S' left the wallet; booked when Polymarket's row shows
+9758fc4fa742 x86 last 10.3h ago [open: 86 hits, no action yet] :: INFO [ops] no_daily_line: 'S' -> 'S'
+d76e3169f01d x4 last 10.3h ago [recurred: 1 hit(s) since the disarm 488.0 h ago] :: INFO [ops] push:no_daily_line: None -> 'S'
+0a443c0ba4cb x1 last 11.6h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Ops digest has gone stale. Last digest commit Nc8c9 at NNNT0N:N:NZ, now NN
+cad1f3aebfb9 x6 last 16.6h ago [open: 6 hits, no action yet] :: INFO [ops] decay_day: 'S' -> 'S' | promotion floor still holds: copy ROI N < floor N
+e109d2da998c x16 last 16.6h ago [open: 16 hits, no action yet] :: INFO [ops] decay_hold: 'S' -> 'S' | does not lose at the prices we would really pay: N at real quotes over N matched cop
+b8e445dc3bb9 x1 last 17.7h ago [open: 1 hits, no action yet] :: INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> is still in form by the bar but lost all N of its settled bets in t
+8d84272137f7 x1 last 17.7h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> is still in form by the bar but lost all N of its settled bets in th
+fffb22075bdc x1 last 19.5h ago [open: 1 hits, no action yet] :: INFO [news-x] read=N new=N newest_lag_s=N source=x:firstsquawk title='S'
+9d498e122ffb x42 last 22.0h ago [open: 42 hits, no action yet] :: INFO [ops] form: 'S' -> 'S' | <hex>: N settled, N won vs N needed, net N on $N, worst day N, N of N exits under N min
+df29d6690f77 x11 last 22.7h ago [open: 11 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N YES N (n=N, trimmed N) · N yes N (n=N, tri
+727577d69f4e x52 last 22.7h ago [open: 52 hits, no action yet] :: INFO [ops] floor_row: 'S' -> 'S' | copies at $N: N yes N (n=N, trimmed N) · N yes N (n=N, trimmed N) · N yes N (n=N, tri
+eedc3d5e112a x1 last 24.2h ago [open: 1 hits, no action yet] :: INFO [ops] escalation_delivered: 'S' -> 'S' | Self-disarm (no trade data) fired N times in the last Nh, last at N:N, eac
+d0b42a80d314 x7 last 27.3h ago [open: 7 hits, no action yet] :: WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for N minutes: copying blind is wors
+c47d62e70341 x68 last 27.6h ago [open: 68 hits, no action yet] :: INFO Received signal N, shutting down...
+c6d91d798e54 x132 last 31.5h ago [open: 132 hits, no action yet] :: INFO [tiered-risk] tier Nb: released $N of exposure from resolved or closed positions | open now: $N
+2497cd50ff7d x40 last 31.5h ago [open: 40 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | lost N on 'S' (<hex>, tier Nb)
+4162a3122f5e x45 last 31.5h ago [open: 45 hits, no action yet] :: INFO [ops] settled: 'S' -> 'S' | won N on 'S' (<hex>, tier Nb)
+d7d42c1f33f7 x46 last 31.5h ago [open: 46 hits, no action yet] :: INFO [ops] push:settled: None -> 'S'
+54ac26fb3ff1 x1893 last 32.3h ago [open: 1893 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/price body={'S':'S'}
+6f12d4998994 x56 last 32.4h ago [open: 56 hits, no action yet] :: INFO [recovery] No pending orders to recover
+6b829965c182 x56 last 32.4h ago [open: 56 hits, no action yet] :: INFO Bot started. Monitoring trades...
+9d8a6d2794ec x52 last 32.4h ago [open: 52 hits, no action yet] :: ERROR [py_clob_client_v2] request error status=N url=https://clob.polymarket.com/auth/api-key body={'S':'S'}
+6c813168939b x172 last 32.7h ago [open: 172 hits, no action yet] :: ERROR [py_clob_client_v2] request error: Server disconnected
+41cab7e764a5 x64 last 32.7h ago [open: 64 hits, no action yet] :: ERROR [py_clob_client_v2] request error: The read operation timed out
 
-## ledger (25 rows)
-{"ts": 1792942907.6054044, "day": "2026-10-25", "kind": "sre_started", "before": "sidecar", "after": "watching", "detail": "tick 120s", "push": null}
-{"ts": 1792955265.880866, "day": "2026-10-25", "kind": "escalation_delivered", "before": "routine escalation", "after": "sent", "detail": "Self-disarm (no trade data) fired 7 times in the last 24h, last at 15:57, each about 15 minutes after a restart. The pro", "push": "BOT"}
+## ledger (23 rows)
 {"ts": 1792960194.9225142, "day": "2026-10-25", "kind": "floor_row", "before": "0x09b045ba floor 100.0", "after": "floor 100.0 (same)", "detail": "copies at $100: 300 yes +36% (n=128, trimmed +29%) · 200 yes +48% (n=174, trimmed +35%) · 150 yes +44% (n=204, trimmed +32%) · 100 YES +52% (n=234, trimmed +42%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6", "floor_before": 100.0, "floor_after": 100.0, "live": false}
 {"ts": 1792960194.9225142, "day": "2026-10-25", "kind": "floor_row", "before": "0x154ca10d floor global", "after": "floor global (same)", "detail": "no floor clears the bars, global floor stays: 300 no +6% (n=250, trimmed +4%) · 200 no +4% (n=313, trimmed +2%) · 150 no +1% (n=448, trimmed -1%) · 100 no -2% (n=612, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0x154ca10dfee317dcfb9337788db7da858cba658e", "floor_before": null, "floor_after": null, "live": false}
 {"ts": 1792960194.9225142, "day": "2026-10-25", "kind": "floor_row", "before": "0x1985327e floor 150.0", "after": "floor 300.0 (moved)", "detail": "copies at $300: 300 YES +35% (n=110, trimmed +28%) · 200 yes +31% (n=149, trimmed +22%) · 150 yes +36% (n=161, trimmed +27%) · 100 yes +34% (n=183, trimmed +26%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": "WALLET", "wallet": "0x1985327e5782c62362dbbdf714c423d40d8f51ab", "floor_before": 150.0, "floor_after": 300.0, "live": false}
@@ -125,9 +123,6 @@ d7d42c1f33f7 x46 last 27.2h ago [open: 46 hits, no action yet] :: INFO [ops] pus
 {"ts": 1793026290.378995, "day": "2026-10-26", "kind": "floor_row", "before": "0xd47e7b93 floor 300.0", "after": "floor 300.0 (same)", "detail": "copies at $300: 300 YES +16% (n=81, trimmed +13%) · 200 no -1% (n=279, trimmed -2%) · 150 no -1% (n=309, trimmed -3%) · 100 no -2% (n=358, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)", "push": null, "wallet": "0xd47e7b93736349b09bc6f39236456d85f58a4e60", "floor_before": 300.0, "floor_after": 300.0, "live": false}
 
 ## important lines (27)
-2026-10-25 15:41:40 INFO  Received signal 15, shutting down...
-2026-10-25 15:57:21 WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying
-2026-10-25 19:07:47 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Self-disarm (no trade data) fired 7 times in the last 24h, last at 15:57, each about 15 minutes after a restart. The pro
 2026-10-25 20:33:07 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +36% (n=128, trimmed +29%) · 200 yes +48% (n=174, trimmed +35%) · 150 yes +44% (n=204, trimmed +32%) · 100 YES +52% (n=234, trimmed +42%); backward replay (copy-and-hold at their price, first entry, clean era)
 2026-10-25 20:33:28 INFO  [ops] floor_row: '0x154ca10d floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +6% (n=250, trimmed +4%) · 200 no +4% (n=313, trimmed +2%) · 150 no +1% (n=448, trimmed -1%) · 100 no -2% (n=612, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)
 2026-10-25 20:33:40 INFO  [ops] floor_row: '0x1985327e floor 150.0' -> 'floor 300.0 (moved)' | copies at $300: 300 YES +35% (n=110, trimmed +28%) · 200 yes +31% (n=149, trimmed +22%) · 150 yes +36% (n=161, trimmed +27%) · 100 yes +34% (n=183, trimmed +26%); backward replay (copy-and-hold at their price, first entry, clean era)
@@ -152,3 +147,6 @@ d7d42c1f33f7 x46 last 27.2h ago [open: 46 hits, no action yet] :: INFO [ops] pus
 2026-10-26 12:59:50 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest is stale again. Last digest commit 899956d at 2026-10-26T07:43:48Z, now 2026-10-26T12:46:12Z, about 5 hours g
 2026-10-26 14:56:09 INFO  [ops] floor_row: '0xc4020444 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +53% (n=60, trimmed +41%) · 200 yes +45% (n=65, trimmed +33%) · 150 yes +43% (n=66, trimmed +31%) · 100 yes +43% (n=66, trimmed +31%); backward replay (copy-and-hold at their price, first entry, clean era)
 2026-10-26 14:56:23 INFO  [ops] floor_row: '0xd47e7b93 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +16% (n=81, trimmed +13%) · 200 no -1% (n=279, trimmed -2%) · 150 no -1% (n=309, trimmed -3%) · 100 no -2% (n=358, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)
+2026-10-26 19:01:05 INFO  [news-src] source=toa status=200 seen=50 new=1 newest_lag_s=29 title='Katana ⚔️ (@katana): Blast is shutting down today.\n\nWe have taken a snapshot of '
+2026-10-26 19:19:53 INFO  [ops] routine_wallet_action: '0x1985327e' -> 'bench applied, now in form' | 0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst
+2026-10-26 19:19:53 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst

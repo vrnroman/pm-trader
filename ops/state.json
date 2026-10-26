@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26T15:03:25.380106+00:00",
+ "generated": "2026-10-26T19:21:10.691741+00:00",
  "money": {
   "cash": 129.784219,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1793026889.4073844,
+  "ts": 1793042381.7248223,
   "day": "2026-10-26"
  },
  "arm": {
@@ -529,8 +529,8 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-26",
-  "last_escalation_id": "2026-10-26T12:46:12Z-607d",
-  "admit_scan_ts": 1793026285.776844,
+  "last_escalation_id": "2026-10-26T18:43:10Z-a9c5",
+  "admit_scan_ts": 1793037283.654104,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 0,
   "day_pnl": 0.19,
@@ -697,7 +697,7 @@
    "85371095176448374159068611132832998991620337721426404188845472589511845613895",
    "99178084978135262485184650218423675222885522982674631982031107379948052387844"
   ],
-  "form_scan_ts": 1793006441.553365,
+  "form_scan_ts": 1793028119.1313844,
   "daily_line_attempt_day": "2026-10-25",
   "daily_line_sent": true,
   "daily_line_day": "2026-10-25",
@@ -752,7 +752,7 @@
   }
  },
  "form": {
-  "ts": 1793006442.602058,
+  "ts": 1793028119.9211874,
   "version": 4,
   "wallets": {
    "0x00110b8ef00db2a1a6bbe1198e52fc4eb5a84333": {
@@ -765,13 +765,13 @@
     "worst_day": -2618.2,
     "ok": false,
     "reason": "scalper: 52% of exits within 10 min; uncopyable at our latency",
-    "ts": 1793006442.602058,
+    "ts": 1793028119.9211874,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
     "exits": 31,
     "flips": 16,
-    "last_trade_ts": 1792990083.0,
+    "last_trade_ts": 1793026964.0,
     "hit": 0.7955,
     "net_pct": 10.85
    },
@@ -785,7 +785,7 @@
     "worst_day": -126.02,
     "ok": false,
     "reason": "only 3 settled bets on our slice in 14 days (need 30)",
-    "ts": 1793006442.602058,
+    "ts": 1793028119.9211874,
     "rows": 1500,
     "covered_days": 14.0,
     "capped": false,
@@ -805,7 +805,7 @@
     "worst_day": -9670.68,
     "ok": true,
     "reason": "61% came out ahead vs 55% needed, net +4.5%",
-    "ts": 1793006442.602058,
+    "ts": 1793028119.9211874,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
@@ -825,7 +825,7 @@
     "worst_day": -285.38,
     "ok": false,
     "reason": "only 3 settled bets on our slice in 14 days (need 30)",
-    "ts": 1793006442.602058,
+    "ts": 1793028119.9211874,
     "rows": 1500,
     "covered_days": 14.0,
     "capped": false,
@@ -845,7 +845,7 @@
     "worst_day": -1428.73,
     "ok": false,
     "reason": "37% came out ahead vs 54% needed (-17 points, need +3)",
-    "ts": 1793006442.602058,
+    "ts": 1793028119.9211874,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
@@ -858,42 +858,42 @@
    "0x3d42e45cbf1c671733fbb8470924ec1bef165bf3": {
     "wallet": "0x3d42e45cbf1c671733fbb8470924ec1bef165bf3",
     "n": 162,
-    "won": 96,
-    "cost": 271404.93,
-    "back": 281921.31,
-    "avg_price": 0.544912704665545,
+    "won": 95,
+    "cost": 272967.45,
+    "back": 280333.09,
+    "avg_price": 0.5460398220850581,
     "worst_day": -17449.31,
     "ok": true,
-    "reason": "59% came out ahead vs 54% needed, net +3.9%",
-    "ts": 1793006442.602058,
+    "reason": "59% came out ahead vs 55% needed, net +2.7%",
+    "ts": 1793028119.9211874,
     "rows": 1500,
     "covered_days": 14.0,
     "capped": false,
     "exits": 16,
     "flips": 0,
-    "last_trade_ts": 1792996317.0,
-    "hit": 0.5926,
-    "net_pct": 3.87
+    "last_trade_ts": 1793024450.0,
+    "hit": 0.5864,
+    "net_pct": 2.7
    },
    "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3": {
     "wallet": "0x9f15613ebf1f36d4bc679e1211d1fc567cf9bdb3",
-    "n": 347,
+    "n": 351,
     "won": 199,
-    "cost": 1743078.23,
-    "back": 1789731.13,
-    "avg_price": 0.5434356126573457,
+    "cost": 1747240.6,
+    "back": 1791504.1,
+    "avg_price": 0.5433730296179076,
     "worst_day": -149979.0,
     "ok": false,
-    "reason": "scalper: 50% of exits within 10 min; uncopyable at our latency",
-    "ts": 1793006442.602058,
+    "reason": "scalper: 52% of exits within 10 min; uncopyable at our latency",
+    "ts": 1793028119.9211874,
     "rows": 5500,
     "covered_days": 14.0,
     "capped": true,
-    "exits": 20,
-    "flips": 10,
-    "last_trade_ts": 1793004984.0,
-    "hit": 0.5735,
-    "net_pct": 2.68
+    "exits": 21,
+    "flips": 11,
+    "last_trade_ts": 1793027958.0,
+    "hit": 0.567,
+    "net_pct": 2.53
    },
    "0x9f6a4549f14154a7f2c74d03efd8de903a61eb61": {
     "wallet": "0x9f6a4549f14154a7f2c74d03efd8de903a61eb61",
@@ -905,55 +905,55 @@
     "worst_day": -834.76,
     "ok": false,
     "reason": "only 20 settled bets on our slice in 14 days (need 30)",
-    "ts": 1793006442.602058,
+    "ts": 1793028119.9211874,
     "rows": 2500,
     "covered_days": 14.0,
     "capped": false,
     "exits": 9,
     "flips": 1,
-    "last_trade_ts": 1793002955.0,
+    "last_trade_ts": 1793026833.0,
     "hit": 0.65,
     "net_pct": 24.33
    },
    "0xc4020444a9d906a6dde62fa898a8f068634cc7f1": {
     "wallet": "0xc4020444a9d906a6dde62fa898a8f068634cc7f1",
-    "n": 63,
-    "won": 37,
-    "cost": 89477.5,
-    "back": 106460.9,
-    "avg_price": 0.4267042307074164,
+    "n": 69,
+    "won": 39,
+    "cost": 96113.98,
+    "back": 113591.44,
+    "avg_price": 0.4205982250718315,
     "worst_day": -7247.46,
     "ok": true,
-    "reason": "59% came out ahead vs 43% needed, net +19.0%",
-    "ts": 1793006442.602058,
-    "rows": 173,
+    "reason": "57% came out ahead vs 42% needed, net +18.2%",
+    "ts": 1793028119.9211874,
+    "rows": 183,
     "covered_days": 14.0,
     "capped": false,
-    "exits": 39,
+    "exits": 40,
     "flips": 2,
-    "last_trade_ts": 1793006177.0,
-    "hit": 0.5873,
-    "net_pct": 18.98
+    "last_trade_ts": 1793024280.0,
+    "hit": 0.5652,
+    "net_pct": 18.18
    },
    "0xd47e7b93736349b09bc6f39236456d85f58a4e60": {
     "wallet": "0xd47e7b93736349b09bc6f39236456d85f58a4e60",
-    "n": 50,
-    "won": 40,
-    "cost": 40725.64,
-    "back": 39267.93,
-    "avg_price": 0.6628302788222057,
+    "n": 49,
+    "won": 39,
+    "cost": 40423.75,
+    "back": 38924.61,
+    "avg_price": 0.6616137066615918,
     "worst_day": -6633.84,
     "ok": false,
-    "reason": "net -3.6% (need +2%)",
-    "ts": 1793006442.602058,
+    "reason": "net -3.7% (need +2%)",
+    "ts": 1793028119.9211874,
     "rows": 1000,
     "covered_days": 14.0,
     "capped": false,
     "exits": 12,
     "flips": 0,
     "last_trade_ts": 1792983797.0,
-    "hit": 0.8,
-    "net_pct": -3.58
+    "hit": 0.7959,
+    "net_pct": -3.71
    },
    "0xd970693a3384dc762b191707a4927ac3814bbbba": {
     "wallet": "0xd970693a3384dc762b191707a4927ac3814bbbba",
@@ -965,7 +965,7 @@
     "worst_day": -44.41,
     "ok": false,
     "reason": "only 3 settled bets on our slice in 14 days (need 30)",
-    "ts": 1793006442.602058,
+    "ts": 1793028119.9211874,
     "rows": 1500,
     "covered_days": 14.0,
     "capped": false,
@@ -985,7 +985,7 @@
     "worst_day": 0.0,
     "ok": false,
     "reason": "only 0 settled bets on our slice in 14 days (need 30)",
-    "ts": 1793006442.602058,
+    "ts": 1793028119.9211874,
     "rows": 500,
     "covered_days": 14.0,
     "capped": false,
@@ -1001,6 +1001,11 @@
     "action": "bench",
     "why": "0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 64% needed to break even, net -16.8% on $1,595, down from 67% won and net +11.7% ",
     "ts": 1792978602.9670756
+   },
+   "0x1985327e5782c62362dbbdf714c423d40d8f51ab": {
+    "action": "bench",
+    "why": "0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst day -285.",
+    "ts": 1793042391.980089
    }
   },
   "unread": {},
@@ -1008,24 +1013,6 @@
   "paused_told": false
  },
  "ledger_tail": [
-  {
-   "ts": 1792942907.6054044,
-   "day": "2026-10-25",
-   "kind": "sre_started",
-   "before": "sidecar",
-   "after": "watching",
-   "detail": "tick 120s",
-   "push": null
-  },
-  {
-   "ts": 1792955265.880866,
-   "day": "2026-10-25",
-   "kind": "escalation_delivered",
-   "before": "routine escalation",
-   "after": "sent",
-   "detail": "Self-disarm (no trade data) fired 7 times in the last 24h, last at 15:57, each about 15 minutes after a restart. The pro",
-   "push": "BOT"
-  },
   {
    "ts": 1792960194.9225142,
    "day": "2026-10-25",
@@ -1297,12 +1284,27 @@
    "floor_before": 300.0,
    "floor_after": 300.0,
    "live": false
+  },
+  {
+   "ts": 1793042391.980089,
+   "day": "2026-10-26",
+   "kind": "routine_wallet_action",
+   "before": "0x1985327e",
+   "after": "bench applied, now in form",
+   "detail": "0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst",
+   "push": "WALLET"
+  },
+  {
+   "ts": 1793042391.980089,
+   "day": "2026-10-26",
+   "kind": "escalation_delivered",
+   "before": "routine wallet_action",
+   "after": "applied",
+   "detail": "0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst",
+   "push": null
   }
  ],
  "important": [
-  "2026-10-25 15:41:40 INFO  Received signal 15, shutting down...",
-  "2026-10-25 15:57:21 WARNING [guard] self_disarm: ENTERED: 🛑 Self-disarmed, back to paper. no trade data for 15 minutes: copying blind is worse than not copying",
-  "2026-10-25 19:07:47 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Self-disarm (no trade data) fired 7 times in the last 24h, last at 15:57, each about 15 minutes after a restart. The pro",
   "2026-10-25 20:33:07 INFO  [ops] floor_row: '0x09b045ba floor 100.0' -> 'floor 100.0 (same)' | copies at $100: 300 yes +36% (n=128, trimmed +29%) · 200 yes +48% (n=174, trimmed +35%) · 150 yes +44% (n=204, trimmed +32%) · 100 YES +52% (n=234, trimmed +42%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-25 20:33:28 INFO  [ops] floor_row: '0x154ca10d floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +6% (n=250, trimmed +4%) · 200 no +4% (n=313, trimmed +2%) · 150 no +1% (n=448, trimmed -1%) · 100 no -2% (n=612, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-25 20:33:40 INFO  [ops] floor_row: '0x1985327e floor 150.0' -> 'floor 300.0 (moved)' | copies at $300: 300 YES +35% (n=110, trimmed +28%) · 200 yes +31% (n=149, trimmed +22%) · 150 yes +36% (n=161, trimmed +27%) · 100 yes +34% (n=183, trimmed +26%); backward replay (copy-and-hold at their price, first entry, clean era)",
@@ -1326,23 +1328,12 @@
   "2026-10-26 11:53:36 INFO  [ops] floor_row: '0x9f6a4549 floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no +7% (n=81, trimmed +2%) · 200 no +8% (n=133, trimmed +3%) · 150 no +5% (n=177, trimmed +1%) · 100 no +7% (n=211, trimmed +1%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-26 12:59:50 INFO  [ops] escalation_delivered: 'routine escalation' -> 'sent' | Ops digest is stale again. Last digest commit 899956d at 2026-10-26T07:43:48Z, now 2026-10-26T12:46:12Z, about 5 hours g",
   "2026-10-26 14:56:09 INFO  [ops] floor_row: '0xc4020444 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +53% (n=60, trimmed +41%) · 200 yes +45% (n=65, trimmed +33%) · 150 yes +43% (n=66, trimmed +31%) · 100 yes +43% (n=66, trimmed +31%); backward replay (copy-and-hold at their price, first entry, clean era)",
-  "2026-10-26 14:56:23 INFO  [ops] floor_row: '0xd47e7b93 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +16% (n=81, trimmed +13%) · 200 no -1% (n=279, trimmed -2%) · 150 no -1% (n=309, trimmed -3%) · 100 no -2% (n=358, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)"
+  "2026-10-26 14:56:23 INFO  [ops] floor_row: '0xd47e7b93 floor 300.0' -> 'floor 300.0 (same)' | copies at $300: 300 YES +16% (n=81, trimmed +13%) · 200 no -1% (n=279, trimmed -2%) · 150 no -1% (n=309, trimmed -3%) · 100 no -2% (n=358, trimmed -3%); backward replay (copy-and-hold at their price, first entry, clean era)",
+  "2026-10-26 19:01:05 INFO  [news-src] source=toa status=200 seen=50 new=1 newest_lag_s=29 title='Katana ⚔️ (@katana): Blast is shutting down today.\\n\\nWe have taken a snapshot of '",
+  "2026-10-26 19:19:53 INFO  [ops] routine_wallet_action: '0x1985327e' -> 'bench applied, now in form' | 0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst",
+  "2026-10-26 19:19:53 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst"
  ],
  "watcher": [
-  {
-   "ts": 1792955271.8739903,
-   "day": "2026-10-25",
-   "woke_because": "eedc3d5e112a",
-   "fingerprint": "eedc3d5e112a",
-   "kind": "note",
-   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
-   "concluded": "The self-disarm fires because 18 deploys today each reset the no-trade-data clock while the deployed build (sha 9c04dfc) boots in NEWS_MODE with copy threads not started, so no trade data ever flows and the 15 minute timer trips after each restart. Hygiene.log and the bot log agree: restarts at 10:52 through 15:41 match the self_disarm ENTERED times, and 17 boots logged copy threads not started. Real money is already off (armed=false since the owner paused on 2026-10-18), so each self-disarm back to paper is a no-op and the routine escalation it raised already reached the owner's phone. The gu",
-   "confidence": 0.86,
-   "cost_usd": 1.0005745000000001,
-   "did": "noted",
-   "proof": "",
-   "question": ""
-  },
   {
    "ts": 1792971948.265768,
    "day": "2026-10-25",
@@ -1427,6 +1418,34 @@
    "confidence": 0.82,
    "cost_usd": 0.74146,
    "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1793041314.1701038,
+   "day": "2026-10-26",
+   "woke_because": "f90e6ab86e24",
+   "fingerprint": "f90e6ab86e24",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "A routine successful news fetch minted a new fingerprint. source=toa logged status=200 3383 times today at steady cadence, this very line among them (seen=50, new=1, newest_lag_s=29), so the news source is working, not down. The only reason it looked new is that this title carried an embedded newline and emoji that the line normaliser folded into a distinct shape. The bot is already in paper mode by the owner pause from 2026-10-18, so no real money is exposed. Nothing to do.",
+   "confidence": 0.95,
+   "cost_usd": 0.21725850000000002,
+   "did": "nothing",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1793042461.4664667,
+   "day": "2026-10-26",
+   "woke_because": "ab399b07d6d9, 440527b3c4c6",
+   "fingerprint": "ab399b07d6d9",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The cause is a routine wallet bench/form decision whose reason sentence took a new shape, so the fingerprinter logged it as new. routine_wallet_action with outcome 'bench applied, now in form' is a steady recurring ops line seen on Oct 14, 16, 17, 18, 22 and twice today; the only change is the reason text ('won 1 of 3 vs 52% needed') versus the older 'lost all N' phrasing, which also spawned the paired escalation_delivered fingerprint 440527b3c4c6. Both are INFO, both x1, and escalation_delivered shows the note already reached the owner's digest. The bot is disarmed and in paper since Oct 18, ",
+   "confidence": 0.9,
+   "cost_usd": 0.4960815,
+   "did": "nothing",
    "proof": "",
    "question": ""
   }
@@ -4465,6 +4484,48 @@
    "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Ops digest is stale again. Last digest commit Nd at NNNT0N:N:NZ, now NNNT1N:N:NZ, about N hours g",
    "recent": [
     1793019710.3233943
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "f90e6ab86e24": {
+   "first": 1793041314.1701038,
+   "last": 1793041314.1701038,
+   "count": 1,
+   "sample": "2026-10-26 19:01:05 INFO  [news-src] source=toa status=200 seen=50 new=1 newest_lag_s=29 title='Katana ⚔️ (@katana): Blast is shutting down today.\\n\\nWe have taken a snapshot of '",
+   "norm": "INFO [news-src] source=toa status=N seen=N new=N newest_lag_s=N title='S'",
+   "recent": [
+    1793041314.1701038
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "ab399b07d6d9": {
+   "first": 1793042461.4664667,
+   "last": 1793042461.4664667,
+   "count": 1,
+   "sample": "2026-10-26 19:19:53 INFO  [ops] routine_wallet_action: '0x1985327e' -> 'bench applied, now in form' | 0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst",
+   "norm": "INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> settled N bets in the last N days, won N of N (N vs N needed to break even), net N on $N, worst",
+   "recent": [
+    1793042461.4664667
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "440527b3c4c6": {
+   "first": 1793042461.4664667,
+   "last": 1793042461.4664667,
+   "count": 1,
+   "sample": "2026-10-26 19:19:53 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x1985327e settled 3 bets in the last 14 days, won 1 of 3 (33% vs 52% needed to break even), net -16.1% on $1,205, worst",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> settled N bets in the last N days, won N of N (N vs N needed to break even), net N on $N, worst",
+   "recent": [
+    1793042461.4664667
    ],
    "action": null,
    "action_ts": null,
