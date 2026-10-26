@@ -1,14 +1,14 @@
 {
-    "id": "2026-10-26T00:42:58Z-e7dc",
-    "ts": 1792975378,
-    "kind": "wallet_action",
-    "action": "bench",
-    "wallet": "0x09b045baad1fbe115c70785635a261411774a3b6",
-    "message": "0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 64% needed to break even, net -16.8% on $1,595, down from 67% won and net +11.7% in the 2026-10-24 digest and 60% won and net +7.3% in the 2026-10-23 digest.",
+    "id": "2026-10-26T06:45:09Z-ad2c",
+    "ts": 1792997109,
+    "kind": "escalation",
+    "message": "Ops digest has gone stale. Last digest commit 232c8c9 at 2026-10-26T01:42:31Z, now 2026-10-26T06:45:09Z: about 5 hours with no new digest, past the 3 hour bar. Before the gap: arm off since 2026-10-18 owner pause, spend $0.00 today, cash $129.78, equity $129.78. 0x1985327e is also losing now in the same window, 4 settled, 25% won vs 53% needed, net -18.2 percent, not yet acted on. Cannot confirm bot health for the last 5 plus hours. Check the ops-digest workflow and the VM.",
     "evidence": [
-        "in form  0x09b045ba: 4 settled, 0% won vs 64% needed, net -16.8% on $1,595, worst day -126, 4 of 4 exits under 10 min",
-        "in form  0x09b045ba: 12 settled, 67% won vs 66% needed, net +11.7% on $4,688, worst day -126, 12 of 12 exits under 10 min (digest 2026-10-24)",
-        "in form  0x09b045ba: 15 settled, 60% won vs 65% needed, net +7.3% on $5,894, worst day -126, 15 of 15 exits under 10 min (digest 2026-10-23)"
+        "# ops digest 2026-10-26T01:36:14.761395+00:00 (last 24h)",
+        "last digest commit 232c8c9 ops: digest 2026-10-26T01:42:31Z (most recent on origin/ops-digest as of this check, now 2026-10-26T06:45:09Z)",
+        "## arm: {\"armed\": false, \"ts\": 1792309258.1766205, \"by\": \"owner:claude-session\", \"reason\": \"owner 2026-10-18: pause real money; -15% on 20 live bets since the top-up, two live windows below paper\"}",
+        "in form  0x1985327e: 4 settled, 25% won vs 53% needed, net -18.2% on $1,600, worst day -285, 4 of 4 exits under 10 min",
+        "2026-10-26 01:36:43 INFO  [ops] routine_wallet_action: '0x09b045ba' -> 'bench applied, now in form' | 0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 6"
     ],
     "commit": null
 }
