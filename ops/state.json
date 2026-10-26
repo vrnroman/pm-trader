@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-26T00:23:39.744962+00:00",
+ "generated": "2026-10-26T01:37:48.006612+00:00",
  "money": {
   "cash": 129.784219,
   "open_cost": 0.0,
@@ -21,7 +21,7 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1792974024.172027,
+  "ts": 1792978601.4537632,
   "day": "2026-10-26"
  },
  "arm": {
@@ -529,7 +529,7 @@
   "guard_fail_streak_prev": 0,
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
-  "last_escalation_id": "2026-10-25T18:44:25Z-b14e",
+  "last_escalation_id": "2026-10-26T00:42:58Z-e7dc",
   "admit_scan_ts": 1792971201.4424367,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 0,
@@ -996,7 +996,13 @@
     "net_pct": 0.0
    }
   },
-  "overrides": {},
+  "overrides": {
+   "0x09b045baad1fbe115c70785635a261411774a3b6": {
+    "action": "bench",
+    "why": "0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 64% needed to break even, net -16.8% on $1,595, down from 67% won and net +11.7% ",
+    "ts": 1792978602.9670756
+   }
+  },
   "unread": {},
   "paused": false,
   "paused_told": false
@@ -1427,23 +1433,27 @@
    "detail": "0xd47e7b93: 45 settled, 82% won vs 73% needed, net +0.1% on $36,419, worst day -5,490, 0 of 9 exits under 10 min",
    "push": "WALLET",
    "wallet": "0xd47e7b93736349b09bc6f39236456d85f58a4e60"
+  },
+  {
+   "ts": 1792978602.9670756,
+   "day": "2026-10-26",
+   "kind": "routine_wallet_action",
+   "before": "0x09b045ba",
+   "after": "bench applied, now in form",
+   "detail": "0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 6",
+   "push": "WALLET"
+  },
+  {
+   "ts": 1792978602.9670756,
+   "day": "2026-10-26",
+   "kind": "escalation_delivered",
+   "before": "routine wallet_action",
+   "after": "applied",
+   "detail": "0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 6",
+   "push": null
   }
  ],
  "important": [
-  "2026-10-25 00:24:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-25 00:42:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-25 00:49:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-10-25 00:50:03 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-10-25 00:50:08 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
-  "2026-10-25 00:50:13 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: The read operation timed out",
-  "2026-10-25 00:53:50 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-25 00:59:04 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-25 01:03:30 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-25 01:03:36 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-25 01:05:33 ERROR [inventory] API sync failed: Client error '429 Too Many Requests' for url 'https://data-api.polymarket.com/positions?user=0xB5c5D02E8662b14691273a22aDd8E2f7F3DcdbF1&limit=500&offset=0'",
-  "2026-10-25 01:08:24 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-25 01:29:18 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
-  "2026-10-25 01:33:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-25 01:49:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-25 01:50:01 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-25 01:53:41 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
@@ -1539,6 +1549,8 @@
   "2026-10-25 20:34:16 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=155, trimmed -7%) · 200 no -2% (n=251, trimmed -4%) · 150 no -4% (n=309, trimmed -6%) · 100 no -3% (n=372, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-25 21:15:49 INFO  [ops] form: '0xd47e7b93 in form' -> 'benched' | 0xd47e7b93: 45 settled, 82% won vs 73% needed, net +0.1% on $36,419, worst day -5,490, 0 of 9 exits under 10 min",
   "2026-10-25 23:45:01 INFO  [news-x] read=98 new=9 newest_lag_s=219 source=x:firstsquawk title='THE DISPUTE HAS RAISED CONCERNS OVER UKRAINE’S DEPENDENCE ON SPACEX FOR CRITICAL'",
+  "2026-10-26 01:36:43 INFO  [ops] routine_wallet_action: '0x09b045ba' -> 'bench applied, now in form' | 0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 6",
+  "2026-10-26 01:36:43 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 6",
   "2026-10-25 02:01:22 TRADE [DISARMED] would BUY $5.00 on 'CF Monterrey vs. CD Guadalajara: O/U 1.5' @ 0.8419 (from 0xd47e...4e60); the arm is off",
   "2026-10-25 02:04:40 TRADE [DISARMED] would BUY $5.00 on 'Houston Dynamo vs. Minnesota United FC: ' @ 0.6942 (from 0xd47e...4e60); the arm is off",
   "2026-10-25 02:39:57 TRADE [DISARMED] would BUY $5.00 on 'CF Monterrey vs. CD Guadalajara: O/U 1.5' @ 0.6080 (from 0xd47e...4e60); the arm is off",
@@ -1605,6 +1617,20 @@
    "confidence": 0.7,
    "cost_usd": 1.069086,
    "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1792978661.2819397,
+   "day": "2026-10-26",
+   "woke_because": "b8e445dc3bb9, 8d84272137f7",
+   "fingerprint": "b8e445dc3bb9",
+   "kind": "nothing",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "The routine wallet backstop benched 0x09b045ba because it still reads in form by the 14-day bar yet lost all 4 of its settled bets (0% won, net -16.8% on $1,595), which is the backstop working as designed. Both woke fingerprints are the same 01:36:43 event: the action and its own escalation_delivered notice. This routine is not new; routine_wallet_action fired 7 times from Oct 14 to Oct 22, and only the reason wording changed, so the fingerprint hashed fresh. Real money is already off, armed is false since the owner paused on Oct 18, so this roster-only action cannot place, size, or double any",
+   "confidence": 0.9,
+   "cost_usd": 0.7114124999999999,
+   "did": "nothing",
    "proof": "",
    "question": ""
   }
@@ -4588,6 +4614,34 @@
    "norm": "INFO [news-x] read=N new=N newest_lag_s=N source=x:firstsquawk title='S'",
    "recent": [
     1792971948.265768
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "b8e445dc3bb9": {
+   "first": 1792978661.2819397,
+   "last": 1792978661.2819397,
+   "count": 1,
+   "sample": "2026-10-26 01:36:43 INFO  [ops] routine_wallet_action: '0x09b045ba' -> 'bench applied, now in form' | 0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 6",
+   "norm": "INFO [ops] routine_wallet_action: 'S' -> 'S' | <hex> is still in form by the bar but lost all N of its settled bets in the current N day window, N won against N",
+   "recent": [
+    1792978661.2819397
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "8d84272137f7": {
+   "first": 1792978661.2819397,
+   "last": 1792978661.2819397,
+   "count": 1,
+   "sample": "2026-10-26 01:36:43 INFO  [ops] escalation_delivered: 'routine wallet_action' -> 'applied' | 0x09b045ba is still in form by the bar but lost all 4 of its settled bets in the current 14 day window, 0% won against 6",
+   "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | <hex> is still in form by the bar but lost all N of its settled bets in the current N day window, N won against N",
+   "recent": [
+    1792978661.2819397
    ],
    "action": null,
    "action_ts": null,
