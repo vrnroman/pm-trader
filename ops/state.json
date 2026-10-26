@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-25T23:31:14.827049+00:00",
+ "generated": "2026-10-26T00:23:39.744962+00:00",
  "money": {
   "cash": 129.784219,
   "open_cost": 0.0,
@@ -7,7 +7,7 @@
   "floor": null,
   "stated": 150.0,
   "spend": {
-   "date": "2026-10-25",
+   "date": "2026-10-26",
    "spent_usd": 0.0,
    "cap_usd": null,
    "remaining_usd": null,
@@ -21,8 +21,8 @@
    "1b": 0,
    "1c": 0
   },
-  "ts": 1792970891.686711,
-  "day": "2026-10-25"
+  "ts": 1792974024.172027,
+  "day": "2026-10-26"
  },
  "arm": {
   "armed": false,
@@ -32,11 +32,11 @@
   "first_armed_ts": 1788617432.0499406
  },
  "spend": {
-  "date": "2026-10-25",
+  "date": "2026-10-26",
   "spent_usd": 0.0,
   "wallet_copies": {},
   "wallet_copies_yesterday": {},
-  "yesterday": "2026-10-24",
+  "yesterday": "2026-10-25",
   "closed_reason": ""
  },
  "tier": {
@@ -530,7 +530,7 @@
   "no_copy_pushed": false,
   "daily_line_missing_day": "2026-10-08",
   "last_escalation_id": "2026-10-25T18:44:25Z-b14e",
-  "admit_scan_ts": 1792960169.7791018,
+  "admit_scan_ts": 1792971201.4424367,
   "day_loss_pushed": "2026-10-18",
   "loss_streak": 0,
   "day_pnl": 0.19,
@@ -1430,7 +1430,6 @@
   }
  ],
  "important": [
-  "2026-10-25 00:11:55 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-25 00:24:22 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-25 00:42:53 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error status=404 url=https://clob.polymarket.com/price body={\"error\":\"No orderbook exists for the requested token id\"}",
   "2026-10-25 00:49:58 [py_clob_client_v2.http_helpers.helpers] ERROR: [py_clob_client_v2] request error: Server disconnected",
@@ -1539,9 +1538,7 @@
   "2026-10-25 20:34:01 INFO  [ops] floor_row: '0x9f15613e floor 300.0' -> 'floor 200.0 (moved)' | copies at $200: 300 yes +14% (n=475, trimmed +11%) · 200 YES +15% (n=535, trimmed +12%) · 150 yes +14% (n=596, trimmed +12%) · 100 yes +13% (n=673, trimmed +11%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-25 20:34:16 INFO  [ops] floor_row: '0xeef6ad0e floor global' -> 'floor global (same)' | no floor clears the bars, global floor stays: 300 no -4% (n=155, trimmed -7%) · 200 no -2% (n=251, trimmed -4%) · 150 no -4% (n=309, trimmed -6%) · 100 no -3% (n=372, trimmed -5%); backward replay (copy-and-hold at their price, first entry, clean era)",
   "2026-10-25 21:15:49 INFO  [ops] form: '0xd47e7b93 in form' -> 'benched' | 0xd47e7b93: 45 settled, 82% won vs 73% needed, net +0.1% on $36,419, worst day -5,490, 0 of 9 exits under 10 min",
-  "2026-10-25 00:13:08 TRADE [DISARMED] would BUY $5.00 on 'Spread: Steelers (-2.5)' @ 0.5600 (from 0x28ef...ff5e); the arm is off",
-  "2026-10-25 00:18:51 TRADE [DISARMED] would BUY $5.00 on 'Spread: Browns (-2.5)' @ 0.5200 (from 0x28ef...ff5e); the arm is off",
-  "2026-10-25 00:20:49 TRADE [DISARMED] would BUY $5.00 on 'Spread: Bengals (-2.5)' @ 0.4700 (from 0x28ef...ff5e); the arm is off",
+  "2026-10-25 23:45:01 INFO  [news-x] read=98 new=9 newest_lag_s=219 source=x:firstsquawk title='THE DISPUTE HAS RAISED CONCERNS OVER UKRAINE’S DEPENDENCE ON SPACEX FOR CRITICAL'",
   "2026-10-25 02:01:22 TRADE [DISARMED] would BUY $5.00 on 'CF Monterrey vs. CD Guadalajara: O/U 1.5' @ 0.8419 (from 0xd47e...4e60); the arm is off",
   "2026-10-25 02:04:40 TRADE [DISARMED] would BUY $5.00 on 'Houston Dynamo vs. Minnesota United FC: ' @ 0.6942 (from 0xd47e...4e60); the arm is off",
   "2026-10-25 02:39:57 TRADE [DISARMED] would BUY $5.00 on 'CF Monterrey vs. CD Guadalajara: O/U 1.5' @ 0.6080 (from 0xd47e...4e60); the arm is off",
@@ -1593,6 +1590,20 @@
    "concluded": "The self-disarm fires because 18 deploys today each reset the no-trade-data clock while the deployed build (sha 9c04dfc) boots in NEWS_MODE with copy threads not started, so no trade data ever flows and the 15 minute timer trips after each restart. Hygiene.log and the bot log agree: restarts at 10:52 through 15:41 match the self_disarm ENTERED times, and 17 boots logged copy threads not started. Real money is already off (armed=false since the owner paused on 2026-10-18), so each self-disarm back to paper is a no-op and the routine escalation it raised already reached the owner's phone. The gu",
    "confidence": 0.86,
    "cost_usd": 1.0005745000000001,
+   "did": "noted",
+   "proof": "",
+   "question": ""
+  },
+  {
+   "ts": 1792971948.265768,
+   "day": "2026-10-25",
+   "woke_because": "fffb22075bdc",
+   "fingerprint": "fffb22075bdc",
+   "kind": "note",
+   "looked_at": "fingerprints, important tail, money/arm/guard, form, two clocks, chain health, log census, receipts, bot logs (read tools)",
+   "concluded": "A benign INFO news feed read was promoted into the important alert channel once and paged the SRE for nothing. Of 132 news-x reads today only this one reached the important log, and zero news-x lines reached it on any prior day. The 18 firstsquawk reads today include many all caps titles, several curly quote titles, and lags up to 287s, and none of those were promoted, so no visible field in the line explains the routing. read=98 new=9 newest_lag_s=219 is normal for this feed and news-src, news and bsky reads keep flowing after 23:45, so the news pipeline is healthy. Money is disarmed since Oc",
+   "confidence": 0.7,
+   "cost_usd": 1.069086,
    "did": "noted",
    "proof": "",
    "question": ""
@@ -4563,6 +4574,20 @@
    "norm": "INFO [ops] escalation_delivered: 'S' -> 'S' | Self-disarm (no trade data) fired N times in the last Nh, last at N:N, each about N minutes after a restart. The pro",
    "recent": [
     1792955271.8739903
+   ],
+   "action": null,
+   "action_ts": null,
+   "path_runs": 0,
+   "path_runs_ts": null
+  },
+  "fffb22075bdc": {
+   "first": 1792971948.265768,
+   "last": 1792971948.265768,
+   "count": 1,
+   "sample": "2026-10-25 23:45:01 INFO  [news-x] read=98 new=9 newest_lag_s=219 source=x:firstsquawk title='THE DISPUTE HAS RAISED CONCERNS OVER UKRAINE’S DEPENDENCE ON SPACEX FOR CRITICAL'",
+   "norm": "INFO [news-x] read=N new=N newest_lag_s=N source=x:firstsquawk title='S'",
+   "recent": [
+    1792971948.265768
    ],
    "action": null,
    "action_ts": null,
