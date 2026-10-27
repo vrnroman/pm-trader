@@ -67,3 +67,11 @@ def test_no_copy_bot_module_is_left():
     assert not os.path.exists(os.path.join(root, "src", "copy_trading"))
     src = open(os.path.join(root, "main.py"), encoding="utf-8").read()
     assert "copy_trading" not in src and "telegram_bot.startup_text()" in src
+
+
+def test_socket_libraries_never_log_below_warning():
+    # websockets DEBUG frames were 96% of the bot log on 2026-10-27
+    import logging
+    import src.logger  # noqa: F401  (configures the levels on import)
+    for name in ("websockets", "websockets.client", "telethon", "twscrape", "urllib3", "httpx"):
+        assert logging.getLogger(name).getEffectiveLevel() >= logging.WARNING, name

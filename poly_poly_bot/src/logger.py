@@ -294,7 +294,12 @@ class BotLogger:
         # which was 93.5% of total log volume (68,889 of 73,666 lines on
         # 2026-07-24) and drowned real signal (~4,500 lines/day).
         for noisy in ("httpcore", "httpx", "httpcore.connection", "httpcore.http11",
-                      "urllib3", "urllib3.connectionpool", "asyncio", "hpack"):
+                      "urllib3", "urllib3.connectionpool", "asyncio", "hpack",
+                      # The news bot's sockets: websockets logs every frame at
+                      # DEBUG, 96% of the 2026-10-27 log (427k of 445k lines;
+                      # 374 MB on 10-25). Telethon and twscrape likewise.
+                      "websockets", "websockets.client", "websockets.protocol",
+                      "telethon", "twscrape"):
             logging.getLogger(noisy).setLevel(logging.WARNING)
 
         log_format = os.environ.get("LOG_FORMAT", "text")
