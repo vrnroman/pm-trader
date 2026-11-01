@@ -357,3 +357,17 @@ def test_a_failed_rest_read_never_books_an_entry_from_an_old_book(rig, monkeypat
     r.process_item(fresh_item("bsky:reuters.com:2", 204_000.0), now=204_000.0)   # next hour: the hourly LLM cap is 1 here
     rows = list(r.books["headline-any"].ledger.rows.values())
     assert rows and rows[0].entry_price == 0.60
+
+
+def test_the_callers_clock_is_per_thread(rig):
+    r, rest = rig
+    seen = {}
+    r._clock_tls.now = 1234.0
+
+    def other():
+        seen["other"] = r._clock()
+    t = threading.Thread(target=other)
+    t.start()
+    t.join()
+    assert r._clock() == 1234.0 and seen["other"] != 1234.0
+    r._clock_tls.now = None
