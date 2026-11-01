@@ -119,6 +119,14 @@ class Runner:
         # gone by lunch (NEWS_LLM_HOURLY_CAP, default budget/12).
         self.min_overlap = int(_env("NEWS_MIN_OVERLAP", 2))
         self.hourly_cap = int(_env("NEWS_LLM_HOURLY_CAP", 0)) or max(1, int(_env("NEWS_LLM_DAILY_BUDGET", 300)) // 12)
+        self.base_hourly_cap = self.hourly_cap
+        self.base_daily = int(_env("NEWS_LLM_DAILY_BUDGET", 300))
+        # A dated window with higher caps, for nights when the calls come in a
+        # flood (US midterms 2026-11-03: hundreds of race calls in a few
+        # hours; the normal 25 an hour would judge a handful). Format
+        # "<start ISO>/<end ISO>/<hourly>/<daily>"; outside it the caps are
+        # the normal ones, so it ends by itself (run s-wj4gnb).
+        self.boost = parse_boost(os.environ.get("NEWS_LLM_BOOST", ""))
         self.hour_calls: dict[str, int] = {}
         self.day_unmatched: dict[str, int] = {}
         self.day_paced: dict[str, int] = {}
@@ -215,6 +223,13 @@ class Runner:
                 self.book.set_ladder(token, fresh)
                 lad = fresh
         return lad
+
+    def _apply_boost(self, now: float) -> None:
+        if self.boost is None:
+            return          # no window configured: the caps stay as set
+        on = self.boost[0] <= now < self.boost[1]
+        self.hourly_cap = self.boost[2] if on else self.base_hourly_cap
+        self.budget.limit = self.boost[3] if on else self.base_daily
 
     def _clock(self) -> float:
         now = getattr(self._clock_tls, "now", None)
@@ -375,6 +390,7 @@ class Runner:
             self.day_repeat[day] = self.day_repeat.get(day, 0) + 1
             return None
         hour = time.strftime("%Y-%m-%dT%H", time.gmtime(now))
+        self._apply_boost(now)
         if self.hour_calls.get(hour, 0) >= self.hourly_cap and item.source != "owner":
             self.day_paced[day] = self.day_paced.get(day, 0) + 1
             logger.info(f"[news] paced: hourly LLM cap {self.hourly_cap} reached, '{item.title[:50]}' not judged")
@@ -993,6 +1009,27 @@ class Runner:
 
 
 _RUNNER: Optional[Runner] = None
+
+
+def parse_boost(raw: str) -> Optional[tuple[float, float, int, int]]:
+    """"2026-11-03T22:00Z/2026-11-05T12:00Z/60/900" -> (start, end, hourly,
+    daily); None when empty or malformed (logged), never a crash."""
+    raw = (raw or "").strip()
+    if not raw:
+        return None
+    import calendar
+    try:
+        a, b, h, d = raw.split("/")
+
+        def ts(x: str) -> float:
+            return float(calendar.timegm(time.strptime(x.strip().rstrip("Z"), "%Y-%m-%dT%H:%M")))
+        out = (ts(a), ts(b), int(h), int(d))
+        if out[0] >= out[1] or out[2] < 1 or out[3] < 1:
+            raise ValueError("empty window or zero cap")
+        return out
+    except Exception as exc:  # noqa: BLE001
+        logger.warn(f"[news] NEWS_LLM_BOOST '{raw}' ignored: {exc}")
+        return None
 
 
 def _register(r: Runner) -> None:

@@ -130,6 +130,8 @@ jobs:
           ensure_env NEWS_DOMAINS politics,crypto,geo,corp
           ensure_env NEWS_MIN_PRICE 0.05
           ensure_env NEWS_MAX_PRICE 0.95
+          # US midterms night (polls close 00:00 UTC 11-04): more judge calls, ends by itself
+          ensure_env NEWS_LLM_BOOST 2026-11-03T22:00Z/2026-11-05T12:00Z/60/900
 
       # deploy.sh builds the image HERE on the runner (native amd64, fast,
       # already GCP-authed), PUSHES it to Artifact Registry, and the VM PULLS it

@@ -131,6 +131,8 @@ V1: tuple[Source, ...] = (
     # --- Bluesky (Jetstream; poll_s=0 means socket) ---
     _bsky("reuters.com", "geo", "politics", "corp"),
     _bsky("apnews.com", "geo", "politics"),
+    # race calls on election nights ("DDHQ PROJECTS: ...", 2026-11 midterms)
+    _bsky("decisiondeskhq.bsky.social", "politics"),
     _bsky("theguardian.com", "geo", "politics"),
     _bsky("washingtonpost.com", "politics", "geo"),
     _bsky("nytimes.com", "politics", "geo"),
