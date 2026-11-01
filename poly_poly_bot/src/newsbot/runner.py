@@ -140,8 +140,10 @@ class Runner:
         from src.newsbot import fees
         self._rest_memo: dict = {}      # token -> (monotonic ts, Ladder|None): one GET serves a mark's two sides
         # the caller's clock while an item is processed or a tick marks
-        # (process_item / mark_all set it to their ``now``), else the wall
-        self._clock = time.time
+        # (process_item / mark_all / scan_jumps set it to their ``now``), else
+        # the wall; per thread, since the judge runs in a worker thread while
+        # the tick marks in another (verifier round 2, s-wj4gnb)
+        self._clock_tls = threading.local()
         self.books = {b: paper_mod.PaperBook(b, ask_ladder=self._ask_ladder, bid_ladder=self._bid_ladder,
                                              fee_bps=fees.fee_bps, book_ts=self._book_ts,
                                              now=lambda: self._clock())
@@ -213,6 +215,10 @@ class Runner:
                 self.book.set_ladder(token, fresh)
                 lad = fresh
         return lad
+
+    def _clock(self) -> float:
+        now = getattr(self._clock_tls, "now", None)
+        return time.time() if now is None else now
 
     def _current(self, token: str):
         """The ladder only when it is a current book (read within
@@ -318,11 +324,11 @@ class Runner:
 
     def process_item(self, item: Item, now: Optional[float] = None) -> Optional[dict]:
         now = time.time() if now is None else now
-        self._clock = lambda: now
+        self._clock_tls.now = now
         try:
             return self._process_item(item, now)
         finally:
-            self._clock = time.time
+            self._clock_tls.now = None
 
     def _process_item(self, item: Item, now: float) -> Optional[dict]:
         self.last_item_ts = now
@@ -531,11 +537,11 @@ class Runner:
     # ---- jumps: tape first ----
     def scan_jumps(self, now: Optional[float] = None) -> int:
         now = time.time() if now is None else now
-        self._clock = lambda: now
+        self._clock_tls.now = now
         try:
             return self._scan_jumps(now)
         finally:
-            self._clock = time.time
+            self._clock_tls.now = None
 
     def _scan_jumps(self, now: Optional[float] = None) -> int:
         now = time.time() if now is None else now
@@ -579,11 +585,11 @@ class Runner:
     # ---- marks, surprise pings, settlement ----
     def mark_all(self, now: Optional[float] = None) -> int:
         now = time.time() if now is None else now
-        self._clock = lambda: now
+        self._clock_tls.now = now
         try:
             return self._mark_all(now)
         finally:
-            self._clock = time.time
+            self._clock_tls.now = None
 
     def _mark_all(self, now: float) -> int:
         n = 0
