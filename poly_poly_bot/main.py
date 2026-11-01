@@ -72,7 +72,10 @@ def _setup_logging():
     # BotLogger already files the app's own records (bot- ops, signals- WARN+).
     fh = _DailyRotatingFileHandler(Path(CONFIG.logs_dir), "bot")
     fh.setFormatter(fmt)
-    fh.setLevel(logging.DEBUG)
+    # INFO, not DEBUG: aiosqlite logs every query at DEBUG, and twscrape's
+    # account upsert carried the owner's X session cookies into bot-*.log
+    # (2026-11-01, s-wj4gnb). No third-party DEBUG belongs in the file.
+    fh.setLevel(logging.INFO)
     fh.addFilter(_not_app_record)
     # Third-party records (urllib3 request lines) can carry credentials in
     # URLs — the 2026-07-16→25 Telegram-token leak walked in through exactly

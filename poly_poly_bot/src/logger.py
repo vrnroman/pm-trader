@@ -69,9 +69,14 @@ class _SignalFilter(logging.Filter):
 _TELEGRAM_TOKEN_RE = re.compile(r"bot\d{6,12}:[A-Za-z0-9_-]{30,}")
 
 
+# X session cookies (twscrape's accounts db upsert, logged by aiosqlite at
+# DEBUG, 2026-11-01): "auth_token": "<hex>", ct0=<hex>, in JSON or a header.
+_X_COOKIE_RE = re.compile(r"""((?:auth_token|ct0)["']?\s*[:=]\s*["']?)[A-Za-z0-9%_-]{16,}""")
+
+
 def scrub_secrets(text: str) -> str:
     """Replace credential-shaped substrings with a redaction marker."""
-    return _TELEGRAM_TOKEN_RE.sub("bot***REDACTED", text)
+    return _X_COOKIE_RE.sub(r"\1***REDACTED", _TELEGRAM_TOKEN_RE.sub("bot***REDACTED", text))
 
 
 class SecretScrubFilter(logging.Filter):
@@ -299,7 +304,9 @@ class BotLogger:
                       # DEBUG, 96% of the 2026-10-27 log (427k of 445k lines;
                       # 374 MB on 10-25). Telethon and twscrape likewise.
                       "websockets", "websockets.client", "websockets.protocol",
-                      "telethon", "twscrape"):
+                      "telethon", "twscrape",
+                      # every query at DEBUG, the X cookie upsert included
+                      "aiosqlite"):
             logging.getLogger(noisy).setLevel(logging.WARNING)
 
         log_format = os.environ.get("LOG_FORMAT", "text")
