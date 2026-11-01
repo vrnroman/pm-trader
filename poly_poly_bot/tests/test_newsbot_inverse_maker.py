@@ -371,3 +371,40 @@ def test_the_callers_clock_is_per_thread(rig):
     t.join()
     assert r._clock() == 1234.0 and seen["other"] != 1234.0
     r._clock_tls.now = None
+
+
+# ---- election night: a dated LLM boost that ends by itself ----
+
+def test_boost_window_raises_the_caps_inside_and_restores_them_outside(rig):
+    r, rest = rig
+    r.boost = runner_mod.parse_boost("2026-11-03T22:00Z/2026-11-05T12:00Z/60/900")
+    start, end = r.boost[0], r.boost[1]
+    base_h, base_d = r.base_hourly_cap, r.base_daily
+    r._apply_boost(start - 1)
+    assert (r.hourly_cap, r.budget.limit) == (base_h, base_d)
+    r._apply_boost(start + 3600)
+    assert (r.hourly_cap, r.budget.limit) == (60, 900)
+    r._apply_boost(end)
+    assert (r.hourly_cap, r.budget.limit) == (base_h, base_d), "the window ends by itself"
+
+
+@pytest.mark.parametrize("raw", ["", "junk", "2026-11-05T12:00Z/2026-11-03T22:00Z/60/900", "2026-11-03T22:00Z/2026-11-05T12:00Z/0/900"])
+def test_a_bad_boost_is_ignored_never_a_crash(raw):
+    assert runner_mod.parse_boost(raw) is None
+
+
+def test_the_deploy_files_boost_parses_through_the_production_parser():
+    """Standing check: the deploy wrote NEWS_MODE=1 once and the parser read
+    only "true"; the shipped value must parse."""
+    import os
+    import re
+    wf = open(os.path.join(os.path.dirname(__file__), "..", "..", ".github", "workflows", "deploy.yml")).read()
+    m = re.search(r"ensure_env NEWS_LLM_BOOST (\S+)", wf)
+    assert m, "the deploy sets the election-night window"
+    b = runner_mod.parse_boost(m.group(1))
+    assert b is not None and b[2] > 25 and b[3] > 300
+
+
+def test_ddhq_is_on_the_roster():
+    from src.newsbot.sources import roster
+    assert any(s.key == "bsky:decisiondeskhq.bsky.social" for s in roster.load())
