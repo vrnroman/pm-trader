@@ -192,3 +192,37 @@ List; the bot reads the List.
   accepted), optional `X_POLL_S`, `X_DOMAINS`. `enabled()` is true only when
   all three are set. Owner steps: `scripts/x_cookies_howto.md`.
 - Dependency: `twscrape>=0.20` (requirements.txt).
+
+## Fresh marks, the inverse / tight / maker books, the go-live bar (run s-wj4gnb, 2026-11-01)
+
+Why. The first week's /pnl read llm -4.6% at 2h with 2 winners in 56. Its
+marks walked the ladder cached at ENTRY for every token the 450-token watch
+set had evicted: the bid at 5m equalled the bid at 2h on 54 of 56 rows while
+Polymarket's price history moved on 31 of them. So the "2h exit" was the
+spread paid at entry. Reconstructed from minute price history, the calls
+carried no direction at 2h (mid -2.5% ±1.7 our way) and paid a ~4% spread;
+the inverse (buy the other side) lost more (-26%), because forward plus
+inverse is minus both spreads.
+
+- Ladders: `Runner._ladder` uses the socket's ladder only when it is younger
+  than 60 s, else one REST /book (5 s memo, kept on the QuoteBook). A mark
+  whose book is older than `NEWS_MARK_MAX_AGE_S` (120) is unknown, never the
+  entry bid. Reads per 30 s tick are capped by `NEWS_MARK_REST_CAP` (40); a
+  row past the cap stays due. Each mark records `mid` and `age_s`; each row
+  records `bid_top`, `mid_entry`, `event`, `fresh_marks=True`.
+- `llm-inverse`: on every llm fire, BUY the other outcome at its own ask
+  ("sell what the judge buys" on Polymarket).
+- `llm-tight`: the llm fire again, only when the spread crossed was
+  <= `NEWS_TIGHT_SPREAD_CENTS` (2) and <= `NEWS_TIGHT_SPREAD_FRAC` (0.04).
+- `llm-maker` (`maker.py`): a BUY rests at the best bid for
+  `NEWS_MAKER_TTL_MIN` (30). Filled only when the ask came down to the limit
+  after posting (socket history or a fresh book) or a trade printed below it;
+  then a row at the limit, maker fee 0, exited at the walked bid. Every
+  order keeps its mid at post, +2h and +24h, so filled vs unfilled shows
+  adverse selection. Ledger `data/news/maker-orders.jsonl`.
+- `verdict.py`: the bar, per EVENT at 2h on clean rows only: GO when the
+  mean event ROI is more than 2 SE above zero over >= 25 events
+  (`NEWS_VERDICT_MIN_EVENTS`), NO-GO when 25 are in and it is not, else
+  NOT-YET "n of 25". /pnl and the 08:00 brief print it per book with the
+  llm book's spread-vs-signal split. Rows before the fix are counted on one
+  line of their own and left out of every number.

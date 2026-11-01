@@ -14,10 +14,19 @@ import html
 import time
 from typing import Callable, Mapping, Optional
 
+from src.newsbot import verdict as verdict_mod
 from src.newsbot.paper import HORIZONS_S, PaperLedger
 
 SGT_S = 8 * 3600
 EXIT = "2h"       # the planned exit: the owner's 2 h to 1 day, the first of them
+# The books the go-live bar is read on, in the order the owner reads them
+# (run s-wj4gnb): the call, its opposite, its cheap-to-trade slice, the
+# same call resting at the bid, and chance.
+BAR = (("llm", "the call, bought at the ask"),
+       ("llm-inverse", "the other side of every call (\"sell what it buys\")"),
+       ("llm-tight", "the call, only where the spread was tight"),
+       ("llm-maker", "the call resting at the bid, filled only if the market came to it"),
+       ("random", "a random market per call"))
 CONTROLS = (("llm", "material and the market had not moved yet: the book that would trade"),
             ("headline-any", "every material call, moved or not"),
             ("tape-first", "a price jump with a headline minutes before it"),
@@ -54,23 +63,56 @@ def _line(label: str, v: Optional[tuple[int, float, float]], width: int = 4) -> 
 
 
 def book_rows(ledger: PaperLedger, since_ts: float = 0.0) -> list:
-    return [r for r in ledger.live_rows() if r.decided_ts >= since_ts]
+    """The clean era only: rows whose marks read a current book. Rows from
+    before 2026-11-01 may carry the entry book replayed at every horizon
+    (run s-wj4gnb) and are counted on one line of their own."""
+    return [r for r in ledger.live_rows() if r.decided_ts >= since_ts and r.fresh_marks]
+
+
+def stale_rows(ledger: PaperLedger) -> list:
+    return [r for r in ledger.live_rows() if not r.fresh_marks]
+
+
+def bar_text(ledgers: Mapping[str, PaperLedger], maker_line: Optional[str] = None) -> list[str]:
+    """The pre-registered go-live bar per book at the planned exit, counted
+    per event, plus where the llm book's money went (spread vs signal)."""
+    out = [f"<b>Go-live bar</b> at {EXIT}: mean ROI per event &gt; {verdict_mod.Z:.0f} SE over "
+           f"{verdict_mod.min_events()}+ events, at real quotes and fees", "<pre>"]
+    for name, _ in BAR:
+        if name in ledgers:
+            out.append(_esc(verdict_mod.verdict_line(f"{name:<11}", book_rows(ledgers[name]), EXIT)))
+    out.append("</pre>")
+    llm = ledgers.get("llm")
+    sp = verdict_mod.split(book_rows(llm), EXIT) if llm else None
+    if sp is not None:
+        a, b = sp["spread"], sp["signal"]
+        sig = ("collecting (n=0)" if b is None else
+               f"{b['mean'] * 100:+.1f}%" + ("" if b["se"] == float("inf") else f" ±{b['se'] * 100:.1f}")
+               + f" ({b['events']} events)")
+        out.append(f"llm at {EXIT}: spread paid {a['mean'] * 100:.1f}% of the price ({a['events']} events); "
+                   f"mid moved our way {sig}")
+    if maker_line:
+        out.append(_esc(maker_line))
+    return out
 
 
 def pnl_text(ledgers: Mapping[str, PaperLedger], *, now: Optional[float] = None,
-             bid_now: Optional[Callable[[str], Optional[float]]] = None, short: bool = False) -> str:
+             bid_now: Optional[Callable[[str], Optional[float]]] = None, short: bool = False,
+             maker_line: Optional[str] = None) -> str:
     """The /pnl report. ``bid_now(token)`` marks open bets at the current
     bid when the running bot can read one."""
     now = time.time() if now is None else now
     llm = ledgers.get("llm")
     rows = book_rows(llm) if llm else []
     all_rows = [r for led in ledgers.values() for r in led.rows.values()]
-    start = min((r.decided_ts for r in all_rows), default=None)
+    start = min((r.decided_ts for r in all_rows if r.fresh_marks), default=None)
     void = sum(1 for r in all_rows if r.void)
     out = ["📊 <b>News bot P&amp;L</b> (paper: $%.0f a bet at the real ask, sold at the real bid, fees in)"
            % (rows[0].stake if rows else 5)]
     if start is not None:
-        out.append(f"Since {_sgt(start, '%Y-%m-%d %H:%M')} SGT")
+        out.append(f"Since {_sgt(start, '%Y-%m-%d %H:%M')} SGT (every exit read a current book)")
+    out.append("")
+    out.extend(bar_text(ledgers, maker_line))
     out.append("")
     staked = sum(r.filled_usd + r.fee_usd for r in rows)
     resolved = [r for r in rows if r.resolution_pnl is not None]
@@ -103,6 +145,11 @@ def pnl_text(ledgers: Mapping[str, PaperLedger], *, now: Optional[float] = None,
                    f"{_money(r[1]) if r else 'n=0'}. /pnl for the rest.")
         return "\n".join(out)
 
+    dl = verdict_mod.domain_lines(rows, EXIT)
+    if dl:
+        out.append("")
+        out.append(f"<b>Where the llm calls stand</b> at {EXIT}, by domain (per event):")
+        out.append("<pre>" + "\n".join(_esc(x) for x in dl) + "</pre>")
     out.append("")
     out.append(f"<b>Against the controls</b>, sold after {EXIT}:")
     out.append("<pre>")
@@ -128,6 +175,13 @@ def pnl_text(ledgers: Mapping[str, PaperLedger], *, now: Optional[float] = None,
                 res += f", held {_money(r.resolution_pnl)}"
             out.append(f"{_sgt(r.decided_ts)} {_esc(r.outcome)} @ {r.entry_price:.2f} "
                        f"<b>{_esc(r.question[:70])}</b>: {res}")
+    old = stale_rows(llm) if llm else []
+    if old:
+        v = _horizon(old, EXIT)
+        out.append(f"\n<i>Before 2026-11-01: {len(old)} llm bets"
+                   + (f", {EXIT} {_money(v[1])} (n={v[0]})" if v else "")
+                   + ". Their exits mostly replayed the entry book, so that number is the spread paid, "
+                   "not a 2h exit; left out above.</i>")
     if void:
         out.append(f"\n<i>{void} duplicate row(s) voided and left out.</i>")
     return "\n".join(out)
