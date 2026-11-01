@@ -74,7 +74,7 @@ def rig(tmp_path, monkeypatch):
              _cand("m9", "c9", "Lakers vs Celtics", ["te", "tf"], dom=("sport",), sports=True)]
     r.index = FakeIndex(cands)
     # a quiet, quoted book for the Anthropic market: fresh
-    lad = clob_ws.parse_ladder({"bids": [{"price": "0.40", "size": "100"}], "asks": [{"price": "0.42", "size": "100"}]}, ts_ms=1_000_000)
+    lad = clob_ws.parse_ladder({"bids": [{"price": "0.40", "size": "100"}], "asks": [{"price": "0.42", "size": "100"}]}, ts_ms=1_650_000)
     for tok in ("ta", "tb", "tc", "td", "te", "tf"):
         r.book.set_ladder(tok, lad)
     r.book.record("ta", 1_000_000, 0.40, 0.42)
@@ -195,6 +195,7 @@ def test_marks_move_the_item_ledger_and_ping_a_missed_move(rig, monkeypatch):
     r.book.record("ta", 1_650_000, 0.48, 0.50)
     r.book.record("ta", 1_690_000, 0.49, 0.51)
     monkeypatch.setattr(judge_mod, "run_claude", _fake_claude())
+    r.book.set_ladder("ta", clob_ws.parse_ladder({"bids": [{"price": "0.49", "size": "50"}], "asks": [{"price": "0.51", "size": "50"}]}, ts_ms=1_690_000))
     r.process_item(_item(i="x6"), now=1700.0)
     it = r.leads.items["x6"]
     assert it.fired is False and it.mid_at_decision == pytest.approx(0.50)
