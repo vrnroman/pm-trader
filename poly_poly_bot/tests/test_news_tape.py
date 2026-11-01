@@ -471,6 +471,9 @@ async def test_stream_quotes_subscribes_pings_reconnects_and_resubscribes_on_set
         timeout=5,
     )
     assert len(fake.calls) == 4 and fake.calls[0][0] == clob_ws.CLOB_WS_URL
+    # the subscribe answer for 450 tokens is ~1.09 MB: the 1 MiB default
+    # killed every connection for a week (run s-wj4gnb)
+    assert all(kw.get("max_size", 0) >= 4 * 2**20 for _, kw in fake.calls)
     subs = [json.loads(s[0]) for s in fake.sent]
     assert subs[0] == {"assets_ids": ["tok-a", "tok-b"], "type": "market"}  # sorted, both ids
     assert subs[1] == subs[0]  # reconnect after the drop resubscribes the same set

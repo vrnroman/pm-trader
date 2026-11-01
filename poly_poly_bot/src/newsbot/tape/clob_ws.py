@@ -32,6 +32,11 @@ log = logging.getLogger("newsbot.tape.clob")
 CLOB_WS_URL = "wss://ws-subscriptions-clob.polymarket.com/ws/market"
 CLOB_REST_BOOK = "https://clob.polymarket.com/book"
 MAX_TOKENS_PER_CONNECTION = 500
+# The subscribe answer is one frame holding every token's full book: ~1.09 MB
+# for 450 tokens, over the websockets library's 1 MiB default, so every
+# connection since 2026-10-27 died on its first frame ("1009 message too
+# big") and the paper books ran on one REST snapshot per token (s-wj4gnb).
+MAX_FRAME_BYTES = 16 * 2**20
 PING_TEXT = "PING"
 
 
@@ -435,7 +440,7 @@ async def _run_shard(
     while not (stop is not None and stop.is_set()):
         pinger: asyncio.Task | None = None
         try:
-            async with connect(url) as ws:
+            async with connect(url, max_size=MAX_FRAME_BYTES) as ws:
                 await ws.send(json.dumps({"assets_ids": list(ids), "type": "market"}))
                 pinger = asyncio.create_task(_ping_forever(ws, ping_interval, sleep))
                 async for raw in ws:
