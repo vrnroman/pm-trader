@@ -11,7 +11,8 @@ def _row(led, rid, *, cond, decided, mark2h=None, res=None, void="", book="llm")
                        published_ts=decided - 60, seen_ts=decided - 30, decided_ts=decided, quote_ts=decided,
                        freshness="fresh", confidence=0.5, why="", ask_top=0.5, entry_price=0.5, stake=5.0,
                        filled_usd=5.0, fee_bps=0, fee_usd=0.0, shares=10.0,
-                       marks={"2h": {"pnl": mark2h}} if mark2h is not None else {}, void=void)
+                       marks={"2h": {"pnl": mark2h}} if mark2h is not None else {}, void=void,
+                       fresh_marks=True)
     if res is not None:
         r.resolution_pnl, r.resolved, r.closed = res, res > 0, True
     led.add(r)

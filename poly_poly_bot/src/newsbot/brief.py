@@ -148,7 +148,7 @@ def brief_text(*, stats: dict, books: dict, today: dict, roster: dict, llm: dict
                      + (f" · lead {_dur(d['lead_median_s'])} (n={d['lead_n']})" if d.get("lead_n") else ""))
     lines.append("")
     lines.append("<b>Books</b> (ROI after fees at the honest bid, ±1 SD)")
-    for name in ("llm", "tape-first", "headline-any", "random"):
+    for name in ("llm", "llm-inverse", "llm-tight", "llm-maker", "tape-first", "headline-any", "random"):
         if name in books:
             lines.append(_esc(_book_line(name, books[name])))
     lines.append("  " + _esc(best_exit_estimate(books)))

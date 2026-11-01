@@ -29,7 +29,7 @@ from typing import Callable, Optional
 from src.logger import logger
 
 HORIZONS_S = {"5m": 300, "30m": 1800, "2h": 7200, "24h": 86400}
-BOOKS = ("llm", "tape-first", "headline-any", "random")
+BOOKS = ("llm", "llm-inverse", "llm-tight", "llm-maker", "tape-first", "headline-any", "random")
 
 
 def _env_f(name: str, default: float) -> float:
@@ -50,6 +50,21 @@ def price_band() -> tuple[float, float]:
     2026-10-27). Below 5c a $5 stake is a lottery ticket that the control
     book then has to match."""
     return _env_f("NEWS_MIN_PRICE", 0.05), _env_f("NEWS_MAX_PRICE", 0.95)
+
+
+def max_mark_age_s() -> float:
+    """A mark walks a book no older than this. The first week's marks walked
+    the ladder cached at ENTRY for any token the watch set had evicted: the
+    bid at 5m equalled the bid at 2h on 54 of 56 llm rows while Polymarket's
+    own price history moved on 31 of them, so the "2h exit" was the spread
+    paid at entry (run s-wj4gnb, 2026-11-01)."""
+    return _env_f("NEWS_MARK_MAX_AGE_S", 120.0)
+
+
+def mark_late_s() -> float:
+    """A mark read this long after its horizon is not that horizon's exit
+    (downtime, a deferred tick): unknown, with how late it was."""
+    return _env_f("NEWS_MARK_LATE_S", 300.0)
 
 
 def ledger_dir() -> str:
@@ -102,6 +117,18 @@ class PaperRow:
     # through two routes, a byte-identical repost): kept with its reason,
     # left out of every count and number (verifier round 7, 2026-10-25).
     void: str = ""
+    # The book at entry, both sides: the spread we paid is ask_top - bid_top,
+    # and the signal is how the mid moved from mid_entry (run s-wj4gnb).
+    bid_top: Optional[float] = None
+    mid_entry: Optional[float] = None
+    # True when every mark on this row reads a book no older than
+    # NEWS_MARK_MAX_AGE_S. Rows from before 2026-11-01 are False: their marks
+    # may be the entry book replayed, so /pnl leaves them out of the clean era.
+    fresh_marks: bool = False
+    # The event the market belongs to: the Serbian turnout night put six
+    # threshold markets of one event in the llm book, which is one
+    # observation, not six (run s-wj4gnb). Empty on old rows.
+    event: str = ""
 
     def exit_pnl(self, exit_price: float) -> float:
         """Sell everything at ``exit_price`` (the walked bid), fee on the way out
@@ -212,7 +239,8 @@ class PaperBook:
 
     def __init__(self, book: str, *, ask_ladder: Callable, bid_ladder: Callable,
                  fee_bps: Callable[[str], Optional[int]], ledger: Optional[PaperLedger] = None,
-                 now: Callable[[], float] = time.time):
+                 now: Callable[[], float] = time.time,
+                 book_ts: Optional[Callable[[str], Optional[float]]] = None):
         assert book in BOOKS, book
         self.book = book
         self.ledger = ledger or PaperLedger(book)
@@ -220,6 +248,9 @@ class PaperBook:
         self._bid = bid_ladder
         self._fee = fee_bps
         self._now = now
+        # When the ladder the last read returned was taken (epoch seconds);
+        # None when the caller cannot say (plain lists in tests).
+        self._book_ts = book_ts
         self.skipped = {"held": 0, "band": 0}
 
     def holds(self, condition_id: str) -> bool:
@@ -231,7 +262,8 @@ class PaperBook:
     def fire(self, *, item_id: str, source: str, domains: tuple, market_id: str,
              condition_id: str, token_id: str, outcome: str, question: str,
              published_ts: float, seen_ts: float, decided_ts: float,
-             freshness: str, confidence: float, why: str) -> Optional[PaperRow]:
+             freshness: str, confidence: float, why: str, event: str = "",
+             entry: Optional[tuple] = None) -> Optional[PaperRow]:
         """Book a BUY at the honest ask. Returns the row, or None when the
         row exists already (idempotent on restart) or the ask could not be
         read (logged as unquotable, never booked at a made-up price)."""
@@ -243,12 +275,15 @@ class PaperBook:
             logger.info(f"[news-paper] {self.book}: already holds '{question[:40]}': not booked again")
             return None
         stake = stake_usd()
-        try:
-            ladder = self._ask(token_id)
-        except Exception as exc:  # noqa: BLE001
-            logger.warn(f"[news-paper] {self.book}: ask ladder unreadable for {token_id[:12]}: {exc}")
-            ladder = None
-        fill = walk(ladder or [], stake, "ask")
+        if entry is not None:
+            fill = Fill(float(entry[0]), stake, 1, float(entry[0]))
+        else:
+            try:
+                ladder = self._ask(token_id)
+            except Exception as exc:  # noqa: BLE001
+                logger.warn(f"[news-paper] {self.book}: ask ladder unreadable for {token_id[:12]}: {exc}")
+                ladder = None
+            fill = walk(ladder or [], stake, "ask")
         if fill.avg_price is None:
             logger.info(f"[news-paper] {self.book}: unquotable {token_id[:12]} ({question[:40]}): not booked")
             return None
@@ -263,17 +298,27 @@ class PaperBook:
             bps = self._fee(token_id)
         except Exception:  # noqa: BLE001
             bps = None
-        rate = (bps or 0) / 10000.0
+        if entry is not None:
+            bps_in = 0          # a resting order that was hit pays no taker fee
+        else:
+            bps_in = bps
+        rate = (bps_in or 0) / 10000.0
         p = fill.avg_price
         fee_usd = round(fill.filled_usd * rate * (1.0 - p), 4)
+        bid_top = _best(self._bid, token_id, "bid") if entry is None else p
+        mid = round((fill.top + bid_top) / 2, 6) if (bid_top is not None and fill.top is not None) else None
+        if entry is not None:
+            mid = float(entry[2]) if len(entry) > 2 and entry[2] is not None else None
         row = PaperRow(
             row_id=row_id, book=self.book, item_id=item_id, source=source, domains=tuple(domains),
             market_id=market_id, condition_id=condition_id, token_id=token_id, outcome=outcome,
             question=question[:160], published_ts=published_ts, seen_ts=seen_ts,
-            decided_ts=decided_ts, quote_ts=self._now(), freshness=freshness,
+            decided_ts=decided_ts, quote_ts=self._now() if entry is None else float(entry[1]),
+            freshness=freshness,
             confidence=float(confidence), why=str(why)[:300],
             ask_top=fill.top, entry_price=p, stake=stake, filled_usd=fill.filled_usd,
             fee_bps=bps, fee_usd=fee_usd, shares=round(fill.filled_usd / p, 4),
+            bid_top=bid_top, mid_entry=mid, fresh_marks=True, event=str(event or "")[:120],
         )
         self.ledger.add(row)
         logger.info(f"[news-paper] {self.book}: BUY ${fill.filled_usd:.2f} '{question[:40]}' "
@@ -281,10 +326,12 @@ class PaperBook:
                     f"fee {fee_usd:.3f}) {freshness} conf {confidence:.2f}")
         return row
 
-    def mark(self, now: Optional[float] = None) -> int:
+    def mark(self, now: Optional[float] = None, budget: Optional[dict] = None) -> int:
         """Book every horizon that has come due on every open row, at the
         honest bid walked for our size. Idempotent: a horizon already marked
-        is never re-marked, so a restart changes nothing."""
+        is never re-marked, so a restart changes nothing. ``budget`` is a
+        shared {"left": n} of book reads this tick; a row past it stays due
+        for the next tick (a fresh book can cost a REST read)."""
         now = self._now() if now is None else now
         n = 0
         changed = False
@@ -293,24 +340,52 @@ class PaperBook:
                    if now >= row.quote_ts + s and h not in row.marks]
             if not due:
                 continue
+            if budget is not None:
+                if budget.get("left", 0) <= 0:
+                    break
+                budget["left"] -= 1
             try:
                 ladder = self._bid(row.token_id)
             except Exception as exc:  # noqa: BLE001
                 logger.warn(f"[news-paper] bid ladder unreadable for {row.token_id[:12]}: {exc}")
                 ladder = None
+            age = self._age(row.token_id, now)
+            if age is not None and age > max_mark_age_s():
+                # an old book is not a price at this horizon: unknown, said
+                logger.info(f"[news-paper] {self.book}: book for {row.token_id[:12]} is {age:.0f}s old: "
+                            f"{','.join(due)} marked unknown")
+                ladder = None
             fill = walk(ladder or [], row.filled_usd, "bid")
+            ask_top = _best(self._ask, row.token_id, "ask") if fill.avg_price is not None else None
+            mid = round((fill.top + ask_top) / 2, 6) if (ask_top is not None and fill.top is not None) else None
             for h in due:
-                if fill.avg_price is None:
-                    row.marks[h] = {"bid_top": None, "exit_price": None, "ts": now, "pnl": None}
+                late = now - (row.quote_ts + HORIZONS_S[h])
+                if late > mark_late_s():
+                    row.marks[h] = {"bid_top": None, "exit_price": None, "ts": now, "pnl": None,
+                                    "mid": None, "age_s": age, "late_s": round(late, 1)}
+                elif fill.avg_price is None:
+                    row.marks[h] = {"bid_top": None, "exit_price": None, "ts": now, "pnl": None,
+                                    "mid": None, "age_s": age}
                 else:
                     row.marks[h] = {"bid_top": fill.top, "exit_price": fill.avg_price,
-                                    "ts": now, "pnl": row.exit_pnl(fill.avg_price)}
+                                    "ts": now, "pnl": row.exit_pnl(fill.avg_price),
+                                    "mid": mid, "age_s": age}
                 n += 1
             changed = True
             # 24h is the last horizon; the row then waits only for resolution
         if changed:
             self.ledger.save()
         return n
+
+    def _age(self, token_id: str, now: float) -> Optional[float]:
+        if self._book_ts is None:
+            return None
+        try:
+            ts = self._book_ts(token_id)
+        except Exception:  # noqa: BLE001
+            return None
+        # a reader that cannot date its book has an old book (review, s-wj4gnb)
+        return float("inf") if not ts else max(0.0, now - float(ts))
 
     def settle(self, resolver: Callable[[str], Optional[object]], now: Optional[float] = None) -> int:
         """Close rows whose market resolved. ``resolver(condition_id)`` returns
@@ -340,6 +415,18 @@ class PaperBook:
         return n
 
 
+def _best(read: Callable, token_id: str, side: str) -> Optional[float]:
+    """The best price on one side, sorted here (project rule), None unread."""
+    try:
+        lad = read(token_id)
+    except Exception:  # noqa: BLE001
+        return None
+    ps = [float(p) for p, s in (lad or []) if float(p) > 0 and float(s) > 0]
+    if not ps:
+        return None
+    return max(ps) if side == "bid" else min(ps)
+
+
 def pick_random_market(candidates: list, rng: random.Random) -> Optional[tuple]:
     """For the random book: (market_id, condition_id, token_id, outcome, question)
     from the index's active rows with a readable price; the caller passes the
@@ -355,9 +442,11 @@ def pick_random_market(candidates: list, rng: random.Random) -> Optional[tuple]:
 
 def summary(ledger: PaperLedger) -> dict:
     """Per horizon: n marked, pnl sum, roi on filled dollars, +/- 1 SD of roi;
-    plus resolution. Every number carries n; empty is n=0, never a zero."""
-    rows = ledger.live_rows()
-    out: dict = {"book": ledger.book, "rows": len(rows), "void": len(ledger.rows) - len(rows), "horizons": {}}
+    plus resolution. Every number carries n; empty is n=0, never a zero.
+    The clean era only (``fresh_marks``), like /pnl; ``stale`` counts the rest."""
+    rows = [r for r in ledger.live_rows() if r.fresh_marks]
+    out: dict = {"book": ledger.book, "rows": len(rows), "void": sum(1 for r in ledger.rows.values() if r.void),
+                 "stale": sum(1 for r in ledger.live_rows() if not r.fresh_marks), "horizons": {}}
     import math
     for h in HORIZONS_S:
         rs = [(r, r.marks[h]) for r in rows if h in r.marks and r.marks[h].get("pnl") is not None]

@@ -372,7 +372,7 @@ def test_a_void_row_stays_in_the_ledger_and_leaves_the_numbers(tmp_path):
     base = dict(book="headline-any", source="tg:x", domains=("geo",), market_id="m", condition_id="c",
                 token_id="t", outcome="Yes", question="q", published_ts=1.0, seen_ts=1.0, decided_ts=1.0,
                 quote_ts=1.0, freshness="fresh", confidence=0.5, why="", ask_top=0.5, entry_price=0.5,
-                stake=5.0, filled_usd=5.0, fee_bps=0, fee_usd=0.0, shares=10.0)
+                stake=5.0, filled_usd=5.0, fee_bps=0, fee_usd=0.0, shares=10.0, fresh_marks=True)
     led.add(paper.PaperRow(row_id="a", item_id="i1", marks={"5m": {"pnl": 1.0}}, **base))
     led.add(paper.PaperRow(row_id="b", item_id="i2", marks={"5m": {"pnl": -1.0}}, **base))
     assert led.void("b", "transport duplicate of i1") and not led.void("zz", "x")

@@ -138,8 +138,16 @@ class Runner:
         self.budget = llm_mod.DailyBudget(os.path.join(d, "llm-budget.json"),
                                           int(_env("NEWS_LLM_DAILY_BUDGET", 300)))
         from src.newsbot import fees
+        self._rest_memo: dict = {}      # token -> (monotonic ts, Ladder|None): one GET serves a mark's two sides
+        self._clock = time.time         # the tick's clock while marking (mark_all sets it to its ``now``)
         self.books = {b: paper_mod.PaperBook(b, ask_ladder=self._ask_ladder, bid_ladder=self._bid_ladder,
-                                             fee_bps=fees.fee_bps) for b in paper_mod.BOOKS}
+                                             fee_bps=fees.fee_bps, book_ts=self._book_ts)
+                      for b in paper_mod.BOOKS}
+        from src.newsbot import maker as maker_mod
+        self.maker = maker_mod.MakerDesk(self.books["llm-maker"])
+        self.mark_cap = int(_env("NEWS_MARK_REST_CAP", 40))   # book reads per 30 s tick, all books
+        self.tight_cents = float(_env("NEWS_TIGHT_SPREAD_CENTS", 2))
+        self.tight_frac = float(_env("NEWS_TIGHT_SPREAD_FRAC", 0.04))
         self.queue: asyncio.Queue = asyncio.Queue(maxsize=5000)
         # Items of the last day, for lead attribution. Persisted: four
         # restarts on the first day each emptied this window and every jump
@@ -176,14 +184,36 @@ class Runner:
         self._load_day()
         _register(self)
 
-    # ---- ladders for the paper books: the socket's book, else one REST read ----
-    def _ladder(self, token: str):
+    # ---- ladders for the paper books: a fresh book, the socket's when it is current ----
+    def _ladder(self, token: str, max_age_s: float = 60.0):
+        """The socket's ladder when it is younger than ``max_age_s``, else one
+        REST read (kept on the QuoteBook). A token the watch set evicted keeps
+        its last ladder in memory with no updates; the first week's marks
+        walked that entry-time book at every horizon (run s-wj4gnb). When the
+        REST read fails the cached ladder is returned and its age decides.
+        The clock is the caller's tick (``self._clock``), not the wall."""
+        now = self._clock()
         lad = self.book.ladder(token)
-        if lad is None or (not lad.asks and not lad.bids):
-            lad = self._rest_book(token)
-            if lad is not None:
-                self.book.set_ladder(token, lad)
+        age_s = None if lad is None or not lad.ts_ms else now - lad.ts_ms / 1000.0
+        if lad is None or (not lad.asks and not lad.bids) or age_s is None or age_s > max_age_s:
+            memo = self._rest_memo.get(token)
+            if memo is not None and time.monotonic() - memo[0] < 5.0:
+                return memo[1] if memo[1] is not None else lad   # a failed read is not retried for 5 s
+            fresh = self._rest_book(token)
+            if len(self._rest_memo) > 500:
+                self._rest_memo.clear()
+            self._rest_memo[token] = (time.monotonic(), fresh)
+            if fresh is not None:
+                # the REST body's timestamp is the book's last change (minutes
+                # on a quiet market); the read is what is current
+                fresh.ts_ms = int(now * 1000)
+                self.book.set_ladder(token, fresh)
+                lad = fresh
         return lad
+
+    def _book_ts(self, token: str):
+        lad = self.book.ladder(token)
+        return lad.ts_ms / 1000.0 if lad is not None and lad.ts_ms else None
 
     def _rest_book(self, token: str):
         """One synchronous GET /book for a token the socket has not met yet
@@ -205,6 +235,15 @@ class Runner:
     def _bid_ladder(self, token: str):
         lad = self._ladder(token)
         return list(lad.bids) if lad else None
+
+    def _mid_now(self, token: str):
+        """The mid of a current book, None when only an old one exists."""
+        lad = self._ladder(token)
+        if lad is None or lad.best_bid is None or lad.best_ask is None or not lad.ts_ms:
+            return None
+        if self._clock() - lad.ts_ms / 1000.0 > paper_mod.max_mark_age_s():
+            return None
+        return (lad.best_bid + lad.best_ask) / 2
 
     def _exclude_cid(self, condition_id: str) -> bool:
         """Sports and short up/down markets never count as jumps; a market the
@@ -362,7 +401,7 @@ class Runner:
                       market_id=str(cand.market_id), condition_id=str(cand.condition_id), token_id=token,
                       outcome=str(outcome), question=cand.question, published_ts=item.published_ts,
                       seen_ts=item.seen_ts, decided_ts=decided_at, freshness=state,
-                      confidence=j.confidence, why=j.why)
+                      confidence=j.confidence, why=j.why, event=str(getattr(cand, "event_title", "") or ""))
         fired = False
         row = None
         # headline-any: every material mapping, no tape rule
@@ -372,6 +411,9 @@ class Runner:
             fired = row is not None
             if fired:
                 self._fire_random(common, now)
+                self._fire_inverse(common, cand, j.outcome_index, now)
+                self._fire_tight(common, row)
+                self._post_maker(common, now)
                 self._say_fire(row, item, detail)
         else:
             logger.info(f"[news] mapped but tape says {state}: '{cand.question[:50]}' ({detail})")
@@ -383,6 +425,51 @@ class Runner:
             quote_ts=now, material=True, fired=fired, freshness=state, mid_at_decision=mid,
             direction=j.direction or "yes"))
         return {"fired": fired, "state": state, "market": cand.question}
+
+    def _fire_tight(self, common: dict, row) -> None:
+        """The cost-gated twin: the same llm call, booked only when the book
+        it crossed was tight (spread <= NEWS_TIGHT_SPREAD_CENTS and <=
+        NEWS_TIGHT_SPREAD_FRAC of the price). If the cheap-to-trade calls
+        lose too, the loss is not the spread (run s-wj4gnb)."""
+        try:
+            if row.bid_top is None or row.ask_top is None or not row.entry_price:
+                return
+            spread = row.ask_top - row.bid_top
+            if spread <= self.tight_cents / 100 + 1e-9 and spread / row.entry_price <= self.tight_frac + 1e-9:
+                self.books["llm-tight"].fire(**common)
+        except Exception as exc:  # noqa: BLE001
+            logger.warn(f"[news] tight book fire failed: {exc}")
+
+    def _post_maker(self, common: dict, now: float) -> None:
+        try:
+            lad = self._ladder(common["token_id"])
+            self.maker.post(common, bid=lad.best_bid if lad else None, ask=lad.best_ask if lad else None,
+                            now=now, event=common.get("event", ""))
+        except Exception as exc:  # noqa: BLE001
+            logger.warn(f"[news] maker post failed: {exc}")
+
+    def _quote_now(self, token: str):
+        lad = self._ladder(token)
+        return (lad.best_bid, lad.best_ask) if lad else None
+
+    def _fire_inverse(self, common: dict, cand, outcome_index: int, now: float) -> None:
+        """The inverse book: on every llm fire, BUY the other outcome of the
+        same market at its own honest ask. On Polymarket "sell what the
+        judge would buy" without holding it is exactly this (owner,
+        2026-11-01: "when algo wants to buy for 2hr then we will sell").
+        Both sides pay the spread, so this is the test of whether the
+        judge is reliably WRONG, not a mirror of its losses."""
+        try:
+            if len(cand.token_ids) != 2:
+                return
+            k = 1 - int(outcome_index)
+            tok = str(cand.token_ids[k])
+            self._touch(tok, now)
+            self.books["llm-inverse"].fire(**{**common, "token_id": tok,
+                                             "outcome": cand.outcomes[k] if k < len(cand.outcomes) else "",
+                                             "why": "inverse of the llm call: " + str(common.get("why", ""))})
+        except Exception as exc:  # noqa: BLE001
+            logger.warn(f"[news] inverse book fire failed: {exc}")
 
     def _fire_random(self, common: dict, now: float) -> None:
         """The random book: one fire per llm fire, on a random active market
@@ -403,7 +490,7 @@ class Runner:
                 q = c.best_ask if i == 0 else (None if c.best_bid is None else 1 - c.best_bid)
                 if q is None or not lo <= q <= hi:
                     continue
-                row = self.books["random"].fire(**{**common, "item_id": f"rnd:{common['item_id']}",
+                row = self.books["random"].fire(**{**common, "item_id": f"rnd:{common['item_id']}", "event": "",
                                                    "source": "random", "market_id": str(c.market_id),
                                                    "condition_id": str(c.condition_id), "token_id": tok,
                                                    "outcome": c.outcomes[i] if i < len(c.outcomes) else "",
@@ -469,10 +556,23 @@ class Runner:
     # ---- marks, surprise pings, settlement ----
     def mark_all(self, now: Optional[float] = None) -> int:
         now = time.time() if now is None else now
+        self._clock = lambda: now
+        try:
+            return self._mark_all(now)
+        finally:
+            self._clock = time.time
+
+    def _mark_all(self, now: float) -> int:
         n = 0
+        budget = {"left": self.mark_cap}
+        try:
+            n += self.maker.check(now, history=self.book.history, last_trade=self.book.last_trade,
+                                  ladder=self._quote_now, mid_now=self._mid_now, budget=budget)
+        except Exception as exc:  # noqa: BLE001
+            logger.warn(f"[news] maker check failed: {exc}")
         for b in self.books.values():
             try:
-                n += b.mark(now)
+                n += b.mark(now, budget=budget)
             except Exception as exc:  # noqa: BLE001
                 logger.warn(f"[news] mark failed for {b.book}: {exc}")
         # the item ledger: cents moved our way since decision, per horizon
@@ -483,8 +583,10 @@ class Runner:
             for h, secs in paper_mod.HORIZONS_S.items():
                 if h in it.moved or now < it.quote_ts + secs:
                     continue
-                b = self.book.best(tok)
-                mid = (b[0] + b[1]) / 2 if (b and b[0] is not None and b[1] is not None) else None
+                if budget["left"] <= 0:
+                    break
+                budget["left"] -= 1
+                mid = self._mid_now(tok)
                 cents = None if mid is None else round((mid - it.mid_at_decision) * 100 * (1 if direction != "no" else -1), 1)
                 self.leads.mark_item(it.item_id, h, cents)
                 if (cents is not None and not it.fired and cents >= self.move_cents
@@ -706,9 +808,16 @@ class Runner:
 
     def pnl_text(self, short: bool = False) -> str:
         def bid_now(tok: str):
-            b = self.book.best(str(tok))
-            return b[0] if b and b[0] is not None else None
-        return pnl_mod.pnl_text({b: pb.ledger for b, pb in self.books.items()}, bid_now=bid_now, short=short)
+            # a cached book older than a mark may be is no bid now (run s-wj4gnb)
+            lad = self.book.ladder(str(tok))
+            if lad is None or lad.best_bid is None or not lad.ts_ms:
+                return None
+            if time.time() - lad.ts_ms / 1000.0 > paper_mod.max_mark_age_s():
+                return None
+            return lad.best_bid
+        from src.newsbot import maker as maker_mod
+        return pnl_mod.pnl_text({b: pb.ledger for b, pb in self.books.items()}, bid_now=bid_now, short=short,
+                                maker_line=maker_mod.summary_line(self.maker.summary()))
 
     # ---- the owner's thumb ----
     def owner_text(self, text: str, msg: dict) -> None:
