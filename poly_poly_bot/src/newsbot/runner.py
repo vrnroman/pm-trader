@@ -139,9 +139,12 @@ class Runner:
                                           int(_env("NEWS_LLM_DAILY_BUDGET", 300)))
         from src.newsbot import fees
         self._rest_memo: dict = {}      # token -> (monotonic ts, Ladder|None): one GET serves a mark's two sides
-        self._clock = time.time         # the tick's clock while marking (mark_all sets it to its ``now``)
+        # the caller's clock while an item is processed or a tick marks
+        # (process_item / mark_all set it to their ``now``), else the wall
+        self._clock = time.time
         self.books = {b: paper_mod.PaperBook(b, ask_ladder=self._ask_ladder, bid_ladder=self._bid_ladder,
-                                             fee_bps=fees.fee_bps, book_ts=self._book_ts)
+                                             fee_bps=fees.fee_bps, book_ts=self._book_ts,
+                                             now=lambda: self._clock())
                       for b in paper_mod.BOOKS}
         from src.newsbot import maker as maker_mod
         self.maker = maker_mod.MakerDesk(self.books["llm-maker"])
@@ -211,6 +214,15 @@ class Runner:
                 lad = fresh
         return lad
 
+    def _current(self, token: str):
+        """The ladder only when it is a current book (read within
+        NEWS_MARK_MAX_AGE_S), else None: what an entry, a resting order, a
+        fill check and the judge's quote may use."""
+        lad = self._ladder(token)
+        if lad is None or not lad.ts_ms or self._clock() - lad.ts_ms / 1000.0 > paper_mod.max_mark_age_s():
+            return None
+        return lad
+
     def _book_ts(self, token: str):
         lad = self.book.ladder(token)
         return lad.ts_ms / 1000.0 if lad is not None and lad.ts_ms else None
@@ -222,6 +234,7 @@ class Runner:
             import httpx
             r = httpx.get(clob_ws.CLOB_REST_BOOK, params={"token_id": token}, timeout=5.0)
             if r.status_code != 200:
+                logger.warn(f"[news] REST book {r.status_code} for {token[:12]}")
                 return None
             return clob_ws.parse_ladder(r.json())
         except Exception as exc:  # noqa: BLE001
@@ -238,10 +251,8 @@ class Runner:
 
     def _mid_now(self, token: str):
         """The mid of a current book, None when only an old one exists."""
-        lad = self._ladder(token)
-        if lad is None or lad.best_bid is None or lad.best_ask is None or not lad.ts_ms:
-            return None
-        if self._clock() - lad.ts_ms / 1000.0 > paper_mod.max_mark_age_s():
+        lad = self._current(token)
+        if lad is None or lad.best_bid is None or lad.best_ask is None:
             return None
         return (lad.best_bid + lad.best_ask) / 2
 
@@ -307,6 +318,13 @@ class Runner:
 
     def process_item(self, item: Item, now: Optional[float] = None) -> Optional[dict]:
         now = time.time() if now is None else now
+        self._clock = lambda: now
+        try:
+            return self._process_item(item, now)
+        finally:
+            self._clock = time.time
+
+    def _process_item(self, item: Item, now: float) -> Optional[dict]:
         self.last_item_ts = now
         # One Telegram post reaches us twice when a channel is read by both the
         # web preview (tg:) and the owner's client (tgm:): Europe Elects post
@@ -371,9 +389,9 @@ class Runner:
             for tok in c.token_ids:
                 self._touch(tok, now)
                 fresh_by_tok[tok] = self.freshness_for(tok, c.condition_id, now)
-                b = self.book.best(tok)
-                if b:
-                    quotes_by_tok[tok] = {"bid": b[0], "ask": b[1]}
+                lad = self._current(tok)
+                if lad is not None and (lad.best_bid is not None or lad.best_ask is not None):
+                    quotes_by_tok[tok] = {"bid": lad.best_bid, "ask": lad.best_ask}
         j = judge_mod.judge(item, cands, fresh_by_tok, budget=self.budget, model=self.model,
                             quotes_by_token=quotes_by_tok, now=now)
         decided_at = time.time()
@@ -393,10 +411,7 @@ class Runner:
         outcome = cand.outcomes[j.outcome_index] if j.outcome_index < len(cand.outcomes) else ""
         self._touch(token, now)
         state, detail = fresh_by_tok.get(token) or self.freshness_for(token, cand.condition_id, now)
-        mid = None
-        b = self.book.best(token)
-        if b and b[0] is not None and b[1] is not None:
-            mid = (b[0] + b[1]) / 2
+        mid = self._mid_now(token)
         common = dict(item_id=item.id, source=item.source, domains=tuple(item.domains or cand.domains),
                       market_id=str(cand.market_id), condition_id=str(cand.condition_id), token_id=token,
                       outcome=str(outcome), question=cand.question, published_ts=item.published_ts,
@@ -442,14 +457,14 @@ class Runner:
 
     def _post_maker(self, common: dict, now: float) -> None:
         try:
-            lad = self._ladder(common["token_id"])
+            lad = self._current(common["token_id"])
             self.maker.post(common, bid=lad.best_bid if lad else None, ask=lad.best_ask if lad else None,
                             now=now, event=common.get("event", ""))
         except Exception as exc:  # noqa: BLE001
             logger.warn(f"[news] maker post failed: {exc}")
 
     def _quote_now(self, token: str):
-        lad = self._ladder(token)
+        lad = self._current(token)
         return (lad.best_bid, lad.best_ask) if lad else None
 
     def _fire_inverse(self, common: dict, cand, outcome_index: int, now: float) -> None:
@@ -515,6 +530,14 @@ class Runner:
 
     # ---- jumps: tape first ----
     def scan_jumps(self, now: Optional[float] = None) -> int:
+        now = time.time() if now is None else now
+        self._clock = lambda: now
+        try:
+            return self._scan_jumps(now)
+        finally:
+            self._clock = time.time
+
+    def _scan_jumps(self, now: Optional[float] = None) -> int:
         now = time.time() if now is None else now
         n = 0
         try:

@@ -283,6 +283,13 @@ class PaperBook:
             except Exception as exc:  # noqa: BLE001
                 logger.warn(f"[news-paper] {self.book}: ask ladder unreadable for {token_id[:12]}: {exc}")
                 ladder = None
+            age = self._age(token_id, self._now())
+            if age is not None and age > max_mark_age_s():
+                # the same rule as a mark: an old book is no price (verifier,
+                # s-wj4gnb: a failed REST read booked Lula Yes at 0.20 from a
+                # two-day-old ladder while the market stood at 0.99)
+                logger.info(f"[news-paper] {self.book}: book for {token_id[:12]} is {age:.0f}s old: not booked")
+                ladder = None
             fill = walk(ladder or [], stake, "ask")
         if fill.avg_price is None:
             logger.info(f"[news-paper] {self.book}: unquotable {token_id[:12]} ({question[:40]}): not booked")

@@ -95,9 +95,9 @@ def rig(tmp_path, monkeypatch):
     r.index = FakeIndex([_cand("m1", "c1", "Will Anthropic announce an IPO in 2026?", ["ta", "tb"])])
     # the entry book, YES 0.40/0.42 and NO 0.58/0.60, as the socket left it
     r.book.set_ladder("ta", clob_ws.parse_ladder({"bids": [{"price": "0.40", "size": "100"}],
-                                                  "asks": [{"price": "0.42", "size": "100"}]}, ts_ms=1_000_000))
+                                                  "asks": [{"price": "0.42", "size": "100"}]}, ts_ms=1_650_000))
     r.book.set_ladder("tb", clob_ws.parse_ladder({"bids": [{"price": "0.58", "size": "100"}],
-                                                  "asks": [{"price": "0.60", "size": "100"}]}, ts_ms=1_000_000))
+                                                  "asks": [{"price": "0.60", "size": "100"}]}, ts_ms=1_650_000))
     r.book.record("ta", 1_000_000, 0.40, 0.42)
     r.book.record("ta", 1_600_000, 0.40, 0.42)
     monkeypatch.setattr(judge_mod, "run_claude", _fake_claude())
@@ -331,3 +331,29 @@ def test_break_even_map_names_a_real_edge_and_calls_small_groups_too_few():
     assert "clears the spread" in lines["geo"] and "25 events" in lines["geo"]
     assert "too few" in lines["corp"] and "3 events" in lines["corp"]
     assert "does not clear" in lines["politics"]
+
+
+def test_a_failed_rest_read_never_books_an_entry_from_an_old_book(rig, monkeypatch):
+    """Verifier round 1 (s-wj4gnb): REST down + a two-day-old cached ladder
+    booked a BUY at the old ask. Driven through Runner._ladder, not lists."""
+    r, rest = rig
+    old = clob_ws.parse_ladder({"bids": [{"price": "0.18", "size": "100"}],
+                                "asks": [{"price": "0.20", "size": "100"}]}, ts_ms=1_000)
+    r.book.set_ladder("ta", old)
+    r.book.set_ladder("tb", old)
+    from src.newsbot.items import Item
+
+    def fresh_item(i, t):   # published a minute before: inside the 30 min item age
+        return Item(id=i, source="bsky:reuters.com", domains=("corp",), published_ts=t - 60, seen_ts=t - 50,
+                    title="Anthropic to announce IPO, Dario says", text="", url="https://x")
+    out = r.process_item(fresh_item("bsky:reuters.com:1", 200_000.0), now=200_000.0)
+    assert out is not None, "the item reached the judge; the books refused the old ladder"
+    assert not r.books["llm"].ledger.rows and not r.books["headline-any"].ledger.rows
+    assert not r.maker.orders and not r.books["llm-inverse"].ledger.rows
+    # the same item with a current REST book books at that book's ask
+    rest["lad"]["ta"] = _rest_ladder(0.58, 0.60, 204_000.0)
+    r._rest_memo.clear()
+    r.judged_recent.clear()
+    r.process_item(fresh_item("bsky:reuters.com:2", 204_000.0), now=204_000.0)   # next hour: the hourly LLM cap is 1 here
+    rows = list(r.books["headline-any"].ledger.rows.values())
+    assert rows and rows[0].entry_price == 0.60
