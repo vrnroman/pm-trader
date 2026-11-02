@@ -124,14 +124,23 @@ jobs:
               echo "  = $1 kept from secret"
             fi
           }
+          # Owner decisions that override the secret: the old line is dropped
+          # and the new one appended (docker --env-file takes the last value).
+          set_env() {
+            sed -i "/^$1=/d" .env
+            printf '\n%s=%s\n' "$1" "$2" >> .env
+            echo "  ! $1=$2 (owner override)"
+          }
           ensure_env NEWS_STAKE_USD 5
           ensure_env NEWS_JUDGE_MODEL claude-sonnet-5-5
-          ensure_env NEWS_LLM_DAILY_BUDGET 300
+          # 300 a day ran out by 20:00 SGT and skipped whole US days of news,
+          # Decision Desk calls included; owner raised it 10x on 2026-11-02 SGT
+          set_env NEWS_LLM_DAILY_BUDGET 3000
           ensure_env NEWS_DOMAINS politics,crypto,geo,corp
           ensure_env NEWS_MIN_PRICE 0.05
           ensure_env NEWS_MAX_PRICE 0.95
           # US midterms night (polls close 00:00 UTC 11-04): more judge calls, ends by itself
-          ensure_env NEWS_LLM_BOOST 2026-11-03T22:00Z/2026-11-05T12:00Z/60/900
+          ensure_env NEWS_LLM_BOOST 2026-11-03T22:00Z/2026-11-05T12:00Z/600/9000
 
       # deploy.sh builds the image HERE on the runner (native amd64, fast,
       # already GCP-authed), PUSHES it to Artifact Registry, and the VM PULLS it

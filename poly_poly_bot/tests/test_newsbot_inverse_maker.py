@@ -402,7 +402,22 @@ def test_the_deploy_files_boost_parses_through_the_production_parser():
     m = re.search(r"ensure_env NEWS_LLM_BOOST (\S+)", wf)
     assert m, "the deploy sets the election-night window"
     b = runner_mod.parse_boost(m.group(1))
-    assert b is not None and b[2] > 25 and b[3] > 300
+    d = re.search(r"set_env NEWS_LLM_DAILY_BUDGET (\d+)", wf)
+    assert d, "the owner's daily budget overrides the secret"
+    daily = int(d.group(1))
+    assert daily == 3000
+    assert b is not None and b[2] > daily // 12 and b[3] > daily, "the night's window sits above the normal caps"
+
+
+def test_a_boost_below_the_normal_caps_never_lowers_them(rig):
+    r, rest = rig
+    r.base_hourly_cap, r.base_daily = 250, 3000
+    r.boost = runner_mod.parse_boost("2026-11-03T22:00Z/2026-11-05T12:00Z/60/900")
+    r._apply_boost(r.boost[0] + 60)
+    assert (r.hourly_cap, r.budget.limit) == (250, 3000)
+    r.boost = runner_mod.parse_boost("2026-11-03T22:00Z/2026-11-05T12:00Z/600/9000")
+    r._apply_boost(r.boost[0] + 60)
+    assert (r.hourly_cap, r.budget.limit) == (600, 9000)
 
 
 def test_ddhq_is_on_the_roster():

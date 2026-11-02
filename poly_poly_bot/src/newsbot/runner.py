@@ -228,8 +228,10 @@ class Runner:
         if self.boost is None:
             return          # no window configured: the caps stay as set
         on = self.boost[0] <= now < self.boost[1]
-        self.hourly_cap = self.boost[2] if on else self.base_hourly_cap
-        self.budget.limit = self.boost[3] if on else self.base_daily
+        # a boost only ever raises: a window written for an older, smaller
+        # budget must not cut the caps on the night it exists for
+        self.hourly_cap = max(self.boost[2], self.base_hourly_cap) if on else self.base_hourly_cap
+        self.budget.limit = max(self.boost[3], self.base_daily) if on else self.base_daily
 
     def _clock(self) -> float:
         now = getattr(self._clock_tls, "now", None)
